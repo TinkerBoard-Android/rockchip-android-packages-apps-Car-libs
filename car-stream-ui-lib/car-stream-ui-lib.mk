@@ -39,6 +39,12 @@ LOCAL_RESOURCE_DIR += frameworks/support/v7/cardview/res
 LOCAL_AAPT_FLAGS += --extra-packages android.support.v7.cardview
 LOCAL_STATIC_JAVA_LIBRARIES += android-support-v7-cardview
 endif
+# Include support-v7-appcompat, if not already included
+ifeq (,$(findstring android-support-v7-appcompat,$(LOCAL_STATIC_JAVA_LIBRARIES)))
+LOCAL_RESOURCE_DIR += frameworks/support/v7/appcompat/res
+LOCAL_AAPT_FLAGS += --extra-packages android.support.v7.appcompat
+LOCAL_STATIC_JAVA_LIBRARIES += android-support-v7-appcompat
+endif
 LOCAL_JAVA_LIBRARIES += android.car
 
 # Include car-stream-ui-lib

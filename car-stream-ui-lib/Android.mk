@@ -29,10 +29,19 @@ LOCAL_AAPT_FLAGS += --extra-packages android.support.v7.cardview
 LOCAL_STATIC_JAVA_LIBRARIES += android-support-v7-cardview
 endif
 
+# Include support-v7-appcompat, if not already included
+ifeq (,$(findstring android-support-v7-appcompat,$(LOCAL_STATIC_JAVA_LIBRARIES)))
+LOCAL_RESOURCE_DIR += frameworks/support/v7/appcompat/res
+LOCAL_STATIC_JAVA_LIBRARIES += android-support-v7-appcompat
+LOCAL_AAPT_FLAGS += --extra-packages android.support.v7.appcompat
+endif
+
 LOCAL_MODULE := car-stream-ui-lib
 LOCAL_MODULE_TAGS := optional
 LOCAL_AAPT_FLAGS += --auto-add-overlay
 
 LOCAL_PROGUARD_ENABLED := disabled
+
+include packages/services/Car/car-support-lib/car-support.mk
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
