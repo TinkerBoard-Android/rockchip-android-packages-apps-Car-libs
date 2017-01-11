@@ -18,14 +18,15 @@ package com.android.car.app;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.car.ui.PagedListView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewStub;
 
 import com.android.car.stream.ui.R;
 
@@ -34,8 +35,9 @@ import com.android.car.stream.ui.R;
  * <p>
  * This Activity manages the overall layout. To use it sub-classes need to:
  * <ul>
- *     <li>Provide the layout to use for the drawer contents via
- *     {@link #getDrawerContentLayoutId()} ()}</li>
+ *     <li>Provide the items for the Drawer by supplying a adapter to the PagedListView (see {@link
+ *     #getDrawerListView()}). The Adapter should ideally be based on {@link DrawerItemViewHolder}
+ *      since that produces items with the right layout and provides click-handling.</li>
  *     <li>Add their main content to the container FrameLayout
  *     (with id = {@link #getContentContainerId()}_</li>
  * </ul>
@@ -51,9 +53,10 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
     private static final float COLOR_SWITCH_SLIDE_OFFSET = 0.25f;
 
     private DrawerLayout mDrawerLayout;
+    private PagedListView mDrawerList;
+    private View mDrawerContent;
     private Toolbar mToolbar;
     private ActionBarDrawerToggle mDrawerToggle;
-    private View mDrawerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,10 +64,8 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
 
         setContentView(R.layout.car_drawer_activity);
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
-
-        ViewStub drawerStub = (ViewStub)findViewById(R.id.left_drawer_stub);
-        drawerStub.setLayoutResource(getDrawerContentLayoutId());
-        mDrawerView = drawerStub.inflate();
+        mDrawerContent = findViewById(R.id.drawer_content);
+        mDrawerList = (PagedListView)findViewById(R.id.drawer_list);
 
         mToolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(mToolbar);
@@ -82,21 +83,13 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
     }
 
     /**
-     * Sub-classes should return the id of the layout to use as the drawer content.
+     * Get the PagedListView that will display the main content of the drawer. Sub-classes should
+     * supply content via {@link PagedListView#setAdapter(RecyclerView.Adapter)}.
      *
-     * @return Id of layout to display in Drawer when opened.
+     * @return PagedListView used to display main drawer content.
      */
-    protected abstract int getDrawerContentLayoutId();
-
-    /**
-     * View obtained by inflating drawer layout (obtained using
-     * {@link #getDrawerContentLayoutId()}). Subclasses can perform additional initialization of the
-     * inflated view.
-     *
-     * @return View inflated from drawer layout.
-     */
-    protected View getDrawerView() {
-        return mDrawerView;
+    protected PagedListView getDrawerListView() {
+        return mDrawerList;
     }
 
     /**
@@ -161,7 +154,7 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
         // In case we're restarting after a config change (e.g. day, night switch), set colors
         // again. Doing it here so that Drawer state is fully synced and we know if its open or not.
         // NOTE: isDrawerOpen must be passed the second child of the DrawerLayout.
-        setTitleAndArrowColor(mDrawerLayout.isDrawerOpen(mDrawerView));
+        setTitleAndArrowColor(mDrawerLayout.isDrawerOpen(mDrawerContent));
     }
 
     @Override
