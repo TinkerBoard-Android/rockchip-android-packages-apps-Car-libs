@@ -21,14 +21,15 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.car.stream.ui.R;
 
 /**
- * Re-usable ViewHolder that inflates car_list_item1.xml layout for use in the Drawer PagedListView
- * (see {@link CarDrawerActivity#getDrawerListView()}.
+ * Re-usable ViewHolder that inflates car_menu_list_item.xml layout for use in the Drawer
+ * PagedListView (see {@link CarDrawerActivity#getDrawerListView()}.
  * <p>
  * Clients should call {@link #create(ViewGroup, DrawerItemClickListener)} in their RecyclerView
  * Adapter's onCreateViewHolder.
@@ -37,11 +38,12 @@ import com.android.car.stream.ui.R;
  */
 public class DrawerItemViewHolder extends RecyclerView.ViewHolder {
     private final ImageView mIcon;
+    private final TextView mTitle;
     private final TextView mText;
-    private final ImageView mRightIcon;
+    private final ViewStub mRightItem;
 
     /**
-     * Inflates car_list_item1.xml layout and wraps it in a DrawerItemViewHolder.
+     * Inflates car_menu_list_item.xml layout and wraps it in a DrawerItemViewHolder.
      *
      * @param parent Parent ViewGroup for created views.
      * @param listener Optional click listener to handle clicks.
@@ -50,36 +52,44 @@ public class DrawerItemViewHolder extends RecyclerView.ViewHolder {
     public static DrawerItemViewHolder create(ViewGroup parent,
             @Nullable DrawerItemClickListener listener) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.car_list_item_1, parent, false);
+                .inflate(R.layout.car_menu_list_item, parent, false);
         return new DrawerItemViewHolder(view, listener);
     }
 
     /**
-     * @return Icon ImageView from inflated car_list_item1.xml layout.
+     * @return Icon ImageView from inflated car_menu_list_item.xml layout.
      */
     public ImageView getIcon() {
         return mIcon;
     }
 
     /**
-     * @return TextView from inflated car_list_item1.xml layout.
+     * @return Main title TextView inflated from car_menu_list_item.xml layout.
+     */
+    public TextView getTitle() {
+        return mTitle;
+    }
+
+    /**
+     * @return Main text TextView from inflated car_menu_list_item.xml layout.
      */
     public TextView getText() {
         return mText;
     }
 
     /**
-     * @return Right-Icon ImageView from inflated car_list_item1.xml layout.
+     * @return Right-Item ViewStub from inflated car_menu_list_item.xml layout.
      */
-    public ImageView getRightIcon() {
-        return mRightIcon;
+    public ViewStub getRightItem() {
+        return mRightItem;
     }
 
     private DrawerItemViewHolder(View view, @Nullable DrawerItemClickListener listener) {
         super(view);
         mIcon = (ImageView)view.findViewById(R.id.icon);
+        mTitle = (TextView)view.findViewById(R.id.title);
         mText = (TextView)view.findViewById(R.id.text);
-        mRightIcon = (ImageView)view.findViewById(R.id.right_icon);
+        mRightItem = (ViewStub)view.findViewById(R.id.right_item);
         if (listener != null) {
             view.setOnClickListener((unusedView) ->  {
                 listener.onItemClick(getAdapterPosition());
