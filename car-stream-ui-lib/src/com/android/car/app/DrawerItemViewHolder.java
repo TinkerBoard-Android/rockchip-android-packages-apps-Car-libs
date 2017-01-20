@@ -16,84 +16,77 @@
 
 package com.android.car.app;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewStub;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.car.stream.ui.R;
 
 /**
- * Re-usable ViewHolder that inflates car_menu_list_item.xml layout for use in the Drawer
- * PagedListView (see {@link CarDrawerActivity#getDrawerListView()}.
- * <p>
- * Clients should call {@link #create(ViewGroup, DrawerItemClickListener)} in their RecyclerView
- * Adapter's onCreateViewHolder.
- * <p>
- * A {@link DrawerItemClickListener} can be provided to handle clicks on specific items.
+ * Re-usable ViewHolder for displaying items in the Drawer PagedListView.
  */
 public class DrawerItemViewHolder extends RecyclerView.ViewHolder {
     private final ImageView mIcon;
     private final TextView mTitle;
     private final TextView mText;
-    private final ViewStub mRightItem;
+    private final ImageView mRightIcon;
 
-    /**
-     * Inflates car_menu_list_item.xml layout and wraps it in a DrawerItemViewHolder.
-     *
-     * @param parent Parent ViewGroup for created views.
-     * @param listener Optional click listener to handle clicks.
-     * @return DrawerItemViewHolder wrapping the inflated view.
-     */
-    public static DrawerItemViewHolder create(ViewGroup parent,
-            @Nullable DrawerItemClickListener listener) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.car_menu_list_item, parent, false);
-        return new DrawerItemViewHolder(view, listener);
+    DrawerItemViewHolder(View view) {
+        super(view);
+        mIcon = (ImageView)view.findViewById(R.id.icon);
+        mTitle = (TextView)view.findViewById(R.id.title);
+        if (mIcon == null || mTitle == null) {
+            throw new IllegalArgumentException("Missing required elements in provided view!");
+        }
+        // Next two are optional and may be null.
+        mText = (TextView)view.findViewById(R.id.text);
+        mRightIcon = (ImageView)view.findViewById(R.id.right_icon);
     }
 
     /**
-     * @return Icon ImageView from inflated car_menu_list_item.xml layout.
+     * @return Icon ImageView from inflated layout.
      */
+    @NonNull
     public ImageView getIcon() {
         return mIcon;
     }
 
     /**
-     * @return Main title TextView inflated from car_menu_list_item.xml layout.
+     * @return Main title TextView from inflated layout.
      */
+    @NonNull
     public TextView getTitle() {
         return mTitle;
     }
 
     /**
-     * @return Main text TextView from inflated car_menu_list_item.xml layout.
+     * @return Main text TextView from inflated layout. May be null.
      */
+    @Nullable
     public TextView getText() {
         return mText;
     }
 
     /**
-     * @return Right-Item ViewStub from inflated car_menu_list_item.xml layout.
+     * @return Right-Icon ImageView from inflated layout. May be null.
      */
-    public ViewStub getRightItem() {
-        return mRightItem;
+    @Nullable
+    public ImageView getRightIcon() {
+        return mRightIcon;
     }
 
-    private DrawerItemViewHolder(View view, @Nullable DrawerItemClickListener listener) {
-        super(view);
-        mIcon = (ImageView)view.findViewById(R.id.icon);
-        mTitle = (TextView)view.findViewById(R.id.title);
-        mText = (TextView)view.findViewById(R.id.text);
-        mRightItem = (ViewStub)view.findViewById(R.id.right_item);
+    /**
+     * Set click-listener on the view wrapped by this ViewHolder. For now only used by
+     * {@link CarDrawerListAdapter}.
+     */
+    void setItemClickListener(@Nullable DrawerItemClickListener listener) {
         if (listener != null) {
-            view.setOnClickListener((unusedView) ->  {
-                listener.onItemClick(getAdapterPosition());
-            });
+            itemView.setOnClickListener((unusedView) -> listener.onItemClick(getAdapterPosition()));
+        } else {
+            itemView.setOnClickListener(null);
         }
     }
 }

@@ -22,26 +22,31 @@ import android.support.car.ui.PagedListView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
 
 import com.android.car.stream.ui.R;
+
+import java.util.Stack;
 
 /**
  * Common base Activity for car apps that need to present a Drawer.
  * <p>
  * This Activity manages the overall layout. To use it sub-classes need to:
  * <ul>
- *     <li>Provide the items for the Drawer by supplying a adapter to the PagedListView (see {@link
- *     #getDrawerListView()}). The Adapter should ideally be based on {@link DrawerItemViewHolder}
- *      since that produces items with the right layout and provides click-handling.</li>
+ *     <li>Provide the root-items for the Drawer by implementing {@link #getRootAdapter()}.</li>
  *     <li>Add their main content to the container FrameLayout
  *     (with id = {@link #getContentContainerId()}_</li>
  * </ul>
  * This class will take care of drawer toggling and display.
+ * <p>
+ * The rootAdapter can implement nested-navigation, in its click-handling, by passing the
+ * CarDrawerAdapter for the next level to {@link #switchToAdapter(CarDrawerAdapter)}. This
+ * activity will maintain a stack of such adapters. When the user navigates up, it will pop the top
+ * adapter off and display its contents again.
  * <p>
  * Any Activity's based on this class need to set their theme to CarDrawerActivityTheme or a
  * derivative.
@@ -52,8 +57,10 @@ import com.android.car.stream.ui.R;
 public abstract class CarDrawerActivity extends AppCompatActivity {
     private static final float COLOR_SWITCH_SLIDE_OFFSET = 0.25f;
 
+    private final Stack<CarDrawerAdapter> mAdapterStack = new Stack<>();
     private DrawerLayout mDrawerLayout;
     private PagedListView mDrawerList;
+    private ProgressBar mProgressBar;
     private View mDrawerContent;
     private Toolbar mToolbar;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -66,37 +73,57 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         mDrawerContent = findViewById(R.id.drawer_content);
         mDrawerList = (PagedListView)findViewById(R.id.drawer_list);
+        mProgressBar = (ProgressBar)findViewById(R.id.drawer_progress);
 
         mToolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(mToolbar);
+
+        // Init drawer adapter stack.
+        CarDrawerAdapter rootAdapter = getRootAdapter();
+        mAdapterStack.push(rootAdapter);
+        mToolbar.setTitle(rootAdapter.getTitleResId());
+        mDrawerList.setAdapter(rootAdapter);
+
         setupDrawerToggling();
     }
 
     /**
-     * Get the DrawerLayout that this activity owns. Callers can perform operations like opening/
-     * closing or adding listeners.
-     *
-     * @return DrawerLayout managed by this activity.
+     * @return Adapter for root content of the Drawer.
      */
-    protected DrawerLayout getDrawerLayout() {
-        return mDrawerLayout;
-    }
+    protected abstract CarDrawerAdapter getRootAdapter();
 
     /**
-     * Get the PagedListView that will display the main content of the drawer. Sub-classes should
-     * supply content via {@link PagedListView#setAdapter(RecyclerView.Adapter)}.
+     * Used to pass in next level of items to display in the Drawer, including updated title. It is
+     * pushed on top of the existing adapter in a stack. Navigating up from this level later will
+     * pop this adapter off and surface contents of the next adapter at the top of the stack (and
+     * its title).
      *
-     * @return PagedListView used to display main drawer content.
+     * @param adapter Adapter for next level of content in the drawer.
      */
-    protected PagedListView getDrawerListView() {
-        return mDrawerList;
+    protected final void switchToAdapter(CarDrawerAdapter adapter) {
+        mAdapterStack.push(adapter);
+        setTitleAndSwitchToAdapter(adapter);
     }
 
     /**
      * Close the drawer if open.
      */
     protected void closeDrawer() {
-        mDrawerLayout.closeDrawer(Gravity.LEFT);
+        if (mDrawerLayout.isDrawerOpen(Gravity.LEFT)) {
+            mDrawerLayout.closeDrawer(Gravity.LEFT);
+        }
+    }
+
+    /**
+     * Used to switch between the Drawer PagedListView and the "loading" progress-bar while the next
+     * level's adapter contents are being fetched.
+     *
+     * @param enable If true, the progress-bar is displayed. If false, the Drawer PagedListView is
+     *               added.
+     */
+    protected void showLoadingProgressBar(boolean enable) {
+        mDrawerList.setVisibility(enable ? View.INVISIBLE : View.VISIBLE);
+        mProgressBar.setVisibility(enable ? View.VISIBLE : View.GONE);
     }
 
     /**
@@ -127,7 +154,11 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
             @Override
             public void onDrawerOpened(View drawerView) {}
             @Override
-            public void onDrawerClosed(View drawerView) {}
+            public void onDrawerClosed(View drawerView) {
+                // If drawer is closed for any reason, revert stack/drawer to initial root state.
+                cleanupStackAndShowRoot();
+                mDrawerList.getRecyclerView().scrollToPosition(0);
+            }
             @Override
             public void onDrawerStateChanged(int newState) {}
         });
@@ -166,11 +197,41 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Delegate touches; It toobar handled them (e.g. menu icon tap), we return.
+        // Handle home-click and see if we can navigate up in the drawer.
+        if (item != null && item.getItemId() == android.R.id.home && maybeHandleUpClick()) {
+            return true;
+        }
+
+        // DrawerToggle gets next chance to handle up-clicks (and any other clicks).
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void setTitleAndSwitchToAdapter(CarDrawerAdapter adapter) {
+        mToolbar.setTitle(adapter.getTitleResId());
+        // NOTE: We don't use swapAdapter() since different levels in the Drawer may switch between
+        // car_menu_list_item_normal, car_menu_list_item_small and car_list_empty layouts.
+        mDrawerList.getRecyclerView().setAdapter(adapter);
+        mDrawerList.getRecyclerView().scrollToPosition(0);
+    }
+
+    private boolean maybeHandleUpClick() {
+        if (mAdapterStack.size() > 1) {
+            mAdapterStack.pop();
+            setTitleAndSwitchToAdapter(mAdapterStack.peek());
+            return true;
+        }
+        return false;
+    }
+
+    /** Clears stack down to root adapter and switches to root adapter. */
+    private void cleanupStackAndShowRoot() {
+        while (mAdapterStack.size() > 1) {
+            mAdapterStack.pop();
+        }
+        setTitleAndSwitchToAdapter(mAdapterStack.peek());
     }
 }

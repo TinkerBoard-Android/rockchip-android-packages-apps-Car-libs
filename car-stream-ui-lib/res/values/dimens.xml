@@ -46,4 +46,18 @@ limitations under the License.
 
     <!-- The default size for the icons within the touch targets in car applications.. -->
     <dimen name="stream_button_icon_size">36dp</dimen>
+
+    <!-- Size of progress-bar in Drawer -->
+    <dimen name="car_drawer_progress_bar_size">48dp</dimen>
+
+    <!-- NOTE: car-support defines a similarly named value, but the value varies by screen-size. We
+        do not want that -->
+    <dimen name="car_drawer_right_margin">96dp</dimen>
+
+    <dimen name="car_drawer_item_right_icon_margin_end">32dp</dimen>
+
+    <!-- Used by car_list_item_empty.xml -->
+    <dimen name="car_drawer_disabled_list_margin_side">16dp</dimen>
+    <dimen name="car_drawer_disabled_list_icon_margin_top">48dp</dimen>
+    <dimen name="car_drawer_disabled_list_icon_margin_bottom">22dp</dimen>
 </resources>
