@@ -18,14 +18,17 @@ package com.android.car.app;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.annotation.LayoutRes;
 import android.support.car.ui.PagedListView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.android.car.stream.ui.R;
@@ -38,8 +41,9 @@ import java.util.Stack;
  * This Activity manages the overall layout. To use it sub-classes need to:
  * <ul>
  *     <li>Provide the root-items for the Drawer by implementing {@link #getRootAdapter()}.</li>
- *     <li>Add their main content to the container FrameLayout
- *     (with id = {@link #getContentContainerId()}_</li>
+ *     <li>Add their main content using {@link #setMainContent(int)} or
+ *     {@link #setMainContent(View)}. They can also add fragments to the main-content container by
+ *     obtaining its id using {@link #getContentContainerId()}</li>
  * </ul>
  * This class will take care of drawer toggling and display.
  * <p>
@@ -81,10 +85,44 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
         // Init drawer adapter stack.
         CarDrawerAdapter rootAdapter = getRootAdapter();
         mAdapterStack.push(rootAdapter);
-        mToolbar.setTitle(rootAdapter.getTitleResId());
+        setToolbarTitleFrom(rootAdapter);
         mDrawerList.setAdapter(rootAdapter);
 
         setupDrawerToggling();
+    }
+
+    private void setToolbarTitleFrom(CarDrawerAdapter adapter) {
+        if (adapter.getTitleResId() != CarDrawerAdapter.INVALID_STRING_RES_ID) {
+            mToolbar.setTitle(adapter.getTitleResId());
+        } else if (adapter.getTitleString() != null) {
+            mToolbar.setTitle(adapter.getTitleString());
+        } else {
+            throw new RuntimeException("CarDrawerAdapter must supply title via " +
+                " getTitleResId() or getTitleString()");
+        }
+    }
+
+    /**
+     * Set main content to display in this Activity. It will be added to R.id.content_frame in
+     * car_drawer_activity.xml. NOTE: Do not use {@link #setContentView(View)}.
+     *
+     * @param view View to display as main content.
+     */
+    public void setMainContent(View view) {
+        ViewGroup parent = (ViewGroup) findViewById(getContentContainerId());
+        parent.addView(view);
+    }
+
+    /**
+     * Set main content to display in this Activity. It will be added to R.id.content_frame in
+     * car_drawer_activity.xml. NOTE: Do not use {@link #setContentView(int)}.
+     *
+     * @param resourceId Layout to display as main content.
+     */
+    public void setMainContent(@LayoutRes int resourceId) {
+        ViewGroup parent = (ViewGroup) findViewById(getContentContainerId());
+        LayoutInflater inflater = getLayoutInflater();
+        inflater.inflate(resourceId, parent, true);
     }
 
     /**
@@ -100,7 +138,7 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
      *
      * @param adapter Adapter for next level of content in the drawer.
      */
-    protected final void switchToAdapter(CarDrawerAdapter adapter) {
+    public final void switchToAdapter(CarDrawerAdapter adapter) {
         mAdapterStack.push(adapter);
         setTitleAndSwitchToAdapter(adapter);
     }
@@ -108,7 +146,7 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
     /**
      * Close the drawer if open.
      */
-    protected void closeDrawer() {
+    public void closeDrawer() {
         if (mDrawerLayout.isDrawerOpen(Gravity.LEFT)) {
             mDrawerLayout.closeDrawer(Gravity.LEFT);
         }
@@ -211,7 +249,7 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
     }
 
     private void setTitleAndSwitchToAdapter(CarDrawerAdapter adapter) {
-        mToolbar.setTitle(adapter.getTitleResId());
+        setToolbarTitleFrom(adapter);
         // NOTE: We don't use swapAdapter() since different levels in the Drawer may switch between
         // car_menu_list_item_normal, car_menu_list_item_small and car_list_empty layouts.
         mDrawerList.getRecyclerView().setAdapter(adapter);
@@ -220,7 +258,8 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
 
     private boolean maybeHandleUpClick() {
         if (mAdapterStack.size() > 1) {
-            mAdapterStack.pop();
+            CarDrawerAdapter adapter = mAdapterStack.pop();
+            adapter.cleanup();
             setTitleAndSwitchToAdapter(mAdapterStack.peek());
             return true;
         }
@@ -230,7 +269,8 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
     /** Clears stack down to root adapter and switches to root adapter. */
     private void cleanupStackAndShowRoot() {
         while (mAdapterStack.size() > 1) {
-            mAdapterStack.pop();
+            CarDrawerAdapter adapter = mAdapterStack.pop();
+            adapter.cleanup();
         }
         setTitleAndSwitchToAdapter(mAdapterStack.peek());
     }

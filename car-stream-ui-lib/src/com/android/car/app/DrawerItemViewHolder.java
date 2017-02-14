@@ -79,8 +79,7 @@ public class DrawerItemViewHolder extends RecyclerView.ViewHolder {
     }
 
     /**
-     * Set click-listener on the view wrapped by this ViewHolder. For now only used by
-     * {@link CarDrawerListAdapter}.
+     * Set click-listener on the view wrapped by this ViewHolder.
      */
     void setItemClickListener(@Nullable DrawerItemClickListener listener) {
         if (listener != null) {

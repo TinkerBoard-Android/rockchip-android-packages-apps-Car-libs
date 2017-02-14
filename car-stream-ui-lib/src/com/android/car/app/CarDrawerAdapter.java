@@ -1,31 +1,84 @@
 package com.android.car.app;
 
+import android.content.Context;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.StringRes;
 import android.support.car.ui.PagedListView;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import com.android.car.stream.ui.R;
 
 /**
- * Base Adapter for displaying items in the CarDrawerActivity's Drawer which is a PagedListView.
+ * Base Adapter for displaying items in the CarDrawerActivity's Drawer which uses a PagedListView.
  * <p>
- * Implementors must return the string resource for the title that will be displayed when displaying
- * the contents of this adapter (see {@link #getTitleResId()}.
+ * Implementors must return the title that will be displayed when displaying the contents of the
+ * Drawer. They should either override {@link #getTitleResId()} or {@link #getTitleString()}. The
+ * title of the root-adapter will also be the main title showed in the toolbar when the drawer is
+ * closed.
  * <p>
  * This class also takes care of implementing the PageListView.ItemCamp contract and subclasses
  * should implement {@link #getActualItemCount()}.
  */
-public abstract class CarDrawerAdapter extends RecyclerView.Adapter<DrawerItemViewHolder>
-        implements PagedListView.ItemCap {
+public abstract class CarDrawerAdapter extends RecyclerView.Adapter<DrawerItemViewHolder> implements
+        PagedListView.ItemCap,
+        DrawerItemClickListener {
+    static final int INVALID_STRING_RES_ID = -1;
 
+    private final boolean mShowDisabledListOnEmpty;
+    private final boolean mUseSmallLayout;
+    private final Drawable mEmptyListDrawable;
     private int mMaxItems = -1;
 
+    protected CarDrawerAdapter(
+            Context context, boolean showDisabledListOnEmpty,boolean useSmallLayout) {
+        mShowDisabledListOnEmpty = showDisabledListOnEmpty;
+        mUseSmallLayout = useSmallLayout;
+        final int iconColor = context.getColor(R.color.car_tint);
+        mEmptyListDrawable = context.getDrawable(R.drawable.ic_list_view_disable);
+        mEmptyListDrawable.setColorFilter(iconColor, PorterDuff.Mode.SRC_IN);
+    }
+
+    /**
+     * Subclasses should override this method or {@link #getTitleString()}.
+     *
+     * @return String resource to display in the toolbar title when displaying this adapter's
+     * contents.
+     */
+    @StringRes
+    protected int getTitleResId() {
+        return INVALID_STRING_RES_ID;
+    }
+
+    /**
+     * Subclasses should override this method or {@link #getTitleResId()}.
+     *
+     * @return String to display in the toolbar title when displaying this adapter's contents.
+     */
+    protected CharSequence getTitleString() {
+        return null;
+    }
+
+    // ItemCap implementation.
     @Override
     public final void setMaxItems(int maxItems) {
         mMaxItems = maxItems;
     }
 
+    private boolean shouldShowDisabledListItem() {
+        return mShowDisabledListOnEmpty && getActualItemCount() == 0;
+    }
+
+    // Honors ItemCap and mShowDisabledListOnEmpty.
     @Override
     public final int getItemCount() {
-        return mMaxItems >= 0  ? Math.min(mMaxItems, getActualItemCount()) : getActualItemCount();
+        if (shouldShowDisabledListItem()) {
+            return 1;
+        }
+        return mMaxItems >= 0 ? Math.min(mMaxItems, getActualItemCount()) : getActualItemCount();
     }
 
     /**
@@ -33,10 +86,43 @@ public abstract class CarDrawerAdapter extends RecyclerView.Adapter<DrawerItemVi
      */
     protected abstract int getActualItemCount();
 
+    @Override
+    public final int getItemViewType(int position) {
+        if (shouldShowDisabledListItem()) {
+            return R.layout.car_list_item_empty;
+        }
+        return mUseSmallLayout
+                ? R.layout.car_menu_list_item_small : R.layout.car_menu_list_item_normal;
+    }
+
+    @Override
+    public final DrawerItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(viewType, parent, false);
+        return new DrawerItemViewHolder(view);
+    }
+
+    @Override
+    public final void onBindViewHolder(DrawerItemViewHolder holder, int position) {
+        if (shouldShowDisabledListItem()) {
+            holder.getTitle().setText(null);
+            holder.getIcon().setImageDrawable(mEmptyListDrawable);
+            holder.setItemClickListener(null);
+        } else {
+            holder.setItemClickListener(this);
+            populateViewHolder(holder, position);
+        }
+    }
+
     /**
-     * @return String resource to display in the toolbar title when displaying this adapter's
-     * contents.
+     * Subclasses should set all elements in {@code holder} to populate the drawer-item.
+     * If some element is not used, it should be nulled out since these ViewHolder/View's are
+     * recycled.
      */
-    @StringRes
-    protected abstract int getTitleResId();
+    protected abstract void populateViewHolder(DrawerItemViewHolder holder, int position);
+
+    /**
+     * Called when this adapter has been popped off the stack and is no longer needed. Subclasses
+     * can override to do any necessary cleanup.
+     */
+    protected void cleanup() {}
 }
