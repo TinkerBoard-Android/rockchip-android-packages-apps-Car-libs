@@ -3,6 +3,8 @@ package com.android.car.app;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.car.ui.PagedListView;
 import android.support.v7.widget.RecyclerView;
@@ -15,8 +17,8 @@ import com.android.car.stream.ui.R;
 /**
  * Base Adapter for displaying items in the CarDrawerActivity's Drawer which uses a PagedListView.
  * <p>
- * Implementors must return the title that will be displayed when displaying the contents of the
- * Drawer. They should either override {@link #getTitleResId()} or {@link #getTitleString()}. The
+ * Subclasses must set the title that will be displayed when displaying the contents of the
+ * Drawer via {@link #setTitle(CharSequence)}. The title can be updated at any point later. The
  * title of the root-adapter will also be the main title showed in the toolbar when the drawer is
  * closed.
  * <p>
@@ -26,12 +28,16 @@ import com.android.car.stream.ui.R;
 public abstract class CarDrawerAdapter extends RecyclerView.Adapter<DrawerItemViewHolder> implements
         PagedListView.ItemCap,
         DrawerItemClickListener {
-    static final int INVALID_STRING_RES_ID = -1;
+    interface TitleChangeListener {
+        void onTitleChanged(CharSequence newTitle);
+    }
 
     private final boolean mShowDisabledListOnEmpty;
     private final boolean mUseSmallLayout;
     private final Drawable mEmptyListDrawable;
     private int mMaxItems = -1;
+    private CharSequence mTitle;
+    private TitleChangeListener mTitleChangeListener;
 
     protected CarDrawerAdapter(
             Context context, boolean showDisabledListOnEmpty,boolean useSmallLayout) {
@@ -42,24 +48,27 @@ public abstract class CarDrawerAdapter extends RecyclerView.Adapter<DrawerItemVi
         mEmptyListDrawable.setColorFilter(iconColor, PorterDuff.Mode.SRC_IN);
     }
 
-    /**
-     * Subclasses should override this method or {@link #getTitleString()}.
-     *
-     * @return String resource to display in the toolbar title when displaying this adapter's
-     * contents.
-     */
-    @StringRes
-    protected int getTitleResId() {
-        return INVALID_STRING_RES_ID;
+    CharSequence getTitle() {
+        return mTitle;
     }
 
     /**
-     * Subclasses should override this method or {@link #getTitleResId()}.
+     * Updates the title to display in the toolbar for this Adapter.
      *
-     * @return String to display in the toolbar title when displaying this adapter's contents.
+     * @param title Title string.
      */
-    protected CharSequence getTitleString() {
-        return null;
+    public final void setTitle(@NonNull CharSequence title) {
+        if (title == null) {
+            throw new IllegalArgumentException("title is null!");
+        }
+        mTitle = title;
+        if (mTitleChangeListener != null) {
+            mTitleChangeListener.onTitleChanged(mTitle);
+        }
+    }
+
+    void setTitleChangeListener(@Nullable TitleChangeListener listener) {
+        mTitleChangeListener = listener;
     }
 
     // ItemCap implementation.
@@ -124,5 +133,5 @@ public abstract class CarDrawerAdapter extends RecyclerView.Adapter<DrawerItemVi
      * Called when this adapter has been popped off the stack and is no longer needed. Subclasses
      * can override to do any necessary cleanup.
      */
-    protected void cleanup() {}
+    public void cleanup() {}
 }

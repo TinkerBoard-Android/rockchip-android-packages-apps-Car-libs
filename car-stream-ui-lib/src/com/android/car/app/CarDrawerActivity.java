@@ -19,6 +19,7 @@ package com.android.car.app;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;
+import android.support.annotation.NonNull;
 import android.support.car.ui.PagedListView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -92,14 +93,13 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
     }
 
     private void setToolbarTitleFrom(CarDrawerAdapter adapter) {
-        if (adapter.getTitleResId() != CarDrawerAdapter.INVALID_STRING_RES_ID) {
-            mToolbar.setTitle(adapter.getTitleResId());
-        } else if (adapter.getTitleString() != null) {
-            mToolbar.setTitle(adapter.getTitleString());
+        if (adapter.getTitle() != null) {
+            mToolbar.setTitle(adapter.getTitle());
         } else {
-            throw new RuntimeException("CarDrawerAdapter must supply title via " +
-                " getTitleResId() or getTitleString()");
+            throw new RuntimeException("CarDrawerAdapter subclass must supply title via " +
+                " setTitle()");
         }
+        adapter.setTitleChangeListener(mToolbar::setTitle);
     }
 
     /**
@@ -139,6 +139,7 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
      * @param adapter Adapter for next level of content in the drawer.
      */
     public final void switchToAdapter(CarDrawerAdapter adapter) {
+        mAdapterStack.peek().setTitleChangeListener(null);
         mAdapterStack.push(adapter);
         setTitleAndSwitchToAdapter(adapter);
     }
@@ -153,13 +154,36 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
     }
 
     /**
+     * Used to open the drawer.
+     */
+    public void openDrawer() {
+        if (!mDrawerLayout.isDrawerOpen(Gravity.LEFT)) {
+            mDrawerLayout.openDrawer(Gravity.LEFT);
+        }
+    }
+
+    /**
+     * @param listener Listener to be notified of Drawer events.
+     */
+    public void addDrawerListener(@NonNull DrawerLayout.DrawerListener listener) {
+        mDrawerLayout.addDrawerListener(listener);
+    }
+
+    /**
+     * @param listener Listener to be notified of Drawer events.
+     */
+    public void removeDrawerListener(@NonNull DrawerLayout.DrawerListener listener) {
+        mDrawerLayout.removeDrawerListener(listener);
+    }
+
+    /**
      * Used to switch between the Drawer PagedListView and the "loading" progress-bar while the next
      * level's adapter contents are being fetched.
      *
      * @param enable If true, the progress-bar is displayed. If false, the Drawer PagedListView is
      *               added.
      */
-    protected void showLoadingProgressBar(boolean enable) {
+    public void showLoadingProgressBar(boolean enable) {
         mDrawerList.setVisibility(enable ? View.INVISIBLE : View.VISIBLE);
         mProgressBar.setVisibility(enable ? View.VISIBLE : View.GONE);
     }
@@ -259,6 +283,7 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
     private boolean maybeHandleUpClick() {
         if (mAdapterStack.size() > 1) {
             CarDrawerAdapter adapter = mAdapterStack.pop();
+            adapter.setTitleChangeListener(null);
             adapter.cleanup();
             setTitleAndSwitchToAdapter(mAdapterStack.peek());
             return true;
@@ -270,6 +295,7 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
     private void cleanupStackAndShowRoot() {
         while (mAdapterStack.size() > 1) {
             CarDrawerAdapter adapter = mAdapterStack.pop();
+            adapter.setTitleChangeListener(null);
             adapter.cleanup();
         }
         setTitleAndSwitchToAdapter(mAdapterStack.peek());
