@@ -39,7 +39,7 @@
             android:background="@color/car_card"
             android:paddingTop="@dimen/lens_header_height" >
 
-            <android.support.car.ui.PagedListView
+            <com.android.car.view.PagedListView
                 android:id="@+id/drawer_list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
