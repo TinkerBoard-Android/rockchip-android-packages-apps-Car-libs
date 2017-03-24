@@ -78,6 +78,8 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         mDrawerContent = findViewById(R.id.drawer_content);
         mDrawerList = (PagedListView)findViewById(R.id.drawer_list);
+        // Let drawer list show unlimited pages of items.
+        mDrawerList.setMaxPages(PagedListView.ItemCap.UNLIMITED);
         mProgressBar = (ProgressBar)findViewById(R.id.drawer_progress);
 
         mToolbar = (Toolbar) findViewById(R.id.main_toolbar);
