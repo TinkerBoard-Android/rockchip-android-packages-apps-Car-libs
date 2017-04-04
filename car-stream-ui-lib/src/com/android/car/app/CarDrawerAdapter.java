@@ -33,16 +33,14 @@ public abstract class CarDrawerAdapter extends RecyclerView.Adapter<DrawerItemVi
     }
 
     private final boolean mShowDisabledListOnEmpty;
-    private final boolean mUseSmallLayout;
     private final Drawable mEmptyListDrawable;
     private int mMaxItems = -1;
     private CharSequence mTitle;
     private TitleChangeListener mTitleChangeListener;
 
     protected CarDrawerAdapter(
-            Context context, boolean showDisabledListOnEmpty,boolean useSmallLayout) {
+            Context context, boolean showDisabledListOnEmpty) {
         mShowDisabledListOnEmpty = showDisabledListOnEmpty;
-        mUseSmallLayout = useSmallLayout;
         final int iconColor = context.getColor(R.color.car_tint);
         mEmptyListDrawable = context.getDrawable(R.drawable.ic_list_view_disable);
         mEmptyListDrawable.setColorFilter(iconColor, PorterDuff.Mode.SRC_IN);
@@ -100,8 +98,19 @@ public abstract class CarDrawerAdapter extends RecyclerView.Adapter<DrawerItemVi
         if (shouldShowDisabledListItem()) {
             return R.layout.car_list_item_empty;
         }
-        return mUseSmallLayout
+        return usesSmallLayout(position)
                 ? R.layout.car_menu_list_item_small : R.layout.car_menu_list_item_normal;
+    }
+
+    /**
+     * Used to indicate the layout used for the Drawer item at given position. Subclasses can
+     *  override this to use normal layout which includes text element below title.
+     *
+     * @param position Adapter position of item.
+     * @return Whether the item at this position will use a small layout (default) or normal layout.
+     */
+    protected boolean usesSmallLayout(int position) {
+        return true;
     }
 
     @Override
