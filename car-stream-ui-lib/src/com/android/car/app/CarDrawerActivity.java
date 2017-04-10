@@ -204,10 +204,8 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
         mDrawerToggle = new ActionBarDrawerToggle(
                 this,                  /* host Activity */
                 mDrawerLayout,         /* DrawerLayout object */
-                // The string id's below are for accessibility. However
-                // since they won't be used in cars, we just pass car_drawer_unused.
-                R.string.car_drawer_unused,
-                R.string.car_drawer_unused
+                R.string.car_drawer_open,
+                R.string.car_drawer_close
         );
         mDrawerLayout.addDrawerListener(mDrawerToggle);
         mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
