@@ -21,7 +21,7 @@ limitations under the License.
         <attr name="offsetRows" format="boolean" />
         <attr name="glowColor" format="color" />
         <!-- Whether loading list view in drawer or not -->
-        <attr name="rightGutterEnabled" format="boolean" />
+        <attr name="usedInDrawer" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="StreamCardView">

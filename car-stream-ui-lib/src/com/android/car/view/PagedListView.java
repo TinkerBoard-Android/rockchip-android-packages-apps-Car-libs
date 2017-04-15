@@ -106,15 +106,17 @@ public class PagedListView extends FrameLayout {
         super(context, attrs, defStyleAttrs, defStyleRes);
         TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.PagedListView, defStyleAttrs, defStyleRes);
-        boolean rightGutterEnabled =
-                a.getBoolean(R.styleable.PagedListView_rightGutterEnabled, false);
+        boolean usedInDrawer = a.getBoolean(R.styleable.PagedListView_usedInDrawer, false);
         LayoutInflater.from(context)
                 .inflate(R.layout.car_paged_recycler_view, this /*root*/, true /*attachToRoot*/);
-        if (rightGutterEnabled) {
+        if (usedInDrawer) {
             FrameLayout maxWidthLayout = (FrameLayout) findViewById(R.id.max_width_layout);
             LayoutParams params =
                     (LayoutParams) maxWidthLayout.getLayoutParams();
-            params.rightMargin = getResources().getDimensionPixelSize(R.dimen.car_card_margin);
+            params.leftMargin = getResources().getDimensionPixelSize(
+                    R.dimen.car_drawer_button_container_width);
+            params.rightMargin = getResources().getDimensionPixelSize(
+                    R.dimen.car_drawer_margin_right);
             maxWidthLayout.setLayoutParams(params);
         }
         mRecyclerView = (CarRecyclerView) findViewById(R.id.recycler_view);

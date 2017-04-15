@@ -42,7 +42,8 @@
             <com.android.car.view.PagedListView
                 android:id="@+id/drawer_list"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                app:usedInDrawer="true" />
 
             <ProgressBar
                 android:id="@+id/drawer_progress"

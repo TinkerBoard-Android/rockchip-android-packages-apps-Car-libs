@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <resources>
-    <dimen name="car_drawer_margin_right">320dp</dimen>
     <dimen name="car_list_item_right_icon_margin">112dp</dimen>
 
     <dimen name="car_list_item_icon_right_margin">60dp</dimen>
