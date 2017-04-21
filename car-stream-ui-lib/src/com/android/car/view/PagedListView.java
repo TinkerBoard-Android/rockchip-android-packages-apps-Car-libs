@@ -53,7 +53,7 @@ public class PagedListView extends FrameLayout {
     private final CarLayoutManager mLayoutManager;
     private final PagedScrollBarView mScrollBarView;
     private final Handler mHandler = new Handler();
-    private Decoration mDecor = new Decoration(getContext());
+    private DividerDecoration mDecor;
 
     /** Maximum number of pages to show. Values < 0 show all pages. */
     private int mMaxPages = -1;
@@ -106,19 +106,33 @@ public class PagedListView extends FrameLayout {
         super(context, attrs, defStyleAttrs, defStyleRes);
         TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.PagedListView, defStyleAttrs, defStyleRes);
-        boolean usedInDrawer = a.getBoolean(R.styleable.PagedListView_usedInDrawer, false);
         LayoutInflater.from(context)
                 .inflate(R.layout.car_paged_recycler_view, this /*root*/, true /*attachToRoot*/);
+        int scrollContainerWidth = getResources().getDimensionPixelSize(
+                R.dimen.car_drawer_button_container_width);
+        if (a.hasValue(R.styleable.PagedListView_scrollbarContainerWidth)) {
+            scrollContainerWidth = a.getDimensionPixelSize(
+                    R.styleable.PagedListView_scrollbarContainerWidth,
+                    scrollContainerWidth);
+            FrameLayout scrollContainer = (FrameLayout) findViewById(R.id.scroll_container);
+            LayoutParams params = (LayoutParams) scrollContainer.getLayoutParams();
+            params.width = scrollContainerWidth;
+            scrollContainer.setLayoutParams(params);
+        }
+
+        boolean usedInDrawer = a.getBoolean(R.styleable.PagedListView_usedInDrawer, false);
         if (usedInDrawer) {
             FrameLayout maxWidthLayout = (FrameLayout) findViewById(R.id.max_width_layout);
-            LayoutParams params =
-                    (LayoutParams) maxWidthLayout.getLayoutParams();
-            params.leftMargin = getResources().getDimensionPixelSize(
-                    R.dimen.car_drawer_button_container_width);
+            LayoutParams params = (LayoutParams) maxWidthLayout.getLayoutParams();
+            params.leftMargin = scrollContainerWidth;
             params.rightMargin = getResources().getDimensionPixelSize(
                     R.dimen.car_drawer_margin_right);
             maxWidthLayout.setLayoutParams(params);
         }
+        boolean showDivider = a.getBoolean(R.styleable.PagedListView_showDivider, true);
+        mDecor = showDivider
+                ? new DividerDecoration(getContext()) : new NoDividerDecoration(getContext());
+
         mRecyclerView = (CarRecyclerView) findViewById(R.id.recycler_view);
         boolean fadeLastItem = a.getBoolean(R.styleable.PagedListView_fadeLastItem, false);
         mRecyclerView.setFadeLastItem(fadeLastItem);
@@ -239,7 +253,7 @@ public class PagedListView extends FrameLayout {
         mMaxPages = getDefaultMaxPages();
     }
 
-    public void setDefaultItemDecoration(Decoration decor) {
+    public void setDefaultItemDecoration(DividerDecoration decor) {
         removeDefaultItemDecoration();
         mDecor = decor;
         addItemDecoration(mDecor);
@@ -460,13 +474,13 @@ public class PagedListView extends FrameLayout {
         public void onLeaveBottom() {}
     }
 
-    public static class Decoration extends RecyclerView.ItemDecoration {
+    public static class DividerDecoration extends RecyclerView.ItemDecoration {
         protected final Paint mPaint;
         protected final int mDividerHeight;
         protected final Context mContext;
 
 
-        public Decoration(Context context) {
+        public DividerDecoration(Context context) {
             mContext = context;
             mPaint = new Paint();
             updateDividerColor();
@@ -542,5 +556,14 @@ public class PagedListView extends FrameLayout {
             }
             return null;
         }
+    }
+
+    public static class NoDividerDecoration extends DividerDecoration {
+        public NoDividerDecoration(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) {}
     }
 }

@@ -27,8 +27,9 @@
                 android:layout_gravity="center_horizontal"
                 android:clipChildren="false"/>
     </com.android.car.view.MaxWidthLayout>
-    <!-- The scroll bar should be drawn ontop of the centered recycler view-->
+    <!-- The scroll bar should be drawn on top of the centered recycler view -->
     <FrameLayout
+            android:id="@+id/scroll_container"
             android:layout_width="@dimen/car_drawer_button_container_width"
             android:layout_height="match_parent">
         <com.android.car.view.PagedScrollBarView

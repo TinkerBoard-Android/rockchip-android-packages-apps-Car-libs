@@ -22,6 +22,10 @@ limitations under the License.
         <attr name="glowColor" format="color" />
         <!-- Whether loading list view in drawer or not -->
         <attr name="usedInDrawer" format="boolean" />
+        <!-- Whether show a divider line between each row or not -->
+        <attr name="showDivider" format="boolean" />
+        <!-- The width of the container for the scroll -->
+        <attr name="scrollbarContainerWidth" format="dimension" />
     </declare-styleable>
 
     <declare-styleable name="StreamCardView">
