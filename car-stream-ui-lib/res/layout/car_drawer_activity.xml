@@ -43,7 +43,8 @@
                 android:id="@+id/drawer_list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:usedInDrawer="true" />
+                app:rightMargin="@dimen/car_drawer_margin_right"
+                app:offsetScrollBar="true" />
 
             <ProgressBar
                 android:id="@+id/drawer_progress"

@@ -120,13 +120,13 @@ public class PagedListView extends FrameLayout {
             scrollContainer.setLayoutParams(params);
         }
 
-        boolean usedInDrawer = a.getBoolean(R.styleable.PagedListView_usedInDrawer, false);
-        if (usedInDrawer) {
+        boolean offsetScrollBar = a.getBoolean(R.styleable.PagedListView_offsetScrollBar, false);
+        if (offsetScrollBar) {
             FrameLayout maxWidthLayout = (FrameLayout) findViewById(R.id.max_width_layout);
             LayoutParams params = (LayoutParams) maxWidthLayout.getLayoutParams();
             params.leftMargin = scrollContainerWidth;
-            params.rightMargin = getResources().getDimensionPixelSize(
-                    R.dimen.car_drawer_margin_right);
+            int rightMargin = a.getDimensionPixelSize(R.styleable.PagedListView_rightMargin, 0);
+            params.rightMargin = rightMargin;
             maxWidthLayout.setLayoutParams(params);
         }
         boolean showDivider = a.getBoolean(R.styleable.PagedListView_showDivider, true);
