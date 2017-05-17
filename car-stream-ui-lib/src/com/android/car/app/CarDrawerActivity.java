@@ -219,7 +219,7 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
             public void onDrawerClosed(View drawerView) {
                 // If drawer is closed for any reason, revert stack/drawer to initial root state.
                 cleanupStackAndShowRoot();
-                mDrawerList.getRecyclerView().scrollToPosition(0);
+                scrollToPosition(0);
             }
             @Override
             public void onDrawerStateChanged(int newState) {}
@@ -277,7 +277,11 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
         // NOTE: We don't use swapAdapter() since different levels in the Drawer may switch between
         // car_menu_list_item_normal, car_menu_list_item_small and car_list_empty layouts.
         mDrawerList.getRecyclerView().setAdapter(adapter);
-        mDrawerList.getRecyclerView().scrollToPosition(0);
+        scrollToPosition(0);
+    }
+
+    public void scrollToPosition(int position) {
+        mDrawerList.getRecyclerView().smoothScrollToPosition(position);
     }
 
     private boolean maybeHandleUpClick() {
