@@ -16,11 +16,13 @@
 package com.android.car.view;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
@@ -29,9 +31,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import com.android.car.stream.ui.R;
 
@@ -48,6 +48,7 @@ public class PagedListView extends FrameLayout {
      * user holds down a pagination button.
      */
     private static final int PAGINATION_HOLD_DELAY_MS = 400;
+    private static final int INVALID_RESOURCE_ID = -1;
 
     private final CarRecyclerView mRecyclerView;
     private final CarLayoutManager mLayoutManager;
@@ -85,7 +86,7 @@ public class PagedListView extends FrameLayout {
      * </pre>
      */
     public interface ItemCap {
-        public static final int UNLIMITED = -1;
+        int UNLIMITED = -1;
 
         /**
          * Sets the maximum number of items available in the adapter. A value less than '0'
@@ -125,19 +126,13 @@ public class PagedListView extends FrameLayout {
             FrameLayout maxWidthLayout = (FrameLayout) findViewById(R.id.max_width_layout);
             LayoutParams params = (LayoutParams) maxWidthLayout.getLayoutParams();
             params.leftMargin = scrollContainerWidth;
-            int rightMargin = a.getDimensionPixelSize(R.styleable.PagedListView_rightMargin, 0);
-            params.rightMargin = rightMargin;
+            params.rightMargin = a.getDimensionPixelSize(R.styleable.PagedListView_rightMargin, 0);
             maxWidthLayout.setLayoutParams(params);
         }
-        boolean showDivider = a.getBoolean(R.styleable.PagedListView_showDivider, true);
-        mDecor = showDivider
-                ? new DividerDecoration(getContext()) : new NoDividerDecoration(getContext());
-
         mRecyclerView = (CarRecyclerView) findViewById(R.id.recycler_view);
         boolean fadeLastItem = a.getBoolean(R.styleable.PagedListView_fadeLastItem, false);
         mRecyclerView.setFadeLastItem(fadeLastItem);
         boolean offsetRows = a.getBoolean(R.styleable.PagedListView_offsetRows, false);
-        a.recycle();
 
         mMaxPages = getDefaultMaxPages();
 
@@ -145,10 +140,21 @@ public class PagedListView extends FrameLayout {
         mLayoutManager.setOffsetRows(offsetRows);
         mLayoutManager.setItemsChangedListener(mItemsChangedListener);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mRecyclerView.addItemDecoration(mDecor);
         mRecyclerView.setOnScrollListener(mOnScrollListener);
         mRecyclerView.getRecycledViewPool().setMaxRecycledViews(0, 12);
         mRecyclerView.setItemAnimator(new CarItemAnimator(mLayoutManager));
+
+        if (a.getBoolean(R.styleable.PagedListView_showDivider, true)) {
+            int dividerStartMargin = a.getDimensionPixelSize(
+                    R.styleable.PagedListView_dividerStartMargin, 0);
+            int dividerStartId = a.getResourceId(R.styleable.PagedListView_alignDividerStartTo,
+                    INVALID_RESOURCE_ID);
+            int dividerEndId = a.getResourceId(R.styleable.PagedListView_alignDividerEndTo,
+                    INVALID_RESOURCE_ID);
+
+            mRecyclerView.addItemDecoration(new DividerDecoration(context, dividerStartMargin,
+                    dividerStartId, dividerEndId));
+        }
 
         mScrollBarView = (PagedScrollBarView) findViewById(R.id.paged_scroll_view);
         mScrollBarView.setPaginationListener(new PagedScrollBarView.PaginationListener() {
@@ -166,6 +172,8 @@ public class PagedListView extends FrameLayout {
 
         setAutoDayNightMode();
         updatePaginationButtons(false /*animate*/);
+
+        a.recycle();
     }
 
     @Override
@@ -253,16 +261,6 @@ public class PagedListView extends FrameLayout {
         mMaxPages = getDefaultMaxPages();
     }
 
-    public void setDefaultItemDecoration(DividerDecoration decor) {
-        removeDefaultItemDecoration();
-        mDecor = decor;
-        addItemDecoration(mDecor);
-    }
-
-    public void removeDefaultItemDecoration() {
-        mRecyclerView.removeItemDecoration(mDecor);
-    }
-
     public void addItemDecoration(@NonNull RecyclerView.ItemDecoration decor) {
         mRecyclerView.addItemDecoration(decor);
     }
@@ -271,19 +269,26 @@ public class PagedListView extends FrameLayout {
         mRecyclerView.removeItemDecoration(decor);
     }
 
+    /**
+     * Sets the scrollbars of this PagedListView to change from light to dark colors depending on
+     * whether or not device is in night mode.
+     */
     public void setAutoDayNightMode() {
         mScrollBarView.setAutoDayNightMode();
-        mDecor.updateDividerColor();
     }
 
+    /**
+     * Sets the scrollbars of this PagedListView to be light colors.
+     */
     public void setLightMode() {
         mScrollBarView.setLightMode();
-        mDecor.updateDividerColor();
     }
 
+    /**
+     * Sets the scrollbars of this PagedListView to be dark colors.
+     */
     public void setDarkMode() {
         mScrollBarView.setDarkMode();
-        mDecor.updateDividerColor();
     }
 
     public void setOnScrollBarListener(OnScrollBarListener listener) {
@@ -474,96 +479,67 @@ public class PagedListView extends FrameLayout {
         public void onLeaveBottom() {}
     }
 
+    /**
+     * A {@link android.support.v7.widget.RecyclerView.ItemDecoration} that will draw a dividing
+     * line between each item in the RecyclerView that it is added to.
+     */
     public static class DividerDecoration extends RecyclerView.ItemDecoration {
-        protected final Paint mPaint;
-        protected final int mDividerHeight;
-        protected final Context mContext;
+        private final Paint mPaint;
+        private final int mDividerHeight;
+        private final int mDividerStartMargin;
+        @IdRes private final int mDividerStartId;
+        @IdRes private final int mDvidierEndId;
 
+        /**
+         * @param dividerStartMargin The start offset of the dividing line. This offset will be
+         *                           relative to {@code dividerStartId} if that value is given.
+         * @param dividerStartId A child view id whose starting edge will be used as the starting
+         *                       edge of the dividing line. If this value is
+         *                       {@link #INVALID_RESOURCE_ID}, the the top container of each
+         *                       child view will be used.
+         * @param dividerEndId A child view id whose ending edge will be used as the starting edge
+         *                     of the dividing lin.e If this value is {@link #INVALID_RESOURCE_ID},
+         *                     then the top container view of each child will be used.
+         */
+        private DividerDecoration(Context context, int dividerStartMargin,
+                @IdRes int dividerStartId, @IdRes int dividerEndId) {
+            mDividerStartMargin = dividerStartMargin;
+            mDividerStartId = dividerStartId;
+            mDvidierEndId = dividerEndId;
 
-        public DividerDecoration(Context context) {
-            mContext = context;
+            Resources res = context.getResources();
             mPaint = new Paint();
-            updateDividerColor();
-            mDividerHeight = mContext.getResources()
-                    .getDimensionPixelSize(R.dimen.car_divider_height);
+            mPaint.setColor(res.getColor(R.color.car_list_divider));
+            mDividerHeight = res.getDimensionPixelSize(R.dimen.car_divider_height);
         }
 
         @Override
         public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) {
-            final int left = getLeft(parent.getChildAt(0));
-            final int right = parent.getWidth() - parent.getPaddingRight();
-            int top;
-            int bottom;
+            for (int i = 0, childCount = parent.getChildCount(); i < childCount; i++) {
+                View container = parent.getChildAt(i);
+                View startChild = mDividerStartId != INVALID_RESOURCE_ID
+                        ? container.findViewById(mDividerStartId)
+                        : container;
 
-            c.drawRect(left, 0, right, mDividerHeight, mPaint);
+                View endChild = mDvidierEndId != INVALID_RESOURCE_ID
+                        ? container.findViewById(mDvidierEndId)
+                        : container;
 
-            final int childCount = parent.getChildCount();
-            for (int i = 0; i < childCount; i++) {
-                final View child = parent.getChildAt(i);
-                final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child
-                        .getLayoutParams();
-                bottom = child.getBottom() - params.bottomMargin;
-                top = bottom - mDividerHeight;
-                if (top > 0) {
+                if (startChild == null || endChild == null) {
+                    continue;
+                }
+
+                int left = mDividerStartMargin + startChild.getLeft();
+                int right = endChild.getRight();
+                int bottom = container.getBottom();
+                int top = bottom - mDividerHeight;
+
+                // Draw a divider line between each item. No need to draw the line for the last
+                // item.
+                if (i != childCount - 1) {
                     c.drawRect(left, top, right, bottom, mPaint);
                 }
             }
         }
-
-        /**
-         * Updates the list divider color which may have changed due to a day night transition.
-         */
-        public void updateDividerColor() {
-            mPaint.setColor(mContext.getResources().getColor(R.color.car_list_divider));
-        }
-
-        /**
-         * Find the left edge of the decoration line. It should be left aligned with the left edge
-         * of the first {@link android.widget.TextView}.
-         */
-        private int getLeft(View root) {
-            if (root == null) {
-                return 0;
-            }
-            View view = findTextView(root);
-            if (view == null) {
-                view = root;
-            }
-            int left = 0;
-            while (view != null && view != root) {
-                left += view.getLeft();
-                view = (View) view.getParent();
-            }
-            return left;
-        }
-
-        private TextView findTextView(View root) {
-            if (root == null) {
-                return null;
-            }
-            if (root instanceof TextView) {
-                return (TextView) root;
-            }
-            if (root instanceof ViewGroup) {
-                ViewGroup parent = (ViewGroup) root;
-                final int childCount = parent.getChildCount();
-                for(int i = 0; i < childCount; i++) {
-                    TextView tv = findTextView(parent.getChildAt(i));
-                    if (tv != null) {
-                        return tv;
-                    }
-                }
-            }
-            return null;
-        }
-    }
-
-    public static class NoDividerDecoration extends DividerDecoration {
-        public NoDividerDecoration(Context context) {
-            super(context);
-        }
-
-        @Override
-        public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) {}
     }
 }

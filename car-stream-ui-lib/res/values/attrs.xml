@@ -22,8 +22,17 @@ limitations under the License.
         <attr name="glowColor" format="color" />
         <!-- Whether offsetting the list view by the amount of left scroll bar -->
         <attr name="offsetScrollBar" format="boolean" />
-        <!-- Whether or not the list view is offset by the width of the scroll bar. -->
+        <!-- Whether or not to show a diving line between each item of the list. -->
         <attr name="showDivider" format="boolean" />
+        <!-- An optional id that specifies a child View whose starting edge will be used to
+             determine the start position of the dividing line. -->
+        <attr name="alignDividerStartTo" format="reference" />
+        <!-- An optional id that specifies a child View whose ending edge will be used to
+             determine the end position of the dividing line. -->
+        <attr name="alignDividerEndTo" format="reference" />
+        <!-- A starting margin before the drawing of the dividing line. This margin will be an
+             offset from the view specified by "alignDividerStartTo" if given. -->
+        <attr name="dividerStartMargin" format="dimension" />
         <!-- The width of the container for the scroll -->
         <attr name="scrollbarContainerWidth" format="dimension" />
         <!-- The width of the margin on the right side of the list -->
