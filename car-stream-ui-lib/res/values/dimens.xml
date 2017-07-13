@@ -138,4 +138,11 @@ limitations under the License.
     <dimen name="search_suggestion_height">64dp</dimen>
     <dimen name="searchview_margin_left">152dp</dimen>
     <dimen name="searchview_margin_right">264dp</dimen>
+
+    <!-- The space on each side of the screen. Some common function widgets, like scroll bar,
+         can go into this space -->
+    <dimen name="side_margin">148dp</dimen>
+
+    <!-- Height of items in a list. -->
+    <dimen name="line_item_height">128dp</dimen>
 </resources>
