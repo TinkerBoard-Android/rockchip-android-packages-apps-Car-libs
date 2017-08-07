@@ -94,6 +94,12 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
         setupDrawerToggling();
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mDrawerLayout.closeDrawer(Gravity.LEFT, false /* animation */);
+    }
+
     private void setToolbarTitleFrom(CarDrawerAdapter adapter) {
         if (adapter.getTitle() != null) {
             mToolbar.setTitle(adapter.getTitle());
