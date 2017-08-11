@@ -65,6 +65,7 @@ limitations under the License.
     <dimen name="car_list_truncated_list_padding">10dp</dimen>
     <dimen name="car_text_vertical_margin">2dp</dimen>
     <dimen name="car_card_bottom_margin">8dp</dimen>
+    <dimen name="car_card_default_radius">16dp</dimen>
 
     <dimen name="car_touch_feedback_radius">32dp</dimen>
     <dimen name="car_card_view_corner_radius">2dp</dimen>
