@@ -143,12 +143,13 @@ limitations under the License.
          can go into this space -->
     <dimen name="side_margin">148dp</dimen>
 
-    <!-- Height of items in a list. -->
-    <dimen name="line_item_height">128dp</dimen>
-
     <!-- Common icon size for car app -->
     <dimen name="car_icon_size">44dp</dimen>
 
     <!-- Touch target size for round or square affordance -->
     <dimen name="car_touch_target">106dp</dimen>
+
+    <!-- Height of items in a list. -->
+    <dimen name="double_line_item_height">256dp</dimen>
+    <dimen name="single_line_item_height">256dp</dimen>
 </resources>
