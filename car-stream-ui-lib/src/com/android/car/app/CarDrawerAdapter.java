@@ -5,7 +5,6 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -96,7 +95,7 @@ public abstract class CarDrawerAdapter extends RecyclerView.Adapter<DrawerItemVi
     @Override
     public final int getItemViewType(int position) {
         if (shouldShowDisabledListItem()) {
-            return R.layout.car_list_item_empty;
+            return R.layout.car_menu_list_item_empty;
         }
         return usesSmallLayout(position)
                 ? R.layout.car_menu_list_item_small : R.layout.car_menu_list_item_normal;
