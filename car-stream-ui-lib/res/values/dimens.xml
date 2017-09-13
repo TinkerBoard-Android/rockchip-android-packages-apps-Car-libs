@@ -126,19 +126,18 @@ limitations under the License.
 
     <dimen name="car_drawer_item_right_icon_margin_end">32dp</dimen>
 
+    <!-- Dimensions of the back arrow in the drawer. -->
+    <dimen name="car_arrow_size">96dp</dimen>
+    <dimen name="car_arrow_thickness">3dp</dimen>
+    <dimen name="car_arrow_shaft_length">34dp</dimen>
+    <dimen name="car_arrow_head_length">18dp</dimen>
+    <dimen name="car_menu_bar_spacing">6dp</dimen>
+    <dimen name="car_menu_bar_length">40dp</dimen>
+
     <!-- Used by car_list_item_empty.xml -->
     <dimen name="car_drawer_disabled_list_margin_side">16dp</dimen>
     <dimen name="car_drawer_disabled_list_icon_margin_top">48dp</dimen>
     <dimen name="car_drawer_disabled_list_icon_margin_bottom">22dp</dimen>
-
-    <!-- These values are all made up since we don't have visual design yet. Will be fixed once
-         we have final visual design.
-    -->
-    <dimen name="searchview_textbox_corner_radius">8dp</dimen>
-    <dimen name="searchview_width">@dimen/car_card_max_width</dimen>
-    <dimen name="search_suggestion_height">64dp</dimen>
-    <dimen name="searchview_margin_left">152dp</dimen>
-    <dimen name="searchview_margin_right">264dp</dimen>
 
     <!-- The space on each side of the screen. Some common function widgets, like scroll bar,
          can go into this space -->
