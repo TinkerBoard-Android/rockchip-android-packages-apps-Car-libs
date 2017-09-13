@@ -153,14 +153,14 @@
         <item name="android:textColor">@color/car_micro_light</item>
     </style>
 
-    <style name="CarDrawerArrowDrawable" >
-        <item name="carArrowColor">@android:color/white</item>
-        <item name="carArrowSpinBars">true</item>
-        <item name="carArrowThickness">2.5dp</item>
-        <item name="carArrowDrawableSize">@dimen/car_drawer_header_menu_button_size</item>
-        <item name="carArrowTopBottomBarSize">18dp</item>
-        <item name="carArrowBarSize">28dp</item>
-        <item name="carArrowMiddleBarSize">24dp</item>
-        <item name="carArrowGapBetweenBars">6dp</item>
+    <style name="DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="color">@color/car_title_light</item>
+        <item name="spinBars">true</item>
+        <item name="barLength">@dimen/car_menu_bar_length</item>
+        <item name="thickness">@dimen/car_arrow_thickness</item>
+        <item name="gapBetweenBars">@dimen/car_menu_bar_spacing</item>
+        <item name="arrowShaftLength">@dimen/car_arrow_shaft_length</item>
+        <item name="arrowHeadLength">@dimen/car_arrow_head_length</item>
+        <item name="drawableSize">@dimen/car_arrow_size</item>
     </style>
 </resources>
