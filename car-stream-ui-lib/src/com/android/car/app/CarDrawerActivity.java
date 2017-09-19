@@ -95,8 +95,8 @@ public abstract class CarDrawerActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onPause() {
+        super.onPause();
         mDrawerLayout.closeDrawer(Gravity.LEFT, false /* animation */);
     }
 
