@@ -39,12 +39,6 @@ limitations under the License.
         <attr name="rightMargin" format="dimension" />
     </declare-styleable>
 
-    <declare-styleable name="StreamCardView">
-        <!-- The number of columns that this StreamCardView should span across. This value will
-             determine the width of the StreamCardView. -->
-        <attr name="columnSpan" format="integer" />
-    </declare-styleable>
-
     <declare-styleable name="DrawerArrowDrawable">
         <!-- The drawing color for the bars -->
         <attr name="carArrowColor" format="color"/>
