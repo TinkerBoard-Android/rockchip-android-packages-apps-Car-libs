@@ -39,7 +39,7 @@ public class EditTextLineItem<VH extends EditTextLineItem.ViewHolder>
 
     /**
      * Interface that can be implemented to control behavior
-     * when the text changes in the EditText
+     * when the text changes in the EditText.
      */
     public interface TextChangeListener {
         /**
@@ -80,7 +80,7 @@ public class EditTextLineItem<VH extends EditTextLineItem.ViewHolder>
     }
 
     /**
-     * Construct new EditTextLineItem with no initialText
+     * Construct new EditTextLineItem with no initial text
      */
     public EditTextLineItem(CharSequence title) {
         this(title, null);

@@ -43,6 +43,7 @@ public abstract class IconToggleLineItem
     public interface IconUpdateListener {
         /**
          * Change the current icon.
+         *
          * @param iconRes The new icon
          */
         void onUpdateIcon(@DrawableRes int iconRes);
@@ -120,8 +121,8 @@ public abstract class IconToggleLineItem
     public abstract boolean isChecked();
 
     /**
-     * Return what should be the current icon, can be used to update the icon if it
-     * should be changing.
+     * Return the resource id of what should be the current icon, can be used to
+     * update the icon if it should be changing.
      */
     @DrawableRes
     public abstract int getIcon();

@@ -41,7 +41,8 @@ public abstract class CheckBoxLineItem
         mTitle = title;
     }
 
-    @Override @LineItemType
+    @Override
+    @LineItemType
     public int getType() {
         return CHECKBOX_TYPE;
     }
