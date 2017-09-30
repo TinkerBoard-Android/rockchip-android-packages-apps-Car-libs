@@ -33,7 +33,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import com.android.car.stream.ui.R;
+import com.android.car.app.R;
 
 /**
  * Custom {@link android.support.v7.widget.RecyclerView} that displays a list of items that
@@ -108,7 +108,7 @@ public class PagedListView extends FrameLayout {
         TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.PagedListView, defStyleAttrs, defStyleRes);
         LayoutInflater.from(context)
-                .inflate(R.layout.car_paged_recycler_view, this /*root*/, true /*attachToRoot*/);
+                .inflate(R.layout.car_paged_recycler_view_1, this /*root*/, true /*attachToRoot*/);
         int scrollContainerWidth = getResources().getDimensionPixelSize(
                 R.dimen.car_drawer_button_container_width);
         if (a.hasValue(R.styleable.PagedListView_scrollbarContainerWidth)) {

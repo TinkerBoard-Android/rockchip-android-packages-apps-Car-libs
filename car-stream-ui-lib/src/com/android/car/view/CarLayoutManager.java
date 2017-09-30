@@ -29,7 +29,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 
-import com.android.car.stream.ui.R;
+import com.android.car.app.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

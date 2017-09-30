@@ -63,6 +63,6 @@ endif
 ifeq (,$(findstring car-stream-ui-lib, $(LOCAL_STATIC_JAVA_LIBRARIES)))
 LOCAL_RESOURCE_DIR += \
     packages/apps/Car/libs/car-stream-ui-lib/res
-LOCAL_AAPT_FLAGS += --extra-packages com.android.car.stream.ui
+LOCAL_AAPT_FLAGS += --extra-packages com.android.car.app
 LOCAL_STATIC_JAVA_LIBRARIES += car-stream-ui-lib
 endif

@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.android.car.stream.ui.R;
 import com.android.car.view.PagedListView;
 
 /**
