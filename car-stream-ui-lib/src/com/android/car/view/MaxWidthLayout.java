@@ -21,7 +21,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import com.android.car.stream.ui.R;
+import com.android.car.app.R;
 
 import java.util.ArrayList;
 import java.util.List;

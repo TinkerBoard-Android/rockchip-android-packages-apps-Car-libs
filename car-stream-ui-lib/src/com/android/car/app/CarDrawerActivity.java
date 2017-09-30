@@ -31,7 +31,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
-import com.android.car.stream.ui.R;
 import com.android.car.view.PagedListView;
 
 import java.util.Stack;

@@ -18,7 +18,7 @@ package com.android.car.view;
 
 import android.view.View;
 
-import com.android.car.stream.ui.R;
+import com.android.car.app.R;
 
 /**
  * A utility class that will set the current background for a View that represents an card entry

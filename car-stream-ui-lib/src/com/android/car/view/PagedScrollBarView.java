@@ -26,7 +26,7 @@ import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import com.android.car.stream.ui.R;
+import com.android.car.app.R;
 
 /**
  * A custom view to provide list scroll behaviour -- up/down buttons and scroll indicator.
@@ -75,7 +75,7 @@ public class PagedScrollBarView extends FrameLayout
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(
-                R.layout.car_paged_scrollbar_buttons, this /*root*/, true /*attachToRoot*/);
+                R.layout.car_paged_scrollbar_buttons_1, this /*root*/, true /*attachToRoot*/);
 
         mUpButton = (ImageView) findViewById(R.id.page_up);
         mUpButton.setImageDrawable(context.getDrawable(R.drawable.ic_up_button));

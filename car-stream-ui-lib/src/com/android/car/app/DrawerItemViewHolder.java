@@ -23,8 +23,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.car.stream.ui.R;
-
 /**
  * Re-usable ViewHolder for displaying items in the Drawer PagedListView.
  */
