@@ -20,14 +20,20 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
-LOCAL_STATIC_ANDROID_LIBRARIES := android-support-v7-recyclerview
+LOCAL_STATIC_ANDROID_LIBRARIES := \
+    android-support-car \
+    android-support-v7-recyclerview
 
-LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
+LOCAL_RESOURCE_DIR := \
+    $(LOCAL_PATH)/res \
+    frameworks/support/car/res
 
 LOCAL_MODULE := car-list
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_AAPT_FLAGS += --auto-add-overlay
+LOCAL_AAPT_FLAGS += \
+    --auto-add-overlay \
+    --extra-packages android.support.car
 
 include packages/apps/Car/libs/car-stream-ui-lib/car-stream-ui-lib.mk
 

@@ -15,10 +15,9 @@
   ~ limitations under the License
   -->
 
-<com.android.car.view.PagedListView
+<android.support.car.widget.PagedListView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/list"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    style="@style/PagedList"
-    />
+    style="@style/PagedList" />
