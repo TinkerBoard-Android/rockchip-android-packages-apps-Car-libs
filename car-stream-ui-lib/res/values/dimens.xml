@@ -18,8 +18,8 @@ limitations under the License.
     <dimen name="car_headline1_size">45sp</dimen>
     <dimen name="car_headline2_size">36sp</dimen>
     <dimen name="car_title_size">26sp</dimen>
-    <dimen name="car_body1_size">32sp</dimen>
-    <dimen name="car_body2_size">26sp</dimen>
+    <dimen name="car_body1_size">40sp</dimen>
+    <dimen name="car_body2_size">32sp</dimen>
     <dimen name="car_caption_size">18sp</dimen>
     <dimen name="car_key1_size">40sp</dimen>
     <dimen name="car_key2_size">18sp</dimen>
@@ -150,6 +150,18 @@ limitations under the License.
     <dimen name="car_touch_target">106dp</dimen>
 
     <!-- Height of items in a list. -->
-    <dimen name="double_line_item_height">256dp</dimen>
-    <dimen name="single_line_item_height">256dp</dimen>
+    <dimen name="double_line_item_height">128dp</dimen>
+    <dimen name="single_line_item_height">128dp</dimen>
+
+    <dimen name="padding0">4dp</dimen>
+    <dimen name="padding1">10dp</dimen>
+    <dimen name="padding2">16dp</dimen>
+    <dimen name="padding3">28dp</dimen>
+    <dimen name="padding4">32dp</dimen>
+
+    <dimen name="radius1">4dp</dimen>
+    <dimen name="radius2">8dp</dimen>
+    <dimen name="radius3">16dp</dimen>
+    <dimen name="radius4">32dp</dimen>
+    <dimen name="radius5">100dp</dimen>
 </resources>

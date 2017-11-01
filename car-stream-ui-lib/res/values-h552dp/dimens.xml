@@ -15,6 +15,6 @@ limitations under the License.
 -->
 <resources>
     <!-- Height of items in a list. -->
-    <dimen name="double_line_item_height">128dp</dimen>
-    <dimen name="single_line_item_height">128dp</dimen>
+    <dimen name="double_line_item_height">116dp</dimen>
+    <dimen name="single_line_item_height">116dp</dimen>
 </resources>

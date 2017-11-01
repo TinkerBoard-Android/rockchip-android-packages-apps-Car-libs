@@ -22,4 +22,7 @@ limitations under the License.
     <!-- Height of items in a list. -->
     <dimen name="double_line_item_height">96dp</dimen>
     <dimen name="single_line_item_height">76dp</dimen>
+
+    <dimen name="car_body1_size">32sp</dimen>
+    <dimen name="car_body2_size">26sp</dimen>
 </resources>

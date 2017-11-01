@@ -25,18 +25,6 @@
         <item name="android:layout_height">@dimen/single_line_item_height</item>
     </style>
 
-    <style name="CarBody1.SingleLine" parent="@style/CarBody1">
-        <item name="android:maxLines">1</item>
-        <item name="android:textColor">@color/text_body_1</item>
-        <item name="android:ellipsize">marquee</item>
-    </style>
-
-    <style name="CarBody2.SingleLine" parent="@style/CarBody2">
-        <item name="android:maxLines">1</item>
-        <item name="android:textColor">@color/text_body_2</item>
-        <item name="android:ellipsize">end</item>
-    </style>
-
     <style name="ListIcon">
         <item name="android:layout_width">@dimen/stream_button_icon_size</item>
         <item name="android:layout_height">@dimen/stream_button_icon_size</item>
