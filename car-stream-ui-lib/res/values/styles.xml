@@ -97,6 +97,16 @@
         <item name="android:textColor">@color/car_body2_light</item>
     </style>
 
+    <style name="CarBody1.SingleLine" parent="@style/CarBody1">
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">marquee</item>
+    </style>
+
+    <style name="CarBody2.SingleLine" parent="@style/CarBody2">
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
     <style name="CarKey1" >
         <item name="android:textStyle">normal</item>
         <item name="android:textSize">@dimen/car_key1_size</item>
