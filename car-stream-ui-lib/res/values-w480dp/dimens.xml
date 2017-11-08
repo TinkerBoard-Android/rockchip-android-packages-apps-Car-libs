@@ -15,7 +15,4 @@ limitations under the License.
 -->
 <resources>
     <dimen name="stream_margin_size">24dp</dimen>
-    <dimen name="stream_content_keyline_2">116dp</dimen>
-    <dimen name="stream_content_keyline_2_neg">-116dp</dimen>
-    <dimen name="stream_card_keyline_2">116dp</dimen>
 </resources>

@@ -23,8 +23,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_gravity="center_vertical"
-        android:layout_marginStart="@dimen/stream_card_keyline_1"
-        android:layout_marginEnd="@dimen/stream_card_keyline_1" >
+        android:layout_marginStart="@dimen/car_keyline_1"
+        android:layout_marginEnd="@dimen/car_keyline_1" >
         <TextView
             android:id="@+id/title"
             android:layout_width="match_parent"

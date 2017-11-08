@@ -82,7 +82,7 @@ limitations under the License.
     <dimen name="car_card_margin">96dp</dimen>
     <dimen name="car_drawer_margin_right">96dp</dimen>
 
-    <dimen name="car_drawer_button_container_width">@dimen/stream_content_keyline_2</dimen>
+    <dimen name="car_drawer_button_container_width">@dimen/car_keyline_2</dimen>
 
     <!-- The margin on both sizes of the screen. This margin limits the amount of space that
          content can take up on screen. -->
@@ -90,17 +90,6 @@ limitations under the License.
 
     <!-- The size of the gutters between each column. -->
     <dimen name="stream_gutter_size">16dp</dimen>
-
-    <!-- Keylines for content in the stream. -->
-    <dimen name="stream_content_keyline_1">24dp</dimen>
-    <dimen name="stream_content_keyline_2">96dp</dimen>
-    <dimen name="stream_content_keyline_1_neg">-24dp</dimen>
-    <dimen name="stream_content_keyline_2_neg">-96dp</dimen>
-
-    <!-- Keylines for content within a card. -->
-    <dimen name="stream_card_keyline_1">24dp</dimen>
-    <dimen name="stream_card_keyline_2">96dp</dimen>
-    <dimen name="stream_card_keyline_3">128dp</dimen>
 
     <!-- The top margin before the start of content in an application. -->
     <dimen name="lens_header_height">96dp</dimen>
@@ -164,4 +153,13 @@ limitations under the License.
     <dimen name="radius3">16dp</dimen>
     <dimen name="radius4">32dp</dimen>
     <dimen name="radius5">100dp</dimen>
+
+    <!-- Keylines for content. -->
+    <dimen name="car_keyline_1">48dp</dimen>
+    <dimen name="car_keyline_2">108dp</dimen>
+    <dimen name="car_keyline_3">152dp</dimen>
+    <dimen name="car_keyline_4">182dp</dimen>
+    <dimen name="car_keyline_1_neg">-48dp</dimen>
+    <dimen name="car_keyline_2_neg">-108dp</dimen>
+    <dimen name="car_keyline_3_neg">-152dp</dimen>
 </resources>

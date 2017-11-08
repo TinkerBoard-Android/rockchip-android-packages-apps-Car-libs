@@ -20,7 +20,7 @@ limitations under the License.
 
     <style name="CarToolbarTheme">
         <item name="titleTextAppearance">@style/CarTitle.Light</item>
-        <item name="contentInsetStart">@dimen/stream_content_keyline_1</item>
-        <item name="contentInsetEnd">@dimen/stream_content_keyline_1</item>
+        <item name="contentInsetStart">@dimen/car_keyline_1</item>
+        <item name="contentInsetEnd">@dimen/car_keyline_1</item>
     </style>
 </resources>
