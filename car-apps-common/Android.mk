@@ -30,8 +30,15 @@ LOCAL_PRIVILEGED_MODULE := true
 
 LOCAL_PROGUARD_ENABLED := disabled
 
-LOCAL_STATIC_JAVA_LIBRARIES := android-support-v4 \
-        android-support-annotations
+LOCAL_USE_AAPT2 := true
+
+LOCAL_STATIC_ANDROID_LIBRARIES := \
+    android-support-v4
+
+LOCAL_STATIC_JAVA_LIBRARIES := \
+    android-support-annotations
+
+LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
 include packages/apps/Car/libs/car-stream-ui-lib/car-stream-ui-lib.mk
 
