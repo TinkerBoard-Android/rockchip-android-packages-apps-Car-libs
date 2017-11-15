@@ -34,8 +34,8 @@ $(error LOCAL_RESOURCE_DIR must be defined)
 endif
 
 # Include android-support-v4, if not already included
-ifeq (,$(findstring android-support-v4,$(LOCAL_STATIC_JAVA_LIBRARIES)))
-LOCAL_STATIC_JAVA_LIBRARIES += android-support-v4
+ifeq (,$(findstring android-support-v4,$(LOCAL_STATIC_ANDROID_LIBRARIES)))
+LOCAL_STATIC_ANDROID_LIBRARIES += android-support-v4
 endif
 
 # Include android-support-annotations, if not already included
@@ -44,9 +44,6 @@ LOCAL_STATIC_JAVA_LIBRARIES += android-support-annotations
 endif
 
 # Include car-apps-common
-ifeq (,$(findstring com.android.car.apps.common, $(LOCAL_STATIC_JAVA_LIBRARIES)))
-LOCAL_RESOURCE_DIR += \
-    packages/apps/Car/libs/car-apps-common/res
-LOCAL_AAPT_FLAGS += --extra-packages com.android.car.apps.common
-LOCAL_STATIC_JAVA_LIBRARIES += car-apps-common
+ifeq (,$(findstring com.android.car.apps.common, $(LOCAL_STATIC_ANDROID_LIBRARIES)))
+LOCAL_STATIC_ANDROID_LIBRARIES += car-apps-common
 endif
