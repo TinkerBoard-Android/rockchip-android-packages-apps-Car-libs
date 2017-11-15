@@ -20,8 +20,8 @@
 
     <CheckBox
         android:id="@+id/checkbox"
-        android:layout_width="@dimen/stream_button_icon_size"
-        android:layout_height="@dimen/stream_button_icon_size"
+        android:layout_width="@dimen/car_primary_icon_size"
+        android:layout_height="@dimen/car_primary_icon_size"
         android:layout_marginStart="@dimen/car_keyline_1"
         android:button="@drawable/ic_check_box"
         android:layout_alignParentStart="true"

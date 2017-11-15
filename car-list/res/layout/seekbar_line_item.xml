@@ -45,7 +45,7 @@
             android:layout_marginTop="@dimen/double_line_text_margin"
             android:thumb="@drawable/ic_seekbar_thumb"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/stream_button_icon_size"
+            android:layout_height="@dimen/car_primary_icon_size"
             android:layout_below="@+id/title"
             android:layout_toEndOf="@+id/icon"/>
     </RelativeLayout>

@@ -33,6 +33,11 @@ ifeq (,$(LOCAL_RESOURCE_DIR))
 $(error LOCAL_RESOURCE_DIR must be defined)
 endif
 
+# Include support-car, if not already included
+ifeq (,$(findstring android-support-v7-cardview,$(LOCAL_STATIC_JAVA_LIBRARIES)))
+LOCAL_STATIC_ANDROID_LIBRARIES += android-support-car
+endif
+
 # Include support-v7-cardview, if not already included
 ifeq (,$(findstring android-support-v7-cardview,$(LOCAL_STATIC_ANDROID_LIBRARIES)))
 LOCAL_STATIC_ANDROID_LIBRARIES += android-support-v7-cardview
