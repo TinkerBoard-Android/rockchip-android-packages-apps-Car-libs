@@ -124,6 +124,9 @@ public class TypedPagedListAdapter extends RecyclerView.Adapter<ViewHolder>
         // with a password input window and a checkbox for show password or not.
         static final int PASSWORD_TYPE = 10;
 
+        // with one title, no underlying divider.
+        static final int SUBTITLE_TEXT_TYPE = 11;
+
         /**
          * Returns the LineItemType of this LineItem
          *
@@ -201,6 +204,8 @@ public class TypedPagedListAdapter extends RecyclerView.Adapter<ViewHolder>
                 return SpinnerLineItem.createViewHolder(parent);
             case LineItem.PASSWORD_TYPE:
                 return PasswordLineItem.createViewHolder(parent);
+            case LineItem.SUBTITLE_TEXT_TYPE:
+                return SubtitleTextLineItem.createViewHolder(parent);
             default:
                 throw new IllegalStateException("ViewType not supported: " + viewType);
         }

@@ -24,7 +24,9 @@ LOCAL_AIDL_INCLUDES := $(call all-Iaidl-files-under, src)
 LOCAL_MODULE := car-radio-service
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_STATIC_JAVA_LIBRARIES += android-support-v4
+LOCAL_USE_AAPT2 := true
+
+LOCAL_STATIC_ANDROID_LIBRARIES += android-support-v4
 
 LOCAL_PROGUARD_ENABLED := disabled
 
