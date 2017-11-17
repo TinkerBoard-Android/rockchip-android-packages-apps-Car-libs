@@ -13,90 +13,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-<resources xmlns:android="http://schemas.android.com/apk/res/android" >
-    <style name="CarHeadline0" >
-        <item name="android:textStyle">normal</item>
-        <item name="android:textSize">@dimen/car_headline0_size</item>
-        <item name="android:textColor">@color/car_headline0</item>
-    </style>
-
-    <style name="CarHeadline0.Dark" >
-        <item name="android:textColor">@color/car_headline0_dark</item>
-    </style>
-
-    <style name="CarHeadline0.Light" >
-        <item name="android:textColor">@color/car_headline0_light</item>
-    </style>
-
-    <style name="CarHeadline1" >
-        <item name="android:textStyle">normal</item>
-        <item name="android:textSize">@dimen/car_headline1_size</item>
-        <item name="android:textColor">@color/car_headline1</item>
-    </style>
-
-    <style name="CarHeadline1.Dark" >
-        <item name="android:textColor">@color/car_headline1_dark</item>
-    </style>
-
-    <style name="CarHeadline1.Light" >
-        <item name="android:textColor">@color/car_headline1_light</item>
-    </style>
-
-    <style name="CarHeadline2" >
-        <item name="android:textStyle">normal</item>
-        <item name="android:textSize">@dimen/car_headline2_size</item>
-        <item name="android:textColor">@color/car_headline1</item>
-
-    </style>
-
-    <style name="CarHeadline2.Dark" >
-        <item name="android:textColor">@color/car_headline1_dark</item>
-    </style>
-
-    <style name="CarHeadline2.Light" >
-        <item name="android:textColor">@color/car_headline1_light</item>
-    </style>
-
-    <style name="CarTitle" >
-        <item name="android:textStyle">normal</item>
-        <item name="android:textSize">@dimen/car_title_size</item>
-        <item name="android:textColor">@color/car_title</item>
-        <item name="android:includeFontPadding">false</item>
-    </style>
-
-    <style name="CarTitle.Dark" >
-        <item name="android:textColor">@color/car_title_dark</item>
-    </style>
-
-    <style name="CarTitle.Light" >
-        <item name="android:textColor">@color/car_title_light</item>
-    </style>
-
-    <style name="CarBody1" >
-        <item name="android:textStyle">normal</item>
-        <item name="android:textSize">@dimen/car_body1_size</item>
-        <item name="android:textColor">@color/car_body1</item>
-    </style>
-
-    <style name="CarBody1.Dark" >
-        <item name="android:textColor">@color/car_body1_dark</item>
-    </style>
-
-    <style name="CarBody1.Light" >
-        <item name="android:textColor">@color/car_body1_light</item>
-    </style>
-
-    <style name="CarBody2" >
-        <item name="android:textStyle">normal</item>
-        <item name="android:textSize">@dimen/car_body2_size</item>
-        <item name="android:textColor">@color/car_body2</item>
-        <item name="android:includeFontPadding">false</item>
-    </style>
-
-    <style name="CarBody2.Light" >
-        <item name="android:textColor">@color/car_body2_light</item>
-    </style>
-
+<resources>
     <style name="CarBody1.SingleLine" parent="@style/CarBody1">
         <item name="android:maxLines">1</item>
         <item name="android:ellipsize">marquee</item>
@@ -105,6 +22,10 @@
     <style name="CarBody2.SingleLine" parent="@style/CarBody2">
         <item name="android:maxLines">1</item>
         <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="CarBody1.Light" >
+        <item name="android:textColor">@color/car_body1_light</item>
     </style>
 
     <style name="CarKey1" >
@@ -147,30 +68,5 @@
 
     <style name="CarCaption.Light" >
         <item name="android:textColor">@color/car_caption_light</item>
-    </style>
-
-    <style name="CarMicro" >
-        <item name="android:textStyle">normal</item>
-        <item name="android:textSize">@dimen/car_micro_size</item>
-        <item name="android:textColor">@color/car_micro</item>
-    </style>
-
-    <style name="CarMicro.Dark" >
-        <item name="android:textColor">@color/car_micro_dark</item>
-    </style>
-
-    <style name="CarMicro.Light" >
-        <item name="android:textColor">@color/car_micro_light</item>
-    </style>
-
-    <style name="DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
-        <item name="color">@color/car_title_light</item>
-        <item name="spinBars">true</item>
-        <item name="barLength">@dimen/car_menu_bar_length</item>
-        <item name="thickness">@dimen/car_arrow_thickness</item>
-        <item name="gapBetweenBars">@dimen/car_menu_bar_spacing</item>
-        <item name="arrowShaftLength">@dimen/car_arrow_shaft_length</item>
-        <item name="arrowHeadLength">@dimen/car_arrow_head_length</item>
-        <item name="drawableSize">@dimen/car_arrow_size</item>
     </style>
 </resources>
