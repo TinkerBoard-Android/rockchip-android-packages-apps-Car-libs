@@ -28,6 +28,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-annotations
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
+    android-support-car \
     android-support-v4 \
     android-support-v7-appcompat \
     android-support-v7-cardview \

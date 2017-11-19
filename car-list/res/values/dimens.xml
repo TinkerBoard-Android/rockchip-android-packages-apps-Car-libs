@@ -22,8 +22,6 @@
     <dimen name="seekbar_track_corner">3dp</dimen>
     <!-- End padding size of swtich view -->
     <dimen name="switch_end_padding">5dp</dimen>
-    <!-- Height used for margin above second of a two line pair -->
-    <dimen name="double_line_text_margin">4dp</dimen>
     <!-- Offset from bottom for text in some LineItems to center -->
     <dimen name="optical_center_offset">1dp</dimen>
     <!-- Padding size for spinner drop down items -->
@@ -31,7 +29,7 @@
     <!-- Margin for top of line items -->
     <dimen name="line_item_top_margin">25dp</dimen>
     <!-- Size of the seekbar thumb -->
-    <dimen name="seekbar_thumb_dimen">30dp</dimen>
+    <dimen name="seekbar_thumb_dimen">20dp</dimen>
     <!-- Size of stroke on seekbar thumb -->
     <dimen name="seekbar_thumb_stroke">1dp</dimen>
 </resources>

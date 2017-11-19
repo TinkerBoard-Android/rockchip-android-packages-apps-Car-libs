@@ -17,17 +17,17 @@
 <resources>
     <style name="LineItem">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">@dimen/double_line_item_height</item>
+        <item name="android:layout_height">@dimen/car_double_line_list_item_height</item>
         <item name="android:foreground">@drawable/car_list_item_background</item>
     </style>
 
-    <style name="LineItem.SingleItem" parent="LineItem">
-        <item name="android:layout_height">@dimen/single_line_item_height</item>
+    <style name="LineItem.SingleLine" parent="LineItem">
+        <item name="android:layout_height">@dimen/car_single_line_list_item_height</item>
     </style>
 
     <style name="ListIcon">
-        <item name="android:layout_width">@dimen/stream_button_icon_size</item>
-        <item name="android:layout_height">@dimen/stream_button_icon_size</item>
+        <item name="android:layout_width">@dimen/car_primary_icon_size</item>
+        <item name="android:layout_height">@dimen/car_primary_icon_size</item>
         <item name="android:layout_centerVertical">true</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:scaleType">fitCenter</item>
@@ -35,17 +35,15 @@
     </style>
 
     <style name="ListSwitch">
-        <item name="android:layout_width">@dimen/stream_button_icon_size</item>
-        <item name="android:layout_height">@dimen/stream_button_icon_size</item>
-        <item name="android:paddingEnd">@dimen/switch_end_padding</item>
+        <item name="android:layout_width">@dimen/car_primary_icon_size</item>
+        <item name="android:layout_height">@dimen/car_primary_icon_size</item>
         <item name="android:scaleX">1.5</item>
         <item name="android:scaleY">1.5</item>
     </style>
 
     <style name="PagedList">
-        <item name="scrollbarContainerWidth">@dimen/side_margin</item>
-        <item name="showDivider">false</item>
+        <item name="showPagedListViewDivider">false</item>
         <item name="offsetScrollBar">true</item>
-        <item name="rightMargin">@dimen/side_margin</item>
+        <item name="listEndMargin">@dimen/car_margin</item>
     </style>
 </resources>

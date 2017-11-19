@@ -52,7 +52,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             style="@style/CarBody2.SingleLine"
-            android:layout_marginTop="@dimen/double_line_text_margin"
+            android:layout_marginTop="@dimen/car_padding_1"
             android:visibility="gone" />
     </LinearLayout>
     <View

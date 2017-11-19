@@ -44,7 +44,7 @@
         <TextView android:id="@+id/desc"
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
-                  android:layout_marginTop="@dimen/double_line_text_margin"
+                  android:layout_marginTop="@dimen/car_padding_1"
                   style="@style/CarBody2.SingleLine"
                   android:gravity="center_vertical"/>
     </LinearLayout>

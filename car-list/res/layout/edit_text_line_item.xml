@@ -34,6 +34,7 @@
             android:id="@+id/input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/car_padding_2"
             style="@style/CarBody1" />
     </LinearLayout>
 </FrameLayout>

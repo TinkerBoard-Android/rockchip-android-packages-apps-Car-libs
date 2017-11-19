@@ -36,7 +36,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/spinner_background"
-            android:layout_marginTop="@dimen/double_line_text_margin" />
+            android:layout_marginTop="@dimen/car_padding_1" />
     </LinearLayout>
     <View
         android:id="@+id/line_item_divider"
