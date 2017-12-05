@@ -17,12 +17,13 @@
 package com.android.car.list;
 
 import android.os.Bundle;
-import android.support.car.widget.PagedListView;
 import android.support.v4.app.Fragment;
 
 import com.android.car.list.R;
 
 import java.util.ArrayList;
+
+import androidx.car.widget.PagedListView;
 
 /**
  *  This class represents an extensible Fragment that holds a TypedPagedListAdapter.
