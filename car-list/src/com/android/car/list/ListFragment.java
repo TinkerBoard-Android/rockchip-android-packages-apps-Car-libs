@@ -53,4 +53,8 @@ public abstract class ListFragment extends Fragment {
      * Gets the list of the LineItems to show up in the list
      */
     public abstract ArrayList<TypedPagedListAdapter.LineItem> getLineItems();
+
+    protected void notifyDataSetChanged() {
+        mPagedListAdapter.notifyDataSetChanged();
+    }
 }

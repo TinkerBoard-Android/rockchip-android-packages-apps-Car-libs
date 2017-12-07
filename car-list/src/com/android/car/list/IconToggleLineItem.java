@@ -19,7 +19,9 @@ package com.android.car.list;
 import android.annotation.DrawableRes;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -36,6 +38,7 @@ public abstract class IconToggleLineItem
     protected final Context mContext;
     private final CharSequence mTitle;
     protected IconUpdateListener mIconUpdateListener;
+    protected SwitchStateUpdateListener mSwitchStateUpdateListener;
 
     /**
      * Interface for enabling icon to be changed by the LineItem.
@@ -49,8 +52,16 @@ public abstract class IconToggleLineItem
         void onUpdateIcon(@DrawableRes int iconRes);
     }
 
-    private final Switch.OnCheckedChangeListener mOnCheckedChangeListener =
-            (view, isChecked) -> onToggleClicked(isChecked);
+    /**
+     * Interface for changing the state of the switch toggle.
+     */
+    public interface SwitchStateUpdateListener {
+
+        void onToggleChanged(boolean checked);
+    }
+
+    private final Switch.OnTouchListener mOnTouchListener =
+            (view, event) -> onToggleTouched((Switch)view, event);
 
     /**
      * Constructor for IconToggleLineItem
@@ -73,18 +84,27 @@ public abstract class IconToggleLineItem
     public void bindViewHolder(ViewHolder viewHolder) {
         super.bindViewHolder(viewHolder);
         viewHolder.title.setText(mTitle);
-        viewHolder.summary.setText(getDesc());
+        CharSequence desc = getDesc();
+        if (TextUtils.isEmpty(desc)) {
+            viewHolder.summary.setVisibility(View.GONE);
+        } else {
+            viewHolder.summary.setVisibility(View.VISIBLE);
+            viewHolder.summary.setText(desc);
+        }
+        viewHolder.toggle.setEnabled(true);
         viewHolder.toggle.setChecked(isChecked());
         viewHolder.onUpdateIcon(getIcon());
-        viewHolder.toggle.setOnCheckedChangeListener(mOnCheckedChangeListener);
+        viewHolder.toggle.setOnTouchListener(mOnTouchListener);
         mIconUpdateListener = viewHolder;
+        mSwitchStateUpdateListener = viewHolder;
     }
 
     /**
      * ViewHolder class that holds all of the elements of an IconToggleLineItem with
      * the ability to be called to change the icon.
      */
-    static class ViewHolder extends RecyclerView.ViewHolder implements IconUpdateListener {
+    static class ViewHolder extends RecyclerView.ViewHolder
+            implements IconUpdateListener, SwitchStateUpdateListener {
         public final ImageView icon;
         public final TextView title;
         public final TextView summary;
@@ -102,6 +122,11 @@ public abstract class IconToggleLineItem
         public void onUpdateIcon(@DrawableRes int iconRes) {
             icon.setImageResource(iconRes);
         }
+
+        @Override
+        public void onToggleChanged(boolean checked) {
+            toggle.setChecked(checked);
+        }
     }
 
     public static RecyclerView.ViewHolder createViewHolder(ViewGroup parent) {
@@ -110,10 +135,10 @@ public abstract class IconToggleLineItem
     }
 
     /**
-     * Called when any part of the line is clicked.
-     * @param isChecked the state of the switch widget at the time of click.
+     * Called when toggle widget is touched.
+     * @return True if the listener has consumed the event, false otherwise.
      */
-    public abstract void onToggleClicked(boolean isChecked);
+    public abstract boolean onToggleTouched(Switch toggleSwitch, MotionEvent event);
 
     /**
      * Return true if checked, false if not.
