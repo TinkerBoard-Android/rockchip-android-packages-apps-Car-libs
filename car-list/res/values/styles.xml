@@ -43,7 +43,6 @@
 
     <style name="PagedList">
         <item name="showPagedListViewDivider">false</item>
-        <item name="offsetScrollBar">true</item>
-        <item name="listEndMargin">@dimen/car_margin</item>
+        <item name="gutter">both</item>
     </style>
 </resources>
