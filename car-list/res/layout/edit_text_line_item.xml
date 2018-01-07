@@ -20,7 +20,7 @@
     style="@style/LineItem" >
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
         android:layout_gravity="center_vertical"
         android:layout_marginStart="@dimen/car_keyline_1"
@@ -29,12 +29,11 @@
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="@style/CarBody2.SingleLine" />
+            android:textAppearance="@style/CarBody2.SingleLine" />
         <EditText
             android:id="@+id/input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/car_padding_2"
-            style="@style/CarBody1" />
+            android:textAppearance="@style/CarBody1" />
     </LinearLayout>
 </FrameLayout>
