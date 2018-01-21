@@ -38,6 +38,16 @@ ifeq (,$(findstring android-support-v7-cardview,$(LOCAL_STATIC_JAVA_LIBRARIES)))
 LOCAL_STATIC_ANDROID_LIBRARIES += android-support-car
 endif
 
+# Include support-design, if not already included
+ifeq (,$(findstring android-support-design,$(LOCAL_STATIC_JAVA_LIBRARIES)))
+LOCAL_STATIC_ANDROID_LIBRARIES += android-support-design
+endif
+
+# Include support-v4, if not already included
+ifeq (,$(findstring android-support-v4,$(LOCAL_STATIC_JAVA_LIBRARIES)))
+LOCAL_STATIC_ANDROID_LIBRARIES += android-support-v4
+endif
+
 # Include support-v7-cardview, if not already included
 ifeq (,$(findstring android-support-v7-cardview,$(LOCAL_STATIC_ANDROID_LIBRARIES)))
 LOCAL_STATIC_ANDROID_LIBRARIES += android-support-v7-cardview
