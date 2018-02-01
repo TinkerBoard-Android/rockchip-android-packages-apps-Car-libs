@@ -40,7 +40,7 @@ endif
 
 # Include support-design, if not already included
 ifeq (,$(findstring android-support-design,$(LOCAL_STATIC_JAVA_LIBRARIES)))
-LOCAL_STATIC_ANDROID_LIBRARIES += android-support-design
+LOCAL_STATIC_ANDROID_LIBRARIES += $(ANDROID_SUPPORT_DESIGN_TARGETS)
 endif
 
 # Include support-v4, if not already included

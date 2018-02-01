@@ -29,8 +29,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
     android-support-car \
-    android-support-design \
     android-support-v4 \
+    $(ANDROID_SUPPORT_DESIGN_TARGETS) \
     android-support-v7-appcompat \
     android-support-v7-cardview \
     android-support-v7-recyclerview
