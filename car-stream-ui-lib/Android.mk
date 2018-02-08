@@ -39,5 +39,6 @@ LOCAL_MODULE := car-stream-ui-lib
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_PROGUARD_ENABLED := disabled
+LOCAL_SDK_VERSION := current
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
