@@ -39,5 +39,6 @@ LOCAL_AAPT_FLAGS += --auto-add-overlay \
         --extra-packages android.support.v7.recyclerview
 
 LOCAL_PROGUARD_ENABLED := disabled
+LOCAL_SDK_VERSION := current
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
