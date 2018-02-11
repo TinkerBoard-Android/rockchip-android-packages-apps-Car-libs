@@ -41,7 +41,7 @@ public abstract class SeekbarLineItem
 
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-            SeekbarLineItem.this.onSeekbarChanged(progress);
+            SeekbarLineItem.this.onSeekbarChanged(progress, fromUser);
         }
 
         @Override
@@ -110,7 +110,7 @@ public abstract class SeekbarLineItem
 
     public abstract int getMaxSeekbarValue();
 
-    public abstract void onSeekbarChanged(int progress);
+    public abstract void onSeekbarChanged(int progress, boolean fromUser);
 
     @Override
     public boolean isClickable() {
