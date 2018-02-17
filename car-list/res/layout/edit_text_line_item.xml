@@ -29,11 +29,11 @@
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/CarBody2.SingleLine" />
+            android:textAppearance="@style/TextAppearance.Car.Body2.SingleLine" />
         <EditText
             android:id="@+id/input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/CarBody1" />
+            android:textAppearance="@style/TextAppearance.Car.Body1" />
     </LinearLayout>
 </FrameLayout>

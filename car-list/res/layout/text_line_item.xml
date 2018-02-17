@@ -32,12 +32,12 @@
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="@style/CarBody1.SingleLine" />
+            style="@style/TextAppearance.Car.Body1.SingleLine" />
         <TextView
             android:id="@+id/desc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="@style/CarBody2.SingleLine"
+            style="@style/TextAppearance.Car.Body2.SingleLine"
             android:layout_marginTop="@dimen/car_padding_1" />
     </LinearLayout>
     <ImageView

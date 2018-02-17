@@ -30,7 +30,7 @@
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="@style/CarBody2.SingleLine" />
+            style="@style/TextAppearance.Car.Body2.SingleLine" />
         <Spinner
             android:id="@+id/spinner"
             android:layout_width="match_parent"
