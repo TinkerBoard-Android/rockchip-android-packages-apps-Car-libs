@@ -42,7 +42,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/line_item_top_margin"
-                style="@style/CarBody2.SingleLine" />
+                style="@style/TextAppearance.Car.Body2.SingleLine" />
             <SeekBar
                 android:id="@+id/seekbar"
                 android:progressDrawable="@drawable/ic_seekbar_track"

@@ -14,59 +14,58 @@
  limitations under the License.
 -->
 <resources>
-    <style name="CarBody1.SingleLine" parent="@style/CarBody1">
+    <style name="TextAppearance.Car.Body1.SingleLine" parent="TextAppearance.Car.Body1">
         <item name="android:maxLines">1</item>
         <item name="android:ellipsize">marquee</item>
     </style>
 
-    <style name="CarBody2.SingleLine" parent="@style/CarBody2">
+    <style name="TextAppearance.Car.Body2.SingleLine" parent="TextAppearance.Car.Body2">
         <item name="android:maxLines">1</item>
         <item name="android:ellipsize">end</item>
     </style>
 
-    <style name="CarBody1.Light" >
-        <item name="android:textColor">@color/car_body1_light</item>
-    </style>
+    <style name="TextAppearance" />
+    <style name="TextAppearance.Car" />
 
-    <style name="CarKey1" >
+    <style name="TextAppearance.Car.Key1" >
         <item name="android:textStyle">normal</item>
         <item name="android:textSize">@dimen/car_key1_size</item>
         <item name="android:textColor">@color/car_key1</item>
     </style>
 
-    <style name="CarKey1.Dark" >
+    <style name="TextAppearance.Car.Key1.Dark" >
         <item name="android:textColor">@color/car_key1_dark</item>
     </style>
 
-    <style name="CarKey1.Light" >
+    <style name="TextAppearance.Car.Key1.Light" >
         <item name="android:textColor">@color/car_key1_light</item>
     </style>
 
-    <style name="CarKey2" >
+    <style name="TextAppearance.Car.Key2" >
         <item name="android:textStyle">normal</item>
         <item name="android:textSize">@dimen/car_key2_size</item>
         <item name="android:textColor">@color/car_key2</item>
     </style>
 
-    <style name="CarKey2.Dark" >
+    <style name="TextAppearance.Car.Key2.Dark" >
         <item name="android:textColor">@color/car_key2_dark</item>
     </style>
 
-    <style name="CarKey2.Light" >
+    <style name="TextAppearance.Car.Key2.Light" >
         <item name="android:textColor">@color/car_key2_light</item>
     </style>
 
-    <style name="CarCaption" >
+    <style name="TextAppearance.Car.Caption" >
         <item name="android:textStyle">normal</item>
         <item name="android:textSize">@dimen/car_caption_size</item>
         <item name="android:textColor">@color/car_caption</item>
     </style>
 
-    <style name="CarCaption.Dark" >
+    <style name="TextAppearance.Car.Caption.Dark" >
         <item name="android:textColor">@color/car_caption_dark</item>
     </style>
 
-    <style name="CarCaption.Light" >
+    <style name="TextAppearance.Car.Caption.Light" >
         <item name="android:textColor">@color/car_caption_light</item>
     </style>
 </resources>

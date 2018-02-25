@@ -26,5 +26,5 @@
         android:layout_marginStart="@dimen/car_keyline_1"
         android:layout_marginEnd="@dimen/car_keyline_1"
         android:textColor="@color/car_highlight"
-        android:textAppearance="@style/CarTitle" />
+        android:textAppearance="@style/TextAppearance.Car.Title" />
 </FrameLayout>

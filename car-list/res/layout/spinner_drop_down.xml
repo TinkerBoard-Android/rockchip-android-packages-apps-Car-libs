@@ -22,5 +22,5 @@
           android:paddingTop="@dimen/tile_top_bottom_padding"
           android:paddingBottom="@dimen/tile_top_bottom_padding"
           android:paddingStart="@dimen/car_keyline_1"
-          style="@style/CarBody1.SingleLine"
+          style="@style/TextAppearance.Car.Body1.SingleLine"
 />
