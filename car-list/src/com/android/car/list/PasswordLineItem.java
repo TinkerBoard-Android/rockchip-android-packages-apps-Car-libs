@@ -58,12 +58,11 @@ public class PasswordLineItem extends EditTextLineItem<PasswordLineItem.ViewHold
 
     @Override
     public void bindViewHolder(PasswordLineItem.ViewHolder viewHolder) {
-        super.bindViewHolder(viewHolder);
         // setTextType is public but with PasswordLineItem it should only be
         // set to be one of the two types as follows so we use super and
         // throw exception on our setTextType.
-        super.setTextType(mShowPassword
-                ? TextType.VISIBLE_PASSWORD : TextType.HIDDEN_PASSWORD);
+        super.setTextType(mShowPassword ? TextType.VISIBLE_PASSWORD : TextType.HIDDEN_PASSWORD);
+        super.bindViewHolder(viewHolder);
         viewHolder.checkbox.setChecked(mShowPassword);
         viewHolder.checkbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             mShowPassword = isChecked;
