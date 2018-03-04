@@ -21,6 +21,8 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := $(call all-java-files-under, src) $(call all-Iaidl-files-under, src)
 LOCAL_AIDL_INCLUDES := $(call all-Iaidl-files-under, src)
 
+LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
+
 LOCAL_MODULE := car-radio-service
 LOCAL_MODULE_TAGS := optional
 
