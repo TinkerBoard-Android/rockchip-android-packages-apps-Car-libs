@@ -24,9 +24,6 @@
         <item name="android:ellipsize">end</item>
     </style>
 
-    <style name="TextAppearance" />
-    <style name="TextAppearance.Car" />
-
     <style name="TextAppearance.Car.Key1" >
         <item name="android:textStyle">normal</item>
         <item name="android:textSize">@dimen/car_key1_size</item>
