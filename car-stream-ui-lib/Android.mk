@@ -35,6 +35,9 @@ LOCAL_STATIC_ANDROID_LIBRARIES := \
     android-support-v7-cardview \
     android-support-v7-recyclerview
 
+# Work around limitations of AAR prebuilts
+LOCAL_RESOURCE_DIR += prebuilts/sdk/current/support/car/res
+
 LOCAL_MODULE := car-stream-ui-lib
 LOCAL_MODULE_TAGS := optional
 

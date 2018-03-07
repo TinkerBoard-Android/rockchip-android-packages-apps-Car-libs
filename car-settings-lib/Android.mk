@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2017 The Android Open Source Project
+# Copyright (C) 2018 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,22 +20,20 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
-LOCAL_USE_AAPT2 := true
-
-LOCAL_STATIC_ANDROID_LIBRARIES := \
-    android-support-car \
-    android-support-v7-recyclerview
-
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
-# Work around limitations of AAR prebuilts
-LOCAL_RESOURCE_DIR += prebuilts/sdk/current/support/car/res
-
-LOCAL_MODULE := car-list
+LOCAL_MODULE := car-settings-lib
 LOCAL_MODULE_TAGS := optional
 
-include packages/apps/Car/libs/car-stream-ui-lib/car-stream-ui-lib.mk
+LOCAL_USE_AAPT2 := true
+
+LOCAL_STATIC_ANDROID_LIBRARIES += $(ANDROID_SUPPORT_CAR_TARGETS)
 
 LOCAL_PROGUARD_ENABLED := disabled
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
+
+# Use the following include to make our test apk.
+ifeq (,$(ONE_SHOT_MAKEFILE))
+    include $(call all-makefiles-under,$(LOCAL_PATH))
+endif
