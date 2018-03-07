@@ -22,6 +22,9 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
+# Work around limitations of AAR prebuilts
+LOCAL_RESOURCE_DIR += prebuilts/sdk/current/support/car/res
+
 LOCAL_MODULE := car-apps-common
 
 LOCAL_MODULE_TAGS := optional
