@@ -168,6 +168,5 @@ public class LocaleListItemProviderTest extends BaseRobolectricTest {
         assertThat(mLocaleListItemProvider.isChildLocale()).isTrue();
         assertThat(mLocaleListItemProvider.getSuggestedLocaleAdapter())
                 .isEqualTo(suggestedLocaleAdapter);
-        verify(mMockListItemAdapter).notifyDataSetChanged();
     }
 }
