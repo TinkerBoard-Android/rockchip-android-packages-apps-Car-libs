@@ -94,10 +94,4 @@ interface IRadioManager {
      * is supplying music.
      */
     boolean hasFocus();
-
-    /**
-     * Returns {@code true} if the current radio module has dual tuners, meaning that a tuner
-     * is available to scan for stations in the background.
-     */
-    boolean hasDualTuners();
 }
