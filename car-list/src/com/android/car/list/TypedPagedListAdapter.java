@@ -38,36 +38,50 @@ import androidx.car.widget.PagedListView;
 public class TypedPagedListAdapter extends RecyclerView.Adapter<ViewHolder>
         implements PagedListView.ItemCap {
 
-    private final Context mContext;
     private ArrayList<LineItem> mContentList;
 
     /**
-     * Constructor with an empty content list
-     *
-     * @param context program context
+     * Constructor instance of {@link TypedPagedListAdapter} with an empty content list
      */
-    public TypedPagedListAdapter(@NonNull Context context) {
-        this(context, new ArrayList<>());
+    public TypedPagedListAdapter() {
+        this(new ArrayList<>());
     }
 
     /**
-     * Constructor with a context and content list
+     * Constructor instance of {@link TypedPagedListAdapter} with content list
      *
-     * @param context program context
      * @param contentList what is contained in the adapter
      */
-    public TypedPagedListAdapter(@NonNull Context context, ArrayList<LineItem> contentList) {
-        mContext = context;
+    public TypedPagedListAdapter(ArrayList<LineItem> contentList) {
         mContentList = contentList;
     }
 
     /**
-     * Change current content list to new content list
+     * Sets current content list to new content list and calls
+     * {@link RecyclerView.Adapter#notifyDataSetChanged()}
      *
      * @param contentList New content list
      */
-    public void updateList(ArrayList<LineItem> contentList) {
+    public void setList(@NonNull ArrayList<LineItem> contentList) {
         mContentList = contentList;
+        notifyDataSetChanged();
+    }
+
+    /**
+     * Adds all items to the content list at given index and calls
+     * {@link RecyclerView.Adapter#notifyDataSetChanged()}
+     *
+     * @param index index at which to insert the first element from the specified list
+     * @param lineItems list containing items to add
+     *
+     * @throws IndexOutOfBoundsException thrown when index is out of bounds
+     */
+    public void addAll(int index, @NonNull ArrayList<LineItem> lineItems) {
+        if (index < 0 || index > mContentList.size()) {
+            throw new IndexOutOfBoundsException(
+                    "Index: " + index + ", Size: " + mContentList.size());
+        }
+        mContentList.addAll(index, lineItems);
         notifyDataSetChanged();
     }
 
@@ -229,6 +243,6 @@ public class TypedPagedListAdapter extends RecyclerView.Adapter<ViewHolder>
 
     @Override
     public void setMaxItems(int maxItems) {
-        // no limit in this list.
+        // No limit in this list.
     }
 }
