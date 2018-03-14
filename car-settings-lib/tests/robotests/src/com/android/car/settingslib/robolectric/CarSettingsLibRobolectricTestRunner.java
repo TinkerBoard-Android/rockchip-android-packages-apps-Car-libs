@@ -70,8 +70,12 @@ public class CarSettingsLibRobolectricTestRunner extends RobolectricTestRunner {
             public List<ResourcePath> getIncludedResourcePaths() {
                 List<ResourcePath> paths = super.getIncludedResourcePaths();
                 paths.add(createResourcePath("file:packages/apps/Car/libs/car-settings-lib/res"));
-                paths.add(createResourcePath("file:frameworks/support/v7/appcompat/res"));
-                paths.add(createResourcePath("file:frameworks/support/car/res"));
+
+                // Support library resources. These need to point to the prebuilts of support
+                // library and not the source.
+                paths.add(createResourcePath("file:prebuilts/sdk/current/support/car/res"));
+                paths.add(createResourcePath(
+                        "file:prebuilts/sdk/current/support/v7/appcompat/res/"));
                 return paths;
             }
         };
