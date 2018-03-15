@@ -45,7 +45,7 @@ public abstract class ListFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         mListView = (PagedListView) getView().findViewById(R.id.list);
-        mPagedListAdapter = new TypedPagedListAdapter(getContext(), getLineItems());
+        mPagedListAdapter = new TypedPagedListAdapter(getLineItems());
         mListView.setAdapter(mPagedListAdapter);
     }
 
