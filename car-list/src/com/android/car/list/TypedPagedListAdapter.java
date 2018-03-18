@@ -21,7 +21,6 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.View;
@@ -86,6 +85,21 @@ public class TypedPagedListAdapter extends RecyclerView.Adapter<ViewHolder>
     }
 
     /**
+     * Removes an item from the content list at the given index and calls
+     * {@link RecyclerView.Adapter#notifyDataSetChanged()}
+     *
+     * @param index the index of the item to be removed
+     */
+    public void remove(int index) {
+        if (index >= mContentList.size()) {
+            throw  new IndexOutOfBoundsException(
+                    "Index: " + index + ", Size: " + mContentList.size());
+        }
+        mContentList.remove(index);
+        notifyItemRemoved(index);
+    }
+
+    /**
      * Return true if empty, false if not.
      */
     public boolean isEmpty() {
@@ -94,8 +108,10 @@ public class TypedPagedListAdapter extends RecyclerView.Adapter<ViewHolder>
 
     /**
      * Definition for items that are able to be inserted into the TypedPagedListAdapter
+     *
+     * @param <VH> viewHolder for use with {@link TypedPagedListAdapter}
      */
-    public static abstract class LineItem<VH extends ViewHolder> {
+    public abstract static class LineItem<VH extends RecyclerView.ViewHolder> {
         @Retention(SOURCE)
         @IntDef({TEXT_TYPE,
                 TOGGLE_TYPE,
@@ -106,7 +122,8 @@ public class TypedPagedListAdapter extends RecyclerView.Adapter<ViewHolder>
                 EDIT_TEXT_TYPE,
                 SINGLE_TEXT_TYPE,
                 SPINNER_TYPE,
-                PASSWORD_TYPE})
+                PASSWORD_TYPE,
+                ACTION_BUTTON_TYPE})
         public @interface LineItemType {}
 
         // with one title and one description
@@ -139,9 +156,8 @@ public class TypedPagedListAdapter extends RecyclerView.Adapter<ViewHolder>
         // with a password input window and a checkbox for show password or not.
         static final int PASSWORD_TYPE = 10;
 
-        // with one title, no underlying divider.
-        static final int SUBTITLE_TEXT_TYPE = 11;
-
+        // with one title, one description, a start icon, and an end action button with icon
+        static final int ACTION_BUTTON_TYPE = 11;
         /**
          * Returns the LineItemType of this LineItem
          *
@@ -219,8 +235,8 @@ public class TypedPagedListAdapter extends RecyclerView.Adapter<ViewHolder>
                 return SpinnerLineItem.createViewHolder(parent);
             case LineItem.PASSWORD_TYPE:
                 return PasswordLineItem.createViewHolder(parent);
-            case LineItem.SUBTITLE_TEXT_TYPE:
-                return SubtitleTextLineItem.createViewHolder(parent);
+            case LineItem.ACTION_BUTTON_TYPE:
+                return ActionIconButtonLineItem.createViewHolder(parent);
             default:
                 throw new IllegalStateException("ViewType not supported: " + viewType);
         }
