@@ -34,17 +34,17 @@ $(error LOCAL_RESOURCE_DIR must be defined)
 endif
 
 # Include support-car, if not already included
-ifeq (,$(findstring android-support-v7-cardview,$(LOCAL_STATIC_JAVA_LIBRARIES)))
+ifeq (,$(findstring android-support-car,$(LOCAL_STATIC_ANDROID_LIBRARIES)))
 LOCAL_STATIC_ANDROID_LIBRARIES += android-support-car
 endif
 
 # Include support-design, if not already included
-ifeq (,$(findstring android-support-design,$(LOCAL_STATIC_JAVA_LIBRARIES)))
-LOCAL_STATIC_ANDROID_LIBRARIES += $(ANDROID_SUPPORT_DESIGN_TARGETS)
+ifeq (,$(findstring android-support-design,$(LOCAL_STATIC_ANDROID_LIBRARIES)))
+LOCAL_STATIC_ANDROID_LIBRARIES += android-support-design
 endif
 
 # Include support-v4, if not already included
-ifeq (,$(findstring android-support-v4,$(LOCAL_STATIC_JAVA_LIBRARIES)))
+ifeq (,$(findstring android-support-v4,$(LOCAL_STATIC_ANDROID_LIBRARIES)))
 LOCAL_STATIC_ANDROID_LIBRARIES += android-support-v4
 endif
 
