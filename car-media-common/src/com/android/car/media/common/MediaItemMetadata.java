@@ -16,118 +16,186 @@
 
 package com.android.car.media.common;
 
+import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.session.MediaSession;
+import android.net.Uri;
+import android.widget.ImageView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Abstract representation of a media item metadata.
  */
 public class MediaItemMetadata {
-    private final MediaMetadata mMediaMetadata;
+    private static final String TAG = "MediaItemMetadata";
+    @NonNull
     private final MediaDescription mMediaDescription;
-    private final Context mContext;
-
-    /** Media item id */
     @Nullable
-    public final String mId;
+    private final Long mQueueId;
 
-    /** Media item title */
-    @Nullable
-    public final CharSequence mTitle;
-
-    /** Media item subtitle */
-    @Nullable
-    public final CharSequence mSubtitle;
-
-    /** Media item description */
-    @Nullable
-    public final CharSequence mDescription;
-
-    /** Queue item id. This can be used on {@link PlaybackModel#onSkipToQueueItem(long)} */
-    public final long mQueueId;
-
-    /** Creates an instance based on the individual pieces of data */
-    public MediaItemMetadata(Context context, MediaMetadata metadata) {
-        MediaDescription description = metadata.getDescription();
-        mId = metadata.getDescription().getMediaId();
-        mContext = context;
-        mTitle = description.getTitle();
-        mSubtitle = description.getSubtitle();
-        mDescription = description.getDescription();
-        mMediaMetadata = metadata;
-        mMediaDescription = metadata.getDescription();
-        mQueueId = 0;
+    /** Creates an instance based on a {@link MediaMetadata} */
+    public MediaItemMetadata(@NonNull MediaMetadata metadata) {
+        this(metadata.getDescription(), null);
     }
 
     /** Creates an instance based on a {@link MediaSession.QueueItem} */
-    public MediaItemMetadata(Context context, MediaSession.QueueItem queueItem) {
-        MediaDescription description = queueItem.getDescription();
-        mId = description.getMediaId();
-        mContext = context;
-        mTitle = description.getTitle();
-        mSubtitle = description.getSubtitle();
-        mDescription = description.getDescription();
-        mMediaMetadata = null;
-        mMediaDescription = queueItem.getDescription();
-        mQueueId = queueItem.getQueueId();
+    public MediaItemMetadata(@NonNull MediaSession.QueueItem queueItem) {
+        this(queueItem.getDescription(), queueItem.getQueueId());
+    }
+
+    private MediaItemMetadata(MediaDescription description, Long queueId) {
+        mMediaDescription = description;
+        mQueueId = queueId;
+    }
+
+    /** @return media item id */
+    @Nullable
+    public String getId() {
+        return mMediaDescription.getMediaId();
+    }
+
+    /** @return media item title */
+    @Nullable
+    public CharSequence getTitle() {
+        return mMediaDescription.getTitle();
+    }
+
+    /** @return media item subtitle */
+    @Nullable
+    public CharSequence getSubtitle() {
+        return mMediaDescription.getSubtitle();
+    }
+
+    /** @return media item description */
+    @Nullable
+    public CharSequence getDescription() {
+        return mMediaDescription.getSubtitle();
     }
 
     /**
-     * @return a {@link Bitmap} corresponding to the album art of this item.
+     * An id that can be used on {@link PlaybackModel#onSkipToQueueItem(long)}
+     * @return the id of this item in the session queue, or NULL if this is not a session queue
+     * item.
      */
     @Nullable
-    public Bitmap getAlbumArt() {
-        Bitmap bitmap = null;
-        if (mMediaMetadata != null) {
-            bitmap = getAlbumArtFromMetadata(mMediaMetadata);
-        }
-        if (bitmap == null && mMediaDescription != null) {
-            bitmap = getAlbumArtFromDescription(mMediaDescription);
-        }
-        // TODO(b/76099191): Implement caching
-        return bitmap;
+    public Long getQueueId() {
+        return mQueueId;
     }
 
-    private static Bitmap getAlbumArtFromMetadata(MediaMetadata metadata) {
-        Bitmap icon = getMetadataBitmap(metadata);
-        if (icon != null) {
-            return icon;
-        } else {
-            // TODO(b/76099191): get icon from metadata URIs
-        }
-        return null;
+    /**
+     * @return album art bitmap, or NULL if this item doesn't have a local album art. In this,
+     * the {@link #getAlbumArtUri()} should be used to obtain a reference to a remote bitmap.
+     */
+    public Bitmap getAlbumArtBitmap() {
+        return mMediaDescription.getIconBitmap();
     }
 
-    private static Bitmap getAlbumArtFromDescription(MediaDescription description) {
-        Bitmap icon = description.getIconBitmap();
-        if (icon != null) {
-            return icon;
-        } else {
-            // TODO(b/76099191) get icon from description icon URI
-        }
-        return null;
+    /**
+     * @return an {@link Uri} referencing the album art bitmap.
+     */
+    public Uri getAlbumArtUri() {
+        return mMediaDescription.getIconUri();
     }
 
-    private static final String[] PREFERRED_BITMAP_ORDER = {
-            MediaMetadata.METADATA_KEY_ALBUM_ART,
-            MediaMetadata.METADATA_KEY_ART,
-            MediaMetadata.METADATA_KEY_DISPLAY_ICON
-    };
+    /**
+     * Updates the given {@link ImageView} with the album art of the given media item. This is an
+     * asynchronous operation.
+     * Note: If a view is set using this method, it should also be cleared using this same method.
+     * Given that the loading is asynchronous, missing to use this method for clearing could cause
+     * a delayed request to set an undesired image, or caching entries to be used for images not
+     * longer necessary.
+     *
+     * @param context {@link Context} used to load resources from
+     * @param metadata metadata to use, or NULL if the {@link ImageView} should be cleared.
+     * @param imageView loading target
+     * @param loadingIndicator a drawable resource that would be set into the {@link ImageView}
+     *                         while the image is being downloaded, or 0 if no loading indicator
+     *                         is required.
+     */
+    public static void updateImageView(Context context, @Nullable MediaItemMetadata metadata,
+            ImageView imageView, @DrawableRes int loadingIndicator) {
+        Glide.with(context).clear(imageView);
+        if (metadata == null) {
+            imageView.setImageBitmap(null);
+            return;
+        }
+        Bitmap image = metadata.getAlbumArtBitmap();
+        if (image != null) {
+            imageView.setImageBitmap(image);
+            return;
+        }
+        Uri imageUri = metadata.getAlbumArtUri();
+        if (imageUri != null) {
+            Glide.with(context)
+                    .load(imageUri)
+                    .apply(RequestOptions.placeholderOf(loadingIndicator))
+                    .into(imageView);
+            return;
+        }
+        imageView.setImageBitmap(null);
+    }
 
-    @Nullable
-    private static Bitmap getMetadataBitmap(@NonNull MediaMetadata metadata) {
-        // Get the best art bitmap we can find
-        for (String bitmapKey : PREFERRED_BITMAP_ORDER) {
-            Bitmap bitmap = metadata.getBitmap(bitmapKey);
-            if (bitmap != null) {
-                return bitmap;
+    /**
+     * Loads the album art of this media item asynchronously. The loaded image will be scaled to
+     * fit into the given view size.
+     * Using {@link #updateImageView(Context, MediaItemMetadata, ImageView, int)} method is
+     * preferred. Only use this method if you are going to apply transformations to the loaded
+     * image.
+     *
+     * @param width desired width (should be > 0)
+     * @param height desired height (should be > 0)
+     * @param fit whether the image should be scaled to fit (fitCenter), or it should be cropped
+     *            (centerCrop).
+     * @return a {@link CompletableFuture} that will be completed once the image is loaded, or the
+     * loading fails.
+     */
+    public CompletableFuture<Bitmap> getAlbumArt(Context context, int width, int height,
+            boolean fit) {
+        Bitmap image = getAlbumArtBitmap();
+        if (image != null) {
+            return CompletableFuture.completedFuture(image);
+        }
+        Uri imageUri = getAlbumArtUri();
+        if (imageUri != null) {
+            CompletableFuture<Bitmap> bitmapCompletableFuture = new CompletableFuture<>();
+            RequestBuilder<Bitmap> builder = Glide.with(context)
+                    .asBitmap()
+                    .load(getAlbumArtUri());
+            if (fit) {
+                builder = builder.apply(RequestOptions.fitCenterTransform());
+            } else {
+                builder = builder.apply(RequestOptions.centerCropTransform());
             }
+            Target<Bitmap> target = new SimpleTarget<Bitmap>(width, height) {
+                @Override
+                public void onResourceReady(@NonNull Bitmap bitmap,
+                        @Nullable Transition<? super Bitmap> transition) {
+                    bitmapCompletableFuture.complete(bitmap);
+                }
+
+                @Override
+                public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                    bitmapCompletableFuture.completeExceptionally(
+                            new IllegalStateException("Unknown error"));
+                }
+            };
+            builder.into(target);
+            return bitmapCompletableFuture;
         }
-        return null;
+        return CompletableFuture.completedFuture(null);
     }
 }
