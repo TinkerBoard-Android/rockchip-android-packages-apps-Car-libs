@@ -29,7 +29,7 @@ LOCAL_STATIC_ANDROID_LIBRARIES := \
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
 # Work around limitations of AAR prebuilts
-LOCAL_RESOURCE_DIR += prebuilts/sdk/current/support/car/res
+LOCAL_RESOURCE_DIR += prebuilts/sdk/current/car/car/res
 
 LOCAL_MODULE := car-list
 LOCAL_MODULE_TAGS := optional
