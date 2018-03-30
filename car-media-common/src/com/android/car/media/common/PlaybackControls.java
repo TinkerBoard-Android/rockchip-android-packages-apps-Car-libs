@@ -197,8 +197,11 @@ public class PlaybackControls extends ActionBar {
         for (int pos = 0; pos < mCustomActionButtons.size(); pos++) {
             ImageButton button = mCustomActionButtons.get(pos);
             if (customActions.size() > pos) {
+                CustomPlaybackAction action = customActions.get(pos);
                 button.setVisibility(VISIBLE);
-                button.setImageDrawable(customActions.get(pos).mIcon);
+                button.setImageDrawable(action.mIcon);
+                button.setOnClickListener(view ->
+                        mModel.onCustomAction(action.mAction, action.mExtras));
             } else {
                 button.setVisibility(INVISIBLE);
             }
