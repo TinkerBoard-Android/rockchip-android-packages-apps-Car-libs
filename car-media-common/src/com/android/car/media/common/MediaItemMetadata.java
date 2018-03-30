@@ -20,8 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.session.MediaSession;
@@ -33,6 +31,10 @@ public class MediaItemMetadata {
     private final MediaMetadata mMediaMetadata;
     private final MediaDescription mMediaDescription;
     private final Context mContext;
+
+    /** Media item id */
+    @Nullable
+    public final String mId;
 
     /** Media item title */
     @Nullable
@@ -46,59 +48,65 @@ public class MediaItemMetadata {
     @Nullable
     public final CharSequence mDescription;
 
+    /** Queue item id. This can be used on {@link PlaybackModel#onSkipToQueueItem(long)} */
+    public final long mQueueId;
+
     /** Creates an instance based on the individual pieces of data */
     public MediaItemMetadata(Context context, MediaMetadata metadata) {
         MediaDescription description = metadata.getDescription();
+        mId = metadata.getDescription().getMediaId();
         mContext = context;
         mTitle = description.getTitle();
         mSubtitle = description.getSubtitle();
         mDescription = description.getDescription();
         mMediaMetadata = metadata;
         mMediaDescription = metadata.getDescription();
+        mQueueId = 0;
     }
 
     /** Creates an instance based on a {@link MediaSession.QueueItem} */
     public MediaItemMetadata(Context context, MediaSession.QueueItem queueItem) {
         MediaDescription description = queueItem.getDescription();
+        mId = description.getMediaId();
         mContext = context;
         mTitle = description.getTitle();
         mSubtitle = description.getSubtitle();
         mDescription = description.getDescription();
         mMediaMetadata = null;
         mMediaDescription = queueItem.getDescription();
+        mQueueId = queueItem.getQueueId();
     }
 
     /**
-     * @return a {@link Drawable} corresponding to the album art of this item.
+     * @return a {@link Bitmap} corresponding to the album art of this item.
      */
     @Nullable
-    public Drawable getAlbumArt() {
-        Drawable drawable = null;
+    public Bitmap getAlbumArt() {
+        Bitmap bitmap = null;
         if (mMediaMetadata != null) {
-            drawable = getAlbumArtFromMetadata(mContext, mMediaMetadata);
+            bitmap = getAlbumArtFromMetadata(mMediaMetadata);
         }
-        if (drawable == null && mMediaDescription != null) {
-            drawable = getAlbumArtFromDescription(mContext, mMediaDescription);
+        if (bitmap == null && mMediaDescription != null) {
+            bitmap = getAlbumArtFromDescription(mMediaDescription);
         }
         // TODO(b/76099191): Implement caching
-        return drawable;
+        return bitmap;
     }
 
-    private static Drawable getAlbumArtFromMetadata(Context context, MediaMetadata metadata) {
+    private static Bitmap getAlbumArtFromMetadata(MediaMetadata metadata) {
         Bitmap icon = getMetadataBitmap(metadata);
         if (icon != null) {
-            return new BitmapDrawable(context.getResources(), icon);
+            return icon;
         } else {
             // TODO(b/76099191): get icon from metadata URIs
         }
         return null;
     }
 
-    private static Drawable getAlbumArtFromDescription(Context context,
-            MediaDescription description) {
+    private static Bitmap getAlbumArtFromDescription(MediaDescription description) {
         Bitmap icon = description.getIconBitmap();
         if (icon != null) {
-            return new BitmapDrawable(context.getResources(), icon);
+            return icon;
         } else {
             // TODO(b/76099191) get icon from description icon URI
         }
