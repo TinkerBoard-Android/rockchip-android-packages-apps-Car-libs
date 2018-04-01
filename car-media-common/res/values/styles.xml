@@ -32,4 +32,9 @@
         <item name="android:padding">@dimen/car_fab_large_padding</item>
     </style>
 
+    <style name="PlaybackControl" parent="Widget.Car.Button.ActionBar">
+        <item name="android:background">@drawable/car_action_button_background_inverse</item>
+        <item name="android:tint">@color/car_tint_inverse</item>
+    </style>
+
 </resources>

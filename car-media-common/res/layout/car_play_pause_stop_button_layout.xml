@@ -30,8 +30,8 @@
         android:src="@drawable/ic_play_pause_stop_animated"/>
     <ProgressBar
         android:id="@+id/spinner"
-        android:layout_width="@dimen/car_action_bar_fab_spinner_size"
-        android:layout_height="@dimen/car_action_bar_fab_spinner_size"
+        android:layout_width="@dimen/car_fab_spinner_size"
+        android:layout_height="@dimen/car_fab_spinner_size"
         android:layout_gravity="center"
         android:padding="9dp"
         android:indeterminateDrawable="@drawable/music_buffering"

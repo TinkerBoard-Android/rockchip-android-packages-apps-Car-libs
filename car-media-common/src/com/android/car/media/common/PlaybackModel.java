@@ -19,9 +19,12 @@ package com.android.car.media.common;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -30,8 +33,10 @@ import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
+import android.media.session.PlaybackState.Actions;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.service.media.MediaBrowserService;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -321,6 +326,25 @@ public class PlaybackModel {
         }
     }
 
+    /**
+     * Starts playing a given media item. This id corresponds to {@link MediaItemMetadata#mId}.
+     */
+    public void onPlayItem(String mediaItemId) {
+        if (mMediaController != null) {
+            mMediaController.getTransportControls().playFromMediaId(mediaItemId, null);
+        }
+    }
+
+    /**
+     * Skips to a particular item in the media queue. This id is {@link MediaItemMetadata#mQueueId}
+     * of the items obtained through {@link #getQueue()}.
+     */
+    public void onSkipToQueueItem(long queueId) {
+        if (mMediaController != null) {
+            mMediaController.getTransportControls().skipToQueueItem(queueId);
+        }
+    }
+
     /** Third-party defined application theme to use * */
     private static final String THEME_META_DATA_NAME =
             "com.google.android.gms.car.application.theme";
@@ -388,7 +412,9 @@ public class PlaybackModel {
         if (state == null) {
             return ACTION_DISABLED;
         }
-        int stopAction = ((state.getActions() & PlaybackState.ACTION_PAUSE) != 0)
+        @Actions long availableActions = state.getActions();
+        int stopAction = (availableActions & PlaybackState.ACTION_PAUSE) != 0
+                || (availableActions & PlaybackState.ACTION_PLAY_PAUSE) != 0
                 ? ACTION_PAUSE
                 : ACTION_STOP;
         switch (state.getState()) {
@@ -512,6 +538,9 @@ public class PlaybackModel {
      */
     @NonNull
     public List<MediaItemMetadata> getQueue() {
+        if (mMediaController == null) {
+            return new ArrayList<>();
+        }
         List<MediaSession.QueueItem> items = mMediaController.getQueue();
         if (items != null) {
             return items.stream()
@@ -528,6 +557,9 @@ public class PlaybackModel {
      * {@link PlaybackObserver#onPlaybackStateChanged()}.
      */
     public boolean hasQueue() {
+        if (mMediaController == null) {
+            return false;
+        }
         List<MediaSession.QueueItem> items = mMediaController.getQueue();
         return items != null && !items.isEmpty();
     }
@@ -567,5 +599,31 @@ public class PlaybackModel {
             Log.e(TAG, "Unable to get resources for " + packageName);
             return null;
         }
+    }
+
+    /**
+     * @return a {@link ComponentName} corresponding to a {@link MediaBrowserService} in the
+     * media source, or null if the media source doesn't implement {@link MediaBrowserService}.
+     * A non-null result doesn't imply that this service is accessible. The consumer code should
+     * attempt to connect and handle rejections gracefully.
+     */
+    @Nullable
+    public ComponentName getMediaBrowseServiceComponent() {
+        if (getPackageName() == null) {
+            return null;
+        }
+        PackageManager packageManager = mContext.getPackageManager();
+        Intent intent = new Intent();
+        intent.setAction(MediaBrowserService.SERVICE_INTERFACE);
+        intent.setPackage(getPackageName());
+        List<ResolveInfo> resolveInfos = packageManager.queryIntentServices(intent,
+                PackageManager.GET_RESOLVED_FILTER);
+        if (resolveInfos == null || resolveInfos.isEmpty()) {
+            return null;
+        }
+        return new ComponentName(
+                getPackageName(),
+                resolveInfos.get(0).serviceInfo.name
+        );
     }
 }

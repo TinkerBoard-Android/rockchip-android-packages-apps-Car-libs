@@ -16,11 +16,14 @@
 
 package com.android.car.media.common;
 
+import android.car.Car;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,7 +44,6 @@ public class PlaybackFragment extends Fragment {
     private ImageView mAlbumArt;
     private TextView mTitle;
     private TextView mSubtitle;
-    private TextView mDescription;
     private SeekBar mSeekbar;
 
     private PlaybackModel.PlaybackObserver mObserver = new PlaybackModel.PlaybackObserver() {
@@ -81,8 +83,16 @@ public class PlaybackFragment extends Fragment {
         mAlbumArt = view.findViewById(R.id.album_art);
         mTitle = view.findViewById(R.id.title);
         mSubtitle = view.findViewById(R.id.subtitle);
-        mDescription = view.findViewById(R.id.description);
         mSeekbar = view.findViewById(R.id.seek_bar);
+
+        mAlbumBackground.setOnClickListener(v -> {
+            Intent intent = new Intent(Car.CAR_INTENT_ACTION_MEDIA_TEMPLATE);
+            ActivityOptionsCompat options = ActivityOptionsCompat
+                    .makeSceneTransitionAnimation(getActivity(), mAlbumArt,
+                            getString(R.string.album_art));
+            startActivity(intent, options.toBundle());
+        });
+
         return view;
     }
 
@@ -113,10 +123,9 @@ public class PlaybackFragment extends Fragment {
         MediaItemMetadata metadata = mModel.getMetadata();
         mTitle.setText(metadata != null ? metadata.mTitle : null);
         mSubtitle.setText(metadata != null ? metadata.mSubtitle : null);
-        mDescription.setText(metadata != null ? metadata.mDescription : null);
-        Drawable art = metadata != null ? metadata.getAlbumArt() : null;
-        mAlbumArt.setImageDrawable(art);
-        mAlbumBackground.setImageDrawable(art);
+        Bitmap art = metadata != null ? metadata.getAlbumArt() : null;
+        mAlbumArt.setImageBitmap(art);
+        mAlbumBackground.setImageBitmap(art);
     }
 
     private void updateAccentColor() {
