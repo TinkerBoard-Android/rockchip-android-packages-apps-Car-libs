@@ -28,12 +28,9 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-annotations
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
-    android-support-car \
+    $(ANDROID_SUPPORT_CAR_TARGETS) \
     android-support-v4 \
-    android-support-design \
-    android-support-v7-appcompat \
-    android-support-v7-cardview \
-    android-support-v7-recyclerview
+    android-support-v7-appcompat
 
 LOCAL_MODULE := car-stream-ui-lib
 LOCAL_MODULE_TAGS := optional
