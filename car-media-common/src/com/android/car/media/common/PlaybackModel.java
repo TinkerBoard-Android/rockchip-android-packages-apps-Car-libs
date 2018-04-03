@@ -412,11 +412,15 @@ public class PlaybackModel {
         if (state == null) {
             return ACTION_DISABLED;
         }
-        @Actions long availableActions = state.getActions();
-        int stopAction = (availableActions & PlaybackState.ACTION_PAUSE) != 0
-                || (availableActions & PlaybackState.ACTION_PLAY_PAUSE) != 0
-                ? ACTION_PAUSE
-                : ACTION_STOP;
+
+        @Actions long actions = state.getActions();
+        int stopAction = ACTION_DISABLED;
+        if ((actions & (PlaybackState.ACTION_PAUSE | PlaybackState.ACTION_PLAY_PAUSE)) != 0) {
+            stopAction = ACTION_PAUSE;
+        } else if ((actions & PlaybackState.ACTION_STOP) != 0) {
+            stopAction = ACTION_STOP;
+        }
+
         switch (state.getState()) {
             case PlaybackState.STATE_PLAYING:
             case PlaybackState.STATE_BUFFERING:
