@@ -127,7 +127,8 @@ public class PlaybackFragment extends Fragment {
     }
 
     private void updateAccentColor() {
-        int color = mModel.getAccentColor();
+        int defaultColor = getResources().getColor(android.R.color.background_dark, null);
+        int color = mModel.getMediaSource().getAccentColor(defaultColor);
         mSeekbar.getProgressDrawable().setColorFilter(color, PorterDuff.Mode.SRC_IN);
     }
 

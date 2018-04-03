@@ -19,14 +19,9 @@ package com.android.car.media.common;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadata;
 import android.media.Rating;
@@ -38,7 +33,6 @@ import android.media.session.PlaybackState;
 import android.media.session.PlaybackState.Actions;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.service.media.MediaBrowserService;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -74,6 +68,7 @@ public class PlaybackModel {
     private Context mContext;
     private List<PlaybackObserver> mObservers = new ArrayList<>();
     private final MediaSessionUpdater mMediaSessionUpdater = new MediaSessionUpdater();
+    private MediaSource mMediaSource;
 
     /**
      * Temporary work-around to bug b/76017849.
@@ -121,21 +116,21 @@ public class PlaybackModel {
     /**
      * An observer of this model
      */
-    public abstract static class PlaybackObserver {
+    public interface PlaybackObserver {
         /**
          * Called whenever the playback state of the current media item changes.
          */
-        protected void onPlaybackStateChanged() {}
+        void onPlaybackStateChanged();
 
         /**
          * Called when the top source media app changes.
          */
-        protected void onSourceChanged() {};
+        void onSourceChanged();
 
         /**
          * Called when the media item being played changes.
          */
-        protected void onMetadataChanged() {};
+        void onMetadataChanged();
     }
 
     private MediaController.Callback mCallback = new MediaController.Callback() {
@@ -188,7 +183,10 @@ public class PlaybackModel {
         }
         mMediaController = mediaController;
         if (mMediaController != null) {
+            mMediaSource = new MediaSource(mContext, mMediaController.getPackageName());
             mMediaController.registerCallback(mCallback);
+        } else {
+            mMediaSource = null;
         }
         notify(PlaybackObserver::onSourceChanged);
     }
@@ -223,15 +221,13 @@ public class PlaybackModel {
     }
 
     /**
-     * @return the package name of the currently selected media source. Changes on this value will
+     * @return a {@link MediaSource} providing access to metadata of the currently playing media
+     * source, or NULL if no media source has an active session. Changes on this value will
      * be notified through {@link PlaybackObserver#onSourceChanged()}
      */
     @Nullable
-    public String getPackageName() {
-        if (mMediaController == null) {
-            return null;
-        }
-        return mMediaController.getPackageName();
+    public MediaSource getMediaSource() {
+        return mMediaSource;
     }
 
     /**
@@ -358,52 +354,6 @@ public class PlaybackModel {
     public void onSkipToQueueItem(long queueId) {
         if (mMediaController != null) {
             mMediaController.getTransportControls().skipToQueueItem(queueId);
-        }
-    }
-
-    /** Third-party defined application theme to use * */
-    private static final String THEME_META_DATA_NAME =
-            "com.google.android.gms.car.application.theme";
-
-    /**
-     * @return the accent color of the currently connected media source. Changes on this value will
-     * be notified through {@link PlaybackObserver#onSourceChanged()}
-     */
-    public int getAccentColor() {
-        if (mMediaController == null) {
-            return mContext.getResources().getColor(android.R.color.background_dark, null);
-        }
-        return getAccentColor(getPackageName());
-    }
-
-    private int getAccentColor(String packageName) {
-        int defaultColor = mContext.getResources().getColor(android.R.color.background_dark, null);
-        TypedArray ta = null;
-        try {
-            ApplicationInfo applicationInfo =
-                    mContext.getPackageManager().getApplicationInfo(packageName,
-                            PackageManager.GET_META_DATA);
-            // CharSequence title = applicationInfo.loadLabel(getContext().getPackageManager());
-            Context packageContext = mContext.createPackageContext(packageName, 0);
-            int appTheme = applicationInfo.metaData != null
-                    ? applicationInfo.metaData.getInt(THEME_META_DATA_NAME)
-                    : 0;
-            appTheme = appTheme == 0
-                    ? applicationInfo.theme
-                    : appTheme;
-            packageContext.setTheme(appTheme);
-            Resources.Theme theme = packageContext.getTheme();
-            ta = theme.obtainStyledAttributes(new int[] {
-                    android.R.attr.colorAccent
-            });
-            return ta.getColor(0, defaultColor);
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.w(TAG, "Unable to obtain accent color from package: " + packageName);
-            return defaultColor;
-        } finally {
-            if (ta != null) {
-                ta.recycle();
-            }
         }
     }
 
@@ -572,6 +522,17 @@ public class PlaybackModel {
     }
 
     /**
+     * @return the title of the queue or NULL if not available.
+     */
+    @Nullable
+    public CharSequence getQueueTitle() {
+        if (mMediaController == null) {
+            return null;
+        }
+        return mMediaController.getQueueTitle();
+    }
+
+    /**
      * @return true if the media queue is not empty. Detailed information can be obtained by
      * calling to {@link #getQueue()}. Changes on this value will be notified through
      * {@link PlaybackObserver#onPlaybackStateChanged()}.
@@ -646,31 +607,5 @@ public class PlaybackModel {
             Log.e(TAG, "Unable to get resources for " + packageName);
             return null;
         }
-    }
-
-    /**
-     * @return a {@link ComponentName} corresponding to a {@link MediaBrowserService} in the
-     * media source, or null if the media source doesn't implement {@link MediaBrowserService}.
-     * A non-null result doesn't imply that this service is accessible. The consumer code should
-     * attempt to connect and handle rejections gracefully.
-     */
-    @Nullable
-    public ComponentName getMediaBrowseServiceComponent() {
-        if (getPackageName() == null) {
-            return null;
-        }
-        PackageManager packageManager = mContext.getPackageManager();
-        Intent intent = new Intent();
-        intent.setAction(MediaBrowserService.SERVICE_INTERFACE);
-        intent.setPackage(getPackageName());
-        List<ResolveInfo> resolveInfos = packageManager.queryIntentServices(intent,
-                PackageManager.GET_RESOLVED_FILTER);
-        if (resolveInfos == null || resolveInfos.isEmpty()) {
-            return null;
-        }
-        return new ComponentName(
-                getPackageName(),
-                resolveInfos.get(0).serviceInfo.name
-        );
     }
 }
