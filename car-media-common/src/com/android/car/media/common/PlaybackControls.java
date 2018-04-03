@@ -26,12 +26,12 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 
+import androidx.car.widget.ActionBar;
+
 import com.android.car.apps.common.ColorChecker;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import androidx.car.widget.ActionBar;
 
 /**
  * Custom view that can be used to display playback controls. It accepts a {@link PlaybackModel}
@@ -60,6 +60,11 @@ public class PlaybackControls extends ActionBar {
             updateState();
             updateCustomActions();
             updateAccentColor();
+        }
+
+        @Override
+        public void onMetadataChanged() {
+            updateCustomActions();  // rating might have changed
         }
     };
     private ColorStateList mIconsColor;
@@ -197,8 +202,11 @@ public class PlaybackControls extends ActionBar {
         for (int pos = 0; pos < mCustomActionButtons.size(); pos++) {
             ImageButton button = mCustomActionButtons.get(pos);
             if (customActions.size() > pos) {
+                CustomPlaybackAction action = customActions.get(pos);
                 button.setVisibility(VISIBLE);
-                button.setImageDrawable(customActions.get(pos).mIcon);
+                button.setImageDrawable(action.mIcon);
+                button.setOnClickListener(view ->
+                        mModel.onCustomAction(action.mAction, action.mExtras));
             } else {
                 button.setVisibility(INVISIBLE);
             }
