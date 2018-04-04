@@ -18,7 +18,6 @@ package com.android.car.media.common;
 
 import android.car.Car;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -109,9 +108,9 @@ public class PlaybackFragment extends Fragment {
     }
 
     private void updateState() {
-        int maxProgress = mModel.getMaxProgress();
+        long maxProgress = mModel.getMaxProgress();
         mSeekbar.setVisibility(maxProgress > 0 ? View.VISIBLE : View.INVISIBLE);
-        mSeekbar.setMax(maxProgress);
+        mSeekbar.setMax((int) maxProgress);
         if (mModel.isPlaying()) {
             mSeekbar.post(mSeekBarRunnable);
         } else {
@@ -121,11 +120,10 @@ public class PlaybackFragment extends Fragment {
 
     private void updateMetadata() {
         MediaItemMetadata metadata = mModel.getMetadata();
-        mTitle.setText(metadata != null ? metadata.mTitle : null);
-        mSubtitle.setText(metadata != null ? metadata.mSubtitle : null);
-        Bitmap art = metadata != null ? metadata.getAlbumArt() : null;
-        mAlbumArt.setImageBitmap(art);
-        mAlbumBackground.setImageBitmap(art);
+        mTitle.setText(metadata != null ? metadata.getTitle() : null);
+        mSubtitle.setText(metadata != null ? metadata.getSubtitle() : null);
+        MediaItemMetadata.updateImageView(getContext(), metadata, mAlbumArt, 0);
+        MediaItemMetadata.updateImageView(getContext(), metadata, mAlbumBackground, 0);
     }
 
     private void updateAccentColor() {
@@ -141,7 +139,7 @@ public class PlaybackFragment extends Fragment {
             if (!mModel.isPlaying()) {
                 return;
             }
-            mSeekbar.setProgress(mModel.getProgress());
+            mSeekbar.setProgress((int) mModel.getProgress());
             mSeekbar.postDelayed(this, SEEK_BAR_UPDATE_TIME_INTERVAL_MS);
         }
     };
