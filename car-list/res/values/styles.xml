@@ -45,4 +45,14 @@
         <item name="showPagedListViewDivider">false</item>
         <item name="gutter">both</item>
     </style>
+
+    <style name="TextAppearance.Car.Body1.SingleLine" parent="TextAppearance.Car.Body1">
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">marquee</item>
+    </style>
+
+    <style name="TextAppearance.Car.Body2.SingleLine" parent="TextAppearance.Car.Body2">
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
 </resources>
