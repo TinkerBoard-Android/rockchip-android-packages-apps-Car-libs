@@ -258,19 +258,19 @@ public class PlaybackModel {
         if (metadata == null) {
             return null;
         }
-        return new MediaItemMetadata(mContext, metadata);
+        return new MediaItemMetadata(metadata);
     }
 
     /**
-     * @return an integer representing the maximum value for the progress bar corresponding on the
-     * current position in the media item, which can be obtained by calling {@link #getProgress()}.
+     * @return duration of the media item, in milliseconds. The current position in this duration
+     * can be obtained by calling {@link #getProgress()}.
      * Changes on this value will be notified through {@link PlaybackObserver#onMetadataChanged()}
      */
-    public int getMaxProgress() {
+    public long getMaxProgress() {
         if (mMediaController == null || mMediaController.getMetadata() == null) {
             return 0;
         } else {
-            return (int) mMediaController.getMetadata()
+            return mMediaController.getMetadata()
                     .getLong(MediaMetadata.METADATA_KEY_DURATION);
         }
     }
@@ -331,15 +331,19 @@ public class PlaybackModel {
         TransportControls cntrl = mMediaController.getTransportControls();
 
         if (ACTION_SET_RATING.equals(action)) {
-            boolean setHeart = extras == null ? false : extras.getBoolean(EXTRA_SET_HEART, false);
+            boolean setHeart = extras != null && extras.getBoolean(EXTRA_SET_HEART, false);
             cntrl.setRating(Rating.newHeartRating(setHeart));
         } else {
             cntrl.sendCustomAction(action, extras);
         }
+
+        if (mMediaController != null) {
+            mMediaController.getTransportControls().sendCustomAction(action, extras);
+        }
     }
 
     /**
-     * Starts playing a given media item. This id corresponds to {@link MediaItemMetadata#mId}.
+     * Starts playing a given media item. This id corresponds to {@link MediaItemMetadata#getId()}.
      */
     public void onPlayItem(String mediaItemId) {
         if (mMediaController != null) {
@@ -456,10 +460,10 @@ public class PlaybackModel {
     }
 
     /**
-     * @return the current playback progress. This is a value between 0 and
+     * @return the current playback progress, in milliseconds. This is a value between 0 and
      * {@link #getMaxProgress()}.
      */
-    public int getProgress() {
+    public long getProgress() {
         if (mMediaController == null) {
             return 0;
         }
@@ -475,7 +479,7 @@ public class PlaybackModel {
             speed = 0f;
         }
         long posDiff = (long) (timeDiff * speed);
-        return Math.min((int) (posDiff + state.getPosition()), getMaxProgress());
+        return Math.min(posDiff + state.getPosition(), getMaxProgress());
     }
 
     /**
@@ -560,7 +564,7 @@ public class PlaybackModel {
         List<MediaSession.QueueItem> items = mMediaController.getQueue();
         if (items != null) {
             return items.stream()
-                    .map(item -> new MediaItemMetadata(mContext, item))
+                    .map(MediaItemMetadata::new)
                     .collect(Collectors.toList());
         } else {
             return new ArrayList<>();
