@@ -23,8 +23,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_USE_AAPT2 := true
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
-    $(ANDROID_SUPPORT_CAR_TARGETS) \
-    android-support-v7-recyclerview
+    $(ANDROID_SUPPORT_CAR_TARGETS)
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
