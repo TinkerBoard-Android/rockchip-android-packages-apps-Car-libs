@@ -50,13 +50,13 @@ public class PlaybackControls extends ActionBar {
     private PlaybackModel mModel;
     private PlaybackModel.PlaybackObserver mObserver = new PlaybackModel.PlaybackObserver() {
         @Override
-        protected void onPlaybackStateChanged() {
+        public void onPlaybackStateChanged() {
             updateState();
             updateCustomActions();
         }
 
         @Override
-        protected void onSourceChanged() {
+        public void onSourceChanged() {
             updateState();
             updateCustomActions();
             updateAccentColor();
@@ -175,7 +175,8 @@ public class PlaybackControls extends ActionBar {
     }
 
     private void updateAccentColor() {
-        int color = mModel.getAccentColor();
+        int defaultColor = mContext.getResources().getColor(android.R.color.background_dark, null);
+        int color = mModel.getMediaSource().getAccentColor(defaultColor);
         int tintColor = ColorChecker.getTintColor(mContext, color);
         mPlayPauseStopImageView.setPrimaryActionColor(color, tintColor);
         mSpinner.setIndeterminateTintList(ColorStateList.valueOf(color));
