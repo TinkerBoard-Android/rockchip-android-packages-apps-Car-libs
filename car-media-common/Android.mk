@@ -71,5 +71,3 @@ LOCAL_SRC_FILES := ../../../../../prebuilts/maven_repo/bumptech/com/github/bumpt
 LOCAL_UNINSTALLABLE_MODULE := true
 
 include $(BUILD_PREBUILT)
-
-
