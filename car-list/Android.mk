@@ -23,7 +23,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_USE_AAPT2 := true
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
-    $(ANDROID_SUPPORT_CAR_TARGETS)
+    android-support-car
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
@@ -32,8 +32,6 @@ LOCAL_RESOURCE_DIR += prebuilts/sdk/current/car/car/res
 
 LOCAL_MODULE := car-list
 LOCAL_MODULE_TAGS := optional
-
-include packages/apps/Car/libs/car-stream-ui-lib/car-stream-ui-lib.mk
 
 LOCAL_PROGUARD_ENABLED := disabled
 
