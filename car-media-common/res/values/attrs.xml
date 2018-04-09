@@ -26,4 +26,8 @@
         <attr name="columns" format="integer" />
         <attr name="show_expand_button" format="boolean"/>
     </declare-styleable>
+
+    <declare-styleable name="FixedRatioImageView">
+        <attr name="aspect_ratio" format="float"/>
+    </declare-styleable>
 </resources>

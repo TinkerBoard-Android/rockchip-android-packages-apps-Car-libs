@@ -24,6 +24,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
+import android.media.browse.MediaBrowser;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.widget.ImageView;
@@ -35,6 +36,7 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -46,20 +48,29 @@ public class MediaItemMetadata {
     private final MediaDescription mMediaDescription;
     @Nullable
     private final Long mQueueId;
+    private final boolean mIsBrowsable;
+    private final boolean mIsPlayable;
 
     /** Creates an instance based on a {@link MediaMetadata} */
     public MediaItemMetadata(@NonNull MediaMetadata metadata) {
-        this(metadata.getDescription(), null);
+        this(metadata.getDescription(), null, false, false);
     }
 
     /** Creates an instance based on a {@link MediaSession.QueueItem} */
     public MediaItemMetadata(@NonNull MediaSession.QueueItem queueItem) {
-        this(queueItem.getDescription(), queueItem.getQueueId());
+        this(queueItem.getDescription(), queueItem.getQueueId(), false, true);
     }
 
-    private MediaItemMetadata(MediaDescription description, Long queueId) {
+    public MediaItemMetadata(@NonNull MediaBrowser.MediaItem item) {
+        this(item.getDescription(), null, item.isBrowsable(), item.isPlayable());
+    }
+
+    private MediaItemMetadata(MediaDescription description, Long queueId, boolean isBrowsable,
+            boolean isPlayable) {
         mMediaDescription = description;
         mQueueId = queueId;
+        mIsPlayable = isPlayable;
+        mIsBrowsable = isBrowsable;
     }
 
     /** @return media item id */
@@ -197,5 +208,30 @@ public class MediaItemMetadata {
             return bitmapCompletableFuture;
         }
         return CompletableFuture.completedFuture(null);
+    }
+
+    public boolean isBrowsable() {
+        return mIsBrowsable;
+    }
+
+    public boolean isPlayable() {
+        return mIsPlayable;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MediaItemMetadata that = (MediaItemMetadata) o;
+        return mIsBrowsable == that.mIsBrowsable
+                && mIsPlayable == that.mIsPlayable
+                && Objects.equals(mMediaDescription.getMediaId(),
+                        that.mMediaDescription.getMediaId())
+                && Objects.equals(mQueueId, that.mQueueId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mMediaDescription.getMediaId(), mQueueId, mIsBrowsable, mIsPlayable);
     }
 }
