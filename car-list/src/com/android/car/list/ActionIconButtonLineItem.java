@@ -16,11 +16,13 @@
 
 package com.android.car.list;
 
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -29,13 +31,24 @@ import android.widget.TextView;
  */
 public abstract class ActionIconButtonLineItem
         extends TypedPagedListAdapter.LineItem<ActionIconButtonLineItem.ViewHolder> {
+
     private final CharSequence mTitle;
+    private final CharSequence mPrimaryAction;
+    private final CharSequence mSecondaryAction;
+    private final Drawable mIconDrawable;
 
     /**
      * Constructs an ActionIconButtonLineItem with just the title set.
      */
-    public ActionIconButtonLineItem(CharSequence title) {
+    public ActionIconButtonLineItem(
+            CharSequence title,
+            CharSequence primaryAction,
+            CharSequence secondaryAction,
+            Drawable iconDrawable) {
         mTitle = title;
+        mPrimaryAction = primaryAction;
+        mSecondaryAction = secondaryAction;
+        mIconDrawable = iconDrawable;
     }
 
     @Override
@@ -46,9 +59,12 @@ public abstract class ActionIconButtonLineItem
     @Override
     public void bindViewHolder(ActionIconButtonLineItem.ViewHolder viewHolder) {
         super.bindViewHolder(viewHolder);
+        viewHolder.mActionButton1.setText(mPrimaryAction);
+        viewHolder.mActionButton2.setText(mSecondaryAction);
         viewHolder.mTitleView.setText(mTitle);
-        setIcon(viewHolder.mIconView);
-        setActionButtonIcon(viewHolder.mEndIconView);
+        viewHolder.mEndIconView.setImageDrawable(mIconDrawable);
+        viewHolder.mActionButton1.setText(mPrimaryAction);
+        viewHolder.mActionButton2.setText(mSecondaryAction);
         CharSequence desc = getDesc();
         if (TextUtils.isEmpty(desc)) {
             viewHolder.mDescView.setVisibility(View.GONE);
@@ -56,10 +72,8 @@ public abstract class ActionIconButtonLineItem
             viewHolder.mDescView.setVisibility(View.VISIBLE);
             viewHolder.mDescView.setText(desc);
         }
-        viewHolder.mEndIconContainer.setOnClickListener(
-                v -> onActionButtonClick(viewHolder.getAdapterPosition()));
-        viewHolder.mDividerLine.setVisibility(
-                isClickable() && isEnabled() ? View.VISIBLE : View.GONE);
+        viewHolder.mActionButton2.setOnClickListener(
+                v -> onSecondaryActionButtonClick(viewHolder.getAdapterPosition()));
     }
 
     /**
@@ -69,19 +83,17 @@ public abstract class ActionIconButtonLineItem
     public static class ViewHolder extends RecyclerView.ViewHolder {
         final TextView mTitleView;
         final TextView mDescView;
-        final ImageView mIconView;
         final ImageView mEndIconView;
-        final View mEndIconContainer;
-        final View mDividerLine;
+        final Button mActionButton1;
+        final Button mActionButton2;
 
         public ViewHolder(View view) {
             super(view);
-            mIconView = (ImageView) view.findViewById(R.id.icon);
             mEndIconView = (ImageView) view.findViewById(R.id.end_icon);
             mTitleView = (TextView) view.findViewById(R.id.title);
             mDescView = (TextView) view.findViewById(R.id.desc);
-            mEndIconContainer = view.findViewById(R.id.end_icon_container);
-            mDividerLine = view.findViewById(R.id.line_item_divider);
+            mActionButton1 = (Button) view.findViewById(R.id.action_button_1);
+            mActionButton2 = (Button) view.findViewById(R.id.action_button_2);
         }
     }
 
@@ -94,19 +106,7 @@ public abstract class ActionIconButtonLineItem
     }
 
     /**
-     * Provides a {@link ImageView} so that the start icon can be set. Derived class should override
-     * to set the icon.
-     */
-    public abstract void setIcon(ImageView iconView);
-
-    /**
-     * Provides a {@link ImageView} so that the action button icon can be set. Derived class should
-     * override to set the icon.
-     */
-    public abstract void setActionButtonIcon(ImageView iconView);
-
-    /**
      * Invoked when the action button's onClickListener is invoked.
      */
-    public abstract void onActionButtonClick(int adapterPosition);
+    public abstract void onSecondaryActionButtonClick(int adapterPosition);
 }
