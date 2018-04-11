@@ -74,6 +74,9 @@ public abstract class ActionIconButtonLineItem
         }
         viewHolder.mActionButton2.setOnClickListener(
                 v -> onSecondaryActionButtonClick(viewHolder.getAdapterPosition()));
+
+        viewHolder.mActionButton1.setOnClickListener(
+                v -> onPrimaryActionButtonClick(viewHolder.mView));
     }
 
     /**
@@ -86,14 +89,16 @@ public abstract class ActionIconButtonLineItem
         final ImageView mEndIconView;
         final Button mActionButton1;
         final Button mActionButton2;
+        final View mView;
 
         public ViewHolder(View view) {
             super(view);
-            mEndIconView = (ImageView) view.findViewById(R.id.end_icon);
-            mTitleView = (TextView) view.findViewById(R.id.title);
-            mDescView = (TextView) view.findViewById(R.id.desc);
-            mActionButton1 = (Button) view.findViewById(R.id.action_button_1);
-            mActionButton2 = (Button) view.findViewById(R.id.action_button_2);
+            mView = view;
+            mEndIconView = (ImageView) mView.findViewById(R.id.end_icon);
+            mTitleView = (TextView) mView.findViewById(R.id.title);
+            mDescView = (TextView) mView.findViewById(R.id.desc);
+            mActionButton1 = (Button) mView.findViewById(R.id.action_button_1);
+            mActionButton2 = (Button) mView.findViewById(R.id.action_button_2);
         }
     }
 
@@ -106,7 +111,12 @@ public abstract class ActionIconButtonLineItem
     }
 
     /**
-     * Invoked when the action button's onClickListener is invoked.
+     * Invoked when the secondary action button's onClickListener is invoked.
      */
     public abstract void onSecondaryActionButtonClick(int adapterPosition);
+
+    /**
+     * Invoked when the primary action button's onClickListener is invoked.
+     */
+    public abstract void onPrimaryActionButtonClick(View view);
 }
