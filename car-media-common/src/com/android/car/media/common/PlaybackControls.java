@@ -186,6 +186,9 @@ public class PlaybackControls extends ActionBar {
     private void updateCustomActions() {
         List<CustomPlaybackAction> customActions = mModel.getCustomActions();
 
+        // TODO(b/78014936): Due a bug in ActionBar, redistributing custom actions can cause a
+        // crash. Removing all views before adding them again is a temporary fix.
+        setViews(new View[0]);
         if (customActions.size() > mCustomActionButtons.size()) {
             for (int i = mCustomActionButtons.size(); i < customActions.size(); i++) {
                 mCustomActionButtons.add(createIconButton(getContext(), mIconsColor, null));

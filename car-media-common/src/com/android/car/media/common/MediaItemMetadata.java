@@ -27,6 +27,8 @@ import android.media.MediaMetadata;
 import android.media.browse.MediaBrowser;
 import android.media.session.MediaSession;
 import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -42,7 +44,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Abstract representation of a media item metadata.
  */
-public class MediaItemMetadata {
+public class MediaItemMetadata implements Parcelable {
     private static final String TAG = "MediaItemMetadata";
     @NonNull
     private final MediaDescription mMediaDescription;
@@ -61,8 +63,18 @@ public class MediaItemMetadata {
         this(queueItem.getDescription(), queueItem.getQueueId(), false, true);
     }
 
+    /** Creates an instance based on a {@link MediaBrowser.MediaItem} */
     public MediaItemMetadata(@NonNull MediaBrowser.MediaItem item) {
         this(item.getDescription(), null, item.isBrowsable(), item.isPlayable());
+    }
+
+    /** Creates an instance based on a {@link Parcel} */
+    public MediaItemMetadata(@NonNull Parcel in) {
+        mMediaDescription = (MediaDescription) in.readValue(
+                MediaDescription.class.getClassLoader());
+        mQueueId = in.readByte() == 0x00 ? null : in.readLong();
+        mIsBrowsable = in.readByte() != 0x00;
+        mIsPlayable = in.readByte() != 0x00;
     }
 
     private MediaItemMetadata(MediaDescription description, Long queueId, boolean isBrowsable,
@@ -99,6 +111,7 @@ public class MediaItemMetadata {
 
     /**
      * An id that can be used on {@link PlaybackModel#onSkipToQueueItem(long)}
+     *
      * @return the id of this item in the session queue, or NULL if this is not a session queue
      * item.
      */
@@ -130,9 +143,9 @@ public class MediaItemMetadata {
      * a delayed request to set an undesired image, or caching entries to be used for images not
      * longer necessary.
      *
-     * @param context {@link Context} used to load resources from
-     * @param metadata metadata to use, or NULL if the {@link ImageView} should be cleared.
-     * @param imageView loading target
+     * @param context          {@link Context} used to load resources from
+     * @param metadata         metadata to use, or NULL if the {@link ImageView} should be cleared.
+     * @param imageView        loading target
      * @param loadingIndicator a drawable resource that would be set into the {@link ImageView}
      *                         while the image is being downloaded, or 0 if no loading indicator
      *                         is required.
@@ -167,10 +180,10 @@ public class MediaItemMetadata {
      * preferred. Only use this method if you are going to apply transformations to the loaded
      * image.
      *
-     * @param width desired width (should be > 0)
+     * @param width  desired width (should be > 0)
      * @param height desired height (should be > 0)
-     * @param fit whether the image should be scaled to fit (fitCenter), or it should be cropped
-     *            (centerCrop).
+     * @param fit    whether the image should be scaled to fit (fitCenter), or it should be cropped
+     *               (centerCrop).
      * @return a {@link CompletableFuture} that will be completed once the image is loaded, or the
      * loading fails.
      */
@@ -226,7 +239,7 @@ public class MediaItemMetadata {
         return mIsBrowsable == that.mIsBrowsable
                 && mIsPlayable == that.mIsPlayable
                 && Objects.equals(mMediaDescription.getMediaId(),
-                        that.mMediaDescription.getMediaId())
+                that.mMediaDescription.getMediaId())
                 && Objects.equals(mQueueId, that.mQueueId);
     }
 
@@ -234,4 +247,36 @@ public class MediaItemMetadata {
     public int hashCode() {
         return Objects.hash(mMediaDescription.getMediaId(), mQueueId, mIsBrowsable, mIsPlayable);
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeValue(mMediaDescription);
+        if (mQueueId == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeLong(mQueueId);
+        }
+        dest.writeByte((byte) (mIsBrowsable ? 0x01 : 0x00));
+        dest.writeByte((byte) (mIsPlayable ? 0x01 : 0x00));
+    }
+
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<MediaItemMetadata> CREATOR =
+            new Parcelable.Creator<MediaItemMetadata>() {
+                @Override
+                public MediaItemMetadata createFromParcel(Parcel in) {
+                    return new MediaItemMetadata(in);
+                }
+
+                @Override
+                public MediaItemMetadata[] newArray(int size) {
+                    return new MediaItemMetadata[size];
+                }
+            };
 }

@@ -32,6 +32,7 @@ import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
 import android.media.session.PlaybackState.Actions;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -47,6 +48,7 @@ import java.util.stream.Collectors;
 /**
  * View-model for playback UI components. This abstractions provides a simplified view of
  * {@link MediaSession} and {@link MediaSessionManager} data and events.
+ *
  * <p>
  * It automatically determines the foreground media app (the one that would normally
  * receive playback events) and exposes metadata and events from such app, or when a different app
@@ -63,12 +65,14 @@ public class PlaybackModel {
     private static final String EXTRA_SET_HEART = "com.android.car.media.common.EXTRA_SET_HEART";
 
     private final MediaSessionManager mMediaSessionManager;
+    private final Handler mHandler = new Handler();
     @Nullable
     private MediaController mMediaController;
     private Context mContext;
     private List<PlaybackObserver> mObservers = new ArrayList<>();
     private final MediaSessionUpdater mMediaSessionUpdater = new MediaSessionUpdater();
     private MediaSource mMediaSource;
+    private boolean mIsStarted;
 
     /**
      * Temporary work-around to bug b/76017849.
@@ -116,21 +120,21 @@ public class PlaybackModel {
     /**
      * An observer of this model
      */
-    public interface PlaybackObserver {
+    public abstract static class PlaybackObserver {
         /**
          * Called whenever the playback state of the current media item changes.
          */
-        void onPlaybackStateChanged();
+        protected void onPlaybackStateChanged() {};
 
         /**
          * Called when the top source media app changes.
          */
-        void onSourceChanged();
+        protected void onSourceChanged() {};
 
         /**
          * Called when the media item being played changes.
          */
-        void onMetadataChanged();
+        protected void onMetadataChanged() {};
     }
 
     private MediaController.Callback mCallback = new MediaController.Callback() {
@@ -155,7 +159,7 @@ public class PlaybackModel {
             this::selectMediaController;
 
     /**
-     * Creates a {@link PlaybackModel}. By default this instance is going to be inactive until
+     * Creates a {@link PlaybackModel}. This instance is going to be inactive until
      * {@link #start()} method is invoked.
      */
     public PlaybackModel(Context context) {
@@ -163,9 +167,43 @@ public class PlaybackModel {
         mMediaSessionManager = mContext.getSystemService(MediaSessionManager.class);
     }
 
+    /**
+     * Sets the {@link MediaController} wrapped by this model.
+     */
+    public void setMediaController(MediaController controller) {
+        changeMediaController(controller);
+    }
+
+    /**
+     * Selects the controller most likely to be the currently active one, out of the list of
+     * active controllers repoted by {@link MediaSessionManager}. It does so by picking the first
+     * one (in order of priority) which an active state as reported by
+     * {@link MediaController#getPlaybackState()}
+     */
     private void selectMediaController(List<MediaController> controllers) {
-        changeMediaController(controllers != null && controllers.size() > 0 ? controllers.get(0) :
-                null);
+        MediaController controller = null;
+        if (controllers != null && controllers.size() > 0) {
+            for (MediaController candidate : controllers) {
+                @PlaybackState.State int state = candidate.getPlaybackState() != null
+                        ? candidate.getPlaybackState().getState()
+                        : PlaybackState.STATE_NONE;
+                if (state == PlaybackState.STATE_BUFFERING
+                        || state == PlaybackState.STATE_CONNECTING
+                        || state == PlaybackState.STATE_FAST_FORWARDING
+                        || state == PlaybackState.STATE_PLAYING
+                        || state == PlaybackState.STATE_REWINDING
+                        || state == PlaybackState.STATE_SKIPPING_TO_NEXT
+                        || state == PlaybackState.STATE_SKIPPING_TO_PREVIOUS
+                        || state == PlaybackState.STATE_SKIPPING_TO_QUEUE_ITEM) {
+                    controller = candidate;
+                    break;
+                }
+            }
+            if (controller == null) {
+                controller = controllers.get(0);
+            }
+        }
+        changeMediaController(controller);
         mMediaSessionUpdater.setControllersByPackageName(controllers);
     }
 
@@ -198,9 +236,10 @@ public class PlaybackModel {
      * Calling this method might cause an immediate {@link PlaybackObserver#onSourceChanged()}
      * event in case the current media source is different than the last known one.
      */
-    public void start() {
+    private void start() {
         mMediaSessionManager.addOnActiveSessionsChangedListener(mSessionChangeListener, null);
         selectMediaController(mMediaSessionManager.getActiveSessions(null));
+        mIsStarted = true;
     }
 
     /**
@@ -208,16 +247,20 @@ public class PlaybackModel {
      * immediate {@link PlaybackObserver#onSourceChanged()} event if a media source was already
      * connected.
      */
-    public void stop() {
+    private void stop() {
         mMediaSessionUpdater.setControllersByPackageName(new ArrayList<>());
         mMediaSessionManager.removeOnActiveSessionsChangedListener(mSessionChangeListener);
         changeMediaController(null);
+        mIsStarted = false;
     }
 
     private void notify(Consumer<PlaybackObserver> notification) {
-        for (PlaybackObserver observer : mObservers) {
-            notification.accept(observer);
-        }
+        mHandler.post(() -> {
+            List<PlaybackObserver> observers = new ArrayList<>(mObservers);
+            for (PlaybackObserver observer : observers) {
+                notification.accept(observer);
+            }
+        });
     }
 
     /**
@@ -227,7 +270,14 @@ public class PlaybackModel {
      */
     @Nullable
     public MediaSource getMediaSource() {
-        return mMediaSource;
+        if (mIsStarted) {
+            return mMediaSource;
+        }
+
+        List<MediaController> controllers = mMediaSessionManager.getActiveSessions(null);
+        return controllers != null && !controllers.isEmpty()
+                ? new MediaSource(mContext, controllers.get(0).getPackageName())
+                : null;
     }
 
     /**
@@ -443,18 +493,29 @@ public class PlaybackModel {
     }
 
     /**
-     * Registers an observer to be notified of media events.
+     * Registers an observer to be notified of media events. If the model is not started yet it
+     * will start right away. If the model was already started, the observer will receive an
+     * immediate {@link PlaybackObserver#onSourceChanged()} event.
      */
     public void registerObserver(PlaybackObserver observer) {
         mObservers.add(observer);
+        if (!mIsStarted) {
+            start();
+        } else {
+            observer.onSourceChanged();
+        }
     }
 
     /**
      * Unregisters an observer previously registered using
-     * {@link #registerObserver(PlaybackObserver)}
+     * {@link #registerObserver(PlaybackObserver)}. There are no other observers the model will
+     * stop tracking changes right away.
      */
     public void unregisterObserver(PlaybackObserver observer) {
         mObservers.remove(observer);
+        if (mObservers.isEmpty() && mIsStarted) {
+            stop();
+        }
     }
 
     /**
@@ -530,6 +591,16 @@ public class PlaybackModel {
             return null;
         }
         return mMediaController.getQueueTitle();
+    }
+
+    /**
+     * @return queue id of the currently playing queue item, or
+     * {@link MediaSession.QueueItem#UNKNOWN_ID} if none of the items is currently playing.
+     */
+    public long getActiveQueueItemId() {
+        PlaybackState playbackState = mMediaController.getPlaybackState();
+        if (playbackState == null) return MediaSession.QueueItem.UNKNOWN_ID;
+        return playbackState.getActiveQueueItemId();
     }
 
     /**
