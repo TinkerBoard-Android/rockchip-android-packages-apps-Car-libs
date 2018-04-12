@@ -176,7 +176,8 @@ public class PlaybackControls extends ActionBar {
 
     private void updateAccentColor() {
         int defaultColor = mContext.getResources().getColor(android.R.color.background_dark, null);
-        int color = mModel.getMediaSource().getAccentColor(defaultColor);
+        MediaSource mediaSource = mModel.getMediaSource();
+        int color = mediaSource == null ? defaultColor : mediaSource.getAccentColor(defaultColor);
         int tintColor = ColorChecker.getTintColor(mContext, color);
         mPlayPauseStopImageView.setPrimaryActionColor(color, tintColor);
         mSpinner.setIndeterminateTintList(ColorStateList.valueOf(color));
