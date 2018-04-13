@@ -16,9 +16,8 @@ LOCAL_USE_AAPT2 := true
 LOCAL_PRIVILEGED_MODULE := true
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
-    android-support-car
-
-include packages/apps/Car/libs/car-settings-lib/car-settings-lib.mk
+    android-support-car \
+    car-settings-lib
 
 include $(BUILD_PACKAGE)
 
