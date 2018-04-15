@@ -32,11 +32,14 @@ LOCAL_PROGUARD_ENABLED := disabled
 
 LOCAL_STATIC_ANDROID_LIBRARIES += \
     android-support-car \
-    car-apps-common
+    car-apps-common \
+    android-support-constraint-layout
 
-LOCAL_STATIC_JAVA_LIBRARIES += car-media-common-glide-target
-LOCAL_STATIC_JAVA_LIBRARIES += car-media-common-gifdecoder-target
-LOCAL_STATIC_JAVA_LIBRARIES += car-media-common-disklrucache-target
+LOCAL_STATIC_JAVA_LIBRARIES += \
+    car-media-common-glide-target \
+    car-media-common-gifdecoder-target \
+    car-media-common-disklrucache-target \
+    android-support-constraint-layout-solver
 
 LOCAL_USE_AAPT2 := true
 
