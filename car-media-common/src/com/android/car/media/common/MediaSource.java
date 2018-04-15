@@ -27,7 +27,11 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.media.browse.MediaBrowser;
+import android.media.session.MediaController;
+import android.media.session.MediaSession;
+import android.os.Handler;
 import android.service.media.MediaBrowserService;
 import android.support.annotation.ColorInt;
 import android.util.Log;
@@ -36,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * This represents a source of media content. It provides convenient methods to access media source
@@ -59,6 +64,7 @@ public class MediaSource {
     @Nullable
     private final MediaBrowser mBrowser;
     private final Context mContext;
+    private final Handler mHandler = new Handler();
     private List<Observer> mObservers = new ArrayList<>();
     private CharSequence mName;
     private @ColorInt int mPrimaryColor;
@@ -68,29 +74,40 @@ public class MediaSource {
     /**
      * An observer of this media source.
      */
-    public interface Observer {
+    public abstract static class Observer {
         /**
          * This method is called if a successful connection to the {@link MediaBrowserService} is
          * made for this source. A connection is initiated as soon as there is at least one
          * {@link Observer} subscribed by using {@link MediaSource#subscribe(Observer)}.
          *
-         * @param mediaBrowser a connected {@link MediaBrowser}, or NULL if connection was
-         *                     unsuccessful (for example: if the media source rejects the
-         *                     connection)
+         * @param success true if the connection was successful or false otherwise.
          */
-        void onBrowseConnected(@Nullable MediaBrowser mediaBrowser);
+        protected void onBrowseConnected(boolean success) {};
 
         /**
          * This method is called if the connection to the {@link MediaBrowserService} is lost.
          */
-        void onBrowseDisconnected();
+        protected void onBrowseDisconnected() {};
+    }
+
+    /**
+     * A subscription to a collection of items
+     */
+    public interface ItemsSubscription {
+        /**
+         * This method is called whenever media items are loaded or updated.
+         *
+         * @param parentId identifier of the items parent.
+         * @param items items loaded, or null if there was an error trying to load them.
+         */
+        void onChildrenLoaded(String parentId, @Nullable List<MediaItemMetadata> items);
     }
 
     private final MediaBrowser.ConnectionCallback mConnectionCallback =
             new MediaBrowser.ConnectionCallback() {
                 @Override
                 public void onConnected() {
-                    MediaSource.this.notify(observer -> observer.onBrowseConnected(mBrowser));
+                    MediaSource.this.notify(observer -> observer.onBrowseConnected(true));
                 }
 
                 @Override
@@ -100,7 +117,7 @@ public class MediaSource {
 
                 @Override
                 public void onConnectionFailed() {
-                    MediaSource.this.notify(observer -> observer.onBrowseConnected(null));
+                    MediaSource.this.notify(observer -> observer.onBrowseConnected(false));
                 }
             };
 
@@ -163,7 +180,7 @@ public class MediaSource {
                 // this exception, but there is no way to know without trying.
             }
         } else {
-            observer.onBrowseConnected(mBrowser);
+            observer.onBrowseConnected(true);
         }
         return true;
     }
@@ -177,8 +194,59 @@ public class MediaSource {
             // TODO(b/77640010): Review MediaBrowse disconnection.
             // Some media sources are not responding correctly to MediaBrowser#disconnect(). We
             // are keeping the connection going.
-            // mBrowser.disconnect();
+            //   mBrowser.disconnect();
         }
+    }
+
+    /**
+     * Subscribes to changes on the list of media item children of the given parent.
+     *
+     * @param parentId parent of the children to load, or null to indicate children of the root
+     *                 node.
+     * @throws IllegalStateException if browsing is not available or it is not connected.
+     */
+    public void subscribeChildren(@Nullable String parentId,
+            ItemsSubscription callback) {
+        if (mBrowser == null || !mBrowser.isConnected()) {
+            throw new IllegalStateException("Browsing is not available for this source: "
+                    + getName());
+        }
+        mBrowser.subscribe(parentId != null ? parentId : mBrowser.getRoot(),
+                wrapCallback(callback));
+    }
+
+    /**
+     * Unsubscribes to changes on the list of media items children of the given parent
+     *
+     * @param parentId parent to unsubscribe, or null to unsubscribe from the root node.
+     * @throws IllegalStateException if browsing is not available or it is not connected.
+     */
+    public void unsubscribeChildren(@Nullable String parentId,
+            ItemsSubscription callback) {
+        if (mBrowser == null || !mBrowser.isConnected()) {
+            throw new IllegalStateException("Browsing is not available for this source: "
+                    + getName());
+        }
+        mBrowser.unsubscribe(parentId != null ? parentId : mBrowser.getRoot(),
+                wrapCallback(callback));
+    }
+
+    private MediaBrowser.SubscriptionCallback wrapCallback(ItemsSubscription subscription) {
+        return new MediaBrowser.SubscriptionCallback() {
+            @Override
+            public void onChildrenLoaded(String parentId,
+                    List<MediaBrowser.MediaItem> children) {
+                List<MediaItemMetadata> items = children.stream()
+                        .map(child -> new MediaItemMetadata(child))
+                        .collect(Collectors.toList());
+                subscription.onChildrenLoaded(parentId, items);
+            }
+
+            @Override
+            public void onError(String parentId) {
+                subscription.onChildrenLoaded(parentId, null);
+            }
+        };
     }
 
     private void extractComponentInfo(@NonNull String packageName,
@@ -258,9 +326,12 @@ public class MediaSource {
     }
 
     private void notify(Consumer<Observer> notification) {
-        for (Observer observer : mObservers) {
-            notification.accept(observer);
-        }
+        mHandler.post(() -> {
+            List<Observer> observers = new ArrayList<>(mObservers);
+            for (Observer observer : observers) {
+                notification.accept(observer);
+            }
+        });
     }
 
     /**
@@ -268,6 +339,13 @@ public class MediaSource {
      */
     public CharSequence getName() {
         return mName;
+    }
+
+    /**
+     * @return the package name that identifies this media source.
+     */
+    public String getPackageName() {
+        return mPackageName;
     }
 
     /**
@@ -283,6 +361,35 @@ public class MediaSource {
         }
     }
 
+    /**
+     * @return a {@link PlaybackModel} that allows controlling this media source. This method
+     * should only be used if this {@link MediaSource} is connected.
+     * @see #subscribe(Observer)
+     */
+    @Nullable
+    public PlaybackModel getPlaybackModel() {
+        if (mBrowser == null) {
+            return null;
+        }
+
+        MediaSession.Token token = mBrowser.getSessionToken();
+        MediaController controller = new MediaController(mContext, token);
+        PlaybackModel playbackModel = new PlaybackModel(mContext);
+        playbackModel.setMediaController(controller);
+        return playbackModel;
+    }
+
+    /**
+     * @return this media source's icon as a {@link Drawable}
+     */
+    public Drawable getPackageIcon() {
+        try {
+            return mContext.getPackageManager().getApplicationIcon(getPackageName());
+        } catch (PackageManager.NameNotFoundException e) {
+            return null;
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -290,6 +397,11 @@ public class MediaSource {
         MediaSource that = (MediaSource) o;
         return Objects.equals(mPackageName, that.mPackageName)
                 && Objects.equals(mBrowseServiceClassName, that.mBrowseServiceClassName);
+    }
+
+    /** @return the current media browser. This media browser might not be connected yet. */
+    public MediaBrowser getMediaBrowser() {
+        return mBrowser;
     }
 
     @Override

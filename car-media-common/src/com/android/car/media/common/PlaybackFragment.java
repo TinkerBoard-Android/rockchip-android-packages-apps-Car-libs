@@ -18,18 +18,25 @@ package com.android.car.media.common;
 
 import android.car.Car;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.SeekBar;
 import android.widget.TextView;
+
+import com.bumptech.glide.request.target.Target;
 
 /**
  * {@link Fragment} that can be used to display and control the currently playing media item.
@@ -38,24 +45,17 @@ import android.widget.TextView;
  */
 public class PlaybackFragment extends Fragment {
     private PlaybackModel mModel;
-    private ImageView mAlbumBackground;
+    private CrossfadeImageView mAlbumBackground;
     private PlaybackControls mPlaybackControls;
-    private ImageView mAlbumArt;
+    private ImageView mAppIcon;
+    private TextView mAppName;
     private TextView mTitle;
     private TextView mSubtitle;
-    private SeekBar mSeekbar;
 
     private PlaybackModel.PlaybackObserver mObserver = new PlaybackModel.PlaybackObserver() {
         @Override
-        public void onPlaybackStateChanged() {
-            updateState();
-        }
-
-        @Override
         public void onSourceChanged() {
-            updateState();
             updateMetadata();
-            updateAccentColor();
         }
 
         @Override
@@ -75,21 +75,17 @@ public class PlaybackFragment extends Fragment {
             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.car_playback_fragment, container, false);
         mModel = new PlaybackModel(getContext());
-        mModel.registerObserver(mObserver);
         mAlbumBackground = view.findViewById(R.id.album_background);
         mPlaybackControls = view.findViewById(R.id.playback_controls);
         mPlaybackControls.setModel(mModel);
-        mAlbumArt = view.findViewById(R.id.album_art);
+        mAppIcon = view.findViewById(R.id.app_icon);
+        mAppName = view.findViewById(R.id.app_name);
         mTitle = view.findViewById(R.id.title);
         mSubtitle = view.findViewById(R.id.subtitle);
-        mSeekbar = view.findViewById(R.id.seek_bar);
 
         mAlbumBackground.setOnClickListener(v -> {
             Intent intent = new Intent(Car.CAR_INTENT_ACTION_MEDIA_TEMPLATE);
-            ActivityOptionsCompat options = ActivityOptionsCompat
-                    .makeSceneTransitionAnimation(getActivity(), mAlbumArt,
-                            getString(R.string.album_art));
-            startActivity(intent, options.toBundle());
+            startActivity(intent);
         });
 
         return view;
@@ -98,50 +94,91 @@ public class PlaybackFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        mModel.start();
+        mModel.registerObserver(mObserver);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        mModel.stop();
-    }
-
-    private void updateState() {
-        long maxProgress = mModel.getMaxProgress();
-        mSeekbar.setVisibility(maxProgress > 0 ? View.VISIBLE : View.INVISIBLE);
-        mSeekbar.setMax((int) maxProgress);
-        if (mModel.isPlaying()) {
-            mSeekbar.post(mSeekBarRunnable);
-        } else {
-            mSeekbar.removeCallbacks(mSeekBarRunnable);
-        }
+        mModel.unregisterObserver(mObserver);
     }
 
     private void updateMetadata() {
+        MediaSource mediaSource = mModel.getMediaSource();
+
+        if (mediaSource == null) {
+            mTitle.setText(null);
+            mSubtitle.setText(null);
+            mAppName.setText(null);
+            mAlbumBackground.setImageBitmap(null, true);
+            return;
+        }
+
         MediaItemMetadata metadata = mModel.getMetadata();
         mTitle.setText(metadata != null ? metadata.getTitle() : null);
         mSubtitle.setText(metadata != null ? metadata.getSubtitle() : null);
-        MediaItemMetadata.updateImageView(getContext(), metadata, mAlbumArt, 0);
-        MediaItemMetadata.updateImageView(getContext(), metadata, mAlbumBackground, 0);
-    }
-
-    private void updateAccentColor() {
-        int defaultColor = getResources().getColor(android.R.color.background_dark, null);
-        int color = mModel.getMediaSource().getAccentColor(defaultColor);
-        mSeekbar.getProgressDrawable().setColorFilter(color, PorterDuff.Mode.SRC_IN);
-    }
-
-    private static final long SEEK_BAR_UPDATE_TIME_INTERVAL_MS = 500;
-
-    private final Runnable mSeekBarRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (!mModel.isPlaying()) {
-                return;
-            }
-            mSeekbar.setProgress((int) mModel.getProgress());
-            mSeekbar.postDelayed(this, SEEK_BAR_UPDATE_TIME_INTERVAL_MS);
+        if (metadata != null) {
+            metadata.getAlbumArt(getContext(),
+                    Target.SIZE_ORIGINAL,
+                    Target.SIZE_ORIGINAL,
+                    false)
+                    .thenAccept(bitmap -> {
+                        //bitmap = ImageUtils.blur(getContext(), bitmap, 1f, 10f);
+                        mAlbumBackground.setImageBitmap(bitmap, true);
+                    });
+        } else {
+            mAlbumBackground.setImageBitmap(null, true);
         }
-    };
+        mAppName.setText(mediaSource.getName());
+        Bitmap cropped = getCircleCroppedBitmap(drawableToBitmap(mediaSource.getPackageIcon()));
+        mAppIcon.setImageBitmap(cropped);
+    }
+
+    /**
+     * Converts the given {@link Drawable} into a {@link Bitmap}
+     */
+    private Bitmap drawableToBitmap(Drawable drawable) {
+        Bitmap bitmap = null;
+
+        if (drawable instanceof BitmapDrawable) {
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+            if (bitmapDrawable.getBitmap() != null) {
+                return bitmapDrawable.getBitmap();
+            }
+        }
+
+        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+        } else {
+            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
+                    drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        }
+
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
+    }
+
+    /**
+     * Crops the given bitmap into a circle with the same dimensions as the original one.
+     */
+    private Bitmap getCircleCroppedBitmap(Bitmap bitmap) {
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(),
+                Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        final int color = 0xff424242;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
+                bitmap.getWidth() / 2f, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+        return output;
+    }
 }
