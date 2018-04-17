@@ -16,7 +16,6 @@
 
 package com.android.car.list;
 
-import android.annotation.DrawableRes;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Icon;

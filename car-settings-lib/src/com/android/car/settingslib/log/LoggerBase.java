@@ -16,9 +16,10 @@
 
 package com.android.car.settingslib.log;
 
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 /**
  * Helper class that wraps {@link Log} to log messages to logcat. The intended use for a Logger is
