@@ -19,19 +19,18 @@ package com.android.car.settingslib.language;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.car.widget.ListItem;
+import androidx.car.widget.ListItemProvider;
+import androidx.car.widget.TextListItem;
+
+import com.android.car.settingslib.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.LocaleStore;
 import com.android.internal.app.SuggestedLocaleAdapter;
 
-import com.android.car.settingslib.R;
-
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-
-import androidx.car.widget.ListItem;
-import androidx.car.widget.ListItemProvider;
-import androidx.car.widget.TextListItem;
 
 /**
  * ListItemProvider that wraps {@link SuggestedLocaleAdapter}.

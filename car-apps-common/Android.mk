@@ -36,11 +36,11 @@ LOCAL_PROGUARD_ENABLED := disabled
 LOCAL_USE_AAPT2 := true
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
-    android-support-v4 \
+    androidx.legacy_legacy-support-v4 \
     car-stream-ui-lib
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    android-support-annotations
+    androidx.annotation_annotation
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
