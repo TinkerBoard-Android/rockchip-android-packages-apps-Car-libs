@@ -41,8 +41,9 @@ import android.media.session.MediaSession;
 import android.os.Bundle;
 import android.os.Handler;
 import android.service.media.MediaBrowserService;
-import android.support.annotation.ColorInt;
 import android.util.Log;
+
+import androidx.annotation.ColorInt;
 
 import java.util.ArrayList;
 import java.util.HashMap;

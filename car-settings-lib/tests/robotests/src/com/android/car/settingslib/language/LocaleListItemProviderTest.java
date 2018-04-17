@@ -17,11 +17,13 @@ package com.android.car.settingslib.language;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.verify;
 import static org.robolectric.RuntimeEnvironment.application;
 
 import android.content.Context;
 import android.telephony.TelephonyManager;
+
+import androidx.car.widget.ListItemAdapter;
+import androidx.car.widget.PagedListView;
 
 import com.android.car.settingslib.robolectric.BaseRobolectricTest;
 import com.android.car.settingslib.robolectric.CarSettingsLibRobolectricTestRunner;
@@ -41,9 +43,6 @@ import org.robolectric.shadows.ShadowTelephonyManager;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-
-import androidx.car.widget.ListItemAdapter;
-import androidx.car.widget.PagedListView;
 
 /**
  * Tests {@link LocaleListItemProvider} to validate
