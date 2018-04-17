@@ -21,15 +21,15 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.car.widget.PagedListView;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView.ViewHolder;
+
 import java.lang.annotation.Retention;
 import java.util.ArrayList;
-
-import androidx.car.widget.PagedListView;
 
 /**
  * Renders all types of LineItem to a view to be displayed as a row in a list.

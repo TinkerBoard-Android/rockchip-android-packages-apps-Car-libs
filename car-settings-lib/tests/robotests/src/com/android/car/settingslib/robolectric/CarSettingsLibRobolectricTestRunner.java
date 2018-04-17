@@ -15,7 +15,7 @@
  */
 package com.android.car.settingslib.robolectric;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.junit.runners.model.InitializationError;
 import org.robolectric.RobolectricTestRunner;
@@ -35,6 +35,11 @@ import java.util.List;
  */
 public class CarSettingsLibRobolectricTestRunner extends RobolectricTestRunner {
 
+    private static final String AAR_VERSION = "1.0.0-alpha1";
+    private static final String SUPPORT_RESOURCE_PATH_TEMPLATE =
+            "jar:file:prebuilts/sdk/current/androidx/m2repository/androidx/"
+                    + "%1$s/%1$s/%2$s/%1$s-%2$s.aar!/res";
+
     /**
      * We don't actually want to change this behavior, so we just call super.
      */
@@ -48,6 +53,13 @@ public class CarSettingsLibRobolectricTestRunner extends RobolectricTestRunner {
         } catch (MalformedURLException e) {
             throw new RuntimeException("CarSettingsLibRobolectricTestRunner failure", e);
         }
+    }
+
+    /**
+     * Create the resource path for a support library component's JAR.
+     */
+    private static String createSupportResourcePathFromJar(@NonNull String componentId) {
+        return String.format(SUPPORT_RESOURCE_PATH_TEMPLATE, componentId, AAR_VERSION);
     }
 
     /**
@@ -73,9 +85,8 @@ public class CarSettingsLibRobolectricTestRunner extends RobolectricTestRunner {
 
                 // Support library resources. These need to point to the prebuilts of support
                 // library and not the source.
-                paths.add(createResourcePath("file:prebuilts/sdk/current/car/car/res"));
-                paths.add(createResourcePath(
-                        "file:prebuilts/sdk/current/support/v7/appcompat/res/"));
+                paths.add(createResourcePath(createSupportResourcePathFromJar("appcompat")));
+                paths.add(createResourcePath(createSupportResourcePathFromJar("car")));
                 return paths;
             }
         };
