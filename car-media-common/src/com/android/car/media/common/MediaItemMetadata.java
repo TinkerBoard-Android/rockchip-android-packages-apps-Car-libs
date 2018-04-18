@@ -238,8 +238,10 @@ public class MediaItemMetadata implements Parcelable {
         MediaItemMetadata that = (MediaItemMetadata) o;
         return mIsBrowsable == that.mIsBrowsable
                 && mIsPlayable == that.mIsPlayable
-                && Objects.equals(mMediaDescription.getMediaId(),
-                that.mMediaDescription.getMediaId())
+                && Objects.equals(getId(), that.getId())
+                && Objects.equals(getTitle(), that.getTitle())
+                && Objects.equals(getSubtitle(), that.getSubtitle())
+                && Objects.equals(getAlbumArtUri(), that.getAlbumArtUri())
                 && Objects.equals(mQueueId, that.mQueueId);
     }
 
