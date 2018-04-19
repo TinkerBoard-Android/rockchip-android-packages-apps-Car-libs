@@ -281,4 +281,19 @@ public class MediaItemMetadata implements Parcelable {
                     return new MediaItemMetadata[size];
                 }
             };
+
+    @Override
+    public String toString() {
+        return "[Id: "
+                + (mMediaDescription != null ? mMediaDescription.getMediaId() : "-")
+                + ", Queue Id: "
+                + (mQueueId != null ? mQueueId : "-")
+                + ", title: "
+                + (mMediaDescription != null ? mMediaDescription.getTitle() : "-")
+                + ", subtitle: "
+                + (mMediaDescription != null ? mMediaDescription.getSubtitle() : "-")
+                + ", album art URI: "
+                + (mMediaDescription != null ? mMediaDescription.getIconUri() : "-")
+                + "]";
+    }
 }

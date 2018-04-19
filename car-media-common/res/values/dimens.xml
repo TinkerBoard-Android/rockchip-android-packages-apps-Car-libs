@@ -18,20 +18,11 @@
 
     <!-- Playback -->
     <item name="playback_initial_scrim_alpha" format="float" type="dimen">0.6</item>
-    <dimen name="playback_secondary_text_margin_top">0dp</dimen>
-    <dimen name="playback_seekbar_margin_top">@dimen/car_padding_4</dimen>
-    <dimen name="playback_height_scrim">256dp</dimen>
-    <dimen name="playback_margin_bottom">@dimen/car_padding_2</dimen>
-    <dimen name="playback_seekbar_height">6dp</dimen>
 
     <!-- Fab -->
-    <dimen name="car_fab_focused_stroke_width">8dp</dimen>
-    <dimen name="car_fab_focused_growth">1.2dp</dimen>
     <dimen name="car_fab_elevation">8dp</dimen>
     <dimen name="car_fab_large_size">96dp</dimen>
     <dimen name="car_fab_large_padding">27dp</dimen>
-    <dimen name="car_fab_small_size">68dp</dimen>
-    <dimen name="car_fab_small_padding">0dp</dimen>
     <dimen name="car_fab_spinner_size">128dp</dimen>
 
 </resources>

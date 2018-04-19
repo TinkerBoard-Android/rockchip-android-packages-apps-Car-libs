@@ -63,10 +63,10 @@ public class FixedRatioImageView extends ImageView {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
         if (getLayoutParams().height == ViewGroup.LayoutParams.MATCH_PARENT) {
-            int height = getMeasuredHeight();
+            int height = getDefaultSize(getSuggestedMinimumHeight(), heightMeasureSpec);
             setMeasuredDimension((int) (height * mAspectRatio), height);
         } else if (getLayoutParams().width == ViewGroup.LayoutParams.MATCH_PARENT) {
-            int width = getMeasuredWidth();
+            int width = getDefaultSize(getSuggestedMinimumWidth(), widthMeasureSpec);
             setMeasuredDimension(width, (int) (width / mAspectRatio));
         } else {
             throw new IllegalArgumentException(

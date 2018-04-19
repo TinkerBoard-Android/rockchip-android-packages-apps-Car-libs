@@ -68,6 +68,7 @@ public class MediaSource {
     private final Handler mHandler = new Handler();
     private List<Observer> mObservers = new ArrayList<>();
     private CharSequence mName;
+    private String mRootNode;
     private @ColorInt int mPrimaryColor;
     private @ColorInt int mAccentColor;
     private @ColorInt int mPrimaryColorDark;
@@ -204,15 +205,21 @@ public class MediaSource {
      *
      * @param parentId parent of the children to load, or null to indicate children of the root
      *                 node.
+     * @param callback callback used to provide updates on the subscribed node.
      * @throws IllegalStateException if browsing is not available or it is not connected.
      */
     public void subscribeChildren(@Nullable String parentId,
             ItemsSubscription callback) {
-        if (mBrowser == null || !mBrowser.isConnected()) {
+        if (mBrowser == null) {
             throw new IllegalStateException("Browsing is not available for this source: "
                     + getName());
         }
-        mBrowser.subscribe(parentId != null ? parentId : mBrowser.getRoot(),
+        if (mRootNode == null && !mBrowser.isConnected()) {
+            throw new IllegalStateException("Subscribing to the root node can only be done while "
+                    + "connected: " + getName());
+        }
+        mRootNode = mBrowser.getRoot();
+        mBrowser.subscribe(parentId != null ? parentId : mRootNode,
                 wrapCallback(callback));
     }
 
@@ -222,14 +229,18 @@ public class MediaSource {
      * @param parentId parent to unsubscribe, or null to unsubscribe from the root node.
      * @throws IllegalStateException if browsing is not available or it is not connected.
      */
-    public void unsubscribeChildren(@Nullable String parentId,
-            ItemsSubscription callback) {
-        if (mBrowser == null || !mBrowser.isConnected()) {
+    public void unsubscribeChildren(@Nullable String parentId) {
+        // If we are not connected
+        if (mBrowser == null) {
             throw new IllegalStateException("Browsing is not available for this source: "
                     + getName());
         }
-        mBrowser.unsubscribe(parentId != null ? parentId : mBrowser.getRoot(),
-                wrapCallback(callback));
+        if (parentId == null && mRootNode == null) {
+            // If we are trying to unsubscribe from root, but we haven't determine it's Id, then
+            // there is nothing we can do.
+            return;
+        }
+        mBrowser.unsubscribe(parentId != null ? parentId : mRootNode);
     }
 
     private MediaBrowser.SubscriptionCallback wrapCallback(ItemsSubscription subscription) {

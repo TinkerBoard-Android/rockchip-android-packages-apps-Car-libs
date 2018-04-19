@@ -28,14 +28,20 @@ import androidx.recyclerview.widget.RecyclerView;
  */
 public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {
     private final int mSpacing;
+    private final int mStartMargin;
+    private final int mEndMargin;
 
     /**
      * Creates a {@link GridSpacingItemDecoration}.
      *
      * @param spacing space to add between grid cells, both vertically and horizontally.
+     * @param startMargin margin on the start side of the grid.
+     * @param endMargin margin on the end side of the grid
      */
-    public GridSpacingItemDecoration(int spacing) {
+    public GridSpacingItemDecoration(int spacing, int startMargin, int endMargin) {
         this.mSpacing = spacing;
+        this.mStartMargin = startMargin;
+        this.mEndMargin = endMargin;
     }
 
     @Override
@@ -46,8 +52,10 @@ public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {
         int column = lp.getSpanIndex();
         int spanCount = layoutManager.getSpanCount();
 
-        outRect.left = column * mSpacing / spanCount;
-        outRect.right = mSpacing - (column + 1) * mSpacing / spanCount;
+        outRect.left = mStartMargin + column * mSpacing / spanCount
+            - (column + 1) * mStartMargin / spanCount;
+        outRect.right = mSpacing - (column + 1) * mSpacing / spanCount
+            + (column + 1) * mEndMargin / spanCount;
         outRect.top = mSpacing;
     }
 }
