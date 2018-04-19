@@ -38,6 +38,8 @@ import android.widget.TextView;
 
 import com.bumptech.glide.request.target.Target;
 
+import java.util.Objects;
+
 /**
  * {@link Fragment} that can be used to display and control the currently playing media item.
  * Its requires the android.Manifest.permission.MEDIA_CONTENT_CONTROL permission be held by the
@@ -51,6 +53,7 @@ public class PlaybackFragment extends Fragment {
     private TextView mAppName;
     private TextView mTitle;
     private TextView mSubtitle;
+    private MediaItemMetadata mCurrentMetadata;
 
     private PlaybackModel.PlaybackObserver mObserver = new PlaybackModel.PlaybackObserver() {
         @Override
@@ -115,6 +118,10 @@ public class PlaybackFragment extends Fragment {
         }
 
         MediaItemMetadata metadata = mModel.getMetadata();
+        if (Objects.equals(mCurrentMetadata, metadata)) {
+            return;
+        }
+        mCurrentMetadata = metadata;
         mTitle.setText(metadata != null ? metadata.getTitle() : null);
         mSubtitle.setText(metadata != null ? metadata.getSubtitle() : null);
         if (metadata != null) {
