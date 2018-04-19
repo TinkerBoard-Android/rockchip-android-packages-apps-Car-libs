@@ -39,9 +39,7 @@ import android.util.Log;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -83,37 +81,29 @@ public class PlaybackModel {
      * cheap operation.
      */
     private class MediaSessionUpdater {
-        private Map<String, MediaController> mControllersByPackageName = new HashMap<>();
+        private List<MediaController> mControllers = new ArrayList<>();
 
         private MediaController.Callback mCallback = new MediaController.Callback() {
             @Override
             public void onPlaybackStateChanged(PlaybackState state) {
                 selectMediaController(mMediaSessionManager.getActiveSessions(null));
             }
+
+            @Override
+            public void onSessionDestroyed() {
+                selectMediaController(mMediaSessionManager.getActiveSessions(null));
+            }
         };
 
         void setControllersByPackageName(List<MediaController> newControllers) {
-            Map<String, MediaController> newControllersMap = new HashMap<>();
-            for (MediaController newController : newControllers) {
-                if (!mControllersByPackageName.containsKey(newController.getPackageName())) {
-                    if (Log.isLoggable(TAG, Log.DEBUG)) {
-                        Log.d(TAG, "New controller detected: "
-                                + newController.getPackageName());
-                    }
-                    newController.registerCallback(mCallback);
-                } else {
-                    mControllersByPackageName.remove(newController.getPackageName());
-                }
-                newControllersMap.put(newController.getPackageName(), newController);
-            }
-            for (MediaController oldController : mControllersByPackageName.values()) {
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Removed controller detected: "
-                            + oldController.getPackageName());
-                }
+            for (MediaController oldController : mControllers) {
                 oldController.unregisterCallback(mCallback);
             }
-            mControllersByPackageName = newControllersMap;
+            for (MediaController newController : newControllers) {
+                newController.registerCallback(mCallback);
+            }
+            mControllers.clear();
+            mControllers.addAll(newControllers);
         }
     }
 
@@ -175,13 +165,66 @@ public class PlaybackModel {
     }
 
     /**
-     * Selects the controller most likely to be the currently active one, out of the list of
+     * Selects one of the provided controllers as the "currently playing" one.
+     */
+    private void selectMediaController(List<MediaController> controllers) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            dump("Selecting a media controller from: ", controllers);
+        }
+        changeMediaController(getTopMostController(controllers));
+        mMediaSessionUpdater.setControllersByPackageName(controllers);
+    }
+
+    private void dump(String title, List<MediaController> controllers) {
+        Log.d(TAG, title + " (total: " + controllers.size() + ")");
+        for (MediaController controller : controllers) {
+            String stateName = getStateName(controller.getPlaybackState() != null
+                    ? controller.getPlaybackState().getState()
+                    : PlaybackState.STATE_NONE);
+            Log.d(TAG, String.format("\t%s: %s",
+                    controller.getPackageName(),
+                    stateName));
+        }
+    }
+
+    private String getStateName(@PlaybackState.State int state) {
+        switch (state) {
+            case PlaybackState.STATE_NONE:
+                return "NONE";
+            case PlaybackState.STATE_STOPPED:
+                return "STOPPED";
+            case PlaybackState.STATE_PAUSED:
+                return "PAUSED";
+            case PlaybackState.STATE_PLAYING:
+                return "PLAYING";
+            case PlaybackState.STATE_FAST_FORWARDING:
+                return "FORWARDING";
+            case PlaybackState.STATE_REWINDING:
+                return "REWINDING";
+            case PlaybackState.STATE_BUFFERING:
+                return "BUFFERING";
+            case PlaybackState.STATE_ERROR:
+                return "ERROR";
+            case PlaybackState.STATE_CONNECTING:
+                return "CONNECTING";
+            case PlaybackState.STATE_SKIPPING_TO_PREVIOUS:
+                return "SKIPPING_TO_PREVIOUS";
+            case PlaybackState.STATE_SKIPPING_TO_NEXT:
+                return "SKIPPING_TO_NEXT";
+            case PlaybackState.STATE_SKIPPING_TO_QUEUE_ITEM:
+                return "SKIPPING_TO_QUEUE_ITEM";
+            default:
+                return "UNKNOWN";
+        }
+    }
+
+    /**
+     * @return the controller most likely to be the currently active one, out of the list of
      * active controllers repoted by {@link MediaSessionManager}. It does so by picking the first
      * one (in order of priority) which an active state as reported by
      * {@link MediaController#getPlaybackState()}
      */
-    private void selectMediaController(List<MediaController> controllers) {
-        MediaController controller = null;
+    private MediaController getTopMostController(List<MediaController> controllers) {
         if (controllers != null && controllers.size() > 0) {
             for (MediaController candidate : controllers) {
                 @PlaybackState.State int state = candidate.getPlaybackState() != null
@@ -195,16 +238,12 @@ public class PlaybackModel {
                         || state == PlaybackState.STATE_SKIPPING_TO_NEXT
                         || state == PlaybackState.STATE_SKIPPING_TO_PREVIOUS
                         || state == PlaybackState.STATE_SKIPPING_TO_QUEUE_ITEM) {
-                    controller = candidate;
-                    break;
+                    return candidate;
                 }
             }
-            if (controller == null) {
-                controller = controllers.get(0);
-            }
+            return controllers.get(0);
         }
-        changeMediaController(controller);
-        mMediaSessionUpdater.setControllersByPackageName(controllers);
+        return null;
     }
 
     private void changeMediaController(MediaController mediaController) {
@@ -212,7 +251,9 @@ public class PlaybackModel {
             Log.d(TAG, "New media controller: " + (mediaController != null
                     ? mediaController.getPackageName() : null));
         }
-        if (mediaController == mMediaController) {
+        if ((mediaController == null && mMediaController == null)
+                || (mediaController != null && mMediaController != null
+                && mediaController.getPackageName().equals(mMediaController.getPackageName()))) {
             // If no change, do nothing.
             return;
         }
@@ -274,9 +315,10 @@ public class PlaybackModel {
             return mMediaSource;
         }
 
-        List<MediaController> controllers = mMediaSessionManager.getActiveSessions(null);
-        return controllers != null && !controllers.isEmpty()
-                ? new MediaSource(mContext, controllers.get(0).getPackageName())
+        MediaController controller = getTopMostController(mMediaSessionManager
+                .getActiveSessions(null));
+        return controller != null
+                ? new MediaSource(mContext, controller.getPackageName())
                 : null;
     }
 
