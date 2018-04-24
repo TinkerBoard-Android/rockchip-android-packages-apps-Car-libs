@@ -122,7 +122,7 @@
             app:barrierDirection="left"
             app:constraint_referenced_ids="guideline,rightmost" />
 
-        <com.android.car.media.common.PlaybackControls
+        <com.android.car.media.common.PlaybackControlsActionBar
             android:id="@+id/playback_controls"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
