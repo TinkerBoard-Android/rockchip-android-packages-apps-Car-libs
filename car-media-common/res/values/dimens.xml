@@ -17,7 +17,7 @@
 <resources>
 
     <!-- Playback -->
-    <item name="playback_initial_scrim_alpha" format="float" type="dimen">0.6</item>
+    <item name="playback_initial_scrim_alpha" format="float" type="dimen">0.8</item>
 
     <!-- Fab -->
     <dimen name="car_fab_elevation">8dp</dimen>
