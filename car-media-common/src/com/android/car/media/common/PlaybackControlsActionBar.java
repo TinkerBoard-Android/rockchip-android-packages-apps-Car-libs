@@ -32,6 +32,7 @@ import com.android.car.apps.common.ColorChecker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of {@link PlaybackControls} that uses the support library {@link ActionBar}
@@ -45,7 +46,8 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
     private Context mContext;
     private ImageButton mSkipPrevButton;
     private ImageButton mSkipNextButton;
-    private List<ImageButton> mCustomActionButtons = new ArrayList<>();
+    private ImageButton mTrackListButton;
+    private Listener mListener;
     private PlaybackModel mModel;
     private PlaybackModel.PlaybackObserver mObserver = new PlaybackModel.PlaybackObserver() {
         @Override
@@ -67,7 +69,6 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
         }
     };
     private ColorStateList mIconsColor;
-
 
     /** Creates a {@link PlaybackControlsActionBar} view */
     public PlaybackControlsActionBar(Context context) {
@@ -132,6 +133,13 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
                 mModel.onSkipNext();
             }
         });
+        mTrackListButton = createIconButton(mContext, mIconsColor,
+                context.getDrawable(R.drawable.ic_tracklist));
+        mTrackListButton.setOnClickListener(v -> {
+            if (mListener != null) {
+                mListener.onToggleQueue();
+            }
+        });
 
         ImageButton overflowButton = createIconButton(context, mIconsColor,
                 context.getDrawable(androidx.car.R.drawable.ic_overflow));
@@ -180,42 +188,27 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
         mSpinner.setIndeterminateTintList(ColorStateList.valueOf(color));
     }
 
+    private List<ImageButton> getExtraActions() {
+        List<ImageButton> extraActions = new ArrayList<>();
+        if (mModel.hasQueue()) {
+            extraActions.add(mTrackListButton);
+        }
+        return extraActions;
+    }
+
     private void updateCustomActions() {
-        List<CustomPlaybackAction> customActions = mModel.getCustomActions();
-
-        if (customActions.size() > mCustomActionButtons.size()) {
-            // TODO(b/78014936): Due a bug in ActionBar, redistributing custom actions can cause a
-            // crash. Removing all views before adding them again is a temporary fix.
-            setViews(new View[0]);
-            for (int i = mCustomActionButtons.size(); i < customActions.size(); i++) {
-                mCustomActionButtons.add(createIconButton(getContext(), mIconsColor, null));
-            }
-            setViews(mCustomActionButtons.toArray(new View[mCustomActionButtons.size()]));
-            Log.i(TAG, "Increasing buttons array: " + customActions.size());
-        }
-        if (customActions.size() < mCustomActionButtons.size()) {
-            // TODO(b/78014936): Due a bug in ActionBar, redistributing custom actions can cause a
-            // crash. Removing all views before adding them again is a temporary fix.
-            setViews(new View[0]);
-            while (mCustomActionButtons.size() > customActions.size()) {
-                mCustomActionButtons.remove(mCustomActionButtons.size() - 1);
-            }
-            setViews(mCustomActionButtons.toArray(new View[mCustomActionButtons.size()]));
-            Log.i(TAG, "Decreasing buttons array: " + customActions.size());
-        }
-
-        for (int pos = 0; pos < mCustomActionButtons.size(); pos++) {
-            ImageButton button = mCustomActionButtons.get(pos);
-            if (customActions.size() > pos) {
-                CustomPlaybackAction action = customActions.get(pos);
-                button.setVisibility(VISIBLE);
-                button.setImageDrawable(action.mIcon);
-                button.setOnClickListener(view ->
-                        mModel.onCustomAction(action.mAction, action.mExtras));
-            } else {
-                button.setVisibility(INVISIBLE);
-            }
-        }
+        List<ImageButton> combinedActions = new ArrayList<>();
+        combinedActions.addAll(getExtraActions());
+        combinedActions.addAll(mModel.getCustomActions()
+                .stream()
+                .map(action -> {
+                    ImageButton button = createIconButton(getContext(), mIconsColor, action.mIcon);
+                    button.setOnClickListener(view ->
+                            mModel.onCustomAction(action.mAction, action.mExtras));
+                    return button;
+                })
+                .collect(Collectors.toList()));
+        setViews(combinedActions.toArray(new ImageButton[combinedActions.size()]));
     }
 
     private void onPlayPauseStopClicked(View view) {
@@ -236,6 +229,16 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
                 Log.i(TAG, "Play/Pause/Stop clicked on invalid state");
                 break;
         }
+    }
+
+    @Override
+    public void setQueueVisible(boolean visible) {
+        mTrackListButton.setActivated(visible);
+    }
+
+    @Override
+    public void setListener(Listener listener) {
+        mListener = listener;
     }
 
     @Override
