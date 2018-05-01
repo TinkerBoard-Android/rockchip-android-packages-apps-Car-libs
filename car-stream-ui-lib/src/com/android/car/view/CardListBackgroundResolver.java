@@ -18,8 +18,6 @@ package com.android.car.view;
 
 import android.view.View;
 
-import com.android.car.app.R;
-
 /**
  * A utility class that will set the current background for a View that represents an card entry
  * in a list for Android Auto. The class will set the background depending on the position of the
