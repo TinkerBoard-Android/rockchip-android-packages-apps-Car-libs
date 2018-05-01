@@ -24,16 +24,8 @@ LOCAL_USE_AAPT2 := true
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
-LOCAL_STATIC_JAVA_LIBRARIES := \
-    androidx.annotation_annotation
-
 LOCAL_STATIC_ANDROID_LIBRARIES := \
-    androidx.car_car \
-    androidx.legacy_legacy-support-v4 \
-    androidx.design_design \
-    androidx.appcompat_appcompat \
-    androidx.cardview_cardview \
-    androidx.recyclerview_recyclerview
+    androidx.car_car
 
 LOCAL_MODULE := car-stream-ui-lib
 LOCAL_MODULE_TAGS := optional
