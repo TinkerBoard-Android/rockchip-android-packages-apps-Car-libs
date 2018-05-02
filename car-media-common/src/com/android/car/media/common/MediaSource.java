@@ -45,8 +45,10 @@ import android.util.Log;
 import androidx.annotation.ColorInt;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -79,6 +81,14 @@ public class MediaSource {
     private @ColorInt int mPrimaryColor;
     private @ColorInt int mAccentColor;
     private @ColorInt int mPrimaryColorDark;
+
+    /**
+     * Custom media sources which should not be templatized.
+     */
+    private static final Set<String> CUSTOM_MEDIA_SOURCES = new HashSet<>();
+    static {
+        CUSTOM_MEDIA_SOURCES.add("com.android.car.radio");
+    }
 
     /**
      * An observer of this media source.
@@ -417,6 +427,13 @@ public class MediaSource {
         return packageIcon != null
                 ? getRoundCroppedBitmap(drawableToBitmap(getPackageIcon()))
                 : null;
+    }
+
+    /**
+     * Indicates if this media source should not be templatize.
+     */
+    public boolean isCustom() {
+        return CUSTOM_MEDIA_SOURCES.contains(mPackageName);
     }
 
     private Bitmap drawableToBitmap(Drawable drawable) {
