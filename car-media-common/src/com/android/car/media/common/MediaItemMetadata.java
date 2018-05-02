@@ -77,6 +77,19 @@ public class MediaItemMetadata implements Parcelable {
         mIsPlayable = in.readByte() != 0x00;
     }
 
+    /**
+     * Creates a clone of this item
+     *
+     * @deprecated this method will be removed as part of b/79089344
+     */
+    @Deprecated
+    public MediaItemMetadata(@NonNull MediaItemMetadata item) {
+        mMediaDescription = item.mMediaDescription;
+        mQueueId = item.mQueueId;
+        mIsBrowsable = item.mIsBrowsable;
+        mIsPlayable = item.mIsPlayable;
+    }
+
     private MediaItemMetadata(MediaDescription description, Long queueId, boolean isBrowsable,
             boolean isPlayable) {
         mMediaDescription = description;
