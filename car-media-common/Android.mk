@@ -32,8 +32,8 @@ LOCAL_PROGUARD_ENABLED := disabled
 
 LOCAL_STATIC_ANDROID_LIBRARIES += \
     android-support-car \
-    car-apps-common \
-    android-support-constraint-layout
+    android-support-constraint-layout \
+    car-apps-common
 
 LOCAL_STATIC_JAVA_LIBRARIES += \
     car-media-common-glide-target \
