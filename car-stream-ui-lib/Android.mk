@@ -24,13 +24,8 @@ LOCAL_USE_AAPT2 := true
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
-LOCAL_STATIC_JAVA_LIBRARIES := \
-    android-support-annotations
-
 LOCAL_STATIC_ANDROID_LIBRARIES := \
-    android-support-car \
-    android-support-v4 \
-    android-support-v7-appcompat
+    android-support-car
 
 LOCAL_MODULE := car-stream-ui-lib
 LOCAL_MODULE_TAGS := optional
