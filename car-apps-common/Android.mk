@@ -22,9 +22,6 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
-# Work around limitations of AAR prebuilts
-LOCAL_RESOURCE_DIR += prebuilts/sdk/current/car/car/res
-
 LOCAL_MODULE := car-apps-common
 
 LOCAL_MODULE_TAGS := optional
@@ -34,13 +31,6 @@ LOCAL_PRIVILEGED_MODULE := true
 LOCAL_PROGUARD_ENABLED := disabled
 
 LOCAL_USE_AAPT2 := true
-
-LOCAL_STATIC_ANDROID_LIBRARIES := \
-    androidx.legacy_legacy-support-v4 \
-    car-stream-ui-lib
-
-LOCAL_STATIC_JAVA_LIBRARIES := \
-    androidx.annotation_annotation
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 

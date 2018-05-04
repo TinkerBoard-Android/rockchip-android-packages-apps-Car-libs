@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.car.apps.common;
+
+package com.android.car.media.common;
 
 import android.content.Context;
 import android.graphics.Color;
 import android.util.Log;
 
 /**
- * @hide
+ * A class that checks to make sure that given colors are within the acceptable contract ratio for
+ * the car environment.
  */
 public class ColorChecker {
     private static final String TAG = "ColorChecker";
     private static final double MIN_CONTRAST_RATIO = 4.5;
-    /**
-     * Non-critical information doesn't have to meet as stringent contrast requirements.
-     */
-    private static final double MIN_NON_CRITICAL_CONTRAST_RATIO = 1.5;
 
     /**
      * Calls {@link #getTintColor(int, int...)} with:
-     *     {@link R.color#car_tint_light} and
-     *     {@link R.color#car_tint_dark}
+     *     {@code R.color.car_tint_light} and
+     *     {@code R.color.car_tint_dark}
      */
     public static int getTintColor(Context context, int backgroundColor) {
         int lightTintColor = context.getResources().getColor(R.color.car_tint_light);
@@ -43,29 +41,10 @@ public class ColorChecker {
     }
 
     /**
-     * Calls {@link #getNonCriticalTintColor(int, int...)} with:
-     *     {@link R.color#car_tint_light} and
-     *     {@link R.color#car_tint_dark}
-     */
-    public static int getNonCriticalTintColor(Context context, int backgroundColor) {
-        int lightTintColor = context.getResources().getColor(R.color.car_tint_light);
-        int darkTintColor = context.getResources().getColor(R.color.car_tint_dark);
-
-        return getNonCriticalTintColor(backgroundColor, lightTintColor, darkTintColor);
-    }
-
-    /**
      * Calls {@link #getTintColor(int, int...)} with {@link #MIN_CONTRAST_RATIO}.
      */
     public static int getTintColor(int backgroundColor, int... tintColors) {
         return getTintColor(MIN_CONTRAST_RATIO, backgroundColor, tintColors);
-    }
-
-    /**
-     * Calls {@link #getTintColor(int, int...)} with {@link #MIN_NON_CRITICAL_CONTRAST_RATIO}.
-     */
-    public static int getNonCriticalTintColor(int backgroundColor, int... tintColors) {
-        return getTintColor(MIN_NON_CRITICAL_CONTRAST_RATIO, backgroundColor, tintColors);
     }
 
     /**
@@ -97,13 +76,20 @@ public class ColorChecker {
         }
     }
 
+    /**
+     * Returns the contrast radio between the two given colors.
+     */
     public static double getContrastRatio(int color1, int color2) {
         return getContrastRatio(getLuminance(color1), getLuminance(color2));
     }
 
+    /**
+     * Returns the contrast ratio between the two luminances. Luminances maps to colors and is the
+     * result returned from {@link #getLuminance(int)}.
+     */
     public static double getContrastRatio(double luminance1, double luminance2) {
-        return (Math.max(luminance1, luminance2) + 0.05) /
-                (Math.min(luminance1, luminance2) + 0.05);
+        return (Math.max(luminance1, luminance2) + 0.05)
+                / (Math.min(luminance1, luminance2) + 0.05);
     }
 
     /**
@@ -133,4 +119,6 @@ public class ColorChecker {
             return Math.pow(((component + 0.055) / 1.055), 2.4);
         }
     }
+
+    private ColorChecker() {}
 }
