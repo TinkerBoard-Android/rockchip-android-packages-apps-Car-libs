@@ -39,6 +39,8 @@
         <item name="android:layout_height">@dimen/car_primary_icon_size</item>
         <item name="android:scaleX">1.5</item>
         <item name="android:scaleY">1.5</item>
+        <item name="android:thumbTint">@color/car_accent</item>
+        <item name="android:trackTint">@color/car_accent</item>
     </style>
 
     <style name="PagedList">
