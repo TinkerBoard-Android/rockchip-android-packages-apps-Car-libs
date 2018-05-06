@@ -28,8 +28,6 @@ import android.widget.ProgressBar;
 
 import androidx.car.widget.ActionBar;
 
-import com.android.car.apps.common.ColorChecker;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;

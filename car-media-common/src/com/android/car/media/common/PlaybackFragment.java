@@ -59,11 +59,6 @@ public class PlaybackFragment extends Fragment {
         }
     };
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -79,7 +74,20 @@ public class PlaybackFragment extends Fragment {
         mSubtitle = view.findViewById(R.id.subtitle);
 
         mAlbumBackground.setOnClickListener(v -> {
-            Intent intent = new Intent(Car.CAR_INTENT_ACTION_MEDIA_TEMPLATE);
+            MediaSource mediaSource = mModel.getMediaSource();
+            Intent intent;
+            if (mediaSource != null && mediaSource.isCustom()) {
+                // We are playing a custom app. Jump to it, not to the template
+                intent = getContext().getPackageManager()
+                        .getLaunchIntentForPackage(mediaSource.getPackageName());
+            } else if (mediaSource != null) {
+                // We are playing a standard app. Open the template to browse it.
+                intent = new Intent(Car.CAR_INTENT_ACTION_MEDIA_TEMPLATE);
+                intent.putExtra(Car.CAR_EXTRA_MEDIA_PACKAGE, mediaSource.getPackageName());
+            } else {
+                // We are not playing. Open the template to start playing something.
+                intent = new Intent(Car.CAR_INTENT_ACTION_MEDIA_TEMPLATE);
+            }
             startActivity(intent);
         });
 
