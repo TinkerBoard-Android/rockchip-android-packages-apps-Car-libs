@@ -20,6 +20,4 @@
     <uses-sdk
         android:minSdkVersion="23"
         android:targetSdkVersion="23" />
-
-    <application android:label="@string/appName" />
 </manifest>
