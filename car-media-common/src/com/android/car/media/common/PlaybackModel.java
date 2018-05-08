@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -61,6 +62,10 @@ public class PlaybackModel {
     private static final String ACTION_SET_RATING =
             "com.android.car.media.common.ACTION_SET_RATING";
     private static final String EXTRA_SET_HEART = "com.android.car.media.common.EXTRA_SET_HEART";
+    private static final String PLAYBACK_MODEL_SHARED_PREFS =
+            "com.android.car.media.PLAYBACK_MODEL";
+    private static final String PLAYBACK_MODEL_ACTIVE_PACKAGE_NAME_KEY =
+            "active_packagename";
 
     private final MediaSessionManager mMediaSessionManager;
     private final Handler mHandler = new Handler();
@@ -71,6 +76,7 @@ public class PlaybackModel {
     private final MediaSessionUpdater mMediaSessionUpdater = new MediaSessionUpdater();
     private MediaSource mMediaSource;
     private boolean mIsStarted;
+    private SharedPreferences mSharedPreferences;
 
     /**
      * Temporary work-around to bug b/76017849.
@@ -155,6 +161,8 @@ public class PlaybackModel {
     public PlaybackModel(Context context) {
         mContext = context;
         mMediaSessionManager = mContext.getSystemService(MediaSessionManager.class);
+        mSharedPreferences = mContext.getSharedPreferences(PLAYBACK_MODEL_SHARED_PREFS,
+                Context.MODE_PRIVATE);
     }
 
     /**
@@ -241,6 +249,15 @@ public class PlaybackModel {
                     return candidate;
                 }
             }
+            // If no source is active, we go for the last known source
+            String packageName = getLastKnownActivePackageName();
+            if (packageName != null) {
+                for (MediaController candidate : controllers) {
+                    if (candidate.getPackageName().equals(packageName)) {
+                        return candidate;
+                    }
+                }
+            }
             return controllers.get(0);
         }
         return null;
@@ -261,6 +278,9 @@ public class PlaybackModel {
             mMediaController.unregisterCallback(mCallback);
         }
         mMediaController = mediaController;
+        setLastKnownActivePackageName(mMediaController != null
+                ? mMediaController.getPackageName()
+                : null);
         if (mMediaController != null) {
             mMediaSource = new MediaSource(mContext, mMediaController.getPackageName());
             mMediaController.registerCallback(mCallback);
@@ -617,6 +637,8 @@ public class PlaybackModel {
         List<MediaSession.QueueItem> items = mMediaController.getQueue();
         if (items != null) {
             return items.stream()
+                    .filter(item -> item.getDescription() != null
+                        && item.getDescription().getTitle() != null)
                     .map(MediaItemMetadata::new)
                     .collect(Collectors.toList());
         } else {
@@ -720,5 +742,15 @@ public class PlaybackModel {
             Log.e(TAG, "Unable to get resources for " + packageName);
             return null;
         }
+    }
+
+    private String getLastKnownActivePackageName() {
+        return mSharedPreferences.getString(PLAYBACK_MODEL_ACTIVE_PACKAGE_NAME_KEY, null);
+    }
+
+    private void setLastKnownActivePackageName(String packageName) {
+        mSharedPreferences.edit()
+                .putString(PLAYBACK_MODEL_ACTIVE_PACKAGE_NAME_KEY, packageName)
+                .apply();
     }
 }

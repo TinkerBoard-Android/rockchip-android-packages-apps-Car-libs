@@ -16,17 +16,21 @@
 
 package com.android.car.media.common;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.service.media.MediaBrowserService;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -39,6 +43,19 @@ import java.util.stream.Collectors;
 public class MediaSourcesManager {
     private static final String TAG = "MediaSourcesManager";
     private final Context mContext;
+    private List<MediaSource> mMediaSources;
+    private List<Observer> mObservers = new ArrayList<>();
+    private static AppInstallUninstallReceiver sReceiver;
+
+    /**
+     * Observer of media source changes
+     */
+    public interface Observer {
+        /**
+         * Invoked when the list of media sources has changed
+         */
+        void onMediaSourcesChanged();
+    }
 
     /**
      * Creates a new instance of the manager for the given context
@@ -48,10 +65,59 @@ public class MediaSourcesManager {
     }
 
     /**
-     * Obtains all available media sources in alphabetical order
+     * Registers an observer. Consumers must remember to unregister their observers to avoid
+     * memory leaks.
      */
-    public List<MediaSource> getAvailableMediaSources() {
-        return getPackageNames().stream()
+    public void registerObserver(Observer observer) {
+        mObservers.add(observer);
+        if (sReceiver == null) {
+            registerBroadcastReceiver();
+            updateMediaSources();
+        }
+    }
+
+    /**
+     * Unregisters an observer.
+     */
+    public void unregisterObserver(Observer observer) {
+        mObservers.remove(observer);
+        if (mObservers.isEmpty() && sReceiver != null) {
+            unregisterBroadcastReceiver();
+        }
+    }
+
+    private void notify(Consumer<Observer> notification) {
+        for (Observer observer : mObservers) {
+            notification.accept(observer);
+        }
+    }
+
+    /**
+     * Returns the list of available media sources.
+     */
+    public List<MediaSource> getMediaSources() {
+        if (sReceiver == null) {
+            updateMediaSources();
+        }
+        return mMediaSources;
+    }
+
+    private void registerBroadcastReceiver() {
+        sReceiver = new AppInstallUninstallReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addDataScheme("package");
+        mContext.getApplicationContext().registerReceiver(sReceiver, filter);
+    }
+
+    private void unregisterBroadcastReceiver() {
+        mContext.getApplicationContext().unregisterReceiver(sReceiver);
+        sReceiver = null;
+    }
+
+    private void updateMediaSources() {
+        mMediaSources = getPackageNames().stream()
                 .filter(packageName -> packageName != null)
                 .map(packageName -> new MediaSource(mContext, packageName))
                 .filter(mediaSource -> {
@@ -90,5 +156,13 @@ public class MediaSourcesManager {
             apps.add(info.activityInfo.packageName);
         }
         return apps;
+    }
+
+    private class AppInstallUninstallReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateMediaSources();
+            MediaSourcesManager.this.notify(Observer::onMediaSourcesChanged);
+        }
     }
 }
