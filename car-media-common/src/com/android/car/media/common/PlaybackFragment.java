@@ -38,6 +38,7 @@ import java.util.Objects;
  * hosting application.
  */
 public class PlaybackFragment extends Fragment {
+    private ActiveMediaSourceManager mActiveMediaSourceManager;
     private PlaybackModel mModel;
     private CrossfadeImageView mAlbumBackground;
     private PlaybackControls mPlaybackControls;
@@ -47,7 +48,8 @@ public class PlaybackFragment extends Fragment {
     private TextView mSubtitle;
     private MediaItemMetadata mCurrentMetadata;
 
-    private PlaybackModel.PlaybackObserver mObserver = new PlaybackModel.PlaybackObserver() {
+    private PlaybackModel.PlaybackObserver mPlaybackObserver =
+            new PlaybackModel.PlaybackObserver() {
         @Override
         public void onSourceChanged() {
             updateMetadata();
@@ -58,12 +60,20 @@ public class PlaybackFragment extends Fragment {
             updateMetadata();
         }
     };
+    private ActiveMediaSourceManager.Observer mActiveSourceObserver =
+            new ActiveMediaSourceManager.Observer() {
+        @Override
+        public void onActiveSourceChanged() {
+            mModel.setMediaController(mActiveMediaSourceManager.getMediaController());
+        }
+    };
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.car_playback_fragment, container, false);
+        mActiveMediaSourceManager = new ActiveMediaSourceManager(getContext());
         mModel = new PlaybackModel(getContext());
         mAlbumBackground = view.findViewById(R.id.album_background);
         mPlaybackControls = view.findViewById(R.id.playback_controls);
@@ -97,13 +107,15 @@ public class PlaybackFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        mModel.registerObserver(mObserver);
+        mActiveMediaSourceManager.registerObserver(mActiveSourceObserver);
+        mModel.registerObserver(mPlaybackObserver);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        mModel.unregisterObserver(mObserver);
+        mActiveMediaSourceManager.unregisterObserver(mActiveSourceObserver);
+        mModel.unregisterObserver(mPlaybackObserver);
     }
 
     private void updateMetadata() {
