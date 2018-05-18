@@ -38,6 +38,7 @@ import android.graphics.drawable.Drawable;
 import android.media.browse.MediaBrowser;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
+import android.os.Bundle;
 import android.os.Handler;
 import android.service.media.MediaBrowserService;
 import android.util.Log;
@@ -45,8 +46,10 @@ import android.util.Log;
 import androidx.annotation.ColorInt;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -67,6 +70,10 @@ public class MediaSource {
             "com.google.android.gms.car.application.theme";
     /** Mark used to indicate that we couldn't find a color and the default one should be used */
     private static final int DEFAULT_COLOR = 0;
+    /** Number of times we will retry obtaining the list of children of a certain node */
+    private static final int CHILDREN_SUBSCRIPTION_RETRIES = 3;
+    /** Time between retries while trying to obtain the list of children of a certain node */
+    private static final int CHILDREN_SUBSCRIPTION_RETRY_TIME_MS = 1000;
 
     private final String mPackageName;
     @Nullable
@@ -116,10 +123,12 @@ public class MediaSource {
         /**
          * This method is called whenever media items are loaded or updated.
          *
+         * @param mediaSource {@link MediaSource} these items belongs to
          * @param parentId identifier of the items parent.
          * @param items items loaded, or null if there was an error trying to load them.
          */
-        void onChildrenLoaded(String parentId, @Nullable List<MediaItemMetadata> items);
+        void onChildrenLoaded(MediaSource mediaSource, String parentId,
+                @Nullable List<MediaItemMetadata> items);
     }
 
     private final MediaBrowser.ConnectionCallback mConnectionCallback =
@@ -217,16 +226,29 @@ public class MediaSource {
         }
     }
 
+    private Map<String, ChildrenSubscription> mChildrenSubscriptions = new HashMap<>();
+
     /**
-     * Subscribes to changes on the list of media item children of the given parent.
+     * Obtains the root node in the browse tree of this node.
+     */
+    public String getRoot() {
+        if (mRootNode == null) {
+            mRootNode = mBrowser.getRoot();
+        }
+        return mRootNode;
+    }
+
+    /**
+     * Subscribes to changes on the list of media item children of the given parent. Multiple
+     * subscription can be added to the same node. If the node has been already loaded, then all
+     * new subscription will immediately obtain a copy of the last obtained list.
      *
      * @param parentId parent of the children to load, or null to indicate children of the root
      *                 node.
      * @param callback callback used to provide updates on the subscribed node.
      * @throws IllegalStateException if browsing is not available or it is not connected.
      */
-    public void subscribeChildren(@Nullable String parentId,
-            ItemsSubscription callback) {
+    public void subscribeChildren(@Nullable String parentId, ItemsSubscription callback) {
         if (mBrowser == null) {
             throw new IllegalStateException("Browsing is not available for this source: "
                     + getName());
@@ -236,17 +258,28 @@ public class MediaSource {
                     + "connected: " + getName());
         }
         mRootNode = mBrowser.getRoot();
-        mBrowser.subscribe(parentId != null ? parentId : mRootNode,
-                wrapCallback(callback));
+
+        String itemId = parentId != null ? parentId : mRootNode;
+        ChildrenSubscription subscription = mChildrenSubscriptions.get(itemId);
+        if (subscription != null) {
+            subscription.add(callback);
+        } else {
+            subscription = new ChildrenSubscription(mBrowser, itemId);
+            subscription.add(callback);
+            mChildrenSubscriptions.put(itemId, subscription);
+            subscription.start(CHILDREN_SUBSCRIPTION_RETRIES,
+                    CHILDREN_SUBSCRIPTION_RETRY_TIME_MS);
+        }
     }
 
     /**
      * Unsubscribes to changes on the list of media items children of the given parent
      *
      * @param parentId parent to unsubscribe, or null to unsubscribe from the root node.
+     * @param callback callback to remove
      * @throws IllegalStateException if browsing is not available or it is not connected.
      */
-    public void unsubscribeChildren(@Nullable String parentId) {
+    public void unsubscribeChildren(@Nullable String parentId, ItemsSubscription callback) {
         // If we are not connected
         if (mBrowser == null) {
             throw new IllegalStateException("Browsing is not available for this source: "
@@ -257,25 +290,155 @@ public class MediaSource {
             // there is nothing we can do.
             return;
         }
-        mBrowser.unsubscribe(parentId != null ? parentId : mRootNode);
+
+        String itemId = parentId != null ? parentId : mRootNode;
+        ChildrenSubscription subscription = mChildrenSubscriptions.get(itemId);
+        if (subscription != null) {
+            subscription.remove(callback);
+            if (subscription.count() == 0) {
+                subscription.stop();
+                mChildrenSubscriptions.remove(itemId);
+            }
+        }
     }
 
-    private MediaBrowser.SubscriptionCallback wrapCallback(ItemsSubscription subscription) {
-        return new MediaBrowser.SubscriptionCallback() {
+    /**
+     * {@link MediaBrowser.SubscriptionCallback} wrapper used to overcome the lack of a reliable
+     * method to obtain the initial list of children of a given node.
+     * <p>
+     * When some 3rd party apps go through configuration changes (i.e., in the case of user-switch),
+     * they leave subscriptions in an intermediate state where neither
+     * {@link MediaBrowser.SubscriptionCallback#onChildrenLoaded(String, List)} nor
+     * {@link MediaBrowser.SubscriptionCallback#onError(String)} are invoked.
+     * <p>
+     * This wrapper works around this problem by retrying the subscription a given number of times
+     * if no data is received after a certain amount of time. This process is started by calling
+     * {@link #start(int, int)}, passing the number of retries and delay between them as
+     * parameters.
+     */
+    private class ChildrenSubscription extends MediaBrowser.SubscriptionCallback {
+        private List<MediaItemMetadata> mItems;
+        private boolean mIsDataLoaded;
+        private List<ItemsSubscription> mSubscriptions = new ArrayList<>();
+        private String mParentId;
+        private int mRetries;
+        private int mRetryDelay;
+        private MediaBrowser mMediaBrowser;
+        private Runnable mRetryRunnable = new Runnable() {
             @Override
-            public void onChildrenLoaded(String parentId,
-                    List<MediaBrowser.MediaItem> children) {
-                List<MediaItemMetadata> items = children.stream()
-                        .map(child -> new MediaItemMetadata(child))
-                        .collect(Collectors.toList());
-                subscription.onChildrenLoaded(parentId, items);
-            }
-
-            @Override
-            public void onError(String parentId) {
-                subscription.onChildrenLoaded(parentId, null);
+            public void run() {
+                if (!mIsDataLoaded) {
+                    if (mRetries > 0) {
+                        mRetries--;
+                        mMediaBrowser.unsubscribe(mParentId);
+                        mMediaBrowser.subscribe(mParentId, ChildrenSubscription.this);
+                        mHandler.postDelayed(this, mRetryDelay);
+                    } else {
+                        mItems = null;
+                        mIsDataLoaded = true;
+                        notifySubscriptions();
+                    }
+                }
             }
         };
+
+        /**
+         * Creates a subscription to the list of children of a certain media browse item
+         *
+         * @param mediaBrowser {@link MediaBrowser} used to create the subscription
+         * @param parentId identifier of the parent node to subscribe to
+         */
+        ChildrenSubscription(@NonNull MediaBrowser mediaBrowser, String parentId) {
+            mParentId = parentId;
+            mMediaBrowser = mediaBrowser;
+        }
+
+        /**
+         * Adds a subscriber to this list of children
+         */
+        void add(ItemsSubscription subscription) {
+            mSubscriptions.add(subscription);
+            if (mIsDataLoaded) {
+                subscription.onChildrenLoaded(MediaSource.this, mParentId, mItems);
+            }
+        }
+
+        /**
+         * Removes a subscriber previously added with {@link #add(ItemsSubscription)}
+         */
+        void remove(ItemsSubscription subscription) {
+            mSubscriptions.remove(subscription);
+        }
+
+        /**
+         * Number of subscribers currently registered
+         */
+        int count() {
+            return mSubscriptions.size();
+        }
+
+        /**
+         * Starts trying to obtain the list of children
+         *
+         * @param retries number of times to retry. If children are not obtained in this time then
+         *                the {@link ItemsSubscription#onChildrenLoaded(MediaSource, String, List)}
+         *                will be invoked with a NULL list.
+         * @param retryDelay time between retries in milliseconds
+         */
+        void start(int retries, int retryDelay) {
+            if (mIsDataLoaded) {
+                notifySubscriptions();
+                mMediaBrowser.subscribe(mParentId, this);
+            } else {
+                mRetries = retries;
+                mRetryDelay = retryDelay;
+                mHandler.post(mRetryRunnable);
+            }
+        }
+
+        /**
+         * Stops retrying
+         */
+        void stop() {
+            mHandler.removeCallbacks(mRetryRunnable);
+            mMediaBrowser.unsubscribe(mParentId);
+        }
+
+        @Override
+        public void onChildrenLoaded(String parentId,
+                List<MediaBrowser.MediaItem> children) {
+            mHandler.removeCallbacks(mRetryRunnable);
+            mItems = children.stream()
+                    .map(child -> new MediaItemMetadata(child))
+                    .collect(Collectors.toList());
+            mIsDataLoaded = true;
+            notifySubscriptions();
+        }
+
+        @Override
+        public void onChildrenLoaded(String parentId, List<MediaBrowser.MediaItem> children,
+                Bundle options) {
+            onChildrenLoaded(parentId, children);
+        }
+
+        @Override
+        public void onError(String parentId) {
+            mHandler.removeCallbacks(mRetryRunnable);
+            mItems = null;
+            mIsDataLoaded = true;
+            notifySubscriptions();
+        }
+
+        @Override
+        public void onError(String parentId, Bundle options) {
+            onError(parentId);
+        }
+
+        private void notifySubscriptions() {
+            for (ItemsSubscription subscription : mSubscriptions) {
+                subscription.onChildrenLoaded(MediaSource.this, mParentId, mItems);
+            }
+        }
     }
 
     private void extractComponentInfo(@NonNull String packageName,
@@ -495,5 +658,10 @@ public class MediaSource {
     @Override
     public int hashCode() {
         return Objects.hash(mPackageName, mBrowseServiceClassName);
+    }
+
+    @Override
+    public String toString() {
+        return getPackageName();
     }
 }
