@@ -553,21 +553,17 @@ public class MediaSource {
     }
 
     /**
-     * @return a {@link PlaybackModel} that allows controlling this media source. This method
-     * should only be used if this {@link MediaSource} is connected.
-     * @see #subscribe(Observer)
+     * Returns a {@link MediaController} that allows controlling this media source, or NULL
+     * if the media source doesn't support browsing or the browser is not connected.
      */
     @Nullable
-    public PlaybackModel getPlaybackModel() {
-        if (mBrowser == null) {
+    public MediaController getMediaController() {
+        if (mBrowser == null || !mBrowser.isConnected()) {
             return null;
         }
 
         MediaSession.Token token = mBrowser.getSessionToken();
-        MediaController controller = new MediaController(mContext, token);
-        PlaybackModel playbackModel = new PlaybackModel(mContext);
-        playbackModel.setMediaController(controller);
-        return playbackModel;
+        return new MediaController(mContext, token);
     }
 
     /**

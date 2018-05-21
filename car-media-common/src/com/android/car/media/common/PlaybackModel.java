@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -29,7 +28,6 @@ import android.media.Rating;
 import android.media.session.MediaController;
 import android.media.session.MediaController.TransportControls;
 import android.media.session.MediaSession;
-import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
 import android.media.session.PlaybackState.Actions;
 import android.os.Bundle;
@@ -45,16 +43,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
- * View-model for playback UI components. This abstractions provides a simplified view of
- * {@link MediaSession} and {@link MediaSessionManager} data and events.
- *
- * <p>
- * It automatically determines the foreground media app (the one that would normally
- * receive playback events) and exposes metadata and events from such app, or when a different app
- * becomes foreground.
- * <p>
- * This requires the android.Manifest.permission.MEDIA_CONTENT_CONTROL
- * permission be held by the calling app.
+ * Wrapper of {@link MediaSession}. It provides access to media session events and extended
+ * information on the currently playing item metadata.
  */
 public class PlaybackModel {
     private static final String TAG = "PlaybackModel";
@@ -62,56 +52,14 @@ public class PlaybackModel {
     private static final String ACTION_SET_RATING =
             "com.android.car.media.common.ACTION_SET_RATING";
     private static final String EXTRA_SET_HEART = "com.android.car.media.common.EXTRA_SET_HEART";
-    private static final String PLAYBACK_MODEL_SHARED_PREFS =
-            "com.android.car.media.PLAYBACK_MODEL";
-    private static final String PLAYBACK_MODEL_ACTIVE_PACKAGE_NAME_KEY =
-            "active_packagename";
 
-    private final MediaSessionManager mMediaSessionManager;
     private final Handler mHandler = new Handler();
     @Nullable
+    private final Context mContext;
+    private final List<PlaybackObserver> mObservers = new ArrayList<>();
     private MediaController mMediaController;
-    private Context mContext;
-    private List<PlaybackObserver> mObservers = new ArrayList<>();
-    private final MediaSessionUpdater mMediaSessionUpdater = new MediaSessionUpdater();
     private MediaSource mMediaSource;
     private boolean mIsStarted;
-    private SharedPreferences mSharedPreferences;
-
-    /**
-     * Temporary work-around to bug b/76017849.
-     * MediaSessionManager is not notifying media session priority changes.
-     * As a work-around we subscribe to playback state changes on all controllers to detect
-     * potential priority changes.
-     * This might cause a few unnecessary checks, but selecting the top-most controller is a
-     * cheap operation.
-     */
-    private class MediaSessionUpdater {
-        private List<MediaController> mControllers = new ArrayList<>();
-
-        private MediaController.Callback mCallback = new MediaController.Callback() {
-            @Override
-            public void onPlaybackStateChanged(PlaybackState state) {
-                selectMediaController(mMediaSessionManager.getActiveSessions(null));
-            }
-
-            @Override
-            public void onSessionDestroyed() {
-                selectMediaController(mMediaSessionManager.getActiveSessions(null));
-            }
-        };
-
-        void setControllersByPackageName(List<MediaController> newControllers) {
-            for (MediaController oldController : mControllers) {
-                oldController.unregisterCallback(mCallback);
-            }
-            for (MediaController newController : newControllers) {
-                newController.registerCallback(mCallback);
-            }
-            mControllers.clear();
-            mControllers.addAll(newControllers);
-        }
-    }
 
     /**
      * An observer of this model
@@ -151,119 +99,29 @@ public class PlaybackModel {
         }
     };
 
-    private MediaSessionManager.OnActiveSessionsChangedListener mSessionChangeListener =
-            this::selectMediaController;
+    /**
+     * Creates a {@link PlaybackModel}
+     */
+    public PlaybackModel(@NonNull Context context) {
+       this(context, null);
+    }
 
     /**
-     * Creates a {@link PlaybackModel}. This instance is going to be inactive until
-     * {@link #start()} method is invoked.
+     * Creates a {@link PlaybackModel} wrapping to the given media controller
      */
-    public PlaybackModel(Context context) {
+    public PlaybackModel(@NonNull Context context, @Nullable MediaController controller) {
         mContext = context;
-        mMediaSessionManager = mContext.getSystemService(MediaSessionManager.class);
-        mSharedPreferences = mContext.getSharedPreferences(PLAYBACK_MODEL_SHARED_PREFS,
-                Context.MODE_PRIVATE);
+        changeMediaController(controller);
     }
 
     /**
      * Sets the {@link MediaController} wrapped by this model.
      */
-    public void setMediaController(MediaController controller) {
-        changeMediaController(controller);
+    public void setMediaController(@Nullable MediaController mediaController) {
+        changeMediaController(mediaController);
     }
 
-    /**
-     * Selects one of the provided controllers as the "currently playing" one.
-     */
-    private void selectMediaController(List<MediaController> controllers) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            dump("Selecting a media controller from: ", controllers);
-        }
-        changeMediaController(getTopMostController(controllers));
-        mMediaSessionUpdater.setControllersByPackageName(controllers);
-    }
-
-    private void dump(String title, List<MediaController> controllers) {
-        Log.d(TAG, title + " (total: " + controllers.size() + ")");
-        for (MediaController controller : controllers) {
-            String stateName = getStateName(controller.getPlaybackState() != null
-                    ? controller.getPlaybackState().getState()
-                    : PlaybackState.STATE_NONE);
-            Log.d(TAG, String.format("\t%s: %s",
-                    controller.getPackageName(),
-                    stateName));
-        }
-    }
-
-    private String getStateName(@PlaybackState.State int state) {
-        switch (state) {
-            case PlaybackState.STATE_NONE:
-                return "NONE";
-            case PlaybackState.STATE_STOPPED:
-                return "STOPPED";
-            case PlaybackState.STATE_PAUSED:
-                return "PAUSED";
-            case PlaybackState.STATE_PLAYING:
-                return "PLAYING";
-            case PlaybackState.STATE_FAST_FORWARDING:
-                return "FORWARDING";
-            case PlaybackState.STATE_REWINDING:
-                return "REWINDING";
-            case PlaybackState.STATE_BUFFERING:
-                return "BUFFERING";
-            case PlaybackState.STATE_ERROR:
-                return "ERROR";
-            case PlaybackState.STATE_CONNECTING:
-                return "CONNECTING";
-            case PlaybackState.STATE_SKIPPING_TO_PREVIOUS:
-                return "SKIPPING_TO_PREVIOUS";
-            case PlaybackState.STATE_SKIPPING_TO_NEXT:
-                return "SKIPPING_TO_NEXT";
-            case PlaybackState.STATE_SKIPPING_TO_QUEUE_ITEM:
-                return "SKIPPING_TO_QUEUE_ITEM";
-            default:
-                return "UNKNOWN";
-        }
-    }
-
-    /**
-     * @return the controller most likely to be the currently active one, out of the list of
-     * active controllers repoted by {@link MediaSessionManager}. It does so by picking the first
-     * one (in order of priority) which an active state as reported by
-     * {@link MediaController#getPlaybackState()}
-     */
-    private MediaController getTopMostController(List<MediaController> controllers) {
-        if (controllers != null && controllers.size() > 0) {
-            for (MediaController candidate : controllers) {
-                @PlaybackState.State int state = candidate.getPlaybackState() != null
-                        ? candidate.getPlaybackState().getState()
-                        : PlaybackState.STATE_NONE;
-                if (state == PlaybackState.STATE_BUFFERING
-                        || state == PlaybackState.STATE_CONNECTING
-                        || state == PlaybackState.STATE_FAST_FORWARDING
-                        || state == PlaybackState.STATE_PLAYING
-                        || state == PlaybackState.STATE_REWINDING
-                        || state == PlaybackState.STATE_SKIPPING_TO_NEXT
-                        || state == PlaybackState.STATE_SKIPPING_TO_PREVIOUS
-                        || state == PlaybackState.STATE_SKIPPING_TO_QUEUE_ITEM) {
-                    return candidate;
-                }
-            }
-            // If no source is active, we go for the last known source
-            String packageName = getLastKnownActivePackageName();
-            if (packageName != null) {
-                for (MediaController candidate : controllers) {
-                    if (candidate.getPackageName().equals(packageName)) {
-                        return candidate;
-                    }
-                }
-            }
-            return controllers.get(0);
-        }
-        return null;
-    }
-
-    private void changeMediaController(MediaController mediaController) {
+    private void changeMediaController(@Nullable MediaController mediaController) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "New media controller: " + (mediaController != null
                     ? mediaController.getPackageName() : null));
@@ -278,40 +136,35 @@ public class PlaybackModel {
             mMediaController.unregisterCallback(mCallback);
         }
         mMediaController = mediaController;
-        setLastKnownActivePackageName(mMediaController != null
-                ? mMediaController.getPackageName()
-                : null);
-        if (mMediaController != null) {
-            mMediaSource = new MediaSource(mContext, mMediaController.getPackageName());
+        mMediaSource = mMediaController != null
+            ? new MediaSource(mContext, mMediaController.getPackageName()) : null;
+        if (mMediaController != null && mIsStarted) {
             mMediaController.registerCallback(mCallback);
-        } else {
-            mMediaSource = null;
         }
-        notify(PlaybackObserver::onSourceChanged);
+        if (mIsStarted) {
+            notify(PlaybackObserver::onSourceChanged);
+        }
     }
 
     /**
-     * Starts following changes on the list of active media sources. If any changes happen, all
-     * observers registered through {@link #registerObserver(PlaybackObserver)} will be notified.
-     * <p>
-     * Calling this method might cause an immediate {@link PlaybackObserver#onSourceChanged()}
-     * event in case the current media source is different than the last known one.
+     * Starts following changes on the playback state of the given source. If any changes happen,
+     * all observers registered through {@link #registerObserver(PlaybackObserver)} will be
+     * notified.
      */
     private void start() {
-        mMediaSessionManager.addOnActiveSessionsChangedListener(mSessionChangeListener, null);
-        selectMediaController(mMediaSessionManager.getActiveSessions(null));
+        if (mMediaController != null) {
+            mMediaController.registerCallback(mCallback);
+        }
         mIsStarted = true;
     }
 
     /**
-     * Stops following changes on the list of active media sources. This method could cause an
-     * immediate {@link PlaybackObserver#onSourceChanged()} event if a media source was already
-     * connected.
+     * Stops following changes on the list of active media sources.
      */
     private void stop() {
-        mMediaSessionUpdater.setControllersByPackageName(new ArrayList<>());
-        mMediaSessionManager.removeOnActiveSessionsChangedListener(mSessionChangeListener);
-        changeMediaController(null);
+        if (mMediaController != null) {
+            mMediaController.unregisterCallback(mCallback);
+        }
         mIsStarted = false;
     }
 
@@ -326,20 +179,20 @@ public class PlaybackModel {
 
     /**
      * @return a {@link MediaSource} providing access to metadata of the currently playing media
-     * source, or NULL if no media source has an active session. Changes on this value will
-     * be notified through {@link PlaybackObserver#onSourceChanged()}
+     * source, or NULL if the media source has no active session.
      */
     @Nullable
     public MediaSource getMediaSource() {
-        if (mIsStarted) {
-            return mMediaSource;
-        }
+        return mMediaSource;
+    }
 
-        MediaController controller = getTopMostController(mMediaSessionManager
-                .getActiveSessions(null));
-        return controller != null
-                ? new MediaSource(mContext, controller.getPackageName())
-                : null;
+    /**
+     * @return a {@link MediaController} that can be used to control this media source, or NULL
+     * if the media source has no active session.
+     */
+    @Nullable
+    public MediaController getMediaController() {
+        return mMediaController;
     }
 
     /**
@@ -399,7 +252,6 @@ public class PlaybackModel {
         if (mMediaController != null) {
             mMediaController.getTransportControls().skipToPrevious();
         }
-
     }
 
     /**
@@ -445,9 +297,7 @@ public class PlaybackModel {
             cntrl.sendCustomAction(action, extras);
         }
 
-        if (mMediaController != null) {
-            mMediaController.getTransportControls().sendCustomAction(action, extras);
-        }
+        mMediaController.getTransportControls().sendCustomAction(action, extras);
     }
 
     /**
@@ -742,15 +592,5 @@ public class PlaybackModel {
             Log.e(TAG, "Unable to get resources for " + packageName);
             return null;
         }
-    }
-
-    private String getLastKnownActivePackageName() {
-        return mSharedPreferences.getString(PLAYBACK_MODEL_ACTIVE_PACKAGE_NAME_KEY, null);
-    }
-
-    private void setLastKnownActivePackageName(String packageName) {
-        mSharedPreferences.edit()
-                .putString(PLAYBACK_MODEL_ACTIVE_PACKAGE_NAME_KEY, packageName)
-                .apply();
     }
 }
