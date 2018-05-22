@@ -99,6 +99,7 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
         if (mModel != null) {
             mModel.registerObserver(mObserver);
         }
+        updateAccentColor();
     }
 
     private void init(Context context) {
@@ -155,10 +156,18 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
     }
 
     private void updateState() {
-        mPlayPauseStopImageView.setAction(convertMainAction(mModel.getMainAction()));
-        mSpinner.setVisibility(mModel.isBuffering() ? VISIBLE : INVISIBLE);
-        mSkipPrevButton.setVisibility(mModel.isSkipPreviewsEnabled() ? VISIBLE : INVISIBLE);
-        mSkipNextButton.setVisibility(mModel.isSkipNextEnabled() ? VISIBLE : INVISIBLE);
+        if (mModel != null) {
+            mPlayPauseStopImageView.setVisibility(View.VISIBLE);
+            mPlayPauseStopImageView.setAction(convertMainAction(mModel.getMainAction()));
+        } else {
+            mPlayPauseStopImageView.setVisibility(View.INVISIBLE);
+        }
+        mSpinner.setVisibility(mModel != null && mModel.isBuffering()
+                ? View.VISIBLE : View.INVISIBLE);
+        mSkipPrevButton.setVisibility(mModel != null && mModel.isSkipPreviewsEnabled()
+                ? View.VISIBLE : View.INVISIBLE);
+        mSkipNextButton.setVisibility(mModel != null && mModel.isSkipNextEnabled()
+                ? View.VISIBLE : View.INVISIBLE);
     }
 
     @PlayPauseStopImageView.Action
@@ -178,23 +187,31 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
     }
 
     private void updateAccentColor() {
-        int defaultColor = mContext.getResources().getColor(android.R.color.background_dark, null);
-        MediaSource mediaSource = mModel.getMediaSource();
-        int color = mediaSource == null ? defaultColor : mediaSource.getAccentColor(defaultColor);
+        int color = getMediaSourceColor();
         int tintColor = ColorChecker.getTintColor(mContext, color);
         mPlayPauseStopImageView.setPrimaryActionColor(color, tintColor);
         mSpinner.setIndeterminateTintList(ColorStateList.valueOf(color));
     }
 
+    private int getMediaSourceColor() {
+        int defaultColor = mContext.getResources().getColor(android.R.color.background_dark, null);
+        MediaSource mediaSource = mModel != null ? mModel.getMediaSource() : null;
+        return mediaSource != null ? mediaSource.getAccentColor(defaultColor) : defaultColor;
+    }
+
     private List<ImageButton> getExtraActions() {
         List<ImageButton> extraActions = new ArrayList<>();
-        if (mModel.hasQueue()) {
+        if (mModel != null && mModel.hasQueue()) {
             extraActions.add(mTrackListButton);
         }
         return extraActions;
     }
 
     private void updateCustomActions() {
+        if (mModel == null) {
+            setViews(new ImageButton[0]);
+            return;
+        }
         List<ImageButton> combinedActions = new ArrayList<>();
         combinedActions.addAll(getExtraActions());
         combinedActions.addAll(mModel.getCustomActions()
