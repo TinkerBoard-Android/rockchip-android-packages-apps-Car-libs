@@ -39,6 +39,7 @@ import com.android.car.broadcastradio.support.platform.ImageResolver;
 import com.android.car.broadcastradio.support.platform.ProgramInfoExt;
 import com.android.car.broadcastradio.support.platform.ProgramSelectorExt;
 import com.android.car.broadcastradio.support.platform.RadioMetadataExt;
+import com.android.car.media.common.ContentStyleMediaConstants;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -152,6 +153,11 @@ public class BrowseTree {
             String mediaId, String title, boolean isPlayable, long folderType) {
         Bundle extras = new Bundle();
         extras.putLong(EXTRA_BCRADIO_FOLDER_TYPE, folderType);
+        extras.putBoolean(ContentStyleMediaConstants.CONTENT_STYLE_SUPPORTED, true);
+        extras.putInt(ContentStyleMediaConstants.CONTENT_STYLE_PLAYABLE_HINT,
+                ContentStyleMediaConstants.CONTENT_STYLE_LIST_ITEM_HINT_VALUE);
+        extras.putInt(ContentStyleMediaConstants.CONTENT_STYLE_BROWSABLE_HINT,
+                ContentStyleMediaConstants.CONTENT_STYLE_LIST_ITEM_HINT_VALUE);
 
         MediaDescriptionCompat desc = descBuilder
                 .setMediaId(mediaId).setTitle(title).setExtras(extras).build();
