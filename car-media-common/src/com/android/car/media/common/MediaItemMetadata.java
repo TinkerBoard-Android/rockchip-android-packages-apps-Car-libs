@@ -27,6 +27,7 @@ import android.media.MediaMetadata;
 import android.media.browse.MediaBrowser;
 import android.media.session.MediaSession;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.widget.ImageView;
@@ -240,8 +241,34 @@ public class MediaItemMetadata implements Parcelable {
         return mIsBrowsable;
     }
 
+    /**
+     * @return Content style hint for browsable items, if provided as an extra, or
+     * 0 as default value if not provided.
+     */
+    public int getBrowsableContentStyleHint() {
+        Bundle extras = mMediaDescription.getExtras();
+        if (extras != null && extras.getBoolean(
+                ContentStyleMediaConstants.CONTENT_STYLE_SUPPORTED, false)) {
+            return extras.getInt(ContentStyleMediaConstants.CONTENT_STYLE_BROWSABLE_HINT, 0);
+        }
+        return 0;
+    }
+
     public boolean isPlayable() {
         return mIsPlayable;
+    }
+
+    /**
+     * @return Content style hint for playable items, if provided as an extra, or
+     * 0 as default value if not provided.
+     */
+    public int getPlayableContentStyleHint() {
+        Bundle extras = mMediaDescription.getExtras();
+        if (extras != null && extras.getBoolean(
+                ContentStyleMediaConstants.CONTENT_STYLE_SUPPORTED, false)) {
+            return extras.getInt(ContentStyleMediaConstants.CONTENT_STYLE_PLAYABLE_HINT, 0);
+        }
+        return 0;
     }
 
     @Override
