@@ -320,6 +320,15 @@ public class PlaybackModel {
     }
 
     /**
+     * Prepares the current media source for playback.
+     */
+    public void onPrepare() {
+        if (mMediaController != null) {
+            mMediaController.getTransportControls().prepare();
+        }
+    }
+
+    /**
      * Possible main actions.
      */
     @IntDef({ACTION_PLAY, ACTION_STOP, ACTION_PAUSE, ACTION_DISABLED})
