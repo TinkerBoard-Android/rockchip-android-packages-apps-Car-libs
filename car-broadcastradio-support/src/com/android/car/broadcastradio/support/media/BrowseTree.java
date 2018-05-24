@@ -109,6 +109,15 @@ public class BrowseTree {
     public static final String EXTRA_BCRADIO_BAND_NAME_EN =
             "android.media.extra.EXTRA_BCRADIO_BAND_NAME_EN";
 
+    /**
+     * General play intent action.
+     *
+     * MediaBrowserService of the radio app must handle this command to perform general
+     * "play" command. It usually means starting playback of recently tuned station.
+     */
+    public static final String ACTION_PLAY_BROADCASTRADIO =
+            "android.car.intent.action.PLAY_BROADCASTRADIO";
+
     private static final String NODE_ROOT = "root_id";
     private static final String NODE_PROGRAMS = "programs_id";
     private static final String NODE_FAVORITES = "favorites_id";
