@@ -382,7 +382,7 @@ public class PlaybackModel {
 
     /**
      * @return the current playback progress, in milliseconds. This is a value between 0 and
-     * {@link #getMaxProgress()}.
+     * {@link #getMaxProgress()} or PROGRESS_UNKNOWN of the current position is unknown.
      */
     public long getProgress() {
         if (mMediaController == null) {
@@ -391,6 +391,9 @@ public class PlaybackModel {
         PlaybackState state = mMediaController.getPlaybackState();
         if (state == null) {
             return 0;
+        }
+        if (state.getPosition() == PlaybackState.PLAYBACK_POSITION_UNKNOWN) {
+            return PlaybackState.PLAYBACK_POSITION_UNKNOWN;
         }
         long timeDiff = SystemClock.elapsedRealtime() - state.getLastPositionUpdateTime();
         float speed = state.getPlaybackSpeed();
