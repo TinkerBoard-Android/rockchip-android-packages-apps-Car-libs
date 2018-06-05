@@ -27,11 +27,12 @@ import android.hardware.radio.RadioManager.BandDescriptor;
 import android.hardware.radio.RadioMetadata;
 import android.os.Bundle;
 import android.support.v4.media.MediaBrowserCompat.MediaItem;
-import android.support.v4.media.MediaBrowserServiceCompat;
-import android.support.v4.media.MediaBrowserServiceCompat.BrowserRoot;
-import android.support.v4.media.MediaBrowserServiceCompat.Result;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.util.Log;
+
+import androidx.media.MediaBrowserServiceCompat;
+import androidx.media.MediaBrowserServiceCompat.BrowserRoot;
+import androidx.media.MediaBrowserServiceCompat.Result;
 
 import com.android.car.broadcastradio.support.Program;
 import com.android.car.broadcastradio.support.R;
@@ -39,7 +40,6 @@ import com.android.car.broadcastradio.support.platform.ImageResolver;
 import com.android.car.broadcastradio.support.platform.ProgramInfoExt;
 import com.android.car.broadcastradio.support.platform.ProgramSelectorExt;
 import com.android.car.broadcastradio.support.platform.RadioMetadataExt;
-import com.android.car.media.common.ContentStyleMediaConstants;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -176,11 +176,6 @@ public class BrowseTree {
             String mediaId, String title, boolean isPlayable, long folderType, Bundle extras) {
         if (extras == null) extras = new Bundle();
         extras.putLong(EXTRA_BCRADIO_FOLDER_TYPE, folderType);
-        extras.putBoolean(ContentStyleMediaConstants.CONTENT_STYLE_SUPPORTED, true);
-        extras.putInt(ContentStyleMediaConstants.CONTENT_STYLE_PLAYABLE_HINT,
-                ContentStyleMediaConstants.CONTENT_STYLE_LIST_ITEM_HINT_VALUE);
-        extras.putInt(ContentStyleMediaConstants.CONTENT_STYLE_BROWSABLE_HINT,
-                ContentStyleMediaConstants.CONTENT_STYLE_LIST_ITEM_HINT_VALUE);
 
         MediaDescriptionCompat desc = descBuilder
                 .setMediaId(mediaId).setTitle(title).setExtras(extras).build();
