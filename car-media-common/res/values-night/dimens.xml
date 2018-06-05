@@ -16,12 +16,5 @@
 -->
 <resources>
     <!-- Album art scrim -->
-    <item name="album_art_scrim_alpha" format="float" type="dimen">0.6</item>
-
-    <!-- Fab -->
-    <dimen name="car_fab_elevation">8dp</dimen>
-    <dimen name="car_fab_large_size">96dp</dimen>
-    <dimen name="car_fab_large_padding">27dp</dimen>
-    <dimen name="car_fab_spinner_size">128dp</dimen>
-
+    <item name="album_art_scrim_alpha" format="float" type="dimen">0.8</item>
 </resources>
