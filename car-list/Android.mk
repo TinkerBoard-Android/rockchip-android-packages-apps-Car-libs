@@ -23,7 +23,10 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_USE_AAPT2 := true
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
-    android-support-car
+    androidx.annotation_annotation \
+    androidx.car_car \
+    androidx.cardview_cardview \
+    androidx.recyclerview_recyclerview
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
