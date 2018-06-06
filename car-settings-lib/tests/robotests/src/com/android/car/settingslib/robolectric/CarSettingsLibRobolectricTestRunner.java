@@ -26,7 +26,9 @@ import org.robolectric.res.ResourcePath;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Custom test runner for the testing of CarSettingsLib. This is needed because the
@@ -34,11 +36,16 @@ import java.util.List;
  * We want to override this to add several spanning different projects.
  */
 public class CarSettingsLibRobolectricTestRunner extends RobolectricTestRunner {
-
-    private static final String AAR_VERSION = "1.0.0-alpha1";
+    private static final Map<String, String> AAR_VERSIONS;
     private static final String SUPPORT_RESOURCE_PATH_TEMPLATE =
             "jar:file:prebuilts/sdk/current/androidx/m2repository/androidx/"
                     + "%1$s/%1$s/%2$s/%1$s-%2$s.aar!/res";
+
+    static {
+        AAR_VERSIONS = new HashMap<>();
+        AAR_VERSIONS.put("car", "1.0.0-alpha3");
+        AAR_VERSIONS.put("appcompat", "1.0.0-alpha1");
+    }
 
     /**
      * We don't actually want to change this behavior, so we just call super.
@@ -59,8 +66,12 @@ public class CarSettingsLibRobolectricTestRunner extends RobolectricTestRunner {
      * Create the resource path for a support library component's JAR.
      */
     private static String createSupportResourcePathFromJar(@NonNull String componentId) {
-        return String.format(SUPPORT_RESOURCE_PATH_TEMPLATE, componentId, AAR_VERSION);
-    }
+        if (!AAR_VERSIONS.containsKey(componentId)) {
+            throw new IllegalArgumentException("Unknown component " + componentId
+                    + ". Update test with appropriate component name and version.");
+        }
+        return String.format(SUPPORT_RESOURCE_PATH_TEMPLATE, componentId,
+                AAR_VERSIONS.get(componentId));    }
 
     /**
      * We are going to create our own custom manifest so that we can add multiple resource
