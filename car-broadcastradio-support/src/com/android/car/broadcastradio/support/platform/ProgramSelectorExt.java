@@ -201,8 +201,11 @@ public class ProgramSelectorExt {
      * @return new ProgramSelector object representing given frequency.
      * @throws IllegalArgumentException if provided frequency is out of bounds.
      */
-    public static @NonNull ProgramSelector createAmFmSelector(int frequencyKhz) {
-        return ProgramSelector.createAmFmSelector(RadioManager.BAND_INVALID, frequencyKhz);
+    public static @NonNull ProgramSelector createAmFmSelector(long frequencyKhz) {
+        if (frequencyKhz < 0 || frequencyKhz > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("illegal frequency value: " + frequencyKhz);
+        }
+        return ProgramSelector.createAmFmSelector(RadioManager.BAND_INVALID, (int) frequencyKhz);
     }
 
     /**
