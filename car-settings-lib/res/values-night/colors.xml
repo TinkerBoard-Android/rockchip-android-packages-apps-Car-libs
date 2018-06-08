@@ -15,7 +15,7 @@
     limitations under the License.
 -->
 <resources>
-    <color name="windowBackground">@color/car_dark_blue_grey_700</color>
+    <color name="windowBackground">#121214</color>
     <color name="colorPrimaryDark">@color/car_dark_blue_grey_800</color>
 
     <color name="blue_600">@color/blue_600_light</color>
