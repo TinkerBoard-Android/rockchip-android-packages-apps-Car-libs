@@ -25,7 +25,7 @@ LOCAL_USE_AAPT2 := true
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
-    android-support-car
+    androidx.car_car
 
 LOCAL_MODULE := car-stream-ui-lib
 LOCAL_MODULE_TAGS := optional
