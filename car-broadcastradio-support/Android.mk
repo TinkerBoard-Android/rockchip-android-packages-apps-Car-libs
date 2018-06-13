@@ -31,8 +31,7 @@ LOCAL_PROGUARD_ENABLED := disabled
 LOCAL_USE_AAPT2 := true
 
 LOCAL_SHARED_ANDROID_LIBRARIES := \
-    android-support-v4 \
-    car-media-common
+    androidx.legacy_legacy-support-v4
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
