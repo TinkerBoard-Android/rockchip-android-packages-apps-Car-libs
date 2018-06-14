@@ -31,17 +31,19 @@ LOCAL_PRIVILEGED_MODULE := true
 LOCAL_PROGUARD_ENABLED := disabled
 
 LOCAL_STATIC_ANDROID_LIBRARIES += \
-    android-support-car \
-    android-support-constraint-layout \
+    androidx.car_car \
+    androidx-constraintlayout_constraintlayout \
     car-apps-common
 
 LOCAL_STATIC_JAVA_LIBRARIES += \
     car-media-common-glide-target \
     car-media-common-gifdecoder-target \
     car-media-common-disklrucache-target \
-    android-support-constraint-layout-solver
+    androidx-constraintlayout_constraintlayout-solver
 
 LOCAL_USE_AAPT2 := true
+
+LOCAL_JAVA_LIBRARIES += android.car
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
@@ -51,6 +53,7 @@ LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 LOCAL_MODULE := car-media-common-disklrucache-target
 LOCAL_SDK_VERSION := current
 LOCAL_SRC_FILES := ../../../../../prebuilts/maven_repo/bumptech/com/github/bumptech/glide/disklrucache/SNAPSHOT/disklrucache-SNAPSHOT$(COMMON_JAVA_PACKAGE_SUFFIX)
+LOCAL_JETIFIER_ENABLED := true
 LOCAL_UNINSTALLABLE_MODULE := true
 
 include $(BUILD_PREBUILT)
@@ -61,6 +64,7 @@ LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 LOCAL_MODULE := car-media-common-gifdecoder-target
 LOCAL_SDK_VERSION := current
 LOCAL_SRC_FILES := ../../../../../prebuilts/maven_repo/bumptech/com/github/bumptech/glide/gifdecoder/SNAPSHOT/gifdecoder-SNAPSHOT$(COMMON_JAVA_PACKAGE_SUFFIX)
+LOCAL_JETIFIER_ENABLED := true
 LOCAL_UNINSTALLABLE_MODULE := true
 
 include $(BUILD_PREBUILT)
@@ -71,6 +75,7 @@ LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 LOCAL_MODULE := car-media-common-glide-target
 LOCAL_SDK_VERSION := current
 LOCAL_SRC_FILES := ../../../../../prebuilts/maven_repo/bumptech/com/github/bumptech/glide/glide/SNAPSHOT/glide-SNAPSHOT$(COMMON_JAVA_PACKAGE_SUFFIX)
+LOCAL_JETIFIER_ENABLED := true
 LOCAL_UNINSTALLABLE_MODULE := true
 
 include $(BUILD_PREBUILT)

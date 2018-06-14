@@ -18,10 +18,11 @@ package com.android.car.media.common;
 
 import android.content.Context;
 import android.graphics.PorterDuff;
-import android.support.annotation.IntDef;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.ImageView;
+
+import androidx.annotation.IntDef;
 
 import com.android.car.apps.common.FabDrawable;
 
