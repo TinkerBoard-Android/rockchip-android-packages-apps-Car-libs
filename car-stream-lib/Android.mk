@@ -26,4 +26,6 @@ ifeq (,$(findstring android-support-annotations,$(LOCAL_STATIC_JAVA_LIBRARIES)))
 LOCAL_STATIC_JAVA_LIBRARIES += android-support-annotations
 endif
 
+LOCAL_MIN_SDK_VERSION := 24
+
 include $(BUILD_STATIC_JAVA_LIBRARY)
