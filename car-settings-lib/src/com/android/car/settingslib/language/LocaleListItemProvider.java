@@ -19,19 +19,19 @@ package com.android.car.settingslib.language;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.car.widget.ListItem;
+import androidx.car.widget.ListItemProvider;
+import androidx.car.widget.SubheaderListItem;
+import androidx.car.widget.TextListItem;
+
+import com.android.car.settingslib.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.LocaleStore;
 import com.android.internal.app.SuggestedLocaleAdapter;
 
-import com.android.car.settingslib.R;
-
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-
-import androidx.car.widget.ListItem;
-import androidx.car.widget.ListItemProvider;
-import androidx.car.widget.TextListItem;
 
 /**
  * ListItemProvider that wraps {@link SuggestedLocaleAdapter}.
@@ -68,20 +68,16 @@ public class LocaleListItemProvider extends ListItemProvider {
 
     @Override
     public ListItem get(int position) {
-        TextListItem item = new TextListItem(mContext);
         int type = mSuggestedLocaleAdapter.getItemViewType(position);
         switch (type) {
             case TYPE_HEADER_SUGGESTED:
             case TYPE_HEADER_ALL_OTHERS:
-                item.addViewBinder(viewHolder ->
-                        viewHolder.getTitle().setTextAppearance(
-                                R.style.TextAppearance_Car_Settings_ListHeader));
-                item.setTitle(mContext.getString(type == TYPE_HEADER_SUGGESTED
+                String title = mContext.getString(type == TYPE_HEADER_SUGGESTED
                         ? R.string.language_picker_list_suggested_header
-                        : R.string.language_picker_list_all_header));
-                break;
-
+                        : R.string.language_picker_list_all_header);
+                return new SubheaderListItem(mContext, title);
             case TYPE_LOCALE:
+                TextListItem item = new TextListItem(mContext);
                 LocaleStore.LocaleInfo info =
                         (LocaleStore.LocaleInfo) mSuggestedLocaleAdapter.getItem(position);
                 item.setTitle(info.getFullNameNative());
@@ -115,15 +111,13 @@ public class LocaleListItemProvider extends ListItemProvider {
                         mLocaleSelectionListener.onLocaleSelected(info);
                     }
                 });
-                break;
-
+                return item;
             default:
                 if (Log.isLoggable(TAG, Log.DEBUG)) {
                     Log.d(TAG, "Attempting to get unknown type: " + type);
                 }
-                break;
+                throw new IllegalStateException("Unknown locale list item type");
         }
-        return item;
     }
 
     @Override
