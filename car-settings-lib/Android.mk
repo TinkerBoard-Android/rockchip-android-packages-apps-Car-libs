@@ -32,6 +32,8 @@ LOCAL_STATIC_ANDROID_LIBRARIES := \
 
 LOCAL_PROGUARD_ENABLED := disabled
 
+LOCAL_MIN_SDK_VERSION := 24
+
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
 # Use the following include to make our test apk.

@@ -20,6 +20,4 @@
     <uses-sdk
             android:minSdkVersion="22"
             android:targetSdkVersion='23'/>
-
-    <application android:label="CarStreamCard" />
 </manifest>
