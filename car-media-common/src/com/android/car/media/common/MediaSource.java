@@ -93,6 +93,9 @@ public class MediaSource {
      * Custom media sources which should not be templatized.
      */
     private static final Set<String> CUSTOM_MEDIA_SOURCES = new HashSet<>();
+    static {
+        CUSTOM_MEDIA_SOURCES.add("com.android.car.radio");
+    }
 
     /**
      * An observer of this media source.
