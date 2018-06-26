@@ -71,7 +71,8 @@ public class CarSettingsLibRobolectricTestRunner extends RobolectricTestRunner {
                     + ". Update test with appropriate component name and version.");
         }
         return String.format(SUPPORT_RESOURCE_PATH_TEMPLATE, componentId,
-                AAR_VERSIONS.get(componentId));    }
+                AAR_VERSIONS.get(componentId));
+    }
 
     /**
      * We are going to create our own custom manifest so that we can add multiple resource
