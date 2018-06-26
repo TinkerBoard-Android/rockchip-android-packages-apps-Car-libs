@@ -18,6 +18,7 @@ package com.android.car.media.common;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -27,6 +28,7 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 
 import androidx.car.widget.ActionBar;
+import androidx.cardview.widget.CardView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,6 +107,9 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
     private void init(Context context) {
         mContext = context;
 
+        CardView actionBarWrapper = findViewById(androidx.car.R.id.action_bar_wrapper);
+        actionBarWrapper.setCardBackgroundColor(context.getColor(androidx.car.R.color.car_card));
+
         mPlayPauseStopImageContainer = inflate(context, R.layout.car_play_pause_stop_button_layout,
                 null);
         mPlayPauseStopImageContainer.setOnClickListener(this::onPlayPauseStopClicked);
@@ -151,6 +156,8 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
 
     private ImageButton createIconButton(Context context, ColorStateList csl, Drawable icon) {
         ImageButton button = new ImageButton(context, null, 0, R.style.PlaybackControl);
+        button.setImageTintList(csl);
+        button.setImageTintMode(PorterDuff.Mode.SRC_ATOP);
         button.setImageDrawable(icon);
         return button;
     }
