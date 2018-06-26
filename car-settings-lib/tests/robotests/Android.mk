@@ -16,7 +16,7 @@ LOCAL_USE_AAPT2 := true
 LOCAL_PRIVILEGED_MODULE := true
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
-    android-support-car \
+    androidx.car_car \
     car-settings-lib
 
 include $(BUILD_PACKAGE)
@@ -37,7 +37,8 @@ LOCAL_JAVA_LIBRARIES := \
     robolectric_android-all-stub \
     Robolectric_all-target \
     mockito-robolectric-prebuilt \
-    truth-prebuilt
+    truth-prebuilt \
+    android.car
 
 LOCAL_INSTRUMENTATION_FOR := CarSettingsLib
 
@@ -57,7 +58,8 @@ LOCAL_JAVA_LIBRARIES := \
     robolectric_android-all-stub \
     Robolectric_all-target \
     mockito-robolectric-prebuilt \
-    truth-prebuilt
+    truth-prebuilt \
+    android.car
 
 LOCAL_TEST_PACKAGE := CarSettingsLib
 
