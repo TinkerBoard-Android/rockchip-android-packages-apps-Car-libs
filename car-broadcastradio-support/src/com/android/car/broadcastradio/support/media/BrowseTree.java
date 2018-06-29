@@ -305,14 +305,6 @@ public class BrowseTree {
         }
     }
 
-    /** @hide */
-    public boolean isFavorite(@NonNull ProgramSelector selector) {
-        synchronized (mLock) {
-            if (mFavorites == null) return false;
-            return mFavorites.contains(new Program(selector, ""));
-        }
-    }
-
     private List<MediaItem> getFavorites() {
         synchronized (mLock) {
             if (mFavorites == null) return null;
