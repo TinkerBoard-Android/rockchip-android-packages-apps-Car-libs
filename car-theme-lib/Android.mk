@@ -26,6 +26,5 @@ LOCAL_MODULE := car-theme-lib
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_PROGUARD_ENABLED := disabled
-LOCAL_SDK_VERSION := current
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
