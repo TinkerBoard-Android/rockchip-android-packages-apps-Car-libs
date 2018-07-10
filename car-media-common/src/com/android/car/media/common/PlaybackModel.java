@@ -371,9 +371,8 @@ public class PlaybackModel {
             case PlaybackState.STATE_STOPPED:
             case PlaybackState.STATE_PAUSED:
             case PlaybackState.STATE_NONE:
-                return ACTION_PLAY;
             case PlaybackState.STATE_ERROR:
-                return ACTION_DISABLED;
+                return (actions & PlaybackState.ACTION_PLAY) != 0 ? ACTION_PLAY : ACTION_DISABLED;
             default:
                 Log.w(TAG, String.format("Unknown PlaybackState: %d", state.getState()));
                 return ACTION_DISABLED;
@@ -465,13 +464,29 @@ public class PlaybackModel {
     }
 
     /**
-     * @return true if the media source is buffering. Changes on this value would be notified
-     * through {@link PlaybackObserver#onPlaybackStateChanged()}
+     * @return true if the media source is loading (e.g.: buffering, connecting, etc.). Changes on
+     * this value would be notified through {@link PlaybackObserver#onPlaybackStateChanged()}
      */
-    public boolean isBuffering() {
-        return mMediaController != null
-                && mMediaController.getPlaybackState() != null
-                && mMediaController.getPlaybackState().getState() == PlaybackState.STATE_BUFFERING;
+    public boolean isLoading() {
+        if (mMediaController == null) {
+            return false;
+        }
+
+        PlaybackState playbackState = mMediaController.getPlaybackState();
+
+        if (playbackState == null) {
+            return false;
+        }
+
+        int state = playbackState.getState();
+
+        return state == PlaybackState.STATE_BUFFERING
+                || state == PlaybackState.STATE_CONNECTING
+                || state == PlaybackState.STATE_FAST_FORWARDING
+                || state == PlaybackState.STATE_REWINDING
+                || state == PlaybackState.STATE_SKIPPING_TO_NEXT
+                || state == PlaybackState.STATE_SKIPPING_TO_PREVIOUS
+                || state == PlaybackState.STATE_SKIPPING_TO_QUEUE_ITEM;
     }
 
     /**
