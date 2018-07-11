@@ -169,7 +169,7 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
         } else {
             mPlayPauseStopImageView.setVisibility(View.INVISIBLE);
         }
-        mSpinner.setVisibility(mModel != null && mModel.isBuffering()
+        mSpinner.setVisibility(mModel != null && mModel.isLoading()
                 ? View.VISIBLE : View.INVISIBLE);
         mSkipPrevButton.setVisibility(mModel != null && mModel.isSkipPreviewsEnabled()
                 ? View.VISIBLE : View.INVISIBLE);
