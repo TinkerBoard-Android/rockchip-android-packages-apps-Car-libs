@@ -1,0 +1,458 @@
+/*
+ * Copyright 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.car.arch.common;
+
+import static java.util.Objects.requireNonNull;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
+import androidx.core.util.Pair;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.Transformations;
+
+import java.util.Objects;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
+
+/**
+ * Utility methods for using {@link LiveData}. In general for Boolean operations, {@code null} is
+ * treated as an "unknown" value, and operations may use short-circuit evaluation to determine the
+ * result. LiveData may be in an uninitialized state where observers are not called when registered
+ * (e.g. a {@link MutableLiveData} where {@link MutableLiveData#setValue(Object)} has not yet been
+ * called). If a Boolean operation receives an uninitialized LiveData as either of its parameters,
+ * the result will also be in an uninitialized state.
+ */
+@SuppressWarnings({"unused", "WeakerAccess"})
+public class LiveDataFunctions {
+
+    private LiveDataFunctions() {
+    }
+
+    private static volatile LiveData<?> sNullLiveData;
+    private static volatile LiveData<Boolean> sTrueLiveData;
+    private static volatile LiveData<Boolean> sFalseLiveData;
+
+    /**
+     * Returns a LiveData that always emits {@code null}. This is different than an uninitialized
+     * LiveData in that observers will be called (with {@code null}) when registered.
+     */
+    public static <T> LiveData<T> nullLiveData() {
+        if (sNullLiveData == null) {
+            sNullLiveData = dataOf(null);
+        }
+        // null can fit any generic type
+        // noinspection unchecked
+        return (LiveData<T>) sNullLiveData;
+    }
+
+    /** Returns a LiveData that always emits {@code true}. */
+    public static LiveData<Boolean> trueLiveData() {
+        if (sTrueLiveData == null) {
+            sTrueLiveData = dataOf(true);
+        }
+        return sTrueLiveData;
+    }
+
+    /** Returns a LiveData that always emits {@code false}. */
+    public static LiveData<Boolean> falseLiveData() {
+        if (sFalseLiveData == null) {
+            sFalseLiveData = dataOf(false);
+        }
+        return sFalseLiveData;
+    }
+
+    /** Returns a LiveData that is initialized with {@code value}. */
+    public static <T> MutableLiveData<T> dataOf(@Nullable T value) {
+        MutableLiveData<T> data = new MutableLiveData<>();
+        data.setValue(value);
+        return data;
+    }
+
+    /**
+     * Returns a LiveData that emits the opposite of {@code data} (or {@code null} if {@code data}
+     * emits {@code null})
+     */
+    public static LiveData<Boolean> not(@NonNull LiveData<Boolean> data) {
+        return Transformations.map(data, bool -> bool == null ? null : !bool);
+    }
+
+    /**
+     * Returns a LiveData that emits {@code true} iff {@code data} emits {@code null}. Otherwise
+     * emits {@code false}
+     */
+    public static LiveData<Boolean> emitsNull(@NonNull LiveData<?> data) {
+        return Transformations.map(data, Objects::isNull);
+    }
+
+    /**
+     * Returns a LiveData that emits the logical AND of the two arguments. Also deals with {@code
+     * null} and uninitalized values as follows:
+     * <table>
+     * <tr>
+     * <th></th>
+     * <th>T</th>
+     * <th>F</th>
+     * <th>N</th>
+     * <th>U</th>
+     * </tr>
+     * <tr>
+     * <th>T</th>
+     * <td>T</td>
+     * <td>F</td>
+     * <td>N</td>
+     * <td>U</td>
+     * </tr>
+     * <tr>
+     * <th>F</th>
+     * <td>F</td>
+     * <td>F</td>
+     * <td>F</td>
+     * <td>U</td>
+     * </tr>
+     * <tr>
+     * <th>N</th>
+     * <td>N</td>
+     * <td>F</td>
+     * <td>N</td>
+     * <td>U</td>
+     * </tr>
+     * <tr>
+     * <th>U</th>
+     * <td>U</td>
+     * <td>U</td>
+     * <td>U</td>
+     * <td>U</td>
+     * </tr>
+     * </table>
+     * <p>
+     * T = {@code true}, F = {@code false}, N = {@code null}, U = uninitialized
+     *
+     * @return a LiveData that emits the logical AND of the two arguments
+     */
+    public static LiveData<Boolean> and(@NonNull LiveData<Boolean> x,
+            @NonNull LiveData<Boolean> y) {
+        return new BinaryOperation<>(
+                x,
+                y,
+                (a, b) -> {
+                    if (a == null) {
+                        if (Boolean.FALSE.equals(b)) {
+                            return false;
+                        }
+                        return null;
+                    }
+                    if (a) {
+                        return b;
+                    }
+                    return false;
+                });
+    }
+
+    /**
+     * Returns a LiveData that emits the logical OR of the two arguments. Also deals with {@code
+     * null} and uninitalized values as follows:
+     * <table>
+     * <tr>
+     * <th></th>
+     * <th>T</th>
+     * <th>F</th>
+     * <th>N</th>
+     * <th>U</th>
+     * </tr>
+     * <tr>
+     * <th>T</th>
+     * <td>T</td>
+     * <td>T</td>
+     * <td>T</td>
+     * <td>U</td>
+     * </tr>
+     * <tr>
+     * <th>F</th>
+     * <td>T</td>
+     * <td>F</td>
+     * <td>N</td>
+     * <td>U</td>
+     * </tr>
+     * <tr>
+     * <th>N</th>
+     * <td>T</td>
+     * <td>N</td>
+     * <td>N</td>
+     * <td>U</td>
+     * </tr>
+     * <tr>
+     * <th>U</th>
+     * <td>U</td>
+     * <td>U</td>
+     * <td>U</td>
+     * <td>U</td>
+     * </tr>
+     * </table>
+     * <p>
+     * T = {@code true}, F = {@code false}, N = {@code null}, U = uninitialized
+     *
+     * @return a LiveData that emits the logical OR of the two arguments
+     */
+    public static LiveData<Boolean> or(@NonNull LiveData<Boolean> x, @NonNull LiveData<Boolean> y) {
+        return new BinaryOperation<>(
+                x,
+                y,
+                (a, b) -> {
+                    if (a == null) {
+                        if (Boolean.TRUE.equals(b)) {
+                            return true;
+                        }
+                        return null;
+                    }
+                    if (!a) {
+                        return b;
+                    }
+                    return true;
+                });
+    }
+
+    /**
+     * Returns a LiveData backed by {@code value} if and only if predicate emits {@code true}. Emits
+     * {@code null} otherwise.
+     * <p>
+     * This is equivalent to {@code iff(predicate, Boolean::booleanValue, value)}
+     *
+     * @see #iff(LiveData, Predicate, LiveData)
+     */
+    public static <T> LiveData<T> iff(
+            @NonNull LiveData<Boolean> predicate, @NonNull LiveData<T> value) {
+        return iff(predicate, Boolean::booleanValue, value);
+    }
+
+    /**
+     * Returns a LiveData backed by {@code value} if and only if the trigger emits a value that
+     * causes {@code predicate} to return {@code true}. Emits {@code null} otherwise.
+     */
+    public static <P, T> LiveData<T> iff(
+            @NonNull LiveData<P> trigger,
+            @NonNull Predicate<? super P> predicate,
+            @NonNull LiveData<T> value) {
+        return new BinaryOperation<>(
+                trigger, value, (p, v) -> p == null || !predicate.test(p) ? null : v);
+    }
+
+    /**
+     * Returns a LiveData that is backed by {@code trueData} when the predicate emits {@code true},
+     * {@code falseData} when the predicate emits {@code false}, and emits {@code null} when the
+     * predicate emits {@code null}.
+     * <p>
+     * This is equivalent to {@code ifThenElse(predicate, Boolean::booleanValue, trueData,
+     * falseData)}
+     *
+     * @param trueData  the LiveData whose value should be emitted when predicate is {@code true}
+     * @param falseData the LiveData whose value should be emitted when predicate is {@code false}
+     * @see #ifThenElse(LiveData, Predicate, LiveData, LiveData)
+     */
+    public static <T> LiveData<T> ifThenElse(
+            @NonNull LiveData<Boolean> predicate,
+            @NonNull LiveData<T> trueData,
+            @NonNull LiveData<T> falseData) {
+        return ifThenElse(predicate, Boolean::booleanValue, trueData, falseData);
+    }
+
+    /**
+     * Returns a LiveData that is backed by {@code trueData} when the trigger satisfies the
+     * predicate, {@code falseData} when the trigger does not satisfy the predicate, and emits
+     * {@code null} when the trigger emits {@code null}.
+     *
+     * @param trueData  the LiveData whose value should be emitted when predicate returns {@code
+     *                  true}
+     * @param falseData the LiveData whose value should be emitted when predicate returns {@code
+     *                  false}
+     */
+    public static <P, T> LiveData<T> ifThenElse(
+            @NonNull LiveData<P> trigger,
+            @NonNull Predicate<? super P> predicate,
+            @NonNull LiveData<T> trueData,
+            @NonNull LiveData<T> falseData) {
+        return Transformations.switchMap(
+                trigger,
+                t -> {
+                    if (t == null) {
+                        return nullLiveData();
+                    } else {
+                        return predicate.test(t) ? trueData : falseData;
+                    }
+                });
+    }
+
+    /**
+     * Returns a LiveData that emits {@code trueValue} when the predicate emits {@code true}, {@code
+     * falseValue} when the predicate emits {@code false}, and emits {@code null} when the predicate
+     * emits {@code null}.
+     * <p>
+     * This is equivalent to {@code ifThenElse(predicate, Boolean::booleanValue, trueValue,
+     * falseValue)}
+     *
+     * @param trueValue  the value that should be emitted when predicate returns {@code true}
+     * @param falseValue the value that should be emitted when predicate returns {@code false}
+     * @see #ifThenElse(LiveData, Predicate, Object, Object)
+     */
+    public static <T> LiveData<T> ifThenElse(
+            @NonNull LiveData<Boolean> predicate, @Nullable T trueValue, @Nullable T falseValue) {
+        return ifThenElse(predicate, Boolean::booleanValue, trueValue, falseValue);
+    }
+
+    /**
+     * Returns a LiveData that emits {@code trueValue} when the trigger satisfies the predicate,
+     * {@code falseValue} when the trigger does not satisfy the predicate, and emits {@code null}
+     * when the trigger emits {@code null}.
+     *
+     * @param trueValue  the value that should be emitted when predicate returns {@code true}
+     * @param falseValue the value that should be emitted when predicate returns {@code false}
+     */
+    public static <P, T> LiveData<T> ifThenElse(
+            @NonNull LiveData<P> trigger,
+            @NonNull Predicate<? super P> predicate,
+            @Nullable T trueValue,
+            @Nullable T falseValue) {
+        return Transformations.map(
+                trigger,
+                t -> {
+                    if (t == null) {
+                        return null;
+                    }
+                    return predicate.test(t) ? trueValue : falseValue;
+                });
+    }
+
+    /**
+     * Returns a LiveData that emits a Pair containing the values of the two parameter LiveDatas. If
+     * either parameter is uninitialized, the resulting LiveData is also uninitialized.
+     * <p>
+     * This is equivalent to calling {@code combine(tData, uData, Pair::new)}.
+     *
+     * @see #combine(LiveData, LiveData, BiFunction)
+     */
+    public static <T, U> LiveData<Pair<T, U>> pair(
+            @NonNull LiveData<T> tData, @NonNull LiveData<U> uData) {
+        return combine(tData, uData, Pair::new);
+    }
+
+    /**
+     * Returns an observer that splits a pair into two separate arguments. This method is mainly
+     * used to simplify lambda expressions and enable method references, especially in combination
+     * with {@link #pair(LiveData, LiveData)}.
+     * <p>
+     * Example:
+     * <pre><code>
+     * class MyViewModel extends ViewModel {
+     *   LiveData&lt;Integer> getIntData() {...}
+     *   LiveData&lt;Boolean> getBoolData() {...}
+     * }
+     *
+     * void consume(int intValue, boolean booleanValue) {...}
+     *
+     * void startObserving(MyViewModel viewModel) {
+     *   pair(viewModel.getIntData(), viewModel.getBoolData()).observe(owner, split(this::consume));
+     * }</code></pre>
+     */
+    public static <T, U> Observer<Pair<T, U>> split(@NonNull BiConsumer<T, U> consumer) {
+        return (pair) -> {
+            if (pair == null) {
+                consumer.accept(null, null);
+            } else {
+                consumer.accept(pair.first, pair.second);
+            }
+        };
+    }
+
+    /**
+     * Returns a LiveData that emits the result of {@code function} on the values of the two
+     * parameter LiveDatas. If either parameter is uninitialized, the resulting LiveData is also
+     * uninitialized.
+     */
+    public static <T, U, R> LiveData<R> combine(
+            @NonNull LiveData<T> tData,
+            @NonNull LiveData<U> uData,
+            @NonNull BiFunction<T, U, R> function) {
+        return new BinaryOperation<>(tData, uData, function);
+    }
+
+    private static class BinaryOperation<T, U, R> extends MediatorLiveData<R> {
+        @NonNull
+        private final BiFunction<T, U, R> mFunction;
+
+        private boolean mTSet;
+        private boolean mUSet;
+        private boolean mValueSet;
+
+        @Nullable
+        private T mTValue;
+        @Nullable
+        private U mUValue;
+
+        BinaryOperation(
+                @NonNull LiveData<T> tLiveData,
+                @NonNull LiveData<U> uLiveData,
+                @NonNull BiFunction<T, U, R> function) {
+            this.mFunction = function;
+            if (tLiveData == uLiveData) {
+                // Only add the source once and only update once when it changes.
+                addSource(
+                        tLiveData,
+                        value -> {
+                            mTSet = true;
+                            mUSet = true;
+                            mTValue = value;
+                            // if both references point to the same LiveData, then T and U are
+                            // compatible types.
+                            // noinspection unchecked
+                            mUValue = (U) value;
+                            update();
+                        });
+            } else {
+                addSource(requireNonNull(tLiveData), this::updateT);
+                addSource(requireNonNull(uLiveData), this::updateU);
+            }
+        }
+
+        private void updateT(@Nullable T tValue) {
+            mTSet = true;
+            this.mTValue = tValue;
+            update();
+        }
+
+        private void updateU(@Nullable U uValue) {
+            mUSet = true;
+            this.mUValue = uValue;
+            update();
+        }
+
+        private void update() {
+            if (mTSet && mUSet) {
+                R result = mFunction.apply(mTValue, mUValue);
+                // Don't setValue if it's the same as the old value unless we haven't set a value
+                // before.
+                if (!mValueSet || result != getValue()) {
+                    mValueSet = true;
+                    setValue(result);
+                }
+            }
+        }
+    }
+}
