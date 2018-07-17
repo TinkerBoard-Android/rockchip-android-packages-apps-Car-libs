@@ -21,6 +21,7 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
+import androidx.arch.core.util.Function;
 import androidx.core.util.Pair;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
@@ -101,6 +102,43 @@ public class LiveDataFunctions {
      */
     public static LiveData<Boolean> emitsNull(@NonNull LiveData<?> data) {
         return Transformations.map(data, Objects::isNull);
+    }
+
+    /**
+     * Returns a LiveData that emits the same value as {@code data}, but only notifies its observers
+     * when the new value is distinct ({@link Objects#equals(Object, Object)}
+     */
+    public static <T> LiveData<T> distinct(@NonNull LiveData<T> data) {
+        return new MediatorLiveData<T>() {
+            private boolean mInitialized = false;
+
+            {
+                addSource(data, value -> {
+                    if (!mInitialized || !Objects.equals(value, getValue())) {
+                        mInitialized = true;
+                        setValue(value);
+                    }
+                });
+            }
+        };
+    }
+
+    /**
+     * Similar to {@link Transformations#map(LiveData, Function)}, but emits {@code null} when
+     * {@code source} emits {@code null}. The input to {@code func} may be treated as not nullable.
+     */
+    public static <T, R> LiveData<R> mapNonNull(@NonNull LiveData<T> source,
+            @NonNull Function<T, R> func) {
+        return mapNonNull(source, null, func);
+    }
+
+    /**
+     * Similar to {@link Transformations#map(LiveData, Function)}, but emits {@code nullValue} when
+     * {@code source} emits {@code null}. The input to {@code func} may be treated as not nullable.
+     */
+    public static <T, R> LiveData<R> mapNonNull(@NonNull LiveData<T> source, @Nullable R nullValue,
+            @NonNull Function<T, R> func) {
+        return Transformations.map(source, value -> value == null ? nullValue : func.apply(value));
     }
 
     /**

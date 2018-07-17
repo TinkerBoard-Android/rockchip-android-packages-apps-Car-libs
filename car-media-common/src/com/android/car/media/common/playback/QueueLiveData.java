@@ -47,6 +47,7 @@ class QueueLiveData extends LiveData<List<MediaSession.QueueItem>> {
 
     @Override
     protected void onActive() {
+        setValue(mMediaController.getQueue());
         mMediaController.registerCallback(mCallback);
     }
 
