@@ -25,8 +25,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -42,8 +40,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.service.media.MediaBrowserService;
 import android.util.Log;
-
-import androidx.annotation.ColorInt;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,11 +61,6 @@ import java.util.stream.Collectors;
 public class MediaSource {
     private static final String TAG = "MediaSource";
 
-    /** Third-party defined application theme to use **/
-    private static final String THEME_META_DATA_NAME =
-            "com.google.android.gms.car.application.theme";
-    /** Mark used to indicate that we couldn't find a color and the default one should be used */
-    private static final int DEFAULT_COLOR = 0;
     /** Number of times we will retry obtaining the list of children of a certain node */
     private static final int CHILDREN_SUBSCRIPTION_RETRIES = 3;
     /** Time between retries while trying to obtain the list of children of a certain node */
@@ -85,9 +76,6 @@ public class MediaSource {
     private List<Observer> mObservers = new ArrayList<>();
     private CharSequence mName;
     private String mRootNode;
-    private @ColorInt int mPrimaryColor;
-    private @ColorInt int mAccentColor;
-    private @ColorInt int mPrimaryColorDark;
 
     /**
      * Custom media sources which should not be templatized.
@@ -443,7 +431,6 @@ public class MediaSource {
 
     private void extractComponentInfo(@NonNull String packageName,
             @Nullable String browseServiceClassName) {
-        TypedArray ta = null;
         try {
             ApplicationInfo applicationInfo =
                     mContext.getPackageManager().getApplicationInfo(packageName,
@@ -462,59 +449,9 @@ public class MediaSource {
             } else {
                 mName = null;
             }
-
-            // Get the proper theme, check theme for service, then application.
-            Context packageContext = mContext.createPackageContext(packageName, 0);
-            int appTheme = applicationInfo.metaData != null
-                    ? applicationInfo.metaData.getInt(THEME_META_DATA_NAME)
-                    : 0;
-            appTheme = appTheme == 0
-                    ? applicationInfo.theme
-                    : appTheme;
-            packageContext.setTheme(appTheme);
-            Resources.Theme theme = packageContext.getTheme();
-            ta = theme.obtainStyledAttributes(new int[] {
-                    android.R.attr.colorPrimary,
-                    android.R.attr.colorAccent,
-                    android.R.attr.colorPrimaryDark
-            });
-            mPrimaryColor = ta.getColor(0, DEFAULT_COLOR);
-            mAccentColor = ta.getColor(1, DEFAULT_COLOR);
-            mPrimaryColorDark = ta.getColor(2, DEFAULT_COLOR);
         } catch (PackageManager.NameNotFoundException e) {
             Log.w(TAG, "Unable to update media client package attributes.", e);
-            mPrimaryColor = DEFAULT_COLOR;
-            mAccentColor = DEFAULT_COLOR;
-            mPrimaryColorDark = DEFAULT_COLOR;
-        } finally {
-            if (ta != null) {
-                ta.recycle();
-            }
         }
-    }
-
-    /**
-     * @return media source primary color, or the given default color if the source metadata
-     * is not available.
-     */
-    public @ColorInt int getPrimaryColor(@ColorInt int defaultColor) {
-        return mPrimaryColor != DEFAULT_COLOR ? mPrimaryColor : defaultColor;
-    }
-
-    /**
-     * @return media source accent color, or the given default color if the source metadata
-     * is not available.
-     */
-    public @ColorInt int getAccentColor(@ColorInt int defaultColor) {
-        return mAccentColor != DEFAULT_COLOR ? mAccentColor : defaultColor;
-    }
-
-    /**
-     * @return media source primary dark color, or the given default color if the source metadata
-     * is not available.
-     */
-    public @ColorInt int getPrimaryColorDark(@ColorInt int defaultColor) {
-        return mPrimaryColorDark != DEFAULT_COLOR ? mPrimaryColorDark : defaultColor;
     }
 
     private void notify(Consumer<Observer> notification) {

@@ -20,6 +20,7 @@ import static androidx.lifecycle.Transformations.map;
 import static androidx.lifecycle.Transformations.switchMap;
 
 import static com.android.car.arch.common.LiveDataFunctions.dataOf;
+import static com.android.car.arch.common.LiveDataFunctions.distinct;
 import static com.android.car.arch.common.LiveDataFunctions.nullLiveData;
 import static com.android.car.arch.common.LiveDataFunctions.pair;
 import static com.android.car.media.common.playback.PlaybackStateAnnotations.Actions;
@@ -55,6 +56,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -105,8 +107,8 @@ public class PlaybackViewModel extends AndroidViewModel {
     private final LiveData<MediaMetadata> mMetadata = switchMap(mMediaController,
             mediaController -> mediaController == null ? nullLiveData()
                     : new MediaMetadataLiveData(mediaController));
-    private final LiveData<MediaItemMetadata> mWrappedMetadata = map(mMetadata,
-            MediaItemMetadata::new);
+    private final LiveData<MediaItemMetadata> mWrappedMetadata = distinct(map(mMetadata,
+            metadata -> metadata == null ? null : new MediaItemMetadata(metadata)));
 
     private final LiveData<PlaybackState> mPlaybackState = switchMap(mMediaController,
             mediaController -> mediaController == null ? nullLiveData()
@@ -117,25 +119,24 @@ public class PlaybackViewModel extends AndroidViewModel {
                     : new QueueLiveData(mediaController));
 
     // Filters out queue items with no description or title and converts them to MediaItemMetadatas
-    private final LiveData<List<MediaItemMetadata>> mSanitizedQueue = map(mQueue,
+    private final LiveData<List<MediaItemMetadata>> mSanitizedQueue = distinct(map(mQueue,
             queue -> queue == null ? Collections.emptyList()
                     : queue.stream()
                             .filter(item -> item.getDescription() != null
                                     && item.getDescription().getTitle() != null)
                             .map(MediaItemMetadata::new)
-                            .collect(Collectors.toList()));
+                            .collect(Collectors.toList())));
 
-    private final LiveData<Boolean> mHasQueue = map(mQueue,
-            queue -> queue != null && !queue.isEmpty());
+    private final LiveData<Boolean> mHasQueue = distinct(map(mQueue,
+            queue -> queue != null && !queue.isEmpty()));
 
     private final LiveData<PlaybackController> mPlaybackControls = map(mMediaController,
             PlaybackController::new);
 
-    private final LiveData<CombinedInfo> mCombinedInfo =
-            map(
-                    pair(mMediaController, pair(mMetadata, mPlaybackState)),
-                    input ->
-                            new CombinedInfo(input.first, input.second.first, input.second.second));
+    private final LiveData<CombinedInfo> mCombinedInfo = map(
+            pair(mMediaController, pair(mMetadata, mPlaybackState)),
+            input -> input.first == null ? null
+                    : new CombinedInfo(input.first, input.second.first, input.second.second));
 
     private final PlaybackInfo mPlaybackInfo = new PlaybackInfo();
 
@@ -217,8 +218,8 @@ public class PlaybackViewModel extends AndroidViewModel {
     }
 
     /**
-     * Contains LiveDatas related to the current PlaybackState. A single instance of this object
-     * is created for each PlaybackViewModel.
+     * Contains LiveDatas related to the current PlaybackState. A single instance of this object is
+     * created for each PlaybackViewModel.
      */
     public class PlaybackInfo {
         private LiveData<Integer> mMainAction = map(mPlaybackState, state -> {
@@ -247,9 +248,9 @@ public class PlaybackViewModel extends AndroidViewModel {
                 case PlaybackState.STATE_STOPPED:
                 case PlaybackState.STATE_PAUSED:
                 case PlaybackState.STATE_NONE:
-                    return ACTION_PLAY;
                 case PlaybackState.STATE_ERROR:
-                    return ACTION_DISABLED;
+                    return (actions & PlaybackState.ACTION_PLAY) != 0 ? ACTION_PLAY
+                            : ACTION_DISABLED;
                 default:
                     Log.w(TAG, String.format("Unknown PlaybackState: %d", state.getState()));
                     return ACTION_DISABLED;
@@ -276,8 +277,22 @@ public class PlaybackViewModel extends AndroidViewModel {
                 state -> state != null
                         && (state.getActions() & PlaybackState.ACTION_SKIP_TO_PREVIOUS) != 0);
 
-        private final LiveData<Boolean> mIsBuffering = map(mPlaybackState,
-                state -> state != null && state.getState() == PlaybackState.STATE_BUFFERING);
+        // true if the media source is loading (e.g.: buffering, connecting, etc.)
+        private final LiveData<Boolean> mIsLoading = map(mPlaybackState,
+                playbackState -> {
+                    if (playbackState == null) {
+                        return false;
+                    }
+
+                    int state = playbackState.getState();
+                    return state == PlaybackState.STATE_BUFFERING
+                            || state == PlaybackState.STATE_CONNECTING
+                            || state == PlaybackState.STATE_FAST_FORWARDING
+                            || state == PlaybackState.STATE_REWINDING
+                            || state == PlaybackState.STATE_SKIPPING_TO_NEXT
+                            || state == PlaybackState.STATE_SKIPPING_TO_PREVIOUS
+                            || state == PlaybackState.STATE_SKIPPING_TO_QUEUE_ITEM;
+                });
 
         private final LiveData<CharSequence> mErrorMessage = map(mPlaybackState,
                 state -> state == null ? null : state.getErrorMessage());
@@ -286,8 +301,9 @@ public class PlaybackViewModel extends AndroidViewModel {
                 state -> state == null ? MediaSession.QueueItem.UNKNOWN_ID
                         : state.getActiveQueueItemId());
 
-        private final LiveData<List<RawCustomPlaybackAction>> mCustomActions = map(mCombinedInfo,
-                this::getCustomActions);
+        private final LiveData<List<RawCustomPlaybackAction>> mCustomActions = distinct(
+                map(mCombinedInfo,
+                        this::getCustomActions));
 
         private PlaybackInfo() {
         }
@@ -298,42 +314,11 @@ public class PlaybackViewModel extends AndroidViewModel {
         }
 
         /**
-         * Returns a sorted list of custom actions available. Call {@link #fetchDrawable(Context,
-         * RawCustomPlaybackAction)} to get the appropriate icon Drawable.
+         * Returns a sorted list of custom actions available. Call {@link
+         * RawCustomPlaybackAction#fetchDrawable(Context)} to get the appropriate icon Drawable.
          */
         public LiveData<List<RawCustomPlaybackAction>> getCustomActions() {
             return mCustomActions;
-        }
-
-        /**
-         * Converts a {@link RawCustomPlaybackAction} into a {@link CustomPlaybackAction} by
-         * fetching the appropriate drawable for the icon.
-         *
-         * @param context Context into which the icon will be drawn
-         * @param action  RawCustomPlaybackAction that contains info to convert
-         * @return the converted CustomPlaybackAction
-         */
-        public CustomPlaybackAction fetchDrawable(@NonNull Context context,
-                @NonNull RawCustomPlaybackAction action) {
-            Drawable icon;
-            if (action.mPackageName == null) {
-                icon = context.getDrawable(action.mIcon);
-            } else {
-                Resources resources = getResourcesForPackage(context, action.mPackageName);
-                if (resources == null) {
-                    icon = null;
-                } else {
-                    // the resources may be from another package. we need to update the
-                    // configuration
-                    // using the context from the activity so we get the drawable from the
-                    // correct DPI
-                    // bucket.
-                    resources.updateConfiguration(context.getResources().getConfiguration(),
-                            context.getResources().getDisplayMetrics());
-                    icon = resources.getDrawable(action.mIcon, null);
-                }
-            }
-            return new CustomPlaybackAction(icon, action.mAction, action.mExtras);
         }
 
         /**
@@ -380,10 +365,11 @@ public class PlaybackViewModel extends AndroidViewModel {
         }
 
         /**
-         * Returns a LiveData that emits {@code true} iff the media source is buffering
+         * Returns a LiveData that emits {@code true} iff the media source is loading (e.g.:
+         * buffering, connecting, etc.)
          */
-        public LiveData<Boolean> isBuffering() {
-            return mIsBuffering;
+        public LiveData<Boolean> isLoading() {
+            return mIsLoading;
         }
 
         /**
@@ -395,8 +381,8 @@ public class PlaybackViewModel extends AndroidViewModel {
         }
 
         /**
-         * Returns a LiveData that emits the queue id of the currently playing queue item, or
-         * {@link MediaSession.QueueItem#UNKNOWN_ID} if none of the items is currently playing.
+         * Returns a LiveData that emits the queue id of the currently playing queue item, or {@link
+         * MediaSession.QueueItem#UNKNOWN_ID} if none of the items is currently playing.
          */
         public LiveData<Long> getActiveQueueItemId() {
             return mActiveQueueItemId;
@@ -404,8 +390,9 @@ public class PlaybackViewModel extends AndroidViewModel {
 
         private List<RawCustomPlaybackAction> getCustomActions(
                 @Nullable CombinedInfo info) {
-            PlaybackState playbackState = info.mPlaybackState;
             List<RawCustomPlaybackAction> actions = new ArrayList<>();
+            if (info == null) return actions;
+            PlaybackState playbackState = info.mPlaybackState;
             if (playbackState == null) return actions;
 
             RawCustomPlaybackAction ratingAction = getRatingAction(info);
@@ -423,6 +410,7 @@ public class PlaybackViewModel extends AndroidViewModel {
 
         @Nullable
         private RawCustomPlaybackAction getRatingAction(@Nullable CombinedInfo info) {
+            if (info == null) return null;
             PlaybackState playbackState = info.mPlaybackState;
             if (playbackState == null) return null;
 
@@ -444,15 +432,6 @@ public class PlaybackViewModel extends AndroidViewModel {
             extras.putBoolean(EXTRA_SET_HEART, !hasHeart);
             return new RawCustomPlaybackAction(iconResource, null, ACTION_SET_RATING,
                     extras);
-        }
-
-        private Resources getResourcesForPackage(Context context, String packageName) {
-            try {
-                return context.getPackageManager().getResourcesForApplication(packageName);
-            } catch (PackageManager.NameNotFoundException e) {
-                Log.e(TAG, "Unable to get resources for " + packageName);
-                return null;
-            }
         }
     }
 
@@ -567,9 +546,9 @@ public class PlaybackViewModel extends AndroidViewModel {
      * {@link PlaybackController} class. Custom actions for the current media source are exposed
      * through {@link PlaybackInfo#getCustomActions()}
      * <p>
-     * Does not contain a {@link Drawable} representation of the icon. Instances of
-     * this object should be converted to a {@link CustomPlaybackAction} via {@link
-     * PlaybackInfo#fetchDrawable(Context, RawCustomPlaybackAction)} for display.
+     * Does not contain a {@link Drawable} representation of the icon. Instances of this object
+     * should be converted to a {@link CustomPlaybackAction} via {@link
+     * RawCustomPlaybackAction#fetchDrawable(Context)} for display.
      */
     public static class RawCustomPlaybackAction {
         // TODO (keyboardr): This class (and associtated translation code) will be merged with
@@ -605,6 +584,64 @@ public class PlaybackViewModel extends AndroidViewModel {
             mPackageName = packageName;
             mAction = action;
             mExtras = extras;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            RawCustomPlaybackAction that = (RawCustomPlaybackAction) o;
+
+            return mIcon == that.mIcon
+                    && Objects.equals(mPackageName, that.mPackageName)
+                    && Objects.equals(mAction, that.mAction)
+                    && Objects.equals(mExtras, that.mExtras);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mIcon, mPackageName, mAction, mExtras);
+        }
+
+        /**
+         * Converts this {@link RawCustomPlaybackAction} into a {@link CustomPlaybackAction} by
+         * fetching the appropriate drawable for the icon.
+         *
+         * @param context Context into which the icon will be drawn
+         * @return the converted CustomPlaybackAction or null if appropriate {@link Resources}
+         * cannot be obtained
+         */
+        @Nullable
+        public CustomPlaybackAction fetchDrawable(@NonNull Context context) {
+            Drawable icon;
+            if (mPackageName == null) {
+                icon = context.getDrawable(mIcon);
+            } else {
+                Resources resources = getResourcesForPackage(context, mPackageName);
+                if (resources == null) {
+                    return null;
+                } else {
+                    // the resources may be from another package. we need to update the
+                    // configuration
+                    // using the context from the activity so we get the drawable from the
+                    // correct DPI
+                    // bucket.
+                    resources.updateConfiguration(context.getResources().getConfiguration(),
+                            context.getResources().getDisplayMetrics());
+                    icon = resources.getDrawable(mIcon, null);
+                }
+            }
+            return new CustomPlaybackAction(icon, mAction, mExtras);
+        }
+
+        private Resources getResourcesForPackage(Context context, String packageName) {
+            try {
+                return context.getPackageManager().getResourcesForApplication(packageName);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.e(TAG, "Unable to get resources for " + packageName);
+                return null;
+            }
         }
     }
 

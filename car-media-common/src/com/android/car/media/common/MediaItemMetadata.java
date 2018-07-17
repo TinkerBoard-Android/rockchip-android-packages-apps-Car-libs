@@ -124,8 +124,6 @@ public class MediaItemMetadata implements Parcelable {
     }
 
     /**
-     * An id that can be used on {@link PlaybackModel#onSkipToQueueItem(long)}
-     *
      * @return the id of this item in the session queue, or NULL if this is not a session queue
      * item.
      */
