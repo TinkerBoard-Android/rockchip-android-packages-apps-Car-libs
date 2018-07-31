@@ -48,6 +48,7 @@ import androidx.lifecycle.MediatorLiveData;
 import com.android.car.media.common.CustomPlaybackAction;
 import com.android.car.media.common.MediaItemMetadata;
 import com.android.car.media.common.R;
+import com.android.car.media.common.source.MediaSourceColors;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -96,11 +97,10 @@ public class PlaybackViewModel extends AndroidViewModel {
      */
     public static final int ACTION_PAUSE = 3;
 
-    public PlaybackViewModel(Application application) {
-        super(application);
-    }
-
     private final SwitchingLiveData<MediaController> mMediaController = new SwitchingLiveData<>();
+
+    private final MediaSourceColors.Factory mColorsFactory;
+    private final LiveData<MediaSourceColors> mColors;
 
     private final LiveData<MediaMetadata> mMetadata = switchMap(mMediaController,
             mediaController -> mediaController == null ? nullLiveData()
@@ -139,6 +139,15 @@ public class PlaybackViewModel extends AndroidViewModel {
 
     private final PlaybackInfo mPlaybackInfo = new PlaybackInfo();
 
+    public PlaybackViewModel(Application application) {
+        super(application);
+        mColorsFactory = new MediaSourceColors.Factory(application);
+        mColors = map(mMediaController, controller ->
+                controller == null ? null
+                        : mColorsFactory.extractColors(controller.getPackageName())
+        );
+    }
+
     /**
      * Sets the MediaController source for this ViewModel. This should be called before other
      * methods on this ViewModel are set. This method may be called multiple times, and the
@@ -155,6 +164,13 @@ public class PlaybackViewModel extends AndroidViewModel {
     @NonNull
     public LiveData<MediaController> getMediaController() {
         return mMediaController;
+    }
+
+    /**
+     * Returns a LiveData that emits the colors for the currently set media source.
+     */
+    public LiveData<MediaSourceColors> getMediaSourceColors() {
+        return mColors;
     }
 
     /**
