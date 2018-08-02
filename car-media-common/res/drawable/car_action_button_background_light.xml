@@ -15,5 +15,5 @@ limitations under the License.
 -->
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
     android:inset="@dimen/car_action_button_ripple_inset" >
-    <ripple android:color="@color/car_card_ripple_background_inverse" />
+    <ripple android:color="@color/car_card_ripple_background_light" />
 </inset>
