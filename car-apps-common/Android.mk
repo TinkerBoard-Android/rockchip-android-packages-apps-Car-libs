@@ -34,4 +34,11 @@ LOCAL_USE_AAPT2 := true
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
+LOCAL_STATIC_ANDROID_LIBRARIES += \
+    androidx.car_car \
+    androidx-constraintlayout_constraintlayout
+
+LOCAL_STATIC_JAVA_LIBRARIES += \
+    androidx-constraintlayout_constraintlayout-solver
+
 include $(BUILD_STATIC_JAVA_LIBRARY)
