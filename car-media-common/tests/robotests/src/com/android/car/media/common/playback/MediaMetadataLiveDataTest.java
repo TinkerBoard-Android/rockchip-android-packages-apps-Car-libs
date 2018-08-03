@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
@@ -74,6 +75,15 @@ public class MediaMetadataLiveDataTest {
         mMediaMetadataLiveData.observe(mLifecycleOwner, new CaptureObserver<>());
 
         assertThat(mCapturedCallback.getValue()).isNotNull();
+    }
+
+    @Test
+    public void testGetValueOnActive() {
+        when(mMediaController.getMetadata()).thenReturn(mMetadata);
+        CaptureObserver<MediaMetadata> observer = new CaptureObserver<>();
+        mMediaMetadataLiveData.observe(mLifecycleOwner, observer);
+
+        assertThat(observer.getObservedValue()).isEqualTo(mMetadata);
     }
 
     @Test

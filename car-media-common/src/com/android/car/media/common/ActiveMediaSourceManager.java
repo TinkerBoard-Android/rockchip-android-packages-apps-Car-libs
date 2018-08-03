@@ -25,6 +25,8 @@ import android.media.session.PlaybackState;
 import android.os.Handler;
 import android.util.Log;
 
+import com.android.car.media.common.playback.PlaybackStateAnnotations;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -140,7 +142,7 @@ public class ActiveMediaSourceManager {
         }
     }
 
-    private String getStateName(@PlaybackState.State int state) {
+    private String getStateName(@PlaybackStateAnnotations.Actions int state) {
         switch (state) {
             case PlaybackState.STATE_NONE:
                 return "NONE";
@@ -180,7 +182,7 @@ public class ActiveMediaSourceManager {
     private MediaController getTopMostController(List<MediaController> controllers) {
         if (controllers != null && controllers.size() > 0) {
             for (MediaController candidate : controllers) {
-                @PlaybackState.State int state = candidate.getPlaybackState() != null
+                @PlaybackStateAnnotations.Actions int state = candidate.getPlaybackState() != null
                         ? candidate.getPlaybackState().getState()
                         : PlaybackState.STATE_NONE;
                 if (state == PlaybackState.STATE_BUFFERING
@@ -241,7 +243,7 @@ public class ActiveMediaSourceManager {
 
     /**
      * Stops following changes on the list of active media sources. This method could cause an
-     * immediate {@link PlaybackModel.PlaybackObserver#onSourceChanged()} event if a media source
+     * immediate {@link Observer#onActiveSourceChanged()} event if a media source
      * was already connected.
      */
     private void stop() {

@@ -56,7 +56,11 @@ class ProgressLiveData extends LiveData<Long> {
 
     private void updateProgress() {
         setValue(getProgress());
-        mTimerHandler.postDelayed(this::updateProgress, UPDATE_INTERVAL_MS);
+        if (mPlaybackState.getState() != PlaybackState.STATE_PAUSED
+                && mPlaybackState.getState() != PlaybackState.STATE_STOPPED
+                && mPlaybackState.getPlaybackSpeed() != 0) {
+            mTimerHandler.postDelayed(this::updateProgress, UPDATE_INTERVAL_MS);
+        }
     }
 
     private long getProgress() {

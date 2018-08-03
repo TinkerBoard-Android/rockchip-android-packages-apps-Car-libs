@@ -43,6 +43,7 @@ class PlaybackStateLiveData extends LiveData<PlaybackState> {
 
     @Override
     protected void onActive() {
+        setValue(mMediaController.getPlaybackState());
         mMediaController.registerCallback(mCallback);
     }
 

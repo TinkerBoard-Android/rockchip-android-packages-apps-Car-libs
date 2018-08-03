@@ -44,6 +44,7 @@ class MediaMetadataLiveData extends LiveData<MediaMetadata> {
 
     @Override
     protected void onActive() {
+        setValue(mMediaController.getMetadata());
         mMediaController.registerCallback(mCallback);
     }
 
