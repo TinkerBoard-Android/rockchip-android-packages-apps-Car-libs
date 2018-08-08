@@ -20,6 +20,7 @@ LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 LOCAL_MODULE := car-glide-disklrucache
 LOCAL_SDK_VERSION := current
 LOCAL_SRC_FILES := ../../../../../prebuilts/maven_repo/bumptech/com/github/bumptech/glide/disklrucache/SNAPSHOT/disklrucache-SNAPSHOT$(COMMON_JAVA_PACKAGE_SUFFIX)
+LOCAL_NOTICE_FILE := prebuilts/maven_repo/bumptech/LICENSE
 LOCAL_JETIFIER_ENABLED := true
 LOCAL_UNINSTALLABLE_MODULE := true
 
@@ -31,6 +32,7 @@ LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 LOCAL_MODULE := car-gifdecoder
 LOCAL_SDK_VERSION := current
 LOCAL_SRC_FILES := ../../../../../prebuilts/maven_repo/bumptech/com/github/bumptech/glide/gifdecoder/SNAPSHOT/gifdecoder-SNAPSHOT$(COMMON_JAVA_PACKAGE_SUFFIX)
+LOCAL_NOTICE_FILE := prebuilts/maven_repo/bumptech/LICENSE
 LOCAL_JETIFIER_ENABLED := true
 LOCAL_UNINSTALLABLE_MODULE := true
 
@@ -42,6 +44,7 @@ LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 LOCAL_MODULE := car-glide
 LOCAL_SDK_VERSION := current
 LOCAL_SRC_FILES := ../../../../../prebuilts/maven_repo/bumptech/com/github/bumptech/glide/glide/SNAPSHOT/glide-SNAPSHOT$(COMMON_JAVA_PACKAGE_SUFFIX)
+LOCAL_NOTICE_FILE := prebuilts/maven_repo/bumptech/LICENSE
 LOCAL_JETIFIER_ENABLED := true
 LOCAL_UNINSTALLABLE_MODULE := true
 
