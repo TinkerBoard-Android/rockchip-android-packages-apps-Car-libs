@@ -22,8 +22,8 @@
         <item name="android:contentInsetEnd">@dimen/car_keyline_1</item>
         <item name="android:contentInsetStart">@dimen/car_keyline_1</item>
         <item name="android:elevation">@dimen/car_action_bar_elevation</item>
-        <item name="android:subtitleTextAppearance">@style/TextAppearance.Car.Body2.Light</item>
-        <item name="android:titleTextAppearance">@style/TextAppearance.Car.Title2.Light</item>
+        <item name="android:subtitleTextAppearance">@style/TextAppearance.Car.Body3.Light</item>
+        <item name="android:titleTextAppearance">@style/TextAppearance.Car.Body1.Medium.Light</item>
         <item name="android:navigationIcon">@drawable/ic_nav_arrow_back</item>
     </style>
 
