@@ -89,34 +89,68 @@ public class LiveDataFunctions {
     }
 
     /**
-     * Returns a LiveData that emits the opposite of {@code data} (or {@code null} if {@code data}
-     * emits {@code null})
+     * Returns a LiveData that emits the opposite of {@code source} (or {@code null} if {@code
+     * source} emits {@code null})
      */
-    public static LiveData<Boolean> not(@NonNull LiveData<Boolean> data) {
-        return Transformations.map(data, bool -> bool == null ? null : !bool);
+    public static LiveData<Boolean> not(@NonNull LiveData<Boolean> source) {
+        return Transformations.map(source, bool -> bool == null ? null : !bool);
     }
 
     /**
-     * Returns a LiveData that emits {@code true} iff {@code data} emits {@code null}. Otherwise
+     * Returns a LiveData that emits {@code true} iff {@code source} emits {@code null}. Otherwise
      * emits {@code false}
      */
-    public static LiveData<Boolean> emitsNull(@NonNull LiveData<?> data) {
-        return Transformations.map(data, Objects::isNull);
+    public static LiveData<Boolean> emitsNull(@NonNull LiveData<?> source) {
+        return Transformations.map(source, Objects::isNull);
     }
 
     /**
-     * Returns a LiveData that emits the same value as {@code data}, but only notifies its observers
-     * when the new value is distinct ({@link Objects#equals(Object, Object)}
+     * Returns a LiveData that emits the same value as {@code source}, but only notifies its
+     * observers when the new value is distinct ({@link Objects#equals(Object, Object)}
      */
-    public static <T> LiveData<T> distinct(@NonNull LiveData<T> data) {
+    public static <T> LiveData<T> distinct(@NonNull LiveData<T> source) {
         return new MediatorLiveData<T>() {
             private boolean mInitialized = false;
 
             {
-                addSource(data, value -> {
+                addSource(source, value -> {
                     if (!mInitialized || !Objects.equals(value, getValue())) {
                         mInitialized = true;
                         setValue(value);
+                    }
+                });
+            }
+        };
+    }
+
+    /**
+     * Create a LiveData that doesn't change when {@code isFrozen} emits {@code true}. If {@code
+     * source} has updated while the data was frozen, it will be updated to the current value once
+     * unfrozen.
+     *
+     * @param isFrozen the result will not update while this data emits {@code true}.
+     * @param source   the source data for the result.
+     * @return a LiveData that doesn't change when {@code isFrozen} emits {@code true}.
+     */
+    public static <T> LiveData<T> freezable(@NonNull LiveData<Boolean> isFrozen,
+            @NonNull LiveData<T> source) {
+        return new MediatorLiveData<T>() {
+
+            private boolean mDirty = false;
+
+            {
+                addSource(requireNonNull(isFrozen), frozen -> {
+                    if (frozen == Boolean.FALSE && mDirty) {
+                        setValue(source.getValue());
+                        mDirty = false;
+                    }
+                });
+                addSource(requireNonNull(source), value -> {
+                    if (isFrozen.getValue() != Boolean.FALSE) {
+                        mDirty = true;
+                    } else {
+                        setValue(source.getValue());
+                        mDirty = false;
                     }
                 });
             }
