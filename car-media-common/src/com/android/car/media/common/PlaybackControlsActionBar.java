@@ -123,6 +123,7 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
 
         mSkipPrevButton = createIconButton(mContext, mIconsColor,
                 context.getDrawable(R.drawable.ic_skip_previous));
+        mSkipPrevButton.setId(R.id.skip_prev);
         mSkipPrevButton.setVisibility(INVISIBLE);
         mSkipPrevButton.setOnClickListener(v -> {
             if (mModel != null) {
@@ -131,6 +132,7 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
         });
         mSkipNextButton = createIconButton(mContext, mIconsColor,
                 context.getDrawable(R.drawable.ic_skip_next));
+        mSkipNextButton.setId(R.id.skip_next);
         mSkipNextButton.setVisibility(INVISIBLE);
         mSkipNextButton.setOnClickListener(v -> {
             if (mModel != null) {
@@ -139,6 +141,7 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
         });
         mTrackListButton = createIconButton(mContext, mIconsColor,
                 context.getDrawable(R.drawable.ic_tracklist));
+        mTrackListButton.setId(R.id.track_list);
         mTrackListButton.setOnClickListener(v -> {
             if (mListener != null) {
                 mListener.onToggleQueue();
@@ -147,6 +150,7 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
 
         ImageButton overflowButton = createIconButton(context, mIconsColor,
                 context.getDrawable(androidx.car.R.drawable.ic_overflow));
+        overflowButton.setId(R.id.overflow);
 
         setView(mPlayPauseStopImageContainer, ActionBar.SLOT_MAIN);
         setView(mSkipPrevButton, ActionBar.SLOT_LEFT);
