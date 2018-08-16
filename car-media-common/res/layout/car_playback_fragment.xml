@@ -24,7 +24,7 @@
 
     <com.android.car.media.common.CrossfadeImageView
         android:id="@+id/album_background"
-        android:background="@color/car_dark_blue_grey_800"
+        android:foreground="@drawable/car_card_ripple_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitStart" />

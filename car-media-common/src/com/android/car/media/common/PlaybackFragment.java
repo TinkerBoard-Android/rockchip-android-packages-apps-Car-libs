@@ -98,7 +98,13 @@ public class PlaybackFragment extends Fragment {
         openIntent.observe(getViewLifecycleOwner(), intent -> {
             // Ensure open intent data stays fresh while view is clickable.
         });
-        albumBackground.setOnClickListener(v -> startActivity(openIntent.getValue()));
+        albumBackground.setOnClickListener(v -> {
+            Intent intent = openIntent.getValue();
+            if (intent != null
+                    && intent.resolveActivity(requireActivity().getPackageManager()) != null) {
+                startActivity(intent);
+            }
+        });
         return view;
     }
 
