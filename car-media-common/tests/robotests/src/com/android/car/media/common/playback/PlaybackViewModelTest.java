@@ -21,14 +21,16 @@ import static com.android.car.arch.common.LiveDataFunctions.dataOf;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
 
+import android.annotation.NonNull;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
-import android.support.annotation.NonNull;
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 
@@ -177,6 +179,52 @@ public class PlaybackViewModelTest {
 
         assertThat(observer.hasBeenNotified()).isTrue();
         assertThat(observer.getObservedValue()).isEqualTo(true);
+    }
+
+    @Test
+    public void testChangeMediaSource_combinedInfoConsistent() {
+        // Ensure getters are consistent with values delivered by callback
+        when(mMediaController.getMetadata()).thenReturn(mMediaMetadata);
+        when(mMediaController.getPlaybackState()).thenReturn(mPlaybackState);
+        deliverValuesToCallbacks(mCapturedCallback, mMediaMetadata, mPlaybackState);
+
+        // Create new MediaController and associated callback captor
+        MediaController newController = mock(MediaController.class);
+        ArgumentCaptor<MediaController.Callback> newCallbackCaptor =
+                ArgumentCaptor.forClass(MediaController.Callback.class);
+        doNothing().when(newController).registerCallback(newCallbackCaptor.capture());
+
+        // Wire up new data for new MediaController
+        MediaMetadata newMetadata = mock(MediaMetadata.class);
+        PlaybackState newPlaybackState = mock(PlaybackState.class);
+        when(newController.getMetadata()).thenReturn(newMetadata);
+        when(newController.getPlaybackState()).thenReturn(newPlaybackState);
+
+        // Ensure that whenever the CombinedInfo value changes, all values are coming from the
+        // same MediaController.
+        mPlaybackViewModel.getCombinedInfoForTesting().observe(mLifecycleOwner, combinedInfo -> {
+            if (combinedInfo.mMetadata == newMetadata
+                    || combinedInfo.mPlaybackState == newPlaybackState) {
+                assertThat(combinedInfo.mMediaController).isSameAs(newController);
+            }
+            if (combinedInfo.mMetadata == mMediaMetadata
+                    || combinedInfo.mPlaybackState == mPlaybackState) {
+                assertThat(combinedInfo.mMediaController).isSameAs(mMediaController);
+            }
+        });
+
+        mPlaybackViewModel.setMediaController(dataOf(newController));
+        deliverValuesToCallbacks(newCallbackCaptor, newMetadata, newPlaybackState);
+    }
+
+    private void deliverValuesToCallbacks(
+            ArgumentCaptor<MediaController.Callback> callbackCaptor,
+            MediaMetadata metadata,
+            PlaybackState playbackState) {
+        for (MediaController.Callback callback : callbackCaptor.getAllValues()) {
+            callback.onMetadataChanged(metadata);
+            callback.onPlaybackStateChanged(playbackState);
+        }
     }
 
     @NonNull

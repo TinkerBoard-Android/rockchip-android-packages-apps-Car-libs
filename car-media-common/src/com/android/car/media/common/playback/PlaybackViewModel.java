@@ -19,6 +19,7 @@ package com.android.car.media.common.playback;
 import static androidx.lifecycle.Transformations.map;
 import static androidx.lifecycle.Transformations.switchMap;
 
+import static com.android.car.arch.common.LiveDataFunctions.combine;
 import static com.android.car.arch.common.LiveDataFunctions.dataOf;
 import static com.android.car.arch.common.LiveDataFunctions.distinct;
 import static com.android.car.arch.common.LiveDataFunctions.nullLiveData;
@@ -133,10 +134,31 @@ public class PlaybackViewModel extends AndroidViewModel {
     private final LiveData<PlaybackController> mPlaybackControls = map(mMediaController,
             PlaybackController::new);
 
-    private final LiveData<CombinedInfo> mCombinedInfo = map(
-            pair(mMediaController, pair(mMetadata, mPlaybackState)),
-            input -> input.first == null ? null
-                    : new CombinedInfo(input.first, input.second.first, input.second.second));
+    private final LiveData<CombinedInfo> mCombinedInfo = combine(mMetadata, mPlaybackState,
+            // getValue() on mMediaController is safe because mMetadata and mPlaybackState are
+            // keeping it active. Don't pass through the values since they may be stale if the
+            // MediaController is being updated.
+            (mediaMetadata, playbackState) -> getCombinedInfo(mMediaController.getValue())
+    );
+
+    @Nullable
+    private CombinedInfo getCombinedInfo(@Nullable MediaController mediaController) {
+        if (mediaController == null) return null;
+
+        MediaMetadata metadata = mediaController.getMetadata();
+        PlaybackState playbackState = mediaController.getPlaybackState();
+        CombinedInfo oldInfo = mCombinedInfo.getValue();
+        // Minimize object churn
+        if (oldInfo == null
+                || !Objects.equals(mediaController, oldInfo.mMediaController)
+                // MediaMetadata.equals() doesn't check some relevant fields
+                || !Objects.equals(playbackState, oldInfo.mPlaybackState)) {
+            return new CombinedInfo(mediaController, metadata, playbackState);
+        } else {
+            return oldInfo;
+        }
+    }
+
 
     private final PlaybackInfo mPlaybackInfo = new PlaybackInfo();
 
@@ -215,6 +237,11 @@ public class PlaybackViewModel extends AndroidViewModel {
      */
     public PlaybackInfo getPlaybackInfo() {
         return mPlaybackInfo;
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    LiveData<CombinedInfo> getCombinedInfoForTesting() {
+        return mCombinedInfo;
     }
 
     /**
@@ -301,9 +328,8 @@ public class PlaybackViewModel extends AndroidViewModel {
                 state -> state == null ? MediaSession.QueueItem.UNKNOWN_ID
                         : state.getActiveQueueItemId());
 
-        private final LiveData<List<RawCustomPlaybackAction>> mCustomActions = distinct(
-                map(mCombinedInfo,
-                        this::getCustomActions));
+        private final LiveData<List<RawCustomPlaybackAction>> mCustomActions =
+                distinct(map(mCombinedInfo, this::getCustomActions));
 
         private PlaybackInfo() {
         }
