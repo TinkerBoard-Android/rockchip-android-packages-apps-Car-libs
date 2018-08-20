@@ -17,6 +17,7 @@
 package com.android.car.arch.common;
 
 import static com.android.car.arch.common.LiveDataFunctions.dataOf;
+import static com.android.car.arch.common.LiveDataFunctions.distinct;
 import static com.android.car.arch.common.LiveDataFunctions.emitsNull;
 import static com.android.car.arch.common.LiveDataFunctions.falseLiveData;
 import static com.android.car.arch.common.LiveDataFunctions.ifThenElse;
@@ -102,6 +103,27 @@ public class LiveDataFunctionsTest {
                 pair(dataOf(new Object()), false),
                 pair(nullLiveData(), true));
         checkUninitialized(emitsNull(new MutableLiveData<>()));
+    }
+
+    @Test
+    public void testDistinct() {
+        CaptureObserver<Integer> observer = new CaptureObserver<>();
+        MutableLiveData<Integer> source = dataOf(0);
+        LiveData<Integer> distinct = distinct(source);
+        distinct.observe(mLifecycleOwner, observer);
+        observer.reset();
+
+        source.setValue(1);
+        assertThat(observer.hasBeenNotified()).isTrue();
+        assertThat(observer.getObservedValue()).isEqualTo(1);
+        observer.reset();
+
+        source.setValue(1);
+        assertThat(observer.hasBeenNotified()).isFalse();
+
+        source.setValue(2);
+        assertThat(observer.hasBeenNotified()).isTrue();
+        assertThat(observer.getObservedValue()).isEqualTo(2);
     }
 
     @Test

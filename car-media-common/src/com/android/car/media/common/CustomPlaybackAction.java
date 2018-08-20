@@ -21,12 +21,13 @@ import android.annotation.Nullable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
+
 /**
  * Abstract representation of a custom playback action. A custom playback action represents a
  * visual element that can be used to trigger playback actions not included in the standard
  * {@link PlaybackControls} class.
  * Custom actions for the current media source are exposed through
- * {@link PlaybackModel#getCustomActions()}
+ * {@link com.android.car.media.common.playback.PlaybackViewModel.PlaybackInfo#getCustomActions()}
  */
 public class CustomPlaybackAction {
     /** Icon to display for this custom action */

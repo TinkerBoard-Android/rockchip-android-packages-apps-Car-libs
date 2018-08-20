@@ -16,6 +16,9 @@
 
 package com.android.car.media.common;
 
+import static com.android.car.arch.common.LiveDataFunctions.pair;
+import static com.android.car.arch.common.LiveDataFunctions.split;
+
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
@@ -27,8 +30,14 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.car.widget.ActionBar;
 import androidx.cardview.widget.CardView;
+import androidx.lifecycle.LifecycleOwner;
+
+import com.android.car.media.common.playback.PlaybackViewModel;
+import com.android.car.media.common.source.MediaSourceColors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,34 +50,16 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
     private static final String TAG = "PlaybackView";
 
     private PlayPauseStopImageView mPlayPauseStopImageView;
-    private View mPlayPauseStopImageContainer;
     private ProgressBar mSpinner;
     private Context mContext;
     private ImageButton mSkipPrevButton;
     private ImageButton mSkipNextButton;
     private ImageButton mTrackListButton;
-    private Listener mListener;
-    private PlaybackModel mModel;
-    private PlaybackModel.PlaybackObserver mObserver = new PlaybackModel.PlaybackObserver() {
-        @Override
-        public void onPlaybackStateChanged() {
-            updateState();
-            updateCustomActions();
-        }
-
-        @Override
-        public void onSourceChanged() {
-            updateState();
-            updateCustomActions();
-            updateAccentColor();
-        }
-
-        @Override
-        public void onMetadataChanged() {
-            updateCustomActions();  // rating might have changed
-        }
-    };
     private ColorStateList mIconsColor;
+    private Listener mListener;
+
+    private PlaybackViewModel mModel;
+    private PlaybackViewModel.PlaybackController mController;
 
     /** Creates a {@link PlaybackControlsActionBar} view */
     public PlaybackControlsActionBar(Context context) {
@@ -92,54 +83,45 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
         init(context);
     }
 
-    @Override
-    public void setModel(PlaybackModel model) {
-        if (mModel != null) {
-            mModel.unregisterObserver(mObserver);
-        }
-        mModel = model;
-        if (mModel != null) {
-            mModel.registerObserver(mObserver);
-        }
-        updateAccentColor();
-    }
-
     private void init(Context context) {
         mContext = context;
 
         CardView actionBarWrapper = findViewById(androidx.car.R.id.action_bar_wrapper);
         actionBarWrapper.setCardBackgroundColor(context.getColor(androidx.car.R.color.car_card));
 
-        mPlayPauseStopImageContainer = inflate(context, R.layout.car_play_pause_stop_button_layout,
+        View mPlayPauseStopImageContainer = inflate(context,
+                R.layout.car_play_pause_stop_button_layout,
                 null);
         mPlayPauseStopImageContainer.setOnClickListener(this::onPlayPauseStopClicked);
         mPlayPauseStopImageView = mPlayPauseStopImageContainer.findViewById(R.id.play_pause_stop);
+        mPlayPauseStopImageView.setVisibility(View.INVISIBLE);
         mSpinner = mPlayPauseStopImageContainer.findViewById(R.id.spinner);
+        mSpinner.setVisibility(View.INVISIBLE);
         mPlayPauseStopImageView.setAction(PlayPauseStopImageView.ACTION_DISABLED);
         mPlayPauseStopImageView.setOnClickListener(this::onPlayPauseStopClicked);
 
         mIconsColor = context.getResources().getColorStateList(R.color.playback_control_color,
                 null);
 
-        mSkipPrevButton = createIconButton(mContext, mIconsColor,
+        mSkipPrevButton = createIconButton(mContext,
                 context.getDrawable(R.drawable.ic_skip_previous));
         mSkipPrevButton.setId(R.id.skip_prev);
         mSkipPrevButton.setVisibility(INVISIBLE);
         mSkipPrevButton.setOnClickListener(v -> {
-            if (mModel != null) {
-                mModel.onSkipPreviews();
+            if (mController != null) {
+                mController.skipToPrevious();
             }
         });
-        mSkipNextButton = createIconButton(mContext, mIconsColor,
+        mSkipNextButton = createIconButton(mContext,
                 context.getDrawable(R.drawable.ic_skip_next));
         mSkipNextButton.setId(R.id.skip_next);
         mSkipNextButton.setVisibility(INVISIBLE);
         mSkipNextButton.setOnClickListener(v -> {
-            if (mModel != null) {
-                mModel.onSkipNext();
+            if (mController != null) {
+                mController.skipToNext();
             }
         });
-        mTrackListButton = createIconButton(mContext, mIconsColor,
+        mTrackListButton = createIconButton(mContext,
                 context.getDrawable(R.drawable.ic_tracklist));
         mTrackListButton.setId(R.id.track_list);
         mTrackListButton.setOnClickListener(v -> {
@@ -148,7 +130,7 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
             }
         });
 
-        ImageButton overflowButton = createIconButton(context, mIconsColor,
+        ImageButton overflowButton = createIconButton(context,
                 context.getDrawable(androidx.car.R.drawable.ic_overflow));
         overflowButton.setId(R.id.overflow);
 
@@ -158,98 +140,97 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
         setExpandCollapseView(overflowButton);
     }
 
-    private ImageButton createIconButton(Context context, ColorStateList csl, Drawable icon) {
+    private ImageButton createIconButton(Context context, Drawable icon) {
         ImageButton button = new ImageButton(context, null, 0, R.style.PlaybackControl);
-        button.setImageTintList(csl);
+        button.setImageTintList(mIconsColor);
         button.setImageTintMode(PorterDuff.Mode.SRC_ATOP);
         button.setImageDrawable(icon);
         return button;
     }
 
-    private void updateState() {
+    @Override
+    public void setModel(@NonNull PlaybackViewModel model, @NonNull LifecycleOwner owner) {
         if (mModel != null) {
-            mPlayPauseStopImageView.setVisibility(View.VISIBLE);
-            mPlayPauseStopImageView.setAction(convertMainAction(mModel.getMainAction()));
-        } else {
-            mPlayPauseStopImageView.setVisibility(View.INVISIBLE);
+            Log.w(TAG, "PlaybackViewModel set more than once. Ignoring subsequent call.");
         }
-        mSpinner.setVisibility(mModel != null && mModel.isLoading()
-                ? View.VISIBLE : View.INVISIBLE);
-        mSkipPrevButton.setVisibility(mModel != null && mModel.isSkipPreviewsEnabled()
-                ? View.VISIBLE : View.INVISIBLE);
-        mSkipNextButton.setVisibility(mModel != null && mModel.isSkipNextEnabled()
-                ? View.VISIBLE : View.INVISIBLE);
+        mModel = model;
+        PlaybackViewModel.PlaybackInfo playbackInfo = model.getPlaybackInfo();
+
+        model.getPlaybackController().observe(owner, controller -> mController = controller);
+        mPlayPauseStopImageView.setVisibility(View.VISIBLE);
+        playbackInfo.getMainAction().observe(owner,
+                action -> mPlayPauseStopImageView.setAction(convertMainAction(action)));
+        playbackInfo.isLoading().observe(owner,
+                isLoading -> mSpinner.setVisibility(isLoading ? View.VISIBLE : View.INVISIBLE));
+        playbackInfo.isSkipPreviousEnabled().observe(owner,
+                enabled -> mSkipPrevButton.setVisibility(enabled ? VISIBLE : INVISIBLE));
+        playbackInfo.isSkipNextEnabled().observe(owner,
+                enabled -> mSkipNextButton.setVisibility(enabled ? VISIBLE : INVISIBLE));
+        model.getMediaSourceColors().observe(owner, this::applyColors);
+        pair(model.hasQueue(), playbackInfo.getCustomActions()).observe(owner,
+                split(this::updateCustomActions));
     }
 
     @PlayPauseStopImageView.Action
-    private int convertMainAction(@PlaybackModel.Action int action) {
+    private int convertMainAction(@PlaybackViewModel.Action int action) {
         switch (action) {
-            case PlaybackModel.ACTION_DISABLED:
+            case PlaybackViewModel.ACTION_DISABLED:
                 return PlayPauseStopImageView.ACTION_DISABLED;
-            case PlaybackModel.ACTION_PLAY:
+            case PlaybackViewModel.ACTION_PLAY:
                 return PlayPauseStopImageView.ACTION_PLAY;
-            case PlaybackModel.ACTION_PAUSE:
+            case PlaybackViewModel.ACTION_PAUSE:
                 return PlayPauseStopImageView.ACTION_PAUSE;
-            case PlaybackModel.ACTION_STOP:
+            case PlaybackViewModel.ACTION_STOP:
                 return PlayPauseStopImageView.ACTION_STOP;
         }
         Log.w(TAG, "Unknown action: " + action);
         return PlayPauseStopImageView.ACTION_DISABLED;
     }
 
-    private void updateAccentColor() {
-        int color = getMediaSourceColor();
+    private void applyColors(MediaSourceColors colors) {
+        int color = getMediaSourceColor(colors);
         int tintColor = ColorChecker.getTintColor(mContext, color);
         mPlayPauseStopImageView.setPrimaryActionColor(color, tintColor);
         mSpinner.setIndeterminateTintList(ColorStateList.valueOf(color));
     }
 
-    private int getMediaSourceColor() {
+    private int getMediaSourceColor(@Nullable MediaSourceColors colors) {
         int defaultColor = mContext.getResources().getColor(android.R.color.background_dark, null);
-        MediaSource mediaSource = mModel != null ? mModel.getMediaSource() : null;
-        return mediaSource != null ? mediaSource.getAccentColor(defaultColor) : defaultColor;
+        return colors != null ? colors.getAccentColor(defaultColor) : defaultColor;
     }
 
-    private List<ImageButton> getExtraActions() {
-        List<ImageButton> extraActions = new ArrayList<>();
-        if (mModel != null && mModel.hasQueue()) {
-            extraActions.add(mTrackListButton);
-        }
-        return extraActions;
-    }
-
-    private void updateCustomActions() {
-        if (mModel == null) {
-            setViews(new ImageButton[0]);
-            return;
-        }
+    private void updateCustomActions(boolean hasQueue,
+            List<PlaybackViewModel.RawCustomPlaybackAction> customActions) {
         List<ImageButton> combinedActions = new ArrayList<>();
-        combinedActions.addAll(getExtraActions());
-        combinedActions.addAll(mModel.getCustomActions()
+        if (hasQueue) {
+            combinedActions.add(mTrackListButton);
+        }
+        combinedActions.addAll(customActions
                 .stream()
+                .map(rawAction -> rawAction.fetchDrawable(getContext()))
                 .map(action -> {
-                    ImageButton button = createIconButton(getContext(), mIconsColor, action.mIcon);
+                    ImageButton button = createIconButton(getContext(), action.mIcon);
                     button.setOnClickListener(view ->
-                            mModel.onCustomAction(action.mAction, action.mExtras));
+                            mController.doCustomAction(action.mAction, action.mExtras));
                     return button;
                 })
                 .collect(Collectors.toList()));
-        setViews(combinedActions.toArray(new ImageButton[combinedActions.size()]));
+        setViews(combinedActions.toArray(new ImageButton[0]));
     }
 
     private void onPlayPauseStopClicked(View view) {
-        if (mModel == null) {
+        if (mController == null) {
             return;
         }
         switch (mPlayPauseStopImageView.getAction()) {
             case PlayPauseStopImageView.ACTION_PLAY:
-                mModel.onPlay();
+                mController.play();
                 break;
             case PlayPauseStopImageView.ACTION_PAUSE:
-                mModel.onPause();
+                mController.pause();
                 break;
             case PlayPauseStopImageView.ACTION_STOP:
-                mModel.onStop();
+                mController.stop();
                 break;
             default:
                 Log.i(TAG, "Play/Pause/Stop clicked on invalid state");
