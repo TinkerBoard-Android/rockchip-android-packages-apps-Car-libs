@@ -20,6 +20,7 @@ import static com.android.car.arch.common.LiveDataFunctions.dataOf;
 import static com.android.car.arch.common.LiveDataFunctions.distinct;
 import static com.android.car.arch.common.LiveDataFunctions.emitsNull;
 import static com.android.car.arch.common.LiveDataFunctions.falseLiveData;
+import static com.android.car.arch.common.LiveDataFunctions.freezable;
 import static com.android.car.arch.common.LiveDataFunctions.ifThenElse;
 import static com.android.car.arch.common.LiveDataFunctions.not;
 import static com.android.car.arch.common.LiveDataFunctions.nullLiveData;
@@ -124,6 +125,42 @@ public class LiveDataFunctionsTest {
         source.setValue(2);
         assertThat(observer.hasBeenNotified()).isTrue();
         assertThat(observer.getObservedValue()).isEqualTo(2);
+    }
+
+    @Test
+    public void testFreezable() {
+        CaptureObserver<Integer> observer = new CaptureObserver<>();
+        MutableLiveData<Boolean> isFrozen = dataOf(false);
+        MutableLiveData<Integer> source = dataOf(0);
+        LiveData<Integer> freezable = freezable(isFrozen, source);
+        freezable.observe(mLifecycleOwner, observer);
+
+        // Initialized to correct value.
+        assertThat(observer.hasBeenNotified()).isTrue();
+        assertThat(observer.getObservedValue()).isEqualTo(0);
+        observer.reset();
+
+        // Updates with source when not frozen.
+        source.setValue(1);
+        assertThat(observer.hasBeenNotified()).isTrue();
+        assertThat(observer.getObservedValue()).isEqualTo(1);
+        observer.reset();
+
+        // Doesn't update when frozen.
+        isFrozen.setValue(true);
+        source.setValue(2);
+        assertThat(observer.hasBeenNotified()).isFalse();
+
+        // Updates when unfrozen.
+        isFrozen.setValue(false);
+        assertThat(observer.hasBeenNotified()).isTrue();
+        assertThat(observer.getObservedValue()).isEqualTo(2);
+        observer.reset();
+
+        // Doesn't notify if no changes while frozen.
+        isFrozen.setValue(true);
+        isFrozen.setValue(false);
+        assertThat(observer.hasBeenNotified()).isFalse();
     }
 
     @Test
