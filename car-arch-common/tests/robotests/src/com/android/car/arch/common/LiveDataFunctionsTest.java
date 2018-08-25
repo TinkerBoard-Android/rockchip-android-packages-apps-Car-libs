@@ -16,6 +16,7 @@
 
 package com.android.car.arch.common;
 
+import static com.android.car.arch.common.LiveDataFunctions.coalesceNull;
 import static com.android.car.arch.common.LiveDataFunctions.dataOf;
 import static com.android.car.arch.common.LiveDataFunctions.distinct;
 import static com.android.car.arch.common.LiveDataFunctions.emitsNull;
@@ -43,6 +44,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -352,21 +354,14 @@ public class LiveDataFunctionsTest {
         LiveData<Object> trueObjectData = dataOf(trueObject);
         LiveData<Object> falseObjectData = dataOf(falseObject);
 
-        testOperator(
-                arg ->
-                        () ->
-                                ifThenElse(
-                                        arg.mPredicate, Boolean::booleanValue, arg.mTrueData,
-                                        arg.mFalseData),
-                pair(
-                        new IfThenElseDataParams<>(trueLiveData(), trueObjectData, falseObjectData),
+        testOperator(arg -> () ->
+                        ifThenElse(arg.mPredicate, Boolean::booleanValue, arg.mTrueData,
+                                arg.mFalseData),
+                pair(new IfThenElseDataParams<>(trueLiveData(), trueObjectData, falseObjectData),
                         trueObject),
-                pair(
-                        new IfThenElseDataParams<>(falseLiveData(), trueObjectData,
-                                falseObjectData),
+                pair(new IfThenElseDataParams<>(falseLiveData(), trueObjectData, falseObjectData),
                         falseObject),
-                pair(
-                        new IfThenElseDataParams<>(dataOf(null), trueObjectData, falseObjectData),
+                pair(new IfThenElseDataParams<>(dataOf(null), trueObjectData, falseObjectData),
                         null));
     }
 
@@ -535,6 +530,186 @@ public class LiveDataFunctionsTest {
     }
 
     @Test
+    public void testCoalesceNull_liveDataParams_truthTable() {
+        TestObject sourceObject = new TestObject();
+        TestObject fallbackObject = new TestObject();
+
+        LiveData<TestObject> sourceData = dataOf(sourceObject);
+        LiveData<TestObject> fallbackData = dataOf(fallbackObject);
+        testBinaryOperator(LiveDataFunctions::coalesceNull,
+                pair(pair(sourceData, fallbackData), sourceObject),
+                pair(pair(sourceData, nullLiveData()), sourceObject),
+                // uninitialized fallback is fine.
+                pair(pair(sourceData, new MutableLiveData<>()), sourceObject),
+                pair(pair(nullLiveData(), fallbackData), fallbackObject),
+                pair(pair(nullLiveData(), nullLiveData()), null));
+    }
+
+    @Test
+    public void testCoalesceNull_liveDataParams_uninitialized() {
+        TestObject fallbackObject = new TestObject();
+        LiveData<TestObject> fallbackData = dataOf(fallbackObject);
+
+        checkUninitialized(coalesceNull(new MutableLiveData<TestObject>(), fallbackData));
+    }
+
+    @Test
+    public void testCoalesceNull_liveDataParams_changeSource() {
+        TestObject firstSourceObject = new TestObject();
+        TestObject secondSourceObject = new TestObject();
+        TestObject fallbackObject = new TestObject();
+
+        MutableLiveData<TestObject> sourceData = dataOf(null);
+        LiveData<TestObject> fallbackData = dataOf(fallbackObject);
+
+        CaptureObserver<TestObject> observer = new CaptureObserver<>();
+        LiveData<TestObject> data = coalesceNull(sourceData, fallbackData);
+
+        data.observe(mLifecycleOwner, observer);
+
+        assertThat(observer.hasBeenNotified()).isTrue();
+        assertThat(observer.getObservedValue()).isSameAs(fallbackObject);
+        observer.reset();
+
+        sourceData.setValue(firstSourceObject);
+
+        assertThat(observer.hasBeenNotified()).isTrue();
+        assertThat(observer.getObservedValue()).isSameAs(firstSourceObject);
+        observer.reset();
+
+        sourceData.setValue(secondSourceObject);
+
+        assertThat(observer.hasBeenNotified()).isTrue();
+        assertThat(observer.getObservedValue()).isSameAs(secondSourceObject);
+        observer.reset();
+
+        sourceData.setValue(null);
+
+        assertThat(observer.hasBeenNotified()).isTrue();
+        assertThat(observer.getObservedValue()).isSameAs(fallbackObject);
+        observer.reset();
+    }
+
+    @Test
+    public void testCoalesceNull_liveDataParams_changeFallback() {
+        TestObject firstFallbackObject = new TestObject();
+        TestObject secondFallbackObject = new TestObject();
+
+        LiveData<TestObject> sourceData = nullLiveData();
+        MutableLiveData<TestObject> fallbackData = dataOf(null);
+
+        CaptureObserver<TestObject> observer = new CaptureObserver<>();
+        LiveData<TestObject> data = coalesceNull(sourceData, fallbackData);
+
+        data.observe(mLifecycleOwner, observer);
+
+        assertThat(observer.hasBeenNotified()).isTrue();
+        assertThat(observer.getObservedValue()).isNull();
+        observer.reset();
+
+        fallbackData.setValue(firstFallbackObject);
+
+        assertThat(observer.hasBeenNotified()).isTrue();
+        assertThat(observer.getObservedValue()).isSameAs(firstFallbackObject);
+        observer.reset();
+
+        fallbackData.setValue(secondFallbackObject);
+
+        assertThat(observer.hasBeenNotified()).isTrue();
+        assertThat(observer.getObservedValue()).isSameAs(secondFallbackObject);
+        observer.reset();
+
+        fallbackData.setValue(null);
+
+        assertThat(observer.hasBeenNotified()).isTrue();
+        assertThat(observer.getObservedValue()).isSameAs(null);
+        observer.reset();
+    }
+
+    @Test
+    public void testCoalesceNull_liveDataParams_changeFallback_doesntNotifyForIrrelevantChanges() {
+        TestObject sourceObject = new TestObject();
+        TestObject fallbackObject = new TestObject();
+
+        LiveData<TestObject> sourceData = dataOf(sourceObject);
+        // Irrelevant because sourceData is always non-null
+        MutableLiveData<TestObject> irrelevantData = dataOf(fallbackObject);
+
+        CaptureObserver<TestObject> observer = new CaptureObserver<>();
+        LiveData<TestObject> data = coalesceNull(sourceData, irrelevantData);
+        data.observe(mLifecycleOwner, observer);
+        observer.reset();
+
+        irrelevantData.setValue(null);
+
+        assertThat(observer.hasBeenNotified()).isFalse();
+    }
+
+    @Test
+    public void testCoalesceNull_valueParams_truthTable() {
+        Object sourceObject = new Object();
+        Object fallbackObject = new Object();
+
+        LiveData<Object> sourceData = dataOf(sourceObject);
+
+        testOperator(args -> () -> coalesceNull(Objects.requireNonNull(args.first), args.second),
+                pair(pair(sourceData, fallbackObject), sourceObject),
+                pair(pair(sourceData, null), sourceObject),
+                pair(pair(nullLiveData(), fallbackObject), fallbackObject),
+                pair(pair(nullLiveData(), null), null));
+
+    }
+
+    @Test
+    public void testCoalesceNull_valueParams_uninitialized() {
+        // Values contained in SoftReference don't actually matter. SoftReference is just used as
+        // an easily instantiable type. Object cannot be used because LiveData extends Object,
+        // and thus some method calls would become ambiguous due to overloads.
+        Object fallbackObject = new Object();
+
+        checkUninitialized(coalesceNull(new MutableLiveData<>(), fallbackObject));
+    }
+
+    @Test
+    public void testCoalesceNull_valueParams_changeSource() {
+        // Values contained in SoftReference don't actually matter. SoftReference is just used as
+        // an easily instantiable type. Object cannot be used because LiveData extends Object,
+        // and thus some method calls would become ambiguous.
+        Object firstSourceObject = new Object();
+        Object secondSourceObject = new Object();
+        Object fallbackObject = new Object();
+
+        MutableLiveData<Object> sourceData = dataOf(null);
+
+        CaptureObserver<Object> observer = new CaptureObserver<>();
+        LiveData<Object> data = coalesceNull(sourceData, fallbackObject);
+
+        data.observe(mLifecycleOwner, observer);
+
+        assertThat(observer.hasBeenNotified()).isTrue();
+        assertThat(observer.getObservedValue()).isSameAs(fallbackObject);
+        observer.reset();
+
+        sourceData.setValue(firstSourceObject);
+
+        assertThat(observer.hasBeenNotified()).isTrue();
+        assertThat(observer.getObservedValue()).isSameAs(firstSourceObject);
+        observer.reset();
+
+        sourceData.setValue(secondSourceObject);
+
+        assertThat(observer.hasBeenNotified()).isTrue();
+        assertThat(observer.getObservedValue()).isSameAs(secondSourceObject);
+        observer.reset();
+
+        sourceData.setValue(null);
+
+        assertThat(observer.hasBeenNotified()).isTrue();
+        assertThat(observer.getObservedValue()).isSameAs(fallbackObject);
+        observer.reset();
+    }
+
+    @Test
     public void testSplit() {
         Object first = new Object();
         Object second = new Object();
@@ -687,5 +862,12 @@ public class LiveDataFunctionsTest {
         for (Pair<LiveData<A>, LiveData<B>> arg : args) {
             checkUninitialized(op.apply(arg.first, arg.second));
         }
+    }
+
+    /**
+     * Used as an easily instantiable type where Object cannot be used because LiveData extends
+     * Object, and thus some method calls would become ambiguous.
+     **/
+    private class TestObject {
     }
 }

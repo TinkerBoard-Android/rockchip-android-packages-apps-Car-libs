@@ -413,6 +413,31 @@ public class LiveDataFunctions {
     }
 
     /**
+     * Returns a LiveData that emits the value of {@code source} if it is not {@code null},
+     * otherwise it emits the value of {@code fallback}.
+     *
+     * @param source   The LiveData whose value should be emitted if not {@code null}
+     * @param fallback The LiveData whose value should be emitted when {@code source} emits {@code
+     *                 null}
+     */
+    public static <T> LiveData<T> coalesceNull(@NonNull LiveData<T> source,
+            @NonNull LiveData<T> fallback) {
+        return new BinaryOperation<>(source, fallback, true, false,
+                (sourceValue, fallbackValue) -> sourceValue == null ? fallbackValue : sourceValue);
+    }
+
+    /**
+     * Returns a LiveData that emits the value of {@code source} if it is not {@code null},
+     * otherwise it emits {@code fallback}.
+     *
+     * @param source   The LiveData whose value should be emitted if not {@code null}
+     * @param fallback The value that should be emitted when {@code source} emits {@code null}
+     */
+    public static <T> LiveData<T> coalesceNull(@NonNull LiveData<T> source, T fallback) {
+        return Transformations.map(source, value -> value == null ? fallback : value);
+    }
+
+    /**
      * Returns a LiveData that emits a Pair containing the values of the two parameter LiveDatas. If
      * either parameter is uninitialized, the resulting LiveData is also uninitialized.
      * <p>
@@ -482,7 +507,22 @@ public class LiveDataFunctions {
                 @NonNull LiveData<T> tLiveData,
                 @NonNull LiveData<U> uLiveData,
                 @NonNull BiFunction<T, U, R> function) {
+            this(tLiveData, uLiveData, true, true, function);
+        }
+
+        BinaryOperation(
+                @NonNull LiveData<T> tLiveData,
+                @NonNull LiveData<U> uLiveData,
+                boolean requireTSet,
+                boolean requireUSet,
+                @NonNull BiFunction<T, U, R> function) {
             this.mFunction = function;
+            if (!requireTSet) {
+                mTSet = true;
+            }
+            if (!requireUSet) {
+                mUSet = true;
+            }
             if (tLiveData == uLiveData) {
                 // Only add the source once and only update once when it changes.
                 addSource(
