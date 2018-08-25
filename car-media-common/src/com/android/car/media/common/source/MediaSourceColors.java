@@ -76,6 +76,11 @@ public class MediaSourceColors {
             mContext = context;
         }
 
+        /** Extract colors for (@code mediaSource} and create a MediaSourceColors for it */
+        public MediaSourceColors extractColors(@NonNull SimpleMediaSource mediaSource) {
+            return extractColors(mediaSource.getPackageName());
+        }
+
         /** Extract colors for {@code packageName} and create a MediaSourceColors for it */
         public MediaSourceColors extractColors(@NonNull String packageName) {
             TypedArray ta = null;
