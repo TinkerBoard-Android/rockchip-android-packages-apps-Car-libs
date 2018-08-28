@@ -26,26 +26,15 @@ import android.media.session.PlaybackState;
 import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
-import androidx.lifecycle.LiveData;
 
 import com.android.car.media.common.playback.PlaybackStateAnnotations;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
- * This is an abstractions over {@link MediaSessionManager} that provides information about the
- * currently "active" media session.
- * <p>
- * It automatically determines the foreground media app (the one that would normally receive
- * playback events) and exposes metadata and events from such app, or when a different app becomes
- * foreground.
- * <p>
- * This requires the android.Manifest.permission.MEDIA_CONTENT_CONTROL permission to be held by the
- * calling app.
+ * Provides functions for selecting a {@link MediaController} from a list of controllers.
  */
-class ActiveMediaControllerLiveData extends LiveData<MediaController> {
+class ActiveMediaSelector {
     private static final String TAG = "ActiveSourceManager";
 
     private static final String PLAYBACK_MODEL_SHARED_PREFS =
@@ -53,67 +42,69 @@ class ActiveMediaControllerLiveData extends LiveData<MediaController> {
     private static final String PLAYBACK_MODEL_ACTIVE_PACKAGE_NAME_KEY =
             "active_packagename";
 
-    private final MediaSessionManager mMediaSessionManager;
-    private final MediaSessionUpdater mMediaSessionUpdater = new MediaSessionUpdater();
     private final SharedPreferences mSharedPreferences;
 
-    /**
-     * Temporary work-around to bug b/76017849. MediaSessionManager is not notifying media session
-     * priority changes. As a work-around we subscribe to playback state changes on all controllers
-     * to detect potential priority changes. This might cause a few unnecessary checks, but
-     * selecting the top-most controller is a cheap operation.
-     */
-    private class MediaSessionUpdater {
-        private List<MediaController> mControllers = new ArrayList<>();
-
-        private MediaController.Callback mCallback = new MediaController.Callback() {
-            @Override
-            public void onPlaybackStateChanged(@Nullable PlaybackState state) {
-                selectMediaController(mMediaSessionManager.getActiveSessions(null));
-            }
-
-            @Override
-            public void onSessionDestroyed() {
-                selectMediaController(mMediaSessionManager.getActiveSessions(null));
-            }
-        };
-
-        void registerCallbacks(List<MediaController> newControllers) {
-            for (MediaController oldController : mControllers) {
-                oldController.unregisterCallback(mCallback);
-            }
-            for (MediaController newController : newControllers) {
-                newController.registerCallback(mCallback);
-            }
-            mControllers.clear();
-            mControllers.addAll(newControllers);
-        }
-    }
-
-    private MediaSessionManager.OnActiveSessionsChangedListener mSessionChangeListener =
-            this::selectMediaController;
-
-    ActiveMediaControllerLiveData(Context context) {
-        this(Objects.requireNonNull(context.getSystemService(MediaSessionManager.class)),
-                context.getSharedPreferences(PLAYBACK_MODEL_SHARED_PREFS, Context.MODE_PRIVATE));
+    ActiveMediaSelector(Context context) {
+        this(context.getSharedPreferences(PLAYBACK_MODEL_SHARED_PREFS, Context.MODE_PRIVATE));
     }
 
     @VisibleForTesting
-    ActiveMediaControllerLiveData(@NonNull MediaSessionManager mediaSessionManager,
-            @NonNull SharedPreferences preferences) {
-        mMediaSessionManager = mediaSessionManager;
+    ActiveMediaSelector(@NonNull SharedPreferences preferences) {
         mSharedPreferences = preferences;
     }
 
     /**
-     * Selects one of the provided controllers as the "currently playing" one.
+     * Searches through {@code controllers} to find the MediaController with the same package name
+     * as {@code mediaSource}.
+     *
+     * @param controllers The List of MediaControllers to search through.
+     * @param mediaSource The MediaSource to match.
+     * @return The MediaController whose package name matches or {@code null} if no match is found.
      */
-    private void selectMediaController(List<MediaController> controllers) {
+    @Nullable
+    MediaController getControllerForSource(@NonNull List<MediaController> controllers,
+            @NonNull SimpleMediaSource mediaSource) {
+        return getControllerForPackage(controllers, mediaSource.getPackageName());
+    }
+
+    /**
+     * Searches through {@code controllers} to find the MediaController with the specified {@code
+     * packageName}
+     *
+     * @param controllers The List of MediaControllers to search through.
+     * @param packageName The package name to find.
+     * @return The MediaController whose package name matches or {@code null} if no match is found.
+     */
+    @Nullable
+    MediaController getControllerForPackage(@NonNull List<MediaController> controllers,
+            @NonNull String packageName) {
+        for (MediaController controller : controllers) {
+            if (controller != null && packageName.equals(controller.getPackageName())) {
+                return controller;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns one of the provided controllers as the "currently playing" one. If {@code previous}
+     * is equivalent, will return that instance.
+     */
+    MediaController getTopMostMediaController(@NonNull List<MediaController> controllers,
+            @Nullable MediaController previous) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             dump("Selecting a media controller from: ", controllers);
         }
-        changeMediaController(getTopMostController(controllers), true);
-        mMediaSessionUpdater.registerCallbacks(controllers);
+        MediaController topMostController = pickTopMostController(controllers);
+        if ((topMostController == null && previous == null)
+                || (topMostController != null && previous != null
+                && topMostController.getPackageName().equals(previous.getPackageName()))) {
+            // If no change, do nothing.
+            return previous;
+        }
+        setLastKnownActivePackageName(
+                topMostController == null ? null : topMostController.getPackageName());
+        return topMostController;
     }
 
     private void dump(@SuppressWarnings("SameParameterValue") String title,
@@ -167,7 +158,7 @@ class ActiveMediaControllerLiveData extends LiveData<MediaController> {
      * {@link MediaController#getPlaybackState()}
      */
     @Nullable
-    private MediaController getTopMostController(List<MediaController> controllers) {
+    private MediaController pickTopMostController(List<MediaController> controllers) {
         if (controllers != null && controllers.size() > 0) {
             for (MediaController candidate : controllers) {
                 @PlaybackStateAnnotations.State int state = candidate.getPlaybackState() != null
@@ -198,39 +189,6 @@ class ActiveMediaControllerLiveData extends LiveData<MediaController> {
         return null;
     }
 
-    private void changeMediaController(MediaController mediaController, boolean persist) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "New media controller: " + (mediaController != null
-                    ? mediaController.getPackageName() : null));
-        }
-        if ((mediaController == null && getValue() == null)
-                || (mediaController != null && getValue() != null
-                && mediaController.getPackageName().equals(getValue().getPackageName()))) {
-            // If no change, do nothing.
-            return;
-        }
-        postValue(mediaController);
-        if (persist) {
-            setLastKnownActivePackageName(mediaController != null
-                    ? mediaController.getPackageName()
-                    : null);
-        }
-    }
-
-    @Override
-    protected void onActive() {
-        mMediaSessionManager.addOnActiveSessionsChangedListener(mSessionChangeListener, null);
-        selectMediaController(mMediaSessionManager.getActiveSessions(null));
-    }
-
-    @Override
-    protected void onInactive() {
-        mMediaSessionUpdater.registerCallbacks(new ArrayList<>());
-        mMediaSessionManager.removeOnActiveSessionsChangedListener(mSessionChangeListener);
-        changeMediaController(null, false);
-    }
-
-
     private String getLastKnownActivePackageName() {
         return mSharedPreferences.getString(PLAYBACK_MODEL_ACTIVE_PACKAGE_NAME_KEY, null);
     }
@@ -239,21 +197,6 @@ class ActiveMediaControllerLiveData extends LiveData<MediaController> {
         mSharedPreferences.edit()
                 .putString(PLAYBACK_MODEL_ACTIVE_PACKAGE_NAME_KEY, packageName)
                 .apply();
-    }
-
-    /**
-     * Returns the {@link MediaController} corresponding to the given package name, or NULL if no
-     * active session exists for it.
-     */
-    @Nullable
-    MediaController getControllerForPackage(String packageName) {
-        List<MediaController> controllers = mMediaSessionManager.getActiveSessions(null);
-        for (MediaController controller : controllers) {
-            if (controller.getPackageName().equals(packageName)) {
-                return controller;
-            }
-        }
-        return null;
     }
 
 }
