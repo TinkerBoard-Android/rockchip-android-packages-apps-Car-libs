@@ -25,13 +25,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
 
-import android.annotation.NonNull;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 
+import androidx.annotation.NonNull;
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 
 import com.android.car.arch.common.testing.CaptureObserver;
@@ -70,6 +70,8 @@ public class PlaybackViewModelTest {
     @Mock
     public MediaMetadata mMediaMetadata;
     @Mock
+    public MediaDescription mMediaDescription;
+    @Mock
     public PlaybackState mPlaybackState;
     @Captor
     private ArgumentCaptor<MediaController.Callback> mCapturedCallback;
@@ -79,6 +81,7 @@ public class PlaybackViewModelTest {
     @Before
     public void setUp() {
         doNothing().when(mMediaController).registerCallback(mCapturedCallback.capture());
+        when(mMediaMetadata.getDescription()).thenReturn(mMediaDescription);
         mPlaybackViewModel = new PlaybackViewModel(application);
         mPlaybackViewModel.setMediaController(dataOf(mMediaController));
     }
@@ -95,21 +98,23 @@ public class PlaybackViewModelTest {
     public void testGetMetadata() {
         CaptureObserver<MediaItemMetadata> observer = new CaptureObserver<>();
         mPlaybackViewModel.getMetadata().observe(mLifecycleOwner, observer);
+        observer.reset();
 
-        assertThat(observer.hasBeenNotified()).isFalse();
         assertThat(mCapturedCallback.getValue()).isNotNull();
         mCapturedCallback.getValue().onMetadataChanged(mMediaMetadata);
 
         assertThat(observer.hasBeenNotified()).isTrue();
-        assertThat(observer.getObservedValue()).isEqualTo(mMediaMetadata);
+        MediaItemMetadata observedValue = observer.getObservedValue();
+        assertThat(observedValue).isNotNull();
+        assertThat(observedValue).isEqualTo(new MediaItemMetadata(mMediaMetadata));
     }
 
     @Test
     public void testGetPlaybackState() {
         CaptureObserver<PlaybackState> observer = new CaptureObserver<>();
         mPlaybackViewModel.getPlaybackState().observe(mLifecycleOwner, observer);
+        observer.reset();
 
-        assertThat(observer.hasBeenNotified()).isFalse();
         assertThat(mCapturedCallback.getValue()).isNotNull();
         mCapturedCallback.getValue().onPlaybackStateChanged(mPlaybackState);
 
@@ -125,9 +130,8 @@ public class PlaybackViewModelTest {
         List<MediaSession.QueueItem> queue = Collections.singletonList(queueItem);
         CaptureObserver<List<MediaItemMetadata>> observer = new CaptureObserver<>();
         mPlaybackViewModel.getQueue().observe(mLifecycleOwner, observer);
+        observer.reset();
 
-        assertThat(observer.hasBeenNotified()).isFalse();
-        assertThat(mCapturedCallback.getValue()).isNotNull();
         mCapturedCallback.getValue().onQueueChanged(queue);
 
         assertThat(observer.hasBeenNotified()).isTrue();
@@ -144,9 +148,10 @@ public class PlaybackViewModelTest {
     public void testGetHasQueue_null() {
         CaptureObserver<Boolean> observer = new CaptureObserver<>();
         mPlaybackViewModel.hasQueue().observe(mLifecycleOwner, observer);
+        mCapturedCallback.getValue().onQueueChanged(
+                Collections.singletonList(createQueueItem("title", 1)));
+        observer.reset();
 
-        assertThat(observer.hasBeenNotified()).isFalse();
-        assertThat(mCapturedCallback.getValue()).isNotNull();
         mCapturedCallback.getValue().onQueueChanged(null);
 
         assertThat(observer.hasBeenNotified()).isTrue();
@@ -158,9 +163,10 @@ public class PlaybackViewModelTest {
         List<MediaSession.QueueItem> queue = Collections.emptyList();
         CaptureObserver<Boolean> observer = new CaptureObserver<>();
         mPlaybackViewModel.hasQueue().observe(mLifecycleOwner, observer);
+        mCapturedCallback.getValue().onQueueChanged(
+                Collections.singletonList(createQueueItem("title", 1)));
+        observer.reset();
 
-        assertThat(observer.hasBeenNotified()).isFalse();
-        assertThat(mCapturedCallback.getValue()).isNotNull();
         mCapturedCallback.getValue().onQueueChanged(queue);
 
         assertThat(observer.hasBeenNotified()).isTrue();
@@ -172,9 +178,8 @@ public class PlaybackViewModelTest {
         List<MediaSession.QueueItem> queue = Collections.singletonList(createQueueItem("title", 1));
         CaptureObserver<Boolean> observer = new CaptureObserver<>();
         mPlaybackViewModel.hasQueue().observe(mLifecycleOwner, observer);
+        observer.reset();
 
-        assertThat(observer.hasBeenNotified()).isFalse();
-        assertThat(mCapturedCallback.getValue()).isNotNull();
         mCapturedCallback.getValue().onQueueChanged(queue);
 
         assertThat(observer.hasBeenNotified()).isTrue();
