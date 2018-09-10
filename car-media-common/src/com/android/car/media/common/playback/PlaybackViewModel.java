@@ -45,8 +45,8 @@ import android.util.Log;
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MediatorLiveData;
 
+import com.android.car.arch.common.switching.SwitchingLiveData;
 import com.android.car.media.common.CustomPlaybackAction;
 import com.android.car.media.common.MediaItemMetadata;
 import com.android.car.media.common.R;
@@ -100,22 +100,27 @@ public class PlaybackViewModel extends AndroidViewModel {
      */
     public static final int ACTION_PAUSE = 3;
 
-    private final SwitchingLiveData<MediaController> mMediaController = new SwitchingLiveData<>();
+    private final SwitchingLiveData<MediaController>
+            mMediaController = SwitchingLiveData.newInstance();
+    private final LiveData<MediaController> mMediaControllerData = mMediaController.asLiveData();
+
+    private final LiveData<MediaController> mDistinctMediaController =
+            distinct(mMediaControllerData, this::haveSamePackageName);
 
     private final MediaSourceColors.Factory mColorsFactory;
     private final LiveData<MediaSourceColors> mColors;
 
-    private final LiveData<MediaMetadata> mMetadata = switchMap(mMediaController,
+    private final LiveData<MediaMetadata> mMetadata = switchMap(mMediaControllerData,
             mediaController -> mediaController == null ? nullLiveData()
                     : new MediaMetadataLiveData(mediaController));
     private final LiveData<MediaItemMetadata> mWrappedMetadata = distinct(map(mMetadata,
             metadata -> metadata == null ? null : new MediaItemMetadata(metadata)));
 
-    private final LiveData<PlaybackState> mPlaybackState = switchMap(mMediaController,
+    private final LiveData<PlaybackState> mPlaybackState = switchMap(mMediaControllerData,
             mediaController -> mediaController == null ? nullLiveData()
                     : new PlaybackStateLiveData(mediaController));
 
-    private final LiveData<List<MediaSession.QueueItem>> mQueue = switchMap(mMediaController,
+    private final LiveData<List<MediaSession.QueueItem>> mQueue = switchMap(mMediaControllerData,
             mediaController -> mediaController == null ? nullLiveData()
                     : new QueueLiveData(mediaController));
 
@@ -131,14 +136,15 @@ public class PlaybackViewModel extends AndroidViewModel {
     private final LiveData<Boolean> mHasQueue = distinct(map(mQueue,
             queue -> queue != null && !queue.isEmpty()));
 
-    private final LiveData<PlaybackController> mPlaybackControls = map(mMediaController,
+    private final LiveData<PlaybackController> mPlaybackControls = map(mDistinctMediaController,
             PlaybackController::new);
 
     private final LiveData<CombinedInfo> mCombinedInfo = combine(mMetadata, mPlaybackState,
             // getValue() on mMediaController is safe because mMetadata and mPlaybackState are
             // keeping it active. Don't pass through the values since they may be stale if the
             // MediaController is being updated.
-            (mediaMetadata, playbackState) -> getCombinedInfo(mMediaController.getValue())
+            (mediaMetadata, playbackState) -> getCombinedInfo(
+                    mMediaController.asLiveData().getValue())
     );
 
     @Nullable
@@ -165,7 +171,7 @@ public class PlaybackViewModel extends AndroidViewModel {
     public PlaybackViewModel(Application application) {
         super(application);
         mColorsFactory = new MediaSourceColors.Factory(application);
-        mColors = map(mMediaController, controller ->
+        mColors = map(mMediaController.asLiveData(), controller ->
                 controller == null ? null
                         : mColorsFactory.extractColors(controller.getPackageName())
         );
@@ -186,7 +192,7 @@ public class PlaybackViewModel extends AndroidViewModel {
      */
     @NonNull
     public LiveData<MediaController> getMediaController() {
-        return mMediaController;
+        return mMediaControllerData;
     }
 
     /**
@@ -242,6 +248,12 @@ public class PlaybackViewModel extends AndroidViewModel {
     @VisibleForTesting(otherwise = VisibleForTesting.NONE)
     LiveData<CombinedInfo> getCombinedInfoForTesting() {
         return mCombinedInfo;
+    }
+
+    private boolean haveSamePackageName(MediaController left, MediaController right) {
+        if (left == right) return true;
+        return left != null && right != null
+                && Objects.equals(left.getPackageName(), right.getPackageName());
     }
 
     /**
@@ -681,25 +693,6 @@ public class PlaybackViewModel extends AndroidViewModel {
             this.mMediaController = mediaController;
             this.mMetadata = metadata;
             this.mPlaybackState = playbackState;
-        }
-    }
-
-    private class SwitchingLiveData<T> extends MediatorLiveData<T> {
-        private LiveData<T> mCurrentSource;
-
-        public void setSource(@Nullable LiveData<T> source) {
-            if (source == mCurrentSource) {
-                return;
-            }
-            if (mCurrentSource != null) {
-                removeSource(mCurrentSource);
-            }
-            mCurrentSource = source;
-            if (source != null) {
-                addSource(source, this::setValue);
-            } else {
-                setValue(null);
-            }
         }
     }
 }

@@ -168,6 +168,7 @@ public class MediaSourceViewModel extends AndroidViewModel {
     /**
      * Returns a live list of all MediaSources that can be selected for playback
      */
+    @NonNull
     public LiveData<List<SimpleMediaSource>> getMediaSources() {
         return mMediaSources;
     }

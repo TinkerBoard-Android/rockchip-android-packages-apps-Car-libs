@@ -33,6 +33,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -40,6 +41,8 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.android.car.media.common.playback.AlbumArtLiveData;
 import com.android.car.media.common.playback.PlaybackViewModel;
+import com.android.car.media.common.source.MediaSourceViewModel;
+import com.android.car.media.common.source.SimpleMediaSource;
 
 import com.bumptech.glide.request.target.Target;
 
@@ -49,32 +52,23 @@ import com.bumptech.glide.request.target.Target;
  * application.
  */
 public class PlaybackFragment extends Fragment {
-    // TODO(keyboardr): replace with MediaSourceViewModel when available
-    private ActiveMediaSourceManager mActiveMediaSourceManager;
-
     private MutableLiveData<MediaController> mMediaController = new MutableLiveData<>();
-
-
-    private ActiveMediaSourceManager.Observer mActiveSourceObserver =
-            new ActiveMediaSourceManager.Observer() {
-                @Override
-                public void onActiveSourceChanged() {
-                    mMediaController.setValue(mActiveMediaSourceManager.getMediaController());
-                }
-            };
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
             Bundle savedInstanceState) {
-        PlaybackViewModel playbackViewModel = ViewModelProviders.of(getActivity())
-                .get(PlaybackViewModel.class);
-        playbackViewModel.setMediaController(mMediaController);
-        ViewModel innerViewModel = ViewModelProviders.of(getActivity()).get(ViewModel.class);
-        innerViewModel.init(playbackViewModel);
+        FragmentActivity activity = requireActivity();
+        PlaybackViewModel playbackViewModel =
+                ViewModelProviders.of(activity).get(PlaybackViewModel.class);
+        MediaSourceViewModel mediaSourceViewModel = ViewModelProviders.of(activity).get(
+                MediaSourceViewModel.class);
+        playbackViewModel.setMediaController(mediaSourceViewModel.getMediaController());
+
+        ViewModel innerViewModel = ViewModelProviders.of(activity).get(ViewModel.class);
+        innerViewModel.init(mediaSourceViewModel, playbackViewModel);
 
         View view = inflater.inflate(R.layout.car_playback_fragment, container, false);
-        mActiveMediaSourceManager = new ActiveMediaSourceManager(getContext());
 
         PlaybackControls playbackControls = view.findViewById(R.id.playback_controls);
         playbackControls.setModel(playbackViewModel, getViewLifecycleOwner());
@@ -108,18 +102,6 @@ public class PlaybackFragment extends Fragment {
         return view;
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        mActiveMediaSourceManager.registerObserver(mActiveSourceObserver);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        mActiveMediaSourceManager.unregisterObserver(mActiveSourceObserver);
-    }
-
     /**
      * ViewModel for the PlaybackFragment
      */
@@ -128,7 +110,7 @@ public class PlaybackFragment extends Fragment {
         private static final Intent MEDIA_TEMPLATE_INTENT =
                 new Intent(Car.CAR_INTENT_ACTION_MEDIA_TEMPLATE);
 
-        private LiveData<MediaSource> mMediaSource;
+        private LiveData<SimpleMediaSource> mMediaSource;
         private LiveData<CharSequence> mAppName;
         private LiveData<Bitmap> mAppIcon;
         private LiveData<Intent> mOpenIntent;
@@ -137,20 +119,22 @@ public class PlaybackFragment extends Fragment {
         private LiveData<Bitmap> mAlbumArt;
 
         private PlaybackViewModel mPlaybackViewModel;
+        private MediaSourceViewModel mMediaSourceViewModel;
 
         public ViewModel(Application application) {
             super(application);
         }
 
-        void init(PlaybackViewModel playbackViewModel) {
-            if (mPlaybackViewModel == playbackViewModel) {
+        void init(MediaSourceViewModel mediaSourceViewModel, PlaybackViewModel playbackViewModel) {
+            if (mMediaSourceViewModel == mediaSourceViewModel
+                    && mPlaybackViewModel == playbackViewModel) {
                 return;
             }
             mPlaybackViewModel = playbackViewModel;
-            mMediaSource = mapNonNull(playbackViewModel.getMediaController(),
-                    controller -> new MediaSource(getApplication(), controller.getPackageName()));
-            mAppName = mapNonNull(mMediaSource, MediaSource::getName);
-            mAppIcon = mapNonNull(mMediaSource, MediaSource::getRoundPackageIcon);
+            mMediaSourceViewModel = mediaSourceViewModel;
+            mMediaSource = mMediaSourceViewModel.getSelectedMediaSource();
+            mAppName = mapNonNull(mMediaSource, SimpleMediaSource::getName);
+            mAppIcon = mapNonNull(mMediaSource, SimpleMediaSource::getRoundPackageIcon);
             mOpenIntent = mapNonNull(mMediaSource, MEDIA_TEMPLATE_INTENT, source -> {
                 if (source.isCustom()) {
                     // We are playing a custom app. Jump to it, not to the template
