@@ -34,12 +34,12 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.media.MediaMetadata;
-import android.media.Rating;
-import android.media.session.MediaController;
-import android.media.session.MediaSession;
-import android.media.session.PlaybackState;
 import android.os.Bundle;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.RatingCompat;
+import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
@@ -100,29 +100,30 @@ public class PlaybackViewModel extends AndroidViewModel {
      */
     public static final int ACTION_PAUSE = 3;
 
-    private final SwitchingLiveData<MediaController>
+    private final SwitchingLiveData<MediaControllerCompat>
             mMediaController = SwitchingLiveData.newInstance();
-    private final LiveData<MediaController> mMediaControllerData = mMediaController.asLiveData();
+    private final LiveData<MediaControllerCompat> mMediaControllerData =
+            mMediaController.asLiveData();
 
-    private final LiveData<MediaController> mDistinctMediaController =
+    private final LiveData<MediaControllerCompat> mDistinctMediaController =
             distinct(mMediaControllerData, this::haveSamePackageName);
 
     private final MediaSourceColors.Factory mColorsFactory;
     private final LiveData<MediaSourceColors> mColors;
 
-    private final LiveData<MediaMetadata> mMetadata = switchMap(mMediaControllerData,
+    private final LiveData<MediaMetadataCompat> mMetadata = switchMap(mMediaControllerData,
             mediaController -> mediaController == null ? nullLiveData()
                     : new MediaMetadataLiveData(mediaController));
     private final LiveData<MediaItemMetadata> mWrappedMetadata = distinct(map(mMetadata,
             metadata -> metadata == null ? null : new MediaItemMetadata(metadata)));
 
-    private final LiveData<PlaybackState> mPlaybackState = switchMap(mMediaControllerData,
+    private final LiveData<PlaybackStateCompat> mPlaybackState = switchMap(mMediaControllerData,
             mediaController -> mediaController == null ? nullLiveData()
                     : new PlaybackStateLiveData(mediaController));
 
-    private final LiveData<List<MediaSession.QueueItem>> mQueue = switchMap(mMediaControllerData,
-            mediaController -> mediaController == null ? nullLiveData()
-                    : new QueueLiveData(mediaController));
+    private final LiveData<List<MediaSessionCompat.QueueItem>> mQueue =
+            switchMap(mMediaControllerData, mediaController ->
+                    mediaController == null ? nullLiveData() : new QueueLiveData(mediaController));
 
     // Filters out queue items with no description or title and converts them to MediaItemMetadatas
     private final LiveData<List<MediaItemMetadata>> mSanitizedQueue = distinct(map(mQueue,
@@ -148,11 +149,11 @@ public class PlaybackViewModel extends AndroidViewModel {
     );
 
     @Nullable
-    private CombinedInfo getCombinedInfo(@Nullable MediaController mediaController) {
+    private CombinedInfo getCombinedInfo(@Nullable MediaControllerCompat mediaController) {
         if (mediaController == null) return null;
 
-        MediaMetadata metadata = mediaController.getMetadata();
-        PlaybackState playbackState = mediaController.getPlaybackState();
+        MediaMetadataCompat metadata = mediaController.getMetadata();
+        PlaybackStateCompat playbackState = mediaController.getPlaybackState();
         CombinedInfo oldInfo = mCombinedInfo.getValue();
         // Minimize object churn
         if (oldInfo == null
@@ -183,7 +184,7 @@ public class PlaybackViewModel extends AndroidViewModel {
      * LiveDatas returned by other methods in this ViewModel will refer to the latest
      * MediaController.
      */
-    public void setMediaController(@Nullable LiveData<MediaController> mediaControllerData) {
+    public void setMediaController(@Nullable LiveData<MediaControllerCompat> mediaControllerData) {
         mMediaController.setSource(mediaControllerData);
     }
 
@@ -191,7 +192,7 @@ public class PlaybackViewModel extends AndroidViewModel {
      * Returns a LiveData that emits the currently set MediaController (may emit null).
      */
     @NonNull
-    public LiveData<MediaController> getMediaController() {
+    public LiveData<MediaControllerCompat> getMediaController() {
         return mMediaControllerData;
     }
 
@@ -204,14 +205,14 @@ public class PlaybackViewModel extends AndroidViewModel {
 
     /**
      * Returns a LiveData that emits a MediaItemMetadata of the current media item in the session
-     * managed by the provided {@link MediaController}.
+     * managed by the provided {@link MediaControllerCompat}.
      */
     public LiveData<MediaItemMetadata> getMetadata() {
         return mWrappedMetadata;
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.NONE)
-    LiveData<PlaybackState> getPlaybackState() {
+    LiveData<PlaybackStateCompat> getPlaybackState() {
         return mPlaybackState;
     }
 
@@ -250,7 +251,7 @@ public class PlaybackViewModel extends AndroidViewModel {
         return mCombinedInfo;
     }
 
-    private boolean haveSamePackageName(MediaController left, MediaController right) {
+    private boolean haveSamePackageName(MediaControllerCompat left, MediaControllerCompat right) {
         if (left == right) {
             return true;
         }
@@ -270,27 +271,28 @@ public class PlaybackViewModel extends AndroidViewModel {
 
             @Actions long actions = state.getActions();
             @Action int stopAction = ACTION_DISABLED;
-            if ((actions & (PlaybackState.ACTION_PAUSE | PlaybackState.ACTION_PLAY_PAUSE)) != 0) {
+            if ((actions & (PlaybackStateCompat.ACTION_PAUSE
+                    | PlaybackStateCompat.ACTION_PLAY_PAUSE)) != 0) {
                 stopAction = ACTION_PAUSE;
-            } else if ((actions & PlaybackState.ACTION_STOP) != 0) {
+            } else if ((actions & PlaybackStateCompat.ACTION_STOP) != 0) {
                 stopAction = ACTION_STOP;
             }
 
             switch (state.getState()) {
-                case PlaybackState.STATE_PLAYING:
-                case PlaybackState.STATE_BUFFERING:
-                case PlaybackState.STATE_CONNECTING:
-                case PlaybackState.STATE_FAST_FORWARDING:
-                case PlaybackState.STATE_REWINDING:
-                case PlaybackState.STATE_SKIPPING_TO_NEXT:
-                case PlaybackState.STATE_SKIPPING_TO_PREVIOUS:
-                case PlaybackState.STATE_SKIPPING_TO_QUEUE_ITEM:
+                case PlaybackStateCompat.STATE_PLAYING:
+                case PlaybackStateCompat.STATE_BUFFERING:
+                case PlaybackStateCompat.STATE_CONNECTING:
+                case PlaybackStateCompat.STATE_FAST_FORWARDING:
+                case PlaybackStateCompat.STATE_REWINDING:
+                case PlaybackStateCompat.STATE_SKIPPING_TO_NEXT:
+                case PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS:
+                case PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM:
                     return stopAction;
-                case PlaybackState.STATE_STOPPED:
-                case PlaybackState.STATE_PAUSED:
-                case PlaybackState.STATE_NONE:
-                case PlaybackState.STATE_ERROR:
-                    return (actions & PlaybackState.ACTION_PLAY) != 0 ? ACTION_PLAY
+                case PlaybackStateCompat.STATE_STOPPED:
+                case PlaybackStateCompat.STATE_PAUSED:
+                case PlaybackStateCompat.STATE_NONE:
+                case PlaybackStateCompat.STATE_ERROR:
+                    return (actions & PlaybackStateCompat.ACTION_PLAY) != 0 ? ACTION_PLAY
                             : ACTION_DISABLED;
                 default:
                     Log.w(TAG, String.format("Unknown PlaybackState: %d", state.getState()));
@@ -300,7 +302,7 @@ public class PlaybackViewModel extends AndroidViewModel {
 
         private final LiveData<Long> mMaxProgress = map(mMetadata,
                 metadata -> metadata == null ? 0
-                        : metadata.getLong(MediaMetadata.METADATA_KEY_DURATION));
+                        : metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION));
 
         private final LiveData<Long> mProgress =
                 switchMap(pair(mPlaybackState, mMaxProgress),
@@ -308,15 +310,15 @@ public class PlaybackViewModel extends AndroidViewModel {
                                 : new ProgressLiveData(pair.first, pair.second));
 
         private final LiveData<Boolean> mIsPlaying = map(mPlaybackState,
-                state -> state != null && state.getState() == PlaybackState.STATE_PLAYING);
+                state -> state != null && state.getState() == PlaybackStateCompat.STATE_PLAYING);
 
         private final LiveData<Boolean> mIsSkipNextEnabled = map(mPlaybackState,
                 state -> state != null
-                        && (state.getActions() & PlaybackState.ACTION_SKIP_TO_NEXT) != 0);
+                        && (state.getActions() & PlaybackStateCompat.ACTION_SKIP_TO_NEXT) != 0);
 
         private final LiveData<Boolean> mIsSkipPreviousEnabled = map(mPlaybackState,
                 state -> state != null
-                        && (state.getActions() & PlaybackState.ACTION_SKIP_TO_PREVIOUS) != 0);
+                        && (state.getActions() & PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS) != 0);
 
         // true if the media source is loading (e.g.: buffering, connecting, etc.)
         private final LiveData<Boolean> mIsLoading = map(mPlaybackState,
@@ -326,20 +328,20 @@ public class PlaybackViewModel extends AndroidViewModel {
                     }
 
                     int state = playbackState.getState();
-                    return state == PlaybackState.STATE_BUFFERING
-                            || state == PlaybackState.STATE_CONNECTING
-                            || state == PlaybackState.STATE_FAST_FORWARDING
-                            || state == PlaybackState.STATE_REWINDING
-                            || state == PlaybackState.STATE_SKIPPING_TO_NEXT
-                            || state == PlaybackState.STATE_SKIPPING_TO_PREVIOUS
-                            || state == PlaybackState.STATE_SKIPPING_TO_QUEUE_ITEM;
+                    return state == PlaybackStateCompat.STATE_BUFFERING
+                            || state == PlaybackStateCompat.STATE_CONNECTING
+                            || state == PlaybackStateCompat.STATE_FAST_FORWARDING
+                            || state == PlaybackStateCompat.STATE_REWINDING
+                            || state == PlaybackStateCompat.STATE_SKIPPING_TO_NEXT
+                            || state == PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS
+                            || state == PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM;
                 });
 
         private final LiveData<CharSequence> mErrorMessage = map(mPlaybackState,
                 state -> state == null ? null : state.getErrorMessage());
 
         private final LiveData<Long> mActiveQueueItemId = map(mPlaybackState,
-                state -> state == null ? MediaSession.QueueItem.UNKNOWN_ID
+                state -> state == null ? MediaSessionCompat.QueueItem.UNKNOWN_ID
                         : state.getActiveQueueItemId());
 
         private final LiveData<List<RawCustomPlaybackAction>> mCustomActions =
@@ -372,7 +374,7 @@ public class PlaybackViewModel extends AndroidViewModel {
         /**
          * Returns a LiveData that emits the current playback progress, in milliseconds. This is a
          * value between 0 and {@link #getMaxProgress()} or
-         * {@link PlaybackState#PLAYBACK_POSITION_UNKNOWN}
+         * {@link PlaybackStateCompat#PLAYBACK_POSITION_UNKNOWN}
          * if the current position is unknown. This value will update on its own periodically (less
          * than a second) while active.
          */
@@ -422,7 +424,7 @@ public class PlaybackViewModel extends AndroidViewModel {
 
         /**
          * Returns a LiveData that emits the queue id of the currently playing queue item, or {@link
-         * MediaSession.QueueItem#UNKNOWN_ID} if none of the items is currently playing.
+         * MediaSessionCompat.QueueItem#UNKNOWN_ID} if none of the items is currently playing.
          */
         public LiveData<Long> getActiveQueueItemId() {
             return mActiveQueueItemId;
@@ -432,13 +434,13 @@ public class PlaybackViewModel extends AndroidViewModel {
                 @Nullable CombinedInfo info) {
             List<RawCustomPlaybackAction> actions = new ArrayList<>();
             if (info == null) return actions;
-            PlaybackState playbackState = info.mPlaybackState;
+            PlaybackStateCompat playbackState = info.mPlaybackState;
             if (playbackState == null) return actions;
 
             RawCustomPlaybackAction ratingAction = getRatingAction(info);
             if (ratingAction != null) actions.add(ratingAction);
 
-            for (PlaybackState.CustomAction action : playbackState.getCustomActions()) {
+            for (PlaybackStateCompat.CustomAction action : playbackState.getCustomActions()) {
                 String packageName = info.mMediaController.getPackageName();
                 actions.add(
                         new RawCustomPlaybackAction(action.getIcon(), packageName,
@@ -451,19 +453,20 @@ public class PlaybackViewModel extends AndroidViewModel {
         @Nullable
         private RawCustomPlaybackAction getRatingAction(@Nullable CombinedInfo info) {
             if (info == null) return null;
-            PlaybackState playbackState = info.mPlaybackState;
+            PlaybackStateCompat playbackState = info.mPlaybackState;
             if (playbackState == null) return null;
 
             long stdActions = playbackState.getActions();
-            if ((stdActions & PlaybackState.ACTION_SET_RATING) == 0) return null;
+            if ((stdActions & PlaybackStateCompat.ACTION_SET_RATING) == 0) return null;
 
             int ratingType = info.mMediaController.getRatingType();
-            if (ratingType != Rating.RATING_HEART) return null;
+            if (ratingType != RatingCompat.RATING_HEART) return null;
 
-            MediaMetadata metadata = info.mMetadata;
+            MediaMetadataCompat metadata = info.mMetadata;
             boolean hasHeart = false;
             if (metadata != null) {
-                Rating rating = metadata.getRating(MediaMetadata.METADATA_KEY_USER_RATING);
+                RatingCompat rating =
+                        metadata.getRating(MediaMetadataCompat.METADATA_KEY_USER_RATING);
                 hasHeart = rating != null && rating.hasHeart();
             }
 
@@ -477,12 +480,12 @@ public class PlaybackViewModel extends AndroidViewModel {
 
     /**
      * Wraps the {@link android.media.session.MediaController.TransportControls TransportControls}
-     * for a {@link MediaController} to send commands.
+     * for a {@link MediaControllerCompat} to send commands.
      */
     public static class PlaybackController {
-        private final MediaController mMediaController;
+        private final MediaControllerCompat mMediaController;
 
-        private PlaybackController(@Nullable MediaController mediaController) {
+        private PlaybackController(@Nullable MediaControllerCompat mediaController) {
             mMediaController = mediaController;
         }
 
@@ -539,11 +542,11 @@ public class PlaybackViewModel extends AndroidViewModel {
          */
         public void doCustomAction(String action, Bundle extras) {
             if (mMediaController == null) return;
-            MediaController.TransportControls cntrl = mMediaController.getTransportControls();
+            MediaControllerCompat.TransportControls cntrl = mMediaController.getTransportControls();
 
             if (ACTION_SET_RATING.equals(action)) {
                 boolean setHeart = extras != null && extras.getBoolean(EXTRA_SET_HEART, false);
-                cntrl.setRating(Rating.newHeartRating(setHeart));
+                cntrl.setRating(RatingCompat.newHeartRating(setHeart));
             } else {
                 cntrl.sendCustomAction(action, extras);
             }
@@ -686,12 +689,12 @@ public class PlaybackViewModel extends AndroidViewModel {
     }
 
     static class CombinedInfo {
-        final MediaController mMediaController;
-        final MediaMetadata mMetadata;
-        final PlaybackState mPlaybackState;
+        final MediaControllerCompat mMediaController;
+        final MediaMetadataCompat mMetadata;
+        final PlaybackStateCompat mPlaybackState;
 
-        private CombinedInfo(MediaController mediaController,
-                MediaMetadata metadata, PlaybackState playbackState) {
+        private CombinedInfo(MediaControllerCompat mediaController,
+                             MediaMetadataCompat metadata, PlaybackStateCompat playbackState) {
             this.mMediaController = mediaController;
             this.mMetadata = metadata;
             this.mPlaybackState = playbackState;

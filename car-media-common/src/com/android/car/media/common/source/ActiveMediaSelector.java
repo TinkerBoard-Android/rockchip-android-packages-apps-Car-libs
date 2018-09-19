@@ -20,9 +20,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
-import android.media.session.PlaybackState;
+import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
@@ -32,7 +32,7 @@ import com.android.car.media.common.playback.PlaybackStateAnnotations;
 import java.util.List;
 
 /**
- * Provides functions for selecting a {@link MediaController} from a list of controllers.
+ * Provides functions for selecting a {@link MediaControllerCompat} from a list of controllers.
  */
 class ActiveMediaSelector {
     private static final String TAG = "ActiveSourceManager";
@@ -54,15 +54,16 @@ class ActiveMediaSelector {
     }
 
     /**
-     * Searches through {@code controllers} to find the MediaController with the same package name
-     * as {@code mediaSource}.
+     * Searches through {@code controllers} to find the MediaControllerCompat with the same package
+     * name as {@code mediaSource}.
      *
      * @param controllers The List of MediaControllers to search through.
      * @param mediaSource The MediaSource to match.
-     * @return The MediaController whose package name matches or {@code null} if no match is found.
+     * @return The MediaControllerCompat whose package name matches or {@code null} if no match is
+     * found.
      */
     @Nullable
-    MediaController getControllerForSource(@NonNull List<MediaController> controllers,
+    MediaControllerCompat getControllerForSource(@NonNull List<MediaControllerCompat> controllers,
             @NonNull SimpleMediaSource mediaSource) {
         return getControllerForPackage(controllers, mediaSource.getPackageName());
     }
@@ -76,9 +77,9 @@ class ActiveMediaSelector {
      * @return The MediaController whose package name matches or {@code null} if no match is found.
      */
     @Nullable
-    MediaController getControllerForPackage(@NonNull List<MediaController> controllers,
+    MediaControllerCompat getControllerForPackage(@NonNull List<MediaControllerCompat> controllers,
             @NonNull String packageName) {
-        for (MediaController controller : controllers) {
+        for (MediaControllerCompat controller : controllers) {
             if (controller != null && packageName.equals(controller.getPackageName())) {
                 return controller;
             }
@@ -90,12 +91,13 @@ class ActiveMediaSelector {
      * Returns one of the provided controllers as the "currently playing" one. If {@code previous}
      * is equivalent, will return that instance.
      */
-    MediaController getTopMostMediaController(@NonNull List<MediaController> controllers,
-            @Nullable MediaController previous) {
+    MediaControllerCompat getTopMostMediaController(
+            @NonNull List<MediaControllerCompat> controllers,
+            @Nullable MediaControllerCompat previous) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             dump("Selecting a media controller from: ", controllers);
         }
-        MediaController topMostController = pickTopMostController(controllers);
+        MediaControllerCompat topMostController = pickTopMostController(controllers);
         if ((topMostController == null && previous == null)
                 || (topMostController != null && previous != null
                 && topMostController.getPackageName().equals(previous.getPackageName()))) {
@@ -108,12 +110,12 @@ class ActiveMediaSelector {
     }
 
     private void dump(@SuppressWarnings("SameParameterValue") String title,
-            List<MediaController> controllers) {
+            List<MediaControllerCompat> controllers) {
         Log.d(TAG, title + " (total: " + controllers.size() + ")");
-        for (MediaController controller : controllers) {
+        for (MediaControllerCompat controller : controllers) {
             String stateName = getStateName(controller.getPlaybackState() != null
                     ? controller.getPlaybackState().getState()
-                    : PlaybackState.STATE_NONE);
+                    : PlaybackStateCompat.STATE_NONE);
             Log.d(TAG, String.format("\t%s: %s",
                     controller.getPackageName(),
                     stateName));
@@ -122,29 +124,29 @@ class ActiveMediaSelector {
 
     private String getStateName(@PlaybackStateAnnotations.State int state) {
         switch (state) {
-            case PlaybackState.STATE_NONE:
+            case PlaybackStateCompat.STATE_NONE:
                 return "NONE";
-            case PlaybackState.STATE_STOPPED:
+            case PlaybackStateCompat.STATE_STOPPED:
                 return "STOPPED";
-            case PlaybackState.STATE_PAUSED:
+            case PlaybackStateCompat.STATE_PAUSED:
                 return "PAUSED";
-            case PlaybackState.STATE_PLAYING:
+            case PlaybackStateCompat.STATE_PLAYING:
                 return "PLAYING";
-            case PlaybackState.STATE_FAST_FORWARDING:
+            case PlaybackStateCompat.STATE_FAST_FORWARDING:
                 return "FORWARDING";
-            case PlaybackState.STATE_REWINDING:
+            case PlaybackStateCompat.STATE_REWINDING:
                 return "REWINDING";
-            case PlaybackState.STATE_BUFFERING:
+            case PlaybackStateCompat.STATE_BUFFERING:
                 return "BUFFERING";
-            case PlaybackState.STATE_ERROR:
+            case PlaybackStateCompat.STATE_ERROR:
                 return "ERROR";
-            case PlaybackState.STATE_CONNECTING:
+            case PlaybackStateCompat.STATE_CONNECTING:
                 return "CONNECTING";
-            case PlaybackState.STATE_SKIPPING_TO_PREVIOUS:
+            case PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS:
                 return "SKIPPING_TO_PREVIOUS";
-            case PlaybackState.STATE_SKIPPING_TO_NEXT:
+            case PlaybackStateCompat.STATE_SKIPPING_TO_NEXT:
                 return "SKIPPING_TO_NEXT";
-            case PlaybackState.STATE_SKIPPING_TO_QUEUE_ITEM:
+            case PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM:
                 return "SKIPPING_TO_QUEUE_ITEM";
             default:
                 return "UNKNOWN";
@@ -155,30 +157,30 @@ class ActiveMediaSelector {
      * Returns the controller most likely to be the currently active one, out of the list of active
      * controllers reported by {@link MediaSessionManager}. It does so by picking the first one (in
      * order of priority) with an active state as reported by
-     * {@link MediaController#getPlaybackState()}
+     * {@link MediaControllerCompat#getPlaybackState()}
      */
     @Nullable
-    private MediaController pickTopMostController(List<MediaController> controllers) {
+    private MediaControllerCompat pickTopMostController(List<MediaControllerCompat> controllers) {
         if (controllers != null && controllers.size() > 0) {
-            for (MediaController candidate : controllers) {
+            for (MediaControllerCompat candidate : controllers) {
                 @PlaybackStateAnnotations.State int state = candidate.getPlaybackState() != null
                         ? candidate.getPlaybackState().getState()
-                        : PlaybackState.STATE_NONE;
-                if (state == PlaybackState.STATE_BUFFERING
-                        || state == PlaybackState.STATE_CONNECTING
-                        || state == PlaybackState.STATE_FAST_FORWARDING
-                        || state == PlaybackState.STATE_PLAYING
-                        || state == PlaybackState.STATE_REWINDING
-                        || state == PlaybackState.STATE_SKIPPING_TO_NEXT
-                        || state == PlaybackState.STATE_SKIPPING_TO_PREVIOUS
-                        || state == PlaybackState.STATE_SKIPPING_TO_QUEUE_ITEM) {
+                        : PlaybackStateCompat.STATE_NONE;
+                if (state == PlaybackStateCompat.STATE_BUFFERING
+                        || state == PlaybackStateCompat.STATE_CONNECTING
+                        || state == PlaybackStateCompat.STATE_FAST_FORWARDING
+                        || state == PlaybackStateCompat.STATE_PLAYING
+                        || state == PlaybackStateCompat.STATE_REWINDING
+                        || state == PlaybackStateCompat.STATE_SKIPPING_TO_NEXT
+                        || state == PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS
+                        || state == PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM) {
                     return candidate;
                 }
             }
             // If no source is active, we go for the last known source
             String packageName = getLastKnownActivePackageName();
             if (packageName != null) {
-                for (MediaController candidate : controllers) {
+                for (MediaControllerCompat candidate : controllers) {
                     if (candidate.getPackageName().equals(packageName)) {
                         return candidate;
                     }

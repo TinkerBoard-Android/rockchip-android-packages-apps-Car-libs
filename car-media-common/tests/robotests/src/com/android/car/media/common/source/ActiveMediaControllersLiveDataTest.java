@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
 import android.media.session.MediaSessionManager.OnActiveSessionsChangedListener;
+import android.support.v4.media.session.MediaControllerCompat;
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.lifecycle.Lifecycle;
@@ -67,10 +68,14 @@ public class ActiveMediaControllersLiveDataTest {
     public MediaController mFirstMediaController;
     @Mock
     public MediaController mSecondMediaController;
+    @Mock
+    public MediaControllerCompat mFirstMediaControllerCompat;
+    @Mock
+    public MediaControllerCompat mSecondMediaControllerCompat;
     @Captor
     public ArgumentCaptor<OnActiveSessionsChangedListener> mSessionChangeListenerCaptor;
     @Captor
-    public ArgumentCaptor<MediaController.Callback> mFirstControllerCallbackCaptor;
+    public ArgumentCaptor<MediaControllerCompat.Callback> mFirstControllerCallbackCaptor;
 
     private List<MediaController> mMediaControllerList;
 
@@ -82,7 +87,7 @@ public class ActiveMediaControllersLiveDataTest {
         mMediaControllerList.add(mFirstMediaController);
         mMediaControllerList.add(mSecondMediaController);
 
-        doNothing().when(mFirstMediaController)
+        doNothing().when(mFirstMediaControllerCompat)
                 .registerCallback(mFirstControllerCallbackCaptor.capture());
         doNothing().when(mMediaSessionManager).addOnActiveSessionsChangedListener(
                 mSessionChangeListenerCaptor.capture(), any());
@@ -98,35 +103,48 @@ public class ActiveMediaControllersLiveDataTest {
 
         when(mMediaSessionManager.getActiveSessions(any())).thenReturn(mMediaControllerList);
 
-        mLiveData = new ActiveMediaControllersLiveData(mMediaSessionManager);
+        mLiveData = new ActiveMediaControllersLiveData(mMediaSessionManager) {
+            @Override
+            protected MediaControllerCompat fromMediaController(MediaController mediaController) {
+                if (mediaController == mFirstMediaController) {
+                    return mFirstMediaControllerCompat;
+                } else if (mediaController == mSecondMediaController) {
+                    return mSecondMediaControllerCompat;
+                }
+                return null;
+            }
+        };
     }
 
     @Test
     public void testFetchOnActive() {
-        CaptureObserver<List<MediaController>> observer = new CaptureObserver<>();
+        CaptureObserver<List<MediaControllerCompat>> observer = new CaptureObserver<>();
 
         mLiveData.observe(mLifecycleOwner, observer);
 
         assertThat(observer.hasBeenNotified()).isTrue();
-        assertThat(observer.getObservedValue()).isEqualTo(mMediaControllerList);
+        List<MediaControllerCompat> mediaControllerCompatList = new ArrayList<>();
+        mediaControllerCompatList.add(mFirstMediaControllerCompat);
+        mediaControllerCompatList.add(mSecondMediaControllerCompat);
+        assertThat(observer.getObservedValue()).isEqualTo(mediaControllerCompatList);
     }
 
 
     @Test
     public void testPlaybackStateChangedTriggersUpdate() {
-        CaptureObserver<List<MediaController>> observer = new CaptureObserver<>();
+        CaptureObserver<List<MediaControllerCompat>> observer = new CaptureObserver<>();
         mLiveData.observe(mLifecycleOwner, observer);
         observer.reset();
 
         mFirstControllerCallbackCaptor.getValue()
-                .onPlaybackStateChanged(mFirstMediaController.getPlaybackState());
+                .onPlaybackStateChanged(mFirstMediaControllerCompat.getPlaybackState());
 
         assertThat(observer.hasBeenNotified()).isTrue();
     }
 
     @Test
     public void testSessionDestroyedTriggersUpdate() {
-        CaptureObserver<List<MediaController>> observer = new CaptureObserver<>();
+        CaptureObserver<List<MediaControllerCompat>> observer = new CaptureObserver<>();
         mLiveData.observe(mLifecycleOwner, observer);
         observer.reset();
 
@@ -137,7 +155,7 @@ public class ActiveMediaControllersLiveDataTest {
 
     @Test
     public void testUnregisterOnInactive() {
-        CaptureObserver<List<MediaController>> observer = new CaptureObserver<>();
+        CaptureObserver<List<MediaControllerCompat>> observer = new CaptureObserver<>();
         mLiveData.observe(mLifecycleOwner, observer);
         observer.reset();
 

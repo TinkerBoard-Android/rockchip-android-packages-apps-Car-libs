@@ -20,7 +20,11 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
-import android.media.session.PlaybackState;
+import android.os.RemoteException;
+import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -29,6 +33,7 @@ import androidx.lifecycle.LiveData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * This is an abstractions over {@link MediaSessionManager} that provides information about the
@@ -37,10 +42,12 @@ import java.util.Objects;
  * This requires the android.Manifest.permission.MEDIA_CONTENT_CONTROL permission to be held by the
  * calling app.
  */
-class ActiveMediaControllersLiveData extends LiveData<List<MediaController>> {
+class ActiveMediaControllersLiveData extends LiveData<List<MediaControllerCompat>> {
 
+    private static final String TAG = "ActiveMedia";
     private final MediaSessionManager mMediaSessionManager;
     private final MediaSessionUpdater mMediaSessionUpdater = new MediaSessionUpdater();
+    private Context mContext;
 
     /**
      * Temporary work-around to bug b/76017849. MediaSessionManager is not notifying media session
@@ -49,27 +56,29 @@ class ActiveMediaControllersLiveData extends LiveData<List<MediaController>> {
      * selecting the top-most controller is a cheap operation.
      */
     private class MediaSessionUpdater {
-        private List<MediaController> mControllers = new ArrayList<>();
+        private List<MediaControllerCompat> mControllers = new ArrayList<>();
 
-        private MediaController.Callback mCallback = new MediaController.Callback() {
+        private MediaControllerCompat.Callback mCallback = new MediaControllerCompat.Callback() {
             @Override
-            public void onPlaybackStateChanged(@Nullable PlaybackState state) {
-                List<MediaController> activeSessions = mMediaSessionManager.getActiveSessions(null);
+            public void onPlaybackStateChanged(@Nullable PlaybackStateCompat state) {
+                List<MediaController> activeSessions =
+                        mMediaSessionManager.getActiveSessions(null);
                 update(activeSessions);
             }
 
             @Override
             public void onSessionDestroyed() {
-                List<MediaController> activeSessions = mMediaSessionManager.getActiveSessions(null);
+                List<MediaController> activeSessions =
+                        mMediaSessionManager.getActiveSessions(null);
                 update(activeSessions);
             }
         };
 
-        private void registerCallbacks(List<MediaController> newControllers) {
-            for (MediaController oldController : mControllers) {
+        private void registerCallbacks(List<MediaControllerCompat> newControllers) {
+            for (MediaControllerCompat oldController : mControllers) {
                 oldController.unregisterCallback(mCallback);
             }
-            for (MediaController newController : newControllers) {
+            for (MediaControllerCompat newController : newControllers) {
                 newController.registerCallback(mCallback);
             }
             mControllers.clear();
@@ -78,10 +87,11 @@ class ActiveMediaControllersLiveData extends LiveData<List<MediaController>> {
     }
 
     private MediaSessionManager.OnActiveSessionsChangedListener mSessionChangeListener =
-            this::setValue;
+            controllers -> setValue(convertCompat(controllers));
 
     ActiveMediaControllersLiveData(Context context) {
         this(Objects.requireNonNull(context.getSystemService(MediaSessionManager.class)));
+        mContext = context;
     }
 
     @VisibleForTesting
@@ -90,8 +100,9 @@ class ActiveMediaControllersLiveData extends LiveData<List<MediaController>> {
     }
 
     private void update(List<MediaController> activeSessions) {
-        setValue(activeSessions);
-        mMediaSessionUpdater.registerCallbacks(activeSessions);
+        List<MediaControllerCompat> activeSessionsCompat = convertCompat(activeSessions);
+        setValue(activeSessionsCompat);
+        mMediaSessionUpdater.registerCallbacks(activeSessionsCompat);
     }
 
     @Override
@@ -106,4 +117,23 @@ class ActiveMediaControllersLiveData extends LiveData<List<MediaController>> {
         mMediaSessionManager.removeOnActiveSessionsChangedListener(mSessionChangeListener);
     }
 
+    private List<MediaControllerCompat> convertCompat(List<MediaController> mediaControllers) {
+        return mediaControllers.stream().map(
+                controller -> fromMediaController(controller))
+                .collect(Collectors.toList());
+    }
+
+    @VisibleForTesting
+    MediaControllerCompat fromMediaController(MediaController mediaController) {
+        // TODO(b/112161702): cache active MediaControllers
+        MediaSessionCompat.Token token =
+                MediaSessionCompat.Token.fromToken(mediaController.getSessionToken());
+        MediaControllerCompat controllerCompat = null;
+        try {
+            controllerCompat = new MediaControllerCompat(mContext, token);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Couldn't get MediaController", e);
+        }
+        return controllerCompat;
+    }
 }

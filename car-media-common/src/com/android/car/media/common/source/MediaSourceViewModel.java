@@ -29,9 +29,12 @@ import android.annotation.Nullable;
 import android.annotation.UiThread;
 import android.app.Application;
 import android.content.ComponentName;
-import android.media.browse.MediaBrowser;
 import android.media.session.MediaController;
-import android.media.session.MediaSession;
+import android.os.RemoteException;
+import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 import androidx.arch.core.util.Function;
@@ -50,6 +53,7 @@ import java.util.function.BiFunction;
  * Contains observable data needed for displaying playback and browse UI
  */
 public class MediaSourceViewModel extends AndroidViewModel {
+    private static final String TAG = "MediaSourceViewModel";
 
     private final LiveData<List<SimpleMediaSource>> mMediaSources;
 
@@ -57,13 +61,13 @@ public class MediaSourceViewModel extends AndroidViewModel {
 
     private final MutableLiveData<SimpleMediaSource> mSelectedMediaSource = new MutableLiveData<>();
 
-    private final LiveData<MediaBrowser> mConnectedMediaBrowser;
+    private final LiveData<MediaBrowserCompat> mConnectedMediaBrowser;
 
     // Media controller for selected media source.
-    private final LiveData<MediaController> mMediaController;
+    private final LiveData<MediaControllerCompat> mMediaController;
 
     // Media controller for active media source, may not be the same as selected media source.
-    private final LiveData<MediaController> mTopActiveMediaController;
+    private final LiveData<MediaControllerCompat> mTopActiveMediaController;
 
     private final LiveData<Boolean> mIsCurrentMediaSourcePlaying;
 
@@ -79,9 +83,9 @@ public class MediaSourceViewModel extends AndroidViewModel {
 
         ActiveMediaSelector createActiveMediaSelector();
 
-        LiveData<List<MediaController>> createActiveMediaControllerData();
+        LiveData<List<MediaControllerCompat>> createActiveMediaControllerData();
 
-        MediaController getControllerForSession(@Nullable MediaSession.Token session);
+        MediaControllerCompat getControllerForSession(@Nullable MediaSessionCompat.Token session);
     }
 
     /**
@@ -104,7 +108,7 @@ public class MediaSourceViewModel extends AndroidViewModel {
             }
 
             @Override
-            public LiveData<List<MediaController>> createActiveMediaControllerData() {
+            public LiveData<List<MediaControllerCompat>> createActiveMediaControllerData() {
                 return new ActiveMediaControllersLiveData(application);
             }
 
@@ -114,9 +118,15 @@ public class MediaSourceViewModel extends AndroidViewModel {
             }
 
             @Override
-            public MediaController getControllerForSession(@Nullable MediaSession.Token token) {
+            public MediaControllerCompat getControllerForSession(
+                    @Nullable MediaSessionCompat.Token token) {
                 if (token == null) return null;
-                return new MediaController(application, token);
+                try {
+                    return new MediaControllerCompat(application, token);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Couldn't get MediaControllerCompat", e);
+                    return null;
+                }
             }
         });
     }
@@ -125,7 +135,7 @@ public class MediaSourceViewModel extends AndroidViewModel {
     MediaSourceViewModel(@NonNull Application application, @NonNull InputFactory inputFactory) {
         super(application);
 
-        LiveData<List<MediaController>> activeMediaControllers =
+        LiveData<List<MediaControllerCompat>> activeMediaControllers =
                 inputFactory.createActiveMediaControllerData();
         ActiveMediaSelector mediaSelector = inputFactory.createActiveMediaSelector();
         mTopActiveMediaController = map(activeMediaControllers,
@@ -149,11 +159,12 @@ public class MediaSourceViewModel extends AndroidViewModel {
                 state -> state != null && (state.mConnectionState == ConnectionState.CONNECTED)
                         ? state.mMediaBrowser : null);
 
-        LiveData<MediaController> controllerFromActiveList =
+        LiveData<MediaControllerCompat> controllerFromActiveList =
                 combine(activeMediaControllers, mSelectedMediaSource,
                         mediaSelector::getControllerForSource);
-        LiveData<MediaController> controllerFromMediaBrowser = mapNonNull(mConnectedMediaBrowser,
-                browser -> inputFactory.getControllerForSession(browser.getSessionToken()));
+        LiveData<MediaControllerCompat> controllerFromMediaBrowser =
+                mapNonNull(mConnectedMediaBrowser,
+                        browser -> inputFactory.getControllerForSession(browser.getSessionToken()));
         // Prefer fetching MediaController from MediaSessionManager's active controller
         // list. Otherwise use controller from MediaBrowser (which requires connecting to it).
         mMediaController = coalesceNull(controllerFromActiveList, controllerFromMediaBrowser);
@@ -203,7 +214,7 @@ public class MediaSourceViewModel extends AndroidViewModel {
      * not connected. Observing the LiveData will attempt to connect to a media browse session if
      * possible.
      */
-    public LiveData<MediaBrowser> getConnectedMediaBrowser() {
+    public LiveData<MediaBrowserCompat> getConnectedMediaBrowser() {
         return mConnectedMediaBrowser;
     }
 
@@ -212,7 +223,7 @@ public class MediaSourceViewModel extends AndroidViewModel {
      * source, or emits {@code null} if the media source doesn't support browsing or the browser is
      * not connected.
      */
-    public LiveData<MediaController> getMediaController() {
+    public LiveData<MediaControllerCompat> getMediaController() {
         return mMediaController;
     }
 
@@ -220,7 +231,7 @@ public class MediaSourceViewModel extends AndroidViewModel {
      * Returns a LiveData that emits a {@link MediaController} for the primary active media source.
      * Note that this may not be from the selected media source.
      */
-    public LiveData<MediaController> getTopActiveMediaController() {
+    public LiveData<MediaControllerCompat> getTopActiveMediaController() {
         return mTopActiveMediaController;
     }
 

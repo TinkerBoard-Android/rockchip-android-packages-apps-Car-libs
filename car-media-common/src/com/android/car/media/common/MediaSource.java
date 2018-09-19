@@ -33,12 +33,13 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.media.browse.MediaBrowser;
-import android.media.session.MediaController;
-import android.media.session.MediaSession;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.service.media.MediaBrowserService;
+import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -70,7 +71,7 @@ public class MediaSource {
     @Nullable
     private final String mBrowseServiceClassName;
     @Nullable
-    private final MediaBrowser mBrowser;
+    private final MediaBrowserCompat mBrowser;
     private final Context mContext;
     private final Handler mHandler = new Handler();
     private List<Observer> mObservers = new ArrayList<>();
@@ -119,8 +120,8 @@ public class MediaSource {
                 @Nullable List<MediaItemMetadata> items);
     }
 
-    private final MediaBrowser.ConnectionCallback mConnectionCallback =
-            new MediaBrowser.ConnectionCallback() {
+    private final MediaBrowserCompat.ConnectionCallback mConnectionCallback =
+            new MediaBrowserCompat.ConnectionCallback() {
                 @Override
                 public void onConnected() {
                     MediaSource.this.notify(observer -> observer.onBrowseConnected(true));
@@ -145,7 +146,7 @@ public class MediaSource {
         mPackageName = packageName;
         mBrowseServiceClassName = getBrowseServiceClassName(packageName);
         if (mBrowseServiceClassName != null) {
-            mBrowser = new MediaBrowser(mContext,
+            mBrowser = new MediaBrowserCompat(mContext,
                     new ComponentName(mPackageName, mBrowseServiceClassName),
                     mConnectionCallback,
                     null);
@@ -291,27 +292,27 @@ public class MediaSource {
     }
 
     /**
-     * {@link MediaBrowser.SubscriptionCallback} wrapper used to overcome the lack of a reliable
-     * method to obtain the initial list of children of a given node.
+     * {@link MediaBrowserCompat.SubscriptionCallback} wrapper used to overcome the lack of a
+     * reliable method to obtain the initial list of children of a given node.
      * <p>
      * When some 3rd party apps go through configuration changes (i.e., in the case of user-switch),
      * they leave subscriptions in an intermediate state where neither
-     * {@link MediaBrowser.SubscriptionCallback#onChildrenLoaded(String, List)} nor
-     * {@link MediaBrowser.SubscriptionCallback#onError(String)} are invoked.
+     * {@link MediaBrowserCompat.SubscriptionCallback#onChildrenLoaded(String, List)} nor
+     * {@link MediaBrowserCompat.SubscriptionCallback#onError(String)} are invoked.
      * <p>
      * This wrapper works around this problem by retrying the subscription a given number of times
      * if no data is received after a certain amount of time. This process is started by calling
      * {@link #start(int, int)}, passing the number of retries and delay between them as
      * parameters.
      */
-    private class ChildrenSubscription extends MediaBrowser.SubscriptionCallback {
+    private class ChildrenSubscription extends MediaBrowserCompat.SubscriptionCallback {
         private List<MediaItemMetadata> mItems;
         private boolean mIsDataLoaded;
         private List<ItemsSubscription> mSubscriptions = new ArrayList<>();
         private String mParentId;
         private int mRetries;
         private int mRetryDelay;
-        private MediaBrowser mMediaBrowser;
+        private MediaBrowserCompat mMediaBrowser;
         private Runnable mRetryRunnable = new Runnable() {
             @Override
             public void run() {
@@ -333,10 +334,10 @@ public class MediaSource {
         /**
          * Creates a subscription to the list of children of a certain media browse item
          *
-         * @param mediaBrowser {@link MediaBrowser} used to create the subscription
+         * @param mediaBrowser {@link MediaBrowserCompat} used to create the subscription
          * @param parentId identifier of the parent node to subscribe to
          */
-        ChildrenSubscription(@NonNull MediaBrowser mediaBrowser, String parentId) {
+        ChildrenSubscription(@NonNull MediaBrowserCompat mediaBrowser, String parentId) {
             mParentId = parentId;
             mMediaBrowser = mediaBrowser;
         }
@@ -394,7 +395,7 @@ public class MediaSource {
 
         @Override
         public void onChildrenLoaded(String parentId,
-                List<MediaBrowser.MediaItem> children) {
+                List<MediaBrowserCompat.MediaItem> children) {
             mHandler.removeCallbacks(mRetryRunnable);
             mItems = children.stream()
                     .map(child -> new MediaItemMetadata(child))
@@ -404,7 +405,7 @@ public class MediaSource {
         }
 
         @Override
-        public void onChildrenLoaded(String parentId, List<MediaBrowser.MediaItem> children,
+        public void onChildrenLoaded(String parentId, List<MediaBrowserCompat.MediaItem> children,
                 Bundle options) {
             onChildrenLoaded(parentId, children);
         }
@@ -491,17 +492,22 @@ public class MediaSource {
     }
 
     /**
-     * Returns a {@link MediaController} that allows controlling this media source, or NULL
+     * Returns a {@link MediaControllerCompat} that allows controlling this media source, or NULL
      * if the media source doesn't support browsing or the browser is not connected.
      */
     @Nullable
-    public MediaController getMediaController() {
+    public MediaControllerCompat getMediaController() {
         if (mBrowser == null || !mBrowser.isConnected()) {
             return null;
         }
 
-        MediaSession.Token token = mBrowser.getSessionToken();
-        return new MediaController(mContext, token);
+        MediaSessionCompat.Token token = mBrowser.getSessionToken();
+        try {
+            return new MediaControllerCompat(mContext, token);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Couldn't get MediaControllerCompat", e);
+            return null;
+        }
     }
 
     /**
@@ -584,7 +590,7 @@ public class MediaSource {
     }
 
     /** @return the current media browser. This media browser might not be connected yet. */
-    public MediaBrowser getMediaBrowser() {
+    public MediaBrowserCompat getMediaBrowser() {
         return mBrowser;
     }
 

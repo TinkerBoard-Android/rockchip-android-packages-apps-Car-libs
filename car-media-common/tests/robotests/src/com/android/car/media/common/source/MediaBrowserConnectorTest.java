@@ -27,7 +27,7 @@ import static org.robolectric.RuntimeEnvironment.application;
 import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
-import android.media.browse.MediaBrowser;
+import android.support.v4.media.MediaBrowserCompat;
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 
@@ -59,18 +59,18 @@ public class MediaBrowserConnectorTest {
     public final TestLifecycleOwner mLifecycleOwner = new TestLifecycleOwner();
 
     @Mock
-    public MediaBrowser mMediaBrowser;
+    public MediaBrowserCompat mMediaBrowser;
 
     private MediaBrowserConnector mLiveData;
-    private MediaBrowser.ConnectionCallback mConnectionCallback;
+    private MediaBrowserCompat.ConnectionCallback mConnectionCallback;
 
     @Before
     public void setUp() {
         mLiveData = new MediaBrowserConnector(application, new ComponentName("", "")) {
             @Override
-            protected MediaBrowser createMediaBrowser(@NonNull Context context,
+            protected MediaBrowserCompat createMediaBrowser(@NonNull Context context,
                     @NonNull ComponentName browseService,
-                    @NonNull MediaBrowser.ConnectionCallback callback) {
+                    @NonNull MediaBrowserCompat.ConnectionCallback callback) {
                 mConnectionCallback = callback;
                 return mMediaBrowser;
             }

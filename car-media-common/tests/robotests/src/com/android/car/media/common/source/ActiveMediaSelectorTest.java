@@ -22,9 +22,9 @@ import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
 
 import android.content.SharedPreferences;
-import android.media.session.MediaController;
-import android.media.session.PlaybackState;
 import android.preference.PreferenceManager;
+import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 
 import androidx.annotation.Nullable;
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
@@ -61,11 +61,11 @@ public class ActiveMediaSelectorTest {
     public final TestLifecycleOwner mLifecycleOwner = new TestLifecycleOwner();
 
     @Mock
-    public MediaController mFirstMediaController;
+    public MediaControllerCompat mFirstMediaController;
     @Mock
-    public MediaController mSecondMediaController;
+    public MediaControllerCompat mSecondMediaController;
 
-    private List<MediaController> mMediaControllerList;
+    private List<MediaControllerCompat> mMediaControllerList;
     private SharedPreferences mSharedPreferences;
     private ActiveMediaSelector mSelector;
 
@@ -80,9 +80,9 @@ public class ActiveMediaSelectorTest {
         mMediaControllerList.add(mFirstMediaController);
         mMediaControllerList.add(mSecondMediaController);
 
-        setControllerState(mFirstMediaController, PlaybackState.STATE_PLAYING);
+        setControllerState(mFirstMediaController, PlaybackStateCompat.STATE_PLAYING);
         when(mFirstMediaController.getPackageName()).thenReturn(TEST_PACKAGE_1);
-        setControllerState(mSecondMediaController, PlaybackState.STATE_PLAYING);
+        setControllerState(mSecondMediaController, PlaybackStateCompat.STATE_PLAYING);
         when(mSecondMediaController.getPackageName()).thenReturn(TEST_PACKAGE_2);
 
 
@@ -97,7 +97,7 @@ public class ActiveMediaSelectorTest {
 
     @Test
     public void testPickPlayingController() {
-        setControllerState(mFirstMediaController, PlaybackState.STATE_PAUSED);
+        setControllerState(mFirstMediaController, PlaybackStateCompat.STATE_PAUSED);
 
         assertThat(mSelector.getTopMostMediaController(mMediaControllerList, null))
                 .isSameAs(mSecondMediaController);
@@ -105,8 +105,8 @@ public class ActiveMediaSelectorTest {
 
     @Test
     public void testUsedLastWhenAllPaused() {
-        setControllerState(mFirstMediaController, PlaybackState.STATE_PAUSED);
-        setControllerState(mSecondMediaController, PlaybackState.STATE_PAUSED);
+        setControllerState(mFirstMediaController, PlaybackStateCompat.STATE_PAUSED);
+        setControllerState(mSecondMediaController, PlaybackStateCompat.STATE_PAUSED);
         setLastObservedController(mSecondMediaController);
 
         assertThat(mSelector.getTopMostMediaController(mMediaControllerList, null))
@@ -124,8 +124,8 @@ public class ActiveMediaSelectorTest {
         assertThat(mSelector.getControllerForPackage(mMediaControllerList, "")).isNull();
     }
 
-    private void setLastObservedController(@Nullable MediaController mediaController) {
-        List<MediaController> mediaControllers =
+    private void setLastObservedController(@Nullable MediaControllerCompat mediaController) {
+        List<MediaControllerCompat> mediaControllers =
                 mediaController == null ? Collections.emptyList()
                         : Collections.singletonList(mediaController);
 
@@ -137,10 +137,10 @@ public class ActiveMediaSelectorTest {
         injectorData.getTopMostMediaController(mediaControllers, null);
     }
 
-    private void setControllerState(MediaController mediaController,
+    private void setControllerState(MediaControllerCompat mediaController,
             @PlaybackStateAnnotations.State int state) {
         when(mediaController.getPlaybackState())
                 .thenReturn(
-                        new PlaybackState.Builder().setState(state, 0, 0).build());
+                        new PlaybackStateCompat.Builder().setState(state, 0, 0).build());
     }
 }
