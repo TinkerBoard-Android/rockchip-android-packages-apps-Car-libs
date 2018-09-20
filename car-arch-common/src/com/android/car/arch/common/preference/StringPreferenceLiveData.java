@@ -40,7 +40,7 @@ public class StringPreferenceLiveData extends PreferenceLiveData<String> {
             @NonNull SharedPreferences preferences, @NonNull String key,
             @Nullable String defaultValue) {
         super(preferences, key);
-        this.mDefaultValue = defaultValue;
+        mDefaultValue = defaultValue;
     }
 
     @Override

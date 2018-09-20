@@ -251,7 +251,9 @@ public class PlaybackViewModel extends AndroidViewModel {
     }
 
     private boolean haveSamePackageName(MediaController left, MediaController right) {
-        if (left == right) return true;
+        if (left == right) {
+            return true;
+        }
         return left != null && right != null
                 && Objects.equals(left.getPackageName(), right.getPackageName());
     }
