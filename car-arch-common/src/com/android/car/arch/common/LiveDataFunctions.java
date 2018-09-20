@@ -32,6 +32,7 @@ import androidx.lifecycle.Transformations;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 /**
@@ -109,12 +110,21 @@ public class LiveDataFunctions {
      * observers when the new value is distinct ({@link Objects#equals(Object, Object)}
      */
     public static <T> LiveData<T> distinct(@NonNull LiveData<T> source) {
+        return distinct(source, Objects::equals);
+    }
+
+    /**
+     * Returns a LiveData that emits the same value as {@code source}, but only notifies its
+     * observers when the new value is distinct ({@code areEqual} returns {@code false})
+     */
+    public static <T> LiveData<T> distinct(@NonNull LiveData<T> source,
+            @NonNull BiPredicate<T, T> areEqual) {
         return new MediatorLiveData<T>() {
             private boolean mInitialized = false;
 
             {
                 addSource(source, value -> {
-                    if (!mInitialized || !Objects.equals(value, getValue())) {
+                    if (!mInitialized || !areEqual.test(value, getValue())) {
                         mInitialized = true;
                         setValue(value);
                     }
