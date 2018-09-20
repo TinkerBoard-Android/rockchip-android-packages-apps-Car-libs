@@ -28,6 +28,10 @@ import java.util.Objects;
 /** Utility methods for working with Fragments */
 public class FragmentUtils {
 
+    private FragmentUtils() {
+        // no instances
+    }
+
     private static Object sParentForTesting;
 
     @VisibleForTesting(otherwise = VisibleForTesting.NONE)
@@ -87,28 +91,29 @@ public class FragmentUtils {
         if (sParentForTesting != null) {
             return;
         }
-        if (FragmentUtils.getParent(fragment, parentType) == null) {
-            String parent;
-            if (fragment.getParentFragment() == null) {
-                if (fragment.getActivity() != null) {
-                    parent = fragment.getActivity().getClass().getName();
-                } else if (fragment.getHost() != null) {
-                    parent = fragment.getHost().getClass().getName();
-                } else {
-                    throw new AssertionError(fragment.getClass().getName()
-                            + " must be added to a parent that implements "
-                            + parentType.getName()
-                            + " but is currently unattached to a parent.");
-                }
-            } else {
-                parent = fragment.getParentFragment().getClass().getName();
-            }
-            throw new AssertionError(
-                    fragment.getClass().getName()
-                            + " must be added to a parent that implements "
-                            + parentType.getName()
-                            + ". Instead found "
-                            + parent);
+        if (FragmentUtils.getParent(fragment, parentType) != null) {
+            return;
         }
+        String parent;
+        if (fragment.getParentFragment() == null) {
+            if (fragment.getActivity() != null) {
+                parent = fragment.getActivity().getClass().getName();
+            } else if (fragment.getHost() != null) {
+                parent = fragment.getHost().getClass().getName();
+            } else {
+                throw new AssertionError(fragment.getClass().getName()
+                        + " must be added to a parent that implements "
+                        + parentType.getName()
+                        + " but is currently unattached to a parent.");
+            }
+        } else {
+            parent = fragment.getParentFragment().getClass().getName();
+        }
+        throw new AssertionError(
+                fragment.getClass().getName()
+                        + " must be added to a parent that implements "
+                        + parentType.getName()
+                        + ". Instead found "
+                        + parent);
     }
 }
