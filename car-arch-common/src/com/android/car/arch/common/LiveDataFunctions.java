@@ -489,6 +489,23 @@ public class LiveDataFunctions {
     }
 
     /**
+     * Returns a switch Function that splits a pair into two separate arguments. This method is
+     * mainly used to simplify lambda expressions and enable method references for {@link
+     * Transformations#switchMap(LiveData, Function) switchMaps}, especially in combination with
+     * {@link #pair(LiveData, LiveData)}.
+     */
+    public static <T, U, V> Function<Pair<T, U>, LiveData<V>> split(
+            @NonNull BiFunction<T, U, LiveData<V>> function) {
+        return (pair) -> {
+            if (pair == null) {
+                return function.apply(null, null);
+            } else {
+                return function.apply(pair.first, pair.second);
+            }
+        };
+    }
+
+    /**
      * Returns a LiveData that emits the result of {@code function} on the values of the two
      * parameter LiveDatas. If either parameter is uninitialized, the resulting LiveData is also
      * uninitialized.
