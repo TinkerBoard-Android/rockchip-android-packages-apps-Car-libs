@@ -19,6 +19,8 @@ package com.android.car.media.common.browse;
 import static androidx.lifecycle.Transformations.map;
 
 import static com.android.car.arch.common.LiveDataFunctions.pair;
+import static com.android.car.arch.common.LiveDataFunctions.split;
+import static com.android.car.arch.common.LoadingSwitchMap.loadingSwitchMap;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -29,8 +31,8 @@ import android.support.v4.media.MediaBrowserCompat;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Transformations;
 
+import com.android.car.arch.common.LoadingSwitchMap;
 import com.android.car.arch.common.switching.SwitchingLiveData;
 import com.android.car.media.common.MediaItemMetadata;
 
@@ -51,12 +53,12 @@ public class MediaBrowserViewModel extends AndroidViewModel {
 
     private final MutableLiveData<String> mCurrentBrowseId = new MutableLiveData<>();
 
-    private final LiveData<List<MediaItemMetadata>> mCurrentMediaItems =
-            Transformations.switchMap(pair(mConnectedMediaBrowser, mCurrentBrowseId),
-                    (pair) -> pair == null || pair.first == null
-                            ? null
-                            : new BrowsedMediaItems(pair.first, pair.second));
-
+    private final LoadingSwitchMap<List<MediaItemMetadata>> mCurrentMediaItems =
+            loadingSwitchMap(pair(mConnectedMediaBrowser, mCurrentBrowseId),
+                    split((connectedMediaBrowser, browseId) ->
+                            connectedMediaBrowser == null
+                                    ? null
+                                    : new BrowsedMediaItems(connectedMediaBrowser, browseId)));
 
     public MediaBrowserViewModel(@NonNull Application application) {
         super(application);
@@ -91,6 +93,10 @@ public class MediaBrowserViewModel extends AndroidViewModel {
         return mCurrentBrowseId.getValue();
     }
 
+    public LiveData<Boolean> isLoading() {
+        return mCurrentMediaItems.isLoading();
+    }
+
     /**
      * Fetches the MediaItemMetadatas for the current browsed id. A MediaSource must be selected and
      * its MediaBrowser connected, otherwise this will emit {@code null}.
@@ -100,7 +106,7 @@ public class MediaBrowserViewModel extends AndroidViewModel {
      * @see #setCurrentBrowseId(String)
      */
     public LiveData<List<MediaItemMetadata>> getBrowsedMediaItems() {
-        return mCurrentMediaItems;
+        return mCurrentMediaItems.getOutput();
     }
 
 }
