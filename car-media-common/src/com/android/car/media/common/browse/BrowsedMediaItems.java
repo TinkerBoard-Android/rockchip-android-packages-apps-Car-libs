@@ -18,9 +18,9 @@ package com.android.car.media.common.browse;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.media.browse.MediaBrowser;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.media.MediaBrowserCompat;
 
 import androidx.lifecycle.LiveData;
 
@@ -44,13 +44,13 @@ class BrowsedMediaItems extends LiveData<List<MediaItemMetadata>> {
      */
     private static final int CHILDREN_SUBSCRIPTION_RETRY_TIME_MS = 1000;
 
-    private final MediaBrowser mBrowser;
+    private final MediaBrowserCompat mBrowser;
     private final String mParentId;
     private final Handler mHandler = new Handler();
 
     private ChildrenSubscription mSubscription;
 
-    BrowsedMediaItems(@NonNull MediaBrowser mediaBrowser, @Nullable String parentId) {
+    BrowsedMediaItems(@NonNull MediaBrowserCompat mediaBrowser, @Nullable String parentId) {
         mBrowser = mediaBrowser;
         mParentId = parentId;
     }
@@ -74,20 +74,20 @@ class BrowsedMediaItems extends LiveData<List<MediaItemMetadata>> {
     }
 
     /**
-     * {@link MediaBrowser.SubscriptionCallback} wrapper used to overcome the lack of a reliable
-     * method to obtain the initial list of children of a given node.
+     * {@link MediaBrowserCompat.SubscriptionCallback} wrapper used to overcome the lack of a
+     * reliable method to obtain the initial list of children of a given node.
      * <p>
      * When some 3rd party apps go through configuration changes (i.e., in the case of user-switch),
      * they leave subscriptions in an intermediate state where neither {@link
-     * MediaBrowser.SubscriptionCallback#onChildrenLoaded(String, List)} nor {@link
-     * MediaBrowser.SubscriptionCallback#onError(String)} are invoked.
+     * MediaBrowserCompat.SubscriptionCallback#onChildrenLoaded(String, List)} nor {@link
+     * MediaBrowserCompat.SubscriptionCallback#onError(String)} are invoked.
      * <p>
      * This wrapper works around this problem by retrying the subscription a given number of times
      * if no data is received after a certain amount of time. This process is started by calling
      * {@link #start(int, int)}, passing the number of retries and delay between them as
      * parameters.
      */
-    private class ChildrenSubscription extends MediaBrowser.SubscriptionCallback {
+    private class ChildrenSubscription extends MediaBrowserCompat.SubscriptionCallback {
         private final String mItemId;
 
         private boolean mIsDataLoaded;
@@ -142,7 +142,7 @@ class BrowsedMediaItems extends LiveData<List<MediaItemMetadata>> {
 
         @Override
         public void onChildrenLoaded(@NonNull String parentId,
-                @NonNull List<MediaBrowser.MediaItem> children) {
+                @NonNull List<MediaBrowserCompat.MediaItem> children) {
             mHandler.removeCallbacks(mRetryRunnable);
             mIsDataLoaded = true;
             setValue(children.stream()
@@ -152,7 +152,7 @@ class BrowsedMediaItems extends LiveData<List<MediaItemMetadata>> {
 
         @Override
         public void onChildrenLoaded(@NonNull String parentId,
-                @NonNull List<MediaBrowser.MediaItem> children,
+                @NonNull List<MediaBrowserCompat.MediaItem> children,
                 @NonNull Bundle options) {
             onChildrenLoaded(parentId, children);
         }

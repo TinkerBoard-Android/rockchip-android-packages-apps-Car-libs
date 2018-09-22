@@ -22,8 +22,8 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.media.session.MediaController;
-import android.media.session.PlaybackState;
+import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.lifecycle.Lifecycle;
@@ -56,11 +56,11 @@ public class PlaybackStateLiveDataTest {
     public final TestLifecycleOwner mLifecycleOwner = new TestLifecycleOwner();
 
     @Mock
-    private MediaController mMediaController;
+    private MediaControllerCompat mMediaController;
     @Mock
-    private PlaybackState mPlaybackState;
+    private PlaybackStateCompat mPlaybackState;
     @Captor
-    private ArgumentCaptor<MediaController.Callback> mCapturedCallback;
+    private ArgumentCaptor<MediaControllerCompat.Callback> mCapturedCallback;
 
     private PlaybackStateLiveData mPlaybackStateLiveData;
 
@@ -80,7 +80,7 @@ public class PlaybackStateLiveDataTest {
     @Test
     public void testGetValueOnActive() {
         when(mMediaController.getPlaybackState()).thenReturn(mPlaybackState);
-        CaptureObserver<PlaybackState> observer = new CaptureObserver<>();
+        CaptureObserver<PlaybackStateCompat> observer = new CaptureObserver<>();
         mPlaybackStateLiveData.observe(mLifecycleOwner, observer);
 
         assertThat(observer.getObservedValue()).isEqualTo(mPlaybackState);
@@ -88,7 +88,7 @@ public class PlaybackStateLiveDataTest {
 
     @Test
     public void testDeliversValueToObserver() {
-        CaptureObserver<PlaybackState> observer = new CaptureObserver<>();
+        CaptureObserver<PlaybackStateCompat> observer = new CaptureObserver<>();
         mPlaybackStateLiveData.observe(mLifecycleOwner, observer);
 
         mCapturedCallback.getValue().onPlaybackStateChanged(mPlaybackState);

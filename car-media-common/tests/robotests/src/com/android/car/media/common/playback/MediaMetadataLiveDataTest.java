@@ -22,8 +22,8 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.media.MediaMetadata;
-import android.media.session.MediaController;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaControllerCompat;
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.lifecycle.Lifecycle;
@@ -56,11 +56,11 @@ public class MediaMetadataLiveDataTest {
     public final TestLifecycleOwner mLifecycleOwner = new TestLifecycleOwner();
 
     @Mock
-    private MediaController mMediaController;
+    private MediaControllerCompat mMediaController;
     @Mock
-    private MediaMetadata mMetadata;
+    private MediaMetadataCompat mMetadata;
     @Captor
-    private ArgumentCaptor<MediaController.Callback> mCapturedCallback;
+    private ArgumentCaptor<MediaControllerCompat.Callback> mCapturedCallback;
 
     private MediaMetadataLiveData mMediaMetadataLiveData;
 
@@ -80,7 +80,7 @@ public class MediaMetadataLiveDataTest {
     @Test
     public void testGetValueOnActive() {
         when(mMediaController.getMetadata()).thenReturn(mMetadata);
-        CaptureObserver<MediaMetadata> observer = new CaptureObserver<>();
+        CaptureObserver<MediaMetadataCompat> observer = new CaptureObserver<>();
         mMediaMetadataLiveData.observe(mLifecycleOwner, observer);
 
         assertThat(observer.getObservedValue()).isEqualTo(mMetadata);
@@ -88,7 +88,7 @@ public class MediaMetadataLiveDataTest {
 
     @Test
     public void testDeliversValueToObserver() {
-        CaptureObserver<MediaMetadata> observer = new CaptureObserver<>();
+        CaptureObserver<MediaMetadataCompat> observer = new CaptureObserver<>();
         mMediaMetadataLiveData.observe(mLifecycleOwner, observer);
 
         mCapturedCallback.getValue().onMetadataChanged(mMetadata);

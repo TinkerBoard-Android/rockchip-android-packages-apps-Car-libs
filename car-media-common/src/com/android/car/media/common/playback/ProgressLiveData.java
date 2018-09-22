@@ -16,10 +16,10 @@
 
 package com.android.car.media.common.playback;
 
-import android.media.session.PlaybackState;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.support.v4.media.session.PlaybackStateCompat;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -28,7 +28,7 @@ import androidx.lifecycle.LiveData;
 import java.util.function.Supplier;
 
 /**
- * Updates current progress from a given {@link PlaybackState} while active
+ * Updates current progress from a given {@link PlaybackStateCompat} while active
  */
 class ProgressLiveData extends LiveData<Long> {
 
@@ -36,18 +36,18 @@ class ProgressLiveData extends LiveData<Long> {
     @VisibleForTesting
     static final long UPDATE_INTERVAL_MS = 500;
 
-    private final PlaybackState mPlaybackState;
+    private final PlaybackStateCompat mPlaybackState;
     private final long mMaxProgress;
     private final Handler mTimerHandler = new Handler(Looper.getMainLooper());
     private final Supplier<Long> mElapsedRealtime;
 
-    ProgressLiveData(@NonNull PlaybackState playbackState, long maxProgress) {
+    ProgressLiveData(@NonNull PlaybackStateCompat playbackState, long maxProgress) {
         this(playbackState, maxProgress, SystemClock::elapsedRealtime);
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.NONE)
     ProgressLiveData(
-            @NonNull PlaybackState playbackState, long maxProgress,
+            @NonNull PlaybackStateCompat playbackState, long maxProgress,
             Supplier<Long> elapsedRealtime) {
         mPlaybackState = playbackState;
         mMaxProgress = maxProgress;
@@ -56,21 +56,21 @@ class ProgressLiveData extends LiveData<Long> {
 
     private void updateProgress() {
         setValue(getProgress());
-        if (mPlaybackState.getState() != PlaybackState.STATE_PAUSED
-                && mPlaybackState.getState() != PlaybackState.STATE_STOPPED
+        if (mPlaybackState.getState() != PlaybackStateCompat.STATE_PAUSED
+                && mPlaybackState.getState() != PlaybackStateCompat.STATE_STOPPED
                 && mPlaybackState.getPlaybackSpeed() != 0) {
             mTimerHandler.postDelayed(this::updateProgress, UPDATE_INTERVAL_MS);
         }
     }
 
     private long getProgress() {
-        if (mPlaybackState.getPosition() == PlaybackState.PLAYBACK_POSITION_UNKNOWN) {
-            return PlaybackState.PLAYBACK_POSITION_UNKNOWN;
+        if (mPlaybackState.getPosition() == PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN) {
+            return PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN;
         }
         long timeDiff = mElapsedRealtime.get() - mPlaybackState.getLastPositionUpdateTime();
         float speed = mPlaybackState.getPlaybackSpeed();
-        if (mPlaybackState.getState() == PlaybackState.STATE_PAUSED
-                || mPlaybackState.getState() == PlaybackState.STATE_STOPPED) {
+        if (mPlaybackState.getState() == PlaybackStateCompat.STATE_PAUSED
+                || mPlaybackState.getState() == PlaybackStateCompat.STATE_STOPPED) {
             // This guards against apps who don't keep their playbackSpeed to spec (b/62375164)
             speed = 0f;
         }

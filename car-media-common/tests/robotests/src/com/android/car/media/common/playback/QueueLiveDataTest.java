@@ -22,8 +22,8 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.media.session.MediaController;
-import android.media.session.MediaSession;
+import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.lifecycle.Lifecycle;
@@ -59,9 +59,9 @@ public class QueueLiveDataTest {
     public final TestLifecycleOwner mLifecycleOwner = new TestLifecycleOwner();
 
     @Mock
-    private MediaController mMediaController;
+    private MediaControllerCompat mMediaController;
     @Captor
-    private ArgumentCaptor<MediaController.Callback> mCapturedCallback;
+    private ArgumentCaptor<MediaControllerCompat.Callback> mCapturedCallback;
 
     private QueueLiveData mQueueLiveData;
 
@@ -80,9 +80,9 @@ public class QueueLiveDataTest {
 
     @Test
     public void testGetValueOnActive() {
-        List<MediaSession.QueueItem> queue = Collections.emptyList();
+        List<MediaSessionCompat.QueueItem> queue = Collections.emptyList();
         when(mMediaController.getQueue()).thenReturn(queue);
-        CaptureObserver<List<MediaSession.QueueItem>> observer = new CaptureObserver<>();
+        CaptureObserver<List<MediaSessionCompat.QueueItem>> observer = new CaptureObserver<>();
         mQueueLiveData.observe(mLifecycleOwner, observer);
 
         assertThat(observer.getObservedValue()).isEqualTo(queue);
@@ -90,9 +90,9 @@ public class QueueLiveDataTest {
 
     @Test
     public void testDeliversValueToObserver() {
-        CaptureObserver<List<MediaSession.QueueItem>> observer = new CaptureObserver<>();
+        CaptureObserver<List<MediaSessionCompat.QueueItem>> observer = new CaptureObserver<>();
         mQueueLiveData.observe(mLifecycleOwner, observer);
-        List<MediaSession.QueueItem> queue = Collections.emptyList();
+        List<MediaSessionCompat.QueueItem> queue = Collections.emptyList();
 
         mCapturedCallback.getValue().onQueueChanged(queue);
 

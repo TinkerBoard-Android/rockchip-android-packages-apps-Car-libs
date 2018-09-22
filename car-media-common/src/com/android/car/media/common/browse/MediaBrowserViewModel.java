@@ -24,7 +24,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
 import android.app.Application;
-import android.media.browse.MediaBrowser;
+import android.support.v4.media.MediaBrowserCompat;
 
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -42,10 +42,10 @@ import java.util.List;
 
 public class MediaBrowserViewModel extends AndroidViewModel {
 
-    private final SwitchingLiveData<MediaBrowser> mMediaBrowserSwitch =
+    private final SwitchingLiveData<MediaBrowserCompat> mMediaBrowserSwitch =
             SwitchingLiveData.newInstance();
 
-    private final LiveData<MediaBrowser> mConnectedMediaBrowser =
+    private final LiveData<MediaBrowserCompat> mConnectedMediaBrowser =
             map(mMediaBrowserSwitch.asLiveData(),
                     MediaBrowserViewModel::requireConnected);
 
@@ -62,7 +62,7 @@ public class MediaBrowserViewModel extends AndroidViewModel {
         super(application);
     }
 
-    private static MediaBrowser requireConnected(@Nullable MediaBrowser mediaBrowser) {
+    private static MediaBrowserCompat requireConnected(@Nullable MediaBrowserCompat mediaBrowser) {
         if (mediaBrowser != null && !mediaBrowser.isConnected()) {
             throw new IllegalStateException(
                     "Only connected MediaBrowsers may be provided to MediaBrowserViewModel.");
@@ -71,10 +71,10 @@ public class MediaBrowserViewModel extends AndroidViewModel {
     }
 
     /**
-     * Set the source {@link MediaBrowser} to use for browsing. If {@code mediaBrowser} emits
+     * Set the source {@link MediaBrowserCompat} to use for browsing. If {@code mediaBrowser} emits
      * non-null, the MediaBrowser emitted must already be in a connected state.
      */
-    public void setConnectedMediaBrowser(@Nullable LiveData<MediaBrowser> mediaBrowser) {
+    public void setConnectedMediaBrowser(@Nullable LiveData<MediaBrowserCompat> mediaBrowser) {
         mMediaBrowserSwitch.setSource(mediaBrowser);
     }
 

@@ -18,27 +18,28 @@ package com.android.car.media.common.playback;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.media.MediaMetadata;
-import android.media.session.MediaController;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaControllerCompat;
 
 import androidx.lifecycle.LiveData;
 
 /**
- * Watches the {@link MediaMetadata} for the session controlled by given a {@link MediaController}.
+ * Watches the {@link MediaMetadataCompat} for the session controlled by given a
+ * {@link MediaControllerCompat}.
  *
- * @see MediaController#getMetadata()
+ * @see MediaControllerCompat#getMetadata()
  */
-class MediaMetadataLiveData extends LiveData<MediaMetadata> {
+class MediaMetadataLiveData extends LiveData<MediaMetadataCompat> {
 
-    private final MediaController mMediaController;
-    private final MediaController.Callback mCallback = new MediaController.Callback() {
+    private final MediaControllerCompat mMediaController;
+    private final MediaControllerCompat.Callback mCallback = new MediaControllerCompat.Callback() {
         @Override
-        public void onMetadataChanged(@Nullable MediaMetadata metadata) {
+        public void onMetadataChanged(@Nullable MediaMetadataCompat metadata) {
             setValue(metadata);
         }
     };
 
-    MediaMetadataLiveData(@NonNull MediaController mediaController) {
+    MediaMetadataLiveData(@NonNull MediaControllerCompat mediaController) {
         mMediaController = mediaController;
     }
 

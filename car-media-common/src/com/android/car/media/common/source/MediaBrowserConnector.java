@@ -19,7 +19,7 @@ package com.android.car.media.common.source;
 import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
-import android.media.browse.MediaBrowser;
+import android.support.v4.media.MediaBrowserCompat;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.VisibleForTesting;
@@ -36,16 +36,16 @@ import java.lang.annotation.RetentionPolicy;
 class MediaBrowserConnector extends LiveData<MediaBrowserConnector.MediaBrowserState> {
 
     /**
-     * Contains the {@link MediaBrowser} for a {@link MediaBrowserConnector} and its associated
-     * connection status.
+     * Contains the {@link MediaBrowserCompat} for a {@link MediaBrowserConnector} and its
+     * associated connection status.
      */
     public static class MediaBrowserState {
-        public final MediaBrowser mMediaBrowser;
+        public final MediaBrowserCompat mMediaBrowser;
 
         @ConnectionState
         public final int mConnectionState;
 
-        MediaBrowserState(MediaBrowser mediaBrowser, @ConnectionState int connectionState) {
+        MediaBrowserState(MediaBrowserCompat mediaBrowser, @ConnectionState int connectionState) {
             mMediaBrowser = mediaBrowser;
             mConnectionState = connectionState;
         }
@@ -61,20 +61,20 @@ class MediaBrowserConnector extends LiveData<MediaBrowserConnector.MediaBrowserS
         int CONNECTION_FAILED = 3;
     }
 
-    private final MediaBrowser mBrowser;
+    private final MediaBrowserCompat mBrowser;
 
     /**
      * Create a new MediaBrowserConnector for the specified component.
      *
      * @param context       The Context with which to build the MediaBrowser.
      * @param browseService The ComponentName of the media browser service.
-     * @see MediaBrowser#MediaBrowser(Context, ComponentName, MediaBrowser.ConnectionCallback,
-     * android.os.Bundle)
+     * @see MediaBrowserCompat#MediaBrowserCompat(Context, ComponentName,
+     * MediaBrowserCompat.ConnectionCallback, android.os.Bundle)
      */
     MediaBrowserConnector(@NonNull Context context,
             @NonNull ComponentName browseService) {
         mBrowser = createMediaBrowser(context, browseService,
-                new MediaBrowser.ConnectionCallback() {
+                new MediaBrowserCompat.ConnectionCallback() {
                     @Override
                     public void onConnected() {
                         setValue(new MediaBrowserState(mBrowser, ConnectionState.CONNECTED));
@@ -94,13 +94,13 @@ class MediaBrowserConnector extends LiveData<MediaBrowserConnector.MediaBrowserS
     }
 
     /**
-     * Instantiate the MediaBrowser this MediaBrowserConnector will connect with.
+     * Instantiate the MediaBrowserCompat this MediaBrowserConnector will connect with.
      */
     @VisibleForTesting()
-    protected MediaBrowser createMediaBrowser(@NonNull Context context,
+    protected MediaBrowserCompat createMediaBrowser(@NonNull Context context,
             @NonNull ComponentName browseService,
-            @NonNull MediaBrowser.ConnectionCallback callback) {
-        return new MediaBrowser(context, browseService, callback, null);
+            @NonNull MediaBrowserCompat.ConnectionCallback callback) {
+        return new MediaBrowserCompat(context, browseService, callback, null);
     }
 
     @Override

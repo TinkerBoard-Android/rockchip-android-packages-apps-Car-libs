@@ -17,27 +17,28 @@
 package com.android.car.media.common.playback;
 
 import android.annotation.NonNull;
-import android.media.session.MediaController;
-import android.media.session.PlaybackState;
+import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 
 import androidx.lifecycle.LiveData;
 
 /**
- * Watches the {@link PlaybackState} for the session controlled by given a {@link MediaController}.
+ * Watches the {@link PlaybackStateCompat} for the session controlled by given a
+ * {@link MediaControllerCompat}.
  *
- * @see MediaController#getPlaybackState()
+ * @see MediaControllerCompat#getPlaybackState()
  */
-class PlaybackStateLiveData extends LiveData<PlaybackState> {
+class PlaybackStateLiveData extends LiveData<PlaybackStateCompat> {
 
-    private final MediaController mMediaController;
-    private final MediaController.Callback mCallback = new MediaController.Callback() {
+    private final MediaControllerCompat mMediaController;
+    private final MediaControllerCompat.Callback mCallback = new MediaControllerCompat.Callback() {
         @Override
-        public void onPlaybackStateChanged(@NonNull PlaybackState playbackState) {
+        public void onPlaybackStateChanged(@NonNull PlaybackStateCompat playbackState) {
             setValue(playbackState);
         }
     };
 
-    PlaybackStateLiveData(@NonNull MediaController mediaController) {
+    PlaybackStateLiveData(@NonNull MediaControllerCompat mediaController) {
         mMediaController = mediaController;
     }
 

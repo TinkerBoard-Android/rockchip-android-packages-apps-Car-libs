@@ -16,11 +16,11 @@
 
 package com.android.car.media.common.playback;
 
+import android.support.v4.media.session.PlaybackStateCompat;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.when;
-
-import android.media.session.PlaybackState;
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.lifecycle.Lifecycle;
@@ -58,7 +58,7 @@ public class ProgressLiveDataTest {
     public final TestLifecycleOwner mLifecycleOwner = new TestLifecycleOwner();
 
     @Mock
-    private PlaybackState mPlaybackState;
+    private PlaybackStateCompat mPlaybackState;
     private long mLastPositionUpdateTime;
 
     private long mCurrentElapsedTime;
@@ -73,7 +73,7 @@ public class ProgressLiveDataTest {
                 invocation -> mLastPositionUpdateTime);
         when(mPlaybackState.getPosition()).thenReturn(START_PROGRESS);
         when(mPlaybackState.getPlaybackSpeed()).thenReturn(1F);
-        when(mPlaybackState.getState()).thenReturn(PlaybackState.STATE_PLAYING);
+        when(mPlaybackState.getState()).thenReturn(PlaybackStateCompat.STATE_PLAYING);
         mProgressLiveData = new ProgressLiveData(mPlaybackState, MAX_PROGRESS,
                 this::getCurrentElapsedTime);
     }
@@ -99,12 +99,13 @@ public class ProgressLiveDataTest {
     @Test
     public void testUnknownProgress() {
         CaptureObserver<Long> progressObserver = new CaptureObserver<>();
-        when(mPlaybackState.getPosition()).thenReturn(PlaybackState.PLAYBACK_POSITION_UNKNOWN);
+        when(mPlaybackState.getPosition())
+                .thenReturn(PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN);
         mProgressLiveData.observe(mLifecycleOwner, progressObserver);
 
         assertThat(progressObserver.hasBeenNotified()).isTrue();
         assertThat(progressObserver.getObservedValue()).isEqualTo(
-                PlaybackState.PLAYBACK_POSITION_UNKNOWN);
+                PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN);
     }
 
     @Test
@@ -139,7 +140,7 @@ public class ProgressLiveDataTest {
     public void testDoesntMoveForwardWhenPaused() {
         CaptureObserver<Long> progressObserver = new CaptureObserver<>();
         mProgressLiveData.observe(mLifecycleOwner, progressObserver);
-        when(mPlaybackState.getState()).thenReturn(PlaybackState.STATE_PAUSED);
+        when(mPlaybackState.getState()).thenReturn(PlaybackStateCompat.STATE_PAUSED);
         progressObserver.reset();
 
         advanceElapsedTime(ProgressLiveData.UPDATE_INTERVAL_MS);
@@ -153,7 +154,7 @@ public class ProgressLiveDataTest {
     public void testDoesntMoveForwardWhenStopped() {
         CaptureObserver<Long> progressObserver = new CaptureObserver<>();
         mProgressLiveData.observe(mLifecycleOwner, progressObserver);
-        when(mPlaybackState.getState()).thenReturn(PlaybackState.STATE_STOPPED);
+        when(mPlaybackState.getState()).thenReturn(PlaybackStateCompat.STATE_STOPPED);
         progressObserver.reset();
 
         advanceElapsedTime(ProgressLiveData.UPDATE_INTERVAL_MS);

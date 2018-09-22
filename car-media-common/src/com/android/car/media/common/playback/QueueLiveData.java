@@ -18,8 +18,8 @@ package com.android.car.media.common.playback;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.media.session.MediaController;
-import android.media.session.MediaSession;
+import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 
 import androidx.lifecycle.LiveData;
 
@@ -27,21 +27,21 @@ import java.util.List;
 
 
 /**
- * Watches the queue for the session controlled by given a {@link MediaController}.
+ * Watches the queue for the session controlled by given a {@link MediaControllerCompat}.
  *
- * @see MediaController#getQueue()
+ * @see MediaControllerCompat#getQueue()
  */
-class QueueLiveData extends LiveData<List<MediaSession.QueueItem>> {
+class QueueLiveData extends LiveData<List<MediaSessionCompat.QueueItem>> {
 
-    private final MediaController mMediaController;
-    private final MediaController.Callback mCallback = new MediaController.Callback() {
+    private final MediaControllerCompat mMediaController;
+    private final MediaControllerCompat.Callback mCallback = new MediaControllerCompat.Callback() {
         @Override
-        public void onQueueChanged(@Nullable List<MediaSession.QueueItem> metadata) {
+        public void onQueueChanged(@Nullable List<MediaSessionCompat.QueueItem> metadata) {
             setValue(metadata);
         }
     };
 
-    QueueLiveData(@NonNull MediaController mediaController) {
+    QueueLiveData(@NonNull MediaControllerCompat mediaController) {
         mMediaController = mediaController;
     }
 

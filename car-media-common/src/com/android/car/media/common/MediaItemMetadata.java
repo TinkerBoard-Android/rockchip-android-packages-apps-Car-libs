@@ -22,14 +22,14 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.media.MediaDescription;
-import android.media.MediaMetadata;
-import android.media.browse.MediaBrowser;
-import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.MediaDescriptionCompat;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -48,31 +48,31 @@ import java.util.concurrent.CompletableFuture;
 public class MediaItemMetadata implements Parcelable {
     private static final String TAG = "MediaItemMetadata";
     @NonNull
-    private final MediaDescription mMediaDescription;
+    private final MediaDescriptionCompat mMediaDescription;
     @Nullable
     private final Long mQueueId;
     private final boolean mIsBrowsable;
     private final boolean mIsPlayable;
 
-    /** Creates an instance based on a {@link MediaMetadata} */
-    public MediaItemMetadata(@NonNull MediaMetadata metadata) {
+    /** Creates an instance based on a {@link MediaMetadataCompat} */
+    public MediaItemMetadata(@NonNull MediaMetadataCompat metadata) {
         this(metadata.getDescription(), null, false, false);
     }
 
-    /** Creates an instance based on a {@link MediaSession.QueueItem} */
-    public MediaItemMetadata(@NonNull MediaSession.QueueItem queueItem) {
+    /** Creates an instance based on a {@link MediaSessionCompat.QueueItem} */
+    public MediaItemMetadata(@NonNull MediaSessionCompat.QueueItem queueItem) {
         this(queueItem.getDescription(), queueItem.getQueueId(), false, true);
     }
 
-    /** Creates an instance based on a {@link MediaBrowser.MediaItem} */
-    public MediaItemMetadata(@NonNull MediaBrowser.MediaItem item) {
+    /** Creates an instance based on a {@link MediaBrowserCompat.MediaItem} */
+    public MediaItemMetadata(@NonNull MediaBrowserCompat.MediaItem item) {
         this(item.getDescription(), null, item.isBrowsable(), item.isPlayable());
     }
 
     /** Creates an instance based on a {@link Parcel} */
     public MediaItemMetadata(@NonNull Parcel in) {
-        mMediaDescription = (MediaDescription) in.readValue(
-                MediaDescription.class.getClassLoader());
+        mMediaDescription = (MediaDescriptionCompat) in.readValue(
+                MediaDescriptionCompat.class.getClassLoader());
         mQueueId = in.readByte() == 0x00 ? null : in.readLong();
         mIsBrowsable = in.readByte() != 0x00;
         mIsPlayable = in.readByte() != 0x00;
@@ -91,8 +91,8 @@ public class MediaItemMetadata implements Parcelable {
         mIsPlayable = item.mIsPlayable;
     }
 
-    private MediaItemMetadata(MediaDescription description, Long queueId, boolean isBrowsable,
-            boolean isPlayable) {
+    private MediaItemMetadata(MediaDescriptionCompat description, Long queueId, boolean isBrowsable,
+                              boolean isPlayable) {
         mMediaDescription = description;
         mQueueId = queueId;
         mIsPlayable = isPlayable;

@@ -26,10 +26,11 @@ import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
 
 import android.media.MediaDescription;
-import android.media.MediaMetadata;
-import android.media.session.MediaController;
-import android.media.session.MediaSession;
-import android.media.session.PlaybackState;
+import android.support.v4.media.MediaDescriptionCompat;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 
 import androidx.annotation.NonNull;
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
@@ -66,29 +67,32 @@ public class PlaybackViewModelTest {
     public final TestLifecycleOwner mLifecycleOwner = new TestLifecycleOwner();
 
     @Mock
-    public MediaController mMediaController;
+    public MediaControllerCompat mMediaController;
     @Mock
-    public MediaMetadata mMediaMetadata;
+    public MediaMetadataCompat mMediaMetadata;
     @Mock
     public MediaDescription mMediaDescription;
     @Mock
-    public PlaybackState mPlaybackState;
+    public MediaDescriptionCompat mMediaDescriptionCompat;
+    @Mock
+    public PlaybackStateCompat mPlaybackState;
     @Captor
-    private ArgumentCaptor<MediaController.Callback> mCapturedCallback;
+    private ArgumentCaptor<MediaControllerCompat.Callback> mCapturedCallback;
 
     private PlaybackViewModel mPlaybackViewModel;
 
     @Before
     public void setUp() {
         doNothing().when(mMediaController).registerCallback(mCapturedCallback.capture());
-        when(mMediaMetadata.getDescription()).thenReturn(mMediaDescription);
+        when(mMediaDescriptionCompat.getMediaDescription()).thenReturn(mMediaDescription);
+        when(mMediaMetadata.getDescription()).thenReturn(mMediaDescriptionCompat);
         mPlaybackViewModel = new PlaybackViewModel(application);
         mPlaybackViewModel.setMediaController(dataOf(mMediaController));
     }
 
     @Test
     public void testGetMediaController() {
-        CaptureObserver<MediaController> observer = new CaptureObserver<>();
+        CaptureObserver<MediaControllerCompat> observer = new CaptureObserver<>();
         mPlaybackViewModel.getMediaController().observe(mLifecycleOwner, observer);
 
         assertThat(observer.getObservedValue()).isEqualTo(mMediaController);
@@ -111,7 +115,7 @@ public class PlaybackViewModelTest {
 
     @Test
     public void testGetPlaybackState() {
-        CaptureObserver<PlaybackState> observer = new CaptureObserver<>();
+        CaptureObserver<PlaybackStateCompat> observer = new CaptureObserver<>();
         mPlaybackViewModel.getPlaybackState().observe(mLifecycleOwner, observer);
         observer.reset();
 
@@ -126,8 +130,8 @@ public class PlaybackViewModelTest {
     public void testGetSanitizedQueue() {
         String title = "title";
         int queueId = 1;
-        MediaSession.QueueItem queueItem = createQueueItem(title, queueId);
-        List<MediaSession.QueueItem> queue = Collections.singletonList(queueItem);
+        MediaSessionCompat.QueueItem queueItem = createQueueItem(title, queueId);
+        List<MediaSessionCompat.QueueItem> queue = Collections.singletonList(queueItem);
         CaptureObserver<List<MediaItemMetadata>> observer = new CaptureObserver<>();
         mPlaybackViewModel.getQueue().observe(mLifecycleOwner, observer);
         observer.reset();
@@ -160,7 +164,7 @@ public class PlaybackViewModelTest {
 
     @Test
     public void testGetHasQueue_empty() {
-        List<MediaSession.QueueItem> queue = Collections.emptyList();
+        List<MediaSessionCompat.QueueItem> queue = Collections.emptyList();
         CaptureObserver<Boolean> observer = new CaptureObserver<>();
         mPlaybackViewModel.hasQueue().observe(mLifecycleOwner, observer);
         mCapturedCallback.getValue().onQueueChanged(
@@ -175,7 +179,8 @@ public class PlaybackViewModelTest {
 
     @Test
     public void testGetHasQueue_true() {
-        List<MediaSession.QueueItem> queue = Collections.singletonList(createQueueItem("title", 1));
+        List<MediaSessionCompat.QueueItem> queue =
+                Collections.singletonList(createQueueItem("title", 1));
         CaptureObserver<Boolean> observer = new CaptureObserver<>();
         mPlaybackViewModel.hasQueue().observe(mLifecycleOwner, observer);
         observer.reset();
@@ -194,14 +199,14 @@ public class PlaybackViewModelTest {
         deliverValuesToCallbacks(mCapturedCallback, mMediaMetadata, mPlaybackState);
 
         // Create new MediaController and associated callback captor
-        MediaController newController = mock(MediaController.class);
-        ArgumentCaptor<MediaController.Callback> newCallbackCaptor =
-                ArgumentCaptor.forClass(MediaController.Callback.class);
+        MediaControllerCompat newController = mock(MediaControllerCompat.class);
+        ArgumentCaptor<MediaControllerCompat.Callback> newCallbackCaptor =
+                ArgumentCaptor.forClass(MediaControllerCompat.Callback.class);
         doNothing().when(newController).registerCallback(newCallbackCaptor.capture());
 
         // Wire up new data for new MediaController
-        MediaMetadata newMetadata = mock(MediaMetadata.class);
-        PlaybackState newPlaybackState = mock(PlaybackState.class);
+        MediaMetadataCompat newMetadata = mock(MediaMetadataCompat.class);
+        PlaybackStateCompat newPlaybackState = mock(PlaybackStateCompat.class);
         when(newController.getMetadata()).thenReturn(newMetadata);
         when(newController.getPlaybackState()).thenReturn(newPlaybackState);
 
@@ -223,18 +228,19 @@ public class PlaybackViewModelTest {
     }
 
     private void deliverValuesToCallbacks(
-            ArgumentCaptor<MediaController.Callback> callbackCaptor,
-            MediaMetadata metadata,
-            PlaybackState playbackState) {
-        for (MediaController.Callback callback : callbackCaptor.getAllValues()) {
+            ArgumentCaptor<MediaControllerCompat.Callback> callbackCaptor,
+            MediaMetadataCompat metadata,
+            PlaybackStateCompat playbackState) {
+        for (MediaControllerCompat.Callback callback : callbackCaptor.getAllValues()) {
             callback.onMetadataChanged(metadata);
             callback.onPlaybackStateChanged(playbackState);
         }
     }
 
     @NonNull
-    private MediaSession.QueueItem createQueueItem(String title, int queueId) {
-        MediaDescription description = new MediaDescription.Builder().setTitle(title).build();
-        return new MediaSession.QueueItem(description, queueId);
+    private MediaSessionCompat.QueueItem createQueueItem(String title, int queueId) {
+        MediaDescriptionCompat description =
+                new MediaDescriptionCompat.Builder().setTitle(title).build();
+        return new MediaSessionCompat.QueueItem(description, queueId);
     }
 }
