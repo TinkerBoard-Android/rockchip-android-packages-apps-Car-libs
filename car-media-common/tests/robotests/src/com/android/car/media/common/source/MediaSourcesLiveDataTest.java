@@ -106,15 +106,15 @@ public class MediaSourcesLiveDataTest {
 
     @Test
     public void testGetAppsOnActive() {
-        CaptureObserver<List<SimpleMediaSource>> observer = new CaptureObserver<>();
+        CaptureObserver<List<MediaSource>> observer = new CaptureObserver<>();
         MediaSourcesLiveData liveData = new MediaSourcesLiveData(application);
 
         liveData.observe(mLifecycleOwner, observer);
         assertThat(observer.hasBeenNotified()).isTrue();
-        List<SimpleMediaSource> observedValue = observer.getObservedValue();
+        List<MediaSource> observedValue = observer.getObservedValue();
         assertThat(observedValue).isNotNull();
         assertThat(
-                observedValue.stream().map(SimpleMediaSource::getPackageName)
+                observedValue.stream().map(MediaSource::getPackageName)
                         .collect(Collectors.toList()))
                 .containsExactly(TEST_ACTIVITY_PACKAGE_1, TEST_SERVICE_PACKAGE_1,
                         TEST_SERVICE_PACKAGE_WITH_METADATA);
@@ -122,7 +122,7 @@ public class MediaSourcesLiveDataTest {
 
     @Test
     public void testGetAppsOnPackageAdded() {
-        CaptureObserver<List<SimpleMediaSource>> observer = new CaptureObserver<>();
+        CaptureObserver<List<MediaSource>> observer = new CaptureObserver<>();
         MediaSourcesLiveData liveData = new MediaSourcesLiveData(application);
         liveData.observe(mLifecycleOwner, observer);
         observer.reset();
@@ -141,10 +141,10 @@ public class MediaSourcesLiveDataTest {
                         packageAdded));
 
         assertThat(observer.hasBeenNotified()).isTrue();
-        List<SimpleMediaSource> observedValue = observer.getObservedValue();
+        List<MediaSource> observedValue = observer.getObservedValue();
         assertThat(observedValue).isNotNull();
         assertThat(
-                observedValue.stream().map(SimpleMediaSource::getPackageName)
+                observedValue.stream().map(MediaSource::getPackageName)
                         .collect(Collectors.toList()))
                 .containsExactly(TEST_ACTIVITY_PACKAGE_1, TEST_ACTIVITY_PACKAGE_2,
                         TEST_SERVICE_PACKAGE_1, TEST_SERVICE_PACKAGE_2,
@@ -153,7 +153,7 @@ public class MediaSourcesLiveDataTest {
 
     @Test
     public void testGetAppsOnPackageRemoved() {
-        CaptureObserver<List<SimpleMediaSource>> observer = new CaptureObserver<>();
+        CaptureObserver<List<MediaSource>> observer = new CaptureObserver<>();
         MediaSourcesLiveData liveData = new MediaSourcesLiveData(application);
         liveData.observe(mLifecycleOwner, observer);
         observer.reset();
@@ -171,10 +171,10 @@ public class MediaSourcesLiveDataTest {
                         broadcastReceiver.onReceive(application, packageRemoved));
 
         assertThat(observer.hasBeenNotified()).isTrue();
-        List<SimpleMediaSource> observedValue = observer.getObservedValue();
+        List<MediaSource> observedValue = observer.getObservedValue();
         assertThat(observedValue).isNotNull();
         assertThat(
-                observedValue.stream().map(SimpleMediaSource::getPackageName)
+                observedValue.stream().map(MediaSource::getPackageName)
                         .collect(Collectors.toList()))
                 .containsExactly(TEST_ACTIVITY_PACKAGE_1, TEST_SERVICE_PACKAGE_WITH_METADATA);
     }

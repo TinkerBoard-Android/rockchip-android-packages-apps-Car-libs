@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  * A LiveData that provides access to the list of all possible media sources that can be selected
  * to be played.
  */
-class MediaSourcesLiveData extends LiveData<List<SimpleMediaSource>> {
+class MediaSourcesLiveData extends LiveData<List<MediaSource>> {
 
     private static final String TAG = "MediaSourcesLiveData";
     private final Context mContext;
@@ -81,9 +81,9 @@ class MediaSourcesLiveData extends LiveData<List<SimpleMediaSource>> {
     }
 
     private void updateMediaSources() {
-        List<SimpleMediaSource> mediaSources = getPackageNames().stream()
+        List<MediaSource> mediaSources = getPackageNames().stream()
                 .filter(Objects::nonNull)
-                .map(packageName -> new SimpleMediaSource(mContext, packageName))
+                .map(packageName -> new MediaSource(mContext, packageName))
                 .filter(mediaSource -> {
                     if (mediaSource.getName() == null) {
                         Log.w(TAG, "Found media source without name: "

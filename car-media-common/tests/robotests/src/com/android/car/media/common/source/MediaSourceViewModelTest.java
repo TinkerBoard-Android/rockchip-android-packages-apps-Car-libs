@@ -65,7 +65,7 @@ public class MediaSourceViewModelTest {
     public final TestLifecycleOwner mLifecycleOwner = new TestLifecycleOwner();
 
     @Mock
-    public SimpleMediaSource mMediaSource;
+    public MediaSource mMediaSource;
     @Mock
     public MediaBrowserCompat mMediaBrowser;
     @Mock
@@ -75,7 +75,7 @@ public class MediaSourceViewModelTest {
     @Mock
     public MediaControllerCompat mMediaControllerFromSessionManager;
 
-    private final MutableLiveData<List<SimpleMediaSource>> mMediaSources = new MutableLiveData<>();
+    private final MutableLiveData<List<MediaSource>> mMediaSources = new MutableLiveData<>();
     private final MutableLiveData<MediaBrowserState> mMediaBrowserState = new MutableLiveData<>();
     private final MutableLiveData<List<MediaControllerCompat>> mActiveMediaControllers =
             new MutableLiveData<>();
@@ -100,7 +100,7 @@ public class MediaSourceViewModelTest {
 
         mViewModel = new MediaSourceViewModel(application, new MediaSourceViewModel.InputFactory() {
             @Override
-            public LiveData<List<SimpleMediaSource>> createMediaSources() {
+            public LiveData<List<MediaSource>> createMediaSources() {
                 return mMediaSources;
             }
 
@@ -161,7 +161,7 @@ public class MediaSourceViewModelTest {
 
     @Test
     public void testGetSelectedMediaSource() {
-        CaptureObserver<SimpleMediaSource> observer = new CaptureObserver<>();
+        CaptureObserver<MediaSource> observer = new CaptureObserver<>();
 
         mViewModel.getSelectedMediaSource().observe(mLifecycleOwner, observer);
 

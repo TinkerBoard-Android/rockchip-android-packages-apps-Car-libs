@@ -39,8 +39,8 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.android.car.media.common.playback.AlbumArtLiveData;
 import com.android.car.media.common.playback.PlaybackViewModel;
+import com.android.car.media.common.source.MediaSource;
 import com.android.car.media.common.source.MediaSourceViewModel;
-import com.android.car.media.common.source.SimpleMediaSource;
 
 import com.bumptech.glide.request.target.Target;
 
@@ -106,7 +106,7 @@ public class PlaybackFragment extends Fragment {
         private static final Intent MEDIA_TEMPLATE_INTENT =
                 new Intent(Car.CAR_INTENT_ACTION_MEDIA_TEMPLATE);
 
-        private LiveData<SimpleMediaSource> mMediaSource;
+        private LiveData<MediaSource> mMediaSource;
         private LiveData<CharSequence> mAppName;
         private LiveData<Bitmap> mAppIcon;
         private LiveData<Intent> mOpenIntent;
@@ -129,8 +129,8 @@ public class PlaybackFragment extends Fragment {
             mPlaybackViewModel = playbackViewModel;
             mMediaSourceViewModel = mediaSourceViewModel;
             mMediaSource = mMediaSourceViewModel.getSelectedMediaSource();
-            mAppName = mapNonNull(mMediaSource, SimpleMediaSource::getName);
-            mAppIcon = mapNonNull(mMediaSource, SimpleMediaSource::getRoundPackageIcon);
+            mAppName = mapNonNull(mMediaSource, MediaSource::getName);
+            mAppIcon = mapNonNull(mMediaSource, MediaSource::getRoundPackageIcon);
             mOpenIntent = mapNonNull(mMediaSource, MEDIA_TEMPLATE_INTENT, source -> {
                 if (source.isCustom()) {
                     // We are playing a custom app. Jump to it, not to the template

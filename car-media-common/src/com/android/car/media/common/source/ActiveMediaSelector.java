@@ -64,7 +64,7 @@ class ActiveMediaSelector {
      */
     @Nullable
     MediaControllerCompat getControllerForSource(@NonNull List<MediaControllerCompat> controllers,
-            @NonNull SimpleMediaSource mediaSource) {
+            @NonNull MediaSource mediaSource) {
         return getControllerForPackage(controllers, mediaSource.getPackageName());
     }
 

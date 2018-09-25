@@ -30,6 +30,7 @@ import android.support.v4.media.MediaBrowserCompat;
 
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.android.car.arch.common.LoadingSwitchMap;
@@ -43,6 +44,20 @@ import java.util.List;
  */
 
 public class MediaBrowserViewModel extends AndroidViewModel {
+
+    /**
+     * Possible states of the application UI
+     */
+    public enum BrowseState {
+        /** There is no content to show */
+        EMPTY,
+        /** We are still in the process of obtaining data */
+        LOADING,
+        /** Data has been loaded */
+        LOADED,
+        /** The content can't be shown due an error */
+        ERROR
+    }
 
     private final SwitchingLiveData<MediaBrowserCompat> mMediaBrowserSwitch =
             SwitchingLiveData.newInstance();
@@ -59,6 +74,38 @@ public class MediaBrowserViewModel extends AndroidViewModel {
                             connectedMediaBrowser == null
                                     ? null
                                     : new BrowsedMediaItems(connectedMediaBrowser, browseId)));
+    private final LiveData<BrowseState> mBrowseState = new MediatorLiveData<BrowseState>() {
+        {
+            setValue(BrowseState.EMPTY);
+            addSource(mCurrentMediaItems.isLoading(), isLoading -> update());
+            addSource(mCurrentMediaItems.getOutput(), items -> update());
+        }
+
+        private void update() {
+            setValue(getState());
+        }
+
+        private BrowseState getState() {
+            Boolean isLoading = mCurrentMediaItems.isLoading().getValue();
+            if (isLoading == null) {
+                // Uninitialized
+                return BrowseState.EMPTY;
+            }
+            if (isLoading) {
+                return BrowseState.LOADING;
+            }
+            List<MediaItemMetadata> items = mCurrentMediaItems.getOutput().getValue();
+            if (items == null) {
+                // Normally this could be null if it hasn't been initialized, but in that case
+                // isLoading would not be false, so this means it must have encountered an error.
+                return BrowseState.ERROR;
+            }
+            if (items.isEmpty()) {
+                return BrowseState.EMPTY;
+            }
+            return BrowseState.LOADED;
+        }
+    };
 
     public MediaBrowserViewModel(@NonNull Application application) {
         super(application);
@@ -91,6 +138,10 @@ public class MediaBrowserViewModel extends AndroidViewModel {
 
     public String getCurrentBrowseId() {
         return mCurrentBrowseId.getValue();
+    }
+
+    public LiveData<BrowseState> getBrowseState() {
+        return mBrowseState;
     }
 
     public LiveData<Boolean> isLoading() {
