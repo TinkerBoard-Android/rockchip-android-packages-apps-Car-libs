@@ -55,11 +55,11 @@ import java.util.function.BiFunction;
 public class MediaSourceViewModel extends AndroidViewModel {
     private static final String TAG = "MediaSourceViewModel";
 
-    private final LiveData<List<SimpleMediaSource>> mMediaSources;
+    private final LiveData<List<MediaSource>> mMediaSources;
 
     private final LiveData<Boolean> mHasMediaSources;
 
-    private final MutableLiveData<SimpleMediaSource> mSelectedMediaSource = new MutableLiveData<>();
+    private final MutableLiveData<MediaSource> mSelectedMediaSource = new MutableLiveData<>();
 
     private final LiveData<MediaBrowserCompat> mConnectedMediaBrowser;
 
@@ -76,7 +76,7 @@ public class MediaSourceViewModel extends AndroidViewModel {
      */
     @VisibleForTesting
     interface InputFactory {
-        LiveData<List<SimpleMediaSource>> createMediaSources();
+        LiveData<List<MediaSource>> createMediaSources();
 
         LiveData<MediaBrowserState> createMediaBrowserConnector(
                 @NonNull ComponentName browseService);
@@ -97,7 +97,7 @@ public class MediaSourceViewModel extends AndroidViewModel {
         this(application, new InputFactory() {
 
             @Override
-            public LiveData<List<SimpleMediaSource>> createMediaSources() {
+            public LiveData<List<MediaSource>> createMediaSources() {
                 return new MediaSourcesLiveData(application);
             }
 
@@ -180,7 +180,7 @@ public class MediaSourceViewModel extends AndroidViewModel {
      * Returns a live list of all MediaSources that can be selected for playback
      */
     @NonNull
-    public LiveData<List<SimpleMediaSource>> getMediaSources() {
+    public LiveData<List<MediaSource>> getMediaSources() {
         return mMediaSources;
     }
 
@@ -195,7 +195,7 @@ public class MediaSourceViewModel extends AndroidViewModel {
     /**
      * Returns a LiveData that emits the MediaSource that is to be browsed or displayed.
      */
-    public LiveData<SimpleMediaSource> getSelectedMediaSource() {
+    public LiveData<MediaSource> getSelectedMediaSource() {
         return mSelectedMediaSource;
     }
 
@@ -204,7 +204,7 @@ public class MediaSourceViewModel extends AndroidViewModel {
      * connection may be made and provided through {@link #getConnectedMediaBrowser()}.
      */
     @UiThread
-    public void setSelectedMediaSource(@Nullable SimpleMediaSource mediaSource) {
+    public void setSelectedMediaSource(@Nullable MediaSource mediaSource) {
         mSelectedMediaSource.setValue(mediaSource);
     }
 

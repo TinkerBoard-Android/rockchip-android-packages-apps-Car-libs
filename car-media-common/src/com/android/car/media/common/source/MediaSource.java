@@ -36,8 +36,6 @@ import android.graphics.drawable.Drawable;
 import android.service.media.MediaBrowserService;
 import android.util.Log;
 
-import com.android.car.media.common.MediaSource;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -47,8 +45,7 @@ import java.util.Set;
  * This represents a source of media content. It provides convenient methods to access media source
  * metadata, such as primary color and application name.
  */
-// TODO (keyboardr): Rename to MediaSource once other MediaSource is removed
-public class SimpleMediaSource {
+public class MediaSource {
     private static final String TAG = "MediaSource";
 
     /**
@@ -66,21 +63,13 @@ public class SimpleMediaSource {
     private CharSequence mName;
 
     /**
-     * Creates a {@link SimpleMediaSource} for the given application package name
+     * Creates a {@link MediaSource} for the given application package name
      */
-    public SimpleMediaSource(@NonNull Context context, @NonNull String packageName) {
+    public MediaSource(@NonNull Context context, @NonNull String packageName) {
         mContext = context;
         mPackageName = packageName;
         mBrowseServiceClassName = getBrowseServiceClassName(packageName);
         extractComponentInfo(mPackageName, mBrowseServiceClassName);
-    }
-
-    /**
-     * Returns a MediaSource equivalent to the one represented by this instance.
-     */
-    // TODO (keyboardr): Remove this method once SimpleMediaSource and MediaSource are merged
-    public MediaSource toMediaSource() {
-        return new MediaSource(mContext, mPackageName);
     }
 
     /**
@@ -236,7 +225,7 @@ public class SimpleMediaSource {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SimpleMediaSource that = (SimpleMediaSource) o;
+        MediaSource that = (MediaSource) o;
         return Objects.equals(mPackageName, that.mPackageName)
                 && Objects.equals(mBrowseServiceClassName, that.mBrowseServiceClassName);
     }

@@ -25,7 +25,9 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-/** Contains the colors for a {@link com.android.car.media.common.MediaSource MediaSource} */
+/**
+ * Contains the colors for a {@link MediaSource}
+ */
 public class MediaSourceColors {
     /**
      * Mark used to indicate that we couldn't find a color and the default one should be used
@@ -77,7 +79,7 @@ public class MediaSourceColors {
         }
 
         /** Extract colors for (@code mediaSource} and create a MediaSourceColors for it */
-        public MediaSourceColors extractColors(@NonNull SimpleMediaSource mediaSource) {
+        public MediaSourceColors extractColors(@NonNull MediaSource mediaSource) {
             return extractColors(mediaSource.getPackageName());
         }
 
