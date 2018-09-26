@@ -186,6 +186,27 @@ public class LiveDataFunctions {
     }
 
     /**
+     * Similar to {@link Transformations#switchMap(LiveData, Function)}, but emits {@code null} when
+     * {@code source} emits {@code null}. The input to {@code func} may be treated as not nullable.
+     */
+    public static <T, R> LiveData<R> switchMapNonNull(@NonNull LiveData<T> source,
+            @NonNull Function<T, LiveData<R>> func) {
+        return switchMapNonNull(source, null, func);
+    }
+
+    /**
+     * Similar to {@link Transformations#switchMap(LiveData, Function)}, but emits {@code nullValue}
+     * when {@code source} emits {@code null}. The input to {@code func} may be treated as not
+     * nullable.
+     */
+    public static <T, R> LiveData<R> switchMapNonNull(@NonNull LiveData<T> source,
+            @Nullable R nullValue,
+            @NonNull Function<T, LiveData<R>> func) {
+        return Transformations.switchMap(source,
+                value -> value == null ? nullLiveData() : func.apply(value));
+    }
+
+    /**
      * Returns a LiveData that emits the logical AND of the two arguments. Also deals with {@code
      * null} and uninitalized values as follows:
      * <table>
