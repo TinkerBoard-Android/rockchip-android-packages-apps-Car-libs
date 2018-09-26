@@ -296,8 +296,6 @@ public class PlaybackModel {
         } else {
             cntrl.sendCustomAction(action, extras);
         }
-
-        mMediaController.getTransportControls().sendCustomAction(action, extras);
     }
 
     /**
