@@ -21,6 +21,7 @@ import static androidx.lifecycle.Transformations.switchMap;
 
 import static com.android.car.arch.common.LiveDataFunctions.coalesceNull;
 import static com.android.car.arch.common.LiveDataFunctions.combine;
+import static com.android.car.arch.common.LiveDataFunctions.dataOf;
 import static com.android.car.arch.common.LiveDataFunctions.mapNonNull;
 import static com.android.car.arch.common.LiveDataFunctions.nullLiveData;
 
@@ -59,7 +60,7 @@ public class MediaSourceViewModel extends AndroidViewModel {
 
     private final LiveData<Boolean> mHasMediaSources;
 
-    private final MutableLiveData<MediaSource> mSelectedMediaSource = new MutableLiveData<>();
+    private final MutableLiveData<MediaSource> mSelectedMediaSource = dataOf(null);
 
     private final LiveData<MediaBrowserCompat> mConnectedMediaBrowser;
 
@@ -144,7 +145,12 @@ public class MediaSourceViewModel extends AndroidViewModel {
         mMediaSources = inputFactory.createMediaSources();
         mHasMediaSources = map(mMediaSources, sources -> sources != null && !sources.isEmpty());
 
-        LiveData<MediaBrowserState> mediaBrowserState = switchMap(mSelectedMediaSource,
+        // If the selected MediaSource is null, use the active MediaSource if available.
+        LiveData<MediaSource> selectedSource = coalesceNull(this.mSelectedMediaSource,
+                mapNonNull(getTopActiveMediaController(),
+                        controller -> new MediaSource(application, controller.getPackageName())));
+
+        LiveData<MediaBrowserState> mediaBrowserState = switchMap(selectedSource,
                 (mediaSource) -> {
                     if (mediaSource == null) {
                         return nullLiveData();
@@ -160,7 +166,7 @@ public class MediaSourceViewModel extends AndroidViewModel {
                         ? state.mMediaBrowser : null);
 
         LiveData<MediaControllerCompat> controllerFromActiveList =
-                combine(activeMediaControllers, mSelectedMediaSource,
+                combine(activeMediaControllers, selectedSource,
                         mediaSelector::getControllerForSource);
         LiveData<MediaControllerCompat> controllerFromMediaBrowser =
                 mapNonNull(mConnectedMediaBrowser,
@@ -169,7 +175,7 @@ public class MediaSourceViewModel extends AndroidViewModel {
         // list. Otherwise use controller from MediaBrowser (which requires connecting to it).
         mMediaController = coalesceNull(controllerFromActiveList, controllerFromMediaBrowser);
 
-        mIsCurrentMediaSourcePlaying = combine(mTopActiveMediaController, mSelectedMediaSource,
+        mIsCurrentMediaSourcePlaying = combine(mTopActiveMediaController, selectedSource,
                 (mediaController, mediaSource) ->
                         mediaController != null && mediaSource != null
                                 && Objects.equals(mediaController.getPackageName(),
