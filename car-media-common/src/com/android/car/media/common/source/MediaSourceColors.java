@@ -24,15 +24,24 @@ import android.content.res.TypedArray;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * Contains the colors for a {@link MediaSource}
  */
 public class MediaSourceColors {
     /**
-     * Mark used to indicate that we couldn't find a color and the default one should be used
+     * Mark used to indicate that we couldn't find a color and the default one should be used.
      */
-    private static final int DEFAULT_COLOR = 0;
+    private static final int FLAG_USE_DEFAULT_COLOR = 0;
+
+    /**
+     * A MediaSourceColors that contains no colors and always returns default colors provided by
+     * callers.
+     */
+    private static final MediaSourceColors EMPTY =
+            new MediaSourceColors(FLAG_USE_DEFAULT_COLOR, FLAG_USE_DEFAULT_COLOR,
+                    FLAG_USE_DEFAULT_COLOR);
 
     private final int mPrimaryColor;
     private final int mAccentColor;
@@ -48,12 +57,12 @@ public class MediaSourceColors {
      * Returns primary color, or the given default color if the source metadata is not available.
      */
     public int getPrimaryColor(int defaultColor) {
-        return mPrimaryColor == DEFAULT_COLOR ? defaultColor : mPrimaryColor;
+        return mPrimaryColor == FLAG_USE_DEFAULT_COLOR ? defaultColor : mPrimaryColor;
     }
 
     /** Returns accent color, or the given default color if the source metadata is not available. */
     public int getAccentColor(int defaultColor) {
-        return mAccentColor == DEFAULT_COLOR ? defaultColor : mAccentColor;
+        return mAccentColor == FLAG_USE_DEFAULT_COLOR ? defaultColor : mAccentColor;
     }
 
     /**
@@ -61,7 +70,7 @@ public class MediaSourceColors {
      * available.
      */
     public int getPrimaryColorDark(int defaultColor) {
-        return mPrimaryColorDark == DEFAULT_COLOR ? defaultColor : mPrimaryColorDark;
+        return mPrimaryColorDark == FLAG_USE_DEFAULT_COLOR ? defaultColor : mPrimaryColorDark;
     }
 
     /** Extracts colors needed for a given package name to create a MediaSourceColors object */
@@ -79,12 +88,20 @@ public class MediaSourceColors {
         }
 
         /** Extract colors for (@code mediaSource} and create a MediaSourceColors for it */
-        public MediaSourceColors extractColors(@NonNull MediaSource mediaSource) {
+        @NonNull
+        public MediaSourceColors extractColors(@Nullable MediaSource mediaSource) {
+            if (mediaSource == null) {
+                return EMPTY;
+            }
             return extractColors(mediaSource.getPackageName());
         }
 
         /** Extract colors for {@code packageName} and create a MediaSourceColors for it */
-        public MediaSourceColors extractColors(@NonNull String packageName) {
+        @NonNull
+        public MediaSourceColors extractColors(@Nullable String packageName) {
+            if (packageName == null) {
+                return EMPTY;
+            }
             TypedArray ta = null;
             try {
                 ApplicationInfo applicationInfo =
@@ -107,12 +124,12 @@ public class MediaSourceColors {
                         android.R.attr.colorPrimaryDark
                 });
                 return new MediaSourceColors(
-                        ta.getColor(0, DEFAULT_COLOR),
-                        ta.getColor(1, DEFAULT_COLOR),
-                        ta.getColor(2, DEFAULT_COLOR));
+                        ta.getColor(0, FLAG_USE_DEFAULT_COLOR),
+                        ta.getColor(1, FLAG_USE_DEFAULT_COLOR),
+                        ta.getColor(2, FLAG_USE_DEFAULT_COLOR));
             } catch (PackageManager.NameNotFoundException e) {
                 Log.w(TAG, "Unable to update media client package attributes.", e);
-                return new MediaSourceColors(DEFAULT_COLOR, DEFAULT_COLOR, DEFAULT_COLOR);
+                return EMPTY;
             } finally {
                 if (ta != null) {
                     ta.recycle();
