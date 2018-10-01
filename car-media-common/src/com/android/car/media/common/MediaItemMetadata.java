@@ -54,6 +54,10 @@ public class MediaItemMetadata implements Parcelable {
     private final boolean mIsBrowsable;
     private final boolean mIsPlayable;
 
+    public MediaItemMetadata(@NonNull MediaDescriptionCompat description) {
+        this(description, null, false, false);
+    }
+
     /** Creates an instance based on a {@link MediaMetadataCompat} */
     public MediaItemMetadata(@NonNull MediaMetadataCompat metadata) {
         this(metadata.getDescription(), null, false, false);
