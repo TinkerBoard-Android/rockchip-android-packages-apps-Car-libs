@@ -16,39 +16,29 @@
 
 package com.android.car.media.common.browse;
 
-import static androidx.lifecycle.Transformations.map;
-
-import static com.android.car.arch.common.LiveDataFunctions.pair;
-import static com.android.car.arch.common.LiveDataFunctions.split;
-import static com.android.car.arch.common.LoadingSwitchMap.loadingSwitchMap;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
-import android.app.Application;
 import android.support.v4.media.MediaBrowserCompat;
 
-import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MediatorLiveData;
-import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModelProvider;
 
-import com.android.car.arch.common.LoadingSwitchMap;
-import com.android.car.arch.common.switching.SwitchingLiveData;
 import com.android.car.media.common.MediaItemMetadata;
+import com.android.car.media.common.source.MediaSourceViewModel;
 
 import java.util.List;
 
 /**
- * Contains observable data needed for displaying playback and browse UI
+ * Contains observable data needed for displaying playback and browse UI. Instances can be obtained
+ * via {@link MediaBrowserViewModel.Factory}
  */
-
-public class MediaBrowserViewModel extends AndroidViewModel {
+public interface MediaBrowserViewModel {
 
     /**
      * Possible states of the application UI
      */
-    public enum BrowseState {
+    enum BrowseState {
         /** There is no content to show */
         EMPTY,
         /** We are still in the process of obtaining data */
@@ -59,94 +49,15 @@ public class MediaBrowserViewModel extends AndroidViewModel {
         ERROR
     }
 
-    private final SwitchingLiveData<MediaBrowserCompat> mMediaBrowserSwitch =
-            SwitchingLiveData.newInstance();
-
-    private final LiveData<MediaBrowserCompat> mConnectedMediaBrowser =
-            map(mMediaBrowserSwitch.asLiveData(),
-                    MediaBrowserViewModel::requireConnected);
-
-    private final MutableLiveData<String> mCurrentBrowseId = new MutableLiveData<>();
-
-    private final LoadingSwitchMap<List<MediaItemMetadata>> mCurrentMediaItems =
-            loadingSwitchMap(pair(mConnectedMediaBrowser, mCurrentBrowseId),
-                    split((connectedMediaBrowser, browseId) ->
-                            connectedMediaBrowser == null
-                                    ? null
-                                    : new BrowsedMediaItems(connectedMediaBrowser, browseId)));
-    private final LiveData<BrowseState> mBrowseState = new MediatorLiveData<BrowseState>() {
-        {
-            setValue(BrowseState.EMPTY);
-            addSource(mCurrentMediaItems.isLoading(), isLoading -> update());
-            addSource(mCurrentMediaItems.getOutput(), items -> update());
-        }
-
-        private void update() {
-            setValue(getState());
-        }
-
-        private BrowseState getState() {
-            Boolean isLoading = mCurrentMediaItems.isLoading().getValue();
-            if (isLoading == null) {
-                // Uninitialized
-                return BrowseState.EMPTY;
-            }
-            if (isLoading) {
-                return BrowseState.LOADING;
-            }
-            List<MediaItemMetadata> items = mCurrentMediaItems.getOutput().getValue();
-            if (items == null) {
-                // Normally this could be null if it hasn't been initialized, but in that case
-                // isLoading would not be false, so this means it must have encountered an error.
-                return BrowseState.ERROR;
-            }
-            if (items.isEmpty()) {
-                return BrowseState.EMPTY;
-            }
-            return BrowseState.LOADED;
-        }
-    };
-
-    public MediaBrowserViewModel(@NonNull Application application) {
-        super(application);
-    }
-
-    private static MediaBrowserCompat requireConnected(@Nullable MediaBrowserCompat mediaBrowser) {
-        if (mediaBrowser != null && !mediaBrowser.isConnected()) {
-            throw new IllegalStateException(
-                    "Only connected MediaBrowsers may be provided to MediaBrowserViewModel.");
-        }
-        return mediaBrowser;
-    }
+    /**
+     * Returns a LiveData that emits the current {@link BrowseState}
+     */
+    LiveData<BrowseState> getBrowseState();
 
     /**
-     * Set the source {@link MediaBrowserCompat} to use for browsing. If {@code mediaBrowser} emits
-     * non-null, the MediaBrowser emitted must already be in a connected state.
+     * Returns a LiveData that emits {@code true} when loading new items
      */
-    public void setConnectedMediaBrowser(@Nullable LiveData<MediaBrowserCompat> mediaBrowser) {
-        mMediaBrowserSwitch.setSource(mediaBrowser);
-    }
-
-    /**
-     * Set the current item to be browsed. If available, the list of items will be emitted by {@link
-     * #getBrowsedMediaItems()}.
-     */
-    @UiThread
-    public void setCurrentBrowseId(@Nullable String browseId) {
-        mCurrentBrowseId.setValue(browseId);
-    }
-
-    public String getCurrentBrowseId() {
-        return mCurrentBrowseId.getValue();
-    }
-
-    public LiveData<BrowseState> getBrowseState() {
-        return mBrowseState;
-    }
-
-    public LiveData<Boolean> isLoading() {
-        return mCurrentMediaItems.isLoading();
-    }
+    LiveData<Boolean> isLoading();
 
     /**
      * Fetches the MediaItemMetadatas for the current browsed id. A MediaSource must be selected and
@@ -154,10 +65,95 @@ public class MediaBrowserViewModel extends AndroidViewModel {
      *
      * @return a LiveData that emits the MediaItemMetadatas for the current browsed id or {@code
      * null} if unavailable.
-     * @see #setCurrentBrowseId(String)
+     * @see WithMutableBrowseId#setCurrentBrowseId(String)
      */
-    public LiveData<List<MediaItemMetadata>> getBrowsedMediaItems() {
-        return mCurrentMediaItems.getOutput();
+    LiveData<List<MediaItemMetadata>> getBrowsedMediaItems();
+
+    /**
+     * A {@link MediaBrowserViewModel} whose selected browse ID may be changed.
+     */
+    interface WithMutableBrowseId extends MediaBrowserViewModel {
+
+        /**
+         * Set the current item to be browsed. If available, the list of items will be emitted by
+         * {@link #getBrowsedMediaItems()}.
+         */
+        @UiThread
+        void setCurrentBrowseId(@Nullable String browseId);
     }
 
+    /**
+     * Creates and/or fetches {@link MediaBrowserViewModel} instances.
+     */
+    class Factory {
+
+        /**
+         * Returns an initialized {@link MediaBrowserViewModel.WithMutableBrowseId}, and fetches a
+         * {@link MediaSourceViewModel} from {@code viewModelProvider} to provide the connected
+         * media browser.
+         */
+        @NonNull
+        public static MediaBrowserViewModel.WithMutableBrowseId getInstance(
+                @NonNull ViewModelProvider viewModelProvider) {
+            MediaBrowserViewModelImpl viewModel = viewModelProvider.get(
+                    MediaBrowserViewModelImpl.class);
+            initMediaBrowser(fetchConnectedMediaBrowser(viewModelProvider), viewModel);
+            return viewModel;
+        }
+
+        /**
+         * Fetch an initialized {@link MediaBrowserViewModel.WithMutableBrowseId}. It will get its
+         * media browser from the {@link MediaSourceViewModel} provided by {@code
+         * viewModelProvider}.
+         *
+         * @param viewModelProvider the ViewModelProvider to load ViewModels from.
+         * @param key               a key to decide which instance of the ViewModel to fetch.
+         *                          Subsequent calls with the same key will return the same
+         *                          instance.
+         * @return an initialized MediaBrowserViewModel.WithMutableBrowseId for the given key.
+         * @see ViewModelProvider#get(String, Class)
+         */
+        @NonNull
+        public static MediaBrowserViewModel.WithMutableBrowseId getInstanceForKey(
+                @NonNull ViewModelProvider viewModelProvider,
+                @NonNull String key) {
+            MediaBrowserViewModelImpl viewModel = viewModelProvider.get(key,
+                    MediaBrowserViewModelImpl.class);
+            initMediaBrowser(fetchConnectedMediaBrowser(viewModelProvider), viewModel);
+            return viewModel;
+        }
+
+        /**
+         * Fetch an initialized {@link MediaBrowserViewModel}. It will get its media browser from
+         * the {@link MediaSourceViewModel} provided by {@code viewModelProvider}. It will already
+         * be configured to browse {@code browseId}.
+         *
+         * @param viewModelProvider the ViewModelProvider to load ViewModels from.
+         * @param browseId          the browseId to browse. This will also serve as the key for
+         *                          fetching the ViewModel.
+         * @return an initialized MediaBrowserViewModel configured to browse the specified browseId.
+         */
+        @NonNull
+        public static MediaBrowserViewModel getInstanceForBrowseId(
+                @NonNull ViewModelProvider viewModelProvider,
+                @NonNull String browseId) {
+            MediaBrowserViewModel.WithMutableBrowseId viewModel =
+                    getInstanceForKey(viewModelProvider, browseId);
+            viewModel.setCurrentBrowseId(browseId);
+            return viewModel;
+        }
+
+        private static void initMediaBrowser(
+                @NonNull LiveData<MediaBrowserCompat> connectedMediaBrowser,
+                MediaBrowserViewModelImpl viewModel) {
+            if (viewModel.mConnectedMediaBrowser != connectedMediaBrowser) {
+                viewModel.setConnectedMediaBrowser(connectedMediaBrowser);
+            }
+        }
+
+        private static LiveData<MediaBrowserCompat> fetchConnectedMediaBrowser(
+                @NonNull ViewModelProvider viewModelProvider) {
+            return viewModelProvider.get(MediaSourceViewModel.class).getConnectedMediaBrowser();
+        }
+    }
 }
