@@ -22,8 +22,9 @@ import static androidx.lifecycle.Transformations.switchMap;
 import static com.android.car.arch.common.LiveDataFunctions.combine;
 import static com.android.car.arch.common.LiveDataFunctions.dataOf;
 import static com.android.car.arch.common.LiveDataFunctions.distinct;
-import static com.android.car.arch.common.LiveDataFunctions.nullLiveData;
+import static com.android.car.arch.common.LiveDataFunctions.mapNonNull;
 import static com.android.car.arch.common.LiveDataFunctions.pair;
+import static com.android.car.arch.common.LiveDataFunctions.switchMapNonNull;
 import static com.android.car.media.common.playback.PlaybackStateAnnotations.Actions;
 
 import android.annotation.IntDef;
@@ -111,19 +112,16 @@ public class PlaybackViewModel extends AndroidViewModel {
     private final MediaSourceColors.Factory mColorsFactory;
     private final LiveData<MediaSourceColors> mColors;
 
-    private final LiveData<MediaMetadataCompat> mMetadata = switchMap(mMediaControllerData,
-            mediaController -> mediaController == null ? nullLiveData()
-                    : new MediaMetadataLiveData(mediaController));
-    private final LiveData<MediaItemMetadata> mWrappedMetadata = distinct(map(mMetadata,
-            metadata -> metadata == null ? null : new MediaItemMetadata(metadata)));
+    private final LiveData<MediaMetadataCompat> mMetadata =
+            switchMapNonNull(mMediaControllerData, MediaMetadataLiveData::new);
+    private final LiveData<MediaItemMetadata> mWrappedMetadata =
+            distinct(mapNonNull(mMetadata, MediaItemMetadata::new));
 
-    private final LiveData<PlaybackStateCompat> mPlaybackState = switchMap(mMediaControllerData,
-            mediaController -> mediaController == null ? nullLiveData()
-                    : new PlaybackStateLiveData(mediaController));
+    private final LiveData<PlaybackStateCompat> mPlaybackState =
+            switchMapNonNull(mMediaControllerData, PlaybackStateLiveData::new);
 
     private final LiveData<List<MediaSessionCompat.QueueItem>> mQueue =
-            switchMap(mMediaControllerData, mediaController ->
-                    mediaController == null ? nullLiveData() : new QueueLiveData(mediaController));
+            switchMap(mMediaControllerData, QueueLiveData::new);
 
     // Filters out queue items with no description or title and converts them to MediaItemMetadatas
     private final LiveData<List<MediaItemMetadata>> mSanitizedQueue = distinct(map(mQueue,
@@ -136,6 +134,9 @@ public class PlaybackViewModel extends AndroidViewModel {
 
     private final LiveData<Boolean> mHasQueue = distinct(map(mQueue,
             queue -> queue != null && !queue.isEmpty()));
+
+    private final LiveData<CharSequence> mQueueTitle =
+            distinct(switchMapNonNull(mMediaControllerData, QueueTitleLiveData::new));
 
     private final LiveData<PlaybackController> mPlaybackControls = map(mDistinctMediaController,
             PlaybackController::new);
@@ -229,6 +230,13 @@ public class PlaybackViewModel extends AndroidViewModel {
      */
     public LiveData<Boolean> hasQueue() {
         return mHasQueue;
+    }
+
+    /**
+     * Returns a LiveData that emits the current queue title.
+     */
+    public LiveData<CharSequence> getQueueTitle() {
+        return mQueueTitle;
     }
 
     /**
@@ -337,12 +345,31 @@ public class PlaybackViewModel extends AndroidViewModel {
                             || state == PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM;
                 });
 
-        private final LiveData<CharSequence> mErrorMessage = map(mPlaybackState,
-                state -> state == null ? null : state.getErrorMessage());
+        private final LiveData<CharSequence> mErrorMessage =
+                mapNonNull(mPlaybackState, PlaybackStateCompat::getErrorMessage);
 
-        private final LiveData<Long> mActiveQueueItemId = map(mPlaybackState,
-                state -> state == null ? MediaSessionCompat.QueueItem.UNKNOWN_ID
-                        : state.getActiveQueueItemId());
+        private final LiveData<Long> mActiveQueueItemId = mapNonNull(mPlaybackState,
+                (long) MediaSessionCompat.QueueItem.UNKNOWN_ID,
+                PlaybackStateCompat::getActiveQueueItemId);
+
+        private final LiveData<Integer> mQueuePosition = combine(mQueue, mActiveQueueItemId,
+                (queue, id) -> {
+                    if (queue == null || id == null
+                            || id == MediaSessionCompat.QueueItem.UNKNOWN_ID) {
+                        return null;
+                    }
+
+                    // A linear scan isn't really the best thing to do for large lists but we
+                    // suspect that the queue isn't going to be very long anyway so we can just
+                    // do the trivial thing. If it starts becoming a problem, we can build an
+                    // index over the ids.
+                    for (int i = 0; i < queue.size(); i++) {
+                        if (queue.get(i).getQueueId() == id) {
+                            return i;
+                        }
+                    }
+                    return null;
+                });
 
         private final LiveData<List<RawCustomPlaybackAction>> mCustomActions =
                 distinct(map(mCombinedInfo, this::getCustomActions));
@@ -428,6 +455,14 @@ public class PlaybackViewModel extends AndroidViewModel {
          */
         public LiveData<Long> getActiveQueueItemId() {
             return mActiveQueueItemId;
+        }
+
+        /**
+         * Returns a LiveData that emits the current position of the currently playing queue item,
+         * or {@code null} if none of the items is currently playing.
+         */
+        public LiveData<Integer> getActiveQueuePosition() {
+            return mQueuePosition;
         }
 
         private List<RawCustomPlaybackAction> getCustomActions(
@@ -694,7 +729,7 @@ public class PlaybackViewModel extends AndroidViewModel {
         final PlaybackStateCompat mPlaybackState;
 
         private CombinedInfo(MediaControllerCompat mediaController,
-                             MediaMetadataCompat metadata, PlaybackStateCompat playbackState) {
+                MediaMetadataCompat metadata, PlaybackStateCompat playbackState) {
             this.mMediaController = mediaController;
             this.mMetadata = metadata;
             this.mPlaybackState = playbackState;
