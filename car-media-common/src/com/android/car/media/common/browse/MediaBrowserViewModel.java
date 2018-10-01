@@ -80,6 +80,13 @@ public interface MediaBrowserViewModel {
          */
         @UiThread
         void setCurrentBrowseId(@Nullable String browseId);
+
+        /**
+         * Set the current item to be searched for. If available, the list of items will be emitted
+         * by {@link #getBrowsedMediaItems()}.
+         */
+        @UiThread
+        void search(@Nullable String query);
     }
 
     /**
