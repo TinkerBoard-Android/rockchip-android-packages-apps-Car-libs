@@ -121,7 +121,7 @@ public class PlaybackViewModel extends AndroidViewModel {
             switchMapNonNull(mMediaControllerData, PlaybackStateLiveData::new);
 
     private final LiveData<List<MediaSessionCompat.QueueItem>> mQueue =
-            switchMap(mMediaControllerData, QueueLiveData::new);
+            switchMapNonNull(mMediaControllerData, QueueLiveData::new);
 
     // Filters out queue items with no description or title and converts them to MediaItemMetadatas
     private final LiveData<List<MediaItemMetadata>> mSanitizedQueue = distinct(map(mQueue,
