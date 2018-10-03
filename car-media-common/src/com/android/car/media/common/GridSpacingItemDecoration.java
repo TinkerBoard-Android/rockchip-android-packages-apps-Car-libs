@@ -22,7 +22,6 @@ import android.view.View;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-
 /**
  * An {@link RecyclerView.ItemDecoration} that adds spacing between cells in a
  * {@link GridLayoutManager}.
