@@ -35,6 +35,12 @@ class SwitchingLiveDataImpl<T> extends MediatorLiveData<T> implements SwitchingL
         return this;
     }
 
+    @Nullable
+    @Override
+    public LiveData<? extends T> getSource() {
+        return mCurrentSource;
+    }
+
     public void setSource(@Nullable LiveData<? extends T> source) {
         if (source == mCurrentSource) {
             return;

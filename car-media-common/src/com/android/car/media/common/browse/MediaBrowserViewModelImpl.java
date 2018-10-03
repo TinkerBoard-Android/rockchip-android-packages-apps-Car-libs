@@ -18,6 +18,7 @@ package com.android.car.media.common.browse;
 
 import static androidx.lifecycle.Transformations.map;
 
+import static com.android.car.arch.common.LiveDataFunctions.dataOf;
 import static com.android.car.arch.common.LiveDataFunctions.emitsNull;
 import static com.android.car.arch.common.LiveDataFunctions.ifThenElse;
 import static com.android.car.arch.common.LiveDataFunctions.pair;
@@ -53,12 +54,8 @@ public class MediaBrowserViewModelImpl extends AndroidViewModel implements
     private final SwitchingLiveData<MediaBrowserCompat> mMediaBrowserSwitch =
             SwitchingLiveData.newInstance();
 
-    final LiveData<MediaBrowserCompat> mConnectedMediaBrowser =
-            map(mMediaBrowserSwitch.asLiveData(),
-                    MediaBrowserViewModelImpl::requireConnected);
-
     private final MutableLiveData<String> mCurrentBrowseId = new MutableLiveData<>();
-    private final MutableLiveData<String> mCurrentSearchQuery = new MutableLiveData<>();
+    private final MutableLiveData<String> mCurrentSearchQuery = dataOf(null);
 
     private final LiveData<Boolean> mIsLoading;
     private final LiveData<List<MediaItemMetadata>> mCurrentMediaItems;
@@ -68,18 +65,20 @@ public class MediaBrowserViewModelImpl extends AndroidViewModel implements
     public MediaBrowserViewModelImpl(@NonNull Application application) {
         super(application);
 
+        LiveData<MediaBrowserCompat> connectedMediaBrowser = map(mMediaBrowserSwitch.asLiveData(),
+                MediaBrowserViewModelImpl::requireConnected);
         LoadingSwitchMap<List<MediaItemMetadata>> currentBrowseItems =
-                loadingSwitchMap(pair(mConnectedMediaBrowser, mCurrentBrowseId),
-                        split((connectedMediaBrowser, browseId) ->
-                                connectedMediaBrowser == null
+                loadingSwitchMap(pair(connectedMediaBrowser, mCurrentBrowseId),
+                        split((mediaBrowser, browseId) ->
+                                mediaBrowser == null
                                         ? null
-                                        : new BrowsedMediaItems(connectedMediaBrowser, browseId)));
+                                        : new BrowsedMediaItems(mediaBrowser, browseId)));
         LoadingSwitchMap<List<MediaItemMetadata>> currentSearchItems =
-                loadingSwitchMap(pair(mConnectedMediaBrowser, mCurrentSearchQuery),
-                        split((connectedMediaBrowser, query) ->
-                                connectedMediaBrowser == null
+                loadingSwitchMap(pair(connectedMediaBrowser, mCurrentSearchQuery),
+                        split((mediaBrowser, query) ->
+                                mediaBrowser == null
                                         ? null
-                                        : new SearchedMediaItems(connectedMediaBrowser, query)));
+                                        : new SearchedMediaItems(mediaBrowser, query)));
         mIsLoading = ifThenElse(emitsNull(mCurrentSearchQuery),
                 currentBrowseItems.isLoading(), currentSearchItems.isLoading());
         mCurrentMediaItems = ifThenElse(emitsNull(mCurrentSearchQuery),
@@ -134,6 +133,10 @@ public class MediaBrowserViewModelImpl extends AndroidViewModel implements
      */
     void setConnectedMediaBrowser(@Nullable LiveData<MediaBrowserCompat> mediaBrowser) {
         mMediaBrowserSwitch.setSource(mediaBrowser);
+    }
+
+    LiveData<? extends MediaBrowserCompat> getMediaBrowserSource() {
+        return mMediaBrowserSwitch.getSource();
     }
 
     /**
