@@ -18,6 +18,8 @@ package com.android.car.media.common.browse;
 
 import static androidx.lifecycle.Transformations.map;
 
+import static com.android.car.arch.common.LiveDataFunctions.emitsNull;
+import static com.android.car.arch.common.LiveDataFunctions.ifThenElse;
 import static com.android.car.arch.common.LiveDataFunctions.pair;
 import static com.android.car.arch.common.LiveDataFunctions.split;
 import static com.android.car.arch.common.LoadingSwitchMap.loadingSwitchMap;
@@ -41,8 +43,8 @@ import com.android.car.media.common.MediaItemMetadata;
 import java.util.List;
 
 /**
- * Contains observable data needed for displaying playback and browse UI. Instances can be obtained
- * via {@link MediaBrowserViewModel.Factory}
+ * Contains observable data needed for displaying playback and browse/search UI. Instances can be
+ * obtained via {@link MediaBrowserViewModel.Factory}
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 public class MediaBrowserViewModelImpl extends AndroidViewModel implements
@@ -56,48 +58,66 @@ public class MediaBrowserViewModelImpl extends AndroidViewModel implements
                     MediaBrowserViewModelImpl::requireConnected);
 
     private final MutableLiveData<String> mCurrentBrowseId = new MutableLiveData<>();
+    private final MutableLiveData<String> mCurrentSearchQuery = new MutableLiveData<>();
 
-    private final LoadingSwitchMap<List<MediaItemMetadata>> mCurrentMediaItems =
-            loadingSwitchMap(pair(mConnectedMediaBrowser, mCurrentBrowseId),
-                    split((connectedMediaBrowser, browseId) ->
-                            connectedMediaBrowser == null
-                                    ? null
-                                    : new BrowsedMediaItems(connectedMediaBrowser, browseId)));
-    private final LiveData<BrowseState> mBrowseState = new MediatorLiveData<BrowseState>() {
-        {
-            setValue(BrowseState.EMPTY);
-            addSource(mCurrentMediaItems.isLoading(), isLoading -> update());
-            addSource(mCurrentMediaItems.getOutput(), items -> update());
-        }
+    private final LiveData<Boolean> mIsLoading;
+    private final LiveData<List<MediaItemMetadata>> mCurrentMediaItems;
 
-        private void update() {
-            setValue(getState());
-        }
-
-        private BrowseState getState() {
-            Boolean isLoading = mCurrentMediaItems.isLoading().getValue();
-            if (isLoading == null) {
-                // Uninitialized
-                return BrowseState.EMPTY;
-            }
-            if (isLoading) {
-                return BrowseState.LOADING;
-            }
-            List<MediaItemMetadata> items = mCurrentMediaItems.getOutput().getValue();
-            if (items == null) {
-                // Normally this could be null if it hasn't been initialized, but in that case
-                // isLoading would not be false, so this means it must have encountered an error.
-                return BrowseState.ERROR;
-            }
-            if (items.isEmpty()) {
-                return BrowseState.EMPTY;
-            }
-            return BrowseState.LOADED;
-        }
-    };
+    private final LiveData<BrowseState> mBrowseState;
 
     public MediaBrowserViewModelImpl(@NonNull Application application) {
         super(application);
+
+        LoadingSwitchMap<List<MediaItemMetadata>> currentBrowseItems =
+                loadingSwitchMap(pair(mConnectedMediaBrowser, mCurrentBrowseId),
+                        split((connectedMediaBrowser, browseId) ->
+                                connectedMediaBrowser == null
+                                        ? null
+                                        : new BrowsedMediaItems(connectedMediaBrowser, browseId)));
+        LoadingSwitchMap<List<MediaItemMetadata>> currentSearchItems =
+                loadingSwitchMap(pair(mConnectedMediaBrowser, mCurrentSearchQuery),
+                        split((connectedMediaBrowser, query) ->
+                                connectedMediaBrowser == null
+                                        ? null
+                                        : new SearchedMediaItems(connectedMediaBrowser, query)));
+        mIsLoading = ifThenElse(emitsNull(mCurrentSearchQuery),
+                currentBrowseItems.isLoading(), currentSearchItems.isLoading());
+        mCurrentMediaItems = ifThenElse(emitsNull(mCurrentSearchQuery),
+                currentBrowseItems.getOutput(), currentSearchItems.getOutput());
+
+        mBrowseState = new MediatorLiveData<BrowseState>() {
+            {
+                setValue(BrowseState.EMPTY);
+                addSource(mIsLoading, isLoading -> update());
+                addSource(mCurrentMediaItems, items -> update());
+            }
+
+            private void update() {
+                setValue(getState());
+            }
+
+            private BrowseState getState() {
+                Boolean isLoading = mIsLoading.getValue();
+                if (isLoading == null) {
+                    // Uninitialized
+                    return BrowseState.EMPTY;
+                }
+                if (isLoading) {
+                    return BrowseState.LOADING;
+                }
+                List<MediaItemMetadata> items = mCurrentMediaItems.getValue();
+                if (items == null) {
+                    // Normally this could be null if it hasn't been initialized, but in that case
+                    // isLoading would not be false, so this means it must have encountered an
+                    // error.
+                    return BrowseState.ERROR;
+                }
+                if (items.isEmpty()) {
+                    return BrowseState.EMPTY;
+                }
+                return BrowseState.LOADED;
+            }
+        };
     }
 
     private static MediaBrowserCompat requireConnected(@Nullable MediaBrowserCompat mediaBrowser) {
@@ -126,6 +146,16 @@ public class MediaBrowserViewModelImpl extends AndroidViewModel implements
         mCurrentBrowseId.setValue(browseId);
     }
 
+    /**
+     * Set the current item to be searched for. If available, the list of items will be emitted
+     * by {@link #getBrowsedMediaItems()}.
+     */
+    @UiThread
+    @Override
+    public void search(@Nullable String query) {
+        mCurrentSearchQuery.setValue(query);
+    }
+
     @Override
     public LiveData<BrowseState> getBrowseState() {
         return mBrowseState;
@@ -133,20 +163,21 @@ public class MediaBrowserViewModelImpl extends AndroidViewModel implements
 
     @Override
     public LiveData<Boolean> isLoading() {
-        return mCurrentMediaItems.isLoading();
+        return mIsLoading;
     }
 
     /**
      * Fetches the MediaItemMetadatas for the current browsed id. A MediaSource must be selected and
-     * its MediaBrowser connected, otherwise this will emit {@code null}.
+     * its MediaBrowser connected, otherwise this will emit {@code null}. Will emit browse results
+     * if provided search query is {@code null}, and search query results otherwise.
      *
-     * @return a LiveData that emits the MediaItemMetadatas for the current browsed id or {@code
-     * null} if unavailable.
+     * @return a LiveData that emits the MediaItemMetadatas for the current search query or browsed
+     * id or {@code null} if unavailable.
      * @see #setCurrentBrowseId(String)
+     * @see #search(String)
      */
     @Override
     public LiveData<List<MediaItemMetadata>> getBrowsedMediaItems() {
-        return mCurrentMediaItems.getOutput();
+        return mCurrentMediaItems;
     }
-
 }
