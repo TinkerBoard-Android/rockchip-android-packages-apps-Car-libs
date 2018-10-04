@@ -123,6 +123,9 @@ public class BrowseTree {
     private static final String NODE_FAVORITES = "favorites_id";
 
     private static final String NODEPREFIX_BAND = "band:";
+    private static final String NODE_BAND_AM = NODEPREFIX_BAND + "am";
+    private static final String NODE_BAND_FM = NODEPREFIX_BAND + "fm";
+
     private static final String NODEPREFIX_AMFMCHANNEL = "amfm:";
     private static final String NODEPREFIX_PROGRAM = "program:";
 
@@ -135,9 +138,9 @@ public class BrowseTree {
     private List<MediaItem> mRootChildren;
 
     private final AmFmChannelList mAmChannels = new AmFmChannelList(
-            NODEPREFIX_BAND + "am", R.string.radio_am_text, "AM");
+            NODE_BAND_AM, R.string.radio_am_text, "AM");
     private final AmFmChannelList mFmChannels = new AmFmChannelList(
-            NODEPREFIX_BAND + "fm", R.string.radio_fm_text, "FM");
+            NODE_BAND_FM, R.string.radio_fm_text, "FM");
 
     private final ProgramList.OnCompleteListener mProgramListCompleteListener =
             this::onProgramListUpdated;
@@ -460,6 +463,18 @@ public class BrowseTree {
             return ProgramSelectorExt.createAmFmSelector(freqInt);
         } else if (mediaId.startsWith(NODEPREFIX_PROGRAM)) {
             return mProgramSelectors.get(mediaId);
+        } else if (mediaId.equals(NODE_FAVORITES)) {
+            if (mFavorites == null || mFavorites.isEmpty()) return null;
+            return mFavorites.iterator().next().getSelector();
+        } else if (mediaId.equals(NODE_PROGRAMS)) {
+            if (mProgramListSnapshot == null || mProgramListSnapshot.isEmpty()) return null;
+            return mProgramListSnapshot.get(0).getSelector();
+        } else if (mediaId.equals(NODE_BAND_AM)) {
+            if (mAmChannels.mBands == null || mAmChannels.mBands.isEmpty()) return null;
+            return ProgramSelectorExt.createAmFmSelector(mAmChannels.mBands.get(0).getLowerLimit());
+        } else if (mediaId.equals(NODE_BAND_FM)) {
+            if (mFmChannels.mBands == null || mFmChannels.mBands.isEmpty()) return null;
+            return ProgramSelectorExt.createAmFmSelector(mFmChannels.mBands.get(0).getLowerLimit());
         }
         return null;
     }
