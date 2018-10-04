@@ -94,6 +94,9 @@ public interface MediaBrowserViewModel {
      */
     class Factory {
 
+        private static final String KEY_BROWSER_ROOT =
+                "com.android.car.media.common.browse.MediaBrowserViewModel.Factory.browserRoot";
+
         /**
          * Returns an initialized {@link MediaBrowserViewModel.WithMutableBrowseId}, and fetches a
          * {@link MediaSourceViewModel} from {@code viewModelProvider} to provide the connected
@@ -150,10 +153,27 @@ public interface MediaBrowserViewModel {
             return viewModel;
         }
 
+        /**
+         * Fetch an initialized {@link MediaBrowserViewModel}. It will get its media browser from
+         * the {@link MediaSourceViewModel} provided by {@code viewModelProvider}. It will already
+         * be configured to browse the root of the browser.
+         *
+         * @param viewModelProvider the ViewModelProvider to load ViewModels from.
+         * @return an initialized MediaBrowserViewModel configured to browse the specified browseId.
+         */
+        @NonNull
+        public static MediaBrowserViewModel getInstanceForBrowseRoot(
+                @NonNull ViewModelProvider viewModelProvider) {
+            MediaBrowserViewModel.WithMutableBrowseId viewModel =
+                    getInstanceForKey(viewModelProvider, KEY_BROWSER_ROOT);
+            viewModel.setCurrentBrowseId(null);
+            return viewModel;
+        }
+
         private static void initMediaBrowser(
                 @NonNull LiveData<MediaBrowserCompat> connectedMediaBrowser,
                 MediaBrowserViewModelImpl viewModel) {
-            if (viewModel.mConnectedMediaBrowser != connectedMediaBrowser) {
+            if (viewModel.getMediaBrowserSource() != connectedMediaBrowser) {
                 viewModel.setConnectedMediaBrowser(connectedMediaBrowser);
             }
         }
