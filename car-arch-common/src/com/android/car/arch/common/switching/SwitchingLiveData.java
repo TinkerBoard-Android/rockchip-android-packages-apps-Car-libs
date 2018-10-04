@@ -37,6 +37,12 @@ public interface SwitchingLiveData<T> {
     LiveData<T> asLiveData();
 
     /**
+     * Returns the current source as set by {@link #setSource(LiveData)}
+     */
+    @Nullable
+    LiveData<? extends T> getSource();
+
+    /**
      * Sets which LiveData acts as the source for this SwitchingLiveData. If {@code null}, this
      * SwitchingLiveData will emit {@code null}.
      */
