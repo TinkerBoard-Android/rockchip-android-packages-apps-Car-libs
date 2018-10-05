@@ -172,6 +172,13 @@ public class MediaSource {
         return CUSTOM_MEDIA_SOURCES.contains(mPackageName);
     }
 
+    /** Returns whether the UI for the source is OK without a drawer for browsing. */
+    public boolean supportsContentForwardBrowse() {
+        // TODO: remove this logic once the UI for these sources properly handles CFB.
+        return !"com.android.bluetooth".equals(mPackageName)
+                && !"com.android.car.media.localmediaplayer".equals(mPackageName);
+    }
+
     /**
      * Returns {@code true} iff this media source has a browse service to connect to.
      */
