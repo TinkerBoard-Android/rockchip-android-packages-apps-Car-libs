@@ -35,9 +35,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.shadows.ShadowTelephonyManager;
 
 import java.util.HashSet;
@@ -79,12 +79,11 @@ public class LocaleListItemProviderTest extends BaseRobolectricTest {
     public void setUpComponents() {
         ShadowLocalePicker.setSystemAssetLocales(TEST_LOCALES);
         ShadowLocalePicker.setSupportedLocales(TEST_LOCALES);
-        ShadowApplication shadowApplication = Shadows.shadowOf(application);
         ShadowTelephonyManager shadowTelephonyManager =
                 Shadows.shadowOf(application.getSystemService(TelephonyManager.class));
         shadowTelephonyManager.setSimCountryIso("");
         shadowTelephonyManager.setNetworkCountryIso("");
-        mContext = shadowApplication.getApplicationContext();
+        mContext = RuntimeEnvironment.application;
         Locale.setDefault(new Locale("en", "US"));
         LocaleStore.fillCache(mContext);
         mLocaleInfos = LocaleStore.getLevelLocales(mContext, new HashSet<>(), null, true);
