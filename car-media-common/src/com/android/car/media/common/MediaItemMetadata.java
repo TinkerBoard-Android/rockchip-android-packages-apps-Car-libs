@@ -250,8 +250,8 @@ public class MediaItemMetadata implements Parcelable {
     public int getBrowsableContentStyleHint() {
         Bundle extras = mMediaDescription.getExtras();
         if (extras != null && extras.getBoolean(
-                ContentStyleMediaConstants.CONTENT_STYLE_SUPPORTED, false)) {
-            return extras.getInt(ContentStyleMediaConstants.CONTENT_STYLE_BROWSABLE_HINT, 0);
+                MediaConstants.CONTENT_STYLE_SUPPORTED, false)) {
+            return extras.getInt(MediaConstants.CONTENT_STYLE_BROWSABLE_HINT, 0);
         }
         return 0;
     }
@@ -267,8 +267,8 @@ public class MediaItemMetadata implements Parcelable {
     public int getPlayableContentStyleHint() {
         Bundle extras = mMediaDescription.getExtras();
         if (extras != null && extras.getBoolean(
-                ContentStyleMediaConstants.CONTENT_STYLE_SUPPORTED, false)) {
-            return extras.getInt(ContentStyleMediaConstants.CONTENT_STYLE_PLAYABLE_HINT, 0);
+                MediaConstants.CONTENT_STYLE_SUPPORTED, false)) {
+            return extras.getInt(MediaConstants.CONTENT_STYLE_PLAYABLE_HINT, 0);
         }
         return 0;
     }

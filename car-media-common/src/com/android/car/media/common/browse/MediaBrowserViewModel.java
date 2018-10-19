@@ -74,6 +74,12 @@ public interface MediaBrowserViewModel {
     LiveData<FutureData<List<MediaItemMetadata>>> getBrowsedMediaItems();
 
     /**
+     * Returns a LiveData that emits whether the media browser supports search. This wil never emit
+     * {@code null}
+     */
+    LiveData<Boolean> supportsSearch();
+
+    /**
      * A {@link MediaBrowserViewModel} whose selected browse ID may be changed.
      */
     interface WithMutableBrowseId extends MediaBrowserViewModel {

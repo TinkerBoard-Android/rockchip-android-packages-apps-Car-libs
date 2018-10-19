@@ -20,7 +20,7 @@ package com.android.car.media.common;
  * Holds constants used when dealing with MediaBrowserServices that support the
  * content style API for media.
  */
-public final class ContentStyleMediaConstants {
+public final class MediaConstants {
 
     /** Declares that ContentStyle is supported */
     public static final String CONTENT_STYLE_SUPPORTED =
@@ -32,6 +32,21 @@ public final class ContentStyleMediaConstants {
      */
     public static final String CONTENT_STYLE_PLAYABLE_HINT =
             "android.auto.media.CONTENT_STYLE_PLAYABLE_HINT";
+
+    /**
+     * Bundle extra indicating that media app supports MediaBrowserCompat.onSearch
+     */
+    public static final String MEDIA_SEARCH_SUPPORTED = "android.media.browse.SEARCH_SUPPORTED";
+
+    /**
+     * Bundle extra indicating that media app supports MediaBrowserCompat.onSearch for pre-release
+     * versions.
+     *
+     * @deprecated this flag has been replaced by {@link #MEDIA_SEARCH_SUPPORTED}
+     */
+    @Deprecated
+    public static final String MEDIA_SEARCH_SUPPORTED_PRERELEASE =
+            "android.auto.media.SEARCH_SUPPORTED";
 
     /**
      * Bundle extra indicating the presentation hint for browsable media items. See {@link
