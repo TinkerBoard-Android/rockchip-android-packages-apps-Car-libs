@@ -51,6 +51,11 @@ public interface MediaBrowserViewModel {
     }
 
     /**
+     * Returns a LiveData that emits the current package name of the browser's service component.
+     */
+    LiveData<String> getPackageName();
+
+    /**
      * Returns a LiveData that emits the current {@link BrowseState}
      */
     LiveData<BrowseState> getBrowseState();
