@@ -24,6 +24,7 @@ import android.support.v4.media.MediaBrowserCompat;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.android.car.arch.common.FutureData;
 import com.android.car.media.common.MediaItemMetadata;
 import com.android.car.media.common.source.MediaSourceViewModel;
 
@@ -54,20 +55,23 @@ public interface MediaBrowserViewModel {
      */
     LiveData<BrowseState> getBrowseState();
 
-    /**
-     * Returns a LiveData that emits {@code true} when loading new items
-     */
-    LiveData<Boolean> isLoading();
 
     /**
-     * Fetches the MediaItemMetadatas for the current browsed id. A MediaSource must be selected and
-     * its MediaBrowser connected, otherwise this will emit {@code null}.
+     * Fetches the MediaItemMetadatas for the current browsed id, and the loading status of the
+     * fetch operation.
      *
-     * @return a LiveData that emits the MediaItemMetadatas for the current browsed id or {@code
-     * null} if unavailable.
-     * @see WithMutableBrowseId#setCurrentBrowseId(String)
+     * This LiveData will never emit {@code null}. If the data is loading, the data component of the
+     * {@link FutureData} will be null
+     * A MediaSource must be selected and its MediaBrowser connected, otherwise the FutureData will
+     * always contain a {@code null} data value.
+     *
+     * Will emit browse results if provided search query is {@code null},
+     * and search query results otherwise.
+     *
+     * @return a LiveData that emits a FutureData that contains the loading status and the
+     * MediaItemMetadatas for the current search query or browsed id
      */
-    LiveData<List<MediaItemMetadata>> getBrowsedMediaItems();
+    LiveData<FutureData<List<MediaItemMetadata>>> getBrowsedMediaItems();
 
     /**
      * A {@link MediaBrowserViewModel} whose selected browse ID may be changed.

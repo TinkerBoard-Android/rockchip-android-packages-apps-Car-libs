@@ -23,47 +23,37 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 
 /**
- * Provides an isLoading() method for switchMaps which may take a long time to finish.
+ * Provides a loading field switchMaps which may take a long time to finish.
  *
  * @param <T> the output type for the switchMap
  * @see androidx.lifecycle.Transformations#switchMap(LiveData, Function) switchMap
  */
+// TODO(b/117950502): Remove single method interface, just return a LiveData<FutureData<T>>
 public interface LoadingSwitchMap<T> {
 
     /**
-     * Returns the output data of the function.
+     * Returns a FutureData with the loading status and output data of the function.
      */
-    LiveData<T> getOutput();
+    LiveData<FutureData<T>> getLoadingOutput();
 
     /**
-     * Returns a LiveData that emits true iff the trigger has notified but the output has not yet.
-     */
-    LiveData<Boolean> isLoading();
-
-    /**
-     * Returns a new LoadingSwitchMap
+     * Custom MediatorLiveData that emits a FutureData containing loading status and function output
      *
-     * @see androidx.lifecycle.Transformations#switchMap(LiveData, Function)
+     * This MediatorLiveData emits values only when the loading status of the output changes.
+     * If the output is loading, the emitted FutureData will have a null value for the data.
      */
     static <X, Y> LoadingSwitchMap<Y> loadingSwitchMap(LiveData<X> trigger,
             Function<X, LiveData<Y>> function) {
         LiveData<Y> output = switchMap(trigger, function);
-        LiveData<Boolean> isLoading = new MediatorLiveData<Boolean>() {
-            {
-                addSource(trigger, data -> setValue(true));
-                addSource(output, data -> setValue(false));
-            }
-        };
-        return new LoadingSwitchMap<Y>() {
-            @Override
-            public LiveData<Y> getOutput() {
-                return output;
-            }
-
-            @Override
-            public LiveData<Boolean> isLoading() {
-                return isLoading;
-            }
-        };
+        LiveData<FutureData<Y>> loadingOutput =
+                new MediatorLiveData<FutureData<Y>>() {
+                    {
+                        addSource(trigger, data ->
+                                setValue(new FutureData<>(true, null)));
+                        addSource(output, data ->
+                                setValue(new FutureData<>(false, output.getValue())));
+                    }
+                };
+        return () -> loadingOutput;
     }
 }
