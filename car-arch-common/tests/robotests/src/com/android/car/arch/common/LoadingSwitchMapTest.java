@@ -42,26 +42,22 @@ public class LoadingSwitchMapTest {
 
     private MutableLiveData<Object> mTrigger;
     private MutableLiveData<Integer> mOutput;
-    private CaptureObserver<Boolean> mLoadingObserver;
-    private CaptureObserver<Integer> mOutputObserver;
+    private CaptureObserver<FutureData<Integer>> mObserver;
 
     @Before
     public void setUp() {
         mTrigger = new MutableLiveData<>();
         mOutput = new MutableLiveData<>();
-        mLoadingObserver = new CaptureObserver<>();
-        mOutputObserver = new CaptureObserver<>();
+        mObserver = new CaptureObserver<>();
     }
 
     @Test
     public void testIsLoading_uninitialized() {
         LoadingSwitchMap<Integer> underTest = LoadingSwitchMap.loadingSwitchMap(mTrigger,
                 (data) -> mOutput);
-        underTest.isLoading().observe(mLifecycleOwner, mLoadingObserver);
-        underTest.getOutput().observe(mLifecycleOwner, mOutputObserver);
+        underTest.getLoadingOutput().observe(mLifecycleOwner, mObserver);
 
-        assertThat(mLoadingObserver.hasBeenNotified()).isFalse();
-        assertThat(mOutputObserver.hasBeenNotified()).isFalse();
+        assertThat(mObserver.hasBeenNotified()).isFalse();
     }
 
     @Test
@@ -70,12 +66,11 @@ public class LoadingSwitchMapTest {
 
         LoadingSwitchMap<Integer> underTest = LoadingSwitchMap.loadingSwitchMap(mTrigger,
                 (data) -> mOutput);
-        underTest.isLoading().observe(mLifecycleOwner, mLoadingObserver);
-        underTest.getOutput().observe(mLifecycleOwner, mOutputObserver);
+        underTest.getLoadingOutput().observe(mLifecycleOwner, mObserver);
 
-        assertThat(mLoadingObserver.hasBeenNotified()).isTrue();
-        assertThat(mLoadingObserver.getObservedValue()).isTrue();
-        assertThat(mOutputObserver.hasBeenNotified()).isFalse();
+        assertThat(mObserver.hasBeenNotified()).isTrue();
+        assertThat(mObserver.getObservedValue().isLoading()).isTrue();
+        assertThat(mObserver.getObservedValue().getData()).isNull();
     }
 
     @Test
@@ -85,34 +80,28 @@ public class LoadingSwitchMapTest {
 
         LoadingSwitchMap<Integer> underTest = LoadingSwitchMap.loadingSwitchMap(mTrigger,
                 (data) -> mOutput);
-        underTest.isLoading().observe(mLifecycleOwner, mLoadingObserver);
-        underTest.getOutput().observe(mLifecycleOwner, mOutputObserver);
+        underTest.getLoadingOutput().observe(mLifecycleOwner, mObserver);
 
-        assertThat(mLoadingObserver.hasBeenNotified()).isTrue();
-        assertThat(mLoadingObserver.getObservedValue()).isFalse();
-        assertThat(mOutputObserver.hasBeenNotified()).isTrue();
-        assertThat(mOutputObserver.getObservedValue()).isEqualTo(1);
+        assertThat(mObserver.hasBeenNotified()).isTrue();
+        assertThat(mObserver.getObservedValue().isLoading()).isFalse();
+        assertThat(mObserver.getObservedValue().getData()).isEqualTo(1);
     }
 
     @Test
     public void testIsLoading_normalFlow() {
         LoadingSwitchMap<Integer> underTest = LoadingSwitchMap.loadingSwitchMap(mTrigger,
                 (data) -> mOutput);
-        underTest.isLoading().observe(mLifecycleOwner, mLoadingObserver);
-        underTest.getOutput().observe(mLifecycleOwner, mOutputObserver);
+        underTest.getLoadingOutput().observe(mLifecycleOwner, mObserver);
 
         mTrigger.setValue(new Object());
 
-        assertThat(mLoadingObserver.hasBeenNotified()).isTrue();
-        assertThat(mLoadingObserver.getObservedValue()).isTrue();
-        assertThat(mOutputObserver.hasBeenNotified()).isFalse();
+        assertThat(mObserver.hasBeenNotified()).isTrue();
+        assertThat(mObserver.getObservedValue().isLoading()).isTrue();
 
         mOutput.setValue(1);
 
-        assertThat(mLoadingObserver.hasBeenNotified()).isTrue();
-        assertThat(mLoadingObserver.getObservedValue()).isFalse();
-        assertThat(mOutputObserver.hasBeenNotified()).isTrue();
-        assertThat(mOutputObserver.getObservedValue()).isEqualTo(1);
+        assertThat(mObserver.getObservedValue().isLoading()).isFalse();
+        assertThat(mObserver.getObservedValue().getData()).isEqualTo(1);
     }
 
     @Test
@@ -122,21 +111,17 @@ public class LoadingSwitchMapTest {
 
         LoadingSwitchMap<Integer> underTest = LoadingSwitchMap.loadingSwitchMap(mTrigger,
                 (data) -> mOutput);
-        underTest.isLoading().observe(mLifecycleOwner, mLoadingObserver);
-        underTest.getOutput().observe(mLifecycleOwner, mOutputObserver);
+        underTest.getLoadingOutput().observe(mLifecycleOwner, mObserver);
 
         mTrigger.setValue(new Object());
 
-        assertThat(mLoadingObserver.hasBeenNotified()).isTrue();
-        assertThat(mLoadingObserver.getObservedValue()).isTrue();
-        assertThat(mOutputObserver.hasBeenNotified()).isTrue();
-        assertThat(mOutputObserver.getObservedValue()).isEqualTo(1);
+        assertThat(mObserver.hasBeenNotified()).isTrue();
+        assertThat(mObserver.getObservedValue().isLoading()).isTrue();
+        assertThat(mObserver.getObservedValue().getData()).isNull();
 
         mOutput.setValue(2);
 
-        assertThat(mLoadingObserver.hasBeenNotified()).isTrue();
-        assertThat(mLoadingObserver.getObservedValue()).isFalse();
-        assertThat(mOutputObserver.hasBeenNotified()).isTrue();
-        assertThat(mOutputObserver.getObservedValue()).isEqualTo(2);
+        assertThat(mObserver.getObservedValue().isLoading()).isFalse();
+        assertThat(mObserver.getObservedValue().getData()).isEqualTo(2);
     }
 }
