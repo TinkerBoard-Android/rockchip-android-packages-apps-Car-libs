@@ -105,6 +105,11 @@ public class MediaSourceViewModelTest {
             }
 
             @Override
+            public List<MediaSource> getMediaSources() {
+                return Collections.emptyList();
+            }
+
+            @Override
             public LiveData<MediaBrowserState> createMediaBrowserConnector(
                     @NonNull ComponentName browseService) {
                 mRequestedBrowseService = browseService;
