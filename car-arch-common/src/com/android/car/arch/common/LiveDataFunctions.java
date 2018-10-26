@@ -207,6 +207,26 @@ public class LiveDataFunctions {
     }
 
     /**
+     * Similar to {@link Transformations#switchMap(LiveData, Function)}, but emits a FutureData,
+     * which provides a loading field for operations which may take a long time to finish.
+     *
+     * This LiveData emits values only when the loading status of the output changes. It will never
+     * emit {@code null}. If the output is loading, the emitted FutureData will have a null value
+     * for the data.
+     */
+    public static <T, R> LiveData<FutureData<R>> loadingSwitchMap(LiveData<T> trigger,
+            @NonNull Function<T, LiveData<R>> func) {
+        LiveData<R> output = Transformations.switchMap(trigger, func);
+        return new MediatorLiveData<FutureData<R>>() {
+            {
+                addSource(trigger, data -> setValue(new FutureData<>(true, null)));
+                addSource(output, data ->
+                        setValue(new FutureData<>(false, output.getValue())));
+            }
+        };
+    }
+
+    /**
      * Returns a LiveData that emits the logical AND of the two arguments. Also deals with {@code
      * null} and uninitalized values as follows:
      * <table>
