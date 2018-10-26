@@ -81,9 +81,14 @@ class MediaSourcesLiveData extends LiveData<List<MediaSource>> {
     }
 
     private void updateMediaSources() {
-        List<MediaSource> mediaSources = getPackageNames().stream()
+        setValue(getMediaSources(mContext));
+    }
+
+    /** Returns the alphabetically sorted list of available media sources. */
+    static List<MediaSource> getMediaSources(Context context) {
+        List<MediaSource> mediaSources = getPackageNames(context).stream()
                 .filter(Objects::nonNull)
-                .map(packageName -> new MediaSource(mContext, packageName))
+                .map(packageName -> new MediaSource(context, packageName))
                 .filter(mediaSource -> {
                     if (mediaSource.getName() == null) {
                         Log.w(TAG, "Found media source without name: "
@@ -94,15 +99,15 @@ class MediaSourcesLiveData extends LiveData<List<MediaSource>> {
                 })
                 .sorted(Comparator.comparing(mediaSource -> mediaSource.getName().toString()))
                 .collect(Collectors.toList());
-        setValue(mediaSources);
+        return mediaSources;
     }
 
     /**
      * Generates a set of all possible apps to choose from, including the ones that are just
      * media services.
      */
-    private Set<String> getPackageNames() {
-        PackageManager packageManager = mContext.getPackageManager();
+    private static Set<String> getPackageNames(Context context) {
+        PackageManager packageManager = context.getPackageManager();
         Intent intent = new Intent(Intent.ACTION_MAIN, null);
         intent.addCategory(Intent.CATEGORY_APP_MUSIC);
 
