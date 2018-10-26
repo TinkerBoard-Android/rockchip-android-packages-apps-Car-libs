@@ -128,7 +128,7 @@ public class PlaybackFragment extends Fragment {
             }
             mPlaybackViewModel = playbackViewModel;
             mMediaSourceViewModel = mediaSourceViewModel;
-            mMediaSource = mMediaSourceViewModel.getSelectedMediaSource();
+            mMediaSource = mMediaSourceViewModel.getActiveMediaSource();
             mAppName = mapNonNull(mMediaSource, MediaSource::getName);
             mAppIcon = mapNonNull(mMediaSource, MediaSource::getRoundPackageIcon);
             mOpenIntent = mapNonNull(mMediaSource, MEDIA_TEMPLATE_INTENT, source -> {
