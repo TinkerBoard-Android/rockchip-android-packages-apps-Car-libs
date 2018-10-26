@@ -21,9 +21,9 @@ import static androidx.lifecycle.Transformations.map;
 import static com.android.car.arch.common.LiveDataFunctions.dataOf;
 import static com.android.car.arch.common.LiveDataFunctions.emitsNull;
 import static com.android.car.arch.common.LiveDataFunctions.ifThenElse;
+import static com.android.car.arch.common.LiveDataFunctions.loadingSwitchMap;
 import static com.android.car.arch.common.LiveDataFunctions.pair;
 import static com.android.car.arch.common.LiveDataFunctions.split;
-import static com.android.car.arch.common.LoadingSwitchMap.loadingSwitchMap;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -38,7 +38,6 @@ import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.android.car.arch.common.FutureData;
-import com.android.car.arch.common.LoadingSwitchMap;
 import com.android.car.arch.common.switching.SwitchingLiveData;
 import com.android.car.media.common.MediaItemMetadata;
 
@@ -68,20 +67,20 @@ public class MediaBrowserViewModelImpl extends AndroidViewModel implements
         LiveData<MediaBrowserCompat> connectedMediaBrowser = map(mMediaBrowserSwitch.asLiveData(),
                 MediaBrowserViewModelImpl::requireConnected);
 
-        LoadingSwitchMap<List<MediaItemMetadata>> currentBrowseItems =
+        LiveData<FutureData<List<MediaItemMetadata>>> currentBrowseItems =
                 loadingSwitchMap(pair(connectedMediaBrowser, mCurrentBrowseId),
                         split((mediaBrowser, browseId) ->
                                 mediaBrowser == null
                                         ? null
                                         : new BrowsedMediaItems(mediaBrowser, browseId)));
-        LoadingSwitchMap<List<MediaItemMetadata>> currentSearchItems =
+        LiveData<FutureData<List<MediaItemMetadata>>> currentSearchItems =
                 loadingSwitchMap(pair(connectedMediaBrowser, mCurrentSearchQuery),
                         split((mediaBrowser, query) ->
                                 mediaBrowser == null
                                         ? null
                                         : new SearchedMediaItems(mediaBrowser, query)));
         mCurrentMediaItems = ifThenElse(emitsNull(mCurrentSearchQuery),
-                currentBrowseItems.getLoadingOutput(), currentSearchItems.getLoadingOutput());
+                currentBrowseItems, currentSearchItems);
         mBrowseState = new MediatorLiveData<BrowseState>() {
             {
                 setValue(BrowseState.EMPTY);

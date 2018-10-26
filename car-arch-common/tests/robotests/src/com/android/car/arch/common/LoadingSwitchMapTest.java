@@ -16,9 +16,12 @@
 
 package com.android.car.arch.common;
 
+import static com.android.car.arch.common.LiveDataFunctions.loadingSwitchMap;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.android.car.arch.common.testing.CaptureObserver;
@@ -53,9 +56,9 @@ public class LoadingSwitchMapTest {
 
     @Test
     public void testIsLoading_uninitialized() {
-        LoadingSwitchMap<Integer> underTest = LoadingSwitchMap.loadingSwitchMap(mTrigger,
+        LiveData<FutureData<Integer>> underTest = loadingSwitchMap(mTrigger,
                 (data) -> mOutput);
-        underTest.getLoadingOutput().observe(mLifecycleOwner, mObserver);
+        underTest.observe(mLifecycleOwner, mObserver);
 
         assertThat(mObserver.hasBeenNotified()).isFalse();
     }
@@ -64,9 +67,9 @@ public class LoadingSwitchMapTest {
     public void testIsLoading_initializedTrigger() {
         mTrigger.setValue(new Object());
 
-        LoadingSwitchMap<Integer> underTest = LoadingSwitchMap.loadingSwitchMap(mTrigger,
+        LiveData<FutureData<Integer>> underTest = loadingSwitchMap(mTrigger,
                 (data) -> mOutput);
-        underTest.getLoadingOutput().observe(mLifecycleOwner, mObserver);
+        underTest.observe(mLifecycleOwner, mObserver);
 
         assertThat(mObserver.hasBeenNotified()).isTrue();
         assertThat(mObserver.getObservedValue().isLoading()).isTrue();
@@ -78,9 +81,9 @@ public class LoadingSwitchMapTest {
         mTrigger.setValue(new Object());
         mOutput.setValue(1);
 
-        LoadingSwitchMap<Integer> underTest = LoadingSwitchMap.loadingSwitchMap(mTrigger,
+        LiveData<FutureData<Integer>> underTest = loadingSwitchMap(mTrigger,
                 (data) -> mOutput);
-        underTest.getLoadingOutput().observe(mLifecycleOwner, mObserver);
+        underTest.observe(mLifecycleOwner, mObserver);
 
         assertThat(mObserver.hasBeenNotified()).isTrue();
         assertThat(mObserver.getObservedValue().isLoading()).isFalse();
@@ -89,9 +92,9 @@ public class LoadingSwitchMapTest {
 
     @Test
     public void testIsLoading_normalFlow() {
-        LoadingSwitchMap<Integer> underTest = LoadingSwitchMap.loadingSwitchMap(mTrigger,
+        LiveData<FutureData<Integer>> underTest = loadingSwitchMap(mTrigger,
                 (data) -> mOutput);
-        underTest.getLoadingOutput().observe(mLifecycleOwner, mObserver);
+        underTest.observe(mLifecycleOwner, mObserver);
 
         mTrigger.setValue(new Object());
 
@@ -109,9 +112,9 @@ public class LoadingSwitchMapTest {
         mTrigger.setValue(new Object());
         mOutput.setValue(1);
 
-        LoadingSwitchMap<Integer> underTest = LoadingSwitchMap.loadingSwitchMap(mTrigger,
+        LiveData<FutureData<Integer>> underTest = loadingSwitchMap(mTrigger,
                 (data) -> mOutput);
-        underTest.getLoadingOutput().observe(mLifecycleOwner, mObserver);
+        underTest.observe(mLifecycleOwner, mObserver);
 
         mTrigger.setValue(new Object());
 
