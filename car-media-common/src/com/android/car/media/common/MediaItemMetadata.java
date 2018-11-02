@@ -30,6 +30,7 @@ import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
+import android.view.View;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -171,11 +172,13 @@ public class MediaItemMetadata implements Parcelable {
         Glide.with(context).clear(imageView);
         if (metadata == null) {
             imageView.setImageBitmap(null);
+            imageView.setVisibility(View.GONE);
             return;
         }
         Bitmap image = metadata.getAlbumArtBitmap();
         if (image != null) {
             imageView.setImageBitmap(image);
+            imageView.setVisibility(View.VISIBLE);
             return;
         }
         Uri imageUri = metadata.getAlbumArtUri();
@@ -184,9 +187,11 @@ public class MediaItemMetadata implements Parcelable {
                     .load(imageUri)
                     .apply(RequestOptions.placeholderOf(loadingIndicator))
                     .into(imageView);
+            imageView.setVisibility(View.VISIBLE);
             return;
         }
         imageView.setImageBitmap(null);
+        imageView.setVisibility(View.GONE);
     }
 
     /**

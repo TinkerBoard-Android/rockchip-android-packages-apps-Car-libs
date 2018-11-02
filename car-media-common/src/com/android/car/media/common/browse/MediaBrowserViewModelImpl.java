@@ -65,8 +65,16 @@ public class MediaBrowserViewModelImpl extends AndroidViewModel implements
 
     private final LiveData<BrowseState> mBrowseState;
 
+    private final LiveData<String> mPackageName;
+
     public MediaBrowserViewModelImpl(@NonNull Application application) {
         super(application);
+
+        mPackageName = map(mConnectedMediaBrowser,
+                mediaBrowser -> {
+                    if (mediaBrowser == null) return null;
+                    return mediaBrowser.getServiceComponent().getPackageName();
+                });
 
         LiveData<FutureData<List<MediaItemMetadata>>> currentBrowseItems =
                 loadingSwitchMap(pair(mConnectedMediaBrowser, mCurrentBrowseId),
@@ -157,6 +165,11 @@ public class MediaBrowserViewModelImpl extends AndroidViewModel implements
     }
 
     @Override
+    public LiveData<String> getPackageName() {
+        return mPackageName;
+    }
+
+    @Override
     public LiveData<BrowseState> getBrowseState() {
         return mBrowseState;
     }
@@ -183,6 +196,7 @@ public class MediaBrowserViewModelImpl extends AndroidViewModel implements
         return mCurrentMediaItems;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public LiveData<Boolean> supportsSearch() {
         return map(mConnectedMediaBrowser, mediaBrowserCompat -> {
