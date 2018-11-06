@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2016 The Android Open Source Project
+# Copyright (C) 2018 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,12 @@ include $(CLEAR_VARS)
 
 LOCAL_USE_AAPT2 := true
 
+LOCAL_SRC_FILES := $(call all-java-files-under, src)
+
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
+
+LOCAL_STATIC_ANDROID_LIBRARIES += \
+    androidx.car_car \
 
 LOCAL_MODULE := car-theme-lib
 LOCAL_MODULE_TAGS := optional
