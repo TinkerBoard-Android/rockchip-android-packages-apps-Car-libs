@@ -32,7 +32,7 @@
         <item name="android:padding">@dimen/car_fab_large_padding</item>
     </style>
 
-    <style name="PlaybackControl" parent="Widget.Car.Button.ActionBar">
+    <style name="PlaybackControl" parent="Widget.Car.Button.CarActionBar">
         <item name="android:background">@drawable/car_action_button_background_light</item>
         <item name="android:tint">@color/car_tint_light</item>
     </style>

@@ -49,6 +49,7 @@ import androidx.lifecycle.LiveData;
 
 import com.android.car.arch.common.switching.SwitchingLiveData;
 import com.android.car.media.common.CustomPlaybackAction;
+import com.android.car.media.common.MediaConstants;
 import com.android.car.media.common.MediaItemMetadata;
 import com.android.car.media.common.R;
 import com.android.car.media.common.source.MediaSourceColors;
@@ -328,6 +329,18 @@ public class PlaybackViewModel extends AndroidViewModel {
                 state -> state != null
                         && (state.getActions() & PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS) != 0);
 
+        private final LiveData<Boolean> mIsSkipNextReserved = map(mMediaControllerData,
+                controller -> controller != null
+                        && controller.getExtras() != null
+                        && controller.getExtras().getBoolean(
+                        MediaConstants.SLOT_RESERVATION_SKIP_TO_NEXT));
+
+        private final LiveData<Boolean> mIsSkipPreviousReserved = map(mMediaControllerData,
+                controller -> controller != null
+                        && controller.getExtras() != null
+                        && controller.getExtras().getBoolean(
+                        MediaConstants.SLOT_RESERVATION_SKIP_TO_PREV));
+
         // true if the media source is loading (e.g.: buffering, connecting, etc.)
         private final LiveData<Boolean> mIsLoading = map(mPlaybackState,
                 playbackState -> {
@@ -426,11 +439,27 @@ public class PlaybackViewModel extends AndroidViewModel {
         }
 
         /**
+         * Returns a LiveData that emits {@code true} iff the media source requires reserved space
+         * for the skip to next action
+         */
+        public LiveData<Boolean> isSkipNextReserved() {
+            return mIsSkipNextReserved;
+        }
+
+        /**
          * Returns a LiveData that emits {@code true} iff the media source supports skipping to the
          * previous item.
          */
         public LiveData<Boolean> isSkipPreviousEnabled() {
             return mIsSkipPreviousEnabled;
+        }
+
+        /**
+         * Returns a LiveData that emits {@code true} iff the media source requires reserved space
+         * for the skip to previous action.
+         */
+        public LiveData<Boolean> isSkipPreviousReserved() {
+            return mIsSkipPreviousReserved;
         }
 
         /**

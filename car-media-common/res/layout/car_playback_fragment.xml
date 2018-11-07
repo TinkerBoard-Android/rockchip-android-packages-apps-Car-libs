@@ -130,6 +130,7 @@
             android:layout_marginEnd="@dimen/car_padding_4"
             android:layout_marginBottom="@dimen/car_padding_4"
             app:columns="3"
+            app:enableOverflow="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
