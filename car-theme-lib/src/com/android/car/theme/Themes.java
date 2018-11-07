@@ -25,7 +25,7 @@ import android.graphics.drawable.Drawable;
 public class Themes {
 
     /**
-     * Returns the color assigned to the given attribute
+     * Returns the color assigned to the given attribute.
      */
     public static int getAttrColor(Context context, int attr) {
         TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
@@ -35,7 +35,7 @@ public class Themes {
     }
 
     /**
-     * Returns the boolean assigned to the given attribute
+     * Returns the boolean assigned to the given attribute.
      */
     public static boolean getAttrBoolean(Context context, int attr) {
         TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
@@ -45,7 +45,7 @@ public class Themes {
     }
 
     /**
-     * Returns the Drawable assigned to the given attribute
+     * Returns the Drawable assigned to the given attribute.
      */
     public static Drawable getAttrDrawable(Context context, int attr) {
         TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
@@ -55,12 +55,22 @@ public class Themes {
     }
 
     /**
-     * Returns the Integer assigned to the given attribute
+     * Returns the Integer assigned to the given attribute.
      */
     public static int getAttrInteger(Context context, int attr) {
         TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
         int value = ta.getInteger(0, 0);
         ta.recycle();
         return value;
+    }
+
+    /**
+     * Returns the identifier of the resolved resource assigned to the given attribute.
+     */
+    public static int getAttrResourceId(Context context, int attr) {
+        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        int resId = ta.getResourceId(0, 0);
+        ta.recycle();
+        return resId;
     }
 }
