@@ -46,4 +46,18 @@
         <item name="arrowHeadLength">@dimen/car_arrow_head_length</item>
         <item name="drawableSize">@dimen/car_arrow_size</item>
     </style>
+
+    <!-- ================ -->
+    <!-- ActionBar Themes -->
+    <!-- ================ -->
+    <eat-comment />
+
+    <!-- Styles for action buttons -->
+    <style name="Widget.Car.Button.CarActionBar">
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:padding">@dimen/car_action_button_icon_inset</item>
+        <item name="android:background">@drawable/car_action_button_background</item>
+        <item name="android:tint">@color/car_tint</item>
+    </style>
+
 </resources>

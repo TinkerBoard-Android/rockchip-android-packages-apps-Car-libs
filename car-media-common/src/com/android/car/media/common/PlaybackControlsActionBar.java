@@ -32,10 +32,10 @@ import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.car.widget.ActionBar;
 import androidx.cardview.widget.CardView;
 import androidx.lifecycle.LifecycleOwner;
 
+import com.android.car.apps.common.CarActionBar;
 import com.android.car.media.common.playback.PlaybackViewModel;
 import com.android.car.media.common.source.MediaSourceColors;
 
@@ -44,17 +44,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Implementation of {@link PlaybackControls} that uses the support library {@link ActionBar}
+ * Implementation of {@link PlaybackControls} that uses the {@link CarActionBar}
  */
-public class PlaybackControlsActionBar extends ActionBar implements PlaybackControls {
+public class PlaybackControlsActionBar extends CarActionBar implements PlaybackControls {
     private static final String TAG = "PlaybackView";
 
+    private static final float ALPHA_ENABLED = 1.0F;
+    private static final float ALPHA_DISABLED = 0.5F;
+
     private PlayPauseStopImageView mPlayPauseStopImageView;
+    private View mPlayPauseStopImageContainer;
     private ProgressBar mSpinner;
     private Context mContext;
     private ImageButton mSkipPrevButton;
     private ImageButton mSkipNextButton;
     private ImageButton mTrackListButton;
+    private ImageButton mOverflowButton;
     private ColorStateList mIconsColor;
     private Listener mListener;
 
@@ -89,7 +94,7 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
         CardView actionBarWrapper = findViewById(androidx.car.R.id.action_bar_wrapper);
         actionBarWrapper.setCardBackgroundColor(context.getColor(androidx.car.R.color.car_card));
 
-        View mPlayPauseStopImageContainer = inflate(context,
+        mPlayPauseStopImageContainer = inflate(context,
                 R.layout.car_play_pause_stop_button_layout,
                 null);
         mPlayPauseStopImageContainer.setOnClickListener(this::onPlayPauseStopClicked);
@@ -106,21 +111,15 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
         mSkipPrevButton = createIconButton(mContext,
                 context.getDrawable(R.drawable.ic_skip_previous));
         mSkipPrevButton.setId(R.id.skip_prev);
-        mSkipPrevButton.setVisibility(INVISIBLE);
-        mSkipPrevButton.setOnClickListener(v -> {
-            if (mController != null) {
-                mController.skipToPrevious();
-            }
-        });
+        mSkipPrevButton.setVisibility(VISIBLE);
+        mSkipPrevButton.setOnClickListener(this::onPrevClicked);
+
         mSkipNextButton = createIconButton(mContext,
                 context.getDrawable(R.drawable.ic_skip_next));
         mSkipNextButton.setId(R.id.skip_next);
-        mSkipNextButton.setVisibility(INVISIBLE);
-        mSkipNextButton.setOnClickListener(v -> {
-            if (mController != null) {
-                mController.skipToNext();
-            }
-        });
+        mSkipNextButton.setVisibility(VISIBLE);
+        mSkipNextButton.setOnClickListener(this::onNextClicked);
+
         mTrackListButton = createIconButton(mContext,
                 context.getDrawable(R.drawable.ic_tracklist));
         mTrackListButton.setId(R.id.track_list);
@@ -130,14 +129,19 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
             }
         });
 
-        ImageButton overflowButton = createIconButton(context,
+        mOverflowButton = createIconButton(context,
                 context.getDrawable(androidx.car.R.drawable.ic_overflow));
-        overflowButton.setId(R.id.overflow);
+        mOverflowButton.setId(R.id.overflow);
 
-        setView(mPlayPauseStopImageContainer, ActionBar.SLOT_MAIN);
-        setView(mSkipPrevButton, ActionBar.SLOT_LEFT);
-        setView(mSkipNextButton, ActionBar.SLOT_RIGHT);
-        setExpandCollapseView(overflowButton);
+        resetInitialViews();
+    }
+
+    private void resetInitialViews() {
+        setViews(new View[0]);
+        setView(mPlayPauseStopImageContainer, CarActionBar.SLOT_MAIN);
+        setView(null, CarActionBar.SLOT_LEFT);
+        setView(null, CarActionBar.SLOT_RIGHT);
+        setExpandCollapseView(mOverflowButton);
     }
 
     private ImageButton createIconButton(Context context, Drawable icon) {
@@ -156,16 +160,57 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
         mModel = model;
         PlaybackViewModel.PlaybackInfo playbackInfo = model.getPlaybackInfo();
 
-        model.getPlaybackController().observe(owner, controller -> mController = controller);
+        model.getPlaybackController().observe(owner, controller -> {
+            if (mController != controller) {
+                mController = controller;
+                resetInitialViews();
+            }
+        });
         mPlayPauseStopImageView.setVisibility(View.VISIBLE);
         playbackInfo.getMainAction().observe(owner,
                 action -> mPlayPauseStopImageView.setAction(convertMainAction(action)));
         playbackInfo.isLoading().observe(owner,
                 isLoading -> mSpinner.setVisibility(isLoading ? View.VISIBLE : View.INVISIBLE));
+
+        playbackInfo.isSkipPreviousReserved().observe(owner,
+                reserved -> {
+                    Boolean enabled = playbackInfo.isSkipPreviousEnabled().getValue();
+                    boolean reservedImplicitly = enabled != null && enabled;
+                    if (reserved || reservedImplicitly) {
+                        setView(mSkipPrevButton, CarActionBar.SLOT_LEFT);
+                    } else {
+                        setView(null, CarActionBar.SLOT_LEFT);
+                    }
+                });
+
+        playbackInfo.isSkipNextReserved().observe(owner,
+                reserved -> {
+                    Boolean enabled = playbackInfo.isSkipNextEnabled().getValue();
+                    boolean reservedImplicitly = enabled != null && enabled;
+                    if (reserved || reservedImplicitly) {
+                        setView(mSkipNextButton, CarActionBar.SLOT_RIGHT);
+                    } else {
+                        setView(null, CarActionBar.SLOT_RIGHT);
+                    }
+                });
+
         playbackInfo.isSkipPreviousEnabled().observe(owner,
-                enabled -> mSkipPrevButton.setVisibility(enabled ? VISIBLE : INVISIBLE));
+                enabled -> {
+                    if (enabled) {
+                        mSkipPrevButton.setAlpha(ALPHA_ENABLED);
+                    } else {
+                        mSkipPrevButton.setAlpha(ALPHA_DISABLED);
+                    }
+                });
+
         playbackInfo.isSkipNextEnabled().observe(owner,
-                enabled -> mSkipNextButton.setVisibility(enabled ? VISIBLE : INVISIBLE));
+                enabled -> {
+                    if (enabled) {
+                        mSkipNextButton.setAlpha(ALPHA_ENABLED);
+                    } else {
+                        mSkipNextButton.setAlpha(ALPHA_DISABLED);
+                    }
+                });
         model.getMediaSourceColors().observe(owner, this::applyColors);
         pair(model.hasQueue(), playbackInfo.getCustomActions()).observe(owner,
                 split(this::updateCustomActions));
@@ -236,6 +281,33 @@ public class PlaybackControlsActionBar extends ActionBar implements PlaybackCont
                 Log.i(TAG, "Play/Pause/Stop clicked on invalid state");
                 break;
         }
+    }
+
+    private void onNextClicked(View view) {
+        PlaybackViewModel.PlaybackInfo playbackInfo = getPlaybackInfoInternal();
+        if (playbackInfo != null && playbackInfo.isSkipNextEnabled() != null) {
+            Boolean enabled = playbackInfo.isSkipNextEnabled().getValue();
+            if (enabled != null && enabled) {
+                mController.skipToNext();
+            }
+        }
+    }
+
+    private void onPrevClicked(View view) {
+        PlaybackViewModel.PlaybackInfo playbackInfo = getPlaybackInfoInternal();
+        if (playbackInfo != null && playbackInfo.isSkipPreviousEnabled() != null) {
+            Boolean enabled = playbackInfo.isSkipPreviousEnabled().getValue();
+            if (enabled != null && enabled) {
+                mController.skipToPrevious();
+            }
+        }
+    }
+
+    private PlaybackViewModel.PlaybackInfo getPlaybackInfoInternal() {
+        if (mController != null && mModel != null) {
+            return mModel.getPlaybackInfo();
+        }
+        return null;
     }
 
     @Override

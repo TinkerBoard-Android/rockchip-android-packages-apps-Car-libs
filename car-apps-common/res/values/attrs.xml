@@ -20,4 +20,13 @@
              value is false by default. -->
         <attr name="clickThrough" format="boolean"/>
     </declare-styleable>
+
+    <!-- Attributes for the CarActionBar. -->
+    <declare-styleable name="CarActionBar">
+        <!-- The number of horizontal slots. The minimum number is 3. -->
+        <attr name="columns" format="integer" />
+        <!-- Whether the overflow button enabled or not. -->
+        <attr name="enableOverflow" format="boolean" />
+    </declare-styleable>
+
 </resources>

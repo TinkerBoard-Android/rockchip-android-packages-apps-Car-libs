@@ -66,4 +66,16 @@ public final class MediaConstants {
      * hints the corresponding items should be presented as grids.
      */
     public static final int CONTENT_STYLE_GRID_ITEM_HINT_VALUE = 2;
+
+    /**
+     * These constants are from
+     * @see <a href=https://developer.android.com/training/auto/audio/#required-actions></a>
+     */
+    public static final String SLOT_RESERVATION_SKIP_TO_NEXT =
+            "com.google.android.gms.car.media.ALWAYS_RESERVE_SPACE_FOR.ACTION_SKIP_TO_NEXT";
+    public static final String SLOT_RESERVATION_SKIP_TO_PREV =
+            "com.google.android.gms.car.media.ALWAYS_RESERVE_SPACE_FOR.ACTION_SKIP_TO_PREVIOUS";
+    public static final String SLOT_RESERVATION_QUEUE =
+            "com.google.android.gms.car.media.ALWAYS_RESERVE_SPACE_FOR.ACTION_QUEUE";
+
 }
