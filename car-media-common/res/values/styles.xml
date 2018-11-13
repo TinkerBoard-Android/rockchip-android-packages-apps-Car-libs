@@ -19,7 +19,7 @@
     <!-- Fab -->
     <style name="FabStyle">
         <item name="android:layout_gravity">center</item>
-        <item name="android:tint">@color/car_tint_light</item>
+        <item name="android:tint">@color/icon_tint</item>
         <item name="android:elevation">@dimen/car_fab_elevation</item>
         <item name="android:focusable">true</item>
         <item name="android:stateListAnimator">@anim/car_fab_state_list_animator</item>
@@ -34,7 +34,7 @@
 
     <style name="PlaybackControl" parent="Widget.Car.Button.CarActionBar">
         <item name="android:background">@drawable/car_action_button_background_light</item>
-        <item name="android:tint">@color/car_tint_light</item>
+        <item name="android:tint">@color/icon_tint</item>
     </style>
 
 </resources>

@@ -33,4 +33,7 @@
         <item>#ff5722</item>
         <item>#757575</item>
     </array>
+
+    <color name="action_bar_background_color">@*android:color/car_card</color>
+    <color name="icon_tint">@*android:color/car_tint</color>
 </resources>

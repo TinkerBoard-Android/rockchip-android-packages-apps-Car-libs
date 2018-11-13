@@ -32,7 +32,6 @@ import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.cardview.widget.CardView;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.android.car.apps.common.CarActionBar;
@@ -90,10 +89,6 @@ public class PlaybackControlsActionBar extends CarActionBar implements PlaybackC
 
     private void init(Context context) {
         mContext = context;
-
-        CardView actionBarWrapper = findViewById(androidx.car.R.id.action_bar_wrapper);
-        actionBarWrapper.setCardBackgroundColor(context.getColor(androidx.car.R.color.car_card));
-
         mPlayPauseStopImageContainer = inflate(context,
                 R.layout.car_play_pause_stop_button_layout,
                 null);
