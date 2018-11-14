@@ -32,7 +32,7 @@
         parent="android:Widget.Toolbar.Button.Navigation">
         <item name="android:background">@drawable/car_card_ripple_background</item>
         <item name="android:scaleType">center</item>
-        <item name="android:tint">@color/car_tint_light</item>
+        <item name="android:tint">@color/icon_tint</item>
     </style>
 
     <!-- The style for the menu bar (i.e. hamburger) and back arrow in the navigation drawer. -->
@@ -57,7 +57,7 @@
         <item name="android:scaleType">fitCenter</item>
         <item name="android:padding">@dimen/car_action_button_icon_inset</item>
         <item name="android:background">@drawable/car_action_button_background</item>
-        <item name="android:tint">@color/car_tint</item>
+        <item name="android:tint">@color/icon_tint</item>
     </style>
 
 </resources>

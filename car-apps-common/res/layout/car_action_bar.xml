@@ -20,7 +20,8 @@ limitations under the License.
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:elevation="@dimen/car_action_bar_elevation"
-    app:cardCornerRadius="@dimen/car_radius_3">
+    app:cardCornerRadius="@dimen/car_radius_3"
+    app:cardBackgroundColor="@color/action_bar_background_color">
 
     <LinearLayout
         android:id="@+id/rows_container"
