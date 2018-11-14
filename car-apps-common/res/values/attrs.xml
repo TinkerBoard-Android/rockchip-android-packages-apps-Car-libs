@@ -21,8 +21,8 @@
         <attr name="clickThrough" format="boolean"/>
     </declare-styleable>
 
-    <!-- Attributes for the CarActionBar. -->
-    <declare-styleable name="CarActionBar">
+    <!-- Attributes for the ControlBar. -->
+    <declare-styleable name="ControlBar">
         <!-- The number of horizontal slots. The minimum number is 3. -->
         <attr name="columns" format="integer" />
         <!-- Whether the overflow button enabled or not. -->
