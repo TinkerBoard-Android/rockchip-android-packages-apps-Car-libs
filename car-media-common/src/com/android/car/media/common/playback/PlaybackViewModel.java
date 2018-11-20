@@ -213,8 +213,10 @@ public class PlaybackViewModel extends AndroidViewModel {
         return mWrappedMetadata;
     }
 
-    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
-    LiveData<PlaybackStateCompat> getPlaybackState() {
+    /**
+     * Returns a LiveData that emits the {@link PlaybackStateCompat} of a {@link MediaSessionCompat}
+     */
+    public LiveData<PlaybackStateCompat> getPlaybackState() {
         return mPlaybackState;
     }
 
