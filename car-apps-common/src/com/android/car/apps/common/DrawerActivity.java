@@ -54,6 +54,7 @@ import androidx.fragment.app.FragmentActivity;
  */
 public class DrawerActivity extends FragmentActivity {
     private CarDrawerController mDrawerController;
+    private ActionBarDrawerToggle mActionBarDrawerToggle;
     private Toolbar mToolbar;
 
     @Override
@@ -63,13 +64,13 @@ public class DrawerActivity extends FragmentActivity {
         super.setContentView(R.layout.drawer_activity);
 
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
+        mActionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
                 R.string.car_drawer_open, R.string.car_drawer_close);
 
         mToolbar = findViewById(R.id.car_toolbar);
         setActionBar(mToolbar);
 
-        mDrawerController = new CarDrawerController(drawerLayout, drawerToggle);
+        mDrawerController = new CarDrawerController(drawerLayout, mActionBarDrawerToggle);
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
     }
@@ -84,6 +85,15 @@ public class DrawerActivity extends FragmentActivity {
     @Nullable
     protected CarDrawerController getDrawerController() {
         return mDrawerController;
+    }
+
+    /**
+     * Returns the {@link ActionBarDrawerToggle} that can switch between back button and drawer
+     * toggle in the case of back navigation. See
+     * {@link ActionBarDrawerToggle#setDrawerIndicatorEnabled(boolean)}.
+     */
+    protected ActionBarDrawerToggle getActionBarDrawerToggle() {
+        return mActionBarDrawerToggle;
     }
 
     @Override
