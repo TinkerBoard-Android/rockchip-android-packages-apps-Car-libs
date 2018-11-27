@@ -1,8 +1,8 @@
 LOCAL_PATH := $(call my-dir)
 
-############################################################
-# CarSettingsLib app just for Robolectric test target.     #
-############################################################
+##################################################################
+# Car Settings Library app just for Robolectric test target.     #
+##################################################################
 include $(CLEAR_VARS)
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
@@ -21,18 +21,18 @@ LOCAL_STATIC_ANDROID_LIBRARIES := \
 
 include $(BUILD_PACKAGE)
 
-################################################
-# Car SettingsLibrary Robolectric test target. #
-################################################
+##################################################################
+# Car Settings Library Robolectric test target.                  #
+##################################################################
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := CarSettingsLibRoboTests
+LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_JAVA_RESOURCE_DIRS := config
 
-# Include the testing libraries
 LOCAL_JAVA_LIBRARIES := \
     robolectric_android-all-stub \
     Robolectric_all-target \
@@ -43,6 +43,9 @@ LOCAL_JAVA_LIBRARIES := \
 LOCAL_INSTRUMENTATION_FOR := CarSettingsLib
 
 LOCAL_MODULE_TAGS := optional
+
+# Generate test_config.properties
+include external/robolectric-shadows/gen_test_config.mk
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 

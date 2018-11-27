@@ -24,9 +24,6 @@ import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.annotation.Resetter;
 
-import java.util.Locale;
-
-
 /**
  * Shadow class for {@link LocalePicker} intended to help provide a defined set of locales that can
  * be set and changed within the test.
@@ -34,29 +31,17 @@ import java.util.Locale;
 @Implements(LocalePicker.class)
 public class ShadowLocalePicker {
 
-    static Locale sUpdatedLocale;
     private static String[] sSystemAssetLocales;
     private static String[] sSupportedLocales;
 
     @Implementation
-    public static void updateLocale(Locale locale) {
-        sUpdatedLocale = locale;
+    protected static String[] getSystemAssetLocales() {
+        return sSystemAssetLocales == null ? new String[0] : sSystemAssetLocales;
     }
 
     @Implementation
-    public static String[] getSystemAssetLocales() {
-        if (sSystemAssetLocales == null) {
-            return new String[0];
-        }
-        return sSystemAssetLocales;
-    }
-
-    @Implementation
-    public static String[] getSupportedLocales(Context context) {
-        if (sSupportedLocales == null) {
-            return new String[0];
-        }
-        return sSupportedLocales;
+    protected static String[] getSupportedLocales(Context context) {
+        return sSupportedLocales == null ? new String[0] : sSupportedLocales;
     }
 
     public static void setSystemAssetLocales(String... locales) {
@@ -69,7 +54,6 @@ public class ShadowLocalePicker {
 
     @Resetter
     public static void reset() {
-        sUpdatedLocale = null;
         sSystemAssetLocales = null;
         sSupportedLocales = null;
     }

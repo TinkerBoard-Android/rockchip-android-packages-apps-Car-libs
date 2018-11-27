@@ -26,7 +26,6 @@ import androidx.car.widget.ListItemAdapter;
 import androidx.car.widget.PagedListView;
 
 import com.android.car.settingslib.robolectric.BaseRobolectricTest;
-import com.android.car.settingslib.robolectric.CarSettingsLibRobolectricTestRunner;
 import com.android.car.settingslib.shadows.ShadowLocalePicker;
 import com.android.internal.app.LocaleStore;
 import com.android.internal.app.SuggestedLocaleAdapter;
@@ -35,6 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
@@ -47,7 +47,7 @@ import java.util.Set;
 /**
  * Tests {@link LocaleListItemProvider} to validate
  */
-@RunWith(CarSettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(shadows = ShadowLocalePicker.class)
 public class LocaleListItemProviderTest extends BaseRobolectricTest {
     private static final int TYPE_HEADER_SUGGESTED = 0;
