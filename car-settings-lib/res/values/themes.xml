@@ -20,6 +20,8 @@
         <item name="android:windowBackground">@color/windowBackground</item>
         <item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="android:windowLightStatusBar">true</item>
+        <item name="android:colorControlNormal">?android:attr/colorAccent</item>
+        <item name="android:colorControlActivated">?android:attr/colorAccent</item>
         <item name="android:colorControlHighlight">?android:attr/colorAccent</item>
         <item name="android:colorAccent">@color/blue_600</item>
         <item name="android:colorButtonNormal">@color/blue_600</item>
