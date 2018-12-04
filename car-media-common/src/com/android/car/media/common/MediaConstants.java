@@ -16,6 +16,8 @@
 
 package com.android.car.media.common;
 
+import android.net.Uri;
+
 /**
  * Holds constants used when dealing with MediaBrowserServices that support the
  * content style API for media.
@@ -78,4 +80,10 @@ public final class MediaConstants {
     public static final String SLOT_RESERVATION_QUEUE =
             "com.google.android.gms.car.media.ALWAYS_RESERVE_SPACE_FOR.ACTION_QUEUE";
 
+    /**
+     * Constants for MediaSourceContentProvider
+     */
+    public static final String AUTHORITY_MEDIA_SOURCE = "com.android.car.media.provider";
+    public static final Uri URI_MEDIA_SOURCE =
+            Uri.parse("content://com.android.car.media.provider/media_source");
 }
