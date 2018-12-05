@@ -20,8 +20,8 @@ limitations under the License.
          google_testing/integration/libraries/app-helpers/first-party/auto/
          -->
 
-    <!-- Action Bar -->
+    <!-- Control Bar -->
     <!-- Content description for the 'Expand/Collapse' button [CHAR_LIMIT=50] -->
-    <string name="car_action_bar_expand_collapse_button">Expand/collapse button</string>
+    <string name="control_bar_expand_collapse_button">Expand/collapse button</string>
 
 </resources>

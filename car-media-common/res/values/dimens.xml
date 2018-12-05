@@ -19,12 +19,12 @@
     <item name="album_art_scrim_alpha" format="float" type="dimen">0.6</item>
 
     <!-- Fab -->
-    <dimen name="car_fab_elevation">8dp</dimen>
-    <dimen name="car_fab_large_size">96dp</dimen>
-    <dimen name="car_fab_large_padding">27dp</dimen>
-    <dimen name="car_fab_spinner_size">128dp</dimen>
+    <dimen name="fab_elevation">8dp</dimen>
+    <dimen name="fab_large_size">96dp</dimen>
+    <dimen name="fab_large_padding">27dp</dimen>
+    <dimen name="fab_spinner_size">128dp</dimen>
 
-    <!-- car_playback_fragment.xml -->
+    <!-- playback_fragment.xml -->
     <dimen name="playback_fragment_text_margin_top">@*android:dimen/car_padding_4</dimen>
     <dimen name="playback_fragment_text_margin_x">@*android:dimen/car_padding_4</dimen>
 

@@ -34,7 +34,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LifecycleOwner;
 
-import com.android.car.apps.common.CarActionBar;
+import com.android.car.apps.common.ControlBar;
 import com.android.car.media.common.playback.PlaybackViewModel;
 import com.android.car.media.common.source.MediaSourceColors;
 
@@ -43,9 +43,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Implementation of {@link PlaybackControls} that uses the {@link CarActionBar}
+ * Implementation of {@link PlaybackControls} that uses the {@link ControlBar}
  */
-public class PlaybackControlsActionBar extends CarActionBar implements PlaybackControls {
+public class PlaybackControlsActionBar extends ControlBar implements PlaybackControls {
     private static final String TAG = "PlaybackView";
 
     private static final float ALPHA_ENABLED = 1.0F;
@@ -89,8 +89,7 @@ public class PlaybackControlsActionBar extends CarActionBar implements PlaybackC
 
     private void init(Context context) {
         mContext = context;
-        mPlayPauseStopImageContainer = inflate(context,
-                R.layout.car_play_pause_stop_button_layout,
+        mPlayPauseStopImageContainer = inflate(context, R.layout.play_pause_stop_button_layout,
                 null);
         mPlayPauseStopImageContainer.setOnClickListener(this::onPlayPauseStopClicked);
         mPlayPauseStopImageView = mPlayPauseStopImageContainer.findViewById(R.id.play_pause_stop);
@@ -103,20 +102,17 @@ public class PlaybackControlsActionBar extends CarActionBar implements PlaybackC
         mIconsColor = context.getResources().getColorStateList(R.color.playback_control_color,
                 null);
 
-        mSkipPrevButton = createIconButton(mContext,
-                context.getDrawable(R.drawable.ic_skip_previous));
+        mSkipPrevButton = createIconButton(context.getDrawable(R.drawable.ic_skip_previous));
         mSkipPrevButton.setId(R.id.skip_prev);
         mSkipPrevButton.setVisibility(VISIBLE);
         mSkipPrevButton.setOnClickListener(this::onPrevClicked);
 
-        mSkipNextButton = createIconButton(mContext,
-                context.getDrawable(R.drawable.ic_skip_next));
+        mSkipNextButton = createIconButton(context.getDrawable(R.drawable.ic_skip_next));
         mSkipNextButton.setId(R.id.skip_next);
         mSkipNextButton.setVisibility(VISIBLE);
         mSkipNextButton.setOnClickListener(this::onNextClicked);
 
-        mTrackListButton = createIconButton(mContext,
-                context.getDrawable(R.drawable.ic_tracklist));
+        mTrackListButton = createIconButton(context.getDrawable(R.drawable.ic_tracklist));
         mTrackListButton.setId(R.id.track_list);
         mTrackListButton.setOnClickListener(v -> {
             if (mListener != null) {
@@ -124,7 +120,7 @@ public class PlaybackControlsActionBar extends CarActionBar implements PlaybackC
             }
         });
 
-        mOverflowButton = createIconButton(context,
+        mOverflowButton = createIconButton(
                 context.getDrawable(androidx.car.R.drawable.ic_overflow));
         mOverflowButton.setId(R.id.overflow);
 
@@ -133,17 +129,17 @@ public class PlaybackControlsActionBar extends CarActionBar implements PlaybackC
 
     private void resetInitialViews() {
         setViews(new View[0]);
-        setView(mPlayPauseStopImageContainer, CarActionBar.SLOT_MAIN);
-        setView(null, CarActionBar.SLOT_LEFT);
-        setView(null, CarActionBar.SLOT_RIGHT);
+        setView(mPlayPauseStopImageContainer, ControlBar.SLOT_MAIN);
+        setView(null, ControlBar.SLOT_LEFT);
+        setView(null, ControlBar.SLOT_RIGHT);
         setExpandCollapseView(mOverflowButton);
     }
 
-    private ImageButton createIconButton(Context context, Drawable icon) {
-        ImageButton button = new ImageButton(context, null, 0, R.style.PlaybackControl);
+    @Override
+    protected ImageButton createIconButton(Drawable icon) {
+        ImageButton button = super.createIconButton(icon);
         button.setImageTintList(mIconsColor);
         button.setImageTintMode(PorterDuff.Mode.SRC_ATOP);
-        button.setImageDrawable(icon);
         return button;
     }
 
@@ -172,9 +168,9 @@ public class PlaybackControlsActionBar extends CarActionBar implements PlaybackC
                     Boolean enabled = playbackInfo.isSkipPreviousEnabled().getValue();
                     boolean reservedImplicitly = enabled != null && enabled;
                     if (reserved || reservedImplicitly) {
-                        setView(mSkipPrevButton, CarActionBar.SLOT_LEFT);
+                        setView(mSkipPrevButton, ControlBar.SLOT_LEFT);
                     } else {
-                        setView(null, CarActionBar.SLOT_LEFT);
+                        setView(null, ControlBar.SLOT_LEFT);
                     }
                 });
 
@@ -183,9 +179,9 @@ public class PlaybackControlsActionBar extends CarActionBar implements PlaybackC
                     Boolean enabled = playbackInfo.isSkipNextEnabled().getValue();
                     boolean reservedImplicitly = enabled != null && enabled;
                     if (reserved || reservedImplicitly) {
-                        setView(mSkipNextButton, CarActionBar.SLOT_RIGHT);
+                        setView(mSkipNextButton,  ControlBar.SLOT_RIGHT);
                     } else {
-                        setView(null, CarActionBar.SLOT_RIGHT);
+                        setView(null, ControlBar.SLOT_RIGHT);
                     }
                 });
 
@@ -249,7 +245,7 @@ public class PlaybackControlsActionBar extends CarActionBar implements PlaybackC
                 .stream()
                 .map(rawAction -> rawAction.fetchDrawable(getContext()))
                 .map(action -> {
-                    ImageButton button = createIconButton(getContext(), action.mIcon);
+                    ImageButton button = createIconButton(action.mIcon);
                     button.setOnClickListener(view ->
                             mController.doCustomAction(action.mAction, action.mExtras));
                     return button;

@@ -20,21 +20,16 @@
     <style name="FabStyle">
         <item name="android:layout_gravity">center</item>
         <item name="android:tint">@color/icon_tint</item>
-        <item name="android:elevation">@dimen/car_fab_elevation</item>
+        <item name="android:elevation">@dimen/fab_elevation</item>
         <item name="android:focusable">true</item>
-        <item name="android:stateListAnimator">@anim/car_fab_state_list_animator</item>
+        <item name="android:stateListAnimator">@anim/fab_state_list_animator</item>
     </style>
 
     <style name="FabStyle.Large" parent="FabStyle">
-        <item name="android:layout_width">@dimen/car_fab_large_size</item>
-        <item name="android:layout_height">@dimen/car_fab_large_size</item>
+        <item name="android:layout_width">@dimen/fab_large_size</item>
+        <item name="android:layout_height">@dimen/fab_large_size</item>
         <item name="android:scaleType">fitCenter</item>
-        <item name="android:padding">@dimen/car_fab_large_padding</item>
-    </style>
-
-    <style name="PlaybackControl" parent="Widget.Car.Button.CarActionBar">
-        <item name="android:background">@drawable/car_action_button_background_light</item>
-        <item name="android:tint">@color/icon_tint</item>
+        <item name="android:padding">@dimen/fab_large_padding</item>
     </style>
 
 </resources>

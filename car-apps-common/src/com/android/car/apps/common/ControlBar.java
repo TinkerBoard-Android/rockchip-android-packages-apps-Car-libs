@@ -28,7 +28,7 @@ import android.transition.TransitionSet;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -37,12 +37,13 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Space;
 
-import androidx.annotation.DrawableRes;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
+
+import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.util.Locale;
@@ -58,8 +59,8 @@ import java.util.Locale;
  * (if the space allows) and on the additional space if the panel is expanded.
  * </ul>
  */
-public class CarActionBar extends RelativeLayout {
-    private static final String TAG = "CarActionBar";
+public class ControlBar extends RelativeLayout {
+    private static final String TAG = "ControlBar";
 
     // ActionBar container
     private ViewGroup mActionBarWrapper;
@@ -68,6 +69,11 @@ public class CarActionBar extends RelativeLayout {
     // All slots in this action bar where 0 is the bottom-start corner of the matrix, and
     // mNumColumns * nNumRows - 1 is the top-end corner
     private FrameLayout[] mSlots;
+    /**
+     * Reference to the first slot we create. Used to properly inflate buttons without loosing
+     * their layout params.
+     */
+    private FrameLayout mFirstCreatedSlot;
     /** Views to set in particular {@link SlotPosition}s */
     private final SparseArray<View> mFixedViews = new SparseArray<>();
     // View to be used for the expand/collapse action
@@ -83,7 +89,7 @@ public class CarActionBar extends RelativeLayout {
     private @Nullable View[] mViews;
     // Number of columns of slots to use.
     private int mNumColumns;
-    // Maximum number of rows to use.
+    // Maximum number of rows to use (at least one!).
     private int mNumRows;
     // Whether the expand button should be visible or not
     private boolean mExpandEnabled;
@@ -92,7 +98,7 @@ public class CarActionBar extends RelativeLayout {
     @IntDef({SLOT_MAIN, SLOT_LEFT, SLOT_RIGHT, SLOT_EXPAND_COLLAPSE})
     public @interface SlotPosition {}
 
-    /** Slot used for main actions {@link CarActionBar}, usually at the bottom center */
+    /** Slot used for main actions {@link ControlBar}, usually at the bottom center */
     public static final int SLOT_MAIN = 0;
     /** Slot used to host 'move left', 'rewind', 'previous' or similar secondary actions,
      * usually at the left of the main action on the bottom row */
@@ -108,67 +114,74 @@ public class CarActionBar extends RelativeLayout {
     // Weight for the spacers used at the start and end of each slots row.
     private static final float SPACERS_WEIGHT = 0.5f;
 
-    public CarActionBar(Context context) {
+    public ControlBar(Context context) {
         super(context);
         init(context, null, 0, 0);
     }
 
-    public CarActionBar(Context context, AttributeSet attrs) {
+    public ControlBar(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context, attrs, 0, 0);
     }
 
-    public CarActionBar(Context context, AttributeSet attrs, int defStyleAttrs) {
+    public ControlBar(Context context, AttributeSet attrs, int defStyleAttrs) {
         super(context, attrs, defStyleAttrs);
         init(context, attrs, defStyleAttrs, 0);
     }
 
-    public CarActionBar(Context context, AttributeSet attrs, int defStyleAttrs, int defStyleRes) {
+    public ControlBar(Context context, AttributeSet attrs, int defStyleAttrs, int defStyleRes) {
         super(context, attrs, defStyleAttrs, defStyleRes);
         init(context, attrs, defStyleAttrs, defStyleRes);
     }
 
     private void init(Context context, AttributeSet attrs, int defStyleAttrs, int defStyleRes) {
-        inflate(context, R.layout.car_action_bar, this);
+        inflate(context, R.layout.control_bar, this);
 
-        TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.CarActionBar,
+        TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ControlBar,
                 defStyleAttrs, defStyleRes);
-        mNumColumns = Math.max(ta.getInteger(R.styleable.CarActionBar_columns, MIN_COLUMNS),
+        mNumColumns = Math.max(ta.getInteger(R.styleable.ControlBar_columns, MIN_COLUMNS),
                 MIN_COLUMNS);
-        mExpandEnabled = ta.getBoolean(R.styleable.CarActionBar_enableOverflow, true);
+        mExpandEnabled = ta.getBoolean(R.styleable.ControlBar_enableOverflow, true);
         ta.recycle();
 
         mActionBarWrapper = findViewById(R.id.action_bar_wrapper);
         mRowsContainer = findViewById(R.id.rows_container);
         mNumRows = mRowsContainer.getChildCount();
+        Preconditions.checkState(mNumRows > 0, "Must have at least 1 row");
+
         mSlots = new FrameLayout[mNumColumns * mNumRows];
+
+        LayoutInflater inflater = LayoutInflater.from(context);
+        final boolean attachToRoot = false;
 
         for (int i = 0; i < mNumRows; i++) {
             // Slots are reserved in reverse order (first slots are in the bottom row)
-            ViewGroup mRow = (ViewGroup) mRowsContainer.getChildAt(mNumRows - i - 1);
+            ViewGroup row = (ViewGroup) mRowsContainer.getChildAt(mNumRows - i - 1);
             // Inflate space on the left
             Space space = new Space(context);
-            mRow.addView(space);
+            row.addView(space);
             space.setLayoutParams(new LinearLayout.LayoutParams(0,
                     ViewGroup.LayoutParams.MATCH_PARENT, SPACERS_WEIGHT));
             // Inflate necessary number of columns
             for (int j = 0; j < mNumColumns; j++) {
                 int pos = i * mNumColumns + j;
-                mSlots[pos] = (FrameLayout) inflate(context, R.layout.car_action_bar_slot, null);
-                mSlots[pos].setLayoutParams(new LinearLayout.LayoutParams(0,
-                        ViewGroup.LayoutParams.MATCH_PARENT, 1f));
-                mRow.addView(mSlots[pos]);
+                mSlots[pos] = (FrameLayout) inflater.inflate(R.layout.control_bar_slot, row,
+                        attachToRoot);
+                if (mFirstCreatedSlot == null) {
+                    mFirstCreatedSlot = mSlots[pos];
+                }
+                row.addView(mSlots[pos]);
             }
             // Inflate space on the right
             space = new Space(context);
-            mRow.addView(space);
+            row.addView(space);
             space.setLayoutParams(new LinearLayout.LayoutParams(0,
                     ViewGroup.LayoutParams.MATCH_PARENT, SPACERS_WEIGHT));
         }
 
-        mDefaultExpandCollapseView = createIconButton(context, R.drawable.ic_overflow);
+        mDefaultExpandCollapseView = createIconButton(context.getDrawable(R.drawable.ic_overflow));
         mDefaultExpandCollapseView.setContentDescription(context.getString(
-                R.string.car_action_bar_expand_collapse_button));
+                R.string.control_bar_expand_collapse_button));
         mDefaultExpandCollapseView.setOnClickListener(v -> onExpandCollapse());
     }
 
@@ -222,9 +235,12 @@ public class CarActionBar extends RelativeLayout {
         return mExpandCollapseView != null ? mExpandCollapseView : mDefaultExpandCollapseView;
     }
 
-    private ImageButton createIconButton(Context context, @DrawableRes int iconResId) {
-        ImageButton button = (ImageButton) inflate(context, R.layout.car_action_bar_button, null);
-        Drawable icon = context.getDrawable(iconResId);
+    /** Creates a control with the proper parameters. Must be called by overrides. */
+    protected ImageButton createIconButton(Drawable icon) {
+        LayoutInflater inflater = LayoutInflater.from(mFirstCreatedSlot.getContext());
+        final boolean attachToRoot = false;
+        ImageButton button = (ImageButton) inflater.inflate(R.layout.control_bar_button,
+                mFirstCreatedSlot, attachToRoot);
         button.setImageDrawable(icon);
         return button;
     }
@@ -289,8 +305,6 @@ public class CarActionBar extends RelativeLayout {
         if (view != null) {
             container.addView(view);
             container.setVisibility(VISIBLE);
-            view.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
         } else {
             container.setVisibility(INVISIBLE);
         }
@@ -301,8 +315,8 @@ public class CarActionBar extends RelativeLayout {
         mSlots[getSlotIndex(SLOT_EXPAND_COLLAPSE)].setActivated(mIsExpanded);
 
         int animationDuration = getContext().getResources().getInteger(mIsExpanded
-                ? R.integer.car_action_bar_expand_anim_duration
-                : R.integer.car_action_bar_collapse_anim_duration);
+                ? R.integer.control_bar_expand_anim_duration
+                : R.integer.control_bar_collapse_anim_duration);
         TransitionSet set = new TransitionSet()
                 .addTransition(new ChangeBounds())
                 .addTransition(new Fade())

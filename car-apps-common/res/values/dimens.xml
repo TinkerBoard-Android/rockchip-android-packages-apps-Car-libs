@@ -17,22 +17,17 @@
 <resources>
     <item name="letter_to_tile_ratio" format="fraction" type="fraction">67%</item>
 
-    <dimen name="car_fab_focused_stroke_width">8dp</dimen>
-    <dimen name="car_fab_focused_growth">1.2dp</dimen>
+    <dimen name="fab_focused_stroke_width">8dp</dimen>
+    <dimen name="fab_focused_growth">1.2dp</dimen>
 
-    <!-- Action Bar -->
-    <dimen name="car_action_bar_height">96dp</dimen>
-    <dimen name="car_action_bar_buttons_space">@dimen/car_padding_4</dimen>
-    <dimen name="car_action_bar_button_width">128dp</dimen>
-    <dimen name="car_action_bar_button_height">128dp</dimen>
-    <dimen name="car_action_bar_activation_ring_stroke_width">3dp</dimen>
-    <dimen name="car_action_bar_activation_ring_radius">64dp</dimen>
-    <dimen name="car_action_bar_touch_ripple_size">38dp</dimen>
-    <dimen name="car_action_bar_button_ripple_radius">48dp</dimen>
-    <dimen name="car_action_bar_elevation">2dp</dimen>
+    <dimen name="touch_target_size">@*android:dimen/car_touch_target_size</dimen>
 
-    <!-- Action Buttons -->
-    <dimen name="car_action_button_icon_inset">24dp</dimen>
-    <dimen name="car_action_button_ripple_inset">16dp</dimen>
+    <!-- Control Bar - typically at the bottom of the application's space. -->
+    <dimen name="control_bar_height">96dp</dimen>
+    <dimen name="control_bar_button_size">@dimen/touch_target_size</dimen>
+    <dimen name="control_bar_elevation">2dp</dimen>
+
+    <!-- Control Buttons -->
+    <dimen name="control_button_padding">16dp</dimen>
 
 </resources>
