@@ -19,32 +19,34 @@ package com.android.car.media.common.source;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
 
 import android.annotation.NonNull;
 import android.content.ComponentName;
-import android.content.Context;
 import android.support.v4.media.MediaBrowserCompat;
 
-import com.android.car.arch.common.testing.CaptureObserver;
 import com.android.car.arch.common.testing.InstantTaskExecutorRule;
 import com.android.car.arch.common.testing.TestLifecycleOwner;
 import com.android.car.media.common.TestConfig;
-import com.android.car.media.common.source.MediaBrowserConnector.ConnectionState;
-import com.android.car.media.common.source.MediaBrowserConnector.MediaBrowserState;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
@@ -58,128 +60,104 @@ public class MediaBrowserConnectorTest {
     public final TestLifecycleOwner mLifecycleOwner = new TestLifecycleOwner();
 
     @Mock
-    public MediaBrowserCompat mMediaBrowser;
+    public MediaBrowserCompat mMediaBrowser1;
+    @Mock
+    public MediaBrowserCompat mMediaBrowser2;
 
-    private MediaBrowserConnector mLiveData;
+    private final ComponentName mBrowseService1 = new ComponentName("mediaService1", "className1");
+    private final ComponentName mBrowseService2 = new ComponentName("mediaService2", "className2");
+
+    private final Map<ComponentName, MediaBrowserCompat> mBrowsers = new HashMap<>(2);
+
+    private MediaBrowserConnector mBrowserConnector;
     private MediaBrowserCompat.ConnectionCallback mConnectionCallback;
+
+    @Mock
+    public MediaBrowserConnector.Callback mConnectedBrowserCallback;
+    @Captor
+    private ArgumentCaptor<MediaBrowserCompat> mConnectedBrowserCaptor;
 
     @Before
     public void setUp() {
-        mLiveData = new MediaBrowserConnector(application, new ComponentName("", "")) {
+        mBrowsers.put(mBrowseService1, mMediaBrowser1);
+        mBrowsers.put(mBrowseService2, mMediaBrowser2);
+        when(mMediaBrowser1.isConnected()).thenReturn(false);
+        when(mMediaBrowser2.isConnected()).thenReturn(false);
+
+        doNothing().when(mConnectedBrowserCallback).onConnectedBrowserChanged(
+                mConnectedBrowserCaptor.capture());
+
+        mBrowserConnector = new MediaBrowserConnector(application, mConnectedBrowserCallback) {
             @Override
-            protected MediaBrowserCompat createMediaBrowser(@NonNull Context context,
-                    @NonNull ComponentName browseService,
+            protected MediaBrowserCompat createMediaBrowser(@NonNull ComponentName browseService,
                     @NonNull MediaBrowserCompat.ConnectionCallback callback) {
                 mConnectionCallback = callback;
-                return mMediaBrowser;
+                return mBrowsers.get(browseService);
             }
         };
     }
 
     @Test
-    public void testConnectOnActive() {
-        CaptureObserver<MediaBrowserState> observer = new CaptureObserver<>();
-        when(mMediaBrowser.isConnected()).thenReturn(false);
-
-        mLiveData.observe(mLifecycleOwner, observer);
-
-        verify(mMediaBrowser).connect();
-        assertThat(observer.hasBeenNotified()).isTrue();
-        MediaBrowserState observedValue = observer.getObservedValue();
-        assertThat(observedValue).isNotNull();
-        assertThat(observedValue.mConnectionState).isEqualTo(ConnectionState.CONNECTING);
-    }
-
-    @Test
-    public void testAlreadyConnectedOnActive() {
-        CaptureObserver<MediaBrowserState> observer = new CaptureObserver<>();
-        when(mMediaBrowser.isConnected()).thenReturn(true);
-
-        mLiveData.observe(mLifecycleOwner, observer);
-
-        verify(mMediaBrowser, never()).connect();
-        assertThat(observer.hasBeenNotified()).isTrue();
-        MediaBrowserState observedValue = observer.getObservedValue();
-        assertThat(observedValue).isNotNull();
-        assertThat(observedValue.mMediaBrowser).isSameAs(mMediaBrowser);
-        assertThat(observedValue.mConnectionState).isEqualTo(ConnectionState.CONNECTED);
-    }
-
-    @Test
-    public void testExceptionOnConnect() {
-        CaptureObserver<MediaBrowserState> observer = new CaptureObserver<>();
-        when(mMediaBrowser.isConnected()).thenReturn(false);
+    public void testExceptionOnConnectDoesNotCrash() {
         setConnectionAction(() -> {
             throw new IllegalStateException("expected");
         });
 
-        mLiveData.observe(mLifecycleOwner, observer);
-
-        verify(mMediaBrowser).connect();
-        assertThat(observer.hasBeenNotified()).isTrue();
-        MediaBrowserState observedValue = observer.getObservedValue();
-        assertThat(observedValue).isNotNull();
-        assertThat(observedValue.mConnectionState).isEqualTo(ConnectionState.CONNECTING);
+        mBrowserConnector.connectTo(mBrowseService1);
+        verify(mMediaBrowser1).connect();
     }
 
     @Test
     public void testConnectionCallback_onConnected() {
-        CaptureObserver<MediaBrowserState> observer = new CaptureObserver<>();
-        when(mMediaBrowser.isConnected()).thenReturn(false);
-        setConnectionAction(() -> {
-            observer.reset();
-            mConnectionCallback.onConnected();
-        });
+        setConnectionAction(() -> mConnectionCallback.onConnected());
 
-        mLiveData.observe(mLifecycleOwner, observer);
+        mBrowserConnector.connectTo(mBrowseService1);
 
-        assertThat(observer.hasBeenNotified()).isTrue();
-        MediaBrowserState observedValue = observer.getObservedValue();
-        assertThat(observedValue).isNotNull();
-        assertThat(observedValue.mMediaBrowser).isSameAs(mMediaBrowser);
-        assertThat(observedValue.mConnectionState).isEqualTo(ConnectionState.CONNECTED);
+        assertThat(mConnectedBrowserCaptor.getValue()).isEqualTo(mMediaBrowser1);
     }
 
     @Test
     public void testConnectionCallback_onConnectionFailed() {
-        CaptureObserver<MediaBrowserState> observer = new CaptureObserver<>();
-        when(mMediaBrowser.isConnected()).thenReturn(false);
-        setConnectionAction(() -> {
-            observer.reset();
-            mConnectionCallback.onConnectionFailed();
-        });
+        setConnectionAction(() -> mConnectionCallback.onConnectionFailed());
 
-        mLiveData.observe(mLifecycleOwner, observer);
+        mBrowserConnector.connectTo(mBrowseService1);
 
-        assertThat(observer.hasBeenNotified()).isTrue();
-        MediaBrowserState observedValue = observer.getObservedValue();
-        assertThat(observedValue).isNotNull();
-        assertThat(observedValue.mConnectionState).isEqualTo(ConnectionState.CONNECTION_FAILED);
+        assertThat(mConnectedBrowserCaptor.getValue()).isNull();
     }
 
     @Test
     public void testConnectionCallback_onConnectionSuspended() {
-        CaptureObserver<MediaBrowserState> observer = new CaptureObserver<>();
-        when(mMediaBrowser.isConnected()).thenReturn(false);
         setConnectionAction(() -> {
             mConnectionCallback.onConnected();
-            observer.reset();
             mConnectionCallback.onConnectionSuspended();
         });
 
-        mLiveData.observe(mLifecycleOwner, observer);
+        mBrowserConnector.connectTo(mBrowseService1);
 
-        assertThat(observer.hasBeenNotified()).isTrue();
-        MediaBrowserState observedValue = observer.getObservedValue();
-        assertThat(observedValue).isNotNull();
-        assertThat(observedValue.mConnectionState).isEqualTo(ConnectionState.DISCONNECTED);
+
+        List<MediaBrowserCompat> browsers = mConnectedBrowserCaptor.getAllValues();
+        assertThat(browsers.get(0)).isEqualTo(mMediaBrowser1);
+        assertThat(browsers.get(1)).isNull();
+    }
+
+    @Test
+    public void testConnectionCallback_onConnectedIgnoredWhenLate() {
+        mBrowserConnector.connectTo(mBrowseService1);
+        MediaBrowserCompat.ConnectionCallback cb1 = mConnectionCallback;
+
+        mBrowserConnector.connectTo(mBrowseService2);
+        MediaBrowserCompat.ConnectionCallback cb2 = mConnectionCallback;
+
+        cb2.onConnected();
+        cb1.onConnected();
+        assertThat(mConnectedBrowserCaptor.getValue()).isEqualTo(mMediaBrowser2);
     }
 
     private void setConnectionAction(@NonNull Runnable action) {
         doAnswer(invocation -> {
             action.run();
             return null;
-        }).when(mMediaBrowser).connect();
+        }).when(mMediaBrowser1).connect();
     }
 
 

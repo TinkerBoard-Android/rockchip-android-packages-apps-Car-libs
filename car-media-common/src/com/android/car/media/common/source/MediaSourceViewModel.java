@@ -16,23 +16,17 @@
 
 package com.android.car.media.common.source;
 
-import static androidx.lifecycle.Transformations.map;
-import static androidx.lifecycle.Transformations.switchMap;
-
+import static com.android.car.apps.common.util.CarAppsDebugUtils.idHash;
 import static com.android.car.arch.common.LiveDataFunctions.dataOf;
-import static com.android.car.arch.common.LiveDataFunctions.nullLiveData;
-import static com.android.car.arch.common.LiveDataFunctions.pair;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Application;
 import android.content.ComponentName;
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.media.session.MediaController;
-import android.media.session.MediaSessionManager;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v4.media.MediaBrowserCompat;
@@ -41,52 +35,49 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
-import androidx.arch.core.util.Function;
-import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModelProviders;
 
 import com.android.car.media.common.MediaConstants;
-import com.android.car.media.common.source.MediaBrowserConnector.ConnectionState;
-import com.android.car.media.common.source.MediaBrowserConnector.MediaBrowserState;
 
-import java.util.List;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 /**
- * Contains observable data needed for displaying playback and browse UI
+ * Contains observable data needed for displaying playback and browse UI.
+ * MediaSourceViewModel is a singleton tied to the application to provide a single source of truth.
  */
 public class MediaSourceViewModel extends AndroidViewModel {
     private static final String TAG = "MediaSourceViewModel";
 
+    private static MediaSourceViewModel sInstance;
+
+    // Primary media source.
     private final MutableLiveData<MediaSource> mPrimaryMediaSource = dataOf(null);
-
-    private final LiveData<MediaBrowserCompat> mConnectedMediaBrowser;
-
-    // Media controller for selected media source.
-    private final LiveData<MediaControllerCompat> mMediaController;
+    // Connected browser for the primary media source.
+    private final MutableLiveData<MediaBrowserCompat> mConnectedMediaBrowser = dataOf(null);
+    // Media controller for the connected browser.
+    private final MutableLiveData<MediaControllerCompat> mMediaController = dataOf(null);
 
     /**
      * Factory for creating dependencies. Can be swapped out for testing.
      */
     @VisibleForTesting
     interface InputFactory {
-        LiveData<MediaBrowserState> createMediaBrowserConnector(
-                @NonNull ComponentName browseService);
-
-        List<MediaControllerCompat> getActiveMediaControllers();
+        MediaBrowserConnector createMediaBrowserConnector(@NonNull Application application,
+                @NonNull MediaBrowserConnector.Callback connectedBrowserCallback);
 
         MediaControllerCompat getControllerForSession(@Nullable MediaSessionCompat.Token session);
 
         MediaSource getSelectedSourceFromContentProvider();
     }
 
-    /** Returns the MediaSourceViewModel tied to the given activity. */
-    public static MediaSourceViewModel get(@NonNull FragmentActivity activity) {
-        return ViewModelProviders.of(activity).get(MediaSourceViewModel.class);
+    /** Returns the MediaSourceViewModel singleton tied to the application. */
+    public static MediaSourceViewModel get(@NonNull Application application) {
+        if (sInstance == null) {
+            sInstance = new MediaSourceViewModel(application);
+        }
+        return sInstance;
     }
 
     /**
@@ -94,21 +85,13 @@ public class MediaSourceViewModel extends AndroidViewModel {
      *
      * @see AndroidViewModel
      */
-    public MediaSourceViewModel(@NonNull Application application) {
+    private MediaSourceViewModel(@NonNull Application application) {
         this(application, new InputFactory() {
-
-            private final MediaSessionManager mMediaSessionManager =
-                    application.getSystemService(MediaSessionManager.class);
-
             @Override
-            public LiveData<MediaBrowserState> createMediaBrowserConnector(
-                    @NonNull ComponentName browseService) {
-                return new MediaBrowserConnector(application, browseService);
-            }
-
-            @Override
-            public List<MediaControllerCompat> getActiveMediaControllers() {
-                return toCompatList(mMediaSessionManager.getActiveSessions(null), application);
+            public MediaBrowserConnector createMediaBrowserConnector(
+                    @NonNull Application application,
+                    @NonNull MediaBrowserConnector.Callback connectedBrowserCallback) {
+                return new MediaBrowserConnector(application, connectedBrowserCallback);
             }
 
             @Override
@@ -141,79 +124,55 @@ public class MediaSourceViewModel extends AndroidViewModel {
         });
     }
 
+    private final InputFactory mInputFactory;
+    private final MediaBrowserConnector mBrowserConnector;
+    private final MediaBrowserConnector.Callback mConnectedBrowserCallback;
+
     @VisibleForTesting
     MediaSourceViewModel(@NonNull Application application, @NonNull InputFactory inputFactory) {
         super(application);
 
-        mPrimaryMediaSource.setValue(inputFactory.getSelectedSourceFromContentProvider());
-        application.getContentResolver().registerContentObserver(
-                MediaConstants.URI_MEDIA_SOURCE, false,
-                new ContentObserver(new Handler()) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        mPrimaryMediaSource.setValue(
-                                inputFactory.getSelectedSourceFromContentProvider());
-                    }
-                });
+        mInputFactory = inputFactory;
 
-        LiveData<MediaBrowserState> mediaBrowserState = switchMap(mPrimaryMediaSource,
-                (mediaSource) -> {
-                    if (mediaSource == null) {
-                        return nullLiveData();
-                    }
-                    ComponentName browseService = mediaSource.getBrowseServiceComponentName();
-                    if (browseService == null) {
-                        return nullLiveData();
-                    }
-                    return inputFactory.createMediaBrowserConnector(browseService);
-                });
-        mConnectedMediaBrowser = map(mediaBrowserState,
-                state -> state != null && (state.mConnectionState == ConnectionState.CONNECTED)
-                        ? state.mMediaBrowser : null);
+        mConnectedBrowserCallback = browser -> {
+            mConnectedMediaBrowser.setValue(browser);
+            if (browser != null) {
+                if (!browser.isConnected()) {
+                    Log.e(TAG, "Browser is NOT connected !! "
+                            + mPrimaryMediaSource.getValue().getPackageName() + idHash(browser));
+                    mMediaController.setValue(null);
+                } else {
+                    mMediaController.setValue(mInputFactory.getControllerForSession(
+                            browser.getSessionToken()));
+                }
+            } else {
+                mMediaController.setValue(null);
+            }
+        };
+        mBrowserConnector = inputFactory.createMediaBrowserConnector(application,
+                mConnectedBrowserCallback);
 
-        mMediaController = map(pair(mPrimaryMediaSource, mConnectedMediaBrowser),
-                (pair) -> {
-                    MediaSource mediaSource = pair.first;
-                    MediaBrowserCompat browser = pair.second;
+        updateModelState();
+        application.getContentResolver().registerContentObserver(MediaConstants.URI_MEDIA_SOURCE,
+                false, mMediaSourceObserver);
 
-                    // Prefer fetching MediaController from MediaSessionManager's active controller
-                    // list. Otherwise use controller from MediaBrowser (which requires connecting
-                    // to it).
-                    if (mediaSource != null) {
-                        List<MediaControllerCompat> controllers =
-                                inputFactory.getActiveMediaControllers();
-                        String packageName = mediaSource.getPackageName();
-                        for (MediaControllerCompat controller : controllers) {
-                            if (controller != null && packageName.equals(
-                                    controller.getPackageName())) {
-                                return controller;
-                            }
-                        }
-                    }
-                    if (browser != null) {
-                        return inputFactory.getControllerForSession(browser.getSessionToken());
-                    }
-                    return null;
-                });
     }
 
-    private static List<MediaControllerCompat> toCompatList(List<MediaController> mediaControllers,
-            Context context) {
-        return mediaControllers.stream().map(
-                controller -> toCompatController(controller, context)).collect(Collectors.toList());
-    }
-
-    private static MediaControllerCompat toCompatController(MediaController mediaController,
-            Context context) {
-        MediaSessionCompat.Token token =
-                MediaSessionCompat.Token.fromToken(mediaController.getSessionToken());
-        MediaControllerCompat controllerCompat = null;
-        try {
-            controllerCompat = new MediaControllerCompat(context, token);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Couldn't get MediaController", e);
+    private final ContentObserver mMediaSourceObserver = new ContentObserver(new Handler()) {
+        @Override
+        public void onChange(boolean selfChange) {
+            updateModelState();
         }
-        return controllerCompat;
+    };
+
+    @VisibleForTesting
+    ContentObserver getMediaSourceObserver() {
+        return mMediaSourceObserver;
+    }
+
+    @VisibleForTesting
+    MediaBrowserConnector.Callback getConnectedBrowserCallback() {
+        return mConnectedBrowserCallback;
     }
 
     /**
@@ -236,8 +195,7 @@ public class MediaSourceViewModel extends AndroidViewModel {
     /**
      * Returns a LiveData that emits the currently connected MediaBrowser. Emits {@code null} if no
      * MediaSource is set, if the MediaSource does not support browsing, or if the MediaBrowser is
-     * not connected. Observing the LiveData will attempt to connect to a media browse session if
-     * possible.
+     * not connected.
      */
     public LiveData<MediaBrowserCompat> getConnectedMediaBrowser() {
         return mConnectedMediaBrowser;
@@ -252,19 +210,30 @@ public class MediaSourceViewModel extends AndroidViewModel {
         return mMediaController;
     }
 
-    private static class LoopbackFunction<P, V> implements Function<P, V> {
-
-        private final BiFunction<P, V, V> mFunction;
-        private V mLastValue;
-
-        private LoopbackFunction(BiFunction<P, V, V> function) {
-            mFunction = function;
+    private void updateModelState() {
+        MediaSource oldMediaSource = mPrimaryMediaSource.getValue();
+        MediaSource newMediaSource = mInputFactory.getSelectedSourceFromContentProvider();
+        if (Objects.equals(oldMediaSource, newMediaSource)) {
+            return;
         }
 
-        @Override
-        public V apply(P param) {
-            mLastValue = mFunction.apply(param, mLastValue);
-            return mLastValue;
+        // Reset dependent values to avoid propagating inconsistencies.
+        mMediaController.setValue(null);
+        mConnectedMediaBrowser.setValue(null);
+        mBrowserConnector.connectTo(null);
+
+        // Broadcast the new source
+        mPrimaryMediaSource.setValue(newMediaSource);
+
+        // Recompute dependent values
+        if (newMediaSource == null) {
+            return;
         }
+
+        ComponentName browseService = newMediaSource.getBrowseServiceComponentName();
+        if (browseService == null) {
+            Log.e(TAG, "No browseService for source: " + newMediaSource.getPackageName());
+        }
+        mBrowserConnector.connectTo(browseService);
     }
 }

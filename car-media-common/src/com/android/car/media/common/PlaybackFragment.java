@@ -57,10 +57,9 @@ public class PlaybackFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
             Bundle savedInstanceState) {
         FragmentActivity activity = requireActivity();
-        PlaybackViewModel playbackViewModel =
-                ViewModelProviders.of(activity).get(PlaybackViewModel.class);
-        mMediaSourceViewModel = ViewModelProviders.of(activity).get(
-                MediaSourceViewModel.class);
+        PlaybackViewModel playbackViewModel = PlaybackViewModel.get(activity.getApplication());
+        mMediaSourceViewModel = MediaSourceViewModel.get(activity.getApplication());
+
         playbackViewModel.setMediaController(mMediaSourceViewModel.getMediaController());
 
         ViewModel innerViewModel = ViewModelProviders.of(activity).get(ViewModel.class);

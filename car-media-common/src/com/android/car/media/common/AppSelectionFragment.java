@@ -131,7 +131,8 @@ public class AppSelectionFragment extends DialogFragment {
         void bind(@NonNull MediaSource mediaSrc) {
             mAppItem.setOnClickListener(
                     v -> {
-                        MediaSourceViewModel model = MediaSourceViewModel.get(requireActivity());
+                        MediaSourceViewModel model = MediaSourceViewModel.get(
+                                requireActivity().getApplication());
                         model.setPrimaryMediaSource(mediaSrc);
                         dismiss();
                     });
