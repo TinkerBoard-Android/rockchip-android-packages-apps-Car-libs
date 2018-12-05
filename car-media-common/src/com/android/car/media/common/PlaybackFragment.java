@@ -21,6 +21,7 @@ import static com.android.car.arch.common.LiveDataFunctions.mapNonNull;
 import android.app.Application;
 import android.car.Car;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -50,6 +51,9 @@ import com.bumptech.glide.request.target.Target;
  * application.
  */
 public class PlaybackFragment extends Fragment {
+
+    private MediaSourceViewModel mMediaSourceViewModel;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -57,12 +61,12 @@ public class PlaybackFragment extends Fragment {
         FragmentActivity activity = requireActivity();
         PlaybackViewModel playbackViewModel =
                 ViewModelProviders.of(activity).get(PlaybackViewModel.class);
-        MediaSourceViewModel mediaSourceViewModel = ViewModelProviders.of(activity).get(
+        mMediaSourceViewModel = ViewModelProviders.of(activity).get(
                 MediaSourceViewModel.class);
-        playbackViewModel.setMediaController(mediaSourceViewModel.getMediaController());
+        playbackViewModel.setMediaController(mMediaSourceViewModel.getMediaController());
 
         ViewModel innerViewModel = ViewModelProviders.of(activity).get(ViewModel.class);
-        innerViewModel.init(mediaSourceViewModel, playbackViewModel);
+        innerViewModel.init(mMediaSourceViewModel, playbackViewModel);
 
         View view = inflater.inflate(R.layout.car_playback_fragment, container, false);
 
@@ -95,7 +99,23 @@ public class PlaybackFragment extends Fragment {
                 startActivity(intent);
             }
         });
+
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mMediaSourceViewModel.setSelectedMediaSource(getSelectedSourceFromContentProvider());
+    }
+
+    private MediaSource getSelectedSourceFromContentProvider() {
+        Cursor cursor = getContext().getContentResolver().query(MediaConstants.URI_MEDIA_SOURCE,
+                null, null, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            return new MediaSource(requireActivity(), cursor.getString(0));
+        }
+        return null;
     }
 
     /**
@@ -128,7 +148,7 @@ public class PlaybackFragment extends Fragment {
             }
             mPlaybackViewModel = playbackViewModel;
             mMediaSourceViewModel = mediaSourceViewModel;
-            mMediaSource = mMediaSourceViewModel.getActiveMediaSource();
+            mMediaSource = mMediaSourceViewModel.getSelectedMediaSource();
             mAppName = mapNonNull(mMediaSource, MediaSource::getName);
             mAppIcon = mapNonNull(mMediaSource, MediaSource::getRoundPackageIcon);
             mOpenIntent = mapNonNull(mMediaSource, MEDIA_TEMPLATE_INTENT, source -> {

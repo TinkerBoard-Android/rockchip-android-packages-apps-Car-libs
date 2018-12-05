@@ -169,7 +169,14 @@ public class MediaSource {
      * Returns {@code true} iff this media source should not be templatized.
      */
     public boolean isCustom() {
-        return CUSTOM_MEDIA_SOURCES.contains(mPackageName);
+        return isCustom(mPackageName);
+    }
+
+    /**
+     * Returns {@code true} iff the provided media package should not be templatized.
+     */
+    public static boolean isCustom(String packageName) {
+        return CUSTOM_MEDIA_SOURCES.contains(packageName);
     }
 
     /**
