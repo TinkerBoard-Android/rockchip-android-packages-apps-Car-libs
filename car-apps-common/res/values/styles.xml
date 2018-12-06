@@ -21,7 +21,7 @@
         <item name="android:background">@android:color/transparent</item>
         <item name="android:contentInsetEnd">@dimen/car_keyline_1</item>
         <item name="android:contentInsetStart">@dimen/car_keyline_1</item>
-        <item name="android:elevation">@dimen/car_action_bar_elevation</item>
+        <item name="android:elevation">@dimen/control_bar_elevation</item>
         <item name="android:subtitleTextAppearance">@style/TextAppearance.Car.Body3.Light</item>
         <item name="android:titleTextAppearance">@style/TextAppearance.Car.Body1.Medium.Light</item>
         <item name="android:navigationIcon">@drawable/ic_nav_arrow_back</item>
@@ -53,10 +53,16 @@
     <eat-comment />
 
     <!-- Styles for action buttons -->
-    <style name="Widget.Car.Button.CarActionBar">
+    <style name="Widget.ActionButton" parent="android:Widget.DeviceDefault.Button">
+        <!-- Force the vector drawables to the right size. -->
+        <item name="android:layout_width">@dimen/control_bar_button_size</item>
+        <item name="android:layout_height">@dimen/control_bar_button_size</item>
+        <item name="android:padding">@dimen/control_button_padding</item>
+        <!-- Note: fitCenter makes icons disappear if the view is too small... -->
         <item name="android:scaleType">fitCenter</item>
-        <item name="android:padding">@dimen/car_action_button_icon_inset</item>
-        <item name="android:background">@drawable/car_action_button_background</item>
+        <item name="android:layout_gravity">center</item>
+
+        <item name="android:background">?android:attr/selectableItemBackgroundBorderless</item>
         <item name="android:tint">@color/icon_tint</item>
     </style>
 

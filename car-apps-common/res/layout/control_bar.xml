@@ -19,7 +19,7 @@ limitations under the License.
     android:id="@+id/action_bar_wrapper"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:elevation="@dimen/car_action_bar_elevation"
+    android:elevation="@dimen/control_bar_elevation"
     app:cardCornerRadius="@dimen/car_radius_3"
     app:cardBackgroundColor="@color/action_bar_background_color">
 
@@ -35,14 +35,14 @@ limitations under the License.
             android:visibility="gone"
             android:clipChildren="false"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/car_action_bar_height">
+            android:layout_height="@dimen/control_bar_height">
         </LinearLayout>
 
         <LinearLayout
             android:orientation="horizontal"
             android:clipChildren="false"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/car_action_bar_height">
+            android:layout_height="@dimen/control_bar_height">
         </LinearLayout>
 
     </LinearLayout>

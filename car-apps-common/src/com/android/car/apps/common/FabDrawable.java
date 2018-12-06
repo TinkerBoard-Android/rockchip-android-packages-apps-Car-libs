@@ -56,9 +56,9 @@ public class FabDrawable extends Drawable {
      * Default constructor to provide consistent fab values across uses.
      */
     public FabDrawable(Context context) {
-        this(context.getResources().getDimensionPixelSize(R.dimen.car_fab_focused_growth),
-                context.getResources().getDimensionPixelSize(R.dimen.car_fab_focused_stroke_width),
-                context.getResources().getInteger(R.integer.car_fab_animation_duration));
+        this(context.getResources().getDimensionPixelSize(R.dimen.fab_focused_growth),
+                context.getResources().getDimensionPixelSize(R.dimen.fab_focused_stroke_width),
+                context.getResources().getInteger(R.integer.fab_animation_duration));
     }
 
     /**

@@ -68,7 +68,7 @@ public class PlaybackFragment extends Fragment {
         ViewModel innerViewModel = ViewModelProviders.of(activity).get(ViewModel.class);
         innerViewModel.init(mMediaSourceViewModel, playbackViewModel);
 
-        View view = inflater.inflate(R.layout.car_playback_fragment, container, false);
+        View view = inflater.inflate(R.layout.playback_fragment, container, false);
 
         PlaybackControls playbackControls = view.findViewById(R.id.playback_controls);
         playbackControls.setModel(playbackViewModel, getViewLifecycleOwner());
