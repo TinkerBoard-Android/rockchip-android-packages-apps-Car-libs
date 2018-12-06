@@ -23,6 +23,27 @@ import android.net.Uri;
  * content style API for media.
  */
 public final class MediaConstants {
+    /**
+     * Bundle extra holding the Pending Intent to launch to let users resolve the current error.
+     * See {@link #ERROR_RESOLUTION_ACTION_LABEL} for more details.
+     */
+    public static final String ERROR_RESOLUTION_ACTION_INTENT =
+            "android.media.extras.ERROR_RESOLUTION_ACTION_INTENT";
+
+    /**
+     * Bundle extra indicating the messaged displayed to users describing an error state.
+     * Used to provide more information for {@link #ERROR_RESOLUTION_ACTION_LABEL}.
+     */
+    public static final String ERROR_RESOLUTION_ACTION_MESSAGE =
+            "android.media.extras.ERROR_RESOLUTION_ACTION_MESSAGE";
+
+    /**
+     * Bundle extra indicating the label of the button users can tap to resolve an error state.
+     * A more detailed explanation should be provided to the user via
+     * {@link PlaybackStateCompat.Builder#setErrorMessage}.
+     */
+    public static final String ERROR_RESOLUTION_ACTION_LABEL =
+            "android.media.extras.ERROR_RESOLUTION_ACTION_LABEL";
 
     /** Declares that ContentStyle is supported */
     public static final String CONTENT_STYLE_SUPPORTED =
