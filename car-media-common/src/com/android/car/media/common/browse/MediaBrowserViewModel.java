@@ -113,16 +113,17 @@ public interface MediaBrowserViewModel {
                 "com.android.car.media.common.browse.MediaBrowserViewModel.Factory.browserRoot";
 
         /**
-         * Returns an initialized {@link MediaBrowserViewModel.WithMutableBrowseId}, and fetches a
-         * {@link MediaSourceViewModel} from {@code viewModelProvider} to provide the connected
-         * media browser.
+         * Returns an initialized {@link MediaBrowserViewModel.WithMutableBrowseId} with the
+         * provided connected media browser. The provided {@code mediaBrowser} does not need to be
+         * from the same scope as {@code viewModelProvider}.
          */
         @NonNull
-        public static MediaBrowserViewModel.WithMutableBrowseId getInstance(
-                @NonNull ViewModelProvider viewModelProvider) {
+        public static MediaBrowserViewModel.WithMutableBrowseId getInstanceWithMediaBrowser(
+                @NonNull ViewModelProvider viewModelProvider,
+                @NonNull LiveData<MediaBrowserCompat> mediaBrowser) {
             MediaBrowserViewModelImpl viewModel = viewModelProvider.get(
                     MediaBrowserViewModelImpl.class);
-            initMediaBrowser(fetchConnectedMediaBrowser(viewModelProvider), viewModel);
+            initMediaBrowser(mediaBrowser, viewModel);
             return viewModel;
         }
 
