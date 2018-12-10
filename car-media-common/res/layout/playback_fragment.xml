@@ -58,18 +58,18 @@
             app:layout_constraintRight_toLeftOf="@+id/app_icon"
             app:layout_constraintTop_toTopOf="parent"/>
 
-        <ImageView
-            android:id="@+id/app_icon"
-            android:contentDescription="@string/album_art"
-            android:layout_marginRight="@dimen/playback_fragment_app_icon_margin_right"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:scaleType="fitCenter"
-            app:layout_constraintDimensionRatio="W,1:1"
+        <com.android.car.media.common.MediaAppSelectorWidget
+            android:id="@+id/app_switch_container"
+            android:layout_width="@dimen/app_switch_widget_width"
+            android:layout_height="wrap_content"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="@+id/app_name"
-            app:layout_constraintBottom_toBottomOf="@+id/app_name"/>
-
+            app:layout_constraintBottom_toBottomOf="@+id/app_name"
+            app:fullScreenDialog="false"
+            android:padding="@dimen/app_switch_widget_icon_padding"
+            android:orientation="horizontal"
+            android:background="@drawable/app_item_background"
+            android:gravity="center" />
 
         <TextView
             android:id="@+id/title"

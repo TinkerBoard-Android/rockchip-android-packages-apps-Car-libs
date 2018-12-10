@@ -26,7 +26,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -72,9 +71,6 @@ public class PlaybackFragment extends Fragment {
         PlaybackControls playbackControls = view.findViewById(R.id.playback_controls);
         playbackControls.setModel(playbackViewModel, getViewLifecycleOwner());
 
-        ImageView appIcon = view.findViewById(R.id.app_icon);
-        innerViewModel.getAppIcon().observe(getViewLifecycleOwner(), appIcon::setImageBitmap);
-
         TextView appName = view.findViewById(R.id.app_name);
         innerViewModel.getAppName().observe(getViewLifecycleOwner(), appName::setText);
 
@@ -87,17 +83,9 @@ public class PlaybackFragment extends Fragment {
         CrossfadeImageView albumBackground = view.findViewById(R.id.album_background);
         innerViewModel.getAlbumArt().observe(getViewLifecycleOwner(),
                 albumArt -> albumBackground.setImageBitmap(albumArt, true));
-        LiveData<Intent> openIntent = innerViewModel.getOpenIntent();
-        openIntent.observe(getViewLifecycleOwner(), intent -> {
-            // Ensure open intent data stays fresh while view is clickable.
-        });
-        albumBackground.setOnClickListener(v -> {
-            Intent intent = openIntent.getValue();
-            if (intent != null
-                    && intent.resolveActivity(requireActivity().getPackageManager()) != null) {
-                startActivity(intent);
-            }
-        });
+        albumBackground.setOnClickListener(
+                // Let the Media center trampoline figure out what to open.
+                v -> startActivity(new Intent(Car.CAR_INTENT_ACTION_MEDIA_TEMPLATE)));
         return view;
     }
 
@@ -106,13 +94,9 @@ public class PlaybackFragment extends Fragment {
      */
     public static class ViewModel extends AndroidViewModel {
 
-        private static final Intent MEDIA_TEMPLATE_INTENT =
-                new Intent(Car.CAR_INTENT_ACTION_MEDIA_TEMPLATE);
-
         private LiveData<MediaSource> mMediaSource;
         private LiveData<CharSequence> mAppName;
         private LiveData<Bitmap> mAppIcon;
-        private LiveData<Intent> mOpenIntent;
         private LiveData<CharSequence> mTitle;
         private LiveData<CharSequence> mSubtitle;
         private LiveData<Bitmap> mAlbumArt;
@@ -134,18 +118,6 @@ public class PlaybackFragment extends Fragment {
             mMediaSource = mMediaSourceViewModel.getPrimaryMediaSource();
             mAppName = mapNonNull(mMediaSource, MediaSource::getName);
             mAppIcon = mapNonNull(mMediaSource, MediaSource::getRoundPackageIcon);
-            mOpenIntent = mapNonNull(mMediaSource, MEDIA_TEMPLATE_INTENT, source -> {
-                if (source.isCustom()) {
-                    // We are playing a custom app. Jump to it, not to the template
-                    return getApplication().getPackageManager()
-                            .getLaunchIntentForPackage(source.getPackageName());
-                } else {
-                    // We are playing a standard app. Open the template to browse it.
-                    Intent intent = new Intent(Car.CAR_INTENT_ACTION_MEDIA_TEMPLATE);
-                    intent.putExtra(Car.CAR_EXTRA_MEDIA_PACKAGE, source.getPackageName());
-                    return intent;
-                }
-            });
             mTitle = mapNonNull(playbackViewModel.getMetadata(), MediaItemMetadata::getTitle);
             mSubtitle = mapNonNull(playbackViewModel.getMetadata(), MediaItemMetadata::getSubtitle);
             mAlbumArt = AlbumArtLiveData.getAlbumArt(getApplication(),
@@ -159,10 +131,6 @@ public class PlaybackFragment extends Fragment {
 
         LiveData<Bitmap> getAppIcon() {
             return mAppIcon;
-        }
-
-        LiveData<Intent> getOpenIntent() {
-            return mOpenIntent;
         }
 
         LiveData<CharSequence> getTitle() {
