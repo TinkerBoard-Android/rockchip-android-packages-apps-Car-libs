@@ -16,8 +16,5 @@ limitations under the License.
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="radio_am_text" msgid="571324921988967868">"AM"</string>
-    <string name="radio_fm_text" msgid="1973045042281933494">"FM"</string>
-    <string name="program_list_text" msgid="4414150317304422313">"స్టేషన్‌లు"</string>
-    <string name="favorites_list_text" msgid="7829827713977109155">"ఇష్టమైనవి"</string>
+    <string name="control_bar_expand_collapse_button" msgid="3420351169078117938">"Zabaltzeko/Tolesteko botoia"</string>
 </resources>
