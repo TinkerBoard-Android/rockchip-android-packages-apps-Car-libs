@@ -47,6 +47,15 @@ public final class MediaConstants {
 
     /** Declares that ContentStyle is supported */
     public static final String CONTENT_STYLE_SUPPORTED =
+            "android.media.browse.CONTENT_STYLE_SUPPORTED";
+
+    /**
+     * Declares that ContentStyle is supported
+     *
+     * @deprecated this flag has been replaced by {@link #CONTENT_STYLE_SUPPORTED}
+     */
+    @Deprecated
+    public static final String CONTENT_STYLE_SUPPORTED_PRERELEASE =
             "android.auto.media.CONTENT_STYLE_SUPPORTED";
 
     /**
@@ -54,7 +63,34 @@ public final class MediaConstants {
      * #CONTENT_STYLE_LIST_ITEM_HINT_VALUE} or {@link #CONTENT_STYLE_GRID_ITEM_HINT_VALUE}
      */
     public static final String CONTENT_STYLE_PLAYABLE_HINT =
+            "android.media.browse.CONTENT_STYLE_PLAYABLE_HINT";
+
+    /**
+     * Bundle extra indicating the presentation hint for playable media items. See {@link
+     * #CONTENT_STYLE_LIST_ITEM_HINT_VALUE} or {@link #CONTENT_STYLE_GRID_ITEM_HINT_VALUE}
+     *
+     * @deprecated this flag has been replaced by {@link #CONTENT_STYLE_PLAYABLE_HINT}
+     */
+    @Deprecated
+    public static final String CONTENT_STYLE_PLAYABLE_HINT_PRERELEASE =
             "android.auto.media.CONTENT_STYLE_PLAYABLE_HINT";
+
+    /**
+     * Bundle extra indicating the presentation hint for browsable media items. See {@link
+     * #CONTENT_STYLE_LIST_ITEM_HINT_VALUE} or {@link #CONTENT_STYLE_GRID_ITEM_HINT_VALUE}
+     */
+    public static final String CONTENT_STYLE_BROWSABLE_HINT =
+            "android.media.browse.CONTENT_STYLE_BROWSABLE_HINT";
+
+    /**
+     * Bundle extra indicating the presentation hint for browsable media items. See {@link
+     * #CONTENT_STYLE_LIST_ITEM_HINT_VALUE} or {@link #CONTENT_STYLE_GRID_ITEM_HINT_VALUE}
+     *
+     * @deprecated this flag has been replaced by {@link #CONTENT_STYLE_BROWSABLE_HINT}
+     */
+    @Deprecated
+    public static final String CONTENT_STYLE_BROWSABLE_HINT_PRERELEASE =
+            "android.auto.media.CONTENT_STYLE_BROWSABLE_HINT";
 
     /**
      * Bundle extra indicating that media app supports MediaBrowserCompat.onSearch
@@ -71,12 +107,18 @@ public final class MediaConstants {
     public static final String MEDIA_SEARCH_SUPPORTED_PRERELEASE =
             "android.auto.media.SEARCH_SUPPORTED";
 
+    /** Bundle extra indicating the media item belongs to a group with the given title. */
+    public static final String CONTENT_STYLE_GROUP_TITLE_HINT =
+            "android.media.browse.CONTENT_STYLE_GROUP_TITLE_HINT";
+
     /**
-     * Bundle extra indicating the presentation hint for browsable media items. See {@link
-     * #CONTENT_STYLE_LIST_ITEM_HINT_VALUE} or {@link #CONTENT_STYLE_GRID_ITEM_HINT_VALUE}
+     * Bundle extra indicating the media item belongs to a group with the given title.
+     *
+     * @deprecated this flag has been replaced by {@link #CONTENT_STYLE_GROUP_TITLE_HINT}
      */
-    public static final String CONTENT_STYLE_BROWSABLE_HINT =
-            "android.auto.media.CONTENT_STYLE_BROWSABLE_HINT";
+    @Deprecated
+    public static final String CONTENT_STYLE_GROUP_TITLE_HINT_PRERELEASE =
+            "android.auto.media.CONTENT_STYLE_GROUP_TITLE_HINT";
 
     /**
      * Value for {@link #CONTENT_STYLE_PLAYABLE_HINT} and {@link #CONTENT_STYLE_BROWSABLE_HINT} that
