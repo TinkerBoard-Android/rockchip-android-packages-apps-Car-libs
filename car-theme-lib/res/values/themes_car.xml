@@ -80,5 +80,26 @@ limitations under the License.
          <item name="android:textAppearanceLargeInverse">@android:style/TextAppearance.DeviceDefault.Large.Inverse</item>
          <item name="android:textAppearanceMediumInverse">@android:style/TextAppearance.DeviceDefault.Medium.Inverse</item>
          <item name="android:textAppearanceSmallInverse">@android:style/TextAppearance.DeviceDefault.Small.Inverse</item>
+         <item name="pagedScrollBarViewStyle">@style/Widget.CarSupportWrapper.Car.Scrollbar</item>
+         <item name="android:alertDialogTheme">@style/Theme.CarSupportWrapper.Dialog.Alert</item>
+         <item name="alertDialogTheme">@style/Theme.CarSupportWrapper.Dialog.Alert</item>
+    </style>
+
+    <style name="Theme.CarSupportWrapper.Dialog.Alert" parent="Theme.Car.Dialog.Alert">
+        <item name="android:background">?android:attr/colorPrimary</item>
+        <item name="android:borderlessButtonStyle">@android:style/Widget.DeviceDefault.Button.Borderless.Colored</item>
+        <item name="android:colorButtonNormal">@*android:color/car_highlight</item>
+        <item name="android:textColorPrimary">@*android:color/car_body1</item>
+        <item name="android:windowTitleStyle">@style/Widget.CarSupportWrapper.Car.Dialog.Title</item>
+        <item name="buttonBarNeutralButtonStyle">@android:style/Widget.DeviceDefault.Button.Borderless.Colored</item>
+        <item name="buttonBarNegativeButtonStyle">@android:style/Widget.DeviceDefault.Button.Borderless.Colored</item>
+        <item name="buttonBarPositiveButtonStyle">@android:style/Widget.DeviceDefault.Button.Borderless.Colored</item>
+        <item name="android:listPreferredItemHeightSmall">@*android:dimen/car_single_line_list_item_height</item>
+        <item name="android:listPreferredItemPaddingStart">@*android:dimen/car_keyline_1</item>
+        <item name="android:listPreferredItemPaddingEnd">@*android:dimen/car_keyline_1</item>
+        <item name="android:textAppearanceLarge">?android:attr/textAppearanceMedium</item>
+        <item name="alertDialogStyle">@*android:style/AlertDialog</item>
+        <item name="android:colorControlNormal">@*android:color/car_body2</item>
+        <item name="android:colorControlActivated">@*android:color/car_highlight</item>
     </style>
 </resources>
