@@ -16,16 +16,16 @@
 
 package com.android.car.media.common.playback;
 
-import android.support.v4.media.session.PlaybackStateCompat;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.when;
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
+import android.support.v4.media.session.PlaybackStateCompat;
+
 import androidx.lifecycle.Lifecycle;
 
 import com.android.car.arch.common.testing.CaptureObserver;
+import com.android.car.arch.common.testing.InstantTaskExecutorRule;
 import com.android.car.arch.common.testing.TestLifecycleOwner;
 import com.android.car.media.common.TestConfig;
 

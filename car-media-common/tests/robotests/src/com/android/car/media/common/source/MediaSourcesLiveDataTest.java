@@ -31,9 +31,8 @@ import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.service.media.MediaBrowserService;
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
-
 import com.android.car.arch.common.testing.CaptureObserver;
+import com.android.car.arch.common.testing.InstantTaskExecutorRule;
 import com.android.car.arch.common.testing.TestLifecycleOwner;
 import com.android.car.media.common.TestConfig;
 
@@ -241,6 +240,8 @@ public class MediaSourcesLiveDataTest {
         applicationInfo.nonLocalizedLabel = "Service Label " + packageName;
         serviceInfo.applicationInfo = applicationInfo;
         resolveInfo.serviceInfo = serviceInfo;
+        // ShadowPackageManager#removeResolveInfosForIntent requires activityInfo to be set...
+        resolveInfo.activityInfo = newActivityResolveInfo(packageName).activityInfo;
         return resolveInfo;
     }
 }
