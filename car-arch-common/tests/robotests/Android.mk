@@ -32,7 +32,7 @@ LOCAL_USE_AAPT2 := true
 LOCAL_PRIVILEGED_MODULE := true
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
-    androidx-car_car \
+    androidx.car_car \
     car-arch-common
 
 include $(BUILD_PACKAGE)
@@ -50,7 +50,8 @@ LOCAL_JAVA_RESOURCE_DIRS := config
 
 # Include the testing libraries
 LOCAL_JAVA_LIBRARIES := \
-    androidx.arch.core_core-testing \
+    androidx.arch.core_core-runtime \
+    androidx.arch.core_core-common \
     robolectric_android-all-stub \
     Robolectric_all-target \
     mockito-robolectric-prebuilt \

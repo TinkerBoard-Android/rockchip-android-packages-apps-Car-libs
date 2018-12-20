@@ -81,3 +81,7 @@ LOCAL_JETIFIER_ENABLED := true
 LOCAL_UNINSTALLABLE_MODULE := true
 
 include $(BUILD_PREBUILT)
+
+ifeq (,$(ONE_SHOT_MAKEFILE))
+    include $(call all-makefiles-under,$(LOCAL_PATH))
+endif
