@@ -27,10 +27,13 @@ import static com.android.car.arch.common.LiveDataFunctions.nullLiveData;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UiThread;
 import android.app.Application;
 import android.content.ComponentName;
+import android.content.ContentValues;
+import android.database.ContentObserver;
+import android.database.Cursor;
 import android.media.session.MediaController;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.session.MediaControllerCompat;
@@ -43,6 +46,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.android.car.media.common.MediaConstants;
 import com.android.car.media.common.source.MediaBrowserConnector.ConnectionState;
 import com.android.car.media.common.source.MediaBrowserConnector.MediaBrowserState;
 
@@ -56,11 +60,7 @@ import java.util.function.BiFunction;
 public class MediaSourceViewModel extends AndroidViewModel {
     private static final String TAG = "MediaSourceViewModel";
 
-    // TODO(b/121270620) Remove active media source logic, get primary media source from
-    //  Media Center's ContentProvider
-    private final MutableLiveData<MediaSource> mSelectedMediaSource = dataOf(null);
-
-    private final LiveData<MediaSource> mActiveMediaSource;
+    private final MutableLiveData<MediaSource> mPrimaryMediaSource = dataOf(null);
 
     private final LiveData<MediaBrowserCompat> mConnectedMediaBrowser;
 
@@ -85,6 +85,8 @@ public class MediaSourceViewModel extends AndroidViewModel {
         LiveData<List<MediaControllerCompat>> createActiveMediaControllerData();
 
         MediaControllerCompat getControllerForSession(@Nullable MediaSessionCompat.Token session);
+
+        MediaSource getSelectedSourceFromContentProvider();
     }
 
     /**
@@ -122,6 +124,16 @@ public class MediaSourceViewModel extends AndroidViewModel {
                     return null;
                 }
             }
+
+            @Override
+            public MediaSource getSelectedSourceFromContentProvider() {
+                Cursor cursor = application.getContentResolver().query(
+                        MediaConstants.URI_MEDIA_SOURCE, null, null, null);
+                if (cursor != null && cursor.moveToFirst()) {
+                    return new MediaSource(application, cursor.getString(0));
+                }
+                return null;
+            }
         });
     }
 
@@ -135,14 +147,18 @@ public class MediaSourceViewModel extends AndroidViewModel {
         mTopActiveMediaController = map(activeMediaControllers,
                 new LoopbackFunction<>(mediaSelector::getTopMostMediaController));
 
-        mActiveMediaSource = mapNonNull(getTopActiveMediaController(),
-                controller -> new MediaSource(application, controller.getPackageName()));
+        mPrimaryMediaSource.setValue(inputFactory.getSelectedSourceFromContentProvider());
+        application.getContentResolver().registerContentObserver(
+                MediaConstants.URI_MEDIA_SOURCE, false,
+                new ContentObserver(new Handler()) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        mPrimaryMediaSource.setValue(
+                                inputFactory.getSelectedSourceFromContentProvider());
+                    }
+                });
 
-        // If the selected MediaSource is null, use the active MediaSource if available.
-        LiveData<MediaSource> selectedSource =
-                coalesceNull(mSelectedMediaSource, mActiveMediaSource);
-
-        LiveData<MediaBrowserState> mediaBrowserState = switchMap(selectedSource,
+        LiveData<MediaBrowserState> mediaBrowserState = switchMap(mPrimaryMediaSource,
                 (mediaSource) -> {
                     if (mediaSource == null) {
                         return nullLiveData();
@@ -158,7 +174,7 @@ public class MediaSourceViewModel extends AndroidViewModel {
                         ? state.mMediaBrowser : null);
 
         LiveData<MediaControllerCompat> controllerFromActiveList =
-                combine(activeMediaControllers, selectedSource,
+                combine(activeMediaControllers, mPrimaryMediaSource,
                         mediaSelector::getControllerForSource);
         LiveData<MediaControllerCompat> controllerFromMediaBrowser =
                 mapNonNull(mConnectedMediaBrowser,
@@ -167,7 +183,7 @@ public class MediaSourceViewModel extends AndroidViewModel {
         // list. Otherwise use controller from MediaBrowser (which requires connecting to it).
         mMediaController = coalesceNull(controllerFromActiveList, controllerFromMediaBrowser);
 
-        mIsCurrentMediaSourcePlaying = combine(mTopActiveMediaController, selectedSource,
+        mIsCurrentMediaSourcePlaying = combine(mTopActiveMediaController, mPrimaryMediaSource,
                 (mediaController, mediaSource) ->
                         mediaController != null && mediaSource != null
                                 && Objects.equals(mediaController.getPackageName(),
@@ -177,22 +193,18 @@ public class MediaSourceViewModel extends AndroidViewModel {
     /**
      * Returns a LiveData that emits the MediaSource that is to be browsed or displayed.
      */
-    public LiveData<MediaSource> getSelectedMediaSource() {
-        return mSelectedMediaSource;
-    }
-
-    /** Returns a LiveData that emits the active MediaSource. */
-    public LiveData<MediaSource> getActiveMediaSource() {
-        return mActiveMediaSource;
+    public LiveData<MediaSource> getPrimaryMediaSource() {
+        return mPrimaryMediaSource;
     }
 
     /**
-     * Set the MediaSource that is to be browsed or displayed. If a browse service is available, a
-     * connection may be made and provided through {@link #getConnectedMediaBrowser()}.
+     * Updates the primary media source, and notifies content provider of new source
      */
-    @UiThread
-    public void setSelectedMediaSource(@Nullable MediaSource mediaSource) {
-        mSelectedMediaSource.setValue(mediaSource);
+    public void setPrimaryMediaSource(MediaSource mediaSource) {
+        ContentValues values = new ContentValues();
+        values.put(MediaConstants.KEY_PACKAGE_NAME, mediaSource.getPackageName());
+        getApplication().getContentResolver().update(
+                MediaConstants.URI_MEDIA_SOURCE, values, null, null);
     }
 
     /**

@@ -21,11 +21,8 @@ import static com.android.car.arch.common.LiveDataFunctions.mapNonNull;
 import android.app.Application;
 import android.car.Car;
 import android.content.Intent;
-import android.database.ContentObserver;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -101,26 +98,7 @@ public class PlaybackFragment extends Fragment {
                 startActivity(intent);
             }
         });
-        mMediaSourceViewModel.setSelectedMediaSource(getSelectedSourceFromContentProvider());
-        requireActivity().getContentResolver().registerContentObserver(
-                MediaConstants.URI_MEDIA_SOURCE, false,
-                new ContentObserver(new Handler()) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        mMediaSourceViewModel.setSelectedMediaSource(
-                                getSelectedSourceFromContentProvider());
-                    }
-                });
         return view;
-    }
-
-    private MediaSource getSelectedSourceFromContentProvider() {
-        Cursor cursor = getContext().getContentResolver().query(MediaConstants.URI_MEDIA_SOURCE,
-                null, null, null);
-        if (cursor != null && cursor.moveToFirst()) {
-            return new MediaSource(requireActivity(), cursor.getString(0));
-        }
-        return null;
     }
 
     /**
@@ -153,7 +131,7 @@ public class PlaybackFragment extends Fragment {
             }
             mPlaybackViewModel = playbackViewModel;
             mMediaSourceViewModel = mediaSourceViewModel;
-            mMediaSource = mMediaSourceViewModel.getSelectedMediaSource();
+            mMediaSource = mMediaSourceViewModel.getPrimaryMediaSource();
             mAppName = mapNonNull(mMediaSource, MediaSource::getName);
             mAppIcon = mapNonNull(mMediaSource, MediaSource::getRoundPackageIcon);
             mOpenIntent = mapNonNull(mMediaSource, MEDIA_TEMPLATE_INTENT, source -> {

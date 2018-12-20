@@ -121,15 +121,19 @@ public class MediaSourceViewModelTest {
                     @Nullable MediaSessionCompat.Token token) {
                 return mMediaControllerFromBrowser;
             }
+
+            @Override
+            public MediaSource getSelectedSourceFromContentProvider() {
+                return mMediaSource;
+            }
         });
-        mViewModel.setSelectedMediaSource(mMediaSource);
     }
 
     @Test
     public void testGetSelectedMediaSource() {
         CaptureObserver<MediaSource> observer = new CaptureObserver<>();
 
-        mViewModel.getSelectedMediaSource().observe(mLifecycleOwner, observer);
+        mViewModel.getPrimaryMediaSource().observe(mLifecycleOwner, observer);
 
         assertThat(observer.getObservedValue()).isSameAs(mMediaSource);
     }
