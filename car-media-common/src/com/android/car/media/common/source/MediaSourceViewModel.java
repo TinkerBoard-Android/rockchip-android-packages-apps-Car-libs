@@ -56,12 +56,6 @@ import java.util.function.BiFunction;
 public class MediaSourceViewModel extends AndroidViewModel {
     private static final String TAG = "MediaSourceViewModel";
 
-    private final InputFactory mInputFactory;
-
-    private final LiveData<List<MediaSource>> mMediaSources;
-
-    private final LiveData<Boolean> mHasMediaSources;
-
     private final MutableLiveData<MediaSource> mSelectedMediaSource = dataOf(null);
 
     private final LiveData<MediaSource> mActiveMediaSource;
@@ -81,11 +75,6 @@ public class MediaSourceViewModel extends AndroidViewModel {
      */
     @VisibleForTesting
     interface InputFactory {
-        LiveData<List<MediaSource>> createMediaSources();
-
-        /** For direct access to the list of media apps while the live data isn't active. */
-        @NonNull List<MediaSource> getMediaSources();
-
         LiveData<MediaBrowserState> createMediaBrowserConnector(
                 @NonNull ComponentName browseService);
 
@@ -103,16 +92,6 @@ public class MediaSourceViewModel extends AndroidViewModel {
      */
     public MediaSourceViewModel(@NonNull Application application) {
         this(application, new InputFactory() {
-
-            @Override
-            public LiveData<List<MediaSource>> createMediaSources() {
-                return new MediaSourcesLiveData(application);
-            }
-
-            @Override
-            public List<MediaSource> getMediaSources() {
-                return MediaSourcesLiveData.getMediaSources(application);
-            }
 
             @Override
             public LiveData<MediaBrowserState> createMediaBrowserConnector(
@@ -147,16 +126,12 @@ public class MediaSourceViewModel extends AndroidViewModel {
     @VisibleForTesting
     MediaSourceViewModel(@NonNull Application application, @NonNull InputFactory inputFactory) {
         super(application);
-        mInputFactory = inputFactory;
 
         LiveData<List<MediaControllerCompat>> activeMediaControllers =
                 inputFactory.createActiveMediaControllerData();
         ActiveMediaSelector mediaSelector = inputFactory.createActiveMediaSelector();
         mTopActiveMediaController = map(activeMediaControllers,
                 new LoopbackFunction<>(mediaSelector::getTopMostMediaController));
-
-        mMediaSources = inputFactory.createMediaSources();
-        mHasMediaSources = map(mMediaSources, sources -> sources != null && !sources.isEmpty());
 
         mActiveMediaSource = mapNonNull(getTopActiveMediaController(),
                 controller -> new MediaSource(application, controller.getPackageName()));
@@ -195,27 +170,6 @@ public class MediaSourceViewModel extends AndroidViewModel {
                         mediaController != null && mediaSource != null
                                 && Objects.equals(mediaController.getPackageName(),
                                 mediaSource.getPackageName()));
-    }
-
-    /**
-     * Returns a live list of all MediaSources that can be selected for playback
-     */
-    @NonNull
-    public LiveData<List<MediaSource>> getMediaSources() {
-        return mMediaSources;
-    }
-
-    @NonNull
-    public List<MediaSource> getMediaSourcesList() {
-        return mInputFactory.getMediaSources();
-    }
-
-    /**
-     * Returns a LiveData that emits whether there are any media sources that can be selected for
-     * playback
-     */
-    public LiveData<Boolean> hasMediaSources() {
-        return mHasMediaSources;
     }
 
     /**

@@ -26,7 +26,8 @@ import android.content.pm.ResolveInfo;
 import android.service.media.MediaBrowserService;
 import android.util.Log;
 
-import androidx.lifecycle.LiveData;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import java.util.Comparator;
 import java.util.HashSet;
@@ -36,78 +37,80 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * A LiveData that provides access to the list of all possible media sources that can be selected
+ * Singleton that provides access to the list of all possible media sources that can be selected
  * to be played.
  */
-class MediaSourcesLiveData extends LiveData<List<MediaSource>> {
+// TODO(arnaudberry) rename to MediaSourcesProvider
+public class MediaSourcesLiveData {
 
-    private static final String TAG = "MediaSourcesLiveData";
-    private final Context mContext;
+    private static final String TAG = "MediaSources";
+
+    private static MediaSourcesLiveData sInstance;
+    private final Context mAppContext;
+    @Nullable
+    private List<MediaSource> mMediaSources;
 
     private final BroadcastReceiver mAppInstallUninstallReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            updateMediaSources();
+            reset();
         }
     };
 
-    MediaSourcesLiveData(@NonNull Context context) {
-        mContext = context;
+    /** Returns the singleton instance. */
+    public static MediaSourcesLiveData getInstance(@NonNull Context context) {
+        if (sInstance == null) {
+            sInstance = new MediaSourcesLiveData(context);
+        }
+        return sInstance;
     }
 
-    @Override
-    protected void onActive() {
-        super.onActive();
-        updateMediaSources();
-        registerBroadcastReceiver();
+    /** Returns a different instance every time (tests don't like statics) */
+    @VisibleForTesting
+    public static MediaSourcesLiveData createForTesting(@NonNull Context context) {
+        return new MediaSourcesLiveData(context);
     }
 
-    @Override
-    protected void onInactive() {
-        super.onInactive();
-        unregisterBroadcastReceiver();
+    @VisibleForTesting
+    void reset() {
+        mMediaSources = null;
     }
 
-    private void registerBroadcastReceiver() {
+    private MediaSourcesLiveData(@NonNull Context context) {
+        mAppContext = context.getApplicationContext();
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_ADDED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addDataScheme("package");
-        mContext.getApplicationContext().registerReceiver(mAppInstallUninstallReceiver, filter);
-    }
-
-    private void unregisterBroadcastReceiver() {
-        mContext.getApplicationContext().unregisterReceiver(mAppInstallUninstallReceiver);
-    }
-
-    private void updateMediaSources() {
-        setValue(getMediaSources(mContext));
+        mAppContext.registerReceiver(mAppInstallUninstallReceiver, filter);
     }
 
     /** Returns the alphabetically sorted list of available media sources. */
-    static List<MediaSource> getMediaSources(Context context) {
-        List<MediaSource> mediaSources = getPackageNames(context).stream()
-                .filter(Objects::nonNull)
-                .map(packageName -> new MediaSource(context, packageName))
-                .filter(mediaSource -> {
-                    if (mediaSource.getName() == null) {
-                        Log.w(TAG, "Found media source without name: "
-                                + mediaSource.getPackageName());
-                        return false;
-                    }
-                    return true;
-                })
-                .sorted(Comparator.comparing(mediaSource -> mediaSource.getName().toString()))
-                .collect(Collectors.toList());
-        return mediaSources;
+    public List<MediaSource> getList() {
+        if (mMediaSources == null) {
+            mMediaSources = getPackageNames().stream()
+                    .filter(Objects::nonNull)
+                    .map(packageName -> new MediaSource(mAppContext, packageName))
+                    .filter(mediaSource -> {
+                        if (mediaSource.getName() == null) {
+                            Log.w(TAG, "Found media source without name: "
+                                    + mediaSource.getPackageName());
+                            return false;
+                        }
+                        return true;
+                    })
+                    .sorted(Comparator.comparing(mediaSource -> mediaSource.getName().toString()))
+                    .collect(Collectors.toList());
+        }
+        return mMediaSources;
     }
 
     /**
      * Generates a set of all possible apps to choose from, including the ones that are just
      * media services.
      */
-    private static Set<String> getPackageNames(Context context) {
-        PackageManager packageManager = context.getPackageManager();
+    private Set<String> getPackageNames() {
+        PackageManager packageManager = mAppContext.getPackageManager();
         Intent intent = new Intent(Intent.ACTION_MAIN, null);
         intent.addCategory(Intent.CATEGORY_APP_MUSIC);
 

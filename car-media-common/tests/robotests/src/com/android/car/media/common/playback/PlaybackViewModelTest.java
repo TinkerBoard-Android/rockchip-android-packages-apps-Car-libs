@@ -33,9 +33,9 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
 import androidx.annotation.NonNull;
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 
 import com.android.car.arch.common.testing.CaptureObserver;
+import com.android.car.arch.common.testing.InstantTaskExecutorRule;
 import com.android.car.arch.common.testing.TestLifecycleOwner;
 import com.android.car.media.common.MediaItemMetadata;
 import com.android.car.media.common.TestConfig;

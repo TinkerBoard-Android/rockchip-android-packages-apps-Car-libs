@@ -30,12 +30,12 @@ import static com.android.car.arch.common.LiveDataFunctions.trueLiveData;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.core.util.Pair;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.android.car.arch.common.testing.CaptureObserver;
+import com.android.car.arch.common.testing.InstantTaskExecutorRule;
 import com.android.car.arch.common.testing.TestLifecycleOwner;
 
 import org.junit.Rule;
