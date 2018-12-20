@@ -56,6 +56,8 @@ import java.util.function.BiFunction;
 public class MediaSourceViewModel extends AndroidViewModel {
     private static final String TAG = "MediaSourceViewModel";
 
+    // TODO(b/121270620) Remove active media source logic, get primary media source from
+    //  Media Center's ContentProvider
     private final MutableLiveData<MediaSource> mSelectedMediaSource = dataOf(null);
 
     private final LiveData<MediaSource> mActiveMediaSource;
