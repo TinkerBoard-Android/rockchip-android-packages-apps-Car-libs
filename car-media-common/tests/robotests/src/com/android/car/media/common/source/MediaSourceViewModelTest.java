@@ -75,7 +75,6 @@ public class MediaSourceViewModelTest {
     @Mock
     public MediaControllerCompat mMediaControllerFromSessionManager;
 
-    private final MutableLiveData<List<MediaSource>> mMediaSources = new MutableLiveData<>();
     private final MutableLiveData<MediaBrowserState> mMediaBrowserState = new MutableLiveData<>();
     private final MutableLiveData<List<MediaControllerCompat>> mActiveMediaControllers =
             new MutableLiveData<>();
@@ -99,15 +98,6 @@ public class MediaSourceViewModelTest {
         mRequestedBrowseService = null;
 
         mViewModel = new MediaSourceViewModel(application, new MediaSourceViewModel.InputFactory() {
-            @Override
-            public LiveData<List<MediaSource>> createMediaSources() {
-                return mMediaSources;
-            }
-
-            @Override
-            public List<MediaSource> getMediaSources() {
-                return Collections.emptyList();
-            }
 
             @Override
             public LiveData<MediaBrowserState> createMediaBrowserConnector(
@@ -133,35 +123,6 @@ public class MediaSourceViewModelTest {
             }
         });
         mViewModel.setSelectedMediaSource(mMediaSource);
-    }
-
-
-    @Test
-    public void testGetMediaSources() {
-        assertThat(mViewModel.getMediaSources()).isSameAs(mMediaSources);
-    }
-
-    @Test
-    public void testHasMediaSources() {
-        CaptureObserver<Boolean> observer = new CaptureObserver<>();
-        mMediaSources.setValue(Collections.singletonList(mMediaSource));
-
-        mViewModel.hasMediaSources().observe(mLifecycleOwner, observer);
-
-        assertThat(observer.hasBeenNotified()).isTrue();
-        assertThat(observer.getObservedValue()).isTrue();
-        observer.reset();
-
-        mMediaSources.setValue(Collections.emptyList());
-
-        assertThat(observer.hasBeenNotified()).isTrue();
-        assertThat(observer.getObservedValue()).isFalse();
-        observer.reset();
-
-        mMediaSources.setValue(null);
-
-        assertThat(observer.hasBeenNotified()).isTrue();
-        assertThat(observer.getObservedValue()).isFalse();
     }
 
     @Test

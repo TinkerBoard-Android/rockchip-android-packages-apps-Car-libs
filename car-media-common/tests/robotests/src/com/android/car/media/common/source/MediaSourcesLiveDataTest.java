@@ -31,7 +31,6 @@ import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.service.media.MediaBrowserService;
 
-import com.android.car.arch.common.testing.CaptureObserver;
 import com.android.car.arch.common.testing.InstantTaskExecutorRule;
 import com.android.car.arch.common.testing.TestLifecycleOwner;
 import com.android.car.media.common.TestConfig;
@@ -68,16 +67,18 @@ public class MediaSourcesLiveDataTest {
     private static final String TEST_SERVICE_PACKAGE_2 = "service_package2";
     private static final String TEST_SERVICE_PACKAGE_WITH_METADATA = "service_package3";
 
+    private MediaSourcesLiveData mMediaSources;
     private Intent mActivityIntent;
     private Intent mServiceIntent;
 
     @Before
     public void setUp() {
+        mMediaSources = MediaSourcesLiveData.createForTesting(application);
+
         mActivityIntent = new Intent(Intent.ACTION_MAIN, null);
         mActivityIntent.addCategory(Intent.CATEGORY_APP_MUSIC);
 
         mServiceIntent = new Intent(MediaBrowserService.SERVICE_INTERFACE);
-
         ShadowPackageManager packageManager = shadowOf(application.getPackageManager());
 
         List<ResolveInfo> activityResolveInfo = buildActivityResolveInfo();
@@ -105,12 +106,7 @@ public class MediaSourcesLiveDataTest {
 
     @Test
     public void testGetAppsOnActive() {
-        CaptureObserver<List<MediaSource>> observer = new CaptureObserver<>();
-        MediaSourcesLiveData liveData = new MediaSourcesLiveData(application);
-
-        liveData.observe(mLifecycleOwner, observer);
-        assertThat(observer.hasBeenNotified()).isTrue();
-        List<MediaSource> observedValue = observer.getObservedValue();
+        List<MediaSource> observedValue = mMediaSources.getList();
         assertThat(observedValue).isNotNull();
         assertThat(
                 observedValue.stream().map(MediaSource::getPackageName)
@@ -121,11 +117,6 @@ public class MediaSourcesLiveDataTest {
 
     @Test
     public void testGetAppsOnPackageAdded() {
-        CaptureObserver<List<MediaSource>> observer = new CaptureObserver<>();
-        MediaSourcesLiveData liveData = new MediaSourcesLiveData(application);
-        liveData.observe(mLifecycleOwner, observer);
-        observer.reset();
-
         List<ResolveInfo> activityResolveInfo = buildActivityResolveInfo();
         activityResolveInfo.add(newActivityResolveInfo(TEST_ACTIVITY_PACKAGE_2));
         List<ResolveInfo> serviceResolveInfo = buildServiceResolveInfo();
@@ -139,8 +130,7 @@ public class MediaSourcesLiveDataTest {
                 .forEach(broadcastReceiver -> broadcastReceiver.onReceive(application,
                         packageAdded));
 
-        assertThat(observer.hasBeenNotified()).isTrue();
-        List<MediaSource> observedValue = observer.getObservedValue();
+        List<MediaSource> observedValue = mMediaSources.getList();
         assertThat(observedValue).isNotNull();
         assertThat(
                 observedValue.stream().map(MediaSource::getPackageName)
@@ -152,11 +142,6 @@ public class MediaSourcesLiveDataTest {
 
     @Test
     public void testGetAppsOnPackageRemoved() {
-        CaptureObserver<List<MediaSource>> observer = new CaptureObserver<>();
-        MediaSourcesLiveData liveData = new MediaSourcesLiveData(application);
-        liveData.observe(mLifecycleOwner, observer);
-        observer.reset();
-
         List<ResolveInfo> activityResolveInfo = buildActivityResolveInfo();
         List<ResolveInfo> serviceResolveInfo = buildServiceResolveInfo();
         serviceResolveInfo.remove(0);
@@ -169,8 +154,7 @@ public class MediaSourcesLiveDataTest {
                 .forEach(broadcastReceiver ->
                         broadcastReceiver.onReceive(application, packageRemoved));
 
-        assertThat(observer.hasBeenNotified()).isTrue();
-        List<MediaSource> observedValue = observer.getObservedValue();
+        List<MediaSource> observedValue = mMediaSources.getList();
         assertThat(observedValue).isNotNull();
         assertThat(
                 observedValue.stream().map(MediaSource::getPackageName)
@@ -204,6 +188,7 @@ public class MediaSourcesLiveDataTest {
         packageManager.removeResolveInfosForIntent(mServiceIntent, TEST_SERVICE_PACKAGE_2);
         packageManager.removeResolveInfosForIntent(mServiceIntent,
                 TEST_SERVICE_PACKAGE_WITH_METADATA);
+
         packageManager.addResolveInfoForIntent(mActivityIntent, activityResolveInfo);
 
         packageManager.addResolveInfoForIntent(mServiceIntent, serviceResolveInfo);
@@ -212,6 +197,7 @@ public class MediaSourcesLiveDataTest {
             intent.setPackage(info.serviceInfo.packageName);
             packageManager.addResolveInfoForIntent(intent, info);
         }
+        mMediaSources.reset();
     }
 
 
