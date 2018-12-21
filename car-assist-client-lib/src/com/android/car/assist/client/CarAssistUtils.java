@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,22 @@
  */
 package com.android.car.assist.client;
 
+import static android.app.Notification.Action.SEMANTIC_ACTION_MARK_AS_READ;
+import static android.app.Notification.Action.SEMANTIC_ACTION_REPLY;
+
 import android.app.Notification;
+import android.app.RemoteInput;
 import android.content.Context;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
 import com.android.car.assist.CarVoiceInteractionSession;
+import com.android.car.assist.client.tts.TextToSpeechHelper;
 import com.android.internal.app.AssistUtils;
 
 import java.util.Arrays;
@@ -42,22 +48,45 @@ import java.util.stream.IntStream;
  */
 public class CarAssistUtils {
     public static final String TAG = "CarAssistUtils";
-    private static final List<Integer> sRequiredSemanticActions = Collections.unmodifiableList(
+    private static final List<Integer> REQUIRED_SEMANTIC_ACTIONS = Collections.unmodifiableList(
             Arrays.asList(
-                    Notification.Action.SEMANTIC_ACTION_REPLY,
-                    Notification.Action.SEMANTIC_ACTION_MARK_AS_READ
+                    SEMANTIC_ACTION_REPLY,
+                    SEMANTIC_ACTION_MARK_AS_READ
             )
     );
 
     // Currently, all supported semantic actions are required.
-    private static final List<Integer> sSupportedSemanticActions = sRequiredSemanticActions;
+    private static final List<Integer> SUPPORTED_SEMANTIC_ACTIONS = REQUIRED_SEMANTIC_ACTIONS;
+
+    private final TextToSpeechHelper.Listener mListener = new TextToSpeechHelper.Listener() {
+        @Override
+        public void onTextToSpeechStarted() {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "onTextToSpeechStarted");
+            }
+        }
+
+        @Override
+        public void onTextToSpeechStopped(boolean error) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "onTextToSpeechStopped");
+            }
+            if (error) {
+                Toast.makeText(mContext, mErrorMessage, Toast.LENGTH_LONG).show();
+            }
+        }
+    };
 
     private final Context mContext;
     private final AssistUtils mAssistUtils;
+    private final FallbackAssistant mFallbackAssistant;
+    private final String mErrorMessage;
 
     public CarAssistUtils(Context context) {
-        mAssistUtils = new AssistUtils(context);
         mContext = context;
+        mAssistUtils = new AssistUtils(context);
+        mFallbackAssistant = new FallbackAssistant(new TextToSpeechHelper(context));
+        mErrorMessage = context.getString(R.string.assist_action_failed_toast);
     }
 
     /**
@@ -88,7 +117,7 @@ public class CarAssistUtils {
 
     /** Returns true if the semantic action provided can be supported. */
     public static boolean isSupportedSemanticAction(int semanticAction) {
-        return sSupportedSemanticActions.contains(semanticAction);
+        return SUPPORTED_SEMANTIC_ACTIONS.contains(semanticAction);
     }
 
     /**
@@ -111,25 +140,25 @@ public class CarAssistUtils {
     private static boolean hasRequiredAssistantCallbacks(StatusBarNotification sbn) {
         List<Integer> semanticActionList = Arrays.stream(sbn.getNotification().actions)
                 .map(Notification.Action::getSemanticAction)
-                .filter(sRequiredSemanticActions::contains)
+                .filter(REQUIRED_SEMANTIC_ACTIONS::contains)
                 .collect(Collectors.toList());
         Set<Integer> semanticActionSet = new HashSet<>(semanticActionList);
 
         return semanticActionList.size() == semanticActionSet.size()
-                && semanticActionSet.containsAll(sRequiredSemanticActions);
+                && semanticActionSet.containsAll(REQUIRED_SEMANTIC_ACTIONS);
     }
 
     /**
-     * Returns true if the reply callback has exactly one RemoteInput.
+     * Returns true if the reply callback has at least one {@link RemoteInput}.
      * <p/>
      * Precondition: There exists only one reply callback.
      */
     private static boolean replyCallbackHasRemoteInput(StatusBarNotification sbn) {
         return Arrays.stream(sbn.getNotification().actions)
-                .filter(action ->
-                        action.getSemanticAction() == Notification.Action.SEMANTIC_ACTION_REPLY)
+                .filter(action -> action.getSemanticAction() == SEMANTIC_ACTION_REPLY)
                 .map(Notification.Action::getRemoteInputs)
-                .anyMatch(remoteInputs -> remoteInputs != null && remoteInputs.length == 1);
+                .filter(Objects::nonNull)
+                .anyMatch(remoteInputs -> remoteInputs.length > 0);
     }
 
     /** Returns true if all Assistant callbacks indicate that they show no UI, false otherwise. */
@@ -138,53 +167,62 @@ public class CarAssistUtils {
         return IntStream.range(0, notification.actions.length)
                 .mapToObj(i -> NotificationCompat.getAction(notification, i))
                 .filter(Objects::nonNull)
-                .filter(action -> sRequiredSemanticActions.contains(action.getSemanticAction()))
+                .filter(action -> SUPPORTED_SEMANTIC_ACTIONS.contains(action.getSemanticAction()))
                 .noneMatch(NotificationCompat.Action::getShowsUserInterface);
     }
 
     /**
-     * Requests a given action from the current active assistant.
+     * Requests a given action from the current active Assistant.
+     *
      *
      * @param sbn the notification payload to deliver to assistant
      * @param semanticAction the semantic action that is to be requested
      * @return true if the request was successful
      */
-    public boolean requestAssistantAction(StatusBarNotification sbn, int semanticAction) {
-        switch (semanticAction) {
-            case Notification.Action.SEMANTIC_ACTION_MARK_AS_READ:
-                return readMessageNotification(sbn);
-            case Notification.Action.SEMANTIC_ACTION_REPLY:
-                return replyMessageNotification(sbn);
-            default:
-                Log.w(TAG, "Unhanded semanticAction");
+    public boolean requestAssistantVoiceAction(StatusBarNotification sbn, int semanticAction) {
+        if (!isCarCompatibleMessagingNotification(sbn)) {
+            Log.w(TAG, "Assistant action requested for non-compatible notification.");
+            return false;
         }
 
-        return false;
+        switch (semanticAction) {
+            case SEMANTIC_ACTION_MARK_AS_READ:
+                return readMessageNotification(sbn);
+            case SEMANTIC_ACTION_REPLY:
+                return replyMessageNotification(sbn);
+            default:
+                return false;
+        }
     }
 
     /**
      * Requests a read action for the notification from the current active Assistant.
+     * If the Assistant is cannot handle the request, a fallback implementation will attempt to
+     * handle it.
      *
      * @param sbn the notification to deliver as the payload
-     * @return true if the read request to Assistant was successful
+     * @return true if the read request was handled successfully
      */
     private boolean readMessageNotification(StatusBarNotification sbn) {
-        return requestAction(sbn, BundleBuilder.buildAssistantReadBundle(sbn));
+        return requestAction(BundleBuilder.buildAssistantReadBundle(sbn))
+                || mFallbackAssistant.handleReadAction(sbn, mListener);
     }
 
     /**
      * Requests a reply action for the notification from the current active Assistant.
+     * If the Assistant is cannot handle the request, a fallback implementation will attempt to
+     * handle it.
      *
      * @param sbn the notification to deliver as the payload
-     * @return true if the reply request to Assistant was successful
+     * @return true if the reply request was handled successfully
      */
     private boolean replyMessageNotification(StatusBarNotification sbn) {
-        return requestAction(sbn, BundleBuilder.buildAssistantReplyBundle(sbn));
+        return requestAction(BundleBuilder.buildAssistantReplyBundle(sbn))
+                || mFallbackAssistant.handleErrorMessage(mErrorMessage, mListener);
     }
 
-    private boolean requestAction(StatusBarNotification sbn, Bundle payloadArguments) {
-        return isCarCompatibleMessagingNotification(sbn)
-                && assistantIsNotificationListener()
+    private boolean requestAction(Bundle payloadArguments) {
+        return assistantIsNotificationListener()
                 && mAssistUtils.showSessionForActiveService(payloadArguments,
                 CarVoiceInteractionSession.SHOW_SOURCE_NOTIFICATION, null, null);
     }

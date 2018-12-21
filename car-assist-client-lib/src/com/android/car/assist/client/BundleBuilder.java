@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@
  */
 package com.android.car.assist.client;
 
-import static com.android.car.assist.CarVoiceInteractionSession.ACTION_READ_NOTIFICATION;
-import static com.android.car.assist.CarVoiceInteractionSession.ACTION_REPLY_NOTIFICATION;
 import static com.android.car.assist.CarVoiceInteractionSession.KEY_ACTION;
 import static com.android.car.assist.CarVoiceInteractionSession.KEY_NOTIFICATION;
+import static com.android.car.assist.CarVoiceInteractionSession.VOICE_ACTION_READ_NOTIFICATION;
+import static com.android.car.assist.CarVoiceInteractionSession.VOICE_ACTION_REPLY_NOTIFICATION;
 
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
@@ -36,7 +36,7 @@ class BundleBuilder {
      */
     static Bundle buildAssistantReadBundle(StatusBarNotification notification) {
         Bundle args = new Bundle();
-        args.putString(KEY_ACTION, ACTION_READ_NOTIFICATION);
+        args.putString(KEY_ACTION, VOICE_ACTION_READ_NOTIFICATION);
         args.putParcelable(KEY_NOTIFICATION, notification);
         return args;
     }
@@ -50,7 +50,7 @@ class BundleBuilder {
      */
     static Bundle buildAssistantReplyBundle(StatusBarNotification notification) {
         Bundle args = new Bundle();
-        args.putString(KEY_ACTION, ACTION_REPLY_NOTIFICATION);
+        args.putString(KEY_ACTION, VOICE_ACTION_REPLY_NOTIFICATION);
         args.putParcelable(KEY_NOTIFICATION, notification);
         return args;
     }
