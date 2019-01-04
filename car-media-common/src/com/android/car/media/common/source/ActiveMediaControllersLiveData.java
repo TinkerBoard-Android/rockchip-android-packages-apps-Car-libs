@@ -41,7 +41,10 @@ import java.util.stream.Collectors;
  * <p>
  * This requires the android.Manifest.permission.MEDIA_CONTENT_CONTROL permission to be held by the
  * calling app.
+ *
+ * @deprecated To be removed with b/121270620
  */
+@Deprecated
 class ActiveMediaControllersLiveData extends LiveData<List<MediaControllerCompat>> {
 
     private static final String TAG = "ActiveMedia";
