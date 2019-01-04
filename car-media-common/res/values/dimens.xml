@@ -24,6 +24,9 @@
     <dimen name="fab_large_padding">27dp</dimen>
     <dimen name="fab_spinner_size">128dp</dimen>
 
+    <!-- App bar -->
+    <dimen name="appbar_height">@*android:dimen/car_app_bar_height</dimen>
+
     <!-- playback_fragment.xml -->
     <dimen name="playback_fragment_text_margin_top">@*android:dimen/car_padding_4</dimen>
     <dimen name="playback_fragment_text_margin_x">@*android:dimen/car_padding_4</dimen>
@@ -32,4 +35,22 @@
 
     <dimen name="playback_fragment_controls_margin_x">@*android:dimen/car_padding_4</dimen>
     <dimen name="playback_fragment_controls_margin_bottom">@*android:dimen/car_padding_4</dimen>
+
+    <!-- app_switch_widget.xml -->
+    <dimen name="app_switch_widget_width">@*android:dimen/car_margin</dimen>
+    <dimen name="app_switch_widget_icon_size">@*android:dimen/car_primary_icon_size</dimen>
+    <dimen name="app_switch_widget_icon_padding">@*android:dimen/car_padding_1</dimen>
+
+    <!-- app_selection_item.xml -->
+    <dimen name="app_selection_item_margin_h">@*android:dimen/car_padding_2</dimen>
+    <dimen name="app_selection_item_margin_bottom">@*android:dimen/car_padding_5</dimen>
+    <dimen name="app_selection_item_padding">@*android:dimen/car_padding_1</dimen>
+    <dimen name="app_selection_item_app_icon_size">@*android:dimen/car_touch_target_size</dimen>
+    <dimen name="app_selection_item_app_icon_margin_bottom">@*android:dimen/car_padding_4</dimen>
+
+    <!-- Drawable app_item_background.xml -->
+    <dimen name="app_item_background_corner_radius">@*android:dimen/car_radius_2</dimen>
+
+    <!-- fragment_app_selection.xml -->
+    <dimen name="fragment_app_selection_list_top_offset">@*android:dimen/car_padding_5</dimen>
 </resources>
