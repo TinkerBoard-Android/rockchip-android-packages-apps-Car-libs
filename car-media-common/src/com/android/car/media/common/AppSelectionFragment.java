@@ -198,7 +198,7 @@ public class AppSelectionFragment extends DialogFragment {
         gridAdapter.updateSources(MediaSourcesLiveData.getInstance(getContext()).getList());
         mDisplayWidget = view.findViewById(R.id.app_switch_container);
         mDisplayWidget.setFragmentOwner(this);
-        mDisplayWidget.setDisplayedSourcePackage(mOriginSourcePackage);
+        mDisplayWidget.setFragmentActivity(getActivity());
 
         PagedListView gridView = view.findViewById(R.id.apps_grid);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), columnNumber);

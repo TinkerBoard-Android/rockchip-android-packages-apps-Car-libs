@@ -33,10 +33,6 @@
 
     <!-- Attributes for the MediaAppSelectorWidget. -->
     <declare-styleable name="MediaAppSelectorWidget">
-        <!-- Whether the widget is there for display purpose only and should not open a new
-            AppSelectionFragment. Should only be used by the AppSelectionFragment UI. -->
-        <attr name="isDisplayOnly" format="boolean"/>
-
         <!-- Whether the AppSelectionFragment opened by pressing the widget should be full screen.
             -->
         <attr name="fullScreenDialog" format="boolean"/>

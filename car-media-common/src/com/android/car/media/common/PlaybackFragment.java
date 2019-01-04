@@ -86,6 +86,10 @@ public class PlaybackFragment extends Fragment {
         albumBackground.setOnClickListener(
                 // Let the Media center trampoline figure out what to open.
                 v -> startActivity(new Intent(Car.CAR_INTENT_ACTION_MEDIA_TEMPLATE)));
+
+        MediaAppSelectorWidget appSelector = view.findViewById(R.id.app_switch_container);
+        appSelector.setFragmentActivity(getActivity());
+
         return view;
     }
 
