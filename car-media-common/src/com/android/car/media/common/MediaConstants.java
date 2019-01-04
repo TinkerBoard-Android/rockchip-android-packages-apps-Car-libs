@@ -149,4 +149,5 @@ public final class MediaConstants {
     public static final String AUTHORITY_MEDIA_SOURCE = "com.android.car.media.provider";
     public static final Uri URI_MEDIA_SOURCE =
             Uri.parse("content://com.android.car.media.provider/media_source");
+    public static final String KEY_PACKAGE_NAME = "package_name";
 }

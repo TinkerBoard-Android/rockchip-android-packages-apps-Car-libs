@@ -49,6 +49,8 @@ class ActiveMediaControllersLiveData extends LiveData<List<MediaControllerCompat
 
     private static final String TAG = "ActiveMedia";
     private final MediaSessionManager mMediaSessionManager;
+
+    // TODO(b/121270620) Clean up MediaController fetching logic, remove this LiveData if not needed
     private final MediaSessionUpdater mMediaSessionUpdater = new MediaSessionUpdater();
     private Context mContext;
 
