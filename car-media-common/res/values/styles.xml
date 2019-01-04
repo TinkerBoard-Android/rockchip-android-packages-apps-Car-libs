@@ -32,4 +32,21 @@
         <item name="android:padding">@dimen/fab_large_padding</item>
     </style>
 
+    <style name="PagedListTheme" parent="Theme.CarSupportWrapper.NoActionBar">
+    </style>
+
+    <style name="MediaAppSelectorStyle" parent="Theme.Car.Light.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@color/app_selection_border</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@*android:color/car_card</item>
+        <item name="android:fragmentOpenEnterAnimation">@anim/media_app_selector_fade_in</item>
+    </style>
+
+    <style
+        name="media_app_selector_animation_fade" >
+        <item name="android:windowEnterAnimation">@anim/media_app_selector_fade_in</item>
+        <item name="android:windowExitAnimation">@anim/media_app_selector_fade_out</item>
+    </style>
+
 </resources>

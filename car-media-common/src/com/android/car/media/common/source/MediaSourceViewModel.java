@@ -42,9 +42,11 @@ import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 import androidx.arch.core.util.Function;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModelProviders;
 
 import com.android.car.media.common.MediaConstants;
 import com.android.car.media.common.source.MediaBrowserConnector.ConnectionState;
@@ -87,6 +89,11 @@ public class MediaSourceViewModel extends AndroidViewModel {
         MediaControllerCompat getControllerForSession(@Nullable MediaSessionCompat.Token session);
 
         MediaSource getSelectedSourceFromContentProvider();
+    }
+
+    /** Returns the MediaSourceViewModel tied to the given activity. */
+    public static MediaSourceViewModel get(@NonNull FragmentActivity activity) {
+        return ViewModelProviders.of(activity).get(MediaSourceViewModel.class);
     }
 
     /**

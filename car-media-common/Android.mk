@@ -35,7 +35,8 @@ LOCAL_STATIC_ANDROID_LIBRARIES += \
     androidx.mediarouter_mediarouter \
     androidx-constraintlayout_constraintlayout \
     car-apps-common \
-    car-arch-common
+    car-arch-common \
+    car-theme-lib
 
 LOCAL_STATIC_JAVA_LIBRARIES += \
     car-media-common-glide-target \
