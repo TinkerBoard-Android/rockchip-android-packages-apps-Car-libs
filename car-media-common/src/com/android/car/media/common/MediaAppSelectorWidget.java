@@ -22,14 +22,12 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.fragment.app.FragmentActivity;
 
-import com.android.car.media.common.source.MediaSource;
 import com.android.car.media.common.source.MediaSourceViewModel;
 
 /**
@@ -38,20 +36,20 @@ import com.android.car.media.common.source.MediaSourceViewModel;
  * bar where tapping it opens an {@link AppSelectionFragment}, and also in the UI of the selection
  * fragment to provide visual continuity and a way to close the fragment without selecting an
  * application.
+ * In order for the widget to connect to {@link MediaSourceViewModel} (so it can update its icon),
+ * {@link #setFragmentActivity} must be called by the code that creates a view containing this
+ * widget.
  */
 public class MediaAppSelectorWidget extends LinearLayout {
 
-    /**
-     * Whether the widget is there only to display the icon of the media source that was selected
-     * when the {@link AppSelectionFragment} was opened.
-     */
-    private final boolean mIsDisplayOnly;
     private final boolean mFullScreenDialog;
     private final ImageView mAppIcon;
     private final ImageView mAppSwitchIcon;
     private final Drawable mDefaultIcon;
     private final Drawable mArrowDropDown;
     private final Drawable mArrowDropUp;
+
+    private FragmentActivity mActivity;
 
     /** The fragment that owns the widget (only set when in display only mode). */
     @Nullable private AppSelectionFragment mFragmentOwner;
@@ -76,8 +74,6 @@ public class MediaAppSelectorWidget extends LinearLayout {
 
         TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.MediaAppSelectorWidget, defStyleAttr, 0 /* defStyleRes */);
-
-        mIsDisplayOnly = a.getBoolean(R.styleable.MediaAppSelectorWidget_isDisplayOnly, false);
         mFullScreenDialog = a.getBoolean(R.styleable.MediaAppSelectorWidget_fullScreenDialog, true);
         a.recycle();
 
@@ -94,19 +90,20 @@ public class MediaAppSelectorWidget extends LinearLayout {
 
         setFragmentOwner(null);
         setOnClickListener(view -> onAppSwitchClicked());
+    }
 
-        if (!mIsDisplayOnly) {
-            FragmentActivity activity = getFragmentActivity();
-            MediaSourceViewModel model = MediaSourceViewModel.get(activity);
-            model.getPrimaryMediaSource().observe(activity, source -> {
-                if (source == null) {
-                    setAppIcon(null);
-                } else {
-                    mDisplayedSourcePackage = source.getPackageName();
-                    setAppIcon(source.getRoundPackageIcon());
-                }
-            });
-        }
+    /** Calling this is required so the widget can show the icon of the primary media source. */
+    public void setFragmentActivity(FragmentActivity activity) {
+        mActivity = activity;
+        MediaSourceViewModel model = MediaSourceViewModel.get(activity);
+        model.getPrimaryMediaSource().observe(activity, source -> {
+            if (source == null) {
+                setAppIcon(null);
+            } else {
+                mDisplayedSourcePackage = source.getPackageName();
+                setAppIcon(source.getRoundPackageIcon());
+            }
+        });
     }
 
     /** Opens the {@link AppSelectionFragment}. */
@@ -114,25 +111,6 @@ public class MediaAppSelectorWidget extends LinearLayout {
         if (!mFragmentIsOpen) {
             onAppSwitchClicked();
         }
-    }
-
-    /**
-     * Small hack that works as long as this is called by widgets part of the UI of an application's
-     * activity (fails when the widget is part of the {@link AppSelectionFragment} UI, since its
-     * context is a {@link ContextThemeWrapper}.
-     */
-    private FragmentActivity getFragmentActivity() {
-        return (FragmentActivity) getContext();
-    }
-
-    /**
-     * Sets the package of the media source shown in the widget. Note that when the widget is
-     * embedded in the bar of the radio app, mIsDisplayOnly is false.
-     */
-    void setDisplayedSourcePackage(String sourcePackage) {
-        mDisplayedSourcePackage = sourcePackage;
-        MediaSource source = new MediaSource(getContext(), mDisplayedSourcePackage);
-        setAppIcon(source.getRoundPackageIcon());
     }
 
     /** Sets whether the widget is shown as part of an {@link AppSelectionFragment} UI. */
@@ -164,7 +142,7 @@ public class MediaAppSelectorWidget extends LinearLayout {
             setIsOpen(true);
             AppSelectionFragment newFragment = AppSelectionFragment.create(this,
                     mDisplayedSourcePackage, mFullScreenDialog);
-            newFragment.show(getFragmentActivity().getSupportFragmentManager(), null);
+            newFragment.show(mActivity.getSupportFragmentManager(), null);
         }
 
     }

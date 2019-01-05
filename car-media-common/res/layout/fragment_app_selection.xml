@@ -44,7 +44,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="@+id/app_bar_bottom"
         app:layout_constraintRight_toRightOf="parent"
-        app:isDisplayOnly="true"
         android:padding="@dimen/app_switch_widget_icon_padding"
         android:orientation="horizontal"
         android:background="@drawable/app_item_background"
