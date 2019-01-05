@@ -136,10 +136,16 @@ public class MediaSourceViewModel extends AndroidViewModel {
             public MediaSource getSelectedSourceFromContentProvider() {
                 Cursor cursor = application.getContentResolver().query(
                         MediaConstants.URI_MEDIA_SOURCE, null, null, null);
-                if (cursor != null && cursor.moveToFirst()) {
-                    return new MediaSource(application, cursor.getString(0));
+                try {
+                    if (cursor != null && cursor.moveToFirst()) {
+                        return new MediaSource(application, cursor.getString(0));
+                    }
+                    return null;
+                } finally {
+                    if (cursor != null) {
+                        cursor.close();
+                    }
                 }
-                return null;
             }
         });
     }
