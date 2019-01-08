@@ -255,10 +255,9 @@ public class MediaItemMetadata implements Parcelable {
     public int getBrowsableContentStyleHint() {
         Bundle extras = mMediaDescription.getExtras();
         if (extras != null) {
-            if (extras.getBoolean(MediaConstants.CONTENT_STYLE_SUPPORTED, false)) {
+            if (extras.containsKey(MediaConstants.CONTENT_STYLE_BROWSABLE_HINT)) {
                 return extras.getInt(MediaConstants.CONTENT_STYLE_BROWSABLE_HINT, 0);
-            } else if (extras.getBoolean(MediaConstants.CONTENT_STYLE_SUPPORTED_PRERELEASE,
-                    false)) {
+            } else if (extras.containsKey(MediaConstants.CONTENT_STYLE_BROWSABLE_HINT_PRERELEASE)) {
                 return extras.getInt(MediaConstants.CONTENT_STYLE_BROWSABLE_HINT_PRERELEASE, 0);
             }
         }
@@ -276,14 +275,31 @@ public class MediaItemMetadata implements Parcelable {
     public int getPlayableContentStyleHint() {
         Bundle extras = mMediaDescription.getExtras();
         if (extras != null) {
-            if (extras.getBoolean(MediaConstants.CONTENT_STYLE_SUPPORTED, false)) {
+
+            if (extras.containsKey(MediaConstants.CONTENT_STYLE_PLAYABLE_HINT)) {
                 return extras.getInt(MediaConstants.CONTENT_STYLE_PLAYABLE_HINT, 0);
-            } else if (extras.getBoolean(MediaConstants.CONTENT_STYLE_SUPPORTED_PRERELEASE,
-                    false)) {
+            } else if (extras.containsKey(MediaConstants.CONTENT_STYLE_PLAYABLE_HINT_PRERELEASE)) {
                 return extras.getInt(MediaConstants.CONTENT_STYLE_PLAYABLE_HINT_PRERELEASE, 0);
             }
         }
         return 0;
+    }
+
+    /**
+     * @return Content style title group this item belongs to, or null if not provided
+     */
+    public String getTitleGrouping() {
+        Bundle extras = mMediaDescription.getExtras();
+        if (extras != null) {
+            if (extras.containsKey(MediaConstants.CONTENT_STYLE_GROUP_TITLE_HINT)) {
+                return extras.getString(MediaConstants.CONTENT_STYLE_GROUP_TITLE_HINT, null);
+            } else if (extras.containsKey(
+                    MediaConstants.CONTENT_STYLE_GROUP_TITLE_HINT_PRERELEASE)) {
+                return extras.getString(MediaConstants.CONTENT_STYLE_GROUP_TITLE_HINT_PRERELEASE,
+                        null);
+            }
+        }
+        return null;
     }
 
     @Override
