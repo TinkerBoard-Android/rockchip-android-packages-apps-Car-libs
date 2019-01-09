@@ -216,4 +216,67 @@ public class MediaBrowserViewModelImpl extends AndroidViewModel implements
             return false;
         });
     }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public LiveData<Boolean> contentStyleEnabled() {
+        return map(mConnectedMediaBrowser, mediaBrowserCompat -> {
+            if (mediaBrowserCompat == null) {
+                return false;
+            }
+            Bundle extras = mediaBrowserCompat.getExtras();
+            if (extras == null) {
+                return false;
+            }
+            if (extras.containsKey(MediaConstants.CONTENT_STYLE_SUPPORTED)) {
+                return extras.getBoolean(MediaConstants.CONTENT_STYLE_SUPPORTED);
+            }
+            if (extras.containsKey(MediaConstants.CONTENT_STYLE_SUPPORTED_PRERELEASE)) {
+                return extras.getBoolean(MediaConstants.CONTENT_STYLE_SUPPORTED_PRERELEASE);
+            }
+            return false;
+        });
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public LiveData<Integer> rootBrowsableHint() {
+        return map(mConnectedMediaBrowser, mediaBrowserCompat -> {
+            if (mediaBrowserCompat == null) {
+                return 0;
+            }
+            Bundle extras = mediaBrowserCompat.getExtras();
+            if (extras == null) {
+                return 0;
+            }
+            if (extras.containsKey(MediaConstants.CONTENT_STYLE_BROWSABLE_HINT)) {
+                return extras.getInt(MediaConstants.CONTENT_STYLE_BROWSABLE_HINT, 0);
+            }
+            if (extras.containsKey(MediaConstants.CONTENT_STYLE_BROWSABLE_HINT_PRERELEASE)) {
+                return extras.getInt(MediaConstants.CONTENT_STYLE_BROWSABLE_HINT_PRERELEASE, 0);
+            }
+            return 0;
+        });
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public LiveData<Integer> rootPlayableHint() {
+        return map(mConnectedMediaBrowser, mediaBrowserCompat -> {
+            if (mediaBrowserCompat == null) {
+                return 0;
+            }
+            Bundle extras = mediaBrowserCompat.getExtras();
+            if (extras == null) {
+                return 0;
+            }
+            if (extras.containsKey(MediaConstants.CONTENT_STYLE_PLAYABLE_HINT)) {
+                return extras.getInt(MediaConstants.CONTENT_STYLE_PLAYABLE_HINT, 0);
+            }
+            if (extras.containsKey(MediaConstants.CONTENT_STYLE_PLAYABLE_HINT_PRERELEASE)) {
+                return extras.getInt(MediaConstants.CONTENT_STYLE_PLAYABLE_HINT_PRERELEASE, 0);
+            }
+            return 0;
+        });
+    }
 }
