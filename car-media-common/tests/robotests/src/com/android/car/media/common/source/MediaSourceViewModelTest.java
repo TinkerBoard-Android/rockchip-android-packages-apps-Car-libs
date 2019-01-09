@@ -18,7 +18,6 @@ package com.android.car.media.common.source;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
 
@@ -48,7 +47,7 @@ import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
@@ -69,15 +68,12 @@ public class MediaSourceViewModelTest {
     @Mock
     public MediaBrowserCompat mMediaBrowser;
     @Mock
-    public ActiveMediaSelector mActiveMediaSelector;
-    @Mock
     public MediaControllerCompat mMediaControllerFromBrowser;
     @Mock
     public MediaControllerCompat mMediaControllerFromSessionManager;
 
     private final MutableLiveData<MediaBrowserState> mMediaBrowserState = new MutableLiveData<>();
-    private final MutableLiveData<List<MediaControllerCompat>> mActiveMediaControllers =
-            new MutableLiveData<>();
+    private final List<MediaControllerCompat> mActiveMediaControllers = new ArrayList<>(1);
 
     private MediaSourceViewModel mViewModel;
 
@@ -90,11 +86,7 @@ public class MediaSourceViewModelTest {
         when(mMediaControllerFromSessionManager.getPackageName())
                 .thenReturn(SESSION_MANAGER_CONTROLLER_PACKAGE_NAME);
 
-        mActiveMediaControllers.setValue(
-                Collections.singletonList(mMediaControllerFromSessionManager));
-        when(mActiveMediaSelector.getTopMostMediaController(any(), any()))
-                .thenReturn(mMediaControllerFromSessionManager);
-
+        mActiveMediaControllers.add(mMediaControllerFromSessionManager);
         mRequestedBrowseService = null;
 
         mViewModel = new MediaSourceViewModel(application, new MediaSourceViewModel.InputFactory() {
@@ -107,12 +99,7 @@ public class MediaSourceViewModelTest {
             }
 
             @Override
-            public ActiveMediaSelector createActiveMediaSelector() {
-                return mActiveMediaSelector;
-            }
-
-            @Override
-            public LiveData<List<MediaControllerCompat>> createActiveMediaControllerData() {
+            public List<MediaControllerCompat> getActiveMediaControllers() {
                 return mActiveMediaControllers;
             }
 
@@ -141,8 +128,8 @@ public class MediaSourceViewModelTest {
     @Test
     public void testGetMediaController_fromSessionManager() {
         CaptureObserver<MediaControllerCompat> observer = new CaptureObserver<>();
-        when(mActiveMediaSelector.getControllerForSource(any(), any()))
-                .thenReturn(mMediaControllerFromSessionManager);
+        when(mMediaSource.getPackageName())
+                .thenReturn(SESSION_MANAGER_CONTROLLER_PACKAGE_NAME);
 
         mViewModel.getMediaController().observe(mLifecycleOwner, observer);
 
@@ -153,7 +140,7 @@ public class MediaSourceViewModelTest {
     @Test
     public void testGetMediaController_noActiveSession() {
         CaptureObserver<MediaControllerCompat> observer = new CaptureObserver<>();
-        mMediaControllerFromSessionManager = null;
+        mActiveMediaControllers.clear();
         ComponentName testComponent = new ComponentName("test", "test");
         when(mMediaSource.getBrowseServiceComponentName()).thenReturn(testComponent);
         mMediaBrowserState.setValue(new MediaBrowserState(mMediaBrowser,
@@ -168,7 +155,7 @@ public class MediaSourceViewModelTest {
     @Test
     public void testGetMediaController_noActiveSession_noBrowseService() {
         CaptureObserver<MediaControllerCompat> observer = new CaptureObserver<>();
-        mMediaControllerFromSessionManager = null;
+        mActiveMediaControllers.clear();
         when(mMediaSource.getBrowseServiceComponentName()).thenReturn(null);
         mMediaBrowserState.setValue(new MediaBrowserState(mMediaBrowser,
                 MediaBrowserConnector.ConnectionState.CONNECTED));
@@ -183,7 +170,7 @@ public class MediaSourceViewModelTest {
     @Test
     public void testGetMediaController_noActiveSession_notConnected() {
         CaptureObserver<MediaControllerCompat> observer = new CaptureObserver<>();
-        mMediaControllerFromSessionManager = null;
+        mActiveMediaControllers.clear();
         ComponentName testComponent = new ComponentName("test", "test");
         when(mMediaSource.getBrowseServiceComponentName()).thenReturn(testComponent);
         mMediaBrowserState.setValue(new MediaBrowserState(mMediaBrowser,
@@ -194,37 +181,5 @@ public class MediaSourceViewModelTest {
         assertThat(observer.hasBeenNotified()).isTrue();
         assertThat(observer.getObservedValue()).isNull();
         assertThat(mRequestedBrowseService).isEqualTo(testComponent);
-    }
-
-    @Test
-    public void testGetActiveMediaController() {
-        when(mActiveMediaSelector.getTopMostMediaController(any(), any()))
-                .thenReturn(mMediaControllerFromBrowser);
-        CaptureObserver<MediaControllerCompat> observer = new CaptureObserver<>();
-
-        mViewModel.getTopActiveMediaController().observe(mLifecycleOwner, observer);
-
-        assertThat(observer.getObservedValue()).isSameAs(mMediaControllerFromBrowser);
-    }
-
-    @Test
-    public void testIsCurrentMediaSourcePlaying() {
-        CaptureObserver<Boolean> observer = new CaptureObserver<>();
-        ComponentName testComponent = new ComponentName("test", "test");
-        when(mMediaSource.getBrowseServiceComponentName()).thenReturn(testComponent);
-        when(mMediaSource.getPackageName()).thenReturn(BROWSER_CONTROLLER_PACKAGE_NAME);
-        when(mActiveMediaSelector.getTopMostMediaController(any(), any()))
-                .thenReturn(mMediaControllerFromBrowser);
-
-        mViewModel.isCurrentMediaSourcePlaying().observe(mLifecycleOwner, observer);
-
-        assertThat(observer.getObservedValue()).isTrue();
-
-        // make
-        when(mActiveMediaSelector.getTopMostMediaController(any(), any()))
-                .thenReturn(mMediaControllerFromSessionManager);
-        mActiveMediaControllers.setValue(mActiveMediaControllers.getValue());
-
-        assertThat(observer.getObservedValue()).isFalse();
     }
 }
