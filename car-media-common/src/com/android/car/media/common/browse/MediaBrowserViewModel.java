@@ -85,6 +85,24 @@ public interface MediaBrowserViewModel {
     LiveData<Boolean> supportsSearch();
 
     /**
+     * Returns a LiveData that emits whether this media browser uses Android Auto specific
+     * content style extras.
+     */
+    LiveData<Boolean> contentStyleEnabled();
+
+    /**
+     * Gets the content style display type of browsable elements in this media browser, set at the
+     * browse root
+     */
+    LiveData<Integer> rootBrowsableHint();
+
+    /**
+     * Gets the content style display type of playable elements in this media browser, set at the
+     * browse root
+     */
+    LiveData<Integer> rootPlayableHint();
+
+    /**
      * A {@link MediaBrowserViewModel} whose selected browse ID may be changed.
      */
     interface WithMutableBrowseId extends MediaBrowserViewModel {
