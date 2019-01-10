@@ -59,7 +59,7 @@ public class Contact implements Parcelable, Comparable<Contact> {
      * A reference to the {@link ContactsContract.Contacts#_ID} that this data belongs to. See
      * {@link ContactsContract.Contacts.Entity#CONTACT_ID}
      */
-    private int mId;
+    private long mId;
 
     /**
      * Whether this contact entry is starred by user.
@@ -136,7 +136,7 @@ public class Contact implements Parcelable, Comparable<Contact> {
                 ContactsContract.CommonDataKinds.Phone.IS_SUPER_PRIMARY);
 
         Contact contact = new Contact();
-        contact.mId = cursor.getInt(contactIdColumn);
+        contact.mId = cursor.getLong(contactIdColumn);
         contact.mDisplayName = cursor.getString(displayNameColumn);
 
         PhoneNumber number = PhoneNumber.newInstance(
@@ -145,7 +145,7 @@ public class Contact implements Parcelable, Comparable<Contact> {
                 cursor.getInt(typeColumn),
                 cursor.getString(labelColumn),
                 cursor.getInt(isPrimaryColumn) > 0,
-                cursor.getInt(rawDataIdColumn),
+                cursor.getLong(rawDataIdColumn),
                 cursor.getInt(dataVersionColumn));
         contact.mPhoneNumbers.add(number);
         if (number.isPrimary()) {
@@ -215,7 +215,7 @@ public class Contact implements Parcelable, Comparable<Contact> {
     }
 
     /** Return the aggregated contact id. */
-    public int getId() {
+    public long getId() {
         return mId;
     }
 
@@ -280,7 +280,7 @@ public class Contact implements Parcelable, Comparable<Contact> {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mId);
+        dest.writeLong(mId);
         dest.writeBoolean(mIsStarred);
         dest.writeInt(mPinnedPosition);
         dest.writeInt(mPhoneNumbers.size());
@@ -309,7 +309,7 @@ public class Contact implements Parcelable, Comparable<Contact> {
     /** Create {@link Contact} object from saved parcelable. */
     private static Contact fromParcel(Parcel source) {
         Contact contact = new Contact();
-        contact.mId = source.readInt();
+        contact.mId = source.readLong();
         contact.mIsStarred = source.readBoolean();
         contact.mPinnedPosition = source.readInt();
         int phoneNumberListLength = source.readInt();
