@@ -140,7 +140,6 @@ public class InMemoryPhoneBook {
 
     private void onDataLoaded(Cursor cursor) {
         Map<String, Contact> result = new LinkedHashMap<>();
-        mPhoneNumberContactMap.clear();
 
         while (cursor.moveToNext()) {
             Contact contact = Contact.fromCursor(mContext, cursor);
@@ -157,12 +156,13 @@ public class InMemoryPhoneBook {
         mContacts.clear();
         mContacts.addAll(result.values());
         Collections.sort(mContacts);
-        mContactsLiveData.setValue(mContacts);
 
+        mPhoneNumberContactMap.clear();
         for (Contact contact : mContacts) {
             for (PhoneNumber phoneNumber : contact.getNumbers()) {
                 mPhoneNumberContactMap.put(phoneNumber.getI18nPhoneNumberWrapper(), contact);
             }
         }
+        mContactsLiveData.setValue(mContacts);
     }
 }
