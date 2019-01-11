@@ -20,7 +20,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.provider.ContactsContract;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
 
 import androidx.annotation.Nullable;
 
@@ -31,11 +31,12 @@ import java.util.Objects;
  */
 public class PhoneNumber implements Parcelable {
 
-    private final int mType;
     private final I18nPhoneNumberWrapper mI18nPhoneNumber;
+    private final int mType;
     @Nullable
     private final String mLabel;
 
+    private boolean mIsPrimary;
     private int mId;
     private int mDataVersion;
 
@@ -43,26 +44,28 @@ public class PhoneNumber implements Parcelable {
      * Creates a new {@link PhoneNumber}.
      *
      * @param rawNumber   A potential phone number.
-     * @param type        The phone number type. See more at
-     *                    {@link ContactsContract.CommonDataKinds.CommonColumns#TYPE}
-     * @param label       The user defined label. See more at
-     *                    {@link ContactsContract.CommonDataKinds.CommonColumns#LABEL}
+     * @param type        The phone number type. See more at {@link Phone#TYPE}
+     * @param label       The user defined label. See more at {@link Phone#LABEL}
+     * @param isPrimary   Whether this is the primary entry of the aggregated contact it belongs
+     *                    to. See more at {@link Phone#IS_SUPER_PRIMARY}.
      * @param id          The unique key for raw contact entry containing the phone number entity.
+     *                    See more at {@link Phone#_ID}
      * @param dataVersion The dataVersion of the raw contact entry record. See more at {@link
-     *                    android.provider.ContactsContract.Data#DATA_VERSION}
+     *                    Phone#DATA_VERSION}
      */
     public static PhoneNumber newInstance(Context context, String rawNumber, int type,
-                                          @Nullable String label, int id, int dataVersion) {
+            @Nullable String label, boolean isPrimary, int id, int dataVersion) {
         I18nPhoneNumberWrapper i18nPhoneNumber = I18nPhoneNumberWrapper.newInstance(context,
                 rawNumber);
-        return new PhoneNumber(i18nPhoneNumber, type, label, id, dataVersion);
+        return new PhoneNumber(i18nPhoneNumber, type, label, isPrimary, id, dataVersion);
     }
 
-    private PhoneNumber(I18nPhoneNumberWrapper i18nNumber, int type, @Nullable String label, int id,
-                        int dataVersion) {
-        mType = type;
+    private PhoneNumber(I18nPhoneNumberWrapper i18nNumber, int type, @Nullable String label,
+            boolean isPrimary, int id, int dataVersion) {
         mI18nPhoneNumber = i18nNumber;
+        mType = type;
         mLabel = label;
+        mIsPrimary = isPrimary;
         mId = id;
         mDataVersion = dataVersion;
     }
@@ -81,10 +84,18 @@ public class PhoneNumber implements Parcelable {
     }
 
     /**
+     * Returns if the phone number is the primary entry for the aggregated contact it belongs to.
+     * See more at {@link Phone#IS_SUPER_PRIMARY}.
+     */
+    public boolean isPrimary() {
+        return mIsPrimary;
+    }
+
+    /**
      * Returns a human readable string label. For example, Home, Work, etc.
      */
     public CharSequence getReadableLabel(Resources res) {
-        return ContactsContract.CommonDataKinds.Phone.getTypeLabel(res, mType, mLabel);
+        return Phone.getTypeLabel(res, mType, mLabel);
     }
 
     /**
@@ -103,7 +114,7 @@ public class PhoneNumber implements Parcelable {
 
     /**
      * Gets the type of phone number, for example Home or Work. Possible values are defined in
-     * {@link ContactsContract.CommonDataKinds.Phone CommonDataKinds.Phone}.
+     * {@link Phone}.
      */
     public int getType() {
         return mType;
@@ -114,14 +125,18 @@ public class PhoneNumber implements Parcelable {
     }
 
     /**
-     * Merge the given phone number with this one, updating both this phone number instance, and
-     * returning it.
+     * Each contact may have a few sources with the same phone number. Merge same phone numbers as
+     * one.
+     *
+     * <p>As long as one of those phone numbers is primary entry of the aggregated contact, mark
+     * the merged phone number as primary.
      */
     public PhoneNumber merge(PhoneNumber phoneNumber) {
         if (equals(phoneNumber)) {
             if (mDataVersion < phoneNumber.mDataVersion) {
                 mDataVersion = phoneNumber.mDataVersion;
                 mId = phoneNumber.mId;
+                mIsPrimary |= phoneNumber.mIsPrimary;
             }
         }
         return this;
@@ -150,6 +165,7 @@ public class PhoneNumber implements Parcelable {
         dest.writeInt(mType);
         dest.writeString(mLabel);
         dest.writeParcelable(mI18nPhoneNumber, flags);
+        dest.writeBoolean(mIsPrimary);
         dest.writeInt(mId);
         dest.writeInt(mDataVersion);
     }
@@ -161,10 +177,11 @@ public class PhoneNumber implements Parcelable {
             String label = source.readString();
             I18nPhoneNumberWrapper i18nPhoneNumberWrapper = source.readParcelable(
                     I18nPhoneNumberWrapper.class.getClassLoader());
+            boolean isPrimary = source.readBoolean();
             int id = source.readInt();
             int dataVersion = source.readInt();
-            PhoneNumber phoneNumber = new PhoneNumber(i18nPhoneNumberWrapper, type, label, id,
-                    dataVersion);
+            PhoneNumber phoneNumber = new PhoneNumber(i18nPhoneNumberWrapper, type, label,
+                    isPrimary, id, dataVersion);
             return phoneNumber;
         }
 

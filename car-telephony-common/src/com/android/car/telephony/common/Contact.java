@@ -30,16 +30,13 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Encapsulates data about a phone Contact entry. Typically loaded from the local Contact store.
  */
 public class Contact implements Parcelable, Comparable<Contact> {
     private static final String TAG = "CD.Contact";
-    private static final int IS_PRIMARY = 1;
 
     /**
      * Contact belongs to TYPE_LETTER if its display name starts with a letter
@@ -78,7 +75,7 @@ public class Contact implements Parcelable, Comparable<Contact> {
     /**
      * All phone numbers of this contact mapping to the unique primary key for the raw data entry.
      */
-    private Set<PhoneNumber> mPhoneNumbers = new HashSet<>();
+    private List<PhoneNumber> mPhoneNumbers = new ArrayList<>();
 
     /**
      * The display name.
@@ -126,28 +123,32 @@ public class Contact implements Parcelable, Comparable<Contact> {
                 ContactsContract.CommonDataKinds.Phone.PHOTO_THUMBNAIL_URI);
         int lookupKeyColumn = cursor.getColumnIndex(
                 ContactsContract.CommonDataKinds.Phone.LOOKUP_KEY);
-        int isPrimaryColumn = cursor.getColumnIndex(
-                ContactsContract.CommonDataKinds.Phone.IS_PRIMARY);
         int typeColumn = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.TYPE);
         int labelColumn = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.LABEL);
         int numberColumn = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
         int rawDataIdColumn = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone._ID);
         int dataVersionColumn = cursor.getColumnIndex(
                 ContactsContract.CommonDataKinds.Phone.DATA_VERSION);
+        // IS_PRIMARY means primary entry of the raw contact and IS_SUPER_PRIMARY means primary
+        // entry of the aggregated contact. It is guaranteed that only one data entry is super
+        // primary.
+        int isPrimaryColumn = cursor.getColumnIndex(
+                ContactsContract.CommonDataKinds.Phone.IS_SUPER_PRIMARY);
 
         Contact contact = new Contact();
         contact.mId = cursor.getInt(contactIdColumn);
         contact.mDisplayName = cursor.getString(displayNameColumn);
 
-        PhoneNumber number = PhoneNumber.newInstance(context,
+        PhoneNumber number = PhoneNumber.newInstance(
+                context,
                 cursor.getString(numberColumn),
                 cursor.getInt(typeColumn),
                 cursor.getString(labelColumn),
+                cursor.getInt(isPrimaryColumn) > 0,
                 cursor.getInt(rawDataIdColumn),
                 cursor.getInt(dataVersionColumn));
         contact.mPhoneNumbers.add(number);
-
-        if (cursor.getInt(isPrimaryColumn) == IS_PRIMARY) {
+        if (number.isPrimary()) {
             contact.mPrimaryPhoneNumber = number;
         }
 
@@ -208,11 +209,14 @@ public class Contact implements Parcelable, Comparable<Contact> {
         return ContactsContract.Contacts.getLookupUri(mId, mLookupKey);
     }
 
-    /**
-     * Returns a copy of all phone numbers associated with this contact.
-     */
+    /** Return all phone numbers associated with this contact. */
     public List<PhoneNumber> getNumbers() {
-        return new ArrayList<>(mPhoneNumbers);
+        return mPhoneNumbers;
+    }
+
+    /** Return the aggregated contact id. */
+    public int getId() {
+        return mId;
     }
 
     public boolean isStarred() {
@@ -231,12 +235,12 @@ public class Contact implements Parcelable, Comparable<Contact> {
     public Contact merge(Contact contact) {
         if (equals(contact)) {
             for (PhoneNumber phoneNumber : contact.mPhoneNumbers) {
-                if (!mPhoneNumbers.contains(phoneNumber)) {
+                int indexOfPhoneNumber = mPhoneNumbers.indexOf(phoneNumber);
+                if (indexOfPhoneNumber < 0) {
                     mPhoneNumbers.add(phoneNumber);
                 } else {
-                    for (PhoneNumber existingPhoneNumber : mPhoneNumbers) {
-                        existingPhoneNumber.merge(phoneNumber);
-                    }
+                    PhoneNumber existingPhoneNumber = mPhoneNumbers.get(indexOfPhoneNumber);
+                    existingPhoneNumber.merge(phoneNumber);
                 }
             }
             if (contact.mPrimaryPhoneNumber != null) {
@@ -264,9 +268,7 @@ public class Contact implements Parcelable, Comparable<Contact> {
         return mPrimaryPhoneNumber;
     }
 
-    /**
-     * @return true if this contact has a primary phone number.
-     */
+    /** Return if this contact has a primary phone number. */
     public boolean hasPrimaryPhoneNumber() {
         return mPrimaryPhoneNumber != null;
     }
@@ -285,7 +287,6 @@ public class Contact implements Parcelable, Comparable<Contact> {
         for (PhoneNumber phoneNumber : mPhoneNumbers) {
             dest.writeParcelable(phoneNumber, flags);
         }
-        dest.writeParcelable(mPrimaryPhoneNumber, flags);
         dest.writeString(mDisplayName);
         dest.writeParcelable(mAvatarThumbnailUri, 0);
         dest.writeParcelable(mAvatarUri, 0);
@@ -312,11 +313,14 @@ public class Contact implements Parcelable, Comparable<Contact> {
         contact.mIsStarred = source.readBoolean();
         contact.mPinnedPosition = source.readInt();
         int phoneNumberListLength = source.readInt();
-        contact.mPhoneNumbers = new HashSet<>();
+        contact.mPhoneNumbers = new ArrayList<>();
         for (int i = 0; i < phoneNumberListLength; i++) {
-            contact.mPhoneNumbers.add(source.readParcelable(PhoneNumber.class.getClassLoader()));
+            PhoneNumber phoneNumber = source.readParcelable(PhoneNumber.class.getClassLoader());
+            contact.mPhoneNumbers.add(phoneNumber);
+            if (phoneNumber.isPrimary()) {
+                contact.mPrimaryPhoneNumber = phoneNumber;
+            }
         }
-        contact.mPrimaryPhoneNumber = source.readParcelable(PhoneNumber.class.getClassLoader());
         contact.mDisplayName = source.readString();
         contact.mAvatarThumbnailUri = source.readParcelable(Uri.class.getClassLoader());
         contact.mAvatarUri = source.readParcelable(Uri.class.getClassLoader());
