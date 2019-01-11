@@ -21,6 +21,7 @@ import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
@@ -31,7 +32,7 @@ import androidx.annotation.Nullable;
  * data set have changed.
  */
 public class ObservableAsyncQuery {
-    private static final int QUERY_TOKEN = 0;
+    private static final String TAG = "CD.ObservableAsyncQuery";
 
     /**
      * Represents query parameters.
@@ -72,21 +73,22 @@ public class ObservableAsyncQuery {
     }
 
     private AsyncQueryHandler mAsyncQueryHandler;
-    private ObservableAsyncQuery.QueryParam mQueryParam;
+    private QueryParam mQueryParam;
     private Cursor mCurrentCursor;
     private ObservableAsyncQuery.OnQueryFinishedListener mOnQueryFinishedListener;
     private ContentObserver mContentObserver;
     private boolean mIsActive = false;
+    private int mToken;
 
     /**
      * @param queryParam Query arguments for the current query.
      * @param listener   Listener which will be called when data is available.
      */
     public ObservableAsyncQuery(
-            @NonNull ObservableAsyncQuery.QueryParam queryParam,
+            @NonNull QueryParam queryParam,
             @NonNull ContentResolver cr,
-            @NonNull ObservableAsyncQuery.OnQueryFinishedListener listener) {
-        mAsyncQueryHandler = new ObservableAsyncQuery.AsyncQueryHandlerImpl(this, cr);
+            @NonNull OnQueryFinishedListener listener) {
+        mAsyncQueryHandler = new AsyncQueryHandlerImpl(this, cr);
         mContentObserver = new ContentObserver(mAsyncQueryHandler) {
             @Override
             public void onChange(boolean selfChange) {
@@ -95,14 +97,21 @@ public class ObservableAsyncQuery {
         };
         mQueryParam = queryParam;
         mOnQueryFinishedListener = listener;
+        mToken = 0;
     }
 
     /**
      * Starts the query and stops any pending query.
      */
+    @MainThread
     public void startQuery() {
-        mAsyncQueryHandler.cancelOperation(QUERY_TOKEN);
-        mAsyncQueryHandler.startQuery(QUERY_TOKEN, null,
+        Log.d(TAG, "startQuery");
+        mAsyncQueryHandler.cancelOperation(mToken); // Cancel the query task.
+        mAsyncQueryHandler.removeMessages(mToken); // Cancel the task to handle query result.
+        mToken++;
+        mAsyncQueryHandler.startQuery(
+                mToken,
+                null,
                 mQueryParam.mUri,
                 mQueryParam.mProjection,
                 mQueryParam.mSelection,
@@ -114,16 +123,20 @@ public class ObservableAsyncQuery {
     /**
      * Stops any pending query and also stops listening on the data set change.
      */
+    @MainThread
     public void stopQuery() {
+        Log.d(TAG, "stopQuery");
         mIsActive = false;
         closeCurrentCursorIfNecessary();
-        mAsyncQueryHandler.cancelOperation(QUERY_TOKEN);
+        mAsyncQueryHandler.cancelOperation(mToken); // Cancel the query task.
+        mAsyncQueryHandler.removeMessages(mToken); // Cancel the task to handle query result.
     }
 
     private void onQueryComplete(int token, Object cookie, Cursor cursor) {
         if (!mIsActive) {
             return;
         }
+        Log.d(TAG, "onQueryComplete");
         closeCurrentCursorIfNecessary();
         if (cursor != null) {
             cursor.registerContentObserver(mContentObserver);
@@ -151,8 +164,10 @@ public class ObservableAsyncQuery {
 
         @Override
         protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
-            super.onQueryComplete(token, cookie, cursor);
-            mQuery.onQueryComplete(token, cookie, cursor);
+            if (token == mQuery.mToken) {
+                // The query result is the most up to date.
+                mQuery.onQueryComplete(token, cookie, cursor);
+            }
         }
     }
 }
