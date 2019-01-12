@@ -76,14 +76,14 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
     private InMemoryPhoneBook(Context context) {
         mContext = context;
 
-        ObservableAsyncQuery.QueryParam contactListQueryParam = new ObservableAsyncQuery.QueryParam(
+        QueryParam contactListQueryParam = new QueryParam(
                 ContactsContract.Data.CONTENT_URI,
                 null,
                 ContactsContract.Data.MIMETYPE + " = ?",
                 new String[]{ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE},
                 ContactsContract.Contacts.DISPLAY_NAME + " ASC ");
         mContactListAsyncQueryLiveData = new AsyncQueryLiveData<List<Contact>>(mContext,
-                contactListQueryParam) {
+                QueryParam.of(contactListQueryParam)) {
             @Override
             protected List<Contact> convertToEntity(Cursor cursor) {
                 return onCursorLoaded(cursor);
