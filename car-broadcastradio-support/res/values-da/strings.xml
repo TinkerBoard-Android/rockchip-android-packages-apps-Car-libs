@@ -19,5 +19,5 @@ limitations under the License.
     <string name="radio_am_text" msgid="571324921988967868">"AM"</string>
     <string name="radio_fm_text" msgid="1973045042281933494">"FM"</string>
     <string name="program_list_text" msgid="4414150317304422313">"Kanaler"</string>
-    <string name="favorites_list_text" msgid="7829827713977109155">"Foretrukne"</string>
+    <string name="favorites_list_text" msgid="7829827713977109155">"Favoritter"</string>
 </resources>
