@@ -109,8 +109,8 @@ public class ControlBar extends RelativeLayout {
     /** Slot reserved for the expand/collapse button */
     public static final int SLOT_EXPAND_COLLAPSE = 3;
 
-    // Minimum number of columns supported
-    private static final int MIN_COLUMNS = 3;
+    // Default number of columns, if unspecified
+    private static final int DEFAULT_COLUMNS = 3;
     // Weight for the spacers used at the start and end of each slots row.
     private static final float SPACERS_WEIGHT = 0.5f;
 
@@ -139,8 +139,7 @@ public class ControlBar extends RelativeLayout {
 
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ControlBar,
                 defStyleAttrs, defStyleRes);
-        mNumColumns = Math.max(ta.getInteger(R.styleable.ControlBar_columns, MIN_COLUMNS),
-                MIN_COLUMNS);
+        mNumColumns = ta.getInteger(R.styleable.ControlBar_columns, DEFAULT_COLUMNS);
         mExpandEnabled = ta.getBoolean(R.styleable.ControlBar_enableOverflow, true);
         ta.recycle();
 
