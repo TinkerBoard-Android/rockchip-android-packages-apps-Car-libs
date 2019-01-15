@@ -24,7 +24,7 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,29 +37,17 @@ import java.util.Map;
  * A singleton statically accessible helper class which pre-loads contacts list into memory so
  * that they can be accessed more easily and quickly.
  */
-public class InMemoryPhoneBook {
+public class InMemoryPhoneBook implements Observer<List<Contact>> {
     private static final String TAG = "CD.InMemoryPhoneBook";
     private static InMemoryPhoneBook sInMemoryPhoneBook;
 
     private final Context mContext;
-
+    private final AsyncQueryLiveData<List<Contact>> mContactListAsyncQueryLiveData;
+    /** A map to speed up phone number searching. */
+    private final Map<I18nPhoneNumberWrapper, Contact> mPhoneNumberContactMap = new HashMap<>();
     private boolean mIsLoaded = false;
 
-    private ObservableAsyncQuery mObservableAsyncQuery;
-    private List<Contact> mContacts = new ArrayList<>();
-    private MutableLiveData<List<Contact>> mContactsLiveData = new MutableLiveData<>();
-    /**
-     * A map to speed up phone number searching.
-     */
-    private Map<I18nPhoneNumberWrapper, Contact> mPhoneNumberContactMap = new HashMap<>();
-
-    private InMemoryPhoneBook(Context context) {
-        mContext = context;
-    }
-
-    /**
-     * Initialize the globally accessible {@link InMemoryPhoneBook}.
-     */
+    /** Initialize the globally accessible {@link InMemoryPhoneBook}. */
     public static InMemoryPhoneBook init(Context context) {
         if (sInMemoryPhoneBook == null) {
             sInMemoryPhoneBook = new InMemoryPhoneBook(context);
@@ -79,30 +67,36 @@ public class InMemoryPhoneBook {
         }
     }
 
-    /**
-     * Tears down the globally accessible {@link InMemoryPhoneBook}.
-     */
+    /** Tears down the globally accessible {@link InMemoryPhoneBook}. */
     public static void tearDown() {
-        sInMemoryPhoneBook.mObservableAsyncQuery.stopQuery();
+        sInMemoryPhoneBook.onTearDown();
         sInMemoryPhoneBook = null;
     }
 
-    private void onInit() {
-        Log.v(TAG, "onInit");
-        String selection = ContactsContract.Data.MIMETYPE + " = ?";
-        String[] selectionArgs = new String[1];
-        selectionArgs[0] = ContactsContract.CommonDataKinds.Phone
-                .CONTENT_ITEM_TYPE;
+    private InMemoryPhoneBook(Context context) {
+        mContext = context;
+
         ObservableAsyncQuery.QueryParam contactListQueryParam = new ObservableAsyncQuery.QueryParam(
                 ContactsContract.Data.CONTENT_URI,
                 null,
-                selection,
-                selectionArgs,
+                ContactsContract.Data.MIMETYPE + " = ?",
+                new String[]{ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE},
                 ContactsContract.Contacts.DISPLAY_NAME + " ASC ");
+        mContactListAsyncQueryLiveData = new AsyncQueryLiveData<List<Contact>>(mContext,
+                contactListQueryParam) {
+            @Override
+            protected List<Contact> convertToEntity(Cursor cursor) {
+                return onCursorLoaded(cursor);
+            }
+        };
+    }
 
-        mObservableAsyncQuery = new ObservableAsyncQuery(contactListQueryParam,
-                mContext.getContentResolver(), this::onDataLoaded);
-        mObservableAsyncQuery.startQuery();
+    private void onInit() {
+        mContactListAsyncQueryLiveData.observeForever(this);
+    }
+
+    private void onTearDown() {
+        mContactListAsyncQueryLiveData.removeObserver(this);
     }
 
     public boolean isLoaded() {
@@ -113,7 +107,7 @@ public class InMemoryPhoneBook {
      * Returns a {@link LiveData} which monitors the contact list changes.
      */
     public LiveData<List<Contact>> getContactsLiveData() {
-        return mContactsLiveData;
+        return mContactListAsyncQueryLiveData;
     }
 
     /**
@@ -125,7 +119,6 @@ public class InMemoryPhoneBook {
         Log.v(TAG, String.format("lookupContactEntry: %s", phoneNumber));
         if (!isLoaded()) {
             Log.w(TAG, "looking up a contact while loading.");
-            return null;
         }
 
         if (TextUtils.isEmpty(phoneNumber)) {
@@ -138,8 +131,9 @@ public class InMemoryPhoneBook {
         return mPhoneNumberContactMap.get(i18nPhoneNumber);
     }
 
-    private void onDataLoaded(Cursor cursor) {
+    private List<Contact> onCursorLoaded(Cursor cursor) {
         Map<String, Contact> result = new LinkedHashMap<>();
+        List<Contact> contacts = new ArrayList<>();
 
         while (cursor.moveToNext()) {
             Contact contact = Contact.fromCursor(mContext, cursor);
@@ -152,17 +146,22 @@ public class InMemoryPhoneBook {
             }
         }
 
-        mIsLoaded = true;
-        mContacts.clear();
-        mContacts.addAll(result.values());
-        Collections.sort(mContacts);
+        contacts.addAll(result.values());
+        Collections.sort(contacts);
 
         mPhoneNumberContactMap.clear();
-        for (Contact contact : mContacts) {
+        for (Contact contact : contacts) {
             for (PhoneNumber phoneNumber : contact.getNumbers()) {
-                mPhoneNumberContactMap.put(phoneNumber.getI18nPhoneNumberWrapper(), contact);
+                mPhoneNumberContactMap.put(phoneNumber.getI18nPhoneNumberWrapper(),
+                        contact);
             }
         }
-        mContactsLiveData.setValue(mContacts);
+        return contacts;
+    }
+
+    @Override
+    public void onChanged(List<Contact> contacts) {
+        Log.d(TAG, "Contacts loaded:" + (contacts == null ? 0 : contacts.size()));
+        mIsLoaded = true;
     }
 }
