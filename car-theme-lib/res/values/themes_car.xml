@@ -70,6 +70,7 @@ limitations under the License.
          <item name="android:editTextColor">@*android:color/car_body1</item>
          <item name="android:textColorHint">@*android:color/car_body2</item>
          <item name="android:textColorPrimary">@*android:color/car_body1</item>
+         <item name="android:textColor">@*android:color/car_body1</item>
          <item name="android:textColorSecondary">@*android:color/car_body2</item>
 
          <item name="android:textAppearance">@android:style/TextAppearance.DeviceDefault</item>
