@@ -30,14 +30,6 @@ import com.android.car.assist.payloadhandlers.NotificationPayloadHandler;
  * by the voice session initiator.
  */
 public abstract class CarVoiceInteractionSession extends VoiceInteractionSession {
-
-    // TODO: Use the flag introduced in new API changes, once the changes are available.
-    /**
-     * Flag for use with {@link #onShow}: indicates that the voice interaction service was invoked
-     * from a notification.
-     */
-    public static final int SHOW_SOURCE_NOTIFICATION = 1 << 6;
-
     /** The key used for the action {@link String} in the payload {@link Bundle}. */
     public static final String KEY_ACTION = "KEY_ACTION";
 

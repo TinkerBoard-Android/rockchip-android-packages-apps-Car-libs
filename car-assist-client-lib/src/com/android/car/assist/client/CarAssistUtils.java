@@ -17,6 +17,7 @@ package com.android.car.assist.client;
 
 import static android.app.Notification.Action.SEMANTIC_ACTION_MARK_AS_READ;
 import static android.app.Notification.Action.SEMANTIC_ACTION_REPLY;
+import static android.service.voice.VoiceInteractionSession.SHOW_SOURCE_NOTIFICATION;
 
 import android.app.Notification;
 import android.app.RemoteInput;
@@ -32,6 +33,7 @@ import androidx.core.app.NotificationCompat;
 import com.android.car.assist.CarVoiceInteractionSession;
 import com.android.car.assist.client.tts.TextToSpeechHelper;
 import com.android.internal.app.AssistUtils;
+import com.android.internal.app.IVoiceActionCheckCallback;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -81,6 +83,12 @@ public class CarAssistUtils {
     private final AssistUtils mAssistUtils;
     private final FallbackAssistant mFallbackAssistant;
     private final String mErrorMessage;
+
+    /** Interface used to receive callbacks from voice action requests. */
+    public interface ActionRequestCallback {
+        /** Callback issued from a voice request on success/error. */
+        void onResult(boolean error);
+    }
 
     public CarAssistUtils(Context context) {
         mContext = context;
@@ -174,24 +182,36 @@ public class CarAssistUtils {
     /**
      * Requests a given action from the current active Assistant.
      *
-     *
      * @param sbn the notification payload to deliver to assistant
-     * @param semanticAction the semantic action that is to be requested
-     * @return true if the request was successful
+     * @param semanticAction the semantic action that is being requested
+     * @param callback the callback to issue on success/error
      */
-    public boolean requestAssistantVoiceAction(StatusBarNotification sbn, int semanticAction) {
+    public void requestAssistantVoiceAction(StatusBarNotification sbn, int semanticAction,
+            ActionRequestCallback callback) {
         if (!isCarCompatibleMessagingNotification(sbn)) {
             Log.w(TAG, "Assistant action requested for non-compatible notification.");
-            return false;
+            callback.onResult(/* error= */ true);
+            return;
+        }
+
+        if (!isSupportedSemanticAction(semanticAction)) {
+            Log.w(TAG, "Requested Assistant action for unsupported semantic action.");
+            callback.onResult(/* error= */ true);
+            return;
         }
 
         switch (semanticAction) {
             case SEMANTIC_ACTION_MARK_AS_READ:
-                return readMessageNotification(sbn);
+                readMessageNotification(sbn, callback);
+                return;
+
             case SEMANTIC_ACTION_REPLY:
-                return replyMessageNotification(sbn);
+                replyMessageNotification(sbn, callback);
+                return;
+
             default:
-                return false;
+                callback.onResult(/* error= */ true);
+                return;
         }
     }
 
@@ -201,11 +221,14 @@ public class CarAssistUtils {
      * handle it.
      *
      * @param sbn the notification to deliver as the payload
-     * @return true if the read request was handled successfully
+     * @param callback the callback to issue on success/error
      */
-    private boolean readMessageNotification(StatusBarNotification sbn) {
-        return requestAction(BundleBuilder.buildAssistantReadBundle(sbn))
-                || mFallbackAssistant.handleReadAction(sbn, mListener);
+    private void readMessageNotification(StatusBarNotification sbn,
+            ActionRequestCallback callback) {
+        Bundle args = BundleBuilder.buildAssistantReadBundle(sbn);
+        String action = CarVoiceInteractionSession.VOICE_ACTION_READ_NOTIFICATION;
+
+        requestAction(sbn, args, action, callback);
     }
 
     /**
@@ -214,16 +237,59 @@ public class CarAssistUtils {
      * handle it.
      *
      * @param sbn the notification to deliver as the payload
-     * @return true if the reply request was handled successfully
+     * @param callback the callback to issue on success/error
      */
-    private boolean replyMessageNotification(StatusBarNotification sbn) {
-        return requestAction(BundleBuilder.buildAssistantReplyBundle(sbn))
-                || mFallbackAssistant.handleErrorMessage(mErrorMessage, mListener);
+    private void replyMessageNotification(StatusBarNotification sbn,
+            ActionRequestCallback callback) {
+        Bundle args = BundleBuilder.buildAssistantReplyBundle(sbn);
+        String action = CarVoiceInteractionSession.VOICE_ACTION_REPLY_NOTIFICATION;
+
+        requestAction(sbn, args, action, callback);
     }
 
-    private boolean requestAction(Bundle payloadArguments) {
-        return assistantIsNotificationListener()
-                && mAssistUtils.showSessionForActiveService(payloadArguments,
-                CarVoiceInteractionSession.SHOW_SOURCE_NOTIFICATION, null, null);
+    private void requestAction(StatusBarNotification sbn, Bundle payloadArguments, String action,
+            ActionRequestCallback callback) {
+
+        if (!assistantIsNotificationListener()) {
+            Log.w(TAG, "Active Assistant does not have Notification Listener permissions.");
+            boolean success = handleFallback(sbn, action);
+            callback.onResult(!success);
+            return;
+        }
+
+        IVoiceActionCheckCallback actionCheckCallback = new IVoiceActionCheckCallback.Stub() {
+            @Override
+            public void onComplete(List<String> supportedActions) {
+                boolean success;
+                if (supportedActions != null && supportedActions.contains(action)) {
+                    if (Log.isLoggable(TAG, Log.DEBUG)) {
+                        Log.d(TAG, "Launching active Assistant for action: " + action);
+                    }
+                    success = mAssistUtils.showSessionForActiveService(payloadArguments,
+                            SHOW_SOURCE_NOTIFICATION, null, null);
+                } else {
+                    Log.w(TAG, "Active Assistant does not support voice action: " + action);
+                    success = handleFallback(sbn, action);
+                }
+                callback.onResult(!success);
+            }
+        };
+
+        Set<String> actionSet = new HashSet<>(Collections.singletonList(action));
+        mAssistUtils.getActiveServiceSupportedActions(actionSet, actionCheckCallback);
+    }
+
+    private boolean handleFallback(StatusBarNotification sbn, String action) {
+        switch (action) {
+            case CarVoiceInteractionSession.VOICE_ACTION_READ_NOTIFICATION:
+                return mFallbackAssistant.handleReadAction(sbn, mListener);
+
+            case CarVoiceInteractionSession.VOICE_ACTION_REPLY_NOTIFICATION:
+                return mFallbackAssistant.handleErrorMessage(mErrorMessage, mListener);
+
+            default:
+                Log.w(TAG, "Requested fallback action for unsupported voice action.");
+                return false;
+        }
     }
 }

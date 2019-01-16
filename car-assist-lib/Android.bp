@@ -23,7 +23,7 @@ android_library {
         enabled: false,
     },
 
-    sdk_version: "28",
+    sdk_version: "current",
 
     static_libs: [
         "androidx.legacy_legacy-support-v4",
