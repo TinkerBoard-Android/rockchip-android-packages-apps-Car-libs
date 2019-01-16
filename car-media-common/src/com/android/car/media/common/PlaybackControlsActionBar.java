@@ -61,6 +61,8 @@ public class PlaybackControlsActionBar extends ControlBar implements PlaybackCon
     private ImageButton mOverflowButton;
     private ColorStateList mIconsColor;
     private Listener mListener;
+    private boolean mSkipNextAdded;
+    private boolean mSkipPrevAdded;
 
     private PlaybackViewModel mModel;
     private PlaybackViewModel.PlaybackController mController;
@@ -132,6 +134,8 @@ public class PlaybackControlsActionBar extends ControlBar implements PlaybackCon
         setView(mPlayPauseStopImageContainer, ControlBar.SLOT_MAIN);
         setView(null, ControlBar.SLOT_LEFT);
         setView(null, ControlBar.SLOT_RIGHT);
+        mSkipNextAdded = false;
+        mSkipPrevAdded = false;
         setExpandCollapseView(mOverflowButton);
     }
 
@@ -168,9 +172,13 @@ public class PlaybackControlsActionBar extends ControlBar implements PlaybackCon
                     Boolean enabled = playbackInfo.isSkipPreviousEnabled().getValue();
                     boolean reservedImplicitly = enabled != null && enabled;
                     if (reserved || reservedImplicitly) {
-                        setView(mSkipPrevButton, ControlBar.SLOT_LEFT);
+                        if (!mSkipPrevAdded) {
+                            setView(mSkipPrevButton, ControlBar.SLOT_LEFT);
+                            mSkipPrevAdded = true;
+                        }
                     } else {
                         setView(null, ControlBar.SLOT_LEFT);
+                        mSkipPrevAdded = false;
                     }
                 });
 
@@ -179,15 +187,23 @@ public class PlaybackControlsActionBar extends ControlBar implements PlaybackCon
                     Boolean enabled = playbackInfo.isSkipNextEnabled().getValue();
                     boolean reservedImplicitly = enabled != null && enabled;
                     if (reserved || reservedImplicitly) {
-                        setView(mSkipNextButton,  ControlBar.SLOT_RIGHT);
+                        if (!mSkipNextAdded) {
+                            setView(mSkipNextButton, ControlBar.SLOT_RIGHT);
+                            mSkipNextAdded = true;
+                        }
                     } else {
                         setView(null, ControlBar.SLOT_RIGHT);
+                        mSkipNextAdded = false;
                     }
                 });
 
         playbackInfo.isSkipPreviousEnabled().observe(owner,
                 enabled -> {
                     if (enabled) {
+                        if (!mSkipPrevAdded) {
+                            setView(mSkipPrevButton, ControlBar.SLOT_LEFT);
+                            mSkipPrevAdded = true;
+                        }
                         mSkipPrevButton.setAlpha(ALPHA_ENABLED);
                     } else {
                         mSkipPrevButton.setAlpha(ALPHA_DISABLED);
@@ -197,6 +213,10 @@ public class PlaybackControlsActionBar extends ControlBar implements PlaybackCon
         playbackInfo.isSkipNextEnabled().observe(owner,
                 enabled -> {
                     if (enabled) {
+                        if (!mSkipNextAdded) {
+                            setView(mSkipNextButton, ControlBar.SLOT_RIGHT);
+                            mSkipNextAdded = true;
+                        }
                         mSkipNextButton.setAlpha(ALPHA_ENABLED);
                     } else {
                         mSkipNextButton.setAlpha(ALPHA_DISABLED);
