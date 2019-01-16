@@ -303,6 +303,13 @@ public class ControlBar extends RelativeLayout {
     private void setView(@Nullable View view, FrameLayout container) {
         container.removeAllViews();
         if (view != null) {
+            ViewGroup parent = (ViewGroup) view.getParent();
+            // As we are removing views (on BT disconnect, for example), some items will be
+            // shifting from expanded to collapsed (like Queue item) - remove those from the
+            // group before adding to the new slot
+            if (view.getParent() != null) {
+                parent.removeView(view);
+            }
             container.addView(view);
             container.setVisibility(VISIBLE);
         } else {
