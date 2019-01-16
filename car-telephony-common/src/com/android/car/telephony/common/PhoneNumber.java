@@ -37,7 +37,7 @@ public class PhoneNumber implements Parcelable {
     private final String mLabel;
 
     private boolean mIsPrimary;
-    private int mId;
+    private long mId;
     private int mDataVersion;
 
     /**
@@ -54,14 +54,14 @@ public class PhoneNumber implements Parcelable {
      *                    Phone#DATA_VERSION}
      */
     public static PhoneNumber newInstance(Context context, String rawNumber, int type,
-            @Nullable String label, boolean isPrimary, int id, int dataVersion) {
+            @Nullable String label, boolean isPrimary, long id, int dataVersion) {
         I18nPhoneNumberWrapper i18nPhoneNumber = I18nPhoneNumberWrapper.newInstance(context,
                 rawNumber);
         return new PhoneNumber(i18nPhoneNumber, type, label, isPrimary, id, dataVersion);
     }
 
     private PhoneNumber(I18nPhoneNumberWrapper i18nNumber, int type, @Nullable String label,
-            boolean isPrimary, int id, int dataVersion) {
+            boolean isPrimary, long id, int dataVersion) {
         mI18nPhoneNumber = i18nNumber;
         mType = type;
         mLabel = label;
@@ -120,7 +120,7 @@ public class PhoneNumber implements Parcelable {
         return mType;
     }
 
-    public int getId() {
+    public long getId() {
         return mId;
     }
 
@@ -166,7 +166,7 @@ public class PhoneNumber implements Parcelable {
         dest.writeString(mLabel);
         dest.writeParcelable(mI18nPhoneNumber, flags);
         dest.writeBoolean(mIsPrimary);
-        dest.writeInt(mId);
+        dest.writeLong(mId);
         dest.writeInt(mDataVersion);
     }
 
@@ -178,7 +178,7 @@ public class PhoneNumber implements Parcelable {
             I18nPhoneNumberWrapper i18nPhoneNumberWrapper = source.readParcelable(
                     I18nPhoneNumberWrapper.class.getClassLoader());
             boolean isPrimary = source.readBoolean();
-            int id = source.readInt();
+            long id = source.readLong();
             int dataVersion = source.readInt();
             PhoneNumber phoneNumber = new PhoneNumber(i18nPhoneNumberWrapper, type, label,
                     isPrimary, id, dataVersion);

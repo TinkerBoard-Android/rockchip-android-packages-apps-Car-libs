@@ -366,4 +366,19 @@ public class TelecomUtils {
                 values, null, null);
     }
 
+    /** Add a contact to favorite or remove it from favorite. */
+    public static int setAsFavoriteContact(Context context, Contact contact, boolean isFavorite) {
+        if (contact.isStarred() == isFavorite) {
+            return 0;
+        }
+
+        ContentValues values = new ContentValues(1);
+        values.put(ContactsContract.Contacts.STARRED, isFavorite ? 1 : 0);
+
+        String where = ContactsContract.Contacts._ID + " = ?";
+        String[] selectionArgs = new String[]{Long.toString(contact.getId())};
+        return context.getContentResolver().update(ContactsContract.Contacts.CONTENT_URI, values,
+                where, selectionArgs);
+    }
+
 }
