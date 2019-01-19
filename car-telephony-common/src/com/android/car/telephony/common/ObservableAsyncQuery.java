@@ -107,7 +107,6 @@ public class ObservableAsyncQuery {
     public void startQuery() {
         Log.d(TAG, "startQuery");
         mAsyncQueryHandler.cancelOperation(mToken); // Cancel the query task.
-        mAsyncQueryHandler.removeMessages(mToken); // Cancel the task to handle query result.
         mToken++;
         mAsyncQueryHandler.startQuery(
                 mToken,
@@ -127,9 +126,8 @@ public class ObservableAsyncQuery {
     public void stopQuery() {
         Log.d(TAG, "stopQuery");
         mIsActive = false;
-        closeCurrentCursorIfNecessary();
+        cleanupCursorIfNecessary();
         mAsyncQueryHandler.cancelOperation(mToken); // Cancel the query task.
-        mAsyncQueryHandler.removeMessages(mToken); // Cancel the task to handle query result.
     }
 
     private void onQueryComplete(int token, Object cookie, Cursor cursor) {
@@ -137,7 +135,7 @@ public class ObservableAsyncQuery {
             return;
         }
         Log.d(TAG, "onQueryComplete");
-        closeCurrentCursorIfNecessary();
+        cleanupCursorIfNecessary();
         if (cursor != null) {
             cursor.registerContentObserver(mContentObserver);
             mCurrentCursor = cursor;
@@ -147,9 +145,9 @@ public class ObservableAsyncQuery {
         }
     }
 
-    private void closeCurrentCursorIfNecessary() {
-        if (mCurrentCursor != null && !mCurrentCursor.isClosed()) {
-            mCurrentCursor.close();
+    protected void cleanupCursorIfNecessary() {
+        if (mCurrentCursor != null) {
+            mCurrentCursor.unregisterContentObserver(mContentObserver);
         }
         mCurrentCursor = null;
     }
@@ -167,6 +165,9 @@ public class ObservableAsyncQuery {
             if (token == mQuery.mToken) {
                 // The query result is the most up to date.
                 mQuery.onQueryComplete(token, cookie, cursor);
+            } else {
+                // Query canceled, close the cursor directly.
+                cursor.close();
             }
         }
     }
