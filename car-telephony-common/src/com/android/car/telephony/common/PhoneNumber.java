@@ -106,6 +106,13 @@ public class PhoneNumber implements Parcelable {
     }
 
     /**
+     * Returns the raw number, the number that is input by the user
+     */
+    public String getRawNumber() {
+        return mI18nPhoneNumber.getRawNumber();
+    }
+
+    /**
      * Returns the format independent i18n {@link I18nPhoneNumberWrapper wrapper} class.
      */
     public I18nPhoneNumberWrapper getI18nPhoneNumberWrapper() {
