@@ -84,6 +84,7 @@ limitations under the License.
          <item name="pagedScrollBarViewStyle">@style/Widget.CarSupportWrapper.Car.Scrollbar</item>
          <item name="android:alertDialogTheme">@style/Theme.CarSupportWrapper.Dialog.Alert</item>
          <item name="alertDialogTheme">@style/Theme.CarSupportWrapper.Dialog.Alert</item>
+         <item name="listItemBackgroundColor">@*android:color/background_device_default_light</item>
     </style>
 
     <style name="Theme.CarSupportWrapper.Dialog.Alert" parent="Theme.Car.Dialog.Alert">
