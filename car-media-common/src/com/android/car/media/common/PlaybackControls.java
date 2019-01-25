@@ -29,25 +29,4 @@ public interface PlaybackControls {
      * layout should be passed to this method.
      */
     void setAnimationViewGroup(ViewGroup animationViewGroup);
-
-    /**
-     * Sets whether the media queue is currently visible or not
-     */
-    void setQueueVisible(boolean visible);
-
-    /**
-     * Sets a listener for playback control events. Consumers of this method must remember to
-     * invoke it with null to avoid memory leaks.
-     */
-    void setListener(Listener listener);
-
-    /**
-     * Listener for this playback controls
-     */
-    interface Listener {
-        /**
-         * Method invoked when the user requests to hide/show the media queue.
-         */
-        void onToggleQueue();
-    }
 }

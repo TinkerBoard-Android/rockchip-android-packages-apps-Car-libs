@@ -16,15 +16,9 @@
 
 package com.android.car.media.common.playback;
 
-import static androidx.lifecycle.Transformations.map;
 import static androidx.lifecycle.Transformations.switchMap;
 
-import static com.android.car.arch.common.LiveDataFunctions.combine;
 import static com.android.car.arch.common.LiveDataFunctions.dataOf;
-import static com.android.car.arch.common.LiveDataFunctions.distinct;
-import static com.android.car.arch.common.LiveDataFunctions.mapNonNull;
-import static com.android.car.arch.common.LiveDataFunctions.pair;
-import static com.android.car.arch.common.LiveDataFunctions.switchMapNonNull;
 import static com.android.car.media.common.playback.PlaybackStateAnnotations.Actions;
 
 import android.annotation.IntDef;
@@ -43,16 +37,18 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
-import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 
-import com.android.car.arch.common.switching.SwitchingLiveData;
 import com.android.car.media.common.CustomPlaybackAction;
 import com.android.car.media.common.MediaConstants;
 import com.android.car.media.common.MediaItemMetadata;
 import com.android.car.media.common.R;
 import com.android.car.media.common.source.MediaSourceColors;
+import com.android.car.media.common.source.MediaSourceViewModel;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -66,9 +62,7 @@ import java.util.stream.Collectors;
  * ViewModel for media playback.
  * <p>
  * Observes changes to the provided MediaController to expose playback state and metadata
- * observables. Clients should ensure {@link #setMediaController(LiveData)} has been called before
- * calling any other methods. {@link #setMediaController(LiveData)} may be called multiple times,
- * but it is expected that clients will only call it once on startup.
+ * observables.
  * <p>
  * PlaybackViewModel is a singleton tied to the application to provide a single source of truth.
  */
@@ -114,100 +108,41 @@ public class PlaybackViewModel extends AndroidViewModel {
      */
     public static final int ACTION_PAUSE = 3;
 
-    private final SwitchingLiveData<MediaControllerCompat>
-            mMediaController = SwitchingLiveData.newInstance();
-    private final LiveData<MediaControllerCompat> mMediaControllerData =
-            mMediaController.asLiveData();
-
-    private final LiveData<MediaControllerCompat> mDistinctMediaController =
-            distinct(mMediaControllerData, this::haveSamePackageName);
+    private final MediaControllerCallback mMediaControllerCallback = new MediaControllerCallback();
+    private final Observer<MediaControllerCompat> mMediaControllerObserver =
+            mMediaControllerCallback::onMediaControllerChanged;
 
     private final MediaSourceColors.Factory mColorsFactory;
-    private final LiveData<MediaSourceColors> mColors;
+    private final MutableLiveData<MediaSourceColors> mColors = dataOf(null);
 
-    private final LiveData<MediaMetadataCompat> mMetadata =
-            switchMapNonNull(mMediaControllerData, MediaMetadataLiveData::new);
-    private final LiveData<MediaItemMetadata> mWrappedMetadata =
-            distinct(mapNonNull(mMetadata, MediaItemMetadata::new));
+    private final MutableLiveData<MediaItemMetadata> mMetadata = dataOf(null);
 
-    private final LiveData<PlaybackStateCompat> mPlaybackState =
-            switchMapNonNull(mMediaControllerData, PlaybackStateLiveData::new);
+    // Filters out queue items with no description or title and converts them to MediaItemMetadata
+    private final MutableLiveData<List<MediaItemMetadata>> mSanitizedQueue = dataOf(null);
 
-    private final LiveData<List<MediaSessionCompat.QueueItem>> mQueue =
-            switchMapNonNull(mMediaControllerData, QueueLiveData::new);
+    private final MutableLiveData<Boolean> mHasQueue = dataOf(null);
 
-    // Filters out queue items with no description or title and converts them to MediaItemMetadatas
-    private final LiveData<List<MediaItemMetadata>> mSanitizedQueue = distinct(map(mQueue,
-            queue -> queue == null ? Collections.emptyList()
-                    : queue.stream()
-                            .filter(item -> item.getDescription() != null
-                                    && item.getDescription().getTitle() != null)
-                            .map(MediaItemMetadata::new)
-                            .collect(Collectors.toList())));
+    private final MutableLiveData<CharSequence> mQueueTitle = dataOf(null);
 
-    private final LiveData<Boolean> mHasQueue = distinct(map(mQueue,
-            queue -> queue != null && !queue.isEmpty()));
+    private final MutableLiveData<PlaybackController> mPlaybackControls = dataOf(null);
 
-    private final LiveData<CharSequence> mQueueTitle =
-            distinct(switchMapNonNull(mMediaControllerData, QueueTitleLiveData::new));
+    private final MutableLiveData<PlaybackStateWrapper> mPlaybackStateWrapper = dataOf(null);
 
-    private final LiveData<PlaybackController> mPlaybackControls = map(mDistinctMediaController,
-            PlaybackController::new);
+    private final LiveData<Long> mProgress =
+            switchMap(mPlaybackStateWrapper,
+                    state -> state == null ? dataOf(0L)
+                            : new ProgressLiveData(state.mState, state.getMaxProgress()));
 
-    private final LiveData<CombinedInfo> mCombinedInfo = combine(mMetadata, mPlaybackState,
-            // getValue() on mMediaController is safe because mMetadata and mPlaybackState are
-            // keeping it active. Don't pass through the values since they may be stale if the
-            // MediaController is being updated.
-            (mediaMetadata, playbackState) -> getCombinedInfo(
-                    mMediaController.asLiveData().getValue())
-    );
 
-    @Nullable
-    private CombinedInfo getCombinedInfo(@Nullable MediaControllerCompat mediaController) {
-        if (mediaController == null) return null;
-
-        MediaMetadataCompat metadata = mediaController.getMetadata();
-        PlaybackStateCompat playbackState = mediaController.getPlaybackState();
-        CombinedInfo oldInfo = mCombinedInfo.getValue();
-        // Minimize object churn
-        if (oldInfo == null
-                || !Objects.equals(mediaController, oldInfo.mMediaController)
-                // MediaMetadata.equals() doesn't check some relevant fields
-                || !Objects.equals(playbackState, oldInfo.mPlaybackState)) {
-            return new CombinedInfo(mediaController, metadata, playbackState);
-        } else {
-            return oldInfo;
-        }
+    private PlaybackViewModel(Application application) {
+        this(application, MediaSourceViewModel.get(application).getMediaController());
     }
 
-
-    private final PlaybackInfo mPlaybackInfo = new PlaybackInfo();
-
-    public PlaybackViewModel(Application application) {
+    @VisibleForTesting
+    public PlaybackViewModel(Application application, LiveData<MediaControllerCompat> controller) {
         super(application);
         mColorsFactory = new MediaSourceColors.Factory(application);
-        mColors = map(mMediaController.asLiveData(), controller ->
-                controller == null ? null
-                        : mColorsFactory.extractColors(controller.getPackageName())
-        );
-    }
-
-    /**
-     * Sets the MediaController source for this ViewModel. This should be called before other
-     * methods on this ViewModel are set. This method may be called multiple times, and the
-     * LiveDatas returned by other methods in this ViewModel will refer to the latest
-     * MediaController.
-     */
-    public void setMediaController(@Nullable LiveData<MediaControllerCompat> mediaControllerData) {
-        mMediaController.setSource(mediaControllerData);
-    }
-
-    /**
-     * Returns a LiveData that emits the currently set MediaController (may emit null).
-     */
-    @NonNull
-    public LiveData<MediaControllerCompat> getMediaController() {
-        return mMediaControllerData;
+        controller.observeForever(mMediaControllerObserver);
     }
 
     /**
@@ -222,14 +157,7 @@ public class PlaybackViewModel extends AndroidViewModel {
      * managed by the provided {@link MediaControllerCompat}.
      */
     public LiveData<MediaItemMetadata> getMetadata() {
-        return mWrappedMetadata;
-    }
-
-    /**
-     * Returns a LiveData that emits the {@link PlaybackStateCompat} of a {@link MediaSessionCompat}
-     */
-    public LiveData<PlaybackStateCompat> getPlaybackState() {
-        return mPlaybackState;
+        return mMetadata;
     }
 
     /**
@@ -262,37 +190,142 @@ public class PlaybackViewModel extends AndroidViewModel {
         return mPlaybackControls;
     }
 
-    /**
-     * Returns an object for accessing data dependent on the current playback state.
-     */
-    public PlaybackInfo getPlaybackInfo() {
-        return mPlaybackInfo;
-    }
-
-    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
-    LiveData<CombinedInfo> getCombinedInfoForTesting() {
-        return mCombinedInfo;
-    }
-
-    private boolean haveSamePackageName(MediaControllerCompat left, MediaControllerCompat right) {
-        if (left == right) {
-            return true;
-        }
-        return left != null && right != null
-                && Objects.equals(left.getPackageName(), right.getPackageName());
+    /** Returns a {@PlaybackStateWrapper} live data. */
+    public LiveData<PlaybackStateWrapper> getPlaybackStateWrapper() {
+        return mPlaybackStateWrapper;
     }
 
     /**
-     * Contains LiveDatas related to the current PlaybackState. A single instance of this object is
-     * created for each PlaybackViewModel.
+     * Returns a LiveData that emits the current playback progress, in milliseconds. This is a
+     * value between 0 and {@link #getPlaybackStateWrapper#getMaxProgress()} or
+     * {@link PlaybackStateCompat#PLAYBACK_POSITION_UNKNOWN} if the current position is unknown.
+     * This value will update on its own periodically (less than a second) while active.
      */
-    public class PlaybackInfo {
-        private LiveData<Integer> mMainAction = map(mPlaybackState, state -> {
-            if (state == null) {
-                return ACTION_DISABLED;
+    public LiveData<Long> getProgress() {
+        return mProgress;
+    }
+
+    @VisibleForTesting
+    MediaControllerCompat getMediaController() {
+        return mMediaControllerCallback.mMediaController;
+    }
+
+    @VisibleForTesting
+    MediaMetadataCompat getMediaMetadata() {
+        return mMediaControllerCallback.mMediaMetadata;
+    }
+
+
+    private class MediaControllerCallback extends MediaControllerCompat.Callback {
+
+        private MediaControllerCompat mMediaController;
+        private MediaMetadataCompat mMediaMetadata;
+        private PlaybackStateCompat mPlaybackState;
+
+        void onMediaControllerChanged(MediaControllerCompat controller) {
+            if (mMediaController == controller) {
+                Log.w(TAG, "onMediaControllerChanged noop");
+                return;
             }
 
-            @Actions long actions = state.getActions();
+            if (mMediaController != null) {
+                mMediaController.unregisterCallback(this);
+            }
+
+            mMediaMetadata = null;
+            mPlaybackState = null;
+            mMediaController = controller;
+            mPlaybackControls.setValue(new PlaybackController(controller));
+
+            if (mMediaController != null) {
+                mMediaController.registerCallback(this);
+
+                mColors.setValue(mColorsFactory.extractColors(controller.getPackageName()));
+
+                // The apps don't always send updates so make sure we fetch the most recent values.
+                onMetadataChanged(mMediaController.getMetadata());
+                onPlaybackStateChanged(mMediaController.getPlaybackState());
+                onQueueChanged(mMediaController.getQueue());
+                onQueueTitleChanged(mMediaController.getQueueTitle());
+            } else {
+                mColors.setValue(null);
+                onMetadataChanged(null);
+                onPlaybackStateChanged(null);
+                onQueueChanged(null);
+                onQueueTitleChanged(null);
+            }
+
+            updatePlaybackStatus();
+        }
+
+        @Override
+        public void onSessionDestroyed() {
+            Log.w(TAG, "onSessionDestroyed");
+            onMediaControllerChanged(null);
+        }
+
+        @Override
+        public void onMetadataChanged(@Nullable MediaMetadataCompat metadata) {
+            mMediaMetadata = metadata;
+            MediaItemMetadata item = (metadata != null) ? new MediaItemMetadata(metadata)
+                    : null;
+            mMetadata.setValue(item);
+            updatePlaybackStatus();
+        }
+
+        @Override
+        public void onQueueTitleChanged(CharSequence title) {
+            mQueueTitle.setValue(title);
+        }
+
+        @Override
+        public void onQueueChanged(@Nullable List<MediaSessionCompat.QueueItem> queue) {
+            List<MediaItemMetadata> filtered = queue == null ? Collections.emptyList()
+                    : queue.stream()
+                            .filter(item -> item.getDescription() != null
+                                    && item.getDescription().getTitle() != null)
+                            .map(MediaItemMetadata::new)
+                            .collect(Collectors.toList());
+
+            mSanitizedQueue.setValue(filtered);
+            mHasQueue.setValue(!filtered.isEmpty());
+        }
+
+        @Override
+        public void onPlaybackStateChanged(PlaybackStateCompat playbackState) {
+            mPlaybackState = playbackState;
+            updatePlaybackStatus();
+        }
+
+        private void updatePlaybackStatus() {
+            if (mMediaController != null && mMediaMetadata != null && mPlaybackState != null) {
+                mPlaybackStateWrapper.setValue(
+                        new PlaybackStateWrapper(mMediaController, mMediaMetadata,
+                                mPlaybackState));
+            } else {
+                mPlaybackStateWrapper.setValue(null);
+            }
+        }
+    }
+
+    /** Convenient extension of {@link PlaybackStateCompat}. */
+    public static final class PlaybackStateWrapper {
+
+        private final MediaControllerCompat mMediaController;
+        private final MediaMetadataCompat mMetadata;
+        private final PlaybackStateCompat mState;
+
+        PlaybackStateWrapper(@NonNull MediaControllerCompat mediaController,
+                @NonNull MediaMetadataCompat metadata, @NonNull PlaybackStateCompat state) {
+            mMediaController = mediaController;
+            mMetadata = metadata;
+            mState = state;
+        }
+
+        /** Returns the main action. */
+        @Action
+        public int getMainAction() {
+            @Actions long actions = mState.getActions();
             @Action int stopAction = ACTION_DISABLED;
             if ((actions & (PlaybackStateCompat.ACTION_PAUSE
                     | PlaybackStateCompat.ACTION_PLAY_PAUSE)) != 0) {
@@ -301,7 +334,7 @@ public class PlaybackViewModel extends AndroidViewModel {
                 stopAction = ACTION_STOP;
             }
 
-            switch (state.getState()) {
+            switch (mState.getState()) {
                 case PlaybackStateCompat.STATE_PLAYING:
                 case PlaybackStateCompat.STATE_BUFFERING:
                 case PlaybackStateCompat.STATE_CONNECTING:
@@ -318,208 +351,99 @@ public class PlaybackViewModel extends AndroidViewModel {
                     return (actions & PlaybackStateCompat.ACTION_PLAY) != 0 ? ACTION_PLAY
                             : ACTION_DISABLED;
                 default:
-                    Log.w(TAG, String.format("Unknown PlaybackState: %d", state.getState()));
+                    Log.w(TAG, String.format("Unknown PlaybackState: %d", mState.getState()));
                     return ACTION_DISABLED;
             }
-        });
-
-        private final LiveData<Long> mMaxProgress = map(mMetadata,
-                metadata -> metadata == null ? 0
-                        : metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION));
-
-        private final LiveData<Long> mProgress =
-                switchMap(pair(mPlaybackState, mMaxProgress),
-                        pair -> pair.first == null ? dataOf(0L)
-                                : new ProgressLiveData(pair.first, pair.second));
-
-        private final LiveData<Boolean> mIsPlaying = map(mPlaybackState,
-                state -> state != null && state.getState() == PlaybackStateCompat.STATE_PLAYING);
-
-        private final LiveData<Boolean> mIsSkipNextEnabled = map(mPlaybackState,
-                state -> state != null
-                        && (state.getActions() & PlaybackStateCompat.ACTION_SKIP_TO_NEXT) != 0);
-
-        private final LiveData<Boolean> mIsSkipPreviousEnabled = map(mPlaybackState,
-                state -> state != null
-                        && (state.getActions() & PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS) != 0);
-
-        private final LiveData<Boolean> mIsSkipNextReserved = map(mMediaControllerData,
-                controller -> controller != null
-                        && controller.getExtras() != null
-                        && controller.getExtras().getBoolean(
-                        MediaConstants.SLOT_RESERVATION_SKIP_TO_NEXT));
-
-        private final LiveData<Boolean> mIsSkipPreviousReserved = map(mMediaControllerData,
-                controller -> controller != null
-                        && controller.getExtras() != null
-                        && controller.getExtras().getBoolean(
-                        MediaConstants.SLOT_RESERVATION_SKIP_TO_PREV));
-
-        // true if the media source is loading (e.g.: buffering, connecting, etc.)
-        private final LiveData<Boolean> mIsLoading = map(mPlaybackState,
-                playbackState -> {
-                    if (playbackState == null) {
-                        return false;
-                    }
-
-                    int state = playbackState.getState();
-                    return state == PlaybackStateCompat.STATE_BUFFERING
-                            || state == PlaybackStateCompat.STATE_CONNECTING
-                            || state == PlaybackStateCompat.STATE_FAST_FORWARDING
-                            || state == PlaybackStateCompat.STATE_REWINDING
-                            || state == PlaybackStateCompat.STATE_SKIPPING_TO_NEXT
-                            || state == PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS
-                            || state == PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM;
-                });
-
-        private final LiveData<CharSequence> mErrorMessage =
-                mapNonNull(mPlaybackState, PlaybackStateCompat::getErrorMessage);
-
-        private final LiveData<Long> mActiveQueueItemId = mapNonNull(mPlaybackState,
-                (long) MediaSessionCompat.QueueItem.UNKNOWN_ID,
-                PlaybackStateCompat::getActiveQueueItemId);
-
-        private final LiveData<Integer> mQueuePosition = combine(mQueue, mActiveQueueItemId,
-                (queue, id) -> {
-                    if (queue == null || id == null
-                            || id == MediaSessionCompat.QueueItem.UNKNOWN_ID) {
-                        return null;
-                    }
-
-                    // A linear scan isn't really the best thing to do for large lists but we
-                    // suspect that the queue isn't going to be very long anyway so we can just
-                    // do the trivial thing. If it starts becoming a problem, we can build an
-                    // index over the ids.
-                    for (int i = 0; i < queue.size(); i++) {
-                        if (queue.get(i).getQueueId() == id) {
-                            return i;
-                        }
-                    }
-                    return null;
-                });
-
-        private final LiveData<List<RawCustomPlaybackAction>> mCustomActions =
-                distinct(map(mCombinedInfo, this::getCustomActions));
-
-        private PlaybackInfo() {
         }
 
-        @Action
-        public LiveData<Integer> getMainAction() {
-            return mMainAction;
+        /**
+         * Returns the duration of the media item in milliseconds. The current position in this
+         * duration can be obtained by calling {@link #getProgress()}.
+         */
+        public long getMaxProgress() {
+            return mMetadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION);
+        }
+
+        /** Returns whether the current media source is playing a media item. */
+        public boolean isPlaying() {
+            return mState.getState() == PlaybackStateCompat.STATE_PLAYING;
+        }
+
+        /** Returns whether the media source supports skipping to the next item. */
+        public boolean isSkipNextEnabled() {
+            return (mState.getActions() & PlaybackStateCompat.ACTION_SKIP_TO_NEXT) != 0;
+        }
+
+        /** Returns whether the media source supports skipping to the previous item. */
+        public boolean isSkipPreviousEnabled() {
+            return (mState.getActions() & PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS) != 0;
+        }
+
+        /** Returns whether the media source requires reserved space for the skip to next action. */
+        public boolean isSkipNextReserved() {
+            return mMediaController.getExtras() != null
+                    && mMediaController.getExtras().getBoolean(
+                    MediaConstants.SLOT_RESERVATION_SKIP_TO_NEXT);
+        }
+
+        /**
+         * Returns whether the media source requires reserved space for the skip to previous action.
+         */
+        public boolean iSkipPreviousReserved() {
+            return mMediaController.getExtras() != null
+                    && mMediaController.getExtras().getBoolean(
+                    MediaConstants.SLOT_RESERVATION_SKIP_TO_PREV);
+        }
+
+        /** Returns whether the media source is loading (e.g.: buffering, connecting, etc.). */
+        public boolean isLoading() {
+            int state = mState.getState();
+            return state == PlaybackStateCompat.STATE_BUFFERING
+                    || state == PlaybackStateCompat.STATE_CONNECTING
+                    || state == PlaybackStateCompat.STATE_FAST_FORWARDING
+                    || state == PlaybackStateCompat.STATE_REWINDING
+                    || state == PlaybackStateCompat.STATE_SKIPPING_TO_NEXT
+                    || state == PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS
+                    || state == PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM;
+        }
+
+        /** See {@link PlaybackStateCompat#getErrorMessage}. */
+        public CharSequence getErrorMessage() {
+            return mState.getErrorMessage();
+        }
+
+        /** See {@link PlaybackStateCompat#getActiveQueueItemId}. */
+        public long getActiveQueueItemId() {
+            return mState.getActiveQueueItemId();
+        }
+
+        /** See {@link PlaybackStateCompat#getState}. */
+        @PlaybackStateCompat.State
+        public int getState() {
+            return mState.getState();
+        }
+
+        /** See {@link PlaybackStateCompat#getExtras}. */
+        public Bundle getExtras() {
+            return mState.getExtras();
+        }
+
+        @VisibleForTesting
+        PlaybackStateCompat getStateCompat() {
+            return mState;
         }
 
         /**
          * Returns a sorted list of custom actions available. Call {@link
          * RawCustomPlaybackAction#fetchDrawable(Context)} to get the appropriate icon Drawable.
          */
-        public LiveData<List<RawCustomPlaybackAction>> getCustomActions() {
-            return mCustomActions;
-        }
-
-        /**
-         * Returns a LiveData that emits the duration of the media item, in milliseconds. The
-         * current position in this duration can be obtained by calling {@link #getProgress()}.
-         */
-        public LiveData<Long> getMaxProgress() {
-            return mMaxProgress;
-        }
-
-        /**
-         * Returns a LiveData that emits the current playback progress, in milliseconds. This is a
-         * value between 0 and {@link #getMaxProgress()} or
-         * {@link PlaybackStateCompat#PLAYBACK_POSITION_UNKNOWN}
-         * if the current position is unknown. This value will update on its own periodically (less
-         * than a second) while active.
-         */
-        public LiveData<Long> getProgress() {
-            return mProgress;
-        }
-
-        /**
-         * Returns a LiveData that emits {@code true} iff the current media source is playing a
-         * media item.
-         */
-        public LiveData<Boolean> isPlaying() {
-            return mIsPlaying;
-        }
-
-        /**
-         * Returns a LiveData that emits {@code true} iff the media source supports skipping to the
-         * next item.
-         */
-        public LiveData<Boolean> isSkipNextEnabled() {
-            return mIsSkipNextEnabled;
-        }
-
-        /**
-         * Returns a LiveData that emits {@code true} iff the media source requires reserved space
-         * for the skip to next action
-         */
-        public LiveData<Boolean> isSkipNextReserved() {
-            return mIsSkipNextReserved;
-        }
-
-        /**
-         * Returns a LiveData that emits {@code true} iff the media source supports skipping to the
-         * previous item.
-         */
-        public LiveData<Boolean> isSkipPreviousEnabled() {
-            return mIsSkipPreviousEnabled;
-        }
-
-        /**
-         * Returns a LiveData that emits {@code true} iff the media source requires reserved space
-         * for the skip to previous action.
-         */
-        public LiveData<Boolean> isSkipPreviousReserved() {
-            return mIsSkipPreviousReserved;
-        }
-
-        /**
-         * Returns a LiveData that emits {@code true} iff the media source is loading (e.g.:
-         * buffering, connecting, etc.)
-         */
-        public LiveData<Boolean> isLoading() {
-            return mIsLoading;
-        }
-
-        /**
-         * Returns a LiveData that emits a human readable description of the error that cause the
-         * media source to be in a non-playable state, or {@code null} if there is no error.
-         */
-        public LiveData<CharSequence> getErrorMessage() {
-            return mErrorMessage;
-        }
-
-        /**
-         * Returns a LiveData that emits the queue id of the currently playing queue item, or {@link
-         * MediaSessionCompat.QueueItem#UNKNOWN_ID} if none of the items is currently playing.
-         */
-        public LiveData<Long> getActiveQueueItemId() {
-            return mActiveQueueItemId;
-        }
-
-        /**
-         * Returns a LiveData that emits the current position of the currently playing queue item,
-         * or {@code null} if none of the items is currently playing.
-         */
-        public LiveData<Integer> getActiveQueuePosition() {
-            return mQueuePosition;
-        }
-
-        private List<RawCustomPlaybackAction> getCustomActions(
-                @Nullable CombinedInfo info) {
+        public List<RawCustomPlaybackAction> getCustomActions() {
             List<RawCustomPlaybackAction> actions = new ArrayList<>();
-            if (info == null) return actions;
-            PlaybackStateCompat playbackState = info.mPlaybackState;
-            if (playbackState == null) return actions;
-
-            RawCustomPlaybackAction ratingAction = getRatingAction(info);
+            RawCustomPlaybackAction ratingAction = getRatingAction();
             if (ratingAction != null) actions.add(ratingAction);
 
-            for (PlaybackStateCompat.CustomAction action : playbackState.getCustomActions()) {
-                String packageName = info.mMediaController.getPackageName();
+            for (PlaybackStateCompat.CustomAction action : mState.getCustomActions()) {
+                String packageName = mMediaController.getPackageName();
                 actions.add(
                         new RawCustomPlaybackAction(action.getIcon(), packageName,
                                 action.getAction(),
@@ -529,37 +453,30 @@ public class PlaybackViewModel extends AndroidViewModel {
         }
 
         @Nullable
-        private RawCustomPlaybackAction getRatingAction(@Nullable CombinedInfo info) {
-            if (info == null) return null;
-            PlaybackStateCompat playbackState = info.mPlaybackState;
-            if (playbackState == null) return null;
-
-            long stdActions = playbackState.getActions();
+        private RawCustomPlaybackAction getRatingAction() {
+            long stdActions = mState.getActions();
             if ((stdActions & PlaybackStateCompat.ACTION_SET_RATING) == 0) return null;
 
-            int ratingType = info.mMediaController.getRatingType();
+            int ratingType = mMediaController.getRatingType();
             if (ratingType != RatingCompat.RATING_HEART) return null;
 
-            MediaMetadataCompat metadata = info.mMetadata;
-            boolean hasHeart = false;
-            if (metadata != null) {
-                RatingCompat rating =
-                        metadata.getRating(MediaMetadataCompat.METADATA_KEY_USER_RATING);
-                hasHeart = rating != null && rating.hasHeart();
-            }
+            RatingCompat rating = mMetadata.getRating(MediaMetadataCompat.METADATA_KEY_USER_RATING);
+            boolean hasHeart = rating != null && rating.hasHeart();
 
             int iconResource = hasHeart ? R.drawable.ic_star_filled : R.drawable.ic_star_empty;
             Bundle extras = new Bundle();
             extras.putBoolean(EXTRA_SET_HEART, !hasHeart);
-            return new RawCustomPlaybackAction(iconResource, null, ACTION_SET_RATING,
-                    extras);
+            return new RawCustomPlaybackAction(iconResource, null, ACTION_SET_RATING, extras);
         }
     }
+
 
     /**
      * Wraps the {@link android.media.session.MediaController.TransportControls TransportControls}
      * for a {@link MediaControllerCompat} to send commands.
      */
+    // TODO(arnaudberry) does this wrapping make sense since we're still null checking the wrapper?
+    // Should we call action methods on the model class instead ?
     public static class PlaybackController {
         private final MediaControllerCompat mMediaController;
 
@@ -665,7 +582,7 @@ public class PlaybackViewModel extends AndroidViewModel {
      * Abstract representation of a custom playback action. A custom playback action represents a
      * visual element that can be used to trigger playback actions not included in the standard
      * {@link PlaybackController} class. Custom actions for the current media source are exposed
-     * through {@link PlaybackInfo#getCustomActions()}
+     * through {@link PlaybackStateWrapper#getCustomActions}
      * <p>
      * Does not contain a {@link Drawable} representation of the icon. Instances of this object
      * should be converted to a {@link CustomPlaybackAction} via {@link
@@ -766,16 +683,4 @@ public class PlaybackViewModel extends AndroidViewModel {
         }
     }
 
-    static class CombinedInfo {
-        final MediaControllerCompat mMediaController;
-        final MediaMetadataCompat mMetadata;
-        final PlaybackStateCompat mPlaybackState;
-
-        private CombinedInfo(MediaControllerCompat mediaController,
-                MediaMetadataCompat metadata, PlaybackStateCompat playbackState) {
-            this.mMediaController = mediaController;
-            this.mMetadata = metadata;
-            this.mPlaybackState = playbackState;
-        }
-    }
 }
