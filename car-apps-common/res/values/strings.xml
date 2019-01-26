@@ -14,18 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <resources>
-    <!-- NOTE: Although these strings won't really be used for accessibility
-         in an auto context, integration tests will use them to open/close
-         drawer. See:
-         google_testing/integration/libraries/app-helpers/first-party/auto/
-         -->
-
     <!-- Control Bar -->
     <!-- Content description for the 'Expand/Collapse' button [CHAR_LIMIT=50] -->
     <string name="control_bar_expand_collapse_button">Expand/collapse button</string>
 
-    <!-- NOTE: Although these strings won't really be used for accessibility
-         in an auto context, they are needed to create an ActionBarDrawerToggle. -->
-    <string name="car_drawer_open" translatable="false">Open drawer</string>
-    <string name="car_drawer_close" translatable="false">Close drawer</string>
+    <string name="car_drawer_open">Open drawer</string>
+    <string name="car_drawer_close">Close drawer</string>
 </resources>
