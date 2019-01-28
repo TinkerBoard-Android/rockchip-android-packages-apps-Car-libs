@@ -95,7 +95,7 @@ public class MediaAppSelectorWidget extends LinearLayout {
     /** Calling this is required so the widget can show the icon of the primary media source. */
     public void setFragmentActivity(FragmentActivity activity) {
         mActivity = activity;
-        MediaSourceViewModel model = MediaSourceViewModel.get(activity);
+        MediaSourceViewModel model = MediaSourceViewModel.get(activity.getApplication());
         model.getPrimaryMediaSource().observe(activity, source -> {
             if (source == null) {
                 setAppIcon(null);
@@ -109,6 +109,13 @@ public class MediaAppSelectorWidget extends LinearLayout {
     /** Opens the {@link AppSelectionFragment}. */
     public void open() {
         if (!mFragmentIsOpen) {
+            onAppSwitchClicked();
+        }
+    }
+
+    /** Closes the {@link AppSelectionFragment}. */
+    public void close() {
+        if (mFragmentIsOpen) {
             onAppSwitchClicked();
         }
     }

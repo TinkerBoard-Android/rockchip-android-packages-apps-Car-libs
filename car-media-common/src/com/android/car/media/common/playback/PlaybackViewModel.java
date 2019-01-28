@@ -69,6 +69,8 @@ import java.util.stream.Collectors;
  * observables. Clients should ensure {@link #setMediaController(LiveData)} has been called before
  * calling any other methods. {@link #setMediaController(LiveData)} may be called multiple times,
  * but it is expected that clients will only call it once on startup.
+ * <p>
+ * PlaybackViewModel is a singleton tied to the application to provide a single source of truth.
  */
 public class PlaybackViewModel extends AndroidViewModel {
     private static final String TAG = "PlaybackViewModel";
@@ -76,6 +78,16 @@ public class PlaybackViewModel extends AndroidViewModel {
     private static final String ACTION_SET_RATING =
             "com.android.car.media.common.ACTION_SET_RATING";
     private static final String EXTRA_SET_HEART = "com.android.car.media.common.EXTRA_SET_HEART";
+
+    private static PlaybackViewModel sInstance;
+
+    /** Returns the PlaybackViewModel singleton tied to the application. */
+    public static PlaybackViewModel get(@NonNull Application application) {
+        if (sInstance == null) {
+            sInstance = new PlaybackViewModel(application);
+        }
+        return sInstance;
+    }
 
     /**
      * Possible main actions.

@@ -150,6 +150,8 @@ public interface MediaBrowserViewModel {
          * media browser from the {@link MediaSourceViewModel} provided by {@code
          * viewModelProvider}.
          *
+         *
+         * @param mediaSourceVM     the {@link MediaSourceViewModel} singleton.
          * @param viewModelProvider the ViewModelProvider to load ViewModels from.
          * @param key               a key to decide which instance of the ViewModel to fetch.
          *                          Subsequent calls with the same key will return the same
@@ -159,11 +161,11 @@ public interface MediaBrowserViewModel {
          */
         @NonNull
         public static MediaBrowserViewModel.WithMutableBrowseId getInstanceForKey(
-                @NonNull ViewModelProvider viewModelProvider,
+                MediaSourceViewModel mediaSourceVM, @NonNull ViewModelProvider viewModelProvider,
                 @NonNull String key) {
             MediaBrowserViewModelImpl viewModel = viewModelProvider.get(key,
                     MediaBrowserViewModelImpl.class);
-            initMediaBrowser(fetchConnectedMediaBrowser(viewModelProvider), viewModel);
+            initMediaBrowser(mediaSourceVM.getConnectedMediaBrowser(), viewModel);
             return viewModel;
         }
 
@@ -172,6 +174,8 @@ public interface MediaBrowserViewModel {
          * the {@link MediaSourceViewModel} provided by {@code viewModelProvider}. It will already
          * be configured to browse {@code browseId}.
          *
+         *
+         * @param mediaSourceVM     the {@link MediaSourceViewModel} singleton.
          * @param viewModelProvider the ViewModelProvider to load ViewModels from.
          * @param browseId          the browseId to browse. This will also serve as the key for
          *                          fetching the ViewModel.
@@ -179,10 +183,10 @@ public interface MediaBrowserViewModel {
          */
         @NonNull
         public static MediaBrowserViewModel getInstanceForBrowseId(
-                @NonNull ViewModelProvider viewModelProvider,
+                MediaSourceViewModel mediaSourceVM, @NonNull ViewModelProvider viewModelProvider,
                 @NonNull String browseId) {
             MediaBrowserViewModel.WithMutableBrowseId viewModel =
-                    getInstanceForKey(viewModelProvider, browseId);
+                    getInstanceForKey(mediaSourceVM, viewModelProvider, browseId);
             viewModel.setCurrentBrowseId(browseId);
             return viewModel;
         }
@@ -192,14 +196,15 @@ public interface MediaBrowserViewModel {
          * the {@link MediaSourceViewModel} provided by {@code viewModelProvider}. It will already
          * be configured to browse the root of the browser.
          *
+         * @param mediaSourceVM     the {@link MediaSourceViewModel} singleton.
          * @param viewModelProvider the ViewModelProvider to load ViewModels from.
          * @return an initialized MediaBrowserViewModel configured to browse the specified browseId.
          */
         @NonNull
         public static MediaBrowserViewModel getInstanceForBrowseRoot(
-                @NonNull ViewModelProvider viewModelProvider) {
+                MediaSourceViewModel mediaSourceVM, @NonNull ViewModelProvider viewModelProvider) {
             MediaBrowserViewModel.WithMutableBrowseId viewModel =
-                    getInstanceForKey(viewModelProvider, KEY_BROWSER_ROOT);
+                    getInstanceForKey(mediaSourceVM, viewModelProvider, KEY_BROWSER_ROOT);
             viewModel.setCurrentBrowseId(null);
             return viewModel;
         }
@@ -210,11 +215,6 @@ public interface MediaBrowserViewModel {
             if (viewModel.getMediaBrowserSource() != connectedMediaBrowser) {
                 viewModel.setConnectedMediaBrowser(connectedMediaBrowser);
             }
-        }
-
-        private static LiveData<MediaBrowserCompat> fetchConnectedMediaBrowser(
-                @NonNull ViewModelProvider viewModelProvider) {
-            return viewModelProvider.get(MediaSourceViewModel.class).getConnectedMediaBrowser();
         }
     }
 }
