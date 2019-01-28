@@ -86,7 +86,7 @@ public class PlaybackViewModelTest {
         doNothing().when(mMediaController).registerCallback(mCapturedCallback.capture());
         when(mMediaDescriptionCompat.getMediaDescription()).thenReturn(mMediaDescription);
         when(mMediaMetadata.getDescription()).thenReturn(mMediaDescriptionCompat);
-        mPlaybackViewModel = new PlaybackViewModel(application);
+        mPlaybackViewModel = PlaybackViewModel.get(application);
         mPlaybackViewModel.setMediaController(dataOf(mMediaController));
     }
 

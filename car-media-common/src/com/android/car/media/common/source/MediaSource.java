@@ -247,4 +247,10 @@ public class MediaSource {
     public String toString() {
         return getPackageName();
     }
+
+    /** Returns the package name of the given source, or null. */
+    @Nullable
+    public static String getPackageName(@Nullable MediaSource source) {
+        return (source != null) ? source.getPackageName() : null;
+    }
 }

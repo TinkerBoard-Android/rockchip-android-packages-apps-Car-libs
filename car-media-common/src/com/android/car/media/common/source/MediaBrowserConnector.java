@@ -16,119 +16,129 @@
 
 package com.android.car.media.common.source;
 
+import static com.android.car.apps.common.util.CarAppsDebugUtils.idHash;
+
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.support.v4.media.MediaBrowserCompat;
-
-import androidx.annotation.IntDef;
-import androidx.annotation.VisibleForTesting;
-import androidx.lifecycle.LiveData;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import android.util.Log;
 
 /**
- * A LiveData that emits a MediaBrowserState for the current connection status. Attempts to maintain
- * a connection while active.
+ * A helper class to connect to a single {@link MediaBrowserCompat}. Connecting to a new one
+ * automatically disconnects the previous browser. Changes of the currently connected browser are
+ * sent via {@link MediaBrowserConnector.Callback}.
  */
 
-class MediaBrowserConnector extends LiveData<MediaBrowserConnector.MediaBrowserState> {
+public class MediaBrowserConnector {
 
-    /**
-     * Contains the {@link MediaBrowserCompat} for a {@link MediaBrowserConnector} and its
-     * associated connection status.
-     */
-    public static class MediaBrowserState {
-        public final MediaBrowserCompat mMediaBrowser;
+    private static final String TAG = "MediaBrowserConnector";
 
-        @ConnectionState
-        public final int mConnectionState;
-
-        MediaBrowserState(MediaBrowserCompat mediaBrowser, @ConnectionState int connectionState) {
-            mMediaBrowser = mediaBrowser;
-            mConnectionState = connectionState;
-        }
+    /** The callback to receive the currently connected {@link MediaBrowserCompat}. */
+    public interface Callback {
+        /** When disconnecting, the given browser will be null. */
+        void onConnectedBrowserChanged(@Nullable MediaBrowserCompat browser);
     }
 
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(value = {ConnectionState.DISCONNECTED, ConnectionState.CONNECTING,
-            ConnectionState.CONNECTED, ConnectionState.CONNECTION_FAILED})
-    public @interface ConnectionState {
-        int DISCONNECTED = 0;
-        int CONNECTING = 1;
-        int CONNECTED = 2;
-        int CONNECTION_FAILED = 3;
-    }
+    private final Context mContext;
+    private final Callback mCallback;
 
-    private final MediaBrowserCompat mBrowser;
+    @Nullable private ComponentName mBrowseService;
+    @Nullable private MediaBrowserCompat mBrowser;
 
     /**
-     * Create a new MediaBrowserConnector for the specified component.
+     * Create a new MediaBrowserConnector.
      *
-     * @param context       The Context with which to build the MediaBrowser.
-     * @param browseService The ComponentName of the media browser service.
-     * @see MediaBrowserCompat#MediaBrowserCompat(Context, ComponentName,
-     * MediaBrowserCompat.ConnectionCallback, android.os.Bundle)
+     * @param context The Context with which to build MediaBrowsers.
      */
-    MediaBrowserConnector(@NonNull Context context,
-            @NonNull ComponentName browseService) {
-        mBrowser = createMediaBrowser(context, browseService,
-                new MediaBrowserCompat.ConnectionCallback() {
-                    @Override
-                    public void onConnected() {
-                        setValue(new MediaBrowserState(mBrowser, ConnectionState.CONNECTED));
-                    }
-
-                    @Override
-                    public void onConnectionFailed() {
-                        setValue(
-                                new MediaBrowserState(mBrowser, ConnectionState.CONNECTION_FAILED));
-                    }
-
-                    @Override
-                    public void onConnectionSuspended() {
-                        setValue(new MediaBrowserState(mBrowser, ConnectionState.DISCONNECTED));
-                    }
-                });
+    MediaBrowserConnector(@NonNull Context context, @NonNull Callback callback) {
+        mContext = context;
+        mCallback = callback;
     }
 
-    /**
-     * Instantiate the MediaBrowserCompat this MediaBrowserConnector will connect with.
-     */
-    @VisibleForTesting()
-    protected MediaBrowserCompat createMediaBrowser(@NonNull Context context,
-            @NonNull ComponentName browseService,
-            @NonNull MediaBrowserCompat.ConnectionCallback callback) {
-        return new MediaBrowserCompat(context, browseService, callback, null);
-    }
+    /** Counter so callbacks from obsolete connections can be ignored. */
+    private int mBrowserConnectionCallbackCounter = 0;
 
-    @Override
-    protected void onActive() {
-        super.onActive();
-        if (mBrowser.isConnected()) {
-            setValue(new MediaBrowserState(mBrowser, ConnectionState.CONNECTED));
-        } else {
-            try {
-                connect();
-            } catch (IllegalStateException ex) {
-                // Ignore: MediaBrowse could be in an intermediate state (not connected, but not
-                // disconnected either.). In this situation, trying to connect again can throw
-                // this exception, but there is no way to know without trying.
+    private class BrowserConnectionCallback extends MediaBrowserCompat.ConnectionCallback {
+
+        private final int mSequenceNumber = ++mBrowserConnectionCallbackCounter;
+        private final String mCallbackPackage = mBrowseService.getPackageName();
+
+        private boolean isValidCall(String method) {
+            if (mSequenceNumber != mBrowserConnectionCallbackCounter) {
+                Log.e(TAG, "Ignoring callback " + method + " for " + mCallbackPackage + " seq: "
+                        + mSequenceNumber + " current: " + mBrowserConnectionCallbackCounter
+                        + " current: " + mBrowseService.getPackageName());
+                return false;
+            } else if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, method + " " + mBrowseService.getPackageName() + idHash(mBrowser));
+            }
+            return true;
+        }
+
+        @Override
+        public void onConnected() {
+            if (isValidCall("onConnected")) {
+                mCallback.onConnectedBrowserChanged(mBrowser);
+            }
+        }
+
+        @Override
+        public void onConnectionFailed() {
+            if (isValidCall("onConnectionFailed")) {
+                mCallback.onConnectedBrowserChanged(null);
+            }
+        }
+
+        @Override
+        public void onConnectionSuspended() {
+            if (isValidCall("onConnectionSuspended")) {
+                mCallback.onConnectedBrowserChanged(null);
             }
         }
     }
 
-    private void connect() {
-        setValue(new MediaBrowserState(mBrowser, ConnectionState.CONNECTING));
-        mBrowser.connect();
+    /**
+     * Creates and connects a new {@link MediaBrowserCompat} if the given {@link ComponentName}
+     * isn't null. If needed, the previous browser is disconnected.
+     * @param browseService the ComponentName of the media browser service.
+     * @see MediaBrowserCompat#MediaBrowserCompat(Context, ComponentName,
+     * MediaBrowserCompat.ConnectionCallback, android.os.Bundle)
+     */
+    public void connectTo(@Nullable ComponentName browseService) {
+        if (mBrowser != null && mBrowser.isConnected()) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Disconnecting: " + mBrowseService.getPackageName() + idHash(mBrowser));
+            }
+            mCallback.onConnectedBrowserChanged(null);
+            mBrowser.disconnect();
+        }
+
+        mBrowseService = browseService;
+        if (mBrowseService != null) {
+            mBrowser = createMediaBrowser(mBrowseService, new BrowserConnectionCallback());
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Connecting to: " + mBrowseService.getPackageName() + idHash(mBrowser));
+            }
+            try {
+                mBrowser.connect();
+            } catch (IllegalStateException ex) {
+                // Is this comment still valid ?
+                // Ignore: MediaBrowse could be in an intermediate state (not connected, but not
+                // disconnected either.). In this situation, trying to connect again can throw
+                // this exception, but there is no way to know without trying.
+                Log.e(TAG, "Connection exception: " + ex);
+            }
+        } else {
+            mBrowser = null;
+        }
     }
 
-    @Override
-    protected void onInactive() {
-        // TODO(b/77640010): Review MediaBrowse disconnection.
-        // Some media sources are not responding correctly to MediaBrowser#disconnect(). We
-        // are keeping the connection going.
-        //   mBrowser.disconnect();
+    // Override for testing.
+    @NonNull
+    protected MediaBrowserCompat createMediaBrowser(@NonNull ComponentName browseService,
+            @NonNull MediaBrowserCompat.ConnectionCallback callback) {
+        return new MediaBrowserCompat(mContext, browseService, callback, null);
     }
 }
