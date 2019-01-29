@@ -119,12 +119,12 @@ public class BrowseTree {
             "android.car.intent.action.PLAY_BROADCASTRADIO";
 
     private static final String NODE_ROOT = "root_id";
-    private static final String NODE_PROGRAMS = "programs_id";
-    private static final String NODE_FAVORITES = "favorites_id";
+    public static final String NODE_PROGRAMS = "programs_id";
+    public static final String NODE_FAVORITES = "favorites_id";
 
     private static final String NODEPREFIX_BAND = "band:";
-    private static final String NODE_BAND_AM = NODEPREFIX_BAND + "am";
-    private static final String NODE_BAND_FM = NODEPREFIX_BAND + "fm";
+    public static final String NODE_BAND_AM = NODEPREFIX_BAND + "am";
+    public static final String NODE_BAND_FM = NODEPREFIX_BAND + "fm";
 
     private static final String NODEPREFIX_AMFMCHANNEL = "amfm:";
     private static final String NODEPREFIX_PROGRAM = "program:";
