@@ -50,6 +50,12 @@ public class NotificationPayloadHandler {
         mContext = context;
     }
 
+    /** @return The {@link StatusBarNotification}, or null if not found. */
+    @Nullable
+    public StatusBarNotification getStatusBarNotification(Bundle args) {
+        return args.getParcelable(CarVoiceInteractionSession.KEY_NOTIFICATION);
+    }
+
     /**
      * Returns the {@link Notification} of the {@link StatusBarNotification}
      * provided in the args {@link Bundle}.
