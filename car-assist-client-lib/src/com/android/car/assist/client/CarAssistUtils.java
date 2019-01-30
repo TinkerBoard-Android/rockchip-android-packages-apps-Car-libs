@@ -50,13 +50,16 @@ public class CarAssistUtils {
     public static final String TAG = "CarAssistUtils";
     private static final List<Integer> REQUIRED_SEMANTIC_ACTIONS = Collections.unmodifiableList(
             Arrays.asList(
-                    SEMANTIC_ACTION_REPLY,
                     SEMANTIC_ACTION_MARK_AS_READ
             )
     );
 
-    // Currently, all supported semantic actions are required.
-    private static final List<Integer> SUPPORTED_SEMANTIC_ACTIONS = REQUIRED_SEMANTIC_ACTIONS;
+    private static final List<Integer> SUPPORTED_SEMANTIC_ACTIONS = Collections.unmodifiableList(
+            Arrays.asList(
+                    SEMANTIC_ACTION_MARK_AS_READ,
+                    SEMANTIC_ACTION_REPLY
+            )
+    );
 
     private final TextToSpeechHelper.Listener mListener = new TextToSpeechHelper.Listener() {
         @Override
