@@ -20,4 +20,6 @@
     <integer name="control_bar_expand_anim_duration">333</integer>
     <integer name="control_bar_collapse_anim_duration">233</integer>
 
+    <!-- Default max string length -->
+    <integer name="default_max_string_length">120</integer>
 </resources>

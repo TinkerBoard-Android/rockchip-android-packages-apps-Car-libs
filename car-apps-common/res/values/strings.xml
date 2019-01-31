@@ -20,4 +20,7 @@ limitations under the License.
 
     <string name="car_drawer_open">Open drawer</string>
     <string name="car_drawer_close">Close drawer</string>
+
+    <!-- CarUxRestrictions Utility -->
+    <string name="ellipsis" translatable="false">&#8230;</string>
 </resources>
