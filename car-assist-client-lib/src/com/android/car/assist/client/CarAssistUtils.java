@@ -95,11 +95,21 @@ public class CarAssistUtils {
     public boolean assistantIsNotificationListener() {
         final String activeComponent = mAssistUtils.getActiveServiceComponentName()
                 .flattenToString();
+        int slashIndex = activeComponent.indexOf("/");
+        final String activePackage = activeComponent.substring(0, slashIndex);
+
         final String listeners = Settings.Secure.getString(mContext.getContentResolver(),
                 Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
 
-        return listeners != null
-                && Arrays.asList(listeners.split(":")).contains(activeComponent);
+        if (listeners != null) {
+            for (String listener : Arrays.asList(listeners.split(":"))) {
+                if (listener.contains(activePackage)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -174,8 +184,7 @@ public class CarAssistUtils {
     /**
      * Requests a given action from the current active Assistant.
      *
-     *
-     * @param sbn the notification payload to deliver to assistant
+     * @param sbn            the notification payload to deliver to assistant
      * @param semanticAction the semantic action that is to be requested
      * @return true if the request was successful
      */
