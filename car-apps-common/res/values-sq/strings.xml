@@ -17,4 +17,6 @@ limitations under the License.
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="control_bar_expand_collapse_button" msgid="3420351169078117938">"Butoni i zgjerimit/palosjes"</string>
+    <string name="car_drawer_open" msgid="2676372472514742324">"Hap sirtarin"</string>
+    <string name="car_drawer_close" msgid="5329374630462464855">"Mbyll sirtarin"</string>
 </resources>

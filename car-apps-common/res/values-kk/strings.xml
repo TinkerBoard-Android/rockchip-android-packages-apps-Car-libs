@@ -17,8 +17,6 @@ limitations under the License.
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="control_bar_expand_collapse_button" msgid="3420351169078117938">"\"Жаю/Жию\" түймесі"</string>
-    <!-- no translation found for car_drawer_open (2676372472514742324) -->
-    <skip />
-    <!-- no translation found for car_drawer_close (5329374630462464855) -->
-    <skip />
+    <string name="car_drawer_open" msgid="2676372472514742324">"Тартпаны ашу"</string>
+    <string name="car_drawer_close" msgid="5329374630462464855">"Тартпаны жабу"</string>
 </resources>

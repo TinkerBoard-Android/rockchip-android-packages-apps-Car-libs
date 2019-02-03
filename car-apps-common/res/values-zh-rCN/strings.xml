@@ -16,7 +16,8 @@ limitations under the License.
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="control_bar_expand_collapse_button" msgid="3420351169078117938">"Bouton Développer/Réduire"</string>
-    <string name="car_drawer_open" msgid="2676372472514742324">"Ouvrir le tiroir"</string>
-    <string name="car_drawer_close" msgid="5329374630462464855">"Fermer le tiroir"</string>
+    <!-- no translation found for control_bar_expand_collapse_button (3420351169078117938) -->
+    <skip />
+    <string name="car_drawer_open" msgid="2676372472514742324">"打开抽屉式导航栏"</string>
+    <string name="car_drawer_close" msgid="5329374630462464855">"关闭抽屉式导航栏"</string>
 </resources>
