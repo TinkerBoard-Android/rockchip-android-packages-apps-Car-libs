@@ -103,11 +103,21 @@ public class CarAssistUtils {
     public boolean assistantIsNotificationListener() {
         final String activeComponent = mAssistUtils.getActiveServiceComponentName()
                 .flattenToString();
+        int slashIndex = activeComponent.indexOf("/");
+        final String activePackage = activeComponent.substring(0, slashIndex);
+
         final String listeners = Settings.Secure.getString(mContext.getContentResolver(),
                 Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
 
-        return listeners != null
-                && Arrays.asList(listeners.split(":")).contains(activeComponent);
+        if (listeners != null) {
+            for (String listener : Arrays.asList(listeners.split(":"))) {
+                if (listener.contains(activePackage)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
