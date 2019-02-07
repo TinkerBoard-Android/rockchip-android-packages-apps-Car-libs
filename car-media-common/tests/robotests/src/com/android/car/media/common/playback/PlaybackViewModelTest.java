@@ -33,6 +33,7 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.MutableLiveData;
 
 import com.android.car.arch.common.testing.CaptureObserver;
 import com.android.car.arch.common.testing.InstantTaskExecutorRule;
@@ -81,21 +82,15 @@ public class PlaybackViewModelTest {
 
     private PlaybackViewModel mPlaybackViewModel;
 
+    private MutableLiveData<MediaControllerCompat> mMediaControllerLiveData;
+
     @Before
     public void setUp() {
         doNothing().when(mMediaController).registerCallback(mCapturedCallback.capture());
         when(mMediaDescriptionCompat.getMediaDescription()).thenReturn(mMediaDescription);
         when(mMediaMetadata.getDescription()).thenReturn(mMediaDescriptionCompat);
-        mPlaybackViewModel = PlaybackViewModel.get(application);
-        mPlaybackViewModel.setMediaController(dataOf(mMediaController));
-    }
-
-    @Test
-    public void testGetMediaController() {
-        CaptureObserver<MediaControllerCompat> observer = new CaptureObserver<>();
-        mPlaybackViewModel.getMediaController().observe(mLifecycleOwner, observer);
-
-        assertThat(observer.getObservedValue()).isEqualTo(mMediaController);
+        mMediaControllerLiveData = dataOf(mMediaController);
+        mPlaybackViewModel = new PlaybackViewModel(application, mMediaControllerLiveData);
     }
 
     @Test
@@ -115,15 +110,16 @@ public class PlaybackViewModelTest {
 
     @Test
     public void testGetPlaybackState() {
-        CaptureObserver<PlaybackStateCompat> observer = new CaptureObserver<>();
-        mPlaybackViewModel.getPlaybackState().observe(mLifecycleOwner, observer);
+        CaptureObserver<PlaybackViewModel.PlaybackStateWrapper> observer = new CaptureObserver<>();
+        mPlaybackViewModel.getPlaybackStateWrapper().observe(mLifecycleOwner, observer);
         observer.reset();
 
         assertThat(mCapturedCallback.getValue()).isNotNull();
+        mCapturedCallback.getValue().onMetadataChanged(mMediaMetadata);
         mCapturedCallback.getValue().onPlaybackStateChanged(mPlaybackState);
 
         assertThat(observer.hasBeenNotified()).isTrue();
-        assertThat(observer.getObservedValue()).isEqualTo(mPlaybackState);
+        assertThat(observer.getObservedValue().getStateCompat()).isEqualTo(mPlaybackState);
     }
 
     @Test
@@ -192,7 +188,7 @@ public class PlaybackViewModelTest {
     }
 
     @Test
-    public void testChangeMediaSource_combinedInfoConsistent() {
+    public void testChangeMediaSource_consistentController() {
         // Ensure getters are consistent with values delivered by callback
         when(mMediaController.getMetadata()).thenReturn(mMediaMetadata);
         when(mMediaController.getPlaybackState()).thenReturn(mPlaybackState);
@@ -210,20 +206,28 @@ public class PlaybackViewModelTest {
         when(newController.getMetadata()).thenReturn(newMetadata);
         when(newController.getPlaybackState()).thenReturn(newPlaybackState);
 
-        // Ensure that whenever the CombinedInfo value changes, all values are coming from the
-        // same MediaController.
-        mPlaybackViewModel.getCombinedInfoForTesting().observe(mLifecycleOwner, combinedInfo -> {
-            if (combinedInfo.mMetadata == newMetadata
-                    || combinedInfo.mPlaybackState == newPlaybackState) {
-                assertThat(combinedInfo.mMediaController).isSameAs(newController);
+        // Ensure that all values are coming from the correct MediaController.
+        mPlaybackViewModel.getMetadata().observe(mLifecycleOwner, mediaItemMetadata -> {
+            if (mPlaybackViewModel.getMediaMetadata() == newMetadata) {
+                assertThat(mPlaybackViewModel.getMediaController()).isSameAs(newController);
             }
-            if (combinedInfo.mMetadata == mMediaMetadata
-                    || combinedInfo.mPlaybackState == mPlaybackState) {
-                assertThat(combinedInfo.mMediaController).isSameAs(mMediaController);
+            if (mPlaybackViewModel.getMediaMetadata() == mMediaMetadata) {
+                assertThat(mPlaybackViewModel.getMediaController()).isSameAs(mMediaController);
             }
         });
 
-        mPlaybackViewModel.setMediaController(dataOf(newController));
+        mPlaybackViewModel.getPlaybackStateWrapper().observe(mLifecycleOwner, state -> {
+            if (state == null) return;
+
+            if (state.getStateCompat() == newPlaybackState) {
+                assertThat(mPlaybackViewModel.getMediaController()).isSameAs(newController);
+            }
+            if (state.getStateCompat() == mPlaybackState) {
+                assertThat(mPlaybackViewModel.getMediaController()).isSameAs(mMediaController);
+            }
+        });
+
+        mMediaControllerLiveData.setValue(newController);
         deliverValuesToCallbacks(newCallbackCaptor, newMetadata, newPlaybackState);
     }
 
