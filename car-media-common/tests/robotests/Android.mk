@@ -35,6 +35,7 @@ LOCAL_JAVA_RESOURCE_DIRS := config
 
 # Include the testing libraries
 LOCAL_JAVA_LIBRARIES := \
+    android.car \
     androidx.arch.core_core-runtime \
     androidx.arch.core_core-common \
     robolectric_android-all-stub \
@@ -57,6 +58,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := RunCarMediaCommonRoboTests
 
 LOCAL_JAVA_LIBRARIES := \
+    android.car \
     CarMediaCommonRoboTests \
     robolectric_android-all-stub \
     Robolectric_all-target \
