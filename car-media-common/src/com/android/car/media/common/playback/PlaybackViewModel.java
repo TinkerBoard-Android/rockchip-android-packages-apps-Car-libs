@@ -133,7 +133,6 @@ public class PlaybackViewModel extends AndroidViewModel {
                     state -> state == null ? dataOf(0L)
                             : new ProgressLiveData(state.mState, state.getMaxProgress()));
 
-
     private PlaybackViewModel(Application application) {
         this(application, MediaSourceViewModel.get(application).getMediaController());
     }
@@ -379,6 +378,13 @@ public class PlaybackViewModel extends AndroidViewModel {
             return (mState.getActions() & PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS) != 0;
         }
 
+        /**
+         * Returns whether the media source supports seeking to a new location in the media stream.
+         */
+        public boolean isSeekToEnabled() {
+            return (mState.getActions() & PlaybackStateCompat.ACTION_SEEK_TO) != 0;
+        }
+
         /** Returns whether the media source requires reserved space for the skip to next action. */
         public boolean isSkipNextReserved() {
             return mMediaController.getExtras() != null
@@ -477,7 +483,7 @@ public class PlaybackViewModel extends AndroidViewModel {
      */
     // TODO(arnaudberry) does this wrapping make sense since we're still null checking the wrapper?
     // Should we call action methods on the model class instead ?
-    public static class PlaybackController {
+    public class PlaybackController {
         private final MediaControllerCompat mMediaController;
 
         private PlaybackController(@Nullable MediaControllerCompat mediaController) {
@@ -526,6 +532,23 @@ public class PlaybackViewModel extends AndroidViewModel {
         public void stop() {
             if (mMediaController != null) {
                 mMediaController.getTransportControls().stop();
+            }
+        }
+
+        /**
+         * Moves to a new location in the media stream
+         *
+         * @param pos Position to move to, in milliseconds.
+         */
+        public void seekTo(long pos) {
+            if (mMediaController != null) {
+                PlaybackStateCompat oldState = mMediaController.getPlaybackState();
+                PlaybackStateCompat newState = new PlaybackStateCompat.Builder(oldState)
+                        .setState(oldState.getState(), pos, oldState.getPlaybackSpeed())
+                        .build();
+                mMediaControllerCallback.onPlaybackStateChanged(newState);
+
+                mMediaController.getTransportControls().seekTo(pos);
             }
         }
 
