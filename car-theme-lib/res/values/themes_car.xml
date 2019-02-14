@@ -53,7 +53,7 @@ limitations under the License.
        match that of the device default theme such that components used by system apps will still
        look like system apps. Values are coming from DeviceDefault
      -->
-     <style name="Theme.CarSupportWrapper.NoActionBar" parent="Theme.Car.Light.NoActionBar">
+     <style name="Theme.CarSupportWrapper.NoActionBar" parent="Theme.Car.NoActionBar">
          <item name="android:background">@null</item>
          <item name="android:windowBackground">@*android:color/background_device_default_light</item>
          <item name="android:borderlessButtonStyle">@*android:style/Widget.DeviceDefault.Button.Borderless.Colored</item>
