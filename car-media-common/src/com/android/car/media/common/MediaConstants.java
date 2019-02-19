@@ -150,4 +150,18 @@ public final class MediaConstants {
     public static final Uri URI_MEDIA_SOURCE =
             Uri.parse("content://com.android.car.media.provider/media_source");
     public static final String KEY_PACKAGE_NAME = "package_name";
+
+    /**
+     * Constants for playable status
+     */
+
+    /**
+     * Bundle extra of type 'boolean' indicating that an item should show the 'explicit' symbol.
+     */
+    public static final String EXTRA_IS_EXPLICIT = "android.media.IS_EXPLICIT";
+
+    /**
+     * Bundle extra of type 'boolean' indicating than an item should show the 'downloaded' symbol.
+     */
+    public static final String EXTRA_IS_DOWNLOADED = "android.media.extra.DOWNLOAD_STATUS";
 }
