@@ -81,6 +81,9 @@ limitations under the License.
          <item name="android:textAppearanceLargeInverse">@android:style/TextAppearance.DeviceDefault.Large.Inverse</item>
          <item name="android:textAppearanceMediumInverse">@android:style/TextAppearance.DeviceDefault.Medium.Inverse</item>
          <item name="android:textAppearanceSmallInverse">@android:style/TextAppearance.DeviceDefault.Small.Inverse</item>
+         <item name="android:textAppearanceListItem">@*android:style/TextAppearance.DeviceDefault.Large</item>
+         <item name="android:textAppearanceListItemSmall">@*android:style/TextAppearance.DeviceDefault.Large</item>
+         <item name="android:textAppearanceListItemSecondary">@*android:style/TextAppearance.DeviceDefault.Small</item>
          <item name="pagedScrollBarViewStyle">@style/Widget.CarSupportWrapper.Car.Scrollbar</item>
          <item name="android:alertDialogTheme">@style/Theme.CarSupportWrapper.Dialog.Alert</item>
          <item name="alertDialogTheme">@style/Theme.CarSupportWrapper.Dialog.Alert</item>
@@ -93,6 +96,9 @@ limitations under the License.
         <item name="android:borderlessButtonStyle">@android:style/Widget.DeviceDefault.Button.Borderless.Colored</item>
         <item name="android:colorButtonNormal">@*android:color/car_highlight</item>
         <item name="android:textColorPrimary">@*android:color/car_body1</item>
+        <item name="android:textAppearanceListItem">@*android:style/TextAppearance.DeviceDefault.Large</item>
+        <item name="android:textAppearanceListItemSmall">@*android:style/TextAppearance.DeviceDefault.Large</item>
+        <item name="android:textAppearanceListItemSecondary">@*android:style/TextAppearance.DeviceDefault.Small</item>
         <item name="android:windowTitleStyle">@style/Widget.CarSupportWrapper.Car.Dialog.Title</item>
         <item name="buttonBarNeutralButtonStyle">@android:style/Widget.DeviceDefault.Button.Borderless.Colored</item>
         <item name="buttonBarNegativeButtonStyle">@android:style/Widget.DeviceDefault.Button.Borderless.Colored</item>
