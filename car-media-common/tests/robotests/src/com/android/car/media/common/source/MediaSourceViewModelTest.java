@@ -18,11 +18,14 @@ package com.android.car.media.common.source;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
 
 import android.annotation.NonNull;
 import android.app.Application;
+import android.car.Car;
+import android.car.media.CarMediaManager;
 import android.content.ComponentName;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.session.MediaControllerCompat;
@@ -59,19 +62,21 @@ public class MediaSourceViewModelTest {
     public final TestLifecycleOwner mLifecycleOwner = new TestLifecycleOwner();
 
     @Mock
-    public MediaSource mMediaSource;
-    @Mock
     public MediaBrowserCompat mMediaBrowser;
     @Mock
     public MediaControllerCompat mMediaControllerFromBrowser;
     @Mock
     public MediaControllerCompat mMediaControllerFromSessionManager;
 
+    @Mock
+    public Car mCar;
+    @Mock
+    public CarMediaManager mCarMediaManager;
+
     private MediaSourceViewModel mViewModel;
 
     private ComponentName mRequestedBrowseService;
-
-    private MediaSource mMediaSourceFromProvider;
+    private MediaSource mMediaSource;
 
     @Before
     public void setUp() {
@@ -81,7 +86,10 @@ public class MediaSourceViewModelTest {
                 .thenReturn(SESSION_MANAGER_CONTROLLER_PACKAGE_NAME);
 
         mRequestedBrowseService = null;
+        mMediaSource = null;
+    }
 
+    private void initializeViewModel() {
         mViewModel = new MediaSourceViewModel(application, new MediaSourceViewModel.InputFactory() {
             @Override
             public MediaBrowserConnector createMediaBrowserConnector(
@@ -104,14 +112,25 @@ public class MediaSourceViewModelTest {
             }
 
             @Override
-            public MediaSource getSelectedSourceFromContentProvider() {
-                return mMediaSourceFromProvider;
+            public Car getCarApi() {
+                return mCar;
+            }
+
+            @Override
+            public CarMediaManager getCarMediaManager(Car carApi) {
+                return mCarMediaManager;
+            }
+
+            @Override
+            public MediaSource getMediaSource(String packageName) {
+                return mMediaSource;
             }
         });
     }
 
     @Test
     public void testGetSelectedMediaSource_none() {
+        initializeViewModel();
         CaptureObserver<MediaSource> observer = new CaptureObserver<>();
 
         mViewModel.getPrimaryMediaSource().observe(mLifecycleOwner, observer);
@@ -123,11 +142,10 @@ public class MediaSourceViewModelTest {
     public void testGetMediaController_connectedBrowser() {
         CaptureObserver<MediaControllerCompat> observer = new CaptureObserver<>();
         ComponentName testComponent = new ComponentName("test", "test");
+        mMediaSource = mock(MediaSource.class);
         when(mMediaSource.getBrowseServiceComponentName()).thenReturn(testComponent);
         when(mMediaBrowser.isConnected()).thenReturn(true);
-
-        mMediaSourceFromProvider = mMediaSource;
-        mViewModel.getMediaSourceObserver().onChange(true);
+        initializeViewModel();
 
         mViewModel.getConnectedBrowserCallback().onConnectedBrowserChanged(mMediaBrowser);
         mViewModel.getMediaController().observe(mLifecycleOwner, observer);
@@ -136,16 +154,14 @@ public class MediaSourceViewModelTest {
         assertThat(mRequestedBrowseService).isEqualTo(testComponent);
     }
 
-
     @Test
     public void testGetMediaController_noActiveSession_notConnected() {
         CaptureObserver<MediaControllerCompat> observer = new CaptureObserver<>();
         ComponentName testComponent = new ComponentName("test", "test");
+        mMediaSource = mock(MediaSource.class);
         when(mMediaSource.getBrowseServiceComponentName()).thenReturn(testComponent);
         when(mMediaBrowser.isConnected()).thenReturn(false);
-
-        mMediaSourceFromProvider = mMediaSource;
-        mViewModel.getMediaSourceObserver().onChange(true);
+        initializeViewModel();
 
         mViewModel.getMediaController().observe(mLifecycleOwner, observer);
 
