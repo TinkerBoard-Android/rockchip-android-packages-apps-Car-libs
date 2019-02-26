@@ -153,6 +153,20 @@ public class MediaItemMetadata implements Parcelable {
     }
 
     /**
+     * @return boolean that indicate if media is explicit.
+     */
+    public boolean isExplicit() {
+        return mMediaDescription.getExtras().getBoolean(MediaConstants.EXTRA_IS_EXPLICIT, false);
+    }
+
+    /**
+     * @return boolean that indicate if media is downloaded.
+     */
+    public boolean isDownloaded() {
+        return mMediaDescription.getExtras().getBoolean(MediaConstants.EXTRA_IS_DOWNLOADED, false);
+    }
+
+    /**
      * Updates the given {@link ImageView} with the album art of the given media item. This is an
      * asynchronous operation.
      * Note: If a view is set using this method, it should also be cleared using this same method.
