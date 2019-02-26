@@ -297,7 +297,7 @@ public class PlaybackViewModel extends AndroidViewModel {
         }
 
         private void updatePlaybackStatus() {
-            if (mMediaController != null && mMediaMetadata != null && mPlaybackState != null) {
+            if (mMediaController != null && mPlaybackState != null) {
                 mPlaybackStateWrapper.setValue(
                         new PlaybackStateWrapper(mMediaController, mMediaMetadata,
                                 mPlaybackState));
@@ -311,11 +311,12 @@ public class PlaybackViewModel extends AndroidViewModel {
     public static final class PlaybackStateWrapper {
 
         private final MediaControllerCompat mMediaController;
+        @Nullable
         private final MediaMetadataCompat mMetadata;
         private final PlaybackStateCompat mState;
 
         PlaybackStateWrapper(@NonNull MediaControllerCompat mediaController,
-                @NonNull MediaMetadataCompat metadata, @NonNull PlaybackStateCompat state) {
+                @Nullable MediaMetadataCompat metadata, @NonNull PlaybackStateCompat state) {
             mMediaController = mediaController;
             mMetadata = metadata;
             mState = state;
@@ -360,7 +361,8 @@ public class PlaybackViewModel extends AndroidViewModel {
          * duration can be obtained by calling {@link #getProgress()}.
          */
         public long getMaxProgress() {
-            return mMetadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION);
+            return mMetadata == null ? 0 :
+                    mMetadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION);
         }
 
         /** Returns whether the current media source is playing a media item. */
@@ -466,8 +468,12 @@ public class PlaybackViewModel extends AndroidViewModel {
             int ratingType = mMediaController.getRatingType();
             if (ratingType != RatingCompat.RATING_HEART) return null;
 
-            RatingCompat rating = mMetadata.getRating(MediaMetadataCompat.METADATA_KEY_USER_RATING);
-            boolean hasHeart = rating != null && rating.hasHeart();
+            boolean hasHeart = false;
+            if (mMetadata != null) {
+                RatingCompat rating = mMetadata.getRating(
+                        MediaMetadataCompat.METADATA_KEY_USER_RATING);
+                hasHeart = rating != null && rating.hasHeart();
+            }
 
             int iconResource = hasHeart ? R.drawable.ic_star_filled : R.drawable.ic_star_empty;
             Bundle extras = new Bundle();
