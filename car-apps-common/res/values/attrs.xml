@@ -29,4 +29,12 @@
         <attr name="enableOverflow" format="boolean" />
     </declare-styleable>
 
+    <!-- Attributes for grid items. -->
+    <declare-styleable name="GridItems">
+        <!-- The preferred TextAppearance for the primary text of grid items. -->
+        <attr name="textAppearanceGridItem" format="reference" />
+        <!-- The preferred TextAppearance for the secondary text of grid items. -->
+        <attr name="textAppearanceGridItemSecondary" format="reference" />
+    </declare-styleable>
+
 </resources>

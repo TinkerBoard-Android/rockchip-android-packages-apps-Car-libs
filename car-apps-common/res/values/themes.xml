@@ -30,5 +30,7 @@ limitations under the License.
         <item name="drawerListTheme">@style/Theme.Car.Light.List</item>
         <item name="toolbarNavigationButtonStyle">@style/Widget.CarDefault.Toolbar.Button.Navigation</item>
         <item name="toolbarStyle">@style/Widget.CarDefault.Toolbar</item>
+        <item name="textAppearanceGridItem">@android:style/TextAppearance.DeviceDefault.Medium</item>
+        <item name="textAppearanceGridItemSecondary">@android:style/TextAppearance.DeviceDefault.Small</item>
     </style>
 </resources>
