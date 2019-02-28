@@ -160,8 +160,11 @@ public final class MediaConstants {
      */
     public static final String EXTRA_IS_EXPLICIT = "android.media.IS_EXPLICIT";
 
+    /** Bundle extra value indicating that an item should show the corresponding metadata */
+    public static long EXTRA_METADATA_ENABLED_VALUE = 1;
+
     /**
      * Bundle extra of type 'boolean' indicating than an item should show the 'downloaded' symbol.
      */
-    public static final String EXTRA_IS_DOWNLOADED = "android.media.extra.DOWNLOAD_STATUS";
+    public static final String EXTRA_DOWNLOAD_STATUS = "android.media.extra.DOWNLOAD_STATUS";
 }

@@ -156,14 +156,18 @@ public class MediaItemMetadata implements Parcelable {
      * @return boolean that indicate if media is explicit.
      */
     public boolean isExplicit() {
-        return mMediaDescription.getExtras().getBoolean(MediaConstants.EXTRA_IS_EXPLICIT, false);
+        Bundle extras = mMediaDescription.getExtras();
+        return extras != null && extras.getLong(MediaConstants.EXTRA_IS_EXPLICIT)
+                == MediaConstants.EXTRA_METADATA_ENABLED_VALUE;
     }
 
     /**
      * @return boolean that indicate if media is downloaded.
      */
     public boolean isDownloaded() {
-        return mMediaDescription.getExtras().getBoolean(MediaConstants.EXTRA_IS_DOWNLOADED, false);
+        Bundle extras = mMediaDescription.getExtras();
+        return extras != null && extras.getLong(MediaConstants.EXTRA_DOWNLOAD_STATUS)
+                == MediaDescriptionCompat.STATUS_DOWNLOADED;
     }
 
     /**
