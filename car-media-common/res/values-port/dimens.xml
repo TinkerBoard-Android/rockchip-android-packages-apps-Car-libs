@@ -16,7 +16,11 @@
 -->
 <resources>
     <!-- Fab -->
-        <dimen name="fab_large_size">76dp</dimen>
-        <dimen name="fab_large_padding">20dp</dimen>
-        <dimen name="fab_spinner_size">80dp</dimen>
+    <dimen name="fab_large_size">76dp</dimen>
+    <dimen name="fab_large_padding">20dp</dimen>
+    <dimen name="fab_spinner_size">80dp</dimen>
+
+    <!-- App bar -->
+    <dimen name="appbar_second_row_height">@*android:dimen/car_app_bar_height</dimen>
+
 </resources>
