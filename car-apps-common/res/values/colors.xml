@@ -35,5 +35,6 @@
     </array>
 
     <color name="action_bar_background_color">@*android:color/car_card</color>
+    <color name="app_bar_background_color">#ff000000</color>
     <color name="icon_tint">@*android:color/car_tint</color>
 </resources>
