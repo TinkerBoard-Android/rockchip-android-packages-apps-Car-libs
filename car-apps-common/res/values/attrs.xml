@@ -37,4 +37,12 @@
         <attr name="textAppearanceGridItemSecondary" format="reference" />
     </declare-styleable>
 
+    <!-- Attributes for tab layout. -->
+    <declare-styleable name="CarTabLayout">
+        <attr name="tabMinWidth" format="reference|dimension"/>
+        <attr name="tabSpacing" format="reference|dimension"/>
+        <attr name="tabFlexibleLayout" format="reference|boolean"/>
+        <attr name="tabItemLayout" format="reference"/>
+    </declare-styleable>
+
 </resources>

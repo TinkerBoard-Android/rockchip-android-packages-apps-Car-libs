@@ -30,4 +30,9 @@
     <!-- Control Buttons -->
     <dimen name="control_button_padding">16dp</dimen>
 
+    <!-- Tabs -->
+    <dimen name="car_tab_min_width">140dp</dimen>
+    <dimen name="car_tab_padding_x">@*android:dimen/car_padding_3</dimen>
+    <dimen name="car_tab_icon_size">@*android:dimen/car_primary_icon_size</dimen>
+
 </resources>
