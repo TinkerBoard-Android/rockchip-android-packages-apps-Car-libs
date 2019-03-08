@@ -20,7 +20,6 @@ import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.database.Cursor;
-import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.MainThread;
@@ -35,30 +34,6 @@ public class ObservableAsyncQuery {
     private static final String TAG = "CD.ObservableAsyncQuery";
 
     /**
-     * Represents query parameters.
-     */
-    public static class QueryParam {
-        final Uri mUri;
-        final String[] mProjection;
-        final String mSelection;
-        final String[] mSelectionArgs;
-        final String mOrderBy;
-
-        public QueryParam(
-                @NonNull Uri uri,
-                @Nullable String[] projection,
-                @Nullable String selection,
-                @Nullable String[] selectionArgs,
-                @Nullable String orderBy) {
-            mUri = uri;
-            mProjection = projection;
-            mSelection = selection;
-            mSelectionArgs = selectionArgs;
-            mOrderBy = orderBy;
-        }
-    }
-
-    /**
      * Called when query is finished.
      */
     public interface OnQueryFinishedListener {
@@ -69,23 +44,23 @@ public class ObservableAsyncQuery {
          * <p>Called on main thread.
          */
         @MainThread
-        void onQueryFinished(Cursor cursor);
+        void onQueryFinished(@Nullable Cursor cursor);
     }
 
     private AsyncQueryHandler mAsyncQueryHandler;
-    private QueryParam mQueryParam;
+    private QueryParam.Provider mQueryParamProvider;
     private Cursor mCurrentCursor;
-    private ObservableAsyncQuery.OnQueryFinishedListener mOnQueryFinishedListener;
+    private OnQueryFinishedListener mOnQueryFinishedListener;
     private ContentObserver mContentObserver;
     private boolean mIsActive = false;
     private int mToken;
 
     /**
-     * @param queryParam Query arguments for the current query.
-     * @param listener   Listener which will be called when data is available.
+     * @param queryParamProvider Supplies query arguments for the current query.
+     * @param listener           Listener which will be called when data is available.
      */
     public ObservableAsyncQuery(
-            @NonNull QueryParam queryParam,
+            @NonNull QueryParam.Provider queryParamProvider,
             @NonNull ContentResolver cr,
             @NonNull OnQueryFinishedListener listener) {
         mAsyncQueryHandler = new AsyncQueryHandlerImpl(this, cr);
@@ -95,7 +70,7 @@ public class ObservableAsyncQuery {
                 startQuery();
             }
         };
-        mQueryParam = queryParam;
+        mQueryParamProvider = queryParamProvider;
         mOnQueryFinishedListener = listener;
         mToken = 0;
     }
@@ -107,16 +82,23 @@ public class ObservableAsyncQuery {
     public void startQuery() {
         Log.d(TAG, "startQuery");
         mAsyncQueryHandler.cancelOperation(mToken); // Cancel the query task.
+
         mToken++;
-        mAsyncQueryHandler.startQuery(
-                mToken,
-                null,
-                mQueryParam.mUri,
-                mQueryParam.mProjection,
-                mQueryParam.mSelection,
-                mQueryParam.mSelectionArgs,
-                mQueryParam.mOrderBy);
+        QueryParam queryParam = mQueryParamProvider.getQueryParam();
+        if (queryParam != null) {
+            mAsyncQueryHandler.startQuery(
+                    mToken,
+                    null,
+                    queryParam.mUri,
+                    queryParam.mProjection,
+                    queryParam.mSelection,
+                    queryParam.mSelectionArgs,
+                    queryParam.mOrderBy);
+        } else {
+            mOnQueryFinishedListener.onQueryFinished(null);
+        }
         mIsActive = true;
+
     }
 
     /**

@@ -22,6 +22,8 @@ import android.database.Cursor;
 import android.os.HandlerThread;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.lifecycle.LiveData;
 
@@ -44,9 +46,9 @@ public abstract class AsyncQueryLiveData<T> extends LiveData<T> {
     private final ObservableAsyncQuery mObservableAsyncQuery;
     private CursorRunnable mCurrentCursorRunnable;
 
-    public AsyncQueryLiveData(Context context, ObservableAsyncQuery.QueryParam queryParam) {
-        mObservableAsyncQuery = new ObservableAsyncQuery(queryParam,
-                context.getContentResolver(), this::onCursorLoaded);
+    public AsyncQueryLiveData(Context context, QueryParam.Provider provider) {
+        mObservableAsyncQuery = new ObservableAsyncQuery(provider, context.getContentResolver(),
+                this::onCursorLoaded);
     }
 
     @Override
@@ -68,7 +70,7 @@ public abstract class AsyncQueryLiveData<T> extends LiveData<T> {
      * Override this function to convert the loaded data. This function is called on non-UI thread.
      */
     @WorkerThread
-    protected abstract T convertToEntity(Cursor cursor);
+    protected abstract T convertToEntity(@NonNull Cursor cursor);
 
     private void onCursorLoaded(Cursor cursor) {
         Log.d(TAG, "onCursorLoaded: " + this);
@@ -83,7 +85,7 @@ public abstract class AsyncQueryLiveData<T> extends LiveData<T> {
         private final Cursor mCursor;
         private boolean mIsActive;
 
-        private CursorRunnable(Cursor cursor) {
+        private CursorRunnable(@Nullable Cursor cursor) {
             mCursor = cursor;
             mIsActive = true;
         }
@@ -93,7 +95,7 @@ public abstract class AsyncQueryLiveData<T> extends LiveData<T> {
             // Bypass the workload to convert to entity and UI change triggered by post value if
             // cursor is not current.
             if (mIsActive) {
-                T entity = convertToEntity(mCursor);
+                T entity = mCursor == null ? null : convertToEntity(mCursor);
                 if (mIsActive) {
                     postValue(entity);
                 }
