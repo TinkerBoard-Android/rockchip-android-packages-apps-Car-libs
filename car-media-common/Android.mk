@@ -31,12 +31,13 @@ LOCAL_PRIVILEGED_MODULE := true
 LOCAL_PROGUARD_ENABLED := disabled
 
 LOCAL_STATIC_ANDROID_LIBRARIES += \
-    androidx.car_car \
+    androidx.cardview_cardview \
+    androidx.legacy_legacy-support-v4 \
+    androidx.recyclerview_recyclerview \
     androidx.mediarouter_mediarouter \
     androidx-constraintlayout_constraintlayout \
     car-apps-common \
-    car-arch-common \
-    car-theme-lib
+    car-arch-common
 
 LOCAL_STATIC_JAVA_LIBRARIES += \
     car-media-common-glide-target \
