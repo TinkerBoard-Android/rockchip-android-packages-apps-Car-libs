@@ -35,7 +35,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_begin="@dimen/appbar_height" />
+        app:layout_constraintGuide_begin="@dimen/appbar_first_row_height" />
 
     <com.android.car.media.common.MediaAppSelectorWidget
         android:id="@+id/app_switch_container"
@@ -54,7 +54,7 @@
         android:theme="@style/PagedListTheme"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/appbar_height"
+        android:layout_marginTop="@dimen/appbar_first_row_height"
         android:clickable="true"
         android:focusable="true"
         app:listContentTopOffset="@dimen/fragment_app_selection_list_top_offset"

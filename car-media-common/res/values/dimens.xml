@@ -25,7 +25,9 @@
     <dimen name="fab_spinner_size">128dp</dimen>
 
     <!-- App bar -->
-    <dimen name="appbar_height">@*android:dimen/car_app_bar_height</dimen>
+    <dimen name="appbar_first_row_height">@*android:dimen/car_app_bar_height</dimen>
+    <!-- By default app bar has only 1 row -->
+    <dimen name="appbar_second_row_height">0dp</dimen>
 
     <!-- playback_fragment.xml -->
     <dimen name="playback_fragment_text_margin_top">@*android:dimen/car_padding_4</dimen>
