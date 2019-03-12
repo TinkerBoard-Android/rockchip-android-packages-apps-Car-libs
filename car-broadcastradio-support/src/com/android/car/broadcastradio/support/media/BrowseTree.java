@@ -125,6 +125,7 @@ public class BrowseTree {
     private static final String NODEPREFIX_BAND = "band:";
     public static final String NODE_BAND_AM = NODEPREFIX_BAND + "am";
     public static final String NODE_BAND_FM = NODEPREFIX_BAND + "fm";
+    public static final String NODE_BAND_DAB = NODEPREFIX_BAND + "dab";
 
     private static final String NODEPREFIX_AMFMCHANNEL = "amfm:";
     private static final String NODEPREFIX_PROGRAM = "program:";
@@ -141,6 +142,7 @@ public class BrowseTree {
             NODE_BAND_AM, R.string.radio_am_text, "AM");
     private final AmFmChannelList mFmChannels = new AmFmChannelList(
             NODE_BAND_FM, R.string.radio_fm_text, "FM");
+    private boolean mDABEnabled;
 
     private final ProgramList.OnCompleteListener mProgramListCompleteListener =
             this::onProgramListUpdated;
@@ -174,15 +176,17 @@ public class BrowseTree {
         return new MediaItem(desc, MediaItem.FLAG_PLAYABLE);
     }
 
-    private static MediaItem createFolder(MediaDescription.Builder descBuilder,
-            String mediaId, String title, boolean isPlayable, long folderType, Bundle extras) {
+    private static MediaItem createFolder(MediaDescription.Builder descBuilder, String mediaId,
+            String title, boolean isBrowseable, boolean isPlayable, long folderType,
+            Bundle extras) {
         if (extras == null) extras = new Bundle();
         extras.putLong(EXTRA_BCRADIO_FOLDER_TYPE, folderType);
 
         MediaDescription desc = descBuilder
                 .setMediaId(mediaId).setTitle(title).setExtras(extras).build();
 
-        int flags = MediaItem.FLAG_BROWSABLE;
+        int flags = 0;
+        if (isBrowseable) flags |= MediaItem.FLAG_BROWSABLE;
         if (isPlayable) flags |= MediaItem.FLAG_PLAYABLE;
         return new MediaItem(desc, flags);
     }
@@ -212,6 +216,19 @@ public class BrowseTree {
             mFmChannels.setBands(fmBands);
             mRootChildren = null;
             mBrowserService.notifyChildrenChanged(NODE_ROOT);
+        }
+    }
+
+    /**
+     * Configures the BrowseTree to include a DAB node or not
+     */
+    public void setDABEnabled(boolean enabled) {
+        synchronized (mLock) {
+            if (mDABEnabled != enabled) {
+                mDABEnabled = enabled;
+                mRootChildren = null;
+                mBrowserService.notifyChildrenChanged(NODE_ROOT);
+            }
         }
     }
 
@@ -335,18 +352,24 @@ public class BrowseTree {
             if (mProgramList != null) {
                 mRootChildren.add(createFolder(dbld, NODE_PROGRAMS,
                         mBrowserService.getString(R.string.program_list_text),
-                        false, BCRADIO_FOLDER_TYPE_PROGRAMS, null));
+                        true, false, BCRADIO_FOLDER_TYPE_PROGRAMS, null));
             }
             if (mFavorites != null) {
                 mRootChildren.add(createFolder(dbld, NODE_FAVORITES,
                         mBrowserService.getString(R.string.favorites_list_text),
-                        true, BCRADIO_FOLDER_TYPE_FAVORITES, null));
+                        true, true, BCRADIO_FOLDER_TYPE_FAVORITES, null));
             }
 
             MediaItem amRoot = mAmChannels.getBandRoot();
             if (amRoot != null) mRootChildren.add(amRoot);
             MediaItem fmRoot = mFmChannels.getBandRoot();
             if (fmRoot != null) mRootChildren.add(fmRoot);
+
+            if (mDABEnabled) {
+                mRootChildren.add(createFolder(dbld, NODE_BAND_DAB,
+                        mBrowserService.getString(R.string.radio_dab_text),
+                        false, true, BCRADIO_FOLDER_TYPE_BAND, null));
+            }
 
             return mRootChildren;
         }
@@ -387,7 +410,8 @@ public class BrowseTree {
             Bundle extras = new Bundle();
             extras.putString(EXTRA_BCRADIO_BAND_NAME_EN, mBandNameEn);
             return createFolder(new MediaDescription.Builder(), mMediaId,
-                    mBrowserService.getString(mBandName), true, BCRADIO_FOLDER_TYPE_BAND, extras);
+                    mBrowserService.getString(mBandName), true, true, BCRADIO_FOLDER_TYPE_BAND,
+                    extras);
         }
 
         public List<MediaItem> getChannels() {
