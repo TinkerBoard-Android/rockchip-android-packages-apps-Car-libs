@@ -28,7 +28,8 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_USE_AAPT2 := true
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
-    androidx.car_car
+    androidx.annotation_annotation \
+    androidx.loader_loader
 
 LOCAL_PROGUARD_ENABLED := disabled
 
