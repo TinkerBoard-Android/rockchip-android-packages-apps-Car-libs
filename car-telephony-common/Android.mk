@@ -31,15 +31,10 @@ LOCAL_PRIVILEGED_MODULE := true
 LOCAL_PROGUARD_ENABLED := disabled
 
 LOCAL_STATIC_ANDROID_LIBRARIES += \
-    androidx.car_car \
-    androidx-constraintlayout_constraintlayout \
     androidx.legacy_legacy-support-v4 \
-    car-apps-common \
-    car-arch-common \
-    car-theme-lib
+    car-apps-common
 
 LOCAL_STATIC_JAVA_LIBRARIES += \
-    androidx-constraintlayout_constraintlayout-solver \
     car-glide \
     car-glide-disklrucache \
     car-gifdecoder \
