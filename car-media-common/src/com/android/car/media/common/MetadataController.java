@@ -32,6 +32,7 @@ import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
 import android.media.session.PlaybackState;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -81,14 +82,15 @@ public class MetadataController {
      * @param viewModel      The ViewModel to provide metadata for display
      * @param pauseUpdates   Views will not update while this LiveData emits {@code true}
      * @param title          Displays the track's title. Must not be {@code null}.
-     * @param subtitle       Displays the track's artist. Must not be {@code null}.
+     * @param albumTitle     Displays the track's album title. May be {@code null}.
+     * @param artist         Displays the track's artist. Must not be {@code null}.
      * @param time           Displays the track's progress as text. May be {@code null}.
      * @param seekBar        Displays the track's progress visually. May be {@code null}.
      * @param albumArt       Displays the track's album art. May be {@code null}.
      */
     public MetadataController(@NonNull LifecycleOwner lifecycleOwner,
             @NonNull PlaybackViewModel viewModel, @Nullable LiveData<Boolean> pauseUpdates,
-            @NonNull TextView title, @NonNull TextView subtitle,
+            @NonNull TextView title, @Nullable TextView albumTitle, @NonNull TextView artist,
             @Nullable TextView time, @Nullable SeekBar seekBar,
             @Nullable ImageView albumArt, int albumArtSizePx) {
         viewModel.getPlaybackController().observe(lifecycleOwner,
@@ -97,7 +99,19 @@ public class MetadataController {
         Model model = new Model(viewModel, pauseUpdates);
 
         model.getTitle().observe(lifecycleOwner, title::setText);
-        model.getSubtitle().observe(lifecycleOwner, subtitle::setText);
+
+        if (albumTitle != null) {
+            model.getAlbumTitle().observe(lifecycleOwner, albumName -> {
+                if (!TextUtils.isEmpty(albumName)) {
+                    albumTitle.setText(albumName);
+                    albumTitle.setVisibility(View.VISIBLE);
+                } else {
+                    albumTitle.setVisibility(View.GONE);
+                }
+            });
+        }
+
+        model.getArtist().observe(lifecycleOwner, artist::setText);
 
         if (albumArt != null) {
             model.setAlbumArtSize(albumArtSizePx);
@@ -114,7 +128,7 @@ public class MetadataController {
         if (time != null) {
             model.hasTime().observe(lifecycleOwner,
                     visible -> time.setVisibility(visible ? View.VISIBLE : View.INVISIBLE));
-            model.getTimeText().observe(lifecycleOwner, time::setText);
+            model.getTimeText().observe(lifecycleOwner, timeText -> time.setText(" - " + timeText));
         }
 
         if (seekBar != null) {
@@ -150,7 +164,8 @@ public class MetadataController {
     static class Model {
 
         private final LiveData<CharSequence> mTitle;
-        private final LiveData<CharSequence> mSubtitle;
+        private final LiveData<CharSequence> mAlbumTitle;
+        private final LiveData<CharSequence> mArtist;
         private final LiveData<Bitmap> mAlbumArt;
         private final LiveData<Long> mProgress;
         private final LiveData<Long> mMaxProgress;
@@ -167,8 +182,10 @@ public class MetadataController {
             }
             mTitle = freezable(pauseUpdates,
                     mapNonNull(playbackViewModel.getMetadata(), MediaItemMetadata::getTitle));
-            mSubtitle = freezable(pauseUpdates,
-                    mapNonNull(playbackViewModel.getMetadata(), MediaItemMetadata::getSubtitle));
+            mAlbumTitle = freezable(pauseUpdates,
+                    mapNonNull(playbackViewModel.getMetadata(), MediaItemMetadata::getAlbumTitle));
+            mArtist = freezable(pauseUpdates,
+                    mapNonNull(playbackViewModel.getMetadata(), MediaItemMetadata::getArtist));
             mAlbumArt = freezable(pauseUpdates,
                     switchMap(mAlbumArtSize,
                             size -> AlbumArtLiveData.getAlbumArt(
@@ -205,8 +222,12 @@ public class MetadataController {
             return mTitle;
         }
 
-        LiveData<CharSequence> getSubtitle() {
-            return mSubtitle;
+        LiveData<CharSequence> getAlbumTitle() {
+            return mAlbumTitle;
+        }
+
+        LiveData<CharSequence> getArtist() {
+            return mArtist;
         }
 
         LiveData<Bitmap> getAlbumArt() {

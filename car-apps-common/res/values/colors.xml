@@ -43,4 +43,7 @@
     <color name="car_tab_unselected_color">@color/car_tab_unselected_color_light</color>
     <color name="car_tab_unselected_color_dark">#99FFFFFF</color>
     <color name="car_tab_unselected_color_light">#B7FFFFFF</color>
+
+    <color name="primary_text_color">#FFFFFFFF</color>
+    <color name="secondary_text_color">#90FFFFFF</color>
 </resources>
