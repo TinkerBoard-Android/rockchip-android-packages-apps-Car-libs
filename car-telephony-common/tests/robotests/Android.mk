@@ -2,24 +2,23 @@ LOCAL_PATH := $(call my-dir)
 
 
 ############################################################
-# CarArchCommon app just for Robolectric test target.     #
+# car-telephony-common just for Robolectric test target.   #
 ############################################################
 include $(CLEAR_VARS)
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
-LOCAL_PACKAGE_NAME := CarTelephonyCommonAppForTesting
+LOCAL_PACKAGE_NAME := CarTelephonyCommonForTesting
 LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_USE_AAPT2 := true
 
+LOCAL_JAVA_LIBRARIES += android.car
+
 LOCAL_PRIVILEGED_MODULE := true
 
-LOCAL_STATIC_ANDROID_LIBRARIES := \
-    androidx.car_car \
-    car-arch-common \
-    car-telephony-common
+LOCAL_STATIC_ANDROID_LIBRARIES := car-telephony-common
 
 include $(BUILD_PACKAGE)
 
@@ -41,7 +40,7 @@ LOCAL_JAVA_LIBRARIES := \
     mockito-robolectric-prebuilt \
     truth-prebuilt
 
-LOCAL_INSTRUMENTATION_FOR := CarTelephonyCommonAppForTesting
+LOCAL_INSTRUMENTATION_FOR := CarTelephonyCommonForTesting
 
 LOCAL_MODULE_TAGS := optional
 
@@ -62,7 +61,7 @@ LOCAL_JAVA_LIBRARIES := \
     truth-prebuilt
 
 
-LOCAL_TEST_PACKAGE := CarTelephonyCommonAppForTesting
+LOCAL_TEST_PACKAGE := CarTelephonyCommonForTesting
 
 LOCAL_INSTRUMENT_SOURCE_DIRS := $(dir $(LOCAL_PATH))../src
 
