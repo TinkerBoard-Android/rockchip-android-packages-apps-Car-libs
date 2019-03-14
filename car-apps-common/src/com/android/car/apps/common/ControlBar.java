@@ -16,8 +16,6 @@
 
 package com.android.car.apps.common;
 
-import static java.lang.annotation.RetentionPolicy.SOURCE;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -37,7 +35,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Space;
 
-import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -45,7 +42,6 @@ import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 
 import com.android.internal.util.Preconditions;
 
-import java.lang.annotation.Retention;
 import java.util.Locale;
 
 
@@ -59,7 +55,7 @@ import java.util.Locale;
  * (if the space allows) and on the additional space if the panel is expanded.
  * </ul>
  */
-public class ControlBar extends RelativeLayout {
+public class ControlBar extends RelativeLayout implements CarControlBar {
     private static final String TAG = "ControlBar";
 
     // ActionBar container
@@ -94,25 +90,11 @@ public class ControlBar extends RelativeLayout {
     // Whether the expand button should be visible or not
     private boolean mExpandEnabled;
 
-    @Retention(SOURCE)
-    @IntDef({SLOT_MAIN, SLOT_LEFT, SLOT_RIGHT, SLOT_EXPAND_COLLAPSE})
-    public @interface SlotPosition {}
-
-    /** Slot used for main actions {@link ControlBar}, usually at the bottom center */
-    public static final int SLOT_MAIN = 0;
-    /** Slot used to host 'move left', 'rewind', 'previous' or similar secondary actions,
-     * usually at the left of the main action on the bottom row */
-    public static final int SLOT_LEFT = 1;
-    /** Slot used to host 'move right', 'fast-forward', 'next' or similar secondary actions,
-     * usually at the right of the main action on the bottom row */
-    public static final int SLOT_RIGHT = 2;
-    /** Slot reserved for the expand/collapse button */
-    public static final int SLOT_EXPAND_COLLAPSE = 3;
 
     // Default number of columns, if unspecified
     private static final int DEFAULT_COLUMNS = 3;
-    // Weight for the spacers used at the start and end of each slots row.
-    private static final float SPACERS_WEIGHT = 0.5f;
+    // Weight for the spacers used between buttons
+    private static final float SPACERS_WEIGHT = 1f;
 
     public ControlBar(Context context) {
         super(context);
@@ -143,7 +125,7 @@ public class ControlBar extends RelativeLayout {
         mExpandEnabled = ta.getBoolean(R.styleable.ControlBar_enableOverflow, true);
         ta.recycle();
 
-        mActionBarWrapper = findViewById(R.id.action_bar_wrapper);
+        mActionBarWrapper = findViewById(R.id.control_bar_wrapper);
         mRowsContainer = findViewById(R.id.rows_container);
         mNumRows = mRowsContainer.getChildCount();
         Preconditions.checkState(mNumRows > 0, "Must have at least 1 row");
@@ -156,11 +138,6 @@ public class ControlBar extends RelativeLayout {
         for (int i = 0; i < mNumRows; i++) {
             // Slots are reserved in reverse order (first slots are in the bottom row)
             ViewGroup row = (ViewGroup) mRowsContainer.getChildAt(mNumRows - i - 1);
-            // Inflate space on the left
-            Space space = new Space(context);
-            row.addView(space);
-            space.setLayoutParams(new LinearLayout.LayoutParams(0,
-                    ViewGroup.LayoutParams.MATCH_PARENT, SPACERS_WEIGHT));
             // Inflate necessary number of columns
             for (int j = 0; j < mNumColumns; j++) {
                 int pos = i * mNumColumns + j;
@@ -169,13 +146,14 @@ public class ControlBar extends RelativeLayout {
                 if (mFirstCreatedSlot == null) {
                     mFirstCreatedSlot = mSlots[pos];
                 }
+                if (j > 0) {
+                    Space space = new Space(context);
+                    row.addView(space);
+                    space.setLayoutParams(new LinearLayout.LayoutParams(0,
+                            ViewGroup.LayoutParams.MATCH_PARENT, SPACERS_WEIGHT));
+                }
                 row.addView(mSlots[pos]);
             }
-            // Inflate space on the right
-            space = new Space(context);
-            row.addView(space);
-            space.setLayoutParams(new LinearLayout.LayoutParams(0,
-                    ViewGroup.LayoutParams.MATCH_PARENT, SPACERS_WEIGHT));
         }
 
         mDefaultExpandCollapseView = createIconButton(context.getDrawable(R.drawable.ic_overflow));
@@ -184,30 +162,11 @@ public class ControlBar extends RelativeLayout {
         mDefaultExpandCollapseView.setOnClickListener(v -> onExpandCollapse());
     }
 
-    /**
-     * Returns an index in the {@link #mSlots} array, given a well-known slot position.
-     */
     private int getSlotIndex(@SlotPosition int slotPosition) {
-        switch (slotPosition) {
-            case SLOT_MAIN:
-                return mNumColumns / 2;
-            case SLOT_LEFT:
-                return mNumColumns < 3 ? -1 : (mNumColumns / 2) - 1;
-            case SLOT_RIGHT:
-                return mNumColumns < 2 ? -1 : (mNumColumns / 2) + 1;
-            case SLOT_EXPAND_COLLAPSE:
-                return mNumColumns - 1;
-            default:
-                throw new IllegalArgumentException("Unknown position: " + slotPosition);
-        }
+        return CarControlBar.getSlotIndex(slotPosition, mNumColumns);
     }
 
-    /**
-     * Sets or clears the view to be displayed at a particular position.
-     *
-     * @param view view to be displayed, or null to leave the position available.
-     * @param slotPosition position to update
-     */
+    @Override
     public void setView(@Nullable View view, @SlotPosition int slotPosition) {
         if (view != null) {
             mFixedViews.put(slotPosition, view);
@@ -234,8 +193,8 @@ public class ControlBar extends RelativeLayout {
         return mExpandCollapseView != null ? mExpandCollapseView : mDefaultExpandCollapseView;
     }
 
-    /** Creates a control with the proper parameters. Must be called by overrides. */
-    protected ImageButton createIconButton(Drawable icon) {
+    @Override
+    public ImageButton createIconButton(Drawable icon) {
         LayoutInflater inflater = LayoutInflater.from(mFirstCreatedSlot.getContext());
         final boolean attachToRoot = false;
         ImageButton button = (ImageButton) inflater.inflate(R.layout.control_bar_button,
@@ -244,19 +203,26 @@ public class ControlBar extends RelativeLayout {
         return button;
     }
 
-    /**
-     * Sets the views to include in each available slot of the action bar. Slots will be filled from
-     * start to end (i.e: left to right) and from bottom to top. If more views than available slots
-     * are provided, all extra views will be ignored.
-     *
-     * @param views array of views to include in each available slot.
-     */
+    @Override
+    public void close() {
+        // TODO(b/128536430)
+    }
+
+    @Override
+    public void setAnimationViewGroup(ViewGroup animationViewGroup) {
+        // TODO(b/128536430)
+    }
+
+    @Override
     public void setViews(@Nullable View[] views) {
         mViews = views;
         updateViewsLayout();
     }
 
     private void updateViewsLayout() {
+        // TODO(b/128524558): Fix this logic to use custom views in the right order, especially
+        // for the overflow row
+
         // Prepare an array of positions taken
         int totalSlots = mSlots.length;
         View[] slotViews = new View[totalSlots];

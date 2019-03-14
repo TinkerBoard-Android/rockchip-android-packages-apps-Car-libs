@@ -17,4 +17,5 @@
 
 <resources>
     <color name="car_tab_unselected_color">@color/car_tab_unselected_color_dark</color>
+    <color name="minimized_control_bar_background_color">#E00E1013</color>
 </resources>
