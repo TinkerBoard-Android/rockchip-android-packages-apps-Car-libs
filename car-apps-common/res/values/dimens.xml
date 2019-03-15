@@ -65,4 +65,14 @@
     <item name="letter_spacing_body2" format="float" type="dimen">0.0</item>
     <item name="letter_spacing_body3" format="float" type="dimen">0.0</item>
 
+    <!-- Default Scroll Bar for PagedRecyclerView -->
+    <dimen name="car_scroll_bar_button_size">@*android:dimen/car_touch_target_size</dimen>
+    <dimen name="car_scroll_bar_thumb_width">@*android:dimen/car_seekbar_height</dimen>
+    <dimen name="car_scroll_bar_separator_margin">@*android:dimen/car_padding_2</dimen>
+    <dimen name="car_scroll_bar_margin">@*android:dimen/car_margin</dimen>
+    <item name="button_disabled_alpha" format="float" type="dimen">0.2</item>
+    <item name="scroller_milliseconds_per_inch" format="float" type="dimen">150</item>
+    <item name="scroller_deceleration_time_divisor" format="float" type="dimen">0.45</item>
+    <item name="scroller_interpolator_factor" format="float" type="dimen">1.8</item>
+
 </resources>

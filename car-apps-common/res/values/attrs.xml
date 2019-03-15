@@ -45,4 +45,41 @@
         <attr name="tabItemLayout" format="reference"/>
     </declare-styleable>
 
+    <declare-styleable name="PagedRecyclerView">
+        <!-- Whether to include a gutter to the start, end or both sides of the list view items.
+             The gutter width will be the width of the scrollbar, and by default will be set to
+             both. -->
+        <attr name="gutter" format="enum">
+            <!-- No gutter on either side, the list view items will extend the full width of the
+                 PagedRecyclerView. -->
+            <enum name="none" value="0" />
+            <!-- Include a gutter on the start side only (i.e. the side with the scrollbar). -->
+            <enum name="start" value="1" />
+            <!-- Include a gutter on the end side only (i.e. the opposite side to the
+                 scrollbar). -->
+            <enum name="end" value="2" />
+            <!-- Include a gutter on both sides of the list view items. -->
+            <enum name="both" value="3" />
+        </attr>
+        <!-- Position of the scrollbar. Default to left. -->
+        <attr name="scrollBarPosition" format="enum">
+            <!-- Position scrollbar on the left side of the screen -->
+            <enum name="start" value="0" />
+            <!-- Position scrollbar on the right side of the screen -->
+            <enum name="end" value="1" />
+        </attr>
+        <!-- Whether to display the Scroll Bar or not. Defaults to true. -->
+        <attr name="scrollBarEnabled" format="boolean" />
+        <!-- Whether to place the scrollbar z-index above the recycler view. Defaults to
+             true. -->
+        <attr name="scrollBarAboveRecyclerView" format="boolean" />
+        <!-- Width of the scrollbar container. -->
+        <attr name="scrollBarContainerWidth" format="dimension" />
+        <!-- Custom Scrollbar class path -->
+        <attr name="scrollBarCustomClass" format="string" />
+    </declare-styleable>
+
+    <declare-styleable name="PagedRecyclerViewTheme">
+        <attr name="pagedRecyclerViewStyle" format="reference" />
+    </declare-styleable>
 </resources>

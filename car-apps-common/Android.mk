@@ -42,7 +42,8 @@ LOCAL_STATIC_ANDROID_LIBRARIES += \
     androidx.interpolator_interpolator \
     androidx.lifecycle_lifecycle-common-java8 \
     androidx.lifecycle_lifecycle-extensions \
-    androidx-constraintlayout_constraintlayout
+    androidx-constraintlayout_constraintlayout \
+    androidx.recyclerview_recyclerview
 
 LOCAL_STATIC_JAVA_LIBRARIES += \
     androidx-constraintlayout_constraintlayout-solver
