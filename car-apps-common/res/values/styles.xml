@@ -66,4 +66,10 @@
         <item name="android:tint">@color/icon_tint</item>
     </style>
 
+    <!-- Styles for car tab view -->
+    <style name="CarTabItemText">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textColor">@color/car_tab_item_selector</item>
+    </style>
+
 </resources>

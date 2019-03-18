@@ -37,4 +37,9 @@
     <color name="action_bar_background_color">@*android:color/car_card</color>
     <color name="app_bar_background_color">#ff000000</color>
     <color name="icon_tint">@*android:color/car_tint</color>
+
+    <color name="car_tab_selected_color">@*android:color/car_grey_50</color>
+    <color name="car_tab_unselected_color">@color/car_tab_unselected_color_light</color>
+    <color name="car_tab_unselected_color_dark">#99FFFFFF</color>
+    <color name="car_tab_unselected_color_light">#B7FFFFFF</color>
 </resources>
