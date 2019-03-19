@@ -214,7 +214,7 @@ public class TextToSpeechHelper {
         }
         // Register BatchListener for entire batch. Will invoke callbacks on Listener as batch
         // progresses.
-        mListeners.put(mCurrentBatchId, new BatchListener(listener));
+        mListeners.put(mCurrentBatchId, new BatchListener(listener, textToSpeak.size()));
     }
 
     /**
@@ -328,9 +328,11 @@ public class TextToSpeechHelper {
     private class BatchListener {
         private final Listener mListener;
         private boolean mBatchStarted;
+        private final int mUtteranceCount;
 
-        BatchListener(Listener listener) {
+        BatchListener(Listener listener, int utteranceCount) {
             mListener = listener;
+            mUtteranceCount = utteranceCount;
         }
 
         // Issues Listener.onTextToSpeechStarted when first item of batch starts.
@@ -343,7 +345,8 @@ public class TextToSpeechHelper {
 
         // Issues Listener.onTextToSpeechStopped when last item of batch finishes.
         void onDone(Pair<String, Integer> parsedId) {
-            if (parsedId.second == 0) {
+            // parseId is zero-indexed, mUtteranceCount is not.
+            if (parsedId.second == (mUtteranceCount - 1)) {
                 handleBatchFinished(parsedId, /* error= */ false);
             }
         }
