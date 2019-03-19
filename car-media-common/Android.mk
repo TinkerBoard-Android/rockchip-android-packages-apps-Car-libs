@@ -32,6 +32,7 @@ LOCAL_PROGUARD_ENABLED := disabled
 
 LOCAL_STATIC_ANDROID_LIBRARIES += \
     androidx.car_car \
+    androidx.mediarouter_mediarouter \
     androidx-constraintlayout_constraintlayout \
     car-apps-common \
     car-arch-common \
