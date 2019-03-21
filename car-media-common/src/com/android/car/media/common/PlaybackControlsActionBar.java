@@ -109,8 +109,7 @@ public class PlaybackControlsActionBar extends ControlBar implements PlaybackCon
         mSkipNextButton.setVisibility(VISIBLE);
         mSkipNextButton.setOnClickListener(this::onNextClicked);
 
-        mOverflowButton = createIconButton(
-                context.getDrawable(androidx.car.R.drawable.ic_overflow));
+        mOverflowButton = createIconButton(context.getDrawable(R.drawable.ic_overflow));
         mOverflowButton.setId(R.id.overflow);
 
         resetInitialViews();

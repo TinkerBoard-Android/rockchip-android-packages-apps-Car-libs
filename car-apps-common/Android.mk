@@ -37,7 +37,11 @@ LOCAL_JAVA_LIBRARIES += android.car
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
 LOCAL_STATIC_ANDROID_LIBRARIES += \
-    androidx.car_car \
+    androidx.annotation_annotation \
+    androidx.cardview_cardview \
+    androidx.interpolator_interpolator \
+    androidx.lifecycle_lifecycle-common-java8 \
+    androidx.lifecycle_lifecycle-extensions \
     androidx-constraintlayout_constraintlayout
 
 LOCAL_STATIC_JAVA_LIBRARIES += \
