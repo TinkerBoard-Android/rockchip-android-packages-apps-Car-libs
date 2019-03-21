@@ -23,7 +23,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.car.widget.PagedListView;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -201,9 +200,9 @@ public class AppSelectionFragment extends DialogFragment {
         mDisplayWidget.setFragmentOwner(this);
         mDisplayWidget.setFragmentActivity(getActivity());
 
-        PagedListView gridView = view.findViewById(R.id.apps_grid);
+        RecyclerView gridView = view.findViewById(R.id.apps_grid);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), columnNumber);
-        gridView.getRecyclerView().setLayoutManager(gridLayoutManager);
+        gridView.setLayoutManager(gridLayoutManager);
         gridView.setAdapter(gridAdapter);
         return view;
     }

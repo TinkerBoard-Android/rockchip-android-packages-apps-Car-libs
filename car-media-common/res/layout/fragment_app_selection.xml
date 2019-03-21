@@ -49,16 +49,14 @@
         android:background="@drawable/app_item_background"
         android:gravity="center" />
 
-    <androidx.car.widget.PagedListView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/apps_grid"
-        android:theme="@style/PagedListTheme"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="@dimen/appbar_first_row_height"
         android:clickable="true"
         android:focusable="true"
-        app:listContentTopOffset="@dimen/fragment_app_selection_list_top_offset"
-        app:showPagedListViewDivider="false" />
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>
