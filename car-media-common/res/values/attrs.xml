@@ -31,6 +31,14 @@
         <attr name="aspect_ratio" format="float"/>
     </declare-styleable>
 
+    <declare-styleable name="CrossfadeImageView">
+        <attr name="align_horizontal" format="enum">
+            <enum name="center" value="0"/>
+            <enum name="left" value="1"/>
+            <enum name="right" value="2"/>
+        </attr>
+    </declare-styleable>
+
     <!-- Attributes for the MediaAppSelectorWidget. -->
     <declare-styleable name="MediaAppSelectorWidget">
         <!-- Whether the AppSelectionFragment opened by pressing the widget should be full screen.

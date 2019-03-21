@@ -34,11 +34,11 @@ import java.util.Objects;
  * in and scaling down the new image.
  */
 public class CrossfadeImageView extends FrameLayout {
-    private final TopCropImageView mImageView1;
-    private final TopCropImageView mImageView2;
+    private final CropAlignedImageView mImageView1;
+    private final CropAlignedImageView mImageView2;
 
-    private TopCropImageView mActiveImageView;
-    private TopCropImageView mInactiveImageView;
+    private CropAlignedImageView mActiveImageView;
+    private CropAlignedImageView mInactiveImageView;
 
     private Bitmap mCurrentBitmap = null;
     private Integer mCurrentColor = null;
@@ -66,10 +66,10 @@ public class CrossfadeImageView extends FrameLayout {
         imageViewBackground.setLayoutParams(lp);
         imageViewBackground.setBackgroundColor(Color.BLACK);
         addView(imageViewBackground);
-        mImageView1 = new TopCropImageView(context, attrs, defStyleAttr, defStyleRes);
+        mImageView1 = new CropAlignedImageView(context, attrs, defStyleAttr, defStyleRes);
         mImageView1.setLayoutParams(lp);
         addView(mImageView1);
-        mImageView2 = new TopCropImageView(context, attrs, defStyleAttr, defStyleRes);
+        mImageView2 = new CropAlignedImageView(context, attrs, defStyleAttr, defStyleRes);
         mImageView2.setLayoutParams(lp);
         addView(mImageView2);
 

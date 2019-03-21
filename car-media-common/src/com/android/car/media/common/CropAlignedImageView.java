@@ -17,37 +17,48 @@
 package com.android.car.media.common;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Matrix;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
 /**
  * A {@link ImageView} that scales in a similar way as {@link ScaleType#CENTER_CROP} but aligning
- * the image to the top of the view.
+ * the image to the specified edge of the view.
  */
-public class TopCropImageView extends ImageView {
-    public TopCropImageView(Context context) {
-        super(context);
-        init();
+public class CropAlignedImageView extends ImageView {
+
+    private static final int ALIGN_HORIZONTAL_CENTER = 0;
+    private static final int ALIGN_HORIZONTAL_LEFT = 1;
+    private static final int ALIGN_HORIZONTAL_RIGHT = 2;
+
+    private int mAlignHorizontal;
+
+    public CropAlignedImageView(Context context) {
+        this(context, null);
     }
 
-    public TopCropImageView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init();
+    public CropAlignedImageView(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
     }
 
-    public TopCropImageView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init();
+    public CropAlignedImageView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
     }
 
-    public TopCropImageView(Context context, AttributeSet attrs, int defStyleAttr,
+    public CropAlignedImageView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init();
+        init(context, attrs, defStyleAttr, defStyleRes);
     }
 
-    private void init() {
+    private void init(Context context, AttributeSet attrs, int defStyleAttr,
+            int defStyleRes) {
+        TypedArray ta = context.obtainStyledAttributes(
+                attrs, R.styleable.CrossfadeImageView, defStyleAttr, defStyleRes);
+        mAlignHorizontal = ta.getInt(R.styleable.CrossfadeImageView_align_horizontal,
+                ALIGN_HORIZONTAL_CENTER);
+        ta.recycle();
         setScaleType(ScaleType.MATRIX);
     }
 
@@ -67,9 +78,22 @@ public class TopCropImageView extends ImageView {
         float fitVerticallyScaleFactor = frameHeight / originalImageHeight;
         float usedScaleFactor = Math.max(fitHorizontallyScaleFactor, fitVerticallyScaleFactor);
         float newImageWidth = originalImageWidth * usedScaleFactor;
+        float newImageHeight = originalImageHeight * usedScaleFactor;
         Matrix matrix = getImageMatrix();
         matrix.setScale(usedScaleFactor, usedScaleFactor, 0, 0);
-        matrix.postTranslate((frameWidth - newImageWidth) / 2, 0);
+        float dx = 0;
+        switch (mAlignHorizontal) {
+            case ALIGN_HORIZONTAL_CENTER:
+                dx = (frameWidth - newImageWidth) / 2;
+                break;
+            case ALIGN_HORIZONTAL_LEFT:
+                dx = 0;
+                break;
+            case ALIGN_HORIZONTAL_RIGHT:
+                dx = (frameWidth - newImageWidth);
+                break;
+        }
+        matrix.postTranslate(dx, (frameHeight - newImageHeight) / 2);
         setImageMatrix(matrix);
     }
 }
