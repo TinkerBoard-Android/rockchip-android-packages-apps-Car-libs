@@ -40,7 +40,9 @@
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textColor">@color/car_tab_item_selector</item>
     </style>
-
+    <style name="CarTabItemBackground">
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+    </style>
 
     <!-- Styles for text. Sub1-3 are not included here as their use should be exceptional -->
     <style name="TextAppearance">
@@ -77,5 +79,4 @@
         <item name="android:textSize">24sp</item>
         <item name="android:letterSpacing">@dimen/letter_spacing_body3</item>
     </style>
-
 </resources>

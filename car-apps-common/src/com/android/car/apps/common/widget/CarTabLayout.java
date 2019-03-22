@@ -14,22 +14,6 @@
  * limitations under the License.
  */
 
-/*
- * Copyright (C) 2019 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.android.car.apps.common.widget;
 
 import android.content.Context;
@@ -73,36 +57,47 @@ import java.util.Set;
  * By doing this, appearance of tab item view can be customized.
  *
  * <p>Touch feedback is using @android:attr/selectableItemBackground.
+ *
+ * @param <T> Presents a CarTab entity
  */
-public class CarTabLayout extends LinearLayout {
+public class CarTabLayout<T extends CarTabLayout.CarTab> extends LinearLayout {
 
-    /** Listener that listens the car tab selection change. */
-    public interface OnCarTabSelectedListener {
+    /**
+     * Listener that listens the car tab selection change.
+     *
+     * @param <T> Presents a CarTab entity that has state update on a tab select action
+     */
+    public interface OnCarTabSelectedListener<T extends CarTab> {
         /** Callback triggered when a car tab is selected. */
-        void onCarTabSelected(CarTab carTab);
+        void onCarTabSelected(T carTab);
 
         /** Callback triggered when a car tab is unselected. */
-        void onCarTabUnselected(CarTab carTab);
+        void onCarTabUnselected(T carTab);
 
         /** Callback triggered when a car tab is reselected. */
-        void onCarTabReselected(CarTab carTab);
+        void onCarTabReselected(T carTab);
     }
 
-    /** No-op implementation of {@link OnCarTabSelectedListener}. */
-    public static class SimpleOnCarTabSelectedListener implements OnCarTabSelectedListener {
+    /**
+     * No-op implementation of {@link OnCarTabSelectedListener}.
+     *
+     * @param <T> See {@link OnCarTabSelectedListener}
+     */
+    public static class SimpleOnCarTabSelectedListener<T extends CarTab> implements
+            OnCarTabSelectedListener<T> {
 
         @Override
-        public void onCarTabSelected(CarTab carTab) {
+        public void onCarTabSelected(T carTab) {
             // No-op
         }
 
         @Override
-        public void onCarTabUnselected(CarTab carTab) {
+        public void onCarTabUnselected(T carTab) {
             // No-op
         }
 
         @Override
-        public void onCarTabReselected(CarTab carTab) {
+        public void onCarTabReselected(T carTab) {
             // No-op
         }
     }
@@ -112,9 +107,9 @@ public class CarTabLayout extends LinearLayout {
     private final boolean mTabFlexibleLayout;
     private final int mTabSpacing;
 
-    private final Set<OnCarTabSelectedListener> mOnCarTabSelectedListeners;
+    private final Set<OnCarTabSelectedListener<T>> mOnCarTabSelectedListeners;
 
-    private final CarTabAdapter mCarTabAdapter;
+    private final CarTabAdapter<T> mCarTabAdapter;
 
     public CarTabLayout(@NonNull Context context) {
         this(context, null);
@@ -147,7 +142,7 @@ public class CarTabLayout extends LinearLayout {
      * Add a tab to this layout. The tab will be added at the end of the list. If this is the first
      * tab to be added it will become the selected tab.
      */
-    public void addCarTab(CarTab carTab) {
+    public void addCarTab(T carTab) {
         mCarTabAdapter.add(carTab);
         // If there is only one tab in the group, set it to be selected.
         if (mCarTabAdapter.getCount() == 1) {
@@ -156,7 +151,7 @@ public class CarTabLayout extends LinearLayout {
     }
 
     /** Set the tab as the current selected tab. */
-    public void selectCarTab(CarTab carTab) {
+    public void selectCarTab(T carTab) {
         mCarTabAdapter.selectCarTab(carTab);
     }
 
@@ -171,12 +166,12 @@ public class CarTabLayout extends LinearLayout {
     }
 
     /** Returns the position of the given car tab. */
-    public int getCarTabPosition(CarTab carTab) {
+    public int getCarTabPosition(T carTab) {
         return mCarTabAdapter.getPosition(carTab);
     }
 
     /** Return the car tab at the given position. */
-    public CarTab get(int position) {
+    public T get(int position) {
         return mCarTabAdapter.getItem(position);
     }
 
@@ -197,19 +192,19 @@ public class CarTabLayout extends LinearLayout {
         mOnCarTabSelectedListeners.remove(onCarTabSelectedListener);
     }
 
-    private void dispatchOnCarTabSelected(CarTab carTab) {
+    private void dispatchOnCarTabSelected(T carTab) {
         for (OnCarTabSelectedListener onCarTabSelectedListener : mOnCarTabSelectedListeners) {
             onCarTabSelectedListener.onCarTabSelected(carTab);
         }
     }
 
-    private void dispatchOnCarTabUnselected(CarTab carTab) {
+    private void dispatchOnCarTabUnselected(T carTab) {
         for (OnCarTabSelectedListener onCarTabSelectedListener : mOnCarTabSelectedListeners) {
             onCarTabSelectedListener.onCarTabUnselected(carTab);
         }
     }
 
-    private void dispatchOnCarTabReselected(CarTab carTab) {
+    private void dispatchOnCarTabReselected(T carTab) {
         for (OnCarTabSelectedListener onCarTabSelectedListener : mOnCarTabSelectedListeners) {
             onCarTabSelectedListener.onCarTabReselected(carTab);
         }
@@ -230,14 +225,20 @@ public class CarTabLayout extends LinearLayout {
         carTabItemView.setGravity(Gravity.CENTER);
         carTabItemView.setPadding(mTabSpacing, 0, mTabSpacing, 0);
         carTabItemView.setMinimumWidth(mTabSpacing * 2 + mTabMinWidth);
-        // TODO: add indirection to allow customization
-        Drawable backgroundDrawable = getAttrDrawable(getContext(),
-                android.R.attr.selectableItemBackground);
+        Drawable backgroundDrawable = getStyledBackgroundDrawable(getContext());
         carTabItemView.setBackground(backgroundDrawable);
         return carTabItemView;
     }
 
-    private static class CarTabAdapter extends BaseAdapter {
+    private Drawable getStyledBackgroundDrawable(Context context) {
+        TypedArray ta = context.obtainStyledAttributes(
+                R.style.CarTabItemBackground, new int[]{android.R.attr.background});
+        Drawable value = ta.getDrawable(0);
+        ta.recycle();
+        return value;
+    }
+
+    private static class CarTabAdapter<T extends CarTab> extends BaseAdapter {
         private static final int MEDIUM_WEIGHT = 500;
         private final Context mContext;
         private final CarTabLayout mCarTabLayout;
@@ -245,7 +246,7 @@ public class CarTabLayout extends LinearLayout {
         private final int mCarTabItemLayoutRes;
         private final Typeface mUnselectedTypeface;
         private final Typeface mSelectedTypeface;
-        private final List<CarTab> mCarTabList;
+        private final List<T> mCarTabList;
 
         private CarTabAdapter(Context context, @LayoutRes int res, CarTabLayout carTabLayout) {
             mCarTabList = new ArrayList<>();
@@ -257,7 +258,7 @@ public class CarTabLayout extends LinearLayout {
             mSelectedTypeface = Typeface.create(mUnselectedTypeface, MEDIUM_WEIGHT, false);
         }
 
-        private void add(@NonNull CarTab carTab) {
+        private void add(@NonNull T carTab) {
             mCarTabList.add(carTab);
             notifyItemInserted(mCarTabList.size() - 1);
         }
@@ -277,7 +278,7 @@ public class CarTabLayout extends LinearLayout {
         }
 
         @Override
-        public CarTab getItem(int position) {
+        public T getItem(int position) {
             return mCarTabList.get(position);
         }
 
@@ -297,8 +298,7 @@ public class CarTabLayout extends LinearLayout {
         }
 
         private void selectCarTab(CarTab carTab) {
-            int position = mCarTabList.indexOf(carTab);
-            selectCarTab(position);
+            selectCarTab(getPosition(carTab));
         }
 
         private void selectCarTab(int position) {
@@ -393,13 +393,5 @@ public class CarTabLayout extends LinearLayout {
         protected void bindIcon(ImageView imageView) {
             imageView.setImageDrawable(mIcon);
         }
-    }
-
-    // TODO: use Themes.getAttrDrawable once refactor change is merged.
-    private static Drawable getAttrDrawable(Context context, int attr) {
-        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
-        Drawable value = ta.getDrawable(0);
-        ta.recycle();
-        return value;
     }
 }
