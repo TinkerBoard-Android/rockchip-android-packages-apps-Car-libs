@@ -16,18 +16,22 @@ limitations under the License.
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/action_bar_wrapper"
+    android:id="@+id/control_bar_wrapper"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:elevation="@dimen/control_bar_elevation"
-    app:cardCornerRadius="@*android:dimen/car_radius_3"
-    app:cardBackgroundColor="@color/action_bar_background_color">
+    android:layout_marginHorizontal="@dimen/control_bar_margin_x"
+    android:layout_marginBottom="@dimen/control_bar_margin_bottom"
+    android:layout_gravity="center"
+    app:cardBackgroundColor="@color/control_bar_background_color"
+    app:cardElevation="@dimen/control_bar_elevation" >
 
     <LinearLayout
         android:id="@+id/rows_container"
         android:orientation="vertical"
         android:animateLayoutChanges="true"
-        android:layout_width="match_parent"
+        android:layout_gravity="center"
+        android:layout_width="@dimen/control_bar_width"
         android:layout_height="wrap_content">
 
         <LinearLayout

@@ -25,6 +25,7 @@
         <!-- Force the vector drawables to the right size. -->
         <item name="android:layout_width">@dimen/control_bar_button_size</item>
         <item name="android:layout_height">@dimen/control_bar_button_size</item>
+        <!-- This padding is used to force resizing of provided icons. -->
         <item name="android:padding">@dimen/control_button_padding</item>
         <!-- Note: fitCenter makes icons disappear if the view is too small... -->
         <item name="android:scaleType">fitCenter</item>
