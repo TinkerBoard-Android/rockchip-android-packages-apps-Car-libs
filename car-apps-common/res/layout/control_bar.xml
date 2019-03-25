@@ -17,11 +17,9 @@ limitations under the License.
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/control_bar_wrapper"
-    android:layout_width="match_parent"
+    android:layout_width="@dimen/control_bar_width"
     android:layout_height="wrap_content"
     android:elevation="@dimen/control_bar_elevation"
-    android:layout_marginHorizontal="@dimen/control_bar_margin_x"
-    android:layout_marginBottom="@dimen/control_bar_margin_bottom"
     android:layout_gravity="center"
     app:cardBackgroundColor="@color/control_bar_background_color"
     app:cardElevation="@dimen/control_bar_elevation" >
@@ -31,7 +29,7 @@ limitations under the License.
         android:orientation="vertical"
         android:animateLayoutChanges="true"
         android:layout_gravity="center"
-        android:layout_width="@dimen/control_bar_width"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <LinearLayout
