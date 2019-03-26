@@ -16,9 +16,8 @@ limitations under the License.
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/ControlBar"
     android:id="@+id/control_bar_wrapper"
-    android:layout_width="@dimen/control_bar_width"
-    android:layout_height="wrap_content"
     android:elevation="@dimen/control_bar_elevation"
     android:layout_gravity="center"
     app:cardBackgroundColor="@color/control_bar_background_color"
