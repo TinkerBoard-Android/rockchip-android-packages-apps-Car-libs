@@ -33,6 +33,8 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.view.View;
 import android.widget.ImageView;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.request.RequestOptions;
@@ -54,24 +56,28 @@ public class MediaItemMetadata implements Parcelable {
     private final Long mQueueId;
     private final boolean mIsBrowsable;
     private final boolean mIsPlayable;
+    private final String mAlbumTitle;
+    private final String mArtist;
 
     public MediaItemMetadata(@NonNull MediaDescriptionCompat description) {
-        this(description, null, false, false);
+        this(description, null, false, false, null, null);
     }
 
     /** Creates an instance based on a {@link MediaMetadataCompat} */
     public MediaItemMetadata(@NonNull MediaMetadataCompat metadata) {
-        this(metadata.getDescription(), null, false, false);
+        this(metadata.getDescription(), null, false, false,
+                metadata.getString(MediaMetadataCompat.METADATA_KEY_ALBUM),
+                metadata.getString(MediaMetadataCompat.METADATA_KEY_ARTIST));
     }
 
     /** Creates an instance based on a {@link MediaSessionCompat.QueueItem} */
     public MediaItemMetadata(@NonNull MediaSessionCompat.QueueItem queueItem) {
-        this(queueItem.getDescription(), queueItem.getQueueId(), false, true);
+        this(queueItem.getDescription(), queueItem.getQueueId(), false, true, null, null);
     }
 
     /** Creates an instance based on a {@link MediaBrowserCompat.MediaItem} */
     public MediaItemMetadata(@NonNull MediaBrowserCompat.MediaItem item) {
-        this(item.getDescription(), null, item.isBrowsable(), item.isPlayable());
+        this(item.getDescription(), null, item.isBrowsable(), item.isPlayable(), null, null);
     }
 
     /** Creates an instance based on a {@link Parcel} */
@@ -81,6 +87,8 @@ public class MediaItemMetadata implements Parcelable {
         mQueueId = in.readByte() == 0x00 ? null : in.readLong();
         mIsBrowsable = in.readByte() != 0x00;
         mIsPlayable = in.readByte() != 0x00;
+        mAlbumTitle = in.readString();
+        mArtist = in.readString();
     }
 
     /**
@@ -94,14 +102,19 @@ public class MediaItemMetadata implements Parcelable {
         mQueueId = item.mQueueId;
         mIsBrowsable = item.mIsBrowsable;
         mIsPlayable = item.mIsPlayable;
+        mAlbumTitle = item.mAlbumTitle;
+        mArtist = item.mArtist;
     }
 
-    private MediaItemMetadata(MediaDescriptionCompat description, Long queueId, boolean isBrowsable,
-                              boolean isPlayable) {
+    @VisibleForTesting
+    public MediaItemMetadata(MediaDescriptionCompat description, Long queueId, boolean isBrowsable,
+            boolean isPlayable, String albumTitle, String artist) {
         mMediaDescription = description;
         mQueueId = queueId;
         mIsPlayable = isPlayable;
         mIsBrowsable = isBrowsable;
+        mAlbumTitle = albumTitle;
+        mArtist = artist;
     }
 
     /** @return media item id */
@@ -122,10 +135,16 @@ public class MediaItemMetadata implements Parcelable {
         return mMediaDescription.getSubtitle();
     }
 
-    /** @return media item description */
+    /** @return the album title for the media */
     @Nullable
-    public CharSequence getDescription() {
-        return mMediaDescription.getSubtitle();
+    public String getAlbumTitle() {
+        return mAlbumTitle;
+    }
+
+    /** @return the artist of the media */
+    @Nullable
+    public CharSequence getArtist() {
+        return mArtist;
     }
 
     /**
@@ -330,6 +349,8 @@ public class MediaItemMetadata implements Parcelable {
                 && Objects.equals(getId(), that.getId())
                 && Objects.equals(getTitle(), that.getTitle())
                 && Objects.equals(getSubtitle(), that.getSubtitle())
+                && Objects.equals(getAlbumTitle(), that.getAlbumTitle())
+                && Objects.equals(getArtist(), that.getArtist())
                 && Objects.equals(getAlbumArtUri(), that.getAlbumArtUri())
                 && Objects.equals(mQueueId, that.mQueueId);
     }
@@ -355,6 +376,8 @@ public class MediaItemMetadata implements Parcelable {
         }
         dest.writeByte((byte) (mIsBrowsable ? 0x01 : 0x00));
         dest.writeByte((byte) (mIsPlayable ? 0x01 : 0x00));
+        dest.writeString(mAlbumTitle);
+        dest.writeString(mArtist);
     }
 
     @SuppressWarnings("unused")
@@ -378,9 +401,13 @@ public class MediaItemMetadata implements Parcelable {
                 + ", Queue Id: "
                 + (mQueueId != null ? mQueueId : "-")
                 + ", title: "
-                + (mMediaDescription != null ? mMediaDescription.getTitle() : "-")
+                + mMediaDescription != null ? mMediaDescription.getTitle().toString() : "-"
                 + ", subtitle: "
-                + (mMediaDescription != null ? mMediaDescription.getSubtitle() : "-")
+                + mMediaDescription != null ? mMediaDescription.getSubtitle().toString() : "-"
+                + ", album title: "
+                + mAlbumTitle != null ? mAlbumTitle : "-"
+                + ", artist: "
+                + mArtist != null ? mArtist : "-"
                 + ", album art URI: "
                 + (mMediaDescription != null ? mMediaDescription.getIconUri() : "-")
                 + "]";
