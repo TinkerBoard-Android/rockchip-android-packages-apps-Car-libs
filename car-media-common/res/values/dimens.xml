@@ -16,7 +16,7 @@
 -->
 <resources>
     <!-- Album art scrim -->
-    <item name="album_art_scrim_alpha" format="float" type="dimen">0.6</item>
+    <item name="album_art_scrim_alpha" format="float" type="dimen">0.75</item>
 
     <!-- Fab -->
     <dimen name="fab_elevation">8dp</dimen>

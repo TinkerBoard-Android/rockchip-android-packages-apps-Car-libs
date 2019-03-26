@@ -101,40 +101,17 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/title"/>
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintGuide_begin="600dp"
-            android:orientation="vertical"/>
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/rightmost"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintGuide_percent="1"
-            android:orientation="vertical"/>
-
-        <androidx.constraintlayout.widget.Barrier
-            android:id="@+id/barrier"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:barrierDirection="left"
-            app:constraint_referenced_ids="guideline,rightmost" />
-
         <com.android.car.media.common.PlaybackControlsActionBar
             android:id="@+id/playback_controls"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/playback_fragment_controls_margin_x"
-            android:layout_marginEnd="@dimen/playback_fragment_controls_margin_x"
+            android:layout_marginHorizontal="@dimen/playback_fragment_controls_margin_x"
             android:layout_marginBottom="@dimen/playback_fragment_controls_margin_bottom"
             app:columns="3"
             app:enableOverflow="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintRight_toLeftOf="@+id/barrier"/>
+            app:layout_constraintRight_toRightOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
