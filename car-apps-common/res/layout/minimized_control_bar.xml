@@ -18,9 +18,8 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/MinimizedControlBar"
     android:id="@+id/minimized_control_bar_layout"
-    android:layout_width="@dimen/minimized_control_bar_width"
-    android:layout_height="@dimen/minimized_control_bar_height"
     android:layout_marginHorizontal="@dimen/minimized_control_bar_margin_x"
     android:layout_marginBottom="@dimen/minimized_control_bar_margin_bottom"
     android:background="@drawable/minimized_control_bar_background">
@@ -41,6 +40,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/minimized_control_bar_text_padding"
+        android:singleLine="true"
         app:layout_constraintVertical_chainStyle="packed"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/minimized_control_bar_subtitle"
@@ -52,6 +52,7 @@
         android:id="@+id/minimized_control_bar_subtitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:singleLine="true"
         app:layout_constraintTop_toBottomOf="@+id/minimized_control_bar_title"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="@+id/minimized_control_bar_title"
