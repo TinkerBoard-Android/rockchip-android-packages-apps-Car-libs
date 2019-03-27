@@ -40,6 +40,7 @@
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textColor">@color/car_tab_item_selector</item>
     </style>
+
     <style name="CarTabItemBackground">
         <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
@@ -78,5 +79,16 @@
     <style name="TextAppearance.Body3" parent="TextAppearance">
         <item name="android:textSize">24sp</item>
         <item name="android:letterSpacing">@dimen/letter_spacing_body3</item>
+    </style>
+
+    <!-- Styles for ControlBar -->
+    <style name="ControlBar">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="MinimizedControlBar">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/minimized_control_bar_height</item>
     </style>
 </resources>
