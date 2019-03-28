@@ -28,6 +28,7 @@ import android.widget.LinearLayout;
 
 import androidx.fragment.app.FragmentActivity;
 
+import com.android.car.apps.common.util.ViewHelper;
 import com.android.car.media.common.source.MediaSourceViewModel;
 
 /**
@@ -43,6 +44,7 @@ import com.android.car.media.common.source.MediaSourceViewModel;
 public class MediaAppSelectorWidget extends LinearLayout {
 
     private final boolean mFullScreenDialog;
+    private final boolean mSwitchingEnabled;
     private final ImageView mAppIcon;
     private final ImageView mAppSwitchIcon;
     private final Drawable mDefaultIcon;
@@ -75,6 +77,7 @@ public class MediaAppSelectorWidget extends LinearLayout {
         TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.MediaAppSelectorWidget, defStyleAttr, 0 /* defStyleRes */);
         mFullScreenDialog = a.getBoolean(R.styleable.MediaAppSelectorWidget_fullScreenDialog, true);
+        mSwitchingEnabled = a.getBoolean(R.styleable.MediaAppSelectorWidget_switchingEnabled, true);
         a.recycle();
 
         mDefaultIcon = getResources().getDrawable(R.drawable.ic_music);
@@ -89,7 +92,11 @@ public class MediaAppSelectorWidget extends LinearLayout {
         mAppSwitchIcon = findViewById(R.id.app_switch_icon);
 
         setFragmentOwner(null);
-        setOnClickListener(view -> onAppSwitchClicked());
+        if (mSwitchingEnabled) {
+            setOnClickListener(view -> onAppSwitchClicked());
+        } else {
+            ViewHelper.setInvisible(mAppSwitchIcon, true);
+        }
     }
 
     /** Calling this is required so the widget can show the icon of the primary media source. */
@@ -108,14 +115,14 @@ public class MediaAppSelectorWidget extends LinearLayout {
 
     /** Opens the {@link AppSelectionFragment}. */
     public void open() {
-        if (!mFragmentIsOpen) {
+        if (mSwitchingEnabled && !mFragmentIsOpen) {
             onAppSwitchClicked();
         }
     }
 
     /** Closes the {@link AppSelectionFragment}. */
     public void close() {
-        if (mFragmentIsOpen) {
+        if (mSwitchingEnabled && mFragmentIsOpen) {
             onAppSwitchClicked();
         }
     }
@@ -127,8 +134,10 @@ public class MediaAppSelectorWidget extends LinearLayout {
     }
 
     void setIsOpen(boolean fragmentIsOpen) {
-        mFragmentIsOpen = fragmentIsOpen;
-        mAppSwitchIcon.setImageDrawable(fragmentIsOpen ? mArrowDropUp : mArrowDropDown);
+        if (mSwitchingEnabled) {
+            mFragmentIsOpen = fragmentIsOpen;
+            mAppSwitchIcon.setImageDrawable(fragmentIsOpen ? mArrowDropUp : mArrowDropDown);
+        }
     }
 
     /**

@@ -41,6 +41,10 @@
 
     <!-- Attributes for the MediaAppSelectorWidget. -->
     <declare-styleable name="MediaAppSelectorWidget">
+        <!-- When false, the widget only displays the application's icon and doesn't react to taps.
+            Default is true. -->
+        <attr name="switchingEnabled" format="boolean"/>
+
         <!-- Whether the AppSelectionFragment opened by pressing the widget should be full screen.
             -->
         <attr name="fullScreenDialog" format="boolean"/>
