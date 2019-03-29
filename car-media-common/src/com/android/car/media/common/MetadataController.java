@@ -42,6 +42,7 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.android.car.apps.common.util.ViewHelper;
 import com.android.car.media.common.playback.AlbumArtLiveData;
 import com.android.car.media.common.playback.PlaybackViewModel;
 
@@ -84,15 +85,17 @@ public class MetadataController {
      * @param title          Displays the track's title. Must not be {@code null}.
      * @param albumTitle     Displays the track's album title. May be {@code null}.
      * @param artist         Displays the track's artist. Must not be {@code null}.
-     * @param time           Displays the track's progress as text. May be {@code null}.
+     * @param timeExtras     Regroups views for time display (eg: separators). May be {@code null}.
+     * @param currentTime    Displays the track's current position as text. May be {@code null}.
+     * @param maxTime        Displays the track's duration as text. May be {@code null}.
      * @param seekBar        Displays the track's progress visually. May be {@code null}.
      * @param albumArt       Displays the track's album art. May be {@code null}.
      */
     public MetadataController(@NonNull LifecycleOwner lifecycleOwner,
             @NonNull PlaybackViewModel viewModel, @Nullable LiveData<Boolean> pauseUpdates,
             @NonNull TextView title, @Nullable TextView albumTitle, @NonNull TextView artist,
-            @Nullable TextView time, @Nullable SeekBar seekBar,
-            @Nullable ImageView albumArt, int albumArtSizePx) {
+            @Nullable View timeExtras, @Nullable TextView currentTime, @Nullable TextView maxTime,
+            @Nullable SeekBar seekBar, @Nullable ImageView albumArt, int albumArtSizePx) {
         viewModel.getPlaybackController().observe(lifecycleOwner,
                 controller -> mController = controller);
 
@@ -125,10 +128,22 @@ public class MetadataController {
             });
         }
 
-        if (time != null) {
-            model.hasTime().observe(lifecycleOwner,
-                    visible -> time.setVisibility(visible ? View.VISIBLE : View.INVISIBLE));
-            model.getTimeText().observe(lifecycleOwner, timeText -> time.setText(" - " + timeText));
+        model.hasTime().observe(lifecycleOwner,
+                visible -> {
+                    // Current and Max time are not necessarily children of timeExtras.
+                    ViewHelper.setVisible(timeExtras, visible);
+                    ViewHelper.setVisible(currentTime, visible);
+                    ViewHelper.setVisible(maxTime, visible);
+                });
+
+        if (currentTime != null) {
+            model.getCurrentTimeText().observe(lifecycleOwner,
+                    timeText -> currentTime.setText(timeText));
+        }
+
+        if (maxTime != null) {
+            model.getMaxTimeText().observe(lifecycleOwner,
+                    timeText -> maxTime.setText(timeText));
         }
 
         if (seekBar != null) {
@@ -169,7 +184,8 @@ public class MetadataController {
         private final LiveData<Bitmap> mAlbumArt;
         private final LiveData<Long> mProgress;
         private final LiveData<Long> mMaxProgress;
-        private final LiveData<CharSequence> mTimeText;
+        private final LiveData<CharSequence> mCurrentTimeText;
+        private final LiveData<CharSequence> mMaxTimeText;
         private final LiveData<Boolean> mHasTime;
         private final LiveData<Boolean> mIsSeekToEnabled;
 
@@ -197,11 +213,14 @@ public class MetadataController {
                     map(playbackViewModel.getPlaybackStateWrapper(),
                             state -> state != null ? state.getMaxProgress() : 0L));
 
-            mTimeText = combine(mProgress, mMaxProgress, (progress, maxProgress) -> {
+            mCurrentTimeText = combine(mProgress, mMaxProgress, (progress, maxProgress) -> {
                 boolean showHours = TimeUnit.MILLISECONDS.toHours(maxProgress) > 0;
-                return String.format("%s / %s",
-                        formatTime(progress, showHours),
-                        formatTime(maxProgress, showHours));
+                return formatTime(progress, showHours);
+            });
+
+            mMaxTimeText = combine(mProgress, mMaxProgress, (progress, maxProgress) -> {
+                boolean showHours = TimeUnit.MILLISECONDS.toHours(maxProgress) > 0;
+                return formatTime(maxProgress, showHours);
             });
 
             mHasTime = combine(mProgress, mMaxProgress,
@@ -242,8 +261,12 @@ public class MetadataController {
             return mMaxProgress;
         }
 
-        LiveData<CharSequence> getTimeText() {
-            return mTimeText;
+        LiveData<CharSequence> getCurrentTimeText() {
+            return mCurrentTimeText;
+        }
+
+        LiveData<CharSequence> getMaxTimeText() {
+            return mMaxTimeText;
         }
 
         LiveData<Boolean> hasTime() {
