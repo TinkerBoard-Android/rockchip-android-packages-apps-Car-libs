@@ -29,4 +29,13 @@ public class ViewHelper {
             view.setVisibility(visible ? View.VISIBLE : View.GONE);
         }
     }
+
+    /**
+     * Sets the visibility of the (optional) view to {@link View#INVISIBLE} or {@link View#VISIBLE}.
+     */
+    public static void setInvisible(@Nullable View view, boolean invisible) {
+        if (view != null) {
+            view.setVisibility(invisible ? View.INVISIBLE : View.VISIBLE);
+        }
+    }
 }
