@@ -20,7 +20,6 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.graphics.drawable.Drawable;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageButton;
 
 import androidx.annotation.IntDef;
@@ -84,17 +83,4 @@ public interface CarControlBar {
                 throw new IllegalArgumentException("Unknown position: " + slotPosition);
         }
     }
-
-    /**
-     * Collapses the control bar.
-     */
-    void close();
-
-    /**
-     * Defines the root {@link ViewGroup} used to animate the expand/collapse layout transitions.
-     * If this method is not used, only this view will be animated.
-     * If other elements of the screen have a layout relative to this view, their container
-     * layout should be passed to this method.
-     */
-    void setAnimationViewGroup(ViewGroup animationViewGroup);
 }
