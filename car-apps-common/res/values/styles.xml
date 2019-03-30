@@ -81,6 +81,9 @@
         <item name="android:letterSpacing">@dimen/letter_spacing_body3</item>
     </style>
 
+    <style name="MinimizedControlBarTitle" parent="TextAppearance.Body1"/>
+    <style name="MinimizedControlBarSubtitle" parent="TextAppearance.Body3"/>
+
     <!-- Styles for ControlBar -->
     <style name="ControlBar">
         <item name="android:layout_width">match_parent</item>

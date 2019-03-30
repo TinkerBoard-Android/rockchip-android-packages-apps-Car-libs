@@ -32,11 +32,11 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/minimized_control_bar_title"
-        />
+        app:layout_constraintEnd_toStartOf="@+id/minimized_control_bar_title"/>
 
     <TextView
         android:id="@+id/minimized_control_bar_title"
+        style="@style/MinimizedControlBarTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/minimized_control_bar_text_padding"
@@ -45,19 +45,18 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/minimized_control_bar_subtitle"
         app:layout_constraintStart_toEndOf="@+id/minimized_control_bar_content_tile"
-        app:layout_constraintEnd_toStartOf="@+id/minimized_control_buttons_wrapper"
-        android:textSize="@dimen/minimized_control_bar_title_text_size"/>
+        app:layout_constraintEnd_toStartOf="@+id/minimized_control_buttons_wrapper"/>
 
     <TextView
         android:id="@+id/minimized_control_bar_subtitle"
+        style="@style/MinimizedControlBarSubtitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:singleLine="true"
         app:layout_constraintTop_toBottomOf="@+id/minimized_control_bar_title"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="@+id/minimized_control_bar_title"
-        app:layout_constraintEnd_toEndOf="@+id/minimized_control_bar_title"
-        android:textSize="@dimen/minimized_control_bar_subtitle_text_size"/>
+        app:layout_constraintEnd_toEndOf="@+id/minimized_control_bar_title"/>
 
     <LinearLayout
         android:id="@+id/minimized_control_buttons_wrapper"
