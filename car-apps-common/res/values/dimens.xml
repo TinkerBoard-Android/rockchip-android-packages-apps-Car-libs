@@ -32,15 +32,13 @@
     <!-- Minimized Control Bar -->
     <dimen name="minimized_control_bar_height">128dp</dimen>
     <dimen name="minimized_control_bar_content_tile_size">96dp</dimen>
-    <dimen name="minimized_control_bar_radius">@*android:dimen/car_radius_2</dimen>
+    <dimen name="minimized_control_bar_radius">0dp</dimen>
     <dimen name="minimized_control_bar_margin_x">0dp</dimen>
-    <dimen name="minimized_control_bar_margin_bottom">@*android:dimen/car_padding_2</dimen>
+    <dimen name="minimized_control_bar_margin_bottom">0dp</dimen>
     <dimen name="minimized_control_bar_edge_padding">@*android:dimen/car_padding_4</dimen>
     <dimen name="minimized_control_bar_text_padding">@*android:dimen/car_padding_3</dimen>
     <dimen name="minimized_control_bar_button_padding">@*android:dimen/car_padding_5</dimen>
     <dimen name="minimized_control_bar_button_size">76dp</dimen>
-    <dimen name="minimized_control_bar_title_text_size">@*android:dimen/car_body1_size</dimen>
-    <dimen name="minimized_control_bar_subtitle_text_size">@*android:dimen/car_body3_size</dimen>
 
     <!-- Control Buttons -->
     <dimen name="control_button_padding">16dp</dimen>
