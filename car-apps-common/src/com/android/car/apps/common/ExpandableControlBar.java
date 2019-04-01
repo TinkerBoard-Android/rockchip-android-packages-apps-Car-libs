@@ -16,8 +16,6 @@
 
 package com.android.car.apps.common;
 
-import android.view.ViewGroup;
-
 import androidx.annotation.Nullable;
 
 /**
@@ -42,12 +40,4 @@ public interface ExpandableControlBar extends CarControlBar {
      * Collapses the control bar.
      */
     void close();
-
-    /**
-     * Defines the root {@link ViewGroup} used to animate the expand/collapse layout transitions.
-     * If this method is not used, only this view will be animated.
-     * If other elements of the screen have a layout relative to this view, their container
-     * layout should be passed to this method.
-     */
-    void setAnimationViewGroup(ViewGroup animationViewGroup);
 }
