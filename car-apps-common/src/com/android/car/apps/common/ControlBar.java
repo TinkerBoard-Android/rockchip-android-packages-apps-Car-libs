@@ -55,7 +55,7 @@ import java.util.Locale;
  * (if the space allows) and on the additional space if the panel is expanded.
  * </ul>
  */
-public class ControlBar extends RelativeLayout implements CarControlBar {
+public class ControlBar extends RelativeLayout implements ExpandableControlBar {
     private static final String TAG = "ControlBar";
 
     // ActionBar container
@@ -89,6 +89,8 @@ public class ControlBar extends RelativeLayout implements CarControlBar {
     private int mNumRows;
     // Whether the expand button should be visible or not
     private boolean mExpandEnabled;
+    // Callback for the expand/collapse button
+    private ExpandCollapseCallback mExpandCollapseCallback;
 
 
     // Default number of columns, if unspecified
@@ -204,6 +206,11 @@ public class ControlBar extends RelativeLayout implements CarControlBar {
     }
 
     @Override
+    public void registerExpandCollapseCallback(@Nullable ExpandCollapseCallback callback) {
+        mExpandCollapseCallback = callback;
+    }
+
+    @Override
     public void close() {
         // TODO(b/128536430)
     }
@@ -284,6 +291,9 @@ public class ControlBar extends RelativeLayout implements CarControlBar {
 
     private void onExpandCollapse() {
         mIsExpanded = !mIsExpanded;
+        if (mExpandCollapseCallback != null) {
+            mExpandCollapseCallback.onExpandCollapse(mIsExpanded);
+        }
         mSlots[getSlotIndex(SLOT_EXPAND_COLLAPSE)].setActivated(mIsExpanded);
 
         int animationDuration = getContext().getResources().getInteger(mIsExpanded

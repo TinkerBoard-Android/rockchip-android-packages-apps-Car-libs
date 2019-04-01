@@ -101,16 +101,6 @@ public class MinimizedControlBar extends ConstraintLayout implements CarControlB
         return button;
     }
 
-    @Override
-    public void close() {
-        // no-op
-    }
-
-    @Override
-    public void setAnimationViewGroup(ViewGroup animationViewGroup) {
-        // no-op
-    }
-
     private void updateViewsLayout() {
         // TODO(b/128524558): Fix this logic to use custom views in the right order
         int viewIndex = 0;
