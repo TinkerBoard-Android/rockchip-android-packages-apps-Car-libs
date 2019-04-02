@@ -45,19 +45,6 @@ public final class MediaConstants {
     public static final String ERROR_RESOLUTION_ACTION_LABEL =
             "android.media.extras.ERROR_RESOLUTION_ACTION_LABEL";
 
-    /** Declares that ContentStyle is supported */
-    public static final String CONTENT_STYLE_SUPPORTED =
-            "android.media.browse.CONTENT_STYLE_SUPPORTED";
-
-    /**
-     * Declares that ContentStyle is supported
-     *
-     * @deprecated this flag has been replaced by {@link #CONTENT_STYLE_SUPPORTED}
-     */
-    @Deprecated
-    public static final String CONTENT_STYLE_SUPPORTED_PRERELEASE =
-            "android.auto.media.CONTENT_STYLE_SUPPORTED";
-
     /**
      * Bundle extra indicating the presentation hint for playable media items. See {@link
      * #CONTENT_STYLE_LIST_ITEM_HINT_VALUE} or {@link #CONTENT_STYLE_GRID_ITEM_HINT_VALUE}
