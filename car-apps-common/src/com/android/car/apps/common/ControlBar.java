@@ -212,12 +212,9 @@ public class ControlBar extends RelativeLayout implements ExpandableControlBar {
 
     @Override
     public void close() {
-        // TODO(b/128536430)
-    }
-
-    @Override
-    public void setAnimationViewGroup(ViewGroup animationViewGroup) {
-        // TODO(b/128536430)
+        if (mIsExpanded) {
+            onExpandCollapse();
+        }
     }
 
     @Override
