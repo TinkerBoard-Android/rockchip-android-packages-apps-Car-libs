@@ -24,6 +24,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import androidx.annotation.Nullable;
+
 /**
  * Utilities for working with URIs.
  */
@@ -68,9 +70,14 @@ public final class UriUtils {
     /**
      * Loads drawable from resource
      */
-    public static Drawable getDrawable(Context context, ShortcutIconResource r)
-            throws NameNotFoundException {
-        Resources resources = context.getPackageManager().getResourcesForApplication(r.packageName);
+    @Nullable
+    public static Drawable getDrawable(Context context, ShortcutIconResource r) {
+        Resources resources = null;
+        try {
+            resources = context.getPackageManager().getResourcesForApplication(r.packageName);
+        } catch (NameNotFoundException e) {
+            // Return null below.
+        }
         if (resources == null) {
             return null;
         }
