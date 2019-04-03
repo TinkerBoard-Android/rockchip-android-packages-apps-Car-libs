@@ -219,27 +219,6 @@ public class MediaBrowserViewModelImpl extends AndroidViewModel implements
 
     @SuppressWarnings("deprecation")
     @Override
-    public LiveData<Boolean> contentStyleEnabled() {
-        return map(mConnectedMediaBrowser, mediaBrowserCompat -> {
-            if (mediaBrowserCompat == null) {
-                return false;
-            }
-            Bundle extras = mediaBrowserCompat.getExtras();
-            if (extras == null) {
-                return false;
-            }
-            if (extras.containsKey(MediaConstants.CONTENT_STYLE_SUPPORTED)) {
-                return extras.getBoolean(MediaConstants.CONTENT_STYLE_SUPPORTED);
-            }
-            if (extras.containsKey(MediaConstants.CONTENT_STYLE_SUPPORTED_PRERELEASE)) {
-                return extras.getBoolean(MediaConstants.CONTENT_STYLE_SUPPORTED_PRERELEASE);
-            }
-            return false;
-        });
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
     public LiveData<Integer> rootBrowsableHint() {
         return map(mConnectedMediaBrowser, mediaBrowserCompat -> {
             if (mediaBrowserCompat == null) {
