@@ -29,6 +29,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemProperties;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
@@ -56,6 +57,13 @@ import java.util.concurrent.CompletableFuture;
  */
 public class MediaItemMetadata implements Parcelable {
     private static final String TAG = "MediaItemMetadata";
+
+    // STOPSHIP(arnaudberry) restore remote uri blocking.
+    // To block remote uris: adb shell setprop log.tag.MediaItemRemoteOK 0
+    private static final String ALLOW_REMOTE_URIS_KEY = "log.tag.MediaItemRemoteOK";
+
+    // To red tint bitmaps:  adb shell setprop log.tag.MediaItemFlagBitmaps 1
+    private static final String FLAG_BITMAPS_KEY = "log.tag.MediaItemFlagBitmaps";
 
     /** Can be used to tint the bitmaps in red so apps switch to content uris. */
     // STOPSHIP(arnaudberry) decide whether to keep this or not.
@@ -200,6 +208,14 @@ public class MediaItemMetadata implements Parcelable {
                 == MediaDescriptionCompat.STATUS_DOWNLOADED;
     }
 
+    private static boolean allowRemoteUris() {
+        return "1".equals(SystemProperties.get(ALLOW_REMOTE_URIS_KEY, "1"));
+    }
+
+    private static boolean flagBitmaps() {
+        return "1".equals(SystemProperties.get(FLAG_BITMAPS_KEY, "0"));
+    }
+
     /**
      * Updates the given {@link ImageView} with the album art of the given media item. This is an
      * asynchronous operation.
@@ -228,7 +244,7 @@ public class MediaItemMetadata implements Parcelable {
         if (image != null) {
             imageView.setImageBitmap(image);
             imageView.setVisibility(View.VISIBLE);
-            if (BITMAP_WARNING_COLOR != 0) {
+            if (flagBitmaps() && BITMAP_WARNING_COLOR != 0) {
                 imageView.setColorFilter(BITMAP_WARNING_COLOR);
             }
             return;
@@ -243,7 +259,7 @@ public class MediaItemMetadata implements Parcelable {
                 } else {
                     Log.e(TAG, "Unable to load resource " + imageUri);
                 }
-            } else if (UriUtils.isContentUri(imageUri)) {
+            } else if (allowRemoteUris() || UriUtils.isContentUri(imageUri)) {
                 Glide.with(context)
                         .load(imageUri)
                         .apply(RequestOptions.placeholderOf(loadingIndicator))
@@ -277,7 +293,7 @@ public class MediaItemMetadata implements Parcelable {
             boolean fit) {
         Bitmap image = getAlbumArtBitmap();
         if (image != null) {
-            if (BITMAP_WARNING_COLOR != 0) {
+            if (flagBitmaps() && BITMAP_WARNING_COLOR != 0) {
                 Bitmap clone = Bitmap.createBitmap(image.getWidth(), image.getHeight(),
                         Bitmap.Config.ARGB_8888);
                 Canvas canvas = new Canvas(clone);
@@ -305,7 +321,7 @@ public class MediaItemMetadata implements Parcelable {
                     Log.e(TAG, errorMessage);
                     return CompletableFuture.failedFuture(new Exception(errorMessage));
                 }
-            } else if (UriUtils.isContentUri(imageUri)) {
+            } else if (allowRemoteUris() || UriUtils.isContentUri(imageUri)) {
                 CompletableFuture<Bitmap> bitmapCompletableFuture = new CompletableFuture<>();
                 RequestBuilder<Bitmap> builder = Glide.with(context)
                         .asBitmap()
