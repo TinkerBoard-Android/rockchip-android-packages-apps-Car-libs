@@ -160,7 +160,7 @@ public class MediaButtonController {
         } else {
             mSkipPrevButton.setAlpha(ALPHA_DISABLED);
         }
-
+        mSkipPrevButton.setEnabled(skipPreviousEnabled);
 
         boolean skipNextReserved = hasState && state.isSkipNextReserved();
         boolean skipNextEnabled = hasState && state.isSkipNextEnabled();
@@ -180,6 +180,7 @@ public class MediaButtonController {
         } else {
             mSkipNextButton.setAlpha(ALPHA_DISABLED);
         }
+        mSkipNextButton.setEnabled(skipNextEnabled);
 
         updateCustomActions(state);
     }
