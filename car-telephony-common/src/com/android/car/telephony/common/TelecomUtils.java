@@ -33,6 +33,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
@@ -49,13 +50,13 @@ import java.util.Locale;
 
 /** Helper methods. */
 public class TelecomUtils {
-    private static final String TAG = "Em.TelecomUtils";
+    private static final String TAG = "CD.TelecomUtils";
 
     private static final String[] CONTACT_ID_PROJECTION = new String[]{
-            ContactsContract.PhoneLookup.DISPLAY_NAME,
-            ContactsContract.PhoneLookup.TYPE,
-            ContactsContract.PhoneLookup.LABEL,
-            ContactsContract.PhoneLookup._ID
+            PhoneLookup.DISPLAY_NAME,
+            PhoneLookup.TYPE,
+            PhoneLookup.LABEL,
+            PhoneLookup._ID
     };
 
     private static String sVoicemailNumber;
@@ -65,21 +66,20 @@ public class TelecomUtils {
      * Return the label for the given phone number.
      *
      * @param number Caller phone number
-     * @return the label if it is found, 0 otherwise.
+     * @return the label if it is found, empty string otherwise.
      */
     public static CharSequence getTypeFromNumber(Context context, String number) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "getTypeFromNumber, number: " + number);
         }
+
         String defaultLabel = "";
-        if (number == null || number.isEmpty()) {
+        if (TextUtils.isEmpty(number)) {
             return defaultLabel;
         }
 
         ContentResolver cr = context.getContentResolver();
-        Resources res = context.getResources();
-        Uri uri = Uri.withAppendedPath(
-                PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
+        Uri uri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
         Cursor cursor = cr.query(uri, CONTACT_ID_PROJECTION, null, null, null);
 
         try {
@@ -88,8 +88,7 @@ public class TelecomUtils {
                 int type = cursor.getInt(typeColumn);
                 int labelColumn = cursor.getColumnIndex(PhoneLookup.LABEL);
                 String label = cursor.getString(labelColumn);
-                CharSequence typeLabel =
-                        Phone.getTypeLabel(res, type, label);
+                CharSequence typeLabel = Phone.getTypeLabel(context.getResources(), type, label);
                 return typeLabel;
             }
         } finally {
@@ -182,24 +181,45 @@ public class TelecomUtils {
     }
 
     /**
-     * Get the display name of the given number (e.g. if it's the voicemail number, return a string
-     * that represents voicemail, if it's a contact, get the contact's name, etc).
+     * Get the display name and photo uri of the given number (e.g. if it's the voicemail number,
+     * return a string and a uri that represents voicemail, if it's a contact, get the contact's
+     * name and its avatar uri, etc).
+     *
+     * @return Pair of display name and contact's photo uri if found. Voicemail number uses drawable
+     * resource uri and null uri for other cases.
      */
-    public static String getDisplayName(Context context, String number) {
+    public static Pair<String, Uri> getDisplayNameAndAvatarUri(Context context, String number) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "getDisplayName: " + number);
+            Log.d(TAG, "getDisplayNameAndAvatarUri: " + number);
         }
 
         if (TextUtils.isEmpty(number)) {
-            return context.getString(R.string.unknown);
+            return new Pair<>(context.getString(R.string.unknown), null);
+        }
+
+        if (isVoicemailNumber(context, number)) {
+            return new Pair<>(
+                    context.getString(R.string.voicemail),
+                    makeResourceUri(context, R.drawable.ic_voicemail));
         }
 
         ContentResolver cr = context.getContentResolver();
-        String name;
-        if (number.equals(getVoicemailNumber(context))) {
-            name = context.getResources().getString(R.string.voicemail);
-        } else {
-            name = getContactNameFromNumber(cr, number);
+        Uri uri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
+
+        Cursor cursor = null;
+        String name = null;
+        String photoUriString = null;
+        try {
+            cursor = cr.query(uri, new String[]{PhoneLookup.DISPLAY_NAME, PhoneLookup.PHOTO_URI},
+                    null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                name = cursor.getString(0);
+                photoUriString = cursor.getString(1);
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
 
         if (name == null) {
@@ -209,27 +229,11 @@ public class TelecomUtils {
         if (name == null) {
             name = context.getString(R.string.unknown);
         }
-        return name;
-    }
 
-    private static String getContactNameFromNumber(ContentResolver cr, String number) {
-        Uri uri = Uri.withAppendedPath(
-                ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
-
-        Cursor cursor = null;
-        String name = null;
-        try {
-            cursor = cr.query(uri,
-                    new String[]{ContactsContract.PhoneLookup.DISPLAY_NAME}, null, null, null);
-            if (cursor != null && cursor.moveToFirst()) {
-                name = cursor.getString(0);
-            }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+        if (TextUtils.isEmpty(photoUriString)) {
+            return new Pair<>(name, null);
         }
-        return name;
+        return new Pair<>(name, Uri.parse(photoUriString));
     }
 
     /**
@@ -337,8 +341,7 @@ public class TelecomUtils {
             final ImageView icon,
             final Uri avatarUri,
             final String displayName) {
-        LetterTileDrawable letterTileDrawable = new LetterTileDrawable(context.getResources());
-        letterTileDrawable.setIsCircular(true);
+        LetterTileDrawable letterTileDrawable = createLetterTile(context, displayName);
 
         if (avatarUri != null) {
             Glide.with(context)
@@ -349,9 +352,16 @@ public class TelecomUtils {
         }
 
         // Use the letter tile as avatar if there is no avatar available from content provider.
-        letterTileDrawable.setContactDetails(displayName, displayName);
         icon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
         icon.setImageDrawable(letterTileDrawable);
+    }
+
+    /** Create a {@link LetterTileDrawable} for the given display name. */
+    public static LetterTileDrawable createLetterTile(Context context, String displayName) {
+        LetterTileDrawable letterTileDrawable = new LetterTileDrawable(context.getResources());
+        letterTileDrawable.setIsCircular(true);
+        letterTileDrawable.setContactDetails(displayName, displayName);
+        return  letterTileDrawable;
     }
 
     /** Set the given phone number as the primary phone number for its associated contact. */
@@ -379,6 +389,14 @@ public class TelecomUtils {
         String[] selectionArgs = new String[]{Long.toString(contact.getId())};
         return context.getContentResolver().update(ContactsContract.Contacts.CONTENT_URI, values,
                 where, selectionArgs);
+    }
+
+    private static Uri makeResourceUri(Context context, int resourceId) {
+        return new Uri.Builder()
+                .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+                .encodedAuthority(context.getBasePackageName())
+                .appendEncodedPath(String.valueOf(resourceId))
+                .build();
     }
 
 }
