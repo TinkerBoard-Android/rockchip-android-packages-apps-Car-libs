@@ -48,15 +48,6 @@
     <dimen name="car_tab_padding_x">@*android:dimen/car_padding_3</dimen>
     <dimen name="car_tab_icon_size">@*android:dimen/car_primary_icon_size</dimen>
 
-    <!-- Padding -->
-    <dimen name="padding_0">4dp</dimen>
-    <dimen name="padding_1">10dp</dimen>
-    <dimen name="padding_2">12dp</dimen>
-    <dimen name="padding_3">16dp</dimen>
-    <dimen name="padding_4">20dp</dimen>
-    <dimen name="padding_5">40dp</dimen>
-    <dimen name="padding_6">64dp</dimen>
-
     <!-- Letter spacing -->
     <item name="letter_spacing_display1" format="float" type="dimen">0.0</item>
     <item name="letter_spacing_display2" format="float" type="dimen">0.0</item>
