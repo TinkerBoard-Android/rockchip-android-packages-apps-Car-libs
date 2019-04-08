@@ -31,6 +31,7 @@ import android.annotation.UiThread;
 import android.app.Application;
 import android.os.Bundle;
 import android.support.v4.media.MediaBrowserCompat;
+import android.text.TextUtils;
 
 import androidx.annotation.RestrictTo;
 import androidx.lifecycle.AndroidViewModel;
@@ -61,6 +62,7 @@ public class MediaBrowserViewModelImpl extends AndroidViewModel implements
     private final LiveData<MediaBrowserCompat> mConnectedMediaBrowser =
             map(mMediaBrowserSwitch.asLiveData(), MediaBrowserViewModelImpl::requireConnected);
 
+    private final LiveData<FutureData<List<MediaItemMetadata>>> mSearchedMediaItems;
     private final LiveData<FutureData<List<MediaItemMetadata>>> mCurrentMediaItems;
 
     private final LiveData<BrowseState> mBrowseState;
@@ -82,14 +84,14 @@ public class MediaBrowserViewModelImpl extends AndroidViewModel implements
                                 mediaBrowser == null
                                         ? null
                                         : new BrowsedMediaItems(mediaBrowser, browseId)));
-        LiveData<FutureData<List<MediaItemMetadata>>> currentSearchItems =
+        mSearchedMediaItems =
                 loadingSwitchMap(pair(mConnectedMediaBrowser, mCurrentSearchQuery),
                         split((mediaBrowser, query) ->
-                                mediaBrowser == null
+                                (mediaBrowser == null || TextUtils.isEmpty(query))
                                         ? null
                                         : new SearchedMediaItems(mediaBrowser, query)));
         mCurrentMediaItems = ifThenElse(emitsNull(mCurrentSearchQuery),
-                currentBrowseItems, currentSearchItems);
+                currentBrowseItems, mSearchedMediaItems);
         mBrowseState = new MediatorLiveData<BrowseState>() {
             {
                 setValue(BrowseState.EMPTY);
@@ -194,6 +196,11 @@ public class MediaBrowserViewModelImpl extends AndroidViewModel implements
     @Override
     public LiveData<FutureData<List<MediaItemMetadata>>> getBrowsedMediaItems() {
         return mCurrentMediaItems;
+    }
+
+    @Override
+    public LiveData<FutureData<List<MediaItemMetadata>>> getSearchedMediaItems() {
+        return mSearchedMediaItems;
     }
 
     @SuppressWarnings("deprecation")

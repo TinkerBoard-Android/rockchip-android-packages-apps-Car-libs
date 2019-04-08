@@ -79,6 +79,15 @@ public interface MediaBrowserViewModel {
     LiveData<FutureData<List<MediaItemMetadata>>> getBrowsedMediaItems();
 
     /**
+     * Fetches the MediaItemMetadatas for the current search query, and the loading status of the
+     * fetch operation.
+     *
+     * This is the same as {@link #getBrowsedMediaItems()}, but only returning search results
+     */
+    LiveData<FutureData<List<MediaItemMetadata>>> getSearchedMediaItems();
+
+
+    /**
      * Returns a LiveData that emits whether the media browser supports search. This wil never emit
      * {@code null}
      */
