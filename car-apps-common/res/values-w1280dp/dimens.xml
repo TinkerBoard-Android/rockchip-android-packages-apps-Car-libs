@@ -17,4 +17,5 @@
 <resources>
     <!-- Control Bar - typically at the bottom of the application's space. -->
     <dimen name="control_bar_width">1028dp</dimen>
+    <dimen name="car_tab_width">180dp</dimen>
 </resources>

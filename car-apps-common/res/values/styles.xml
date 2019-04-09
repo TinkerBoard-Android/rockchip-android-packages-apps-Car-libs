@@ -37,8 +37,20 @@
 
     <!-- Styles for car tab view -->
     <style name="CarTabItemText">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textAppearance">@style/TextAppearance.Body3</item>
         <item name="android:textColor">@color/car_tab_item_selector</item>
+        <item name="android:layout_width">@dimen/car_tab_width</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="CarTabItemIcon">
+        <item name="android:layout_width">@dimen/car_tab_icon_size</item>
+        <item name="android:layout_height">@dimen/car_tab_icon_size</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:tint">@color/car_tab_item_selector</item>
+        <item name="android:tintMode">src_in</item>
     </style>
 
     <style name="CarTabItemBackground">
