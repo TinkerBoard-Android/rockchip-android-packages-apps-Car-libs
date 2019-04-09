@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.car.media.common;
+package com.android.car.apps.common;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -119,19 +119,19 @@ public class CrossfadeImageView extends FrameLayout {
 
     private final Animation.AnimationListener mAnimationListener =
             new Animation.AnimationListener() {
-        @Override
-        public void onAnimationEnd(Animation animation) {
-            if (mInactiveImageView != null) {
-                mInactiveImageView.setVisibility(View.GONE);
-            }
-        }
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    if (mInactiveImageView != null) {
+                        mInactiveImageView.setVisibility(View.GONE);
+                    }
+                }
 
-        @Override
-        public void onAnimationStart(Animation animation) { }
+                @Override
+                public void onAnimationStart(Animation animation) { }
 
-        @Override
-        public void onAnimationRepeat(Animation animation) { }
-    };
+                @Override
+                public void onAnimationRepeat(Animation animation) { }
+            };
 
     private void animateViews() {
         mInactiveImageView.setVisibility(View.VISIBLE);
