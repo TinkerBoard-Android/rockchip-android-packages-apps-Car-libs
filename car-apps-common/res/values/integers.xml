@@ -22,4 +22,7 @@
 
     <!-- Default max string length -->
     <integer name="default_max_string_length">120</integer>
+
+    <!-- The amount of time it takes for a new image in a CrossfadeImageView to fade in. -->
+    <integer name="crossfade_image_view_fade_in_duration">250</integer>
 </resources>

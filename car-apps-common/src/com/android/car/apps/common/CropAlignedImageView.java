@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.car.media.common;
+package com.android.car.apps.common;
 
 import android.content.Context;
 import android.content.res.TypedArray;

@@ -83,4 +83,12 @@
     <declare-styleable name="PagedRecyclerViewTheme">
         <attr name="pagedRecyclerViewStyle" format="reference" />
     </declare-styleable>
+
+    <declare-styleable name="CrossfadeImageView">
+        <attr name="align_horizontal" format="enum">
+            <enum name="center" value="0"/>
+            <enum name="left" value="1"/>
+            <enum name="right" value="2"/>
+        </attr>
+    </declare-styleable>
 </resources>
