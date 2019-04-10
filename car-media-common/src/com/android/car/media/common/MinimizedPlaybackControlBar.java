@@ -59,8 +59,8 @@ public class MinimizedPlaybackControlBar extends MinimizedControlBar implements 
     public void setModel(@NonNull PlaybackViewModel model, @NonNull LifecycleOwner owner) {
         mMediaButtonController.setModel(model, owner);
         mMetadataController = new MetadataController(owner, model,
-                falseLiveData(), mTitle, null, mSubtitle, null, null, null, null, mContentTile,
-                getContext().getResources().getDimensionPixelSize(
-                        R.dimen.minimized_control_bar_content_tile_size));
+                falseLiveData(), mTitle, mSubtitle, null, null, null, null, null, null,
+                mContentTile, getContext().getResources().getDimensionPixelSize(
+                R.dimen.minimized_control_bar_content_tile_size));
     }
 }
