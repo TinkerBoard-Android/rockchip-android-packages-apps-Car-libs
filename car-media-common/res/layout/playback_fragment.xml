@@ -68,7 +68,7 @@
             app:fullScreenDialog="false"
             android:padding="@dimen/app_switch_widget_icon_padding"
             android:orientation="horizontal"
-            android:background="@drawable/app_item_background"
+            android:background="@drawable/appbar_view_icon_background"
             android:gravity="center" />
 
         <TextView

@@ -24,8 +24,8 @@
     <!-- App selection background -->
     <color name="app_selection_border">#40000000</color>
     <color name="app_selection_background">#ff000000</color>
-    <!-- App selection items background -->
-    <color name="app_item_background_color">#66ffffff</color>
+    <!-- App icons selection background -->
+    <color name="appbar_view_icon_background_color">#66ffffff</color>
 
     <!-- ColorChecker.java -->
     <color name="media_tint_light">@*android:color/car_tint_light</color>
