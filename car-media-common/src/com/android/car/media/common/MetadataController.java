@@ -79,22 +79,30 @@ public class MetadataController {
     /**
      * Create a new MetadataController that operates on the provided Views
      *
+     * Note: when the text of a TextView is empty, its visibility will be set to View.INVISIBLE
+     * instead of View.GONE. Thus the views stay in the same position, and the constraint chains of
+     * the layout won't be disrupted.
+     *
      * @param lifecycleOwner The lifecycle scope for the Views provided to this controller
      * @param viewModel      The ViewModel to provide metadata for display
      * @param pauseUpdates   Views will not update while this LiveData emits {@code true}
      * @param title          Displays the track's title. Must not be {@code null}.
+     * @param artist         Displays the track's artist. May be {@code null}.
      * @param albumTitle     Displays the track's album title. May be {@code null}.
-     * @param artist         Displays the track's artist. Must not be {@code null}.
-     * @param timeExtras     Regroups views for time display (eg: separators). May be {@code null}.
+     * @param outerSeparator Displays the separator between the album title and time. May be {@code
+     *                       null}.
      * @param currentTime    Displays the track's current position as text. May be {@code null}.
+     * @param innerSeparator Displays the separator between the currentTime and the maxTime. May be
+     *                       {@code null}.
      * @param maxTime        Displays the track's duration as text. May be {@code null}.
      * @param seekBar        Displays the track's progress visually. May be {@code null}.
      * @param albumArt       Displays the track's album art. May be {@code null}.
      */
     public MetadataController(@NonNull LifecycleOwner lifecycleOwner,
             @NonNull PlaybackViewModel viewModel, @Nullable LiveData<Boolean> pauseUpdates,
-            @NonNull TextView title, @Nullable TextView albumTitle, @NonNull TextView artist,
-            @Nullable View timeExtras, @Nullable TextView currentTime, @Nullable TextView maxTime,
+            @NonNull TextView title, @Nullable TextView artist, @Nullable TextView albumTitle,
+            @Nullable TextView outerSeparator, @Nullable TextView currentTime,
+            @Nullable TextView innerSeparator, @Nullable TextView maxTime,
             @Nullable SeekBar seekBar, @Nullable ImageView albumArt, int albumArtSizePx) {
         viewModel.getPlaybackController().observe(lifecycleOwner,
                 controller -> mController = controller);
@@ -105,16 +113,17 @@ public class MetadataController {
 
         if (albumTitle != null) {
             model.getAlbumTitle().observe(lifecycleOwner, albumName -> {
-                if (!TextUtils.isEmpty(albumName)) {
-                    albumTitle.setText(albumName);
-                    albumTitle.setVisibility(View.VISIBLE);
-                } else {
-                    albumTitle.setVisibility(View.GONE);
-                }
+                albumTitle.setText(albumName);
+                ViewHelper.setInvisible(albumTitle, TextUtils.isEmpty(albumName));
             });
         }
 
-        model.getArtist().observe(lifecycleOwner, artist::setText);
+        if (artist != null) {
+            model.getArtist().observe(lifecycleOwner, artistName -> {
+                artist.setText(artistName);
+                ViewHelper.setInvisible(artist, TextUtils.isEmpty(artistName));
+            });
+        }
 
         if (albumArt != null) {
             model.setAlbumArtSize(albumArtSizePx);
@@ -128,12 +137,19 @@ public class MetadataController {
             });
         }
 
+        if (outerSeparator != null) {
+            model.showOuterSeparator().observe(lifecycleOwner,
+                    // The text of outerSeparator is not empty. when albumTitle is empty,
+                    // the visibility of outerSeparator should be View.GONE instead of
+                    // View.INVISIBLE so that currentTime can be aligned to the left .
+                    visible -> ViewHelper.setVisible(outerSeparator, visible));
+        }
+
         model.hasTime().observe(lifecycleOwner,
                 visible -> {
-                    // Current and Max time are not necessarily children of timeExtras.
-                    ViewHelper.setVisible(timeExtras, visible);
-                    ViewHelper.setVisible(currentTime, visible);
-                    ViewHelper.setVisible(maxTime, visible);
+                    ViewHelper.setInvisible(currentTime, !visible);
+                    ViewHelper.setInvisible(innerSeparator, !visible);
+                    ViewHelper.setInvisible(maxTime, !visible);
                 });
 
         if (currentTime != null) {
@@ -188,6 +204,7 @@ public class MetadataController {
         private final LiveData<CharSequence> mMaxTimeText;
         private final LiveData<Boolean> mHasTime;
         private final LiveData<Boolean> mIsSeekToEnabled;
+        private final LiveData<Boolean> mShowOuterSeparator;
 
         private final MutableLiveData<Integer> mAlbumArtSize = new MutableLiveData<>();
 
@@ -227,11 +244,13 @@ public class MetadataController {
                     (progress, maxProgress) ->
                             maxProgress > 0 && progress != PlaybackState.PLAYBACK_POSITION_UNKNOWN);
 
+            mShowOuterSeparator = combine(mAlbumTitle, mHasTime,
+                    (albumName, hasTime) -> !TextUtils.isEmpty(albumName) && hasTime);
+
             mIsSeekToEnabled = distinct(freezable(pauseUpdates,
                     map(playbackViewModel.getPlaybackStateWrapper(),
                             state -> state != null && state.isSeekToEnabled())));
         }
-
 
         void setAlbumArtSize(int size) {
             mAlbumArtSize.setValue(size);
@@ -275,6 +294,10 @@ public class MetadataController {
 
         LiveData<Boolean> isSeekToEnabled() {
             return mIsSeekToEnabled;
+        }
+
+        LiveData<Boolean> showOuterSeparator() {
+            return mShowOuterSeparator;
         }
 
         @SuppressLint("DefaultLocale")
