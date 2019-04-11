@@ -94,4 +94,10 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">@dimen/minimized_control_bar_height</item>
     </style>
+
+    <style name="PagedRecyclerView">
+        <item name="gutter">both</item>
+        <item name="scrollBarPosition">start</item>
+        <item name="scrollBarAboveRecyclerView">true</item>
+    </style>
 </resources>
