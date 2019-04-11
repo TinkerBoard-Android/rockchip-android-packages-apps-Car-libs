@@ -23,4 +23,7 @@ limitations under the License.
 
     <!-- CarUxRestrictions Utility -->
     <string name="ellipsis" translatable="false">&#8230;</string>
+
+    <string name="scroll_bar_page_down_button">Scroll down</string>
+    <string name="scroll_bar_page_up_button">Scroll up</string>
 </resources>

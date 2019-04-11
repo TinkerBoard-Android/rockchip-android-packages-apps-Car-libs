@@ -52,4 +52,7 @@
 
     <color name="primary_app_icon_color">#FFFFFFFF</color>
     <color name="secondary_app_icon_color">#B8FFFFFF</color>
+    <color name="car_tint_inverse">@*android:color/car_tint_inverse</color>
+    <color name="car_scrollbar_thumb_inverse">@*android:color/car_scrollbar_thumb_dark</color>
+    <color name="car_card_ripple_background">#17000000</color>
 </resources>
