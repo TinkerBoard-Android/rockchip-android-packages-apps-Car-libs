@@ -100,4 +100,6 @@
         <item name="scrollBarPosition">start</item>
         <item name="scrollBarAboveRecyclerView">true</item>
     </style>
+    <style name="PagedRecyclerView.NestedRecyclerView">
+    </style>
 </resources>

@@ -131,7 +131,18 @@ public final class PagedRecyclerView extends RecyclerView {
         init(context, attrs, defStyle);
     }
 
-    private void init(Context context, AttributeSet attrs, int defStyle) {
+    private void init(Context context, AttributeSet attrs, int defStyleAttr) {
+        TypedArray a = context.obtainStyledAttributes(
+                attrs, R.styleable.PagedRecyclerView, defStyleAttr,
+                R.style.PagedRecyclerView);
+
+        mScrollBarEnabled = a.getBoolean(R.styleable.PagedRecyclerView_scrollBarEnabled, true);
+
+        if (!mScrollBarEnabled) {
+            a.recycle();
+            return;
+        }
+
         mContext = context;
         mAttrs = attrs;
 
@@ -145,16 +156,10 @@ public final class PagedRecyclerView extends RecyclerView {
         super.setNestedScrollingEnabled(false);
         super.setClipToPadding(false);
 
-        TypedArray a = context.obtainStyledAttributes(
-                attrs, R.styleable.PagedRecyclerView, 0,
-                defStyle == 0 ? R.style.PagedRecyclerView : defStyle /* defStyleRes */);
-
         // Gutter
         int defaultGutterSize = getResources().getDimensionPixelSize(R.dimen.car_scroll_bar_margin);
         mGutter = a.getInt(R.styleable.PagedRecyclerView_gutter, Gutter.BOTH);
         mGutterSize = defaultGutterSize;
-
-        mScrollBarEnabled = a.getBoolean(R.styleable.PagedRecyclerView_scrollBarEnabled, true);
 
         int carMargin = mContext.getResources().getDimensionPixelSize(
                 R.dimen.car_scroll_bar_margin);
@@ -173,8 +178,7 @@ public final class PagedRecyclerView extends RecyclerView {
             public void onGlobalLayout() {
                 PagedRecyclerView.this.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 initNestedRecyclerView();
-
-                setGutter(mGutter);
+                setNestedViewLayout();
 
                 if (mScrollBarEnabled) {
                     createScrollBarFromConfig();
@@ -187,14 +191,23 @@ public final class PagedRecyclerView extends RecyclerView {
 
     @Override
     public void setClipToPadding(boolean clipToPadding) {
+        if (!mScrollBarEnabled) {
+            super.setClipToPadding(clipToPadding);
+            return;
+        }
+
         if (mNestedRecyclerView == null) return;
         mNestedRecyclerView.setClipToPadding(clipToPadding);
     }
 
     @Override
     public void setAdapter(@Nullable Adapter adapter) {
-        mNestedAdapter = adapter;
+        if (!mScrollBarEnabled) {
+            super.setAdapter(adapter);
+            return;
+        }
 
+        mNestedAdapter = adapter;
         if (mNestedRecyclerView != null) {
             mNestedRecyclerView.setAdapter(adapter);
         }
@@ -202,8 +215,12 @@ public final class PagedRecyclerView extends RecyclerView {
 
     @Override
     public void setLayoutManager(@Nullable LayoutManager layout) {
-        mNestedLayoutManager = layout;
+        if (!mScrollBarEnabled) {
+            super.setLayoutManager(layout);
+            return;
+        }
 
+        mNestedLayoutManager = layout;
         if (mNestedRecyclerView != null) {
             mNestedRecyclerView.setLayoutManager(layout);
         }
@@ -217,7 +234,9 @@ public final class PagedRecyclerView extends RecyclerView {
             throw new Error("Outer RecyclerView failed to initialize.");
         }
 
-        mNestedRecyclerView = vh.mRecyclerView;
+        mNestedRecyclerView = new RecyclerView(mContext, mAttrs,
+                R.style.PagedRecyclerView_NestedRecyclerView);
+        vh.mFrameLayout.addView(mNestedRecyclerView);
 
         mNestedRecyclerView.setAdapter(mNestedAdapter);
         mNestedRecyclerView.setLayoutManager(mNestedLayoutManager);
@@ -249,7 +268,7 @@ public final class PagedRecyclerView extends RecyclerView {
     }
 
     /**
-     * Set the gutter to the specified value.
+     * Set the nested view's layout to the specified value.
      *
      * <p>The gutter is the space to the start/end of the list view items and will be equal in size
      * to the scroll bars. By default, there is a gutter to both the left and right of the list
@@ -257,8 +276,7 @@ public final class PagedRecyclerView extends RecyclerView {
      *
      * @param gutter A {@link Gutter} value that identifies which sides to apply the gutter to.
      */
-    public void setGutter(@Gutter int gutter) {
-        mGutter = gutter;
+    private void setNestedViewLayout() {
         int startMargin = 0;
         int endMargin = 0;
         if ((mGutter & Gutter.START) != 0) {
@@ -270,9 +288,11 @@ public final class PagedRecyclerView extends RecyclerView {
 
         MarginLayoutParams layoutParams =
                 (MarginLayoutParams) mNestedRecyclerView.getLayoutParams();
+
         layoutParams.setMarginStart(startMargin);
         layoutParams.setMarginEnd(endMargin);
 
+        layoutParams.height = LayoutParams.MATCH_PARENT;
         layoutParams.width = super.getLayoutManager().getWidth() - startMargin - endMargin;
         // requestLayout() isn't sufficient because we also need to resolveLayoutParams().
         mNestedRecyclerView.setLayoutParams(layoutParams);
