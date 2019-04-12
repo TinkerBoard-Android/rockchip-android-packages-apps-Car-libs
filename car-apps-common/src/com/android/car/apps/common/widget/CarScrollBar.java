@@ -194,7 +194,7 @@ class CarScrollBar extends ScrollBarUI {
      *
      * @param position Enum value of the scrollbar position. 0 for Start and 1 for end.
      */
-    void setScrollBarPosition(int position) {
+    void setScrollBarPosition(@ScrollBarPosition int position) {
         FrameLayout.LayoutParams layoutParams =
                 (FrameLayout.LayoutParams) mScrollView.getLayoutParams();
         if (position == ScrollBarPosition.START) {

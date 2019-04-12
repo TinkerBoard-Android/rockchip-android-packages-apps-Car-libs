@@ -68,7 +68,8 @@
             <!-- Position scrollbar on the right side of the screen -->
             <enum name="end" value="1" />
         </attr>
-        <!-- Whether to display the Scroll Bar or not. Defaults to true. -->
+        <!-- Whether to display the Scroll Bar or not. Defaults to true. If this is set to false,
+             the PagedRecyclerView will behave exactly like the RecyclerView. -->
         <attr name="scrollBarEnabled" format="boolean" />
         <!-- Whether to place the scrollbar z-index above the recycler view. Defaults to
              true. -->

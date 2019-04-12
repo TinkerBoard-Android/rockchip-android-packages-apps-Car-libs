@@ -19,6 +19,7 @@ package com.android.car.apps.common.widget;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -61,11 +62,11 @@ final class PagedRecyclerViewAdapter
      * The viewholder class for the parent recyclerview.
      */
     static class NestedRowViewHolder extends RecyclerView.ViewHolder {
-        public RecyclerView mRecyclerView;
+        public FrameLayout mFrameLayout;
 
         NestedRowViewHolder(View view) {
             super(view);
-            mRecyclerView = view.findViewById(R.id.nested_recycler_view);
+            mFrameLayout = view.findViewById(R.id.nested_recycler_view_layout);
         }
     }
 }
