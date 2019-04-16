@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.media.MediaMetadata;
 import android.os.Bundle;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.RatingCompat;
@@ -107,6 +108,9 @@ public class PlaybackViewModel extends AndroidViewModel {
      * Pause playing
      */
     public static final int ACTION_PAUSE = 3;
+
+    /** Needs to be a MediaMetadata because the compat class doesn't implement equals... */
+    private static final MediaMetadata EMPTY_MEDIA_METADATA = new MediaMetadata.Builder().build();
 
     private final MediaControllerCallback mMediaControllerCallback = new MediaControllerCallback();
     private final Observer<MediaControllerCompat> mMediaControllerObserver =
@@ -264,10 +268,18 @@ public class PlaybackViewModel extends AndroidViewModel {
         }
 
         @Override
-        public void onMetadataChanged(@Nullable MediaMetadataCompat metadata) {
-            mMediaMetadata = metadata;
-            MediaItemMetadata item = (metadata != null) ? new MediaItemMetadata(metadata)
-                    : null;
+        public void onMetadataChanged(@Nullable MediaMetadataCompat mmdCompat) {
+            // MediaSession#setMetadata builds an empty MediaMetadata when its argument is null,
+            // yet MediaMetadataCompat doesn't implement equals... so if the given mmdCompat's
+            // MediaMetadata equals EMPTY_MEDIA_METADATA, set mMediaMetadata to null to keep
+            // the code simpler everywhere else.
+            if ((mmdCompat != null) && EMPTY_MEDIA_METADATA.equals(mmdCompat.getMediaMetadata())) {
+                mMediaMetadata = null;
+            } else {
+                mMediaMetadata = mmdCompat;
+            }
+            MediaItemMetadata item =
+                    (mMediaMetadata != null) ? new MediaItemMetadata(mMediaMetadata) : null;
             mMetadata.setValue(item);
             updatePlaybackStatus();
         }
@@ -299,8 +311,7 @@ public class PlaybackViewModel extends AndroidViewModel {
         private void updatePlaybackStatus() {
             if (mMediaController != null && mPlaybackState != null) {
                 mPlaybackStateWrapper.setValue(
-                        new PlaybackStateWrapper(mMediaController, mMediaMetadata,
-                                mPlaybackState));
+                        new PlaybackStateWrapper(mMediaController, mMediaMetadata, mPlaybackState));
             } else {
                 mPlaybackStateWrapper.setValue(null);
             }
@@ -320,6 +331,11 @@ public class PlaybackViewModel extends AndroidViewModel {
             mMediaController = mediaController;
             mMetadata = metadata;
             mState = state;
+        }
+
+        /** Returns true if there's enough information in the state to show a UI for it. */
+        public boolean shouldDisplay() {
+            return (mMetadata != null) || (getMainAction() != ACTION_DISABLED);
         }
 
         /** Returns the main action. */
