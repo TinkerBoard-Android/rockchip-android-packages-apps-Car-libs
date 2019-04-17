@@ -17,4 +17,7 @@
 
 <resources>
     <bool name="car_tab_flexible_layout">true</bool>
+
+    <!-- Scale factor for the background image -->
+    <dimen name="background_image_scale" format="float">1.5</dimen>
 </resources>
