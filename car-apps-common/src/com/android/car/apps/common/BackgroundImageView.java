@@ -18,6 +18,7 @@ package com.android.car.apps.common;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.AttributeSet;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -38,6 +39,7 @@ public class BackgroundImageView extends ConstraintLayout {
     private int mBackgroundImageSize = 0;
 
     private Bitmap mBitmap;
+    private View mDarkeningScrim;
 
     public BackgroundImageView(Context context) {
         super(context);
@@ -58,6 +60,7 @@ public class BackgroundImageView extends ConstraintLayout {
         inflate(getContext(), R.layout.background_image, this);
 
         mImageView = findViewById(R.id.background_image_image);
+        mDarkeningScrim = findViewById(R.id.background_image_darkening_scrim);
 
         mBackgroundScale = getResources().getFloat(R.dimen.background_image_scale);
 
@@ -136,5 +139,10 @@ public class BackgroundImageView extends ConstraintLayout {
      */
     public int getDesiredBackgroundSize() {
         return mBackgroundImageSize;
+    }
+
+    /** Dims/undims the background image by 30% */
+    public void setDimmed(boolean dim) {
+        mDarkeningScrim.setVisibility(dim ?  View.VISIBLE : View.GONE);
     }
 }
