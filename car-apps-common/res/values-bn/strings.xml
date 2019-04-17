@@ -19,4 +19,8 @@ limitations under the License.
     <string name="control_bar_expand_collapse_button" msgid="3420351169078117938">"বড় করা/আড়াল করার বোতাম"</string>
     <string name="car_drawer_open" msgid="2676372472514742324">"ড্রয়ার খুলুন"</string>
     <string name="car_drawer_close" msgid="5329374630462464855">"ড্রয়ার বন্ধ করুন"</string>
+    <!-- no translation found for scroll_bar_page_down_button (8633547153186948066) -->
+    <skip />
+    <!-- no translation found for scroll_bar_page_up_button (8306413844913744345) -->
+    <skip />
 </resources>
