@@ -61,4 +61,7 @@
 
     <!-- fragment_app_selection.xml -->
     <dimen name="fragment_app_selection_list_top_offset">@*android:dimen/car_padding_5</dimen>
+
+    <!-- Minimized Progress Bar -->
+    <dimen name="minimized_progress_bar_track_height">4dp</dimen>
 </resources>
