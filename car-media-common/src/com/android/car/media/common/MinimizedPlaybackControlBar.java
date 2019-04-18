@@ -16,13 +16,18 @@
 
 package com.android.car.media.common;
 
+import static androidx.lifecycle.Transformations.map;
+
 import static com.android.car.arch.common.LiveDataFunctions.falseLiveData;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.util.AttributeSet;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LiveData;
 
 import com.android.car.apps.common.MinimizedControlBar;
 import com.android.car.media.common.playback.PlaybackViewModel;
@@ -37,6 +42,9 @@ public class MinimizedPlaybackControlBar extends MinimizedControlBar implements 
 
     private MediaButtonController mMediaButtonController;
     private MetadataController mMetadataController;
+    private ProgressBar mProgressBar;
+    private PlaybackViewModel mPlaybackViewModel;
+    private LiveData<Long> mMaxProgress;
 
     public MinimizedPlaybackControlBar(Context context) {
         this(context, null);
@@ -47,12 +55,13 @@ public class MinimizedPlaybackControlBar extends MinimizedControlBar implements 
     }
 
     public MinimizedPlaybackControlBar(Context context, AttributeSet attrs, int defStyleAttrs) {
-        super(context, attrs, defStyleAttrs);
+        super(context, attrs, defStyleAttrs, R.layout.minimized_playback_control_bar);
         init(context);
     }
 
     private void init(Context context) {
         mMediaButtonController = new MediaButtonController(context, this);
+        mProgressBar = findViewById(R.id.progress_bar);
     }
 
     @Override
@@ -62,5 +71,26 @@ public class MinimizedPlaybackControlBar extends MinimizedControlBar implements 
                 falseLiveData(), mTitle, mSubtitle, null, null, null, null, null, null,
                 mContentTile, getContext().getResources().getDimensionPixelSize(
                 R.dimen.minimized_control_bar_content_tile_size));
+
+        mPlaybackViewModel = model;
+        if (mProgressBar != null) {
+            mPlaybackViewModel.getMediaSourceColors().observe(owner,
+                    sourceColors -> {
+                        int defaultColor = getContext().getResources().getColor(
+                                R.color.minimized_progress_bar_highlight, null);
+                        int color = sourceColors != null ? sourceColors.getAccentColor(defaultColor)
+                                : defaultColor;
+                        mProgressBar.setProgressTintList(ColorStateList.valueOf(color));
+                    });
+
+            // TODO(b/130566861): Get the progress and max progress through Model once Model is
+            //  moved out to be a top-level class.
+            mPlaybackViewModel.getProgress().observe(owner,
+                    progress -> mProgressBar.setProgress(progress.intValue()));
+            mMaxProgress = map(mPlaybackViewModel.getPlaybackStateWrapper(),
+                    state -> state != null ? state.getMaxProgress() : 0L);
+            mMaxProgress.observe(owner,
+                    maxProgress -> mProgressBar.setMax(maxProgress.intValue()));
+        }
     }
 }
