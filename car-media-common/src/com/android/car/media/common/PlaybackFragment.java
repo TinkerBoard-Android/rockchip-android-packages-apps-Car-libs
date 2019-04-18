@@ -125,7 +125,7 @@ public class PlaybackFragment extends Fragment {
             mAppName = mapNonNull(mMediaSource, MediaSource::getName);
             mAppIcon = mapNonNull(mMediaSource, MediaSource::getRoundPackageIcon);
             mTitle = mapNonNull(playbackViewModel.getMetadata(), MediaItemMetadata::getTitle);
-            mSubtitle = mapNonNull(playbackViewModel.getMetadata(), MediaItemMetadata::getSubtitle);
+            mSubtitle = mapNonNull(playbackViewModel.getMetadata(), MediaItemMetadata::getArtist);
             mAlbumArt = AlbumArtLiveData.getAlbumArt(getApplication(),
                     Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL, false,
                     playbackViewModel.getMetadata());
