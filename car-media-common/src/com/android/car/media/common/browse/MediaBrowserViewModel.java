@@ -70,11 +70,8 @@ public interface MediaBrowserViewModel {
      * A MediaSource must be selected and its MediaBrowser connected, otherwise the FutureData will
      * always contain a {@code null} data value.
      *
-     * Will emit browse results if provided search query is {@code null},
-     * and search query results otherwise.
-     *
      * @return a LiveData that emits a FutureData that contains the loading status and the
-     * MediaItemMetadatas for the current search query or browsed id
+     * MediaItemMetadatas for the current browsed id
      */
     LiveData<FutureData<List<MediaItemMetadata>>> getBrowsedMediaItems();
 
@@ -82,7 +79,7 @@ public interface MediaBrowserViewModel {
      * Fetches the MediaItemMetadatas for the current search query, and the loading status of the
      * fetch operation.
      *
-     * This is the same as {@link #getBrowsedMediaItems()}, but only returning search results
+     * See {@link #getBrowsedMediaItems()}
      */
     LiveData<FutureData<List<MediaItemMetadata>>> getSearchedMediaItems();
 
