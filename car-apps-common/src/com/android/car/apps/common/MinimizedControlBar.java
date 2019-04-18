@@ -61,12 +61,17 @@ public class MinimizedControlBar extends ConstraintLayout implements CarControlB
 
 
     public MinimizedControlBar(Context context, AttributeSet attrs, int defStyleAttrs) {
-        super(context, attrs, defStyleAttrs);
-        init(context, attrs, defStyleAttrs);
+        this(context, attrs, defStyleAttrs, R.layout.minimized_control_bar);
     }
 
-    private void init(Context context, AttributeSet attrs, int defStyleAttrs) {
-        inflate(context, R.layout.minimized_control_bar, this);
+    protected MinimizedControlBar(Context context, AttributeSet attrs, int defStyleAttrs,
+            int layoutId) {
+        super(context, attrs, defStyleAttrs);
+        init(context, layoutId);
+    }
+
+    private void init(Context context, int layoutId) {
+        inflate(context, layoutId, this);
         mViews = new View[NUM_COLUMNS];
         mTitle = findViewById(R.id.minimized_control_bar_title);
         mSubtitle = findViewById(R.id.minimized_control_bar_subtitle);
