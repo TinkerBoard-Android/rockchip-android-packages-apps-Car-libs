@@ -53,6 +53,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class MetadataController {
     private PlaybackViewModel.PlaybackController mController;
+    private final Model mModel;
 
     private boolean mTrackingTouch;
     private SeekBar.OnSeekBarChangeListener mOnSeekBarChangeListener =
@@ -83,9 +84,8 @@ public class MetadataController {
      * instead of View.GONE. Thus the views stay in the same position, and the constraint chains of
      * the layout won't be disrupted.
      *
-     * @param lifecycleOwner The lifecycle scope for the Views provided to this controller
-     * @param viewModel      The ViewModel to provide metadata for display
-     * @param pauseUpdates   Views will not update while this LiveData emits {@code true}
+     * @param lifecycleOwner The lifecycle scope for the Views provided to this controller.
+     * @param model          The Model to provide metadata for display.
      * @param title          Displays the track's title. Must not be {@code null}.
      * @param artist         Displays the track's artist. May be {@code null}.
      * @param albumTitle     Displays the track's album title. May be {@code null}.
@@ -98,36 +98,34 @@ public class MetadataController {
      * @param seekBar        Displays the track's progress visually. May be {@code null}.
      * @param albumArt       Displays the track's album art. May be {@code null}.
      */
-    public MetadataController(@NonNull LifecycleOwner lifecycleOwner,
-            @NonNull PlaybackViewModel viewModel, @Nullable LiveData<Boolean> pauseUpdates,
+    public MetadataController(@NonNull LifecycleOwner lifecycleOwner, @NonNull Model model,
             @NonNull TextView title, @Nullable TextView artist, @Nullable TextView albumTitle,
             @Nullable TextView outerSeparator, @Nullable TextView currentTime,
             @Nullable TextView innerSeparator, @Nullable TextView maxTime,
             @Nullable SeekBar seekBar, @Nullable ImageView albumArt, int albumArtSizePx) {
-        viewModel.getPlaybackController().observe(lifecycleOwner,
+        mModel = model;
+        mModel.getPlaybackViewModel().getPlaybackController().observe(lifecycleOwner,
                 controller -> mController = controller);
 
-        Model model = new Model(viewModel, pauseUpdates);
-
-        model.getTitle().observe(lifecycleOwner, title::setText);
+        mModel.getTitle().observe(lifecycleOwner, title::setText);
 
         if (albumTitle != null) {
-            model.getAlbumTitle().observe(lifecycleOwner, albumName -> {
+            mModel.getAlbumTitle().observe(lifecycleOwner, albumName -> {
                 albumTitle.setText(albumName);
                 ViewHelper.setInvisible(albumTitle, TextUtils.isEmpty(albumName));
             });
         }
 
         if (artist != null) {
-            model.getArtist().observe(lifecycleOwner, artistName -> {
+            mModel.getArtist().observe(lifecycleOwner, artistName -> {
                 artist.setText(artistName);
                 ViewHelper.setInvisible(artist, TextUtils.isEmpty(artistName));
             });
         }
 
         if (albumArt != null) {
-            model.setAlbumArtSize(albumArtSizePx);
-            model.getAlbumArt().observe(lifecycleOwner, bitmap -> {
+            mModel.setAlbumArtSize(albumArtSizePx);
+            mModel.getAlbumArt().observe(lifecycleOwner, bitmap -> {
                 if (bitmap == null) {
                     albumArt.setImageDrawable(new ColorDrawable(title.getContext().getResources()
                             .getColor(R.color.album_art_placeholder_color, null)));
@@ -138,14 +136,14 @@ public class MetadataController {
         }
 
         if (outerSeparator != null) {
-            model.showOuterSeparator().observe(lifecycleOwner,
+            mModel.showOuterSeparator().observe(lifecycleOwner,
                     // The text of outerSeparator is not empty. when albumTitle is empty,
                     // the visibility of outerSeparator should be View.GONE instead of
                     // View.INVISIBLE so that currentTime can be aligned to the left .
                     visible -> ViewHelper.setVisible(outerSeparator, visible));
         }
 
-        model.hasTime().observe(lifecycleOwner,
+        mModel.hasTime().observe(lifecycleOwner,
                 visible -> {
                     ViewHelper.setInvisible(currentTime, !visible);
                     ViewHelper.setInvisible(innerSeparator, !visible);
@@ -153,28 +151,28 @@ public class MetadataController {
                 });
 
         if (currentTime != null) {
-            model.getCurrentTimeText().observe(lifecycleOwner,
+            mModel.getCurrentTimeText().observe(lifecycleOwner,
                     timeText -> currentTime.setText(timeText));
         }
 
         if (maxTime != null) {
-            model.getMaxTimeText().observe(lifecycleOwner,
+            mModel.getMaxTimeText().observe(lifecycleOwner,
                     timeText -> maxTime.setText(timeText));
         }
 
         if (seekBar != null) {
-            model.hasTime().observe(lifecycleOwner,
+            mModel.hasTime().observe(lifecycleOwner,
                     visible -> seekBar.setVisibility(visible ? View.VISIBLE : View.INVISIBLE));
-            model.getMaxProgress().observe(lifecycleOwner,
+            mModel.getMaxProgress().observe(lifecycleOwner,
                     maxProgress -> seekBar.setMax(maxProgress.intValue()));
-            model.getProgress().observe(lifecycleOwner,
+            mModel.getProgress().observe(lifecycleOwner,
                     progress -> {
                         if (!mTrackingTouch) {
                             seekBar.setProgress(progress.intValue());
                         }
                     });
 
-            model.isSeekToEnabled().observe(lifecycleOwner,
+            mModel.isSeekToEnabled().observe(lifecycleOwner,
                     enabled -> {
                         mTrackingTouch = false;
                         if (seekBar.getThumb() != null) {
@@ -186,13 +184,15 @@ public class MetadataController {
                     });
 
             seekBar.setOnSeekBarChangeListener(mOnSeekBarChangeListener);
-            viewModel.getPlaybackStateWrapper().observe(lifecycleOwner, state -> {
-                mTrackingTouch = false;
-            });
+            mModel.getPlaybackViewModel().getPlaybackStateWrapper().observe(lifecycleOwner,
+                    state -> mTrackingTouch = false);
         }
     }
 
-    static class Model {
+    /**
+     * Model to convert playback metadata to formatted text.
+     */
+    public static class Model {
 
         private final LiveData<CharSequence> mTitle;
         private final LiveData<CharSequence> mAlbumTitle;
@@ -208,8 +208,17 @@ public class MetadataController {
 
         private final MutableLiveData<Integer> mAlbumArtSize = new MutableLiveData<>();
 
-        Model(@NonNull PlaybackViewModel playbackViewModel,
+        private final PlaybackViewModel mPlaybackViewModel;
+
+        /**
+         * Creates a Model for current track's metadata.
+         *
+         * @param playbackViewModel The ViewModel to provide metadata for display
+         * @param pauseUpdates      Views will not update while this LiveData emits {@code true}
+         */
+        public Model(@NonNull PlaybackViewModel playbackViewModel,
                 @Nullable LiveData<Boolean> pauseUpdates) {
+            mPlaybackViewModel = playbackViewModel;
             if (pauseUpdates == null) {
                 pauseUpdates = falseLiveData();
             }
@@ -252,6 +261,13 @@ public class MetadataController {
                             state -> state != null && state.isSeekToEnabled())));
         }
 
+        /*
+         * Gets the PlaybackViewModel.
+         */
+        public PlaybackViewModel getPlaybackViewModel() {
+            return mPlaybackViewModel;
+        }
+
         void setAlbumArtSize(int size) {
             mAlbumArtSize.setValue(size);
         }
@@ -280,15 +296,25 @@ public class MetadataController {
             return mMaxProgress;
         }
 
-        LiveData<CharSequence> getCurrentTimeText() {
+        /**
+         * Returns a LiveData that emits formatted text indicating the current playback progress.
+         */
+        public LiveData<CharSequence> getCurrentTimeText() {
             return mCurrentTimeText;
         }
 
-        LiveData<CharSequence> getMaxTimeText() {
+        /**
+         * Returns a LiveData that emits formatted text indicating the duration of the media item.
+         */
+        public LiveData<CharSequence> getMaxTimeText() {
             return mMaxTimeText;
         }
 
-        LiveData<Boolean> hasTime() {
+        /**
+         * Returns a LiveData that emits a boolean value indicating whether the media item has
+         * playback progress.
+         */
+        public LiveData<Boolean> hasTime() {
             return mHasTime;
         }
 
