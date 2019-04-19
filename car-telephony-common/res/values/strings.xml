@@ -27,19 +27,19 @@
     </string>
 
 
-    <!-- Status label for phone state [CHAR LIMIT=20] -->
-    <string name="call_state_connecting">Connecting</string>
-    <!-- Status label for phone state [CHAR LIMIT=20] -->
-    <string name="call_state_dialing">Dialing</string>
+    <!-- Status label for phone state. &#8230; is an ellipsis. [CHAR LIMIT=20] -->
+    <string name="call_state_connecting">Connecting&#8230;</string>
+    <!-- Status label for phone state. &#8230; is an ellipsis. [CHAR LIMIT=20] -->
+    <string name="call_state_dialing">Dialing&#8230;</string>
     <!-- Status label for phone state [CHAR LIMIT=20] -->
     <string name="call_state_hold">On Hold</string>
     <!-- Status label for phone state [CHAR LIMIT=20] -->
     <string name="call_state_call_ended">Call Ended</string>
     <!-- Status label for phone state [CHAR LIMIT=20] -->
     <string name="call_state_call_active">Connected</string>
-    <!-- Status label for phone state [CHAR LIMIT=20] -->
-    <string name="call_state_call_ringing">Ringing</string>
-    <!-- Status label for phone state [CHAR LIMIT=20] -->
-    <string name="call_state_call_ending">Disconnecting</string>
+    <!-- Status label for phone state. &#8230; is an ellipsis. [CHAR LIMIT=20] -->
+    <string name="call_state_call_ringing">Ringing&#8230;</string>
+    <!-- Status label for phone state. &#8230; is an ellipsis. [CHAR LIMIT=20] -->
+    <string name="call_state_call_ending">Disconnecting&#8230;</string>
 
 </resources>
