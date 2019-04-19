@@ -37,8 +37,6 @@
         android:alpha="@dimen/album_art_scrim_alpha"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/playback_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -73,30 +71,24 @@
 
         <TextView
             android:id="@+id/title"
+            style="@style/PlaybackTitleStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/playback_fragment_text_margin_top"
             android:layout_marginLeft="@dimen/playback_fragment_text_margin_x"
             android:layout_marginRight="@dimen/playback_fragment_text_margin_x"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:includeFontPadding="false"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/app_name"/>
 
         <TextView
             android:id="@+id/subtitle"
+            style="@style/PlaybackSubtitleStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/playback_fragment_text_margin_top"
             android:layout_marginLeft="@dimen/playback_fragment_text_margin_x"
             android:layout_marginRight="@dimen/playback_fragment_text_margin_x"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:includeFontPadding="false"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/title"/>
