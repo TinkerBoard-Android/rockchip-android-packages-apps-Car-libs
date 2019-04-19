@@ -19,8 +19,6 @@ limitations under the License.
     <string name="control_bar_expand_collapse_button" msgid="3420351169078117938">"ವಿಸ್ತರಿಸಿ/ಕುಗ್ಗಿಸಿ ಬಟನ್"</string>
     <string name="car_drawer_open" msgid="2676372472514742324">"ಡ್ರಾಯರ್ ತೆರೆಯಿರಿ"</string>
     <string name="car_drawer_close" msgid="5329374630462464855">"ಡ್ರಾಯರ್ ಮುಚ್ಚಿರಿ"</string>
-    <!-- no translation found for scroll_bar_page_down_button (8633547153186948066) -->
-    <skip />
-    <!-- no translation found for scroll_bar_page_up_button (8306413844913744345) -->
-    <skip />
+    <string name="scroll_bar_page_down_button" msgid="8633547153186948066">"ಕೆಳಗೆ ಸ್ಕ್ರಾಲ್ ಮಾಡಿ"</string>
+    <string name="scroll_bar_page_up_button" msgid="8306413844913744345">"ಮೇಲೆ ಸ್ಕ್ರಾಲ್ ಮಾಡಿ"</string>
 </resources>
