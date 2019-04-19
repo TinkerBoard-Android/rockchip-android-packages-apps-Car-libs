@@ -36,7 +36,7 @@
 
     <color name="control_bar_background_color">@android:color/transparent</color>
     <color name="minimized_control_bar_background_color">#F00E1013</color>
-    <color name="control_bar_scrim_color">#C7000000</color>
+    <color name="scrim_overlay_color">#C7000000</color>
     <color name="app_bar_background_color">#E0000000</color>
     <color name="icon_tint">@*android:color/car_tint</color>
 
