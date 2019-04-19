@@ -31,7 +31,6 @@ import android.telecom.Call;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.widget.ImageView;
@@ -234,41 +233,6 @@ public class TelecomUtils {
             return new Pair<>(name, null);
         }
         return new Pair<>(name, Uri.parse(photoUriString));
-    }
-
-    /**
-     * @return A formatted string that has information about the phone call
-     * Possible strings:
-     * "Mobile · Dialing"
-     * "Mobile · 1:05"
-     * "Bluetooth disconnected"
-     */
-    public static String getCallInfoText(Context context, CallDetail callDetail, int callState,
-            String number) {
-        CharSequence label = TelecomUtils.getTypeFromNumber(context, number);
-        String text;
-        if (callState == Call.STATE_ACTIVE) {
-            long duration = callDetail.getConnectTimeMillis() > 0 ? System.currentTimeMillis()
-                    - callDetail.getConnectTimeMillis() : 0;
-            String durationString = DateUtils.formatElapsedTime(duration / 1000);
-            if (!TextUtils.isEmpty(durationString) && !TextUtils.isEmpty(label)) {
-                text = context.getString(R.string.phone_label_with_info, label, durationString);
-            } else if (!TextUtils.isEmpty(durationString)) {
-                text = durationString;
-            } else if (!TextUtils.isEmpty(label)) {
-                text = (String) label;
-            } else {
-                text = "";
-            }
-        } else {
-            String state = callStateToUiString(context, callState);
-            if (!TextUtils.isEmpty(label)) {
-                text = context.getString(R.string.phone_label_with_info, label, state);
-            } else {
-                text = state;
-            }
-        }
-        return text;
     }
 
     /**
