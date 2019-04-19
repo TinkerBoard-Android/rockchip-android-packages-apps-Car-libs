@@ -55,4 +55,6 @@
     <color name="car_tint_inverse">@*android:color/car_tint_inverse</color>
     <color name="car_scrollbar_thumb_inverse">@*android:color/car_scrollbar_thumb_dark</color>
     <color name="car_card_ripple_background">#17000000</color>
+
+    <color name="background_image_30p_black">#4D000000</color>
 </resources>
