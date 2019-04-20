@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -103,9 +102,8 @@ public class CarTabLayout<T extends CarTabLayout.CarTab> extends LinearLayout {
     }
 
     // View attributes
-    private final int mTabMinWidth;
     private final boolean mTabFlexibleLayout;
-    private final int mTabSpacing;
+    private final int mTabPaddingX;
 
     private final Set<OnCarTabSelectedListener<T>> mOnCarTabSelectedListeners;
 
@@ -125,10 +123,8 @@ public class CarTabLayout<T extends CarTabLayout.CarTab> extends LinearLayout {
 
         TypedArray ta = context.obtainStyledAttributes(
                 attrs, R.styleable.CarTabLayout, defStyle, 0);
-        mTabSpacing = ta.getDimensionPixelSize(R.styleable.CarTabLayout_tabSpacing,
+        mTabPaddingX = ta.getDimensionPixelSize(R.styleable.CarTabLayout_tabPaddingX,
                 context.getResources().getDimensionPixelSize(R.dimen.car_tab_padding_x));
-        mTabMinWidth = ta.getDimensionPixelSize(R.styleable.CarTabLayout_tabMinWidth,
-                context.getResources().getDimensionPixelSize(R.dimen.car_tab_min_width));
         mTabFlexibleLayout = ta.getBoolean(R.styleable.CarTabLayout_tabFlexibleLayout,
                 context.getResources().getBoolean(R.bool.car_tab_flexible_layout));
         int tabItemLayout = ta.getResourceId(R.styleable.CarTabLayout_tabItemLayout,
@@ -211,10 +207,13 @@ public class CarTabLayout<T extends CarTabLayout.CarTab> extends LinearLayout {
     }
 
     private void addCarTabView(View carTabView, int position) {
-        LayoutParams layoutParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
+        LayoutParams layoutParams;
         if (mTabFlexibleLayout) {
+            layoutParams = new LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT);
             layoutParams.weight = 1;
+        } else {
+            layoutParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
         }
         addView(carTabView, position, layoutParams);
     }
@@ -223,8 +222,7 @@ public class CarTabLayout<T extends CarTabLayout.CarTab> extends LinearLayout {
         LinearLayout carTabItemView = new LinearLayout(mContext);
         carTabItemView.setOrientation(LinearLayout.VERTICAL);
         carTabItemView.setGravity(Gravity.CENTER);
-        carTabItemView.setPadding(mTabSpacing, 0, mTabSpacing, 0);
-        carTabItemView.setMinimumWidth(mTabSpacing * 2 + mTabMinWidth);
+        carTabItemView.setPadding(mTabPaddingX, 0, mTabPaddingX, 0);
         Drawable backgroundDrawable = getStyledBackgroundDrawable(getContext());
         carTabItemView.setBackground(backgroundDrawable);
         return carTabItemView;
@@ -347,29 +345,7 @@ public class CarTabLayout<T extends CarTabLayout.CarTab> extends LinearLayout {
             carTabItemView.setSelected(carTab.mIsSelected);
             iconView.setSelected(carTab.mIsSelected);
             textView.setSelected(carTab.mIsSelected);
-
-            maybeAdjustTextViewWidth(textView);
             textView.setTypeface(carTab.mIsSelected ? mSelectedTypeface : mUnselectedTypeface);
-        }
-
-        /** We don't want the car tab item view change width due to the font weight change. */
-        private void maybeAdjustTextViewWidth(@NonNull TextView textView) {
-            CharSequence text = textView.getText();
-            if (mCarTabLayout.mTabFlexibleLayout || TextUtils.isEmpty(text)) {
-                return;
-            }
-
-            int wrapContentSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-
-            textView.setTypeface(mSelectedTypeface);
-            textView.measure(wrapContentSpec, wrapContentSpec);
-            int selectedWidth = textView.getMeasuredWidth();
-
-            textView.setTypeface(mUnselectedTypeface);
-            textView.measure(wrapContentSpec, wrapContentSpec);
-            int unselectedWidth = textView.getMeasuredWidth();
-
-            textView.setWidth(Math.max(selectedWidth, unselectedWidth));
         }
     }
 
