@@ -58,4 +58,9 @@
                 android:endColor="#B8000000" />
         </shape>
     </item>
+    <item>
+        <shape>
+            <solid android:color="@color/background_image_30p_black"/>
+        </shape>
+    </item>
 </layer-list>
