@@ -74,14 +74,22 @@ public class MinimizedPlaybackControlBar extends MinimizedControlBar implements 
 
         mPlaybackViewModel = model;
         if (mProgressBar != null) {
-            mPlaybackViewModel.getMediaSourceColors().observe(owner,
-                    sourceColors -> {
-                        int defaultColor = getContext().getResources().getColor(
-                                R.color.minimized_progress_bar_highlight, null);
-                        int color = sourceColors != null ? sourceColors.getAccentColor(defaultColor)
-                                : defaultColor;
-                        mProgressBar.setProgressTintList(ColorStateList.valueOf(color));
-                    });
+            boolean useMediaSourceColor =
+                    getContext().getResources().getBoolean(
+                            R.bool.use_media_source_color_for_minimized_progress_bar);
+            int defaultColor = getContext().getResources().getColor(
+                    R.color.minimized_progress_bar_highlight, null);
+            if (useMediaSourceColor) {
+                mPlaybackViewModel.getMediaSourceColors().observe(owner,
+                        sourceColors -> {
+                            int color = sourceColors != null ? sourceColors.getAccentColor(
+                                    defaultColor)
+                                    : defaultColor;
+                            mProgressBar.setProgressTintList(ColorStateList.valueOf(color));
+                        });
+            } else {
+                mProgressBar.setProgressTintList(ColorStateList.valueOf(defaultColor));
+            }
 
             // TODO(b/130566861): Get the progress and max progress through Model once Model is
             //  moved out to be a top-level class.
