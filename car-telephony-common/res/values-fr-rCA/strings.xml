@@ -19,11 +19,15 @@
     <string name="unknown" msgid="3237922751873109097">"Inconnu"</string>
     <string name="voicemail" msgid="2125552157407909509">"Messagerie vocale"</string>
     <string name="phone_label_with_info" msgid="4652109530699808645">"<xliff:g id="LABEL">%1$s</xliff:g> : <xliff:g id="DURATION">%2$s</xliff:g>"</string>
-    <string name="call_state_connecting" msgid="6844097368588248151">"Connexion en cours…"</string>
-    <string name="call_state_dialing" msgid="4397655224585553327">"Composition…"</string>
+    <!-- no translation found for call_state_connecting (5930724746375294866) -->
+    <skip />
+    <!-- no translation found for call_state_dialing (1534599871716648114) -->
+    <skip />
     <string name="call_state_hold" msgid="6834028102796624100">"En attente"</string>
     <string name="call_state_call_ended" msgid="4159349597599886429">"Appel terminé"</string>
     <string name="call_state_call_active" msgid="2769644783657864202">"Connecté"</string>
-    <string name="call_state_call_ringing" msgid="2115824593555284816">"Sonnerie en cours…"</string>
-    <string name="call_state_call_ending" msgid="738099494362020903">"Déconnexion…"</string>
+    <!-- no translation found for call_state_call_ringing (4618803402954375017) -->
+    <skip />
+    <!-- no translation found for call_state_call_ending (5037498349965472247) -->
+    <skip />
 </resources>
