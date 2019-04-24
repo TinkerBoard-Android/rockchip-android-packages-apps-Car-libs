@@ -42,7 +42,6 @@ public class UxrTextView extends TextView {
     private CarUxRestrictionsUtil mCarUxRestrictionsUtil;
     private CarUxRestrictions mCarUxRestrictions;
     private CarUxRestrictionsUtil.OnUxRestrictionsChangedListener mListener;
-    private UXRTransformationMethod mUXRTransformation;
 
     public UxrTextView(Context context) {
         super(context);
@@ -66,18 +65,14 @@ public class UxrTextView extends TextView {
 
     private void init(Context context) {
         mCarUxRestrictionsUtil = CarUxRestrictionsUtil.getInstance(context);
-        mUXRTransformation = new UXRTransformationMethod();
-        mListener = new CarUxRestrictionsUtil.OnUxRestrictionsChangedListener() {
-            @Override
-            public void onRestrictionsChanged(CarUxRestrictions carUxRestrictions) {
-                updateCarUxRestrictions(carUxRestrictions);
-            }
-        };
+        mListener = this::updateCarUxRestrictions;
     }
 
     private void updateCarUxRestrictions(CarUxRestrictions carUxRestrictions) {
         mCarUxRestrictions = carUxRestrictions;
-        setTransformationMethod(mUXRTransformation);
+
+        // setTransformationMethod doesn't do anything when passed the same instance...
+        setTransformationMethod(new UXRTransformationMethod());
     }
 
     @Override
