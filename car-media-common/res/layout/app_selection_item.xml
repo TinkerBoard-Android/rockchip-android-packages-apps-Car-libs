@@ -42,6 +42,5 @@
         android:layout_height="wrap_content"
         android:textAppearance="?attr/textAppearanceGridItem"
         android:gravity="center"
-        android:ellipsize="end"
-        android:maxLines="1" />
+        android:singleLine="true"/>
 </LinearLayout>
