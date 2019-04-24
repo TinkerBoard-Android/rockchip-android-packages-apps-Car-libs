@@ -15,9 +15,13 @@
  */
 package com.android.car.apps.common;
 
+import static android.car.drivingstate.CarUxRestrictions.UX_RESTRICTIONS_LIMIT_STRING_LENGTH;
+
+import android.annotation.Nullable;
 import android.car.Car;
 import android.car.CarNotConnectedException;
 import android.car.drivingstate.CarUxRestrictions;
+import android.car.drivingstate.CarUxRestrictions.CarUxRestrictionsInfo;
 import android.car.drivingstate.CarUxRestrictionsManager;
 import android.content.Context;
 import android.util.Log;
@@ -106,16 +110,28 @@ public class CarUxRestrictionsUtil {
     }
 
     /**
+     * Returns whether any of the given flags is blocked by the current restrictions. If null is
+     * given, the method returns true for safety.
+     */
+    public static boolean isRestricted(@CarUxRestrictionsInfo int restrictionFlags,
+            @Nullable CarUxRestrictions uxr) {
+        return (uxr == null) || ((uxr.getActiveRestrictions() & restrictionFlags) != 0);
+    }
+
+    /**
      * Complies the input string with the given UX restrictions.
      * Returns the original string if already compliant, otherwise a shortened ellipsized string.
      */
     public static String complyString(Context context, String str, CarUxRestrictions uxr) {
-        int maxLength = uxr == null
-                ? context.getResources().getInteger(R.integer.default_max_string_length)
-                : uxr.getMaxRestrictedStringLength();
 
-        if (str.length() > maxLength) {
-            return str.substring(0, maxLength) + context.getString(R.string.ellipsis);
+        if (isRestricted(UX_RESTRICTIONS_LIMIT_STRING_LENGTH, uxr)) {
+            int maxLength = uxr == null
+                    ? context.getResources().getInteger(R.integer.default_max_string_length)
+                    : uxr.getMaxRestrictedStringLength();
+
+            if (str.length() > maxLength) {
+                return str.substring(0, maxLength) + context.getString(R.string.ellipsis);
+            }
         }
 
         return str;
