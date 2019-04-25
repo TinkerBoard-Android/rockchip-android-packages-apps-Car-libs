@@ -17,4 +17,5 @@
 
 <resources>
     <bool name="car_tab_flexible_layout">false</bool>
+    <bool name="use_media_source_color_for_minimized_progress_bar">true</bool>
 </resources>
