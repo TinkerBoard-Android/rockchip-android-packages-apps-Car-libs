@@ -21,7 +21,7 @@
             <gradient
                 android:angle="90"
                 android:centerColor="@android:color/transparent"
-                android:centerY="0.64"
+                android:centerY="0.5"
                 android:endColor="#F5000000"/>
         </shape>
     </item>
@@ -30,7 +30,7 @@
             <gradient
                 android:angle="90"
                 android:centerColor="@android:color/transparent"
-                android:centerY="0.36"
+                android:centerY="0.5"
                 android:startColor="#F5000000" />
         </shape>
     </item>
@@ -38,7 +38,7 @@
         <shape>
             <gradient
                 android:centerColor="@android:color/transparent"
-                android:centerX="0.16"
+                android:centerX="0.04"
                 android:endColor="@android:color/black" />
         </shape>
     </item>
@@ -46,7 +46,7 @@
         <shape>
             <gradient
                 android:centerColor="@android:color/transparent"
-                android:centerX="0.16"
+                android:centerX="0.04"
                 android:endColor="@android:color/black" />
         </shape>
     </item>
@@ -54,7 +54,7 @@
         <shape>
             <gradient
                 android:centerColor="@android:color/transparent"
-                android:centerX="0.12"
+                android:centerX="0"
                 android:endColor="#B8000000" />
         </shape>
     </item>
