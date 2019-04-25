@@ -20,6 +20,7 @@ import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -216,6 +217,24 @@ public class MediaItemMetadata implements Parcelable {
         return "1".equals(SystemProperties.get(FLAG_BITMAPS_KEY, "0"));
     }
 
+    private static Drawable getPlaceholderDrawable(Context context,
+            @NonNull MediaItemMetadata metadata) {
+        TypedArray placeholderImages = context.getResources().obtainTypedArray(
+                R.array.placeholder_images);
+        if (placeholderImages != null && placeholderImages.length() > 0) {
+            int titleHash = (metadata.getTitle() != null) ? metadata.getTitle().hashCode() : 0;
+            int artistHash = (metadata.getArtist() != null) ? metadata.getArtist().hashCode() : 0;
+            int albumHash =
+                    (metadata.getAlbumTitle() != null) ? metadata.getAlbumTitle().hashCode() : 0;
+            int random = Math.floorMod(titleHash ^ artistHash ^ albumHash,
+                    placeholderImages.length());
+            Drawable placeholder = placeholderImages.getDrawable(random);
+            placeholderImages.recycle();
+            return placeholder;
+        }
+        return context.getDrawable(R.drawable.ic_placeholder);
+    }
+
     /**
      * Updates the given {@link ImageView} with the album art of the given media item. This is an
      * asynchronous operation.
@@ -271,8 +290,9 @@ public class MediaItemMetadata implements Parcelable {
             imageView.setVisibility(View.VISIBLE);
             return;
         }
-        imageView.setImageBitmap(null);
-        imageView.setVisibility(View.GONE);
+
+        imageView.setImageDrawable(getPlaceholderDrawable(context, metadata));
+        imageView.setVisibility(View.VISIBLE);
     }
 
     /**
