@@ -28,7 +28,7 @@ import android.widget.LinearLayout;
 
 import androidx.fragment.app.FragmentActivity;
 
-import com.android.car.apps.common.util.ViewHelper;
+import com.android.car.apps.common.util.ViewUtils;
 import com.android.car.media.common.source.MediaSourceViewModel;
 
 /**
@@ -95,7 +95,7 @@ public class MediaAppSelectorWidget extends LinearLayout {
         if (mSwitchingEnabled) {
             setOnClickListener(view -> onAppSwitchClicked());
         } else {
-            ViewHelper.setInvisible(mAppSwitchIcon, true);
+            ViewUtils.setInvisible(mAppSwitchIcon, true);
         }
     }
 
