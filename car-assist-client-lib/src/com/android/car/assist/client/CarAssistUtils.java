@@ -100,18 +100,25 @@ public class CarAssistUtils {
                 .flattenToString();
         int slashIndex = activeComponent.indexOf("/");
         final String activePackage = activeComponent.substring(0, slashIndex);
+        // TODO: remove this log
+        Log.d(TAG, "assistantIsNotificationListener: activeComponent: " + activeComponent
+                + " activePackage: " + activePackage + " active user: "
+                + mContext.getContentResolver().getUserId());
 
         final String listeners = Settings.Secure.getString(mContext.getContentResolver(),
                 Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
 
         if (listeners != null) {
+            // TODO: remove this log
+            Log.d(TAG, " Listeners are: " + listeners);
             for (String listener : Arrays.asList(listeners.split(":"))) {
                 if (listener.contains(activePackage)) {
+                    Log.d(TAG, "Active assistant has notification listener: " + listener);
                     return true;
                 }
             }
         }
-
+        Log.w(TAG, "No notification listeners found for assistant: " + activeComponent);
         return false;
     }
 
@@ -216,6 +223,7 @@ public class CarAssistUtils {
      * @return true if the read request was handled successfully
      */
     private boolean readMessageNotification(StatusBarNotification sbn) {
+        Log.i(TAG, " in readMessageNotification");
         return requestAction(BundleBuilder.buildAssistantReadBundle(sbn))
                 || mFallbackAssistant.handleReadAction(sbn, mListener);
     }
@@ -234,8 +242,15 @@ public class CarAssistUtils {
     }
 
     private boolean requestAction(Bundle payloadArguments) {
-        return assistantIsNotificationListener()
-                && mAssistUtils.showSessionForActiveService(payloadArguments,
-                CarVoiceInteractionSession.SHOW_SOURCE_NOTIFICATION, null, null);
+        if (assistantIsNotificationListener()) {
+            if (mAssistUtils.showSessionForActiveService(payloadArguments,
+                    CarVoiceInteractionSession.SHOW_SOURCE_NOTIFICATION, null, null)) {
+                Log.d(TAG, " Successfully showed session, returning true");
+                return true;
+            } else {
+                Log.d(TAG, "Session could not be shown for active service");
+            }
+        }
+        return false;
     }
 }
