@@ -41,4 +41,7 @@
     <color name="minimized_progress_bar_background">#00000000</color>
     <!-- Color used on the minimized progress bar -->
     <color name="minimized_progress_bar_highlight">@color/media_source_default_color</color>
+
+    <!-- Color used on the fab spinner -->
+    <color name="fab_spinner_indeterminate_color">@color/media_source_default_color</color>
 </resources>
