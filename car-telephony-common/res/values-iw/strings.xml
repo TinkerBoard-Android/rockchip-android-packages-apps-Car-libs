@@ -19,15 +19,11 @@
     <string name="unknown" msgid="3237922751873109097">"לא ידוע"</string>
     <string name="voicemail" msgid="2125552157407909509">"דואר קולי"</string>
     <string name="phone_label_with_info" msgid="4652109530699808645">"<xliff:g id="LABEL">%1$s</xliff:g>  ·  <xliff:g id="DURATION">%2$s</xliff:g>"</string>
-    <!-- no translation found for call_state_connecting (5930724746375294866) -->
-    <skip />
-    <!-- no translation found for call_state_dialing (1534599871716648114) -->
-    <skip />
+    <string name="call_state_connecting" msgid="5930724746375294866">"מתחבר…"</string>
+    <string name="call_state_dialing" msgid="1534599871716648114">"מחייג…"</string>
     <string name="call_state_hold" msgid="6834028102796624100">"בהמתנה"</string>
     <string name="call_state_call_ended" msgid="4159349597599886429">"השיחה הסתיימה"</string>
     <string name="call_state_call_active" msgid="2769644783657864202">"מתבצעת שיחה"</string>
-    <!-- no translation found for call_state_call_ringing (4618803402954375017) -->
-    <skip />
-    <!-- no translation found for call_state_call_ending (5037498349965472247) -->
-    <skip />
+    <string name="call_state_call_ringing" msgid="4618803402954375017">"מצלצל…"</string>
+    <string name="call_state_call_ending" msgid="5037498349965472247">"מתנתק…"</string>
 </resources>
