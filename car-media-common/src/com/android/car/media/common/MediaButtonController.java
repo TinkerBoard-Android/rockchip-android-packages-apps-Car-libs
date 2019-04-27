@@ -112,7 +112,11 @@ public class MediaButtonController {
             }
         });
         mPlayPauseStopImageView.setVisibility(View.VISIBLE);
-        model.getMediaSourceColors().observe(owner, this::applyColors);
+        boolean useMediaSourceColor =
+                mContext.getResources().getBoolean(R.bool.use_media_source_color_for_fab_spinner);
+        if (useMediaSourceColor) {
+            model.getMediaSourceColors().observe(owner, this::updateSpinerColors);
+        }
         model.getPlaybackStateWrapper().observe(owner, this::onPlaybackStateChanged);
     }
 
@@ -203,10 +207,8 @@ public class MediaButtonController {
         return PlayPauseStopImageView.ACTION_DISABLED;
     }
 
-    private void applyColors(MediaSourceColors colors) {
+    private void updateSpinerColors(MediaSourceColors colors) {
         int color = getMediaSourceColor(colors);
-        int tintColor = ColorChecker.getTintColor(mContext, color);
-        mPlayPauseStopImageView.setPrimaryActionColor(color, tintColor);
         mSpinner.setIndeterminateTintList(ColorStateList.valueOf(color));
     }
 

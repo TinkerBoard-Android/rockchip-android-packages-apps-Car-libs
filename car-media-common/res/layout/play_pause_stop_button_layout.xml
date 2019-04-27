@@ -25,7 +25,7 @@
     button -->
     <com.android.car.media.common.PlayPauseStopImageView
         android:id="@+id/play_pause_stop"
-        style="@style/FabStyle.Large"
+        style="@style/Widget.ActionButton"
         android:foreground="@drawable/fab_empty_foreground"
         android:src="@drawable/ic_play_pause_stop_animated"/>
     <ProgressBar
@@ -35,6 +35,7 @@
         android:layout_gravity="center"
         android:padding="9dp"
         android:indeterminateDrawable="@drawable/music_buffering"
+        android:indeterminateTint="@color/fab_spinner_indeterminate_color"
         android:focusable="false"
         android:visibility="invisible" />
 </FrameLayout>
