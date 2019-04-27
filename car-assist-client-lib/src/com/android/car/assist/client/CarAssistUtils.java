@@ -115,11 +115,12 @@ public class CarAssistUtils {
         if (listeners != null) {
             for (String listener : Arrays.asList(listeners.split(":"))) {
                 if (listener.contains(activePackage)) {
+                    Log.d(TAG, "Active assistant has notification listener: " + listener);
                     return true;
                 }
             }
         }
-
+        Log.w(TAG, "No notification listeners found for assistant: " + activeComponent);
         return false;
     }
 
