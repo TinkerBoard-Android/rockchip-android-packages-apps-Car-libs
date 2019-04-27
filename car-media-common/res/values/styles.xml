@@ -16,22 +16,6 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Fab -->
-    <style name="FabStyle">
-        <item name="android:layout_gravity">center</item>
-        <item name="android:tint">@color/icon_tint</item>
-        <item name="android:elevation">@dimen/fab_elevation</item>
-        <item name="android:focusable">true</item>
-        <item name="android:stateListAnimator">@anim/fab_state_list_animator</item>
-    </style>
-
-    <style name="FabStyle.Large" parent="FabStyle">
-        <item name="android:layout_width">@dimen/fab_large_size</item>
-        <item name="android:layout_height">@dimen/fab_large_size</item>
-        <item name="android:scaleType">fitCenter</item>
-        <item name="android:padding">@dimen/fab_large_padding</item>
-    </style>
-
     <style name="MediaAppSelectorStyle" parent="android:Theme.DeviceDefault.NoActionBar">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@color/app_selection_border</item>
