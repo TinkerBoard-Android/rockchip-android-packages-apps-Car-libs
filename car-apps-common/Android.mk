@@ -49,3 +49,7 @@ LOCAL_STATIC_JAVA_LIBRARIES += \
     androidx-constraintlayout_constraintlayout-solver
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
+
+ifeq (,$(ONE_SHOT_MAKEFILE))
+    include $(call all-makefiles-under,$(LOCAL_PATH))
+endif
