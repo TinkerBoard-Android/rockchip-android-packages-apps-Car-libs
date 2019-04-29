@@ -23,6 +23,8 @@ limitations under the License.
 
     <!-- CarUxRestrictions Utility -->
     <string name="ellipsis" translatable="false">&#8230;</string>
+    <!-- Warn user that the action they are trying to perform is blocked while the car is in motion [CHAR LIMIT=60] -->
+    <string name="restricted_while_driving">Feature not available while driving.</string>
 
     <string name="scroll_bar_page_down_button">Scroll down</string>
     <string name="scroll_bar_page_up_button">Scroll up</string>
