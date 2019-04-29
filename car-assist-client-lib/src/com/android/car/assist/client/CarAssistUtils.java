@@ -19,6 +19,7 @@ import static android.app.Notification.Action.SEMANTIC_ACTION_MARK_AS_READ;
 import static android.app.Notification.Action.SEMANTIC_ACTION_REPLY;
 import static android.service.voice.VoiceInteractionSession.SHOW_SOURCE_NOTIFICATION;
 
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.RemoteInput;
 import android.content.Context;
@@ -86,6 +87,7 @@ public class CarAssistUtils {
     private final AssistUtils mAssistUtils;
     private final FallbackAssistant mFallbackAssistant;
     private final String mErrorMessage;
+    private final ActivityManager mActivityManager;
 
     /** Interface used to receive callbacks from voice action requests. */
     public interface ActionRequestCallback {
@@ -98,6 +100,7 @@ public class CarAssistUtils {
         mAssistUtils = new AssistUtils(context);
         mFallbackAssistant = new FallbackAssistant(new TextToSpeechHelper(context));
         mErrorMessage = context.getString(R.string.assist_action_failed_toast);
+        mActivityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
     }
 
     /**
@@ -109,8 +112,8 @@ public class CarAssistUtils {
         int slashIndex = activeComponent.indexOf("/");
         final String activePackage = activeComponent.substring(0, slashIndex);
 
-        final String listeners = Settings.Secure.getString(mContext.getContentResolver(),
-                Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
+        final String listeners = Settings.Secure.getStringForUser(mContext.getContentResolver(),
+                Settings.Secure.ENABLED_NOTIFICATION_LISTENERS, ActivityManager.getCurrentUser());
 
         if (listeners != null) {
             for (String listener : Arrays.asList(listeners.split(":"))) {
