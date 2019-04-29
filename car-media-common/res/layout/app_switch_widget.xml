@@ -16,15 +16,14 @@
 -->
 <merge
     xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <ImageView
-        android:id="@+id/app_icon"
-        android:layout_width="@dimen/app_switch_widget_icon_size"
-        android:layout_height="@dimen/app_switch_widget_icon_size"/>
-
     <ImageView
         android:id="@+id/app_switch_icon"
         android:layout_width="@dimen/app_switch_widget_icon_size"
         android:layout_height="@dimen/app_switch_widget_icon_size"
         android:tint="@color/app_switch_widget_icon_tint"/>
+
+    <ImageView
+        android:id="@+id/app_icon"
+        android:layout_width="@dimen/app_switch_widget_icon_size"
+        android:layout_height="@dimen/app_switch_widget_icon_size"/>
 </merge>
