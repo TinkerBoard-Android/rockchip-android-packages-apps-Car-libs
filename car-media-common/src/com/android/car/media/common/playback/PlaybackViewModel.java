@@ -132,9 +132,9 @@ public class PlaybackViewModel extends AndroidViewModel {
 
     private final MutableLiveData<PlaybackStateWrapper> mPlaybackStateWrapper = dataOf(null);
 
-    private final LiveData<Long> mProgress =
+    private final LiveData<PlaybackProgress> mProgress =
             switchMap(mPlaybackStateWrapper,
-                    state -> state == null ? dataOf(0L)
+                    state -> state == null ? dataOf(new PlaybackProgress(0L, 0L))
                             : new ProgressLiveData(state.mState, state.getMaxProgress()));
 
     private PlaybackViewModel(Application application) {
@@ -204,7 +204,7 @@ public class PlaybackViewModel extends AndroidViewModel {
      * {@link PlaybackStateCompat#PLAYBACK_POSITION_UNKNOWN} if the current position is unknown.
      * This value will update on its own periodically (less than a second) while active.
      */
-    public LiveData<Long> getProgress() {
+    public LiveData<PlaybackProgress> getProgress() {
         return mProgress;
     }
 

@@ -16,10 +16,6 @@
 
 package com.android.car.media.common;
 
-import static androidx.lifecycle.Transformations.map;
-
-import static com.android.car.arch.common.LiveDataFunctions.falseLiveData;
-
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.util.AttributeSet;
@@ -27,7 +23,6 @@ import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.LiveData;
 
 import com.android.car.apps.common.MinimizedControlBar;
 import com.android.car.media.common.playback.PlaybackViewModel;
@@ -44,7 +39,6 @@ public class MinimizedPlaybackControlBar extends MinimizedControlBar implements 
     private MetadataController mMetadataController;
     private ProgressBar mProgressBar;
     private PlaybackViewModel mPlaybackViewModel;
-    private LiveData<Long> mMaxProgress;
 
     public MinimizedPlaybackControlBar(Context context) {
         this(context, null);
@@ -67,8 +61,8 @@ public class MinimizedPlaybackControlBar extends MinimizedControlBar implements 
     @Override
     public void setModel(@NonNull PlaybackViewModel model, @NonNull LifecycleOwner owner) {
         mMediaButtonController.setModel(model, owner);
-        mMetadataController = new MetadataController(owner, new MetadataController.Model(model,
-                falseLiveData()), mTitle, mSubtitle, null, null, null, null, null, null,
+        mMetadataController = new MetadataController(owner, model,
+                mTitle, mSubtitle, null, null, null, null, null, null,
                 mContentTile, getContext().getResources().getDimensionPixelSize(
                 R.dimen.minimized_control_bar_content_tile_size));
 
@@ -91,14 +85,11 @@ public class MinimizedPlaybackControlBar extends MinimizedControlBar implements 
                 mProgressBar.setProgressTintList(ColorStateList.valueOf(defaultColor));
             }
 
-            // TODO(b/130566861): Get the progress and max progress through Model once Model is
-            //  moved out to be a top-level class.
             mPlaybackViewModel.getProgress().observe(owner,
-                    progress -> mProgressBar.setProgress(progress.intValue()));
-            mMaxProgress = map(mPlaybackViewModel.getPlaybackStateWrapper(),
-                    state -> state != null ? state.getMaxProgress() : 0L);
-            mMaxProgress.observe(owner,
-                    maxProgress -> mProgressBar.setMax(maxProgress.intValue()));
+                    progress -> {
+                        mProgressBar.setProgress((int) progress.getProgress());
+                        mProgressBar.setMax((int) progress.getMaxProgress());
+                    });
         }
     }
 }

@@ -30,7 +30,7 @@ import java.util.function.Supplier;
 /**
  * Updates current progress from a given {@link PlaybackStateCompat} while active
  */
-class ProgressLiveData extends LiveData<Long> {
+class ProgressLiveData extends LiveData<PlaybackProgress> {
 
     /** How long this LiveData should wait between progress updates */
     @VisibleForTesting
@@ -55,7 +55,7 @@ class ProgressLiveData extends LiveData<Long> {
     }
 
     private void updateProgress() {
-        setValue(getProgress());
+        setValue(new PlaybackProgress(getProgress(), mMaxProgress));
         if (mPlaybackState.getState() != PlaybackStateCompat.STATE_PAUSED
                 && mPlaybackState.getState() != PlaybackStateCompat.STATE_STOPPED
                 && mPlaybackState.getPlaybackSpeed() != 0) {
