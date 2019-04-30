@@ -19,7 +19,7 @@
     <color name="album_art_scrim">#000000</color>
 
     <!-- app_switch_widget.xml -->
-    <color name="app_switch_widget_icon_tint">@*android:color/car_body1_light</color>
+    <color name="app_switch_widget_icon_tint">@color/primary_app_icon_color</color>
 
     <!-- App selection background -->
     <color name="app_selection_border">#40000000</color>
