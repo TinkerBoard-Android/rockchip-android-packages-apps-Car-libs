@@ -90,4 +90,23 @@
             <enum name="right" value="2"/>
         </attr>
     </declare-styleable>
+
+    <!-- Attributes for the UxrImageView. -->
+    <declare-styleable name="UxrImageView">
+        <attr name="carUxRestrictions">
+            <!-- Values are copied from android.car.drivingstate.CarUxRestrictions. Note:
+            UX_RESTRICTIONS_BASELINE is not allowed here because it's useless and confusing. -->
+            <flag name="UX_RESTRICTIONS_NO_DIALPAD" value="1"/>
+            <flag name="UX_RESTRICTIONS_NO_FILTERING" value="2"/>
+            <flag name="UX_RESTRICTIONS_LIMIT_STRING_LENGTH" value="4"/>
+            <flag name="UX_RESTRICTIONS_NO_KEYBOARD" value="8"/>
+            <flag name="UX_RESTRICTIONS_NO_VIDEO" value="16"/>
+            <flag name="UX_RESTRICTIONS_LIMIT_CONTENT" value="32"/>
+            <flag name="UX_RESTRICTIONS_NO_SETUP" value="64"/>
+            <flag name="UX_RESTRICTIONS_NO_TEXT_MESSAGE" value="128"/>
+            <flag name="UX_RESTRICTIONS_NO_VOICE_TRANSCRIPTION" value="256"/>
+            <flag name="UX_RESTRICTIONS_FULLY_RESTRICTED" value="511"/>
+        </attr>
+        <attr name="state_ux_restricted" format="boolean" />
+    </declare-styleable>
 </resources>
