@@ -42,7 +42,7 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.android.car.apps.common.util.ViewHelper;
+import com.android.car.apps.common.util.ViewUtils;
 import com.android.car.media.common.playback.AlbumArtLiveData;
 import com.android.car.media.common.playback.PlaybackViewModel;
 
@@ -112,14 +112,14 @@ public class MetadataController {
         if (albumTitle != null) {
             mModel.getAlbumTitle().observe(lifecycleOwner, albumName -> {
                 albumTitle.setText(albumName);
-                ViewHelper.setInvisible(albumTitle, TextUtils.isEmpty(albumName));
+                ViewUtils.setInvisible(albumTitle, TextUtils.isEmpty(albumName));
             });
         }
 
         if (artist != null) {
             mModel.getArtist().observe(lifecycleOwner, artistName -> {
                 artist.setText(artistName);
-                ViewHelper.setInvisible(artist, TextUtils.isEmpty(artistName));
+                ViewUtils.setInvisible(artist, TextUtils.isEmpty(artistName));
             });
         }
 
@@ -140,14 +140,14 @@ public class MetadataController {
                     // The text of outerSeparator is not empty. when albumTitle is empty,
                     // the visibility of outerSeparator should be View.GONE instead of
                     // View.INVISIBLE so that currentTime can be aligned to the left .
-                    visible -> ViewHelper.setVisible(outerSeparator, visible));
+                    visible -> ViewUtils.setVisible(outerSeparator, visible));
         }
 
         mModel.hasTime().observe(lifecycleOwner,
                 visible -> {
-                    ViewHelper.setInvisible(currentTime, !visible);
-                    ViewHelper.setInvisible(innerSeparator, !visible);
-                    ViewHelper.setInvisible(maxTime, !visible);
+                    ViewUtils.setInvisible(currentTime, !visible);
+                    ViewUtils.setInvisible(innerSeparator, !visible);
+                    ViewUtils.setInvisible(maxTime, !visible);
                 });
 
         if (currentTime != null) {
