@@ -1,13 +1,13 @@
 LOCAL_PATH := $(call my-dir)
 
 ############################################################
-# CarMediaCommon app just for Robolectric test target.     #
+# CarAppsCommon app just for Robolectric test target.     #
 ############################################################
 include $(CLEAR_VARS)
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
-LOCAL_PACKAGE_NAME := CarMediaCommon
+LOCAL_PACKAGE_NAME := CarAppsCommon
 LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_MODULE_TAGS := optional
 
@@ -15,18 +15,19 @@ LOCAL_USE_AAPT2 := true
 
 LOCAL_PRIVILEGED_MODULE := true
 
+LOCAL_JAVA_LIBRARIES := android.car
+
 LOCAL_STATIC_ANDROID_LIBRARIES := \
-    car-arch-common \
-    car-media-common
+    car-apps-common
 
 include $(BUILD_PACKAGE)
 
 ################################################
-# Car Media Common Robolectric test target. #
+# Car Apps Common Robolectric test target. #
 ################################################
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := CarMediaCommonRoboTests
+LOCAL_MODULE := CarAppsCommonRoboTests
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
@@ -35,36 +36,34 @@ LOCAL_JAVA_RESOURCE_DIRS := config
 # Include the testing libraries
 LOCAL_JAVA_LIBRARIES := \
     android.car \
-    androidx.arch.core_core-runtime \
-    androidx.arch.core_core-common \
     robolectric_android-all-stub \
     Robolectric_all-target \
     mockito-robolectric-prebuilt \
     truth-prebuilt
 
 
-LOCAL_INSTRUMENTATION_FOR := CarMediaCommon
+LOCAL_INSTRUMENTATION_FOR := CarAppsCommon
 
 LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
 ##################################################################
-# Car Media Common runner target to run the previous target. #
+# Car Apps Common runner target to run the previous target. #
 ##################################################################
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := RunCarMediaCommonRoboTests
+LOCAL_MODULE := RunCarAppsCommonRoboTests
 
 LOCAL_JAVA_LIBRARIES := \
     android.car \
-    CarMediaCommonRoboTests \
+    CarAppsCommonRoboTests \
     robolectric_android-all-stub \
     Robolectric_all-target \
     mockito-robolectric-prebuilt \
     truth-prebuilt
 
-LOCAL_TEST_PACKAGE := CarMediaCommon
+LOCAL_TEST_PACKAGE := CarAppsCommon
 
 LOCAL_ROBOTEST_FILES := $(filter-out %/BaseRobolectricTest.java,\
     $(call find-files-in-subdirs,$(LOCAL_PATH)/src,*Test.java,.))
