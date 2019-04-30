@@ -37,7 +37,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.android.car.apps.common.CrossfadeImageView;
-import com.android.car.apps.common.util.ViewHelper;
+import com.android.car.apps.common.util.ViewUtils;
 import com.android.car.media.common.playback.AlbumArtLiveData;
 import com.android.car.media.common.playback.PlaybackViewModel;
 import com.android.car.media.common.source.MediaSource;
@@ -70,7 +70,7 @@ public class PlaybackFragment extends Fragment {
         PlaybackControlsActionBar playbackControls = view.findViewById(R.id.playback_controls);
         playbackControls.setModel(playbackViewModel, getViewLifecycleOwner());
         playbackViewModel.getPlaybackStateWrapper().observe(getViewLifecycleOwner(),
-                state -> ViewHelper.setVisible(playbackControls,
+                state -> ViewUtils.setVisible(playbackControls,
                         (state != null) && state.shouldDisplay()));
 
         TextView appName = view.findViewById(R.id.app_name);
