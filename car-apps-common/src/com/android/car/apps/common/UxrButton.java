@@ -23,21 +23,19 @@ import android.content.res.TypedArray;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.ImageView;
+import android.widget.Button;
 import android.widget.Toast;
 
-import androidx.annotation.VisibleForTesting;
-
 /**
- * UX Restrictions compliant ImageView.
+ * UX Restrictions compliant Button.
  * This class will automatically listen to Car UXRestrictions, and respond to click event
  * accordingly. You can set one or multiple restrictions in the layout file, e.g.,
  * app:carUxRestrictions="UX_RESTRICTIONS_NO_SETUP|UX_RESTRICTIONS_NO_KEYBOARD"
  * If not set, it'll use UX_RESTRICTIONS_FULLY_RESTRICTED as fallback.
- * If no restriction is enforced, this ImageView will work as a normal ImageView; otherwise, its
+ * If no restriction is enforced, this Button will work as a normal Button; otherwise, its
  * OnClickListener will be disabled if any, and a blocking message will be displayed.
  */
-public class UxrImageView extends ImageView {
+public class UxrButton extends Button {
     private static final int[] STATE_UX_RESTRICTED = {R.attr.state_ux_restricted};
 
     private CarUxRestrictionsUtil mCarUxRestrictionsUtil;
@@ -63,22 +61,22 @@ public class UxrImageView extends ImageView {
         }
     };
 
-    public UxrImageView(Context context) {
+    public UxrButton(Context context) {
         super(context);
         init(context, null);
     }
 
-    public UxrImageView(Context context, AttributeSet attrs) {
+    public UxrButton(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context, attrs);
     }
 
-    public UxrImageView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public UxrButton(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context, attrs);
     }
 
-    public UxrImageView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public UxrButton(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init(context, attrs);
     }
@@ -86,9 +84,9 @@ public class UxrImageView extends ImageView {
     private void init(Context context, AttributeSet attrs) {
         mCarUxRestrictionsUtil = CarUxRestrictionsUtil.getInstance(context);
         super.setOnClickListener(mOnClickListenerWrapper);
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.UxrImageView);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.UxrButton);
         try {
-            mRestrictions = a.getInteger(R.styleable.UxrImageView_carUxRestrictions,
+            mRestrictions = a.getInteger(R.styleable.UxrButton_carUxRestrictions,
                     CarUxRestrictions.UX_RESTRICTIONS_FULLY_RESTRICTED);
         } finally {
             a.recycle();
@@ -121,13 +119,11 @@ public class UxrImageView extends ImageView {
         mCarUxRestrictionsUtil.unregister(mListener);
     }
 
-    @VisibleForTesting
-    boolean isRestricted() {
+    private boolean isRestricted() {
         return CarUxRestrictionsUtil.isRestricted(mRestrictions, mActiveCarUxRestrictions);
     }
 
-    @VisibleForTesting
-    void updateActiveCarUxRestrictions(CarUxRestrictions carUxRestrictions) {
+    private void updateActiveCarUxRestrictions(CarUxRestrictions carUxRestrictions) {
         mActiveCarUxRestrictions = carUxRestrictions;
         mHandler.post(() -> refreshDrawableState());
     }
@@ -138,10 +134,5 @@ public class UxrImageView extends ImageView {
     protected void showBlockingMessage() {
         Toast.makeText(getContext(), R.string.restricted_while_driving,
                 Toast.LENGTH_SHORT).show();
-    }
-
-    @VisibleForTesting
-    void setRestrictions(@CarUxRestrictions.CarUxRestrictionsInfo int restrictions) {
-        mRestrictions = restrictions;
     }
 }
