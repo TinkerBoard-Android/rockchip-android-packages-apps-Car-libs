@@ -73,4 +73,14 @@ public class Themes {
         ta.recycle();
         return resId;
     }
+
+    /**
+     * Returns the dimension pixel size assigned to the given attribute.
+     */
+    public static int getAttrDimensionPixelSize(Context context, int attr) {
+        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        int dimensionPixelSize = ta.getDimensionPixelSize(0, 0);
+        ta.recycle();
+        return dimensionPixelSize;
+    }
 }
