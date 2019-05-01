@@ -36,6 +36,7 @@ import com.android.car.assist.client.tts.TextToSpeechHelper;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.app.IVoiceActionCheckCallback;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -163,14 +164,24 @@ public class CarAssistUtils {
      * is returned if multiple callbacks exist for any semantic action that is supported.
      */
     private static boolean hasRequiredAssistantCallbacks(StatusBarNotification sbn) {
-        List<Integer> semanticActionList = Arrays.stream(sbn.getNotification().actions)
-                .map(Notification.Action::getSemanticAction)
+        List<Integer> semanticActionList = getAllActions(sbn.getNotification())
+                .stream()
+                .map(NotificationCompat.Action::getSemanticAction)
                 .filter(REQUIRED_SEMANTIC_ACTIONS::contains)
                 .collect(Collectors.toList());
         Set<Integer> semanticActionSet = new HashSet<>(semanticActionList);
-
         return semanticActionList.size() == semanticActionSet.size()
                 && semanticActionSet.containsAll(REQUIRED_SEMANTIC_ACTIONS);
+    }
+
+    /** Retrieves all visible and invisible {@link Action}s from the {@link #notification}. */
+    private static List<NotificationCompat.Action> getAllActions(Notification notification) {
+        List<NotificationCompat.Action> actions = new ArrayList<>();
+        actions.addAll(NotificationCompat.getInvisibleActions(notification));
+        for (int i = 0; i < NotificationCompat.getActionCount(notification); i++) {
+            actions.add(NotificationCompat.getAction(notification, i));
+        }
+        return actions;
     }
 
     /**
