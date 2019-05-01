@@ -51,7 +51,7 @@ public class TextToSpeechHelper {
          * Called when play-out starts for batch. May never get called if batch has errors or
          * interruptions.
          */
-        void onTextToSpeechStarted();
+        void onTextToSpeechStarted(long requestId);
 
         /**
          * Called when play-out ends for batch.
@@ -59,7 +59,7 @@ public class TextToSpeechHelper {
          * @param error Whether play-out ended due to an error or not. Note: if it was aborted, it's
          *              not considered an error.
          */
-        void onTextToSpeechStopped(boolean error);
+        void onTextToSpeechStopped(long requestId, boolean error);
     }
 
     private static final String TAG = "CM#TextToSpeechHelper";
@@ -70,6 +70,7 @@ public class TextToSpeechHelper {
     private final Map<String, BatchListener> mListeners = new HashMap<>();
     private final Handler mHandler = new Handler();
     private final Context mContext;
+    private final TextToSpeechHelper.Listener mListener;
     private final AudioManager.OnAudioFocusChangeListener mNoOpListener = (f) -> { /* NO-OP */ };
     private final AudioManager mAudioManager;
     private final long mShutdownDelayMillis;
@@ -89,18 +90,20 @@ public class TextToSpeechHelper {
         }
     };
 
-    public TextToSpeechHelper(Context context) {
-        this(context, new AndroidTextToSpeechEngine(), DEFAULT_SHUTDOWN_DELAY_MILLIS);
+    public TextToSpeechHelper(Context context, TextToSpeechHelper.Listener listener) {
+        this(context, new AndroidTextToSpeechEngine(), DEFAULT_SHUTDOWN_DELAY_MILLIS, listener);
     }
 
     @VisibleForTesting
-    TextToSpeechHelper(Context context, TextToSpeechEngine ttsEngine, long shutdownDelayMillis) {
+    TextToSpeechHelper(Context context, TextToSpeechEngine ttsEngine, long shutdownDelayMillis,
+            TextToSpeechHelper.Listener listener) {
         mContext = context;
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         mTextToSpeechEngine = ttsEngine;
         mShutdownDelayMillis = shutdownDelayMillis;
         // OnInitListener will only set to SUCCESS/ERROR. So we initialize to STOPPED.
         mInitStatus = TextToSpeech.STOPPED;
+        mListener = listener;
     }
 
     private void maybeInitAndKeepAlive() {
@@ -122,7 +125,7 @@ public class TextToSpeechHelper {
         }
         mInitStatus = initStatus;
         if (mPendingRequest != null) {
-            playInternal(mPendingRequest.mTextToSpeak, mPendingRequest.mListener);
+            playInternal(mPendingRequest.mTextToSpeak, mPendingRequest.mRequestId);
             mPendingRequest = null;
         }
     }
@@ -138,10 +141,10 @@ public class TextToSpeechHelper {
      * will reject anything longer. See {@link TextToSpeech#getMaxSpeechInputLength()}.
      *
      * @param textToSpeak Batch of text to play-out.
-     * @param listener Observer that will receive callbacks about play-out progress.
+     * @param requestId The tracking request id
      * @return true if the request to play was successful
      */
-    public boolean requestPlay(List<CharSequence> textToSpeak, Listener listener) {
+    public boolean requestPlay(List<CharSequence> textToSpeak, long requestId) {
         if (textToSpeak.isEmpty()) {
             /* no-op */
             return true;
@@ -158,11 +161,11 @@ public class TextToSpeechHelper {
         if (mInitStatus == TextToSpeech.STOPPED) {
             // Squash any already queued request.
             if (mPendingRequest != null) {
-                onTtsStopped(mPendingRequest.mListener, /* error= */ false);
+                onTtsStopped(requestId, /* error= */ false);
             }
-            mPendingRequest = new SpeechRequest(textToSpeak, listener);
+            mPendingRequest = new SpeechRequest(textToSpeak, requestId);
         } else {
-            playInternal(textToSpeak, listener);
+            playInternal(textToSpeak, requestId);
         }
         return true;
     }
@@ -178,15 +181,15 @@ public class TextToSpeechHelper {
     }
 
     // wrap call back to listener.onTextToSpeechStopped with adandonAudioFocus.
-    private void onTtsStopped(Listener listener, boolean error) {
+    private void onTtsStopped(long requestId, boolean error) {
         mAudioManager.abandonAudioFocus(mNoOpListener);
-        mHandler.post(() -> listener.onTextToSpeechStopped(error));
+        mHandler.post(() -> mListener.onTextToSpeechStopped(requestId, error));
     }
 
-    private void playInternal(List<CharSequence> textToSpeak, Listener listener) {
+    private void playInternal(List<CharSequence> textToSpeak, long requestId) {
         if (mInitStatus == TextToSpeech.ERROR) {
             Log.e(TAG, "TTS setup failed!");
-            onTtsStopped(listener, /* error= */ true);
+            onTtsStopped(requestId, /* error= */ true);
             return;
         }
 
@@ -195,7 +198,7 @@ public class TextToSpeechHelper {
 
         // Queue up new batch. We assign id's = "batchId;index" where index increments from 0
         // to batchSize - 1. If queueing fails, we abort the whole batch.
-        mCurrentBatchId = Integer.toString(listener.hashCode());
+        mCurrentBatchId = Long.toString(requestId);
         for (int i = 0; i < textToSpeak.size(); i++) {
             CharSequence text = textToSpeak.get(i);
             String utteranceId =
@@ -208,13 +211,13 @@ public class TextToSpeechHelper {
                 mTextToSpeechEngine.stop();
                 mCurrentBatchId = null;
                 Log.e(TAG, "Queuing text failed!");
-                onTtsStopped(listener, /* error= */ true);
+                onTtsStopped(requestId, /* error= */ true);
                 return;
             }
         }
         // Register BatchListener for entire batch. Will invoke callbacks on Listener as batch
         // progresses.
-        mListeners.put(mCurrentBatchId, new BatchListener(listener, textToSpeak.size()));
+        mListeners.put(mCurrentBatchId, new BatchListener(requestId, textToSpeak.size()));
     }
 
     /**
@@ -326,12 +329,12 @@ public class TextToSpeechHelper {
      * {@link Listener} that client is listening on.
      */
     private class BatchListener {
-        private final Listener mListener;
         private boolean mBatchStarted;
+        private final long mRequestId;
         private final int mUtteranceCount;
 
-        BatchListener(Listener listener, int utteranceCount) {
-            mListener = listener;
+        BatchListener(long requestId, int utteranceCount) {
+            mRequestId = requestId;
             mUtteranceCount = utteranceCount;
         }
 
@@ -339,7 +342,7 @@ public class TextToSpeechHelper {
         void onStart() {
             if (!mBatchStarted) {
                 mBatchStarted = true;
-                mListener.onTextToSpeechStarted();
+                mListener.onTextToSpeechStarted(mRequestId);
             }
         }
 
@@ -368,18 +371,18 @@ public class TextToSpeechHelper {
         // Handles terminal callbacks for the batch. We invoke stopped and remove ourselves.
         // No further callbacks will be handled for the batch.
         private void handleBatchFinished(Pair<String, Integer> parsedId, boolean error) {
-            onTtsStopped(mListener, error);
+            onTtsStopped(mRequestId, error);
             mListeners.remove(parsedId.first);
         }
     }
 
     private static class SpeechRequest {
         final List<CharSequence> mTextToSpeak;
-        final Listener mListener;
+        final long mRequestId;
 
-        SpeechRequest(List<CharSequence> textToSpeak, Listener listener) {
+        SpeechRequest(List<CharSequence> textToSpeak, long requestId) {
             mTextToSpeak = textToSpeak;
-            mListener = listener;
+            mRequestId = requestId;
         }
     }
 }
