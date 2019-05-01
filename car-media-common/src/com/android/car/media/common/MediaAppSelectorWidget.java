@@ -95,7 +95,7 @@ public class MediaAppSelectorWidget extends LinearLayout {
         if (mSwitchingEnabled) {
             setOnClickListener(view -> onAppSwitchClicked());
         } else {
-            ViewUtils.setInvisible(mAppSwitchIcon, true);
+            ViewUtils.setVisible(mAppSwitchIcon, false);
         }
     }
 
