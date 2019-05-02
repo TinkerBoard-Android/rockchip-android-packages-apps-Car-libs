@@ -247,9 +247,10 @@ public class MediaItemMetadata implements Parcelable {
      * @param loadingIndicator a drawable resource that would be set into the {@link ImageView}
      *                         while the image is being downloaded, or 0 if no loading indicator
      *                         is required.
+     * @param showPlaceholder  whether to show an image placeholder when the image is null.
      */
     public static void updateImageView(Context context, @Nullable MediaItemMetadata metadata,
-            ImageView imageView, @DrawableRes int loadingIndicator) {
+            ImageView imageView, @DrawableRes int loadingIndicator, boolean showPlaceholder) {
         Glide.with(context).clear(imageView);
         imageView.clearColorFilter();
         if (metadata == null) {
@@ -289,8 +290,13 @@ public class MediaItemMetadata implements Parcelable {
             return;
         }
 
-        imageView.setImageDrawable(getPlaceholderDrawable(context, metadata));
-        imageView.setVisibility(View.VISIBLE);
+        if (showPlaceholder) {
+            imageView.setImageDrawable(getPlaceholderDrawable(context, metadata));
+            imageView.setVisibility(View.VISIBLE);
+        } else {
+            imageView.setImageBitmap(null);
+            imageView.setVisibility(View.GONE);
+        }
     }
 
     /**
