@@ -26,7 +26,7 @@ import android.widget.TextView;
 
 /**
  * UX Restrictions compliant TextView.
- * This class will automatically listen to Car UXRestrictions and resize text accordingly.
+ * This class will automatically listen to Car UXRestrictions and truncate text accordingly.
  *
  * Attributes that trigger {@link TextView#setTransformationMethod} should NOT be set and calls to
  * the method should NOT be made to prevent overriding UX Restrictions.
