@@ -89,41 +89,41 @@ public class ProgressLiveDataTest {
 
     @Test
     public void testSetsValueOnActive() {
-        CaptureObserver<Long> progressObserver = new CaptureObserver<>();
+        CaptureObserver<PlaybackProgress> progressObserver = new CaptureObserver<>();
         mProgressLiveData.observe(mLifecycleOwner, progressObserver);
 
         assertThat(progressObserver.hasBeenNotified()).isTrue();
-        assertThat(progressObserver.getObservedValue()).isEqualTo(START_PROGRESS);
+        assertThat(progressObserver.getObservedValue().getProgress()).isEqualTo(START_PROGRESS);
     }
 
     @Test
     public void testUnknownProgress() {
-        CaptureObserver<Long> progressObserver = new CaptureObserver<>();
+        CaptureObserver<PlaybackProgress> progressObserver = new CaptureObserver<>();
         when(mPlaybackState.getPosition())
                 .thenReturn(PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN);
         mProgressLiveData.observe(mLifecycleOwner, progressObserver);
 
         assertThat(progressObserver.hasBeenNotified()).isTrue();
-        assertThat(progressObserver.getObservedValue()).isEqualTo(
+        assertThat(progressObserver.getObservedValue().getProgress()).isEqualTo(
                 PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN);
     }
 
     @Test
     public void testMovesForwardAtNormalSpeed() {
-        CaptureObserver<Long> progressObserver = new CaptureObserver<>();
+        CaptureObserver<PlaybackProgress> progressObserver = new CaptureObserver<>();
         mProgressLiveData.observe(mLifecycleOwner, progressObserver);
         progressObserver.reset();
 
         advanceElapsedTime(ProgressLiveData.UPDATE_INTERVAL_MS);
 
         assertThat(progressObserver.hasBeenNotified()).isTrue();
-        assertThat(progressObserver.getObservedValue()).isEqualTo(
+        assertThat(progressObserver.getObservedValue().getProgress()).isEqualTo(
                 START_PROGRESS + ProgressLiveData.UPDATE_INTERVAL_MS);
     }
 
     @Test
     public void testMovesForwardAtCustomSpeed() {
-        CaptureObserver<Long> progressObserver = new CaptureObserver<>();
+        CaptureObserver<PlaybackProgress> progressObserver = new CaptureObserver<>();
         mProgressLiveData.observe(mLifecycleOwner, progressObserver);
         float speed = 2F;
         when(mPlaybackState.getPlaybackSpeed()).thenReturn(speed);
@@ -132,13 +132,13 @@ public class ProgressLiveDataTest {
         advanceElapsedTime(ProgressLiveData.UPDATE_INTERVAL_MS);
 
         assertThat(progressObserver.hasBeenNotified()).isTrue();
-        assertThat(progressObserver.getObservedValue()).isEqualTo(
+        assertThat(progressObserver.getObservedValue().getProgress()).isEqualTo(
                 (long) (START_PROGRESS + ProgressLiveData.UPDATE_INTERVAL_MS * speed));
     }
 
     @Test
     public void testDoesntMoveForwardWhenPaused() {
-        CaptureObserver<Long> progressObserver = new CaptureObserver<>();
+        CaptureObserver<PlaybackProgress> progressObserver = new CaptureObserver<>();
         mProgressLiveData.observe(mLifecycleOwner, progressObserver);
         when(mPlaybackState.getState()).thenReturn(PlaybackStateCompat.STATE_PAUSED);
         progressObserver.reset();
@@ -146,13 +146,13 @@ public class ProgressLiveDataTest {
         advanceElapsedTime(ProgressLiveData.UPDATE_INTERVAL_MS);
 
         assertThat(progressObserver.hasBeenNotified()).isTrue();
-        assertThat(progressObserver.getObservedValue()).isEqualTo(
+        assertThat(progressObserver.getObservedValue().getProgress()).isEqualTo(
                 START_PROGRESS);
     }
 
     @Test
     public void testDoesntMoveForwardWhenStopped() {
-        CaptureObserver<Long> progressObserver = new CaptureObserver<>();
+        CaptureObserver<PlaybackProgress> progressObserver = new CaptureObserver<>();
         mProgressLiveData.observe(mLifecycleOwner, progressObserver);
         when(mPlaybackState.getState()).thenReturn(PlaybackStateCompat.STATE_STOPPED);
         progressObserver.reset();
@@ -160,13 +160,13 @@ public class ProgressLiveDataTest {
         advanceElapsedTime(ProgressLiveData.UPDATE_INTERVAL_MS);
 
         assertThat(progressObserver.hasBeenNotified()).isTrue();
-        assertThat(progressObserver.getObservedValue()).isEqualTo(
+        assertThat(progressObserver.getObservedValue().getProgress()).isEqualTo(
                 START_PROGRESS);
     }
 
     @Test
     public void testDoesntUpdateWhenInactive() {
-        CaptureObserver<Long> progressObserver = new CaptureObserver<>();
+        CaptureObserver<PlaybackProgress> progressObserver = new CaptureObserver<>();
         mProgressLiveData.observe(mLifecycleOwner, progressObserver);
         mLifecycleOwner.markState(Lifecycle.State.DESTROYED);
         progressObserver.reset();
