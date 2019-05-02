@@ -17,6 +17,6 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item app:state_ux_restricted="true" android:color="@color/uxr_image_view_disabled_color"/>
-    <item app:state_ux_restricted="false" android:color="@color/primary_app_icon_color"/>
+    <item app:state_ux_restricted="true" android:color="@color/uxr_button_text_disabled_color"/>
+    <item app:state_ux_restricted="false" android:color="@color/uxr_button_text_color"/>
 </selector>

@@ -91,8 +91,8 @@
         </attr>
     </declare-styleable>
 
-    <!-- Attributes for the UxrImageView. -->
-    <declare-styleable name="UxrImageView">
+    <!-- Attributes for UX restrictions compliant Button. -->
+    <declare-styleable name="UxrButton">
         <attr name="carUxRestrictions">
             <!-- Values are copied from android.car.drivingstate.CarUxRestrictions. Note:
             UX_RESTRICTIONS_BASELINE is not allowed here because it's useless and confusing. -->
