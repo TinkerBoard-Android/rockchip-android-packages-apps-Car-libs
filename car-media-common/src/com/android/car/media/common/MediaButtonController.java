@@ -26,6 +26,9 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 
+import androidx.annotation.ColorRes;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LifecycleOwner;
@@ -63,15 +66,13 @@ public class MediaButtonController {
 
     private CarControlBar mControlBar;
 
-    public MediaButtonController(Context context, CarControlBar controlBar) {
-        init(context, controlBar);
-    }
-
-    private void init(Context context, CarControlBar controlBar) {
+    public MediaButtonController(Context context, CarControlBar controlBar,
+            @ColorRes int iconColorsId, @LayoutRes int playPauseContainerId,
+            @DrawableRes int skipPrevButtonId, @DrawableRes int skipNextButtonId) {
         mContext = context;
         mControlBar = controlBar;
-        mPlayPauseStopImageContainer = LayoutInflater.from(context)
-                .inflate(R.layout.play_pause_stop_button_layout, null);
+        mPlayPauseStopImageContainer =
+                LayoutInflater.from(context).inflate(playPauseContainerId, null);
         mPlayPauseStopImageContainer.setOnClickListener(this::onPlayPauseStopClicked);
         mPlayPauseStopImageView = mPlayPauseStopImageContainer.findViewById(R.id.play_pause_stop);
         mPlayPauseStopImageView.setVisibility(View.INVISIBLE);
@@ -80,15 +81,14 @@ public class MediaButtonController {
         mPlayPauseStopImageView.setAction(PlayPauseStopImageView.ACTION_DISABLED);
         mPlayPauseStopImageView.setOnClickListener(this::onPlayPauseStopClicked);
 
-        mIconsColor = context.getResources().getColorStateList(R.color.playback_control_color,
-                null);
+        mIconsColor = context.getResources().getColorStateList(iconColorsId, null);
 
-        mSkipPrevButton = createIconButton(context.getDrawable(R.drawable.ic_skip_previous));
+        mSkipPrevButton = createIconButton(context.getDrawable(skipPrevButtonId));
         mSkipPrevButton.setId(R.id.skip_prev);
         mSkipPrevButton.setVisibility(View.VISIBLE);
         mSkipPrevButton.setOnClickListener(this::onPrevClicked);
 
-        mSkipNextButton = createIconButton(context.getDrawable(R.drawable.ic_skip_next));
+        mSkipNextButton = createIconButton(context.getDrawable(skipNextButtonId));
         mSkipNextButton.setId(R.id.skip_next);
         mSkipNextButton.setVisibility(View.VISIBLE);
         mSkipNextButton.setOnClickListener(this::onNextClicked);
