@@ -54,7 +54,9 @@ public class MinimizedPlaybackControlBar extends MinimizedControlBar implements 
     }
 
     private void init(Context context) {
-        mMediaButtonController = new MediaButtonController(context, this);
+        mMediaButtonController = new MediaButtonController(context, this,
+                R.color.playback_control_color, R.layout.minimized_play_pause_stop_button_layout,
+                R.drawable.ic_skip_previous, R.drawable.ic_skip_next);
         mProgressBar = findViewById(R.id.progress_bar);
     }
 
