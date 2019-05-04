@@ -310,7 +310,7 @@ public class TelecomUtils {
         if (avatarUri != null) {
             Glide.with(context)
                     .load(avatarUri)
-                    .apply(new RequestOptions().circleCrop().error(letterTileDrawable))
+                    .apply(new RequestOptions().centerCrop().error(letterTileDrawable))
                     .into(icon);
             return;
         }
@@ -323,7 +323,6 @@ public class TelecomUtils {
     /** Create a {@link LetterTileDrawable} for the given display name. */
     public static LetterTileDrawable createLetterTile(Context context, String displayName) {
         LetterTileDrawable letterTileDrawable = new LetterTileDrawable(context.getResources());
-        letterTileDrawable.setIsCircular(true);
         letterTileDrawable.setContactDetails(displayName, displayName);
         return  letterTileDrawable;
     }
