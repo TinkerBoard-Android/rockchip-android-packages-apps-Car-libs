@@ -20,6 +20,7 @@ limitations under the License.
     <skip />
     <string name="car_drawer_open" msgid="2676372472514742324">"打开抽屉式导航栏"</string>
     <string name="car_drawer_close" msgid="5329374630462464855">"关闭抽屉式导航栏"</string>
+    <string name="restricted_while_driving" msgid="2278031053760704437">"驾车时无法使用此功能。"</string>
     <string name="scroll_bar_page_down_button" msgid="8633547153186948066">"向下滚动"</string>
     <string name="scroll_bar_page_up_button" msgid="8306413844913744345">"向上滚动"</string>
 </resources>
