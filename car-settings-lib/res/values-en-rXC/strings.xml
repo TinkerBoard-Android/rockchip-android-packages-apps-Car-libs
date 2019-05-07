@@ -17,6 +17,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="language_picker_list_suggested_header" msgid="8931437200168779395">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‏‏‎‏‏‎‎‎‏‎‏‏‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‏‎‏‏‎‏‎‏‏‎‏‏‎‏‎‎‎‎‎‎‎‏‎‎‎‏‏‏‎‎‎‏‎‎‏‏‏‏‏‏‏‎‏‎‎‎‎‎‏‏‎Suggested‎‏‎‎‏‎"</string>
-    <string name="language_picker_list_all_header" msgid="3907663373765943630">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‏‏‎‏‏‎‎‎‏‎‏‏‏‏‏‎‏‏‎‏‏‎‎‎‏‏‏‎‏‎‏‏‎‎‏‏‏‏‎‎‏‎‎‎‏‎‎‏‏‏‏‏‏‏‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‏‎‏‎‎‏‏‏‎‎All languages‎‏‎‎‏‎"</string>
+    <string name="language_picker_list_suggested_header" msgid="8931437200168779395">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‏‏‏‎‏‏‎‎‎‏‎‏‏‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‏‎‏‏‎‏‎‏‏‎‏‏‎‏‎‎‎‎‎‎‎‏‎‎‎‏‏‏‎‎‎‏‎‎‏‏‏‏‏‏‏‎‏‎‎‎‎‎‏‏‎Suggested‎‏‎‎‏‎"</string>
+    <string name="language_picker_list_all_header" msgid="3907663373765943630">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‏‏‏‎‏‏‎‎‎‏‎‏‏‏‏‏‎‏‏‎‏‏‎‎‎‏‏‏‎‏‎‏‏‎‎‏‏‏‏‎‎‏‎‎‎‏‎‎‏‏‏‏‏‏‏‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‏‎‏‎‎‏‏‏‎‎All languages‎‏‎‎‏‎"</string>
 </resources>
