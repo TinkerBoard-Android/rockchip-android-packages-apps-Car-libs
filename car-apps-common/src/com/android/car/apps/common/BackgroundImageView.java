@@ -42,21 +42,16 @@ public class BackgroundImageView extends ConstraintLayout {
     private View mDarkeningScrim;
 
     public BackgroundImageView(Context context) {
-        super(context);
-        init();
+        this(context, null);
     }
 
     public BackgroundImageView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init();
+        this(context, attrs, 0);
     }
 
     public BackgroundImageView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        init();
-    }
 
-    private void init() {
         inflate(getContext(), R.layout.background_image, this);
 
         mImageView = findViewById(R.id.background_image_image);
