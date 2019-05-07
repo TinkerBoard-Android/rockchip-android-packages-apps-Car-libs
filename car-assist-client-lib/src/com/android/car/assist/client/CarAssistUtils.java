@@ -19,6 +19,7 @@ import static android.app.Notification.Action.SEMANTIC_ACTION_MARK_AS_READ;
 import static android.app.Notification.Action.SEMANTIC_ACTION_REPLY;
 import static android.service.voice.VoiceInteractionSession.SHOW_SOURCE_NOTIFICATION;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.RemoteInput;
@@ -27,12 +28,10 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
 import com.android.car.assist.CarVoiceInteractionSession;
-import com.android.car.assist.client.tts.TextToSpeechHelper;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.app.IVoiceActionCheckCallback;
 
@@ -65,30 +64,10 @@ public class CarAssistUtils {
             )
     );
 
-    private final TextToSpeechHelper.Listener mListener = new TextToSpeechHelper.Listener() {
-        @Override
-        public void onTextToSpeechStarted() {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "onTextToSpeechStarted");
-            }
-        }
-
-        @Override
-        public void onTextToSpeechStopped(boolean error) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "onTextToSpeechStopped");
-            }
-            if (error) {
-                Toast.makeText(mContext, mErrorMessage, Toast.LENGTH_LONG).show();
-            }
-        }
-    };
-
     private final Context mContext;
     private final AssistUtils mAssistUtils;
     private final FallbackAssistant mFallbackAssistant;
     private final String mErrorMessage;
-    private final ActivityManager mActivityManager;
 
     /** Interface used to receive callbacks from voice action requests. */
     public interface ActionRequestCallback {
@@ -99,9 +78,8 @@ public class CarAssistUtils {
     public CarAssistUtils(Context context) {
         mContext = context;
         mAssistUtils = new AssistUtils(context);
-        mFallbackAssistant = new FallbackAssistant(new TextToSpeechHelper(context));
+        mFallbackAssistant = new FallbackAssistant(context);
         mErrorMessage = context.getString(R.string.assist_action_failed_toast);
-        mActivityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
     }
 
     /**
@@ -175,13 +153,28 @@ public class CarAssistUtils {
     }
 
     /** Retrieves all visible and invisible {@link Action}s from the {@link #notification}. */
-    private static List<NotificationCompat.Action> getAllActions(Notification notification) {
+    public static List<NotificationCompat.Action> getAllActions(Notification notification) {
         List<NotificationCompat.Action> actions = new ArrayList<>();
         actions.addAll(NotificationCompat.getInvisibleActions(notification));
         for (int i = 0; i < NotificationCompat.getActionCount(notification); i++) {
             actions.add(NotificationCompat.getAction(notification, i));
         }
         return actions;
+    }
+
+    /**
+     * Retrieves the {@link NotificationCompat.Action} containing the
+     * {@link NotificationCompat.Action#SEMANTIC_ACTION_MARK_AS_READ} semantic action.
+     */
+    @Nullable
+    public static NotificationCompat.Action getMarkAsReadAction(Notification notification) {
+        for (NotificationCompat.Action action : getAllActions(notification)) {
+            if (action.getSemanticAction()
+                    == NotificationCompat.Action.SEMANTIC_ACTION_MARK_AS_READ) {
+                return action;
+            }
+        }
+        return null;
     }
 
     /**
@@ -210,11 +203,11 @@ public class CarAssistUtils {
     /**
      * Requests a given action from the current active Assistant.
      *
-     * @param sbn the notification payload to deliver to assistant
-     * @param semanticAction the semantic action that is being requested
+     * @param sbn         the notification payload to deliver to assistant
+     * @param voiceAction must be a valid {@link CarVoiceInteractionSession} VOICE_ACTION
      * @param callback the callback to issue on success/error
      */
-    public void requestAssistantVoiceAction(StatusBarNotification sbn, int semanticAction,
+    public void requestAssistantVoiceAction(StatusBarNotification sbn, String voiceAction,
             ActionRequestCallback callback) {
         if (!isCarCompatibleMessagingNotification(sbn)) {
             Log.w(TAG, "Assistant action requested for non-compatible notification.");
@@ -222,22 +215,15 @@ public class CarAssistUtils {
             return;
         }
 
-        if (!isSupportedSemanticAction(semanticAction)) {
-            Log.w(TAG, "Requested Assistant action for unsupported semantic action.");
-            callback.onResult(/* error= */ true);
-            return;
-        }
-
-        switch (semanticAction) {
-            case SEMANTIC_ACTION_MARK_AS_READ:
+        switch (voiceAction) {
+            case CarVoiceInteractionSession.VOICE_ACTION_READ_NOTIFICATION:
                 readMessageNotification(sbn, callback);
                 return;
-
-            case SEMANTIC_ACTION_REPLY:
+            case CarVoiceInteractionSession.VOICE_ACTION_REPLY_NOTIFICATION:
                 replyMessageNotification(sbn, callback);
                 return;
-
             default:
+                Log.w(TAG, "Requested Assistant action for unsupported semantic action.");
                 callback.onResult(/* error= */ true);
                 return;
         }
@@ -310,10 +296,10 @@ public class CarAssistUtils {
     private boolean handleFallback(StatusBarNotification sbn, String action) {
         switch (action) {
             case CarVoiceInteractionSession.VOICE_ACTION_READ_NOTIFICATION:
-                return mFallbackAssistant.handleReadAction(sbn, mListener);
+                return mFallbackAssistant.handleReadAction(sbn);
 
             case CarVoiceInteractionSession.VOICE_ACTION_REPLY_NOTIFICATION:
-                return mFallbackAssistant.handleErrorMessage(mErrorMessage, mListener);
+                return mFallbackAssistant.handleErrorMessage(mErrorMessage);
 
             default:
                 Log.w(TAG, "Requested fallback action for unsupported voice action.");
