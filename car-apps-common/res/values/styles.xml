@@ -30,8 +30,7 @@
         <!-- Note: fitCenter makes icons disappear if the view is too small... -->
         <item name="android:scaleType">fitCenter</item>
         <item name="android:layout_gravity">center</item>
-
-        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:background">@drawable/control_button_background</item>
         <item name="android:tint">@color/icon_tint</item>
     </style>
 

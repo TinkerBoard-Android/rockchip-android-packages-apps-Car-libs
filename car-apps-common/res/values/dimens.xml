@@ -27,6 +27,8 @@
     <dimen name="control_bar_margin_x">@*android:dimen/car_margin</dimen>
     <dimen name="control_bar_margin_bottom">@*android:dimen/car_padding_2</dimen>
     <dimen name="control_bar_button_size">76dp</dimen>
+    <dimen name="control_bar_button_slot_size">96dp</dimen>
+    <dimen name="control_bar_button_slot_padding">10dp</dimen>
     <dimen name="control_bar_elevation">0dp</dimen>
 
     <!-- Minimized Control Bar -->
@@ -42,6 +44,7 @@
 
     <!-- Control Buttons -->
     <dimen name="control_button_padding">16dp</dimen>
+    <dimen name="control_button_background_radius">48dp</dimen>
 
     <!-- Tabs -->
     <dimen name="car_tab_width">135dp</dimen>
@@ -72,4 +75,5 @@
     <item name="background_image_blur_radius" format="float" type="dimen">25</item>
     <!-- Scale to apply to images before blurring them to create the playback background -->
     <item name="background_image_blur_scale" format="float" type="dimen">.5</item>
+
 </resources>

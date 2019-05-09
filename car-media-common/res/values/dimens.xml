@@ -30,10 +30,10 @@
     <dimen name="appbar_second_row_height">0dp</dimen>
     <!-- The height of app bar when it expends to 2 rows. Equals 2 * @dimen/appbar_first_row_height. -->
     <dimen name="appbar_2_rows_height">160dp</dimen>
-    <dimen name="appbar_view_icon_touch_target_size">76dp</dimen>
+    <dimen name="appbar_view_icon_touch_target_size">96dp</dimen>
     <dimen name="appbar_view_icon_size">@*android:dimen/car_primary_icon_size</dimen>
     <!-- Padding of primary icon, equals (@dimen/appbar_view_icon_touch_target_size - @dimen/appbar_view_icon_size) / 2. -->
-    <dimen name="appbar_view_icon_padding">16dp</dimen>
+    <dimen name="appbar_view_icon_padding">26dp</dimen>
 
     <!-- playback_fragment.xml -->
     <dimen name="playback_fragment_text_margin_top">@*android:dimen/car_padding_4</dimen>
@@ -64,4 +64,7 @@
 
     <!-- Minimized Progress Bar -->
     <dimen name="minimized_progress_bar_track_height">4dp</dimen>
+
+    <!-- appbar_view_icon_background.xml -->
+    <dimen name="appbar_view_icon_background_radius">48dp</dimen>
 </resources>
