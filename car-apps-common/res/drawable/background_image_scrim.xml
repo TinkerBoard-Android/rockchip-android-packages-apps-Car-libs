@@ -20,42 +20,27 @@
         <shape>
             <gradient
                 android:angle="90"
+                android:startColor="#F5000000"
                 android:centerColor="@android:color/transparent"
-                android:centerY="0.5"
                 android:endColor="#F5000000"/>
         </shape>
     </item>
     <item>
         <shape>
             <gradient
-                android:angle="90"
-                android:centerColor="@android:color/transparent"
-                android:centerY="0.5"
-                android:startColor="#F5000000" />
-        </shape>
-    </item>
-    <item>
-        <shape>
-            <gradient
-                android:centerColor="@android:color/transparent"
-                android:centerX="0.04"
+                android:centerX="0.48"
+                android:startColor="@android:color/transparent"
+                android:centerColor="@android:color/black"
                 android:endColor="@android:color/black" />
         </shape>
     </item>
     <item>
         <shape>
             <gradient
-                android:centerColor="@android:color/transparent"
-                android:centerX="0.04"
-                android:endColor="@android:color/black" />
-        </shape>
-    </item>
-    <item>
-        <shape>
-            <gradient
-                android:centerColor="@android:color/transparent"
-                android:centerX="0"
-                android:endColor="#B8000000" />
+                android:centerX="0.38"
+                android:startColor="@android:color/transparent"
+                android:centerColor="#B3000000"
+                android:endColor="#B3000000" />
         </shape>
     </item>
     <item>
