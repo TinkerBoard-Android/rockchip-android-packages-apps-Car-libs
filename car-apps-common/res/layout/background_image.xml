@@ -35,30 +35,13 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@+id/background_image_guideline"/>
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/gradient_guideline"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.48"/>
     <View
-        android:id="@+id/background_image_scrim_left"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@drawable/background_image_scrim"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/gradient_guideline"/>
-
-    <View
-        android:id="@+id/background_image_scrim_right"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@android:color/black"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toRightOf="@+id/gradient_guideline"
         app:layout_constraintRight_toRightOf="parent"/>
 
     <View
