@@ -40,7 +40,7 @@
     <com.android.car.media.common.MediaAppSelectorWidget
         android:id="@+id/app_switch_container"
         android:layout_width="@dimen/app_switch_widget_width"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/appbar_view_icon_touch_target_size"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="@+id/app_bar_bottom"
         app:layout_constraintRight_toRightOf="parent"
