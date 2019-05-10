@@ -24,6 +24,16 @@
     android:layout_marginBottom="@dimen/minimized_control_bar_margin_bottom"
     android:background="@drawable/minimized_control_bar_background">
 
+    <View
+        android:id="@+id/metadata_background"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/car_card_ripple_background"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/minimized_control_buttons_wrapper"/>
+
     <ImageView
         android:id="@+id/minimized_control_bar_content_tile"
         android:layout_width="@dimen/minimized_control_bar_content_tile_size"
@@ -71,23 +81,23 @@
         app:layout_constraintEnd_toEndOf="parent">
         <include
             android:id="@+id/minimized_control_bar_left_slot"
-            android:layout_width="@dimen/control_bar_button_size"
-            android:layout_height="@dimen/control_bar_button_size"
+            android:layout_width="@dimen/minimized_control_bar_button_size"
+            android:layout_height="@dimen/minimized_control_bar_button_size"
             android:layout_marginEnd="@dimen/minimized_control_bar_button_padding"
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
             layout="@layout/control_bar_slot"/>
         <include
             android:id="@+id/minimized_control_bar_main_slot"
-            android:layout_width="@dimen/control_bar_button_size"
-            android:layout_height="@dimen/control_bar_button_size"
+            android:layout_width="@dimen/minimized_control_bar_button_size"
+            android:layout_height="@dimen/minimized_control_bar_button_size"
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
             layout="@layout/control_bar_slot"/>
         <include
             android:id="@+id/minimized_control_bar_right_slot"
-            android:layout_width="@dimen/control_bar_button_size"
-            android:layout_height="@dimen/control_bar_button_size"
+            android:layout_width="@dimen/minimized_control_bar_button_size"
+            android:layout_height="@dimen/minimized_control_bar_button_size"
             android:layout_marginStart="@dimen/minimized_control_bar_button_padding"
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
