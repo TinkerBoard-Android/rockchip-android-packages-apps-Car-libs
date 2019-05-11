@@ -19,7 +19,7 @@
         android:height="@dimen/appbar_view_icon_size"
         android:viewportWidth="48"
         android:viewportHeight="48"
-        android:tint="@color/appbar_icon_tint_selector">
+        android:tint="@color/selectable_button_tint_selector">
 
     <path
         android:pathData="M0 0h48v48H0z"/>

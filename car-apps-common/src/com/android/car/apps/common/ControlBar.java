@@ -158,7 +158,8 @@ public class ControlBar extends RelativeLayout implements ExpandableControlBar {
             }
         }
 
-        mDefaultExpandCollapseView = createIconButton(context.getDrawable(R.drawable.ic_overflow));
+        mDefaultExpandCollapseView = createIconButton(
+                context.getDrawable(R.drawable.ic_overflow_button));
         mDefaultExpandCollapseView.setContentDescription(context.getString(
                 R.string.control_bar_expand_collapse_button));
         mDefaultExpandCollapseView.setOnClickListener(v -> onExpandCollapse());
@@ -197,10 +198,15 @@ public class ControlBar extends RelativeLayout implements ExpandableControlBar {
 
     @Override
     public ImageButton createIconButton(Drawable icon) {
+        return createIconButton(icon, R.layout.control_bar_button);
+    }
+
+    @Override
+    public ImageButton createIconButton(Drawable icon, int viewId) {
         LayoutInflater inflater = LayoutInflater.from(mFirstCreatedSlot.getContext());
         final boolean attachToRoot = false;
-        ImageButton button = (ImageButton) inflater.inflate(R.layout.control_bar_button,
-                mFirstCreatedSlot, attachToRoot);
+        ImageButton button = (ImageButton) inflater.inflate(viewId, mFirstCreatedSlot,
+                attachToRoot);
         button.setImageDrawable(icon);
         return button;
     }
@@ -288,6 +294,9 @@ public class ControlBar extends RelativeLayout implements ExpandableControlBar {
 
     private void onExpandCollapse() {
         mIsExpanded = !mIsExpanded;
+        if (mExpandCollapseView != null) {
+            mExpandCollapseView.setSelected(mIsExpanded);
+        }
         if (mExpandCollapseCallback != null) {
             mExpandCollapseCallback.onExpandCollapse(mIsExpanded);
         }
