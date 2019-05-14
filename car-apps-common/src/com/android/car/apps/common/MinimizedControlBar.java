@@ -98,10 +98,14 @@ public class MinimizedControlBar extends ConstraintLayout implements CarControlB
 
     @Override
     public ImageButton createIconButton(Drawable icon) {
+        return createIconButton(icon, R.layout.control_bar_button);
+    }
+
+    @Override
+    public ImageButton createIconButton(Drawable icon, int viewId) {
         LayoutInflater inflater = LayoutInflater.from(mSlots[0].getContext());
         final boolean attachToRoot = false;
-        ImageButton button = (ImageButton) inflater.inflate(R.layout.control_bar_button,
-                mSlots[0], attachToRoot);
+        ImageButton button = (ImageButton) inflater.inflate(viewId, mSlots[0], attachToRoot);
         button.setImageDrawable(icon);
         return button;
     }

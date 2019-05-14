@@ -30,6 +30,12 @@
     <dimen name="control_bar_button_slot_size">96dp</dimen>
     <dimen name="control_bar_button_slot_padding">10dp</dimen>
     <dimen name="control_bar_elevation">0dp</dimen>
+    <dimen name="control_bar_button_padding">16dp</dimen>
+    <dimen name="control_bar_button_background_radius">48dp</dimen>
+
+    <!-- Overflow button in control Bar -->
+    <dimen name="overflow_button_icon_size">44dp</dimen>
+    <dimen name="overflow_button_icon_background_size">54dp</dimen>
 
     <!-- Minimized Control Bar -->
     <dimen name="minimized_control_bar_height">128dp</dimen>
@@ -41,10 +47,6 @@
     <dimen name="minimized_control_bar_text_padding">@*android:dimen/car_padding_3</dimen>
     <dimen name="minimized_control_bar_button_padding">@*android:dimen/car_padding_5</dimen>
     <dimen name="minimized_control_bar_button_size">76dp</dimen>
-
-    <!-- Control Buttons -->
-    <dimen name="control_button_padding">16dp</dimen>
-    <dimen name="control_button_background_radius">48dp</dimen>
 
     <!-- Tabs -->
     <dimen name="car_tab_width">135dp</dimen>
