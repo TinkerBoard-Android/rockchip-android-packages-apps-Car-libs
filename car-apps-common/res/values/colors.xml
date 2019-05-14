@@ -63,5 +63,5 @@
     <color name="uxr_button_image_disabled_color">#80FFFFFF</color>
     <color name="uxr_button_text_disabled_color">#80FFFFFF</color>
 
-    <color name="control_button_background_color">#66ffffff</color>
+    <color name="control_bar_button_background_color">#66ffffff</color>
 </resources>

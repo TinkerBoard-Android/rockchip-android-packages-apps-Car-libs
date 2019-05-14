@@ -59,13 +59,14 @@ public class PlaybackControlsActionBar extends ControlBar implements PlaybackCon
     }
 
     private void init(Context context) {
-        mOverflowButton = createIconButton(context.getDrawable(R.drawable.ic_overflow));
+        mOverflowButton = createIconButton(context.getDrawable(R.drawable.ic_overflow_button),
+                R.layout.control_bar_selectable_button);
         mOverflowButton.setId(R.id.overflow);
+        setExpandCollapseView(mOverflowButton);
 
         mMediaButtonController = new MediaButtonController(context, this,
                 R.color.playback_control_color, R.layout.full_play_pause_stop_button_layout,
                 R.drawable.ic_skip_previous, R.drawable.ic_skip_next);
-        setExpandCollapseView(mOverflowButton);
     }
 
     @Override
