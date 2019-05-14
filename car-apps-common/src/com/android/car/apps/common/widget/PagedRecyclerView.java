@@ -61,6 +61,9 @@ public final class PagedRecyclerView extends RecyclerView {
     private LayoutManager mNestedLayoutManager;
     private RecyclerView mNestedRecyclerView;
 
+    private Boolean mVerticalFadingEdgeEnabled;
+    private Integer mFadingEdgeLength;
+
     /**
      * The possible values for @{link #setGutter}. The default value is actually
      * {@link PagedRecyclerView.Gutter#BOTH}.
@@ -226,6 +229,30 @@ public final class PagedRecyclerView extends RecyclerView {
         }
     }
 
+    @Override
+    public void setVerticalFadingEdgeEnabled(boolean verticalFadingEdgeEnabled) {
+        if (!mScrollBarEnabled) {
+            super.setVerticalFadingEdgeEnabled(verticalFadingEdgeEnabled);
+            return;
+        }
+
+        mVerticalFadingEdgeEnabled = verticalFadingEdgeEnabled;
+        if (mNestedRecyclerView == null) return;
+        mNestedRecyclerView.setVerticalFadingEdgeEnabled(verticalFadingEdgeEnabled);
+    }
+
+    @Override
+    public void setFadingEdgeLength(int length) {
+        if (!mScrollBarEnabled) {
+            super.setFadingEdgeLength(length);
+            return;
+        }
+
+        mFadingEdgeLength = length;
+        if (mNestedRecyclerView == null) return;
+        mNestedRecyclerView.setFadingEdgeLength(length);
+    }
+
     private void initNestedRecyclerView() {
         PagedRecyclerViewAdapter.NestedRowViewHolder vh =
                 (PagedRecyclerViewAdapter.NestedRowViewHolder)
@@ -240,6 +267,13 @@ public final class PagedRecyclerView extends RecyclerView {
 
         mNestedRecyclerView.setAdapter(mNestedAdapter);
         mNestedRecyclerView.setLayoutManager(mNestedLayoutManager);
+
+        if (mVerticalFadingEdgeEnabled != null) {
+            mNestedRecyclerView.setVerticalFadingEdgeEnabled(mVerticalFadingEdgeEnabled);
+        }
+        if (mFadingEdgeLength != null) {
+            mNestedRecyclerView.setFadingEdgeLength(mFadingEdgeLength);
+        }
     }
 
     private void createScrollBarFromConfig() {
