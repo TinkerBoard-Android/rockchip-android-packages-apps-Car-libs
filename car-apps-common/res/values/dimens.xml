@@ -27,8 +27,7 @@
     <dimen name="control_bar_margin_x">@*android:dimen/car_margin</dimen>
     <dimen name="control_bar_margin_bottom">@*android:dimen/car_padding_2</dimen>
     <dimen name="control_bar_button_size">76dp</dimen>
-    <dimen name="control_bar_button_slot_size">96dp</dimen>
-    <dimen name="control_bar_button_slot_padding">10dp</dimen>
+    <dimen name="control_bar_button_slot_size">@dimen/control_bar_height</dimen>
     <dimen name="control_bar_elevation">0dp</dimen>
     <dimen name="control_bar_button_padding">16dp</dimen>
     <dimen name="control_bar_button_background_radius">48dp</dimen>
