@@ -49,6 +49,12 @@ public interface CarControlBar {
      */
     ImageButton createIconButton(Drawable icon);
 
+    /**
+     * Create an ImageButton with the provided icon to be used in this control bar, and the view
+     * id to inflate.
+     */
+    ImageButton createIconButton(Drawable icon, int viewId);
+
 
     @Retention(SOURCE)
     @IntDef({SLOT_MAIN, SLOT_LEFT, SLOT_RIGHT, SLOT_EXPAND_COLLAPSE})
