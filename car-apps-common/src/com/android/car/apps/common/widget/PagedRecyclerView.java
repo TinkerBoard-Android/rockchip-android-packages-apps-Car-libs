@@ -18,7 +18,6 @@ package com.android.car.apps.common.widget;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -26,6 +25,7 @@ import android.util.Log;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
 import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -46,9 +46,7 @@ public final class PagedRecyclerView extends RecyclerView {
     private static final String TAG = "PagedRecyclerView";
 
     private Context mContext;
-    private AttributeSet mAttrs;
 
-    private ScrollBarUI mScrollBar;
     private boolean mScrollBarEnabled;
     private int mScrollBarContainerWidth;
     private @ScrollBarPosition int mScrollBarPosition;
@@ -57,12 +55,7 @@ public final class PagedRecyclerView extends RecyclerView {
     @Gutter
     private int mGutter;
     private int mGutterSize;
-    private Adapter mNestedAdapter;
-    private LayoutManager mNestedLayoutManager;
     private RecyclerView mNestedRecyclerView;
-
-    private Boolean mVerticalFadingEdgeEnabled;
-    private Integer mFadingEdgeLength;
 
     /**
      * The possible values for @{link #setGutter}. The default value is actually
@@ -139,7 +132,8 @@ public final class PagedRecyclerView extends RecyclerView {
                 attrs, R.styleable.PagedRecyclerView, defStyleAttr,
                 R.style.PagedRecyclerView);
 
-        mScrollBarEnabled = a.getBoolean(R.styleable.PagedRecyclerView_scrollBarEnabled, true);
+        mScrollBarEnabled = a.getBoolean(R.styleable.PagedRecyclerView_scrollBarEnabled,
+                /* defValue= */true);
 
         if (!mScrollBarEnabled) {
             a.recycle();
@@ -147,7 +141,9 @@ public final class PagedRecyclerView extends RecyclerView {
         }
 
         mContext = context;
-        mAttrs = attrs;
+
+        mNestedRecyclerView = new RecyclerView(mContext, attrs,
+                R.style.PagedRecyclerView_NestedRecyclerView);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
         linearLayoutManager.setOrientation(RecyclerView.HORIZONTAL);
@@ -173,7 +169,7 @@ public final class PagedRecyclerView extends RecyclerView {
                     ScrollBarPosition.START);
 
         mScrollBarAboveRecyclerView = a.getBoolean(
-                R.styleable.PagedRecyclerView_scrollBarAboveRecyclerView, true /* defValue */);
+                R.styleable.PagedRecyclerView_scrollBarAboveRecyclerView, /* defValue= */true);
 
         // Apply layout changes after the layout has been calculated the this view.
         this.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
@@ -194,63 +190,114 @@ public final class PagedRecyclerView extends RecyclerView {
 
     @Override
     public void setClipToPadding(boolean clipToPadding) {
-        if (!mScrollBarEnabled) {
+        if (mScrollBarEnabled) {
+            mNestedRecyclerView.setClipToPadding(clipToPadding);
+        } else {
             super.setClipToPadding(clipToPadding);
-            return;
         }
-
-        if (mNestedRecyclerView == null) return;
-        mNestedRecyclerView.setClipToPadding(clipToPadding);
     }
 
     @Override
     public void setAdapter(@Nullable Adapter adapter) {
-        if (!mScrollBarEnabled) {
-            super.setAdapter(adapter);
-            return;
-        }
-
-        mNestedAdapter = adapter;
-        if (mNestedRecyclerView != null) {
+        if (mScrollBarEnabled) {
             mNestedRecyclerView.setAdapter(adapter);
+        } else {
+            super.setAdapter(adapter);
         }
     }
 
     @Override
     public void setLayoutManager(@Nullable LayoutManager layout) {
-        if (!mScrollBarEnabled) {
-            super.setLayoutManager(layout);
-            return;
-        }
-
-        mNestedLayoutManager = layout;
-        if (mNestedRecyclerView != null) {
+        if (mScrollBarEnabled) {
             mNestedRecyclerView.setLayoutManager(layout);
+        } else {
+            super.setLayoutManager(layout);
         }
     }
 
     @Override
     public void setVerticalFadingEdgeEnabled(boolean verticalFadingEdgeEnabled) {
-        if (!mScrollBarEnabled) {
+        if (mScrollBarEnabled) {
+            mNestedRecyclerView.setVerticalFadingEdgeEnabled(verticalFadingEdgeEnabled);
+        } else {
             super.setVerticalFadingEdgeEnabled(verticalFadingEdgeEnabled);
-            return;
         }
-
-        mVerticalFadingEdgeEnabled = verticalFadingEdgeEnabled;
-        if (mNestedRecyclerView == null) return;
-        mNestedRecyclerView.setVerticalFadingEdgeEnabled(verticalFadingEdgeEnabled);
     }
 
     @Override
     public void setFadingEdgeLength(int length) {
-        if (!mScrollBarEnabled) {
+        if (mScrollBarEnabled) {
+            mNestedRecyclerView.setFadingEdgeLength(length);
+        } else {
             super.setFadingEdgeLength(length);
-            return;
         }
+    }
 
-        mFadingEdgeLength = length;
-        if (mNestedRecyclerView == null) return;
-        mNestedRecyclerView.setFadingEdgeLength(length);
+    @Override
+    public void addItemDecoration(@NonNull ItemDecoration decor) {
+        if (mScrollBarEnabled) {
+            mNestedRecyclerView.addItemDecoration(decor);
+        } else {
+            super.addItemDecoration(decor);
+        }
+    }
+
+    @Override
+    public void addItemDecoration(@NonNull ItemDecoration decor, int index) {
+        if (mScrollBarEnabled) {
+            mNestedRecyclerView.addItemDecoration(decor, index);
+        } else {
+            super.addItemDecoration(decor, index);
+        }
+    }
+
+    @Override
+    public void setItemAnimator(@Nullable ItemAnimator animator) {
+        if (mScrollBarEnabled) {
+            mNestedRecyclerView.setItemAnimator(animator);
+        } else {
+            super.setItemAnimator(animator);
+        }
+    }
+
+    @Override
+    public void setPadding(int left, int top, int right, int bottom) {
+        if (mScrollBarEnabled) {
+            mNestedRecyclerView.setPadding(left, top, right, bottom);
+        } else {
+            super.setPadding(left, top, right, bottom);
+        }
+    }
+
+    @Override
+    public void setPaddingRelative(int start, int top, int end, int bottom) {
+        if (mScrollBarEnabled) {
+            mNestedRecyclerView.setPaddingRelative(start, top, end, bottom);
+        } else {
+            super.setPaddingRelative(start, top, end, bottom);
+
+        }
+    }
+
+    @Override
+    public int getPaddingStart() {
+        return mScrollBarEnabled ? mNestedRecyclerView.getPaddingStart() : super.getPaddingStart();
+    }
+
+    @Override
+    public int getPaddingEnd() {
+        return mScrollBarEnabled ? mNestedRecyclerView.getPaddingEnd() : super.getPaddingEnd();
+    }
+
+    @Override
+    public int getPaddingTop() {
+        return mScrollBarEnabled ? mNestedRecyclerView.getPaddingTop() : super.getPaddingTop();
+    }
+
+    @Override
+    public int getPaddingBottom() {
+        return mScrollBarEnabled ? mNestedRecyclerView.getPaddingBottom()
+                : super.getPaddingBottom();
     }
 
     private void initNestedRecyclerView() {
@@ -261,19 +308,7 @@ public final class PagedRecyclerView extends RecyclerView {
             throw new Error("Outer RecyclerView failed to initialize.");
         }
 
-        mNestedRecyclerView = new RecyclerView(mContext, mAttrs,
-                R.style.PagedRecyclerView_NestedRecyclerView);
         vh.mFrameLayout.addView(mNestedRecyclerView);
-
-        mNestedRecyclerView.setAdapter(mNestedAdapter);
-        mNestedRecyclerView.setLayoutManager(mNestedLayoutManager);
-
-        if (mVerticalFadingEdgeEnabled != null) {
-            mNestedRecyclerView.setVerticalFadingEdgeEnabled(mVerticalFadingEdgeEnabled);
-        }
-        if (mFadingEdgeLength != null) {
-            mNestedRecyclerView.setFadingEdgeLength(mFadingEdgeLength);
-        }
     }
 
     private void createScrollBarFromConfig() {
@@ -284,21 +319,22 @@ public final class PagedRecyclerView extends RecyclerView {
         }
 
         Class<?> cls;
+        ScrollBarUI scrollBar;
         try {
             cls = mContext.getClassLoader().loadClass(clsName);
         } catch (Throwable t) {
             throw andLog("Error loading scroll bar component: " + clsName, t);
         }
         try {
-            mScrollBar = (ScrollBarUI) cls.newInstance();
+            scrollBar = (ScrollBarUI) cls.newInstance();
         } catch (Throwable t) {
             throw andLog("Error creating scroll bar component: " + clsName, t);
         }
 
-        mScrollBar.initialize(mContext, mNestedRecyclerView, mScrollBarContainerWidth,
+        scrollBar.initialize(mContext, mNestedRecyclerView, mScrollBarContainerWidth,
                 mScrollBarPosition, mScrollBarAboveRecyclerView);
 
-        if (DEBUG) Log.d(TAG, "started " + mScrollBar.getClass().getSimpleName());
+        if (DEBUG) Log.d(TAG, "started " + scrollBar.getClass().getSimpleName());
     }
 
     /**
@@ -307,8 +343,6 @@ public final class PagedRecyclerView extends RecyclerView {
      * <p>The gutter is the space to the start/end of the list view items and will be equal in size
      * to the scroll bars. By default, there is a gutter to both the left and right of the list
      * view items, to account for the scroll bar.
-     *
-     * @param gutter A {@link Gutter} value that identifies which sides to apply the gutter to.
      */
     private void setNestedViewLayout() {
         int startMargin = 0;
