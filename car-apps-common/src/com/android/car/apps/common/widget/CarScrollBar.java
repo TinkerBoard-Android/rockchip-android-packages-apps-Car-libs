@@ -100,6 +100,10 @@ class CarScrollBar extends ScrollBarUI {
         mScrollView.setLayoutParams(
                 new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
 
+        // Apply recyclerView's top and bottom padding.
+        mScrollView.setPadding(mScrollView.getPaddingLeft(), mRecyclerView.getPaddingTop(),
+                mScrollView.getPaddingRight(), mRecyclerView.getPaddingBottom());
+
         mButtonDisabledAlpha = context.getResources().getFloat(R.dimen.button_disabled_alpha);
 
         if (scrollBarAboveRecyclerView) {
