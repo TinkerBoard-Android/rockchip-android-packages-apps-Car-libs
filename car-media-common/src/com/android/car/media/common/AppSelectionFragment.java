@@ -41,6 +41,8 @@ import java.util.List;
  * {@link #mSelectorWidget}. To ensure visual coherence, the UI of the fragment also shows a
  * {@link MediaAppSelectorWidget} widget, but this one is in "display only" mode as tapping it
  * closes the fragment rather than opening a new one.
+ * Note: the fragment dismisses itself in {@link #onStop} as its less confusing to come back to the
+ * media app than the fragment after using another facet.
  */
 public class AppSelectionFragment extends DialogFragment {
 
@@ -141,6 +143,7 @@ public class AppSelectionFragment extends DialogFragment {
         }
     }
 
+    /** Closes the selector (allowing state loss). */
     @Override
     public void dismiss() {
         if (mSelectorWidget != null) {
@@ -152,13 +155,8 @@ public class AppSelectionFragment extends DialogFragment {
         // before the fragment fades away to reveal the underlying MediaAppSelectorWidget with an
         // arrow pointing the other way. Otherwise we end up seeing the arrows pointing in opposite
         // directions... Note that in the home screen the widgets are not overlapped.
-        mDisplayWidget.postDelayed(() -> superDismiss(), 50);
+        mDisplayWidget.postDelayed(() -> dismissAllowingStateLoss(), 50);
     }
-
-    private void superDismiss() {
-        super.dismiss();
-    }
-
 
     @Override
     public void onStart() {
@@ -167,6 +165,12 @@ public class AppSelectionFragment extends DialogFragment {
         if (getDialog() != null) {
             getDialog().getWindow().setWindowAnimations(R.style.media_app_selector_animation_fade);
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        dismiss();
     }
 
     @Override
