@@ -22,6 +22,8 @@ import android.service.notification.StatusBarNotification;
 import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionSession;
 
+import androidx.annotation.StringDef;
+
 import com.android.car.assist.payloadhandlers.NotificationPayloadHandler;
 
 /**
@@ -42,6 +44,12 @@ public abstract class CarVoiceInteractionSession extends VoiceInteractionSession
     public static final String KEY_ACTION = "KEY_ACTION";
 
     /**
+     * The key used for the {@link CarVoiceInteractionSession#VOICE_ACTION_HANDLE_EXCEPTION} payload
+     * {@link Bundle}. Must map to a {@link ExceptionValue}.
+     */
+    public static final String KEY_EXCEPTION = "KEY_EXCEPTION";
+
+    /**
      * The key used for the payload {@link Bundle}, if a {@link StatusBarNotification} is used as
      * the payload.
      */
@@ -55,6 +63,26 @@ public abstract class CarVoiceInteractionSession extends VoiceInteractionSession
 
     /** Indicates to assistant that a reply action is being requested for a given payload. */
     public static final String VOICE_ACTION_REPLY_NOTIFICATION = "VOICE_ACTION_REPLY_NOTIFICATION";
+
+    /**
+     * Indicates to assistant that it should resolve the exception in the given payload (found in
+     * {@link CarVoiceInteractionSession#KEY_EXCEPTION}'s value).
+     */
+    public static final String VOICE_ACTION_HANDLE_EXCEPTION = "VOICE_ACTION_HANDLE_EXCEPTION";
+
+    /**
+     * The list of exceptions the active voice service must handle.
+     */
+    @StringDef({EXCEPTION_NOTIFICATION_LISTENER_PERMISSIONS_MISSING})
+    public @interface ExceptionValue {}
+
+    /**
+     * Indicates to assistant that it is missing the Notification Listener permission, and should
+     * request this permission from the user.
+     **/
+    public static final String EXCEPTION_NOTIFICATION_LISTENER_PERMISSIONS_MISSING =
+            "EXCEPTION_NOTIFICATION_LISTENER_PERMISSIONS_MISSING";
+
 
     private final NotificationPayloadHandler mNotificationPayloadHandler;
 
