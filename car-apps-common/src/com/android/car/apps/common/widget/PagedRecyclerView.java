@@ -51,6 +51,7 @@ public final class PagedRecyclerView extends RecyclerView {
     private int mScrollBarContainerWidth;
     private @ScrollBarPosition int mScrollBarPosition;
     private boolean mScrollBarAboveRecyclerView;
+    private String mScrollBarClass;
 
     @Gutter
     private int mGutter;
@@ -171,21 +172,23 @@ public final class PagedRecyclerView extends RecyclerView {
         mScrollBarAboveRecyclerView = a.getBoolean(
                 R.styleable.PagedRecyclerView_scrollBarAboveRecyclerView, /* defValue= */true);
 
-        // Apply layout changes after the layout has been calculated the this view.
+        mScrollBarClass = a.getString(R.styleable.PagedRecyclerView_scrollBarCustomClass);
+        a.recycle();
+
+        // Apply inner RV layout changes after the layout has been calculated for this view.
         this.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
+                // View holder layout is still pending.
+                if (PagedRecyclerView.this.findViewHolderForAdapterPosition(0) == null) return;
+
                 PagedRecyclerView.this.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 initNestedRecyclerView();
                 setNestedViewLayout();
 
-                if (mScrollBarEnabled) {
-                    createScrollBarFromConfig();
-                }
+                createScrollBarFromConfig();
             }
         });
-
-        a.recycle();
     }
 
     @Override
@@ -300,6 +303,14 @@ public final class PagedRecyclerView extends RecyclerView {
                 : super.getPaddingBottom();
     }
 
+    @Override
+    public void setVisibility(int visibility) {
+        super.setVisibility(visibility);
+        if (mScrollBarEnabled) {
+            mNestedRecyclerView.setVisibility(visibility);
+        }
+    }
+
     private void initNestedRecyclerView() {
         PagedRecyclerViewAdapter.NestedRowViewHolder vh =
                 (PagedRecyclerViewAdapter.NestedRowViewHolder)
@@ -313,7 +324,8 @@ public final class PagedRecyclerView extends RecyclerView {
 
     private void createScrollBarFromConfig() {
         if (DEBUG) Log.d(TAG, "createScrollBarFromConfig");
-        final String clsName = mContext.getString(R.string.config_scrollBarComponent);
+        final String clsName = mScrollBarClass == null
+                ? mContext.getString(R.string.config_scrollBarComponent) : mScrollBarClass;
         if (clsName == null || clsName.length() == 0) {
             throw andLog("No scroll bar component configured", null);
         }
