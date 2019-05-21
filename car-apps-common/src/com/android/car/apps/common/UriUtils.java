@@ -81,10 +81,8 @@ public final class UriUtils {
         if (resources == null) {
             return null;
         }
-        resources.updateConfiguration(context.getResources().getConfiguration(),
-                context.getResources().getDisplayMetrics());
         final int id = resources.getIdentifier(r.resourceName, null, null);
-        return resources.getDrawable(id);
+        return resources.getDrawable(id, null);
     }
 
     /**
