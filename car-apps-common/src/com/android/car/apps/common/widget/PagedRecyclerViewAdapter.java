@@ -32,7 +32,7 @@ import java.util.ArrayList;
  */
 final class PagedRecyclerViewAdapter
         extends RecyclerView.Adapter<PagedRecyclerViewAdapter.NestedRowViewHolder> {
-    private ArrayList<String> mItem = new ArrayList();
+    private ArrayList<String> mItem = new ArrayList<>();
 
     PagedRecyclerViewAdapter() {
         this.mItem.add("nested_RecyclerView");
