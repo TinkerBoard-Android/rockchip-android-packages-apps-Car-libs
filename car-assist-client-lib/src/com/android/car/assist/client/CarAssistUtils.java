@@ -82,21 +82,19 @@ public class CarAssistUtils {
                 .flattenToString();
         int slashIndex = activeComponent.indexOf("/");
         final String activePackage = activeComponent.substring(0, slashIndex);
-        // TODO: remove this log
-        Log.d(TAG, "assistantIsNotificationListener: activeComponent: " + activeComponent
-                + " activePackage: " + activePackage + " context user: "
-                + mContext.getContentResolver().getUserId() + " current user "
-                + ActivityManager.getCurrentUser());
 
         final String listeners = Settings.Secure.getStringForUser(mContext.getContentResolver(),
                 Settings.Secure.ENABLED_NOTIFICATION_LISTENERS, ActivityManager.getCurrentUser());
 
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "Current user: " + ActivityManager.getCurrentUser()
+                    + " has active voice service: " + activePackage + " and enabled notification "
+                    + " listeners: " + listeners);
+        }
+
         if (listeners != null) {
-            // TODO: remove this log
-            Log.d(TAG, " Listeners are: " + listeners);
             for (String listener : Arrays.asList(listeners.split(":"))) {
                 if (listener.contains(activePackage)) {
-                    Log.d(TAG, "Active assistant has notification listener: " + listener);
                     return true;
                 }
             }
@@ -231,7 +229,6 @@ public class CarAssistUtils {
      * @return true if the read request was handled successfully
      */
     private boolean readMessageNotification(StatusBarNotification sbn) {
-        Log.i(TAG, " in readMessageNotification");
         return requestAction(BundleBuilder.buildAssistantReadBundle(sbn))
                 || mFallbackAssistant.handleReadAction(sbn);
     }
@@ -253,10 +250,12 @@ public class CarAssistUtils {
         if (assistantIsNotificationListener()) {
             if (mAssistUtils.showSessionForActiveService(payloadArguments,
                     CarVoiceInteractionSession.SHOW_SOURCE_NOTIFICATION, null, null)) {
-                Log.d(TAG, " Successfully showed session, returning true");
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Log.d(TAG, " Successfully showed session, returning true");
+                }
                 return true;
             } else {
-                Log.d(TAG, "Session could not be shown for active service");
+                Log.w(TAG, "Session could not be shown for active service");
             }
         }
         return false;
