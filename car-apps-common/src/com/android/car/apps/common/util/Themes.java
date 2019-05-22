@@ -16,6 +16,7 @@
 package com.android.car.apps.common.util;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 
@@ -32,6 +33,18 @@ public class Themes {
         int colorAccent = ta.getColor(0, 0);
         ta.recycle();
         return colorAccent;
+    }
+
+    /**
+     * Retrieve the ColorStateList for the given attribute. The value may be either a single solid
+     * color or a reference to a color or complex {@link android.content.res.ColorStateList}
+     * description.
+     */
+    public static ColorStateList getAttrColorStateList(Context context, int attr) {
+        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        ColorStateList colorStateList = ta.getColorStateList(0);
+        ta.recycle();
+        return colorStateList;
     }
 
     /**
