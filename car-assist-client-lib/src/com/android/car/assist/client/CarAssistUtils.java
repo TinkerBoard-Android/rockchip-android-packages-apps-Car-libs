@@ -67,6 +67,12 @@ public class CarAssistUtils {
     private final FallbackAssistant mFallbackAssistant;
     private final String mErrorMessage;
 
+    /** Interface used to receive callbacks from voice action requests. */
+    public interface ActionRequestCallback {
+        /** Callback issued from a voice request on success/error. */
+        void onResult(boolean hasError);
+    }
+
     public CarAssistUtils(Context context) {
         mContext = context;
         mAssistUtils = new AssistUtils(context);
@@ -202,62 +208,101 @@ public class CarAssistUtils {
      *
      * @param sbn         the notification payload to deliver to assistant
      * @param voiceAction must be a valid {@link CarVoiceInteractionSession} VOICE_ACTION
-     * @return true if the request was successful
+     * @param callback    the callback to issue on success/error
      */
-    public boolean requestAssistantVoiceAction(StatusBarNotification sbn, String voiceAction) {
+    public void requestAssistantVoiceAction(StatusBarNotification sbn, String voiceAction,
+            ActionRequestCallback callback) {
         if (!isCarCompatibleMessagingNotification(sbn)) {
             Log.w(TAG, "Assistant action requested for non-compatible notification.");
-            return false;
+            callback.onResult(/* hasError= */ true);
+            return;
         }
 
         switch (voiceAction) {
             case CarVoiceInteractionSession.VOICE_ACTION_READ_NOTIFICATION:
-                return readMessageNotification(sbn);
+                readMessageNotification(sbn, callback);
+                return;
             case CarVoiceInteractionSession.VOICE_ACTION_REPLY_NOTIFICATION:
-                return replyMessageNotification(sbn);
+                replyMessageNotification(sbn, callback);
+                return;
             default:
-                return false;
+                Log.w(TAG, "Requested Assistant action for unsupported semantic action.");
+                callback.onResult(/* hasError= */ true);
+                return;
         }
     }
 
     /**
      * Requests a read action for the notification from the current active Assistant.
-     * If the Assistant is cannot handle the request, a fallback implementation will attempt to
+     * If the Assistant cannot handle the request, a fallback implementation will attempt to
      * handle it.
      *
-     * @param sbn the notification to deliver as the payload
-     * @return true if the read request was handled successfully
+     * @param sbn      the notification to deliver as the payload
+     * @param callback the callback to issue on success/error
      */
-    private boolean readMessageNotification(StatusBarNotification sbn) {
-        return requestAction(BundleBuilder.buildAssistantReadBundle(sbn))
-                || mFallbackAssistant.handleReadAction(sbn);
+    private void readMessageNotification(StatusBarNotification sbn,
+            ActionRequestCallback callback) {
+        Bundle args = BundleBuilder.buildAssistantReadBundle(sbn);
+        String action = CarVoiceInteractionSession.VOICE_ACTION_READ_NOTIFICATION;
+
+        requestAction(action, sbn, args, callback);
     }
 
     /**
      * Requests a reply action for the notification from the current active Assistant.
-     * If the Assistant is cannot handle the request, a fallback implementation will attempt to
+     * If the Assistant cannot handle the request, a fallback implementation will attempt to
      * handle it.
      *
-     * @param sbn the notification to deliver as the payload
-     * @return true if the reply request was handled successfully
+     * @param sbn      the notification to deliver as the payload
+     * @param callback the callback to issue on success/error
      */
-    private boolean replyMessageNotification(StatusBarNotification sbn) {
-        return requestAction(BundleBuilder.buildAssistantReplyBundle(sbn))
-                || mFallbackAssistant.handleErrorMessage(mErrorMessage);
+    private void replyMessageNotification(StatusBarNotification sbn,
+            ActionRequestCallback callback) {
+        Bundle args = BundleBuilder.buildAssistantReplyBundle(sbn);
+        String action = CarVoiceInteractionSession.VOICE_ACTION_REPLY_NOTIFICATION;
+
+        requestAction(action, sbn, args, callback);
     }
 
-    private boolean requestAction(Bundle payloadArguments) {
-        if (assistantIsNotificationListener()) {
-            if (mAssistUtils.showSessionForActiveService(payloadArguments,
-                    CarVoiceInteractionSession.SHOW_SOURCE_NOTIFICATION, null, null)) {
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, " Successfully showed session, returning true");
-                }
-                return true;
-            } else {
-                Log.w(TAG, "Session could not be shown for active service");
-            }
+    private void requestAction(String action, StatusBarNotification sbn, Bundle payloadArguments,
+            ActionRequestCallback callback) {
+        if (!assistantIsNotificationListener()) {
+            handleFallback(sbn, action, callback);
+            return;
         }
-        return false;
+
+        boolean success = mAssistUtils.showSessionForActiveService(payloadArguments,
+                CarVoiceInteractionSession.SHOW_SOURCE_NOTIFICATION, null, null);
+        if (success) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Launching active assistant for action: " + action);
+            }
+        } else {
+            Log.w(TAG, "Failed to launch active assistant.");
+        }
+        callback.onResult(/* hasError= */ !success);
+    }
+
+    private void handleFallback(StatusBarNotification sbn, String action,
+            ActionRequestCallback callback) {
+        FallbackAssistant.Listener listener = new FallbackAssistant.Listener() {
+            @Override
+            public void onMessageRead(boolean error) {
+                callback.onResult(error);
+            }
+        };
+
+        switch (action) {
+            case CarVoiceInteractionSession.VOICE_ACTION_READ_NOTIFICATION:
+                mFallbackAssistant.handleReadAction(sbn, listener);
+                break;
+            case CarVoiceInteractionSession.VOICE_ACTION_REPLY_NOTIFICATION:
+                mFallbackAssistant.handleErrorMessage(mErrorMessage, listener);
+                break;
+            default:
+                Log.w(TAG, "Requested unsupported FallbackAssistant action.");
+                callback.onResult(/* hasError= */ true);
+                return;
+        }
     }
 }
