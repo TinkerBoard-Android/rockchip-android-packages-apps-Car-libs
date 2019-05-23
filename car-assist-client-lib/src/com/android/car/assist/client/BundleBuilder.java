@@ -16,12 +16,16 @@
 package com.android.car.assist.client;
 
 import static com.android.car.assist.CarVoiceInteractionSession.KEY_ACTION;
+import static com.android.car.assist.CarVoiceInteractionSession.KEY_EXCEPTION;
 import static com.android.car.assist.CarVoiceInteractionSession.KEY_NOTIFICATION;
+import static com.android.car.assist.CarVoiceInteractionSession.VOICE_ACTION_HANDLE_EXCEPTION;
 import static com.android.car.assist.CarVoiceInteractionSession.VOICE_ACTION_READ_NOTIFICATION;
 import static com.android.car.assist.CarVoiceInteractionSession.VOICE_ACTION_REPLY_NOTIFICATION;
 
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
+
+import com.android.car.assist.CarVoiceInteractionSession.ExceptionValue;
 
 /**
  * Helper class for building Bundle arguments. Used by {@link CarAssistUtils}.
@@ -52,6 +56,20 @@ class BundleBuilder {
         Bundle args = new Bundle();
         args.putString(KEY_ACTION, VOICE_ACTION_REPLY_NOTIFICATION);
         args.putParcelable(KEY_NOTIFICATION, notification);
+        return args;
+    }
+
+    /**
+     * Returns a {@link Bundle} to be delivered to Assistant to indicate that it should handle
+     * the specified {@input exception}.
+     *
+     * @return The bundle that can be sent to Assistant.
+     */
+    static Bundle buildAssistantHandleExceptionBundle(
+            @ExceptionValue String exception) {
+        Bundle args = new Bundle();
+        args.putString(KEY_ACTION, VOICE_ACTION_HANDLE_EXCEPTION);
+        args.putString(KEY_EXCEPTION, exception);
         return args;
     }
 }
