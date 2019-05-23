@@ -18,6 +18,8 @@ package com.android.car.assist.client;
 import static android.app.Notification.Action.SEMANTIC_ACTION_MARK_AS_READ;
 import static android.app.Notification.Action.SEMANTIC_ACTION_REPLY;
 
+import static com.android.car.assist.CarVoiceInteractionSession.EXCEPTION_NOTIFICATION_LISTENER_PERMISSIONS_MISSING;
+
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.Notification;
@@ -28,6 +30,7 @@ import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
+import androidx.annotation.StringDef;
 import androidx.core.app.NotificationCompat;
 
 import com.android.car.assist.CarVoiceInteractionSession;
@@ -66,11 +69,36 @@ public class CarAssistUtils {
     private final AssistUtils mAssistUtils;
     private final FallbackAssistant mFallbackAssistant;
     private final String mErrorMessage;
+    private final boolean mIsFallbackAssistantEnabled;
 
     /** Interface used to receive callbacks from voice action requests. */
     public interface ActionRequestCallback {
-        /** Callback issued from a voice request on success/error. */
-        void onResult(boolean hasError);
+        /**
+         * The action was successfully completed either by the active or fallback assistant.
+         **/
+        String RESULT_SUCCESS = "SUCCESS";
+
+        /**
+         * The action was not successfully completed, but the active assistant has been prompted to
+         * alert the user of this error and handle it. The caller of this callback is recommended
+         * to NOT alert the user of this error again.
+         */
+        String RESULT_FAILED_WITH_ERROR_HANDLED = "FAILED_WITH_ERROR_HANDLED";
+
+        /**
+         * The action has not been successfully completed, and the error has not been handled.
+         **/
+        String RESULT_FAILED = "FAILED";
+
+        /**
+         * The list of result states.
+         */
+        @StringDef({RESULT_FAILED, RESULT_FAILED_WITH_ERROR_HANDLED, RESULT_SUCCESS})
+        @interface ResultState {
+        }
+
+        /** Callback containing the result of completing the voice action request. */
+        void onResult(@ResultState String state);
     }
 
     public CarAssistUtils(Context context) {
@@ -78,6 +106,15 @@ public class CarAssistUtils {
         mAssistUtils = new AssistUtils(context);
         mFallbackAssistant = new FallbackAssistant(context);
         mErrorMessage = context.getString(R.string.assist_action_failed_toast);
+        mIsFallbackAssistantEnabled =
+                context.getResources().getBoolean(R.bool.config_enableFallbackAssistant);
+    }
+
+    /**
+     * @return {@code true} if there is an active assistant.
+     */
+    public boolean hasActiveAssistant() {
+        return mAssistUtils.getActiveServiceComponentName() != null;
     }
 
     /**
@@ -86,6 +123,12 @@ public class CarAssistUtils {
     public boolean assistantIsNotificationListener() {
         final String activeComponent = mAssistUtils.getActiveServiceComponentName()
                 .flattenToString();
+        if (activeComponent == null) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "No active assistant was found.");
+            }
+            return false;
+        }
         int slashIndex = activeComponent.indexOf("/");
         final String activePackage = activeComponent.substring(0, slashIndex);
 
@@ -214,7 +257,7 @@ public class CarAssistUtils {
             ActionRequestCallback callback) {
         if (!isCarCompatibleMessagingNotification(sbn)) {
             Log.w(TAG, "Assistant action requested for non-compatible notification.");
-            callback.onResult(/* hasError= */ true);
+            callback.onResult(ActionRequestCallback.RESULT_FAILED);
             return;
         }
 
@@ -227,7 +270,7 @@ public class CarAssistUtils {
                 return;
             default:
                 Log.w(TAG, "Requested Assistant action for unsupported semantic action.");
-                callback.onResult(/* hasError= */ true);
+                callback.onResult(ActionRequestCallback.RESULT_FAILED);
                 return;
         }
     }
@@ -267,28 +310,49 @@ public class CarAssistUtils {
     private void requestAction(String action, StatusBarNotification sbn, Bundle payloadArguments,
             ActionRequestCallback callback) {
         if (!assistantIsNotificationListener()) {
-            handleFallback(sbn, action, callback);
+            if (mIsFallbackAssistantEnabled) {
+                handleFallback(sbn, action, callback);
+            } else {
+                // If there is no active assistant, and fallback assistant is not enabled, then
+                // there is nothing for us to do. If there is an active assistant, alert them
+                // to request permissions.
+                String resultState = ActionRequestCallback.RESULT_FAILED;
+                if (hasActiveAssistant() && requestedHandlePermissionsActionSuccessfully()) {
+                    resultState = ActionRequestCallback.RESULT_FAILED_WITH_ERROR_HANDLED;
+                }
+                callback.onResult(resultState);
+            }
             return;
         }
 
         boolean success = mAssistUtils.showSessionForActiveService(payloadArguments,
                 CarVoiceInteractionSession.SHOW_SOURCE_NOTIFICATION, null, null);
+        String resultState = ActionRequestCallback.RESULT_FAILED;
         if (success) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "Launching active assistant for action: " + action);
             }
+            resultState = ActionRequestCallback.RESULT_SUCCESS;
         } else {
             Log.w(TAG, "Failed to launch active assistant.");
         }
-        callback.onResult(/* hasError= */ !success);
+        callback.onResult(resultState);
     }
 
     private void handleFallback(StatusBarNotification sbn, String action,
             ActionRequestCallback callback) {
         FallbackAssistant.Listener listener = new FallbackAssistant.Listener() {
             @Override
-            public void onMessageRead(boolean error) {
-                callback.onResult(error);
+            public void onMessageRead(boolean hasError) {
+                String resultState = hasError ? ActionRequestCallback.RESULT_FAILED
+                        : ActionRequestCallback.RESULT_SUCCESS;
+                // Only change the resultState if fallback failed, and assistant successfully
+                // alerted to prompt user for permissions.
+                if (hasActiveAssistant() && requestedHandlePermissionsActionSuccessfully()
+                        && resultState.equals(ActionRequestCallback.RESULT_FAILED)) {
+                    resultState = ActionRequestCallback.RESULT_FAILED_WITH_ERROR_HANDLED;
+                }
+                callback.onResult(resultState);
             }
         };
 
@@ -301,8 +365,25 @@ public class CarAssistUtils {
                 break;
             default:
                 Log.w(TAG, "Requested unsupported FallbackAssistant action.");
-                callback.onResult(/* hasError= */ true);
+                callback.onResult(ActionRequestCallback.RESULT_FAILED);
                 return;
         }
+    }
+
+    /**
+     * Requests the active voice service to handle the permissions missing error.
+     *
+     * @return {@code true} if active assistant was successfully alerted.
+     **/
+    private boolean requestedHandlePermissionsActionSuccessfully() {
+        Bundle payloadArguments = BundleBuilder
+                .buildAssistantHandleExceptionBundle(
+                        EXCEPTION_NOTIFICATION_LISTENER_PERMISSIONS_MISSING);
+        boolean requestedSuccessfully = mAssistUtils.showSessionForActiveService(payloadArguments,
+                CarVoiceInteractionSession.SHOW_SOURCE_NOTIFICATION, null, null);
+        if (!requestedSuccessfully) {
+            Log.w(TAG, "Failed to alert assistant to request permissions from user");
+        }
+        return requestedSuccessfully;
     }
 }
