@@ -100,16 +100,12 @@ class CarScrollBar extends ScrollBarUI {
         mScrollView.setLayoutParams(
                 new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
 
-        // Apply recyclerView's top and bottom padding.
-        mScrollView.setPadding(mScrollView.getPaddingLeft(), mRecyclerView.getPaddingTop(),
-                mScrollView.getPaddingRight(), mRecyclerView.getPaddingBottom());
-
         mButtonDisabledAlpha = context.getResources().getFloat(R.dimen.button_disabled_alpha);
 
         if (scrollBarAboveRecyclerView) {
             parent.addView(mScrollView);
         } else {
-            parent.addView(mScrollView, /* index */ 0);
+            parent.addView(mScrollView, /* index= */0);
         }
 
         setScrollBarContainerWidth(scrollBarContainerWidth);
@@ -158,6 +154,10 @@ class CarScrollBar extends ScrollBarUI {
 
             calculateScrollThumbTrackHeight();
             mHandler.post(() -> updatePaginationButtons(false /*animate*/));
+
+            // Apply recyclerView's top and bottom padding.
+            mScrollView.setPadding(mScrollView.getPaddingLeft(), mRecyclerView.getPaddingTop(),
+                    mScrollView.getPaddingRight(), mRecyclerView.getPaddingBottom());
         });
     }
 
@@ -172,12 +172,12 @@ class CarScrollBar extends ScrollBarUI {
     }
 
     /** Returns {@code true} if the "up" button is pressed */
-    boolean isUpPressed() {
+    private boolean isUpPressed() {
         return mUpButton.isPressed();
     }
 
     /** Returns {@code true} if the "down" button is pressed */
-    boolean isDownPressed() {
+    private boolean isDownPressed() {
         return mDownButton.isPressed();
     }
 
@@ -215,7 +215,7 @@ class CarScrollBar extends ScrollBarUI {
      *
      * @param enabled {@code true} if the up button is enabled.
      */
-    void setUpEnabled(boolean enabled) {
+    private void setUpEnabled(boolean enabled) {
         mUpButton.setEnabled(enabled);
         mUpButton.setAlpha(enabled ? 1f : mButtonDisabledAlpha);
     }
@@ -225,7 +225,7 @@ class CarScrollBar extends ScrollBarUI {
      *
      * @param enabled {@code true} if the down button is enabled.
      */
-    void setDownEnabled(boolean enabled) {
+    private void setDownEnabled(boolean enabled) {
         mDownButton.setEnabled(enabled);
         mDownButton.setAlpha(enabled ? 1f : mButtonDisabledAlpha);
     }
@@ -235,7 +235,7 @@ class CarScrollBar extends ScrollBarUI {
      *
      * @return {@code true} if the down button is enabled. {@code false} otherwise.
      */
-    boolean isDownEnabled() {
+    private boolean isDownEnabled() {
         return mDownButton.isEnabled();
     }
 
@@ -449,8 +449,7 @@ class CarScrollBar extends ScrollBarUI {
         if (firstChild == null || firstChild.getHeight() == 0) {
             mRowsPerPage = 1;
         } else {
-            mRowsPerPage = Math.max(1, (getRecyclerView().getHeight()
-                    - getRecyclerView().getPaddingTop()) / firstChild.getHeight());
+            mRowsPerPage = Math.max(1, getRecyclerView().getHeight() / firstChild.getHeight());
         }
     }
 
@@ -535,8 +534,9 @@ class CarScrollBar extends ScrollBarUI {
      * {@code PagedRecyclerView}, then the snapping will not occur.
      */
     void pageUp() {
+        int currentOffset = getRecyclerView().computeVerticalScrollOffset();
         if (getRecyclerView().getLayoutManager() == null
-                || getRecyclerView().getChildCount() == 0) {
+                || getRecyclerView().getChildCount() == 0 || currentOffset == 0) {
             return;
         }
 
@@ -645,7 +645,7 @@ class CarScrollBar extends ScrollBarUI {
      */
     private void updatePaginationButtons(boolean animate) {
 
-        boolean isAtStart = isAtStart();
+        boolean isAtStart = isAtStart() && mRecyclerView.computeVerticalScrollOffset() == 0;
         boolean isAtEnd = isAtEnd();
         RecyclerView.LayoutManager layoutManager = getRecyclerView().getLayoutManager();
 

@@ -18,6 +18,7 @@ package com.android.car.apps.common.widget;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import android.car.drivingstate.CarUxRestrictions;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -30,6 +31,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.car.apps.common.CarUxRestrictionsUtil;
 import com.android.car.apps.common.R;
 import com.android.car.apps.common.util.ScrollBarUI;
 
@@ -47,6 +49,9 @@ public final class PagedRecyclerView extends RecyclerView {
 
     private Context mContext;
 
+    private final CarUxRestrictionsUtil mCarUxRestrictionsUtil;
+    private final CarUxRestrictionsUtil.OnUxRestrictionsChangedListener mListener;
+
     private boolean mScrollBarEnabled;
     private int mScrollBarContainerWidth;
     private @ScrollBarPosition int mScrollBarPosition;
@@ -57,6 +62,7 @@ public final class PagedRecyclerView extends RecyclerView {
     private int mGutter;
     private int mGutterSize;
     private RecyclerView mNestedRecyclerView;
+    private Adapter mAdapter;
 
     /**
      * The possible values for @{link #setGutter}. The default value is actually
@@ -115,6 +121,64 @@ public final class PagedRecyclerView extends RecyclerView {
         int END = 2;
     }
 
+    /**
+     * Interface for a {@link RecyclerView.Adapter} to cap the number of items.
+     *
+     * <p>NOTE: it is still up to the adapter to use maxItems in {@link
+     * RecyclerView.Adapter#getItemCount()}.
+     *
+     * <p>the recommended way would be with:
+     *
+     * <pre>{@code
+     * {@literal@}Override
+     * public int getItemCount() {
+     *   return Math.min(super.getItemCount(), mMaxItems);
+     * }
+     * }</pre>
+     */
+    public interface ItemCap {
+        /**
+         * A value to pass to {@link #setMaxItems(int)} that indicates there should be no limit.
+         */
+        int UNLIMITED = -1;
+
+        /**
+         * Sets the maximum number of items available in the adapter. A value less than '0' means
+         * the list should not be capped.
+         */
+        void setMaxItems(int maxItems);
+    }
+
+    /**
+     * Custom layout manager for the outer recyclerview. Since paddings should be applied by the
+     * inner recycler view within its bounds, this layout manager should always have 0 padding.
+     */
+    private class PagedRecyclerViewLayoutManager extends LinearLayoutManager {
+        PagedRecyclerViewLayoutManager(Context context, int orientation, boolean reverseLayout) {
+            super(context, orientation, reverseLayout);
+        }
+
+        @Override
+        public int getPaddingTop() {
+            return 0;
+        }
+
+        @Override
+        public int getPaddingBottom() {
+            return 0;
+        }
+
+        @Override
+        public int getPaddingStart() {
+            return 0;
+        }
+
+        @Override
+        public int getPaddingEnd() {
+            return 0;
+        }
+    }
+
     public PagedRecyclerView(@NonNull Context context) {
         this(context, null, 0);
     }
@@ -125,6 +189,10 @@ public final class PagedRecyclerView extends RecyclerView {
 
     public PagedRecyclerView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+
+        mCarUxRestrictionsUtil = CarUxRestrictionsUtil.getInstance(context);
+        mListener = this::updateCarUxRestrictions;
+
         init(context, attrs, defStyle);
     }
 
@@ -146,9 +214,9 @@ public final class PagedRecyclerView extends RecyclerView {
         mNestedRecyclerView = new RecyclerView(mContext, attrs,
                 R.style.PagedRecyclerView_NestedRecyclerView);
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
-        linearLayoutManager.setOrientation(RecyclerView.HORIZONTAL);
-        super.setLayoutManager(linearLayoutManager);
+        PagedRecyclerViewLayoutManager layoutManager = new PagedRecyclerViewLayoutManager(context,
+                LinearLayoutManager.HORIZONTAL, false);
+        super.setLayoutManager(layoutManager);
 
         PagedRecyclerViewAdapter adapter = new PagedRecyclerViewAdapter();
         super.setAdapter(adapter);
@@ -192,6 +260,47 @@ public final class PagedRecyclerView extends RecyclerView {
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        mCarUxRestrictionsUtil.register(mListener);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mCarUxRestrictionsUtil.unregister(mListener);
+    }
+
+    private void updateCarUxRestrictions(CarUxRestrictions carUxRestrictions) {
+        // If the adapter does not implement ItemCap, then the max items on it cannot be updated.
+        if (!(mAdapter instanceof ItemCap)) {
+            return;
+        }
+
+        int maxItems = ItemCap.UNLIMITED;
+        if ((carUxRestrictions.getActiveRestrictions()
+                & CarUxRestrictions.UX_RESTRICTIONS_LIMIT_CONTENT) != 0) {
+            maxItems = carUxRestrictions.getMaxCumulativeContentItems();
+        }
+
+        int originalCount = mAdapter.getItemCount();
+        ((ItemCap) mAdapter).setMaxItems(maxItems);
+        int newCount = mAdapter.getItemCount();
+
+        if (newCount == originalCount) {
+            return;
+        }
+
+        if (newCount < originalCount) {
+            mAdapter.notifyItemRangeRemoved(
+                    newCount, originalCount - newCount);
+        } else {
+            mAdapter.notifyItemRangeInserted(
+                    originalCount, newCount - originalCount);
+        }
+    }
+
+    @Override
     public void setClipToPadding(boolean clipToPadding) {
         if (mScrollBarEnabled) {
             mNestedRecyclerView.setClipToPadding(clipToPadding);
@@ -202,6 +311,7 @@ public final class PagedRecyclerView extends RecyclerView {
 
     @Override
     public void setAdapter(@Nullable Adapter adapter) {
+        mAdapter = adapter;
         if (mScrollBarEnabled) {
             mNestedRecyclerView.setAdapter(adapter);
         } else {
@@ -237,20 +347,20 @@ public final class PagedRecyclerView extends RecyclerView {
     }
 
     @Override
-    public void addItemDecoration(@NonNull ItemDecoration decor) {
-        if (mScrollBarEnabled) {
-            mNestedRecyclerView.addItemDecoration(decor);
-        } else {
-            super.addItemDecoration(decor);
-        }
-    }
-
-    @Override
     public void addItemDecoration(@NonNull ItemDecoration decor, int index) {
         if (mScrollBarEnabled) {
             mNestedRecyclerView.addItemDecoration(decor, index);
         } else {
             super.addItemDecoration(decor, index);
+        }
+    }
+
+    @Override
+    public void addItemDecoration(@NonNull ItemDecoration decor) {
+        if (mScrollBarEnabled) {
+            mNestedRecyclerView.addItemDecoration(decor);
+        } else {
+            super.addItemDecoration(decor);
         }
     }
 
@@ -278,7 +388,6 @@ public final class PagedRecyclerView extends RecyclerView {
             mNestedRecyclerView.setPaddingRelative(start, top, end, bottom);
         } else {
             super.setPaddingRelative(start, top, end, bottom);
-
         }
     }
 
