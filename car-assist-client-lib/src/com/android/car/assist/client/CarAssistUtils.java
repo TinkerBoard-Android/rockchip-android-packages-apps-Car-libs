@@ -94,10 +94,15 @@ public class CarAssistUtils {
         final String listeners = Settings.Secure.getStringForUser(mContext.getContentResolver(),
                 Settings.Secure.ENABLED_NOTIFICATION_LISTENERS, ActivityManager.getCurrentUser());
 
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "Current user: " + ActivityManager.getCurrentUser()
+                    + " has active voice service: " + activePackage + " and enabled notification "
+                    + " listeners: " + listeners);
+        }
+
         if (listeners != null) {
             for (String listener : Arrays.asList(listeners.split(":"))) {
                 if (listener.contains(activePackage)) {
-                    Log.d(TAG, "Active assistant has notification listener: " + listener);
                     return true;
                 }
             }
