@@ -96,7 +96,8 @@ public class PagedSnapHelper extends LinearSnapHelper {
      * <ul>
      *     <li>there is no item; or
      *     <li>no visible item can fully fit in the containing RecyclerView; or
-     *     <li>an item longer than containing RecyclerView is about to scroll out.
+     *     <li>an item longer than containing RecyclerView is about to scroll out; or
+     *     <li>recyclerview has top padding and the view is the first item in the adapter.
      * </ul>
      */
     @Override
@@ -169,6 +170,13 @@ public class PagedSnapHelper extends LinearSnapHelper {
         if ((childToReturn == null
                 || (lastItemVisible && lastItemPercentageVisible > closestPercentageVisible))) {
             childToReturn = lastVisibleChild;
+        }
+
+        // Return null if the childToReturn is the first item to allow scrolling to the top when
+        // the recyclerview has top padding.
+        if (mRecyclerView.getPaddingTop() > 0
+                && mRecyclerView.getChildAdapterPosition(childToReturn) == 0) {
+            return null;
         }
 
         // Return null if the childToReturn is not valid. This allows the user to scroll freely
@@ -291,7 +299,7 @@ public class PagedSnapHelper extends LinearSnapHelper {
     }
 
     /** Returns {@code true} if the RecyclerView is completely displaying the first item. */
-    public boolean isAtStart(RecyclerView.LayoutManager layoutManager) {
+    boolean isAtStart(RecyclerView.LayoutManager layoutManager) {
         if (layoutManager == null || layoutManager.getChildCount() == 0) {
             return true;
         }
