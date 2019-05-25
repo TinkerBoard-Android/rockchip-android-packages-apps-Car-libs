@@ -38,11 +38,14 @@ class BrowsedMediaItems extends LiveData<List<MediaItemMetadata>> {
     /**
      * Number of times we will retry obtaining the list of children of a certain node
      */
-    private static final int CHILDREN_SUBSCRIPTION_RETRIES = 3;
+    private static final int CHILDREN_SUBSCRIPTION_RETRIES = 1;
     /**
      * Time between retries while trying to obtain the list of children of a certain node
      */
-    private static final int CHILDREN_SUBSCRIPTION_RETRY_TIME_MS = 1000;
+    private static final int CHILDREN_SUBSCRIPTION_RETRY_TIME_MS = 5000;
+
+    /** Whether to send an error after the last timeout. The subscription stays active regardless.*/
+    private static final boolean LAST_RETRY_TIMEOUT_SENDS_ERROR = false;
 
     private final MediaBrowserCompat mBrowser;
     private final String mParentId;
@@ -86,6 +89,7 @@ class BrowsedMediaItems extends LiveData<List<MediaItemMetadata>> {
      * if no data is received after a certain amount of time. This process is started by calling
      * {@link #start(int, int)}, passing the number of retries and delay between them as
      * parameters.
+     * TODO: remove all this code if it's indeed not needed anymore (using retry=1 to be sure).
      */
     private class ChildrenSubscription extends MediaBrowserCompat.SubscriptionCallback {
         private final String mItemId;
@@ -107,7 +111,7 @@ class BrowsedMediaItems extends LiveData<List<MediaItemMetadata>> {
                         mBrowser.unsubscribe(mItemId);
                         mBrowser.subscribe(mItemId, ChildrenSubscription.this);
                         mHandler.postDelayed(this, mRetryDelay);
-                    } else {
+                    } else if (LAST_RETRY_TIMEOUT_SENDS_ERROR) {
                         mIsDataLoaded = true;
                         setValue(null);
                     }
