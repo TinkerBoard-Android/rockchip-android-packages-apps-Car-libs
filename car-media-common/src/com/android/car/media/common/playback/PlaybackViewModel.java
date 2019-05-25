@@ -436,6 +436,11 @@ public class PlaybackViewModel extends AndroidViewModel {
             return mState.getErrorMessage();
         }
 
+        /** See {@link PlaybackStateCompat#getErrorCode()}. */
+        public int getErrorCode() {
+            return mState.getErrorCode();
+        }
+
         /** See {@link PlaybackStateCompat#getActiveQueueItemId}. */
         public long getActiveQueueItemId() {
             return mState.getActiveQueueItemId();
