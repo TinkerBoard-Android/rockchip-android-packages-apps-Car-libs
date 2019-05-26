@@ -20,16 +20,21 @@ import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 
+import androidx.annotation.StyleRes;
+
 /**
  * Various utility methods associated with theming.
  */
 public class Themes {
 
-    /**
-     * Returns the color assigned to the given attribute.
-     */
+    /** Returns the color assigned to the given attribute. */
     public static int getAttrColor(Context context, int attr) {
-        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        return getAttrColor(context, /*styleResId=*/ 0, attr);
+    }
+
+    /** Returns the color assigned to the given attribute defined in the given style. */
+    public static int getAttrColor(Context context, @StyleRes int styleResId, int attr) {
+        TypedArray ta = context.obtainStyledAttributes(styleResId, new int[]{attr});
         int colorAccent = ta.getColor(0, 0);
         ta.recycle();
         return colorAccent;
@@ -41,7 +46,17 @@ public class Themes {
      * description.
      */
     public static ColorStateList getAttrColorStateList(Context context, int attr) {
-        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        return getAttrColorStateList(context, /*styleResId=*/ 0, attr);
+    }
+
+    /**
+     * Retrieve the ColorStateList for the given attribute defined in the given style. The value
+     * may be either a single solid color or a reference to a color or complex {@link
+     * android.content.res.ColorStateList} description.
+     */
+    public static ColorStateList getAttrColorStateList(Context context, @StyleRes int styleResId,
+            int attr) {
+        TypedArray ta = context.obtainStyledAttributes(styleResId, new int[]{attr});
         ColorStateList colorStateList = ta.getColorStateList(0);
         ta.recycle();
         return colorStateList;
@@ -51,47 +66,71 @@ public class Themes {
      * Returns the boolean assigned to the given attribute.
      */
     public static boolean getAttrBoolean(Context context, int attr) {
-        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        return getAttrBoolean(context, /*styleResId=*/ 0, attr);
+    }
+
+    /** Returns the boolean assigned to the given attribute defined in the given style. */
+    public static boolean getAttrBoolean(Context context, @StyleRes int styleResId, int attr) {
+        TypedArray ta = context.obtainStyledAttributes(styleResId, new int[]{attr});
         boolean value = ta.getBoolean(0, false);
         ta.recycle();
         return value;
     }
 
-    /**
-     * Returns the Drawable assigned to the given attribute.
-     */
+    /** Returns the Drawable assigned to the given attribute. */
     public static Drawable getAttrDrawable(Context context, int attr) {
-        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        return getAttrDrawable(context, /*styleResId=*/ 0, attr);
+    }
+
+    /** Returns the Drawable assigned to the given attribute defined in the given style. */
+    public static Drawable getAttrDrawable(Context context, @StyleRes int styleResId, int attr) {
+        TypedArray ta = context.obtainStyledAttributes(styleResId, new int[]{attr});
         Drawable value = ta.getDrawable(0);
         ta.recycle();
         return value;
     }
 
-    /**
-     * Returns the Integer assigned to the given attribute.
-     */
+    /** Returns the Integer assigned to the given attribute. */
     public static int getAttrInteger(Context context, int attr) {
-        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        return getAttrInteger(context, /*styleResId=*/ 0, attr);
+    }
+
+    /** Returns the Integer assigned to the given attribute defined in the given style. */
+    public static int getAttrInteger(Context context, @StyleRes int styleResId, int attr) {
+        TypedArray ta = context.obtainStyledAttributes(styleResId, new int[]{attr});
         int value = ta.getInteger(0, 0);
         ta.recycle();
         return value;
     }
 
-    /**
-     * Returns the identifier of the resolved resource assigned to the given attribute.
-     */
+    /** Returns the identifier of the resolved resource assigned to the given attribute. */
     public static int getAttrResourceId(Context context, int attr) {
-        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        return getAttrResourceId(context, /*styleResId=*/ 0, attr);
+    }
+
+    /**
+     * Returns the identifier of the resolved resource assigned to the given attribute defined in
+     * the given style.
+     */
+    public static int getAttrResourceId(Context context, @StyleRes int styleResId, int attr) {
+        TypedArray ta = context.obtainStyledAttributes(styleResId, new int[]{attr});
         int resId = ta.getResourceId(0, 0);
         ta.recycle();
         return resId;
     }
 
-    /**
-     * Returns the dimension pixel size assigned to the given attribute.
-     */
+    /** Returns the dimension pixel size assigned to the given attribute. */
     public static int getAttrDimensionPixelSize(Context context, int attr) {
-        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        return getAttrDimensionPixelSize(context, /*styleResId=*/ 0, attr);
+    }
+
+    /**
+     * Returns the dimension pixel size assigned to the given attribute defined in the given
+     * style.
+     */
+    public static int getAttrDimensionPixelSize(Context context, @StyleRes int styleResId,
+            int attr) {
+        TypedArray ta = context.obtainStyledAttributes(styleResId, new int[]{attr});
         int dimensionPixelSize = ta.getDimensionPixelSize(0, 0);
         ta.recycle();
         return dimensionPixelSize;
