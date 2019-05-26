@@ -36,6 +36,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.car.apps.common.R;
+import com.android.car.apps.common.util.Themes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -223,17 +224,10 @@ public class CarTabLayout<T extends CarTabLayout.CarTab> extends LinearLayout {
         carTabItemView.setOrientation(LinearLayout.VERTICAL);
         carTabItemView.setGravity(Gravity.CENTER);
         carTabItemView.setPadding(mTabPaddingX, 0, mTabPaddingX, 0);
-        Drawable backgroundDrawable = getStyledBackgroundDrawable(getContext());
+        Drawable backgroundDrawable = Themes.getAttrDrawable(getContext(),
+                R.style.CarTabItemBackground, android.R.attr.background);
         carTabItemView.setBackground(backgroundDrawable);
         return carTabItemView;
-    }
-
-    private Drawable getStyledBackgroundDrawable(Context context) {
-        TypedArray ta = context.obtainStyledAttributes(
-                R.style.CarTabItemBackground, new int[]{android.R.attr.background});
-        Drawable value = ta.getDrawable(0);
-        ta.recycle();
-        return value;
     }
 
     private static class CarTabAdapter<T extends CarTab> extends BaseAdapter {
