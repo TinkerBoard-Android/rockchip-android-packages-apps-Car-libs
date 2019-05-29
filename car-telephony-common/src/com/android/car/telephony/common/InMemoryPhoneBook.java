@@ -47,13 +47,15 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
     private final Map<I18nPhoneNumberWrapper, Contact> mPhoneNumberContactMap = new HashMap<>();
     private boolean mIsLoaded = false;
 
-    /** Initialize the globally accessible {@link InMemoryPhoneBook}. */
+    /**
+     * Initialize the globally accessible {@link InMemoryPhoneBook}.
+     * Returns the existing {@link InMemoryPhoneBook} if already initialized.
+     * {@link #tearDown()} must be called before init to reinitialize.
+     */
     public static InMemoryPhoneBook init(Context context) {
         if (sInMemoryPhoneBook == null) {
             sInMemoryPhoneBook = new InMemoryPhoneBook(context);
             sInMemoryPhoneBook.onInit();
-        } else {
-            throw new IllegalStateException("Call teardown before reinitialized PhoneBook");
         }
         return get();
     }
