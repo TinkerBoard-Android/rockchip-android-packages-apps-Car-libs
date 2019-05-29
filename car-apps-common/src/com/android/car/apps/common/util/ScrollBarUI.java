@@ -41,4 +41,10 @@ public abstract class ScrollBarUI {
     public abstract void initialize(Context context, RecyclerView recyclerView,
             int scrollBarContainerWidth, @ScrollBarPosition int scrollBarPosition,
             boolean scrollBarAboveRecyclerView);
+
+    /**
+     * Requests layout of the scrollbar. Should be called when there's been a change that will
+     * affect the size of the scrollbar view.
+     */
+    public abstract void requestLayout();
 }
