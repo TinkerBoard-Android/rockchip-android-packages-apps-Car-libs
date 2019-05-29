@@ -135,10 +135,13 @@ class CarScrollBar extends ScrollBarUI {
         mScrollView.addOnLayoutChangeListener((View v, int left, int top, int right, int bottom,
                     int oldLeft, int oldTop, int oldRight, int oldBottom) -> {
             int width = right - left;
-            int height = bottom - top;
+
+            OrientationHelper orientationHelper =
+                    getOrientationHelper(getRecyclerView().getLayoutManager());
+            int height = orientationHelper.getTotalSpace();
 
             // This value will keep track of the top of the current view being laid out.
-            int layoutTop = mScrollView.getPaddingTop();
+            int layoutTop = orientationHelper.getStartAfterPadding();
 
             // Lay out the up button at the top of the view.
             layoutViewCenteredFromTop(mUpButton, layoutTop, width);
@@ -149,16 +152,17 @@ class CarScrollBar extends ScrollBarUI {
             layoutViewCenteredFromTop(mScrollThumb, layoutTop, width);
 
             // Lay out the bottom button at the bottom of the view.
-            int downBottom = height - mScrollView.getPaddingBottom();
+            int downBottom = height + orientationHelper.getStartAfterPadding();
             layoutViewCenteredFromBottom(mDownButton, downBottom, width);
 
-            calculateScrollThumbTrackHeight();
-            mHandler.post(() -> updatePaginationButtons(false /*animate*/));
-
-            // Apply recyclerView's top and bottom padding.
-            mScrollView.setPadding(mScrollView.getPaddingLeft(), mRecyclerView.getPaddingTop(),
-                    mScrollView.getPaddingRight(), mRecyclerView.getPaddingBottom());
+            mHandler.post(this::calculateScrollThumbTrackHeight);
+            mHandler.post(() -> updatePaginationButtons(/* animate= */false));
         });
+    }
+
+    @Override
+    public void requestLayout() {
+        mScrollView.requestLayout();
     }
 
     /**
@@ -484,13 +488,6 @@ class CarScrollBar extends ScrollBarUI {
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     updatePaginationButtons(false);
                 }
-
-                @Override
-                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                    if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                        mHandler.postDelayed(mPaginationRunnable, PAGINATION_HOLD_DELAY_MS);
-                    }
-                }
             };
 
     private final Runnable mPaginationRunnable = () -> {
@@ -543,8 +540,8 @@ class CarScrollBar extends ScrollBarUI {
         // Use OrientationHelper to calculate scroll distance in order to match snapping behavior.
         OrientationHelper orientationHelper =
                 getOrientationHelper(getRecyclerView().getLayoutManager());
+        int screenSize = orientationHelper.getTotalSpace();
 
-        int screenSize = getRecyclerView().getHeight();
         int scrollDistance = screenSize;
         // The iteration order matters. In case where there are 2 items longer than screen size, we
         // want to focus on upcoming view.
@@ -590,7 +587,7 @@ class CarScrollBar extends ScrollBarUI {
 
         OrientationHelper orientationHelper =
                 getOrientationHelper(getRecyclerView().getLayoutManager());
-        int screenSize = getRecyclerView().getHeight();
+        int screenSize = orientationHelper.getTotalSpace();
         int scrollDistance = screenSize;
 
         // If the last item is partially visible, page down should bring it to the top.
@@ -645,7 +642,7 @@ class CarScrollBar extends ScrollBarUI {
      */
     private void updatePaginationButtons(boolean animate) {
 
-        boolean isAtStart = isAtStart() && mRecyclerView.computeVerticalScrollOffset() == 0;
+        boolean isAtStart = isAtStart();
         boolean isAtEnd = isAtEnd();
         RecyclerView.LayoutManager layoutManager = getRecyclerView().getLayoutManager();
 
@@ -661,7 +658,7 @@ class CarScrollBar extends ScrollBarUI {
             return;
         }
 
-        if (getRecyclerView().getLayoutManager().canScrollVertically()) {
+        if (layoutManager.canScrollVertically()) {
             setParameters(
                     getRecyclerView().computeVerticalScrollRange(),
                     getRecyclerView().computeVerticalScrollOffset(),
@@ -691,7 +688,7 @@ class CarScrollBar extends ScrollBarUI {
      *
      * @param position The position in the list to scroll to.
      */
-    void scrollToPosition(int position) {
+    private void scrollToPosition(int position) {
         RecyclerView.LayoutManager layoutManager = getRecyclerView().getLayoutManager();
         if (layoutManager == null) {
             return;

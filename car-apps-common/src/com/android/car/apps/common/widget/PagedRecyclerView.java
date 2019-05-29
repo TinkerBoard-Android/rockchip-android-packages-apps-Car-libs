@@ -63,6 +63,7 @@ public final class PagedRecyclerView extends RecyclerView {
     private int mGutterSize;
     private RecyclerView mNestedRecyclerView;
     private Adapter mAdapter;
+    private ScrollBarUI mScrollBarUI;
 
     /**
      * The possible values for @{link #setGutter}. The default value is actually
@@ -377,6 +378,7 @@ public final class PagedRecyclerView extends RecyclerView {
     public void setPadding(int left, int top, int right, int bottom) {
         if (mScrollBarEnabled) {
             mNestedRecyclerView.setPadding(left, top, right, bottom);
+            if (mScrollBarUI != null) mScrollBarUI.requestLayout();
         } else {
             super.setPadding(left, top, right, bottom);
         }
@@ -386,6 +388,7 @@ public final class PagedRecyclerView extends RecyclerView {
     public void setPaddingRelative(int start, int top, int end, int bottom) {
         if (mScrollBarEnabled) {
             mNestedRecyclerView.setPaddingRelative(start, top, end, bottom);
+            if (mScrollBarUI != null) mScrollBarUI.requestLayout();
         } else {
             super.setPaddingRelative(start, top, end, bottom);
         }
@@ -440,22 +443,21 @@ public final class PagedRecyclerView extends RecyclerView {
         }
 
         Class<?> cls;
-        ScrollBarUI scrollBar;
         try {
             cls = mContext.getClassLoader().loadClass(clsName);
         } catch (Throwable t) {
             throw andLog("Error loading scroll bar component: " + clsName, t);
         }
         try {
-            scrollBar = (ScrollBarUI) cls.newInstance();
+            mScrollBarUI = (ScrollBarUI) cls.newInstance();
         } catch (Throwable t) {
             throw andLog("Error creating scroll bar component: " + clsName, t);
         }
 
-        scrollBar.initialize(mContext, mNestedRecyclerView, mScrollBarContainerWidth,
+        mScrollBarUI.initialize(mContext, mNestedRecyclerView, mScrollBarContainerWidth,
                 mScrollBarPosition, mScrollBarAboveRecyclerView);
 
-        if (DEBUG) Log.d(TAG, "started " + scrollBar.getClass().getSimpleName());
+        if (DEBUG) Log.d(TAG, "started " + mScrollBarUI.getClass().getSimpleName());
     }
 
     /**
