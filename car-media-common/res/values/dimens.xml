@@ -40,8 +40,6 @@
     <dimen name="playback_fragment_text_margin_x">@*android:dimen/car_padding_4</dimen>
 
     <dimen name="playback_fragment_app_icon_margin_right">@*android:dimen/car_padding_4</dimen>
-
-    <dimen name="playback_fragment_controls_margin_x">@*android:dimen/car_padding_4</dimen>
     <dimen name="playback_fragment_controls_margin_bottom">@*android:dimen/car_padding_4</dimen>
 
     <!-- app_switch_widget.xml -->
