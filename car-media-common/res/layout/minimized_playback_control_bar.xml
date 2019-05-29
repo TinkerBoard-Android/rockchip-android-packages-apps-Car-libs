@@ -15,22 +15,18 @@
   ~ limitations under the License.
   -->
 
-<merge
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-
-    <com.android.car.apps.common.MinimizedControlBar
-        android:id="@+id/minimized_control_bar"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+    android:layout_height="wrap_content"
+    android:background="@drawable/minimized_control_bar_background">
 
     <ProgressBar
         android:id="@+id/progress_bar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="top"
         android:clickable="false"
         android:focusable="false"
         android:progressDrawable="@drawable/minimized_progress_bar_background"
@@ -39,4 +35,7 @@
         android:progressBackgroundTint="@color/minimized_progress_bar_background"
         android:background="@null"/>
 
-</merge>
+    <com.android.car.apps.common.MinimizedControlBar
+        android:id="@+id/minimized_control_bar"
+        style="@style/MinimizedControlBar"/>
+</LinearLayout>
