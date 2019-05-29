@@ -96,7 +96,6 @@
             android:id="@+id/playback_controls"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/playback_fragment_controls_margin_x"
             android:layout_marginBottom="@dimen/playback_fragment_controls_margin_bottom"
             app:columns="3"
             app:enableOverflow="false"
