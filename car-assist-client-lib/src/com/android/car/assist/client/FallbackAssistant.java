@@ -16,6 +16,7 @@
 
 package com.android.car.assist.client;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.Notification.MessagingStyle.Message;
@@ -51,8 +52,7 @@ public class FallbackAssistant {
     private final Context mContext;
     private final TextToSpeechHelper mTextToSpeechHelper;
     private final RequestIdGenerator mRequestIdGenerator;
-
-    private Map<Long, StatusBarNotification> mPlayMessageRequestTracker = new HashMap<>();
+    private Map<Long, ActionRequestInfo> mRequestIdToActionRequestInfo = new HashMap<>();
 
     private final TextToSpeechHelper.Listener mListener = new TextToSpeechHelper.Listener() {
         @Override
@@ -67,15 +67,22 @@ public class FallbackAssistant {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "onTextToSpeechStopped");
             }
+
             if (error) {
                 Toast.makeText(mContext, mContext.getString(R.string.assist_action_failed_toast),
                         Toast.LENGTH_LONG).show();
-            } else if (mPlayMessageRequestTracker.containsKey(requestId)) {
-                sendMarkAsReadIntent(mPlayMessageRequestTracker.get(requestId));
             }
-            mPlayMessageRequestTracker.remove(requestId);
+            finishAction(requestId, error);
         }
     };
+
+    /** Listener to allow clients to be alerted when their requested message has been read. **/
+    public interface Listener {
+        /**
+         * Called after the TTS engine has finished reading aloud the message.
+         */
+        void onMessageRead(boolean hasError);
+    }
 
     public FallbackAssistant(Context context) {
         mContext = context;
@@ -87,9 +94,8 @@ public class FallbackAssistant {
      * Handles a fallback read action by reading all messages in the notification.
      *
      * @param sbn the payload notification from which to extract messages from
-     * @return true if successful
      */
-    public boolean handleReadAction(StatusBarNotification sbn) {
+    public void handleReadAction(StatusBarNotification sbn, Listener listener) {
         if (mTextToSpeechHelper.isSpeaking()) {
             mTextToSpeechHelper.requestStop();
         }
@@ -98,7 +104,7 @@ public class FallbackAssistant {
                 .getParcelableArray(Notification.EXTRA_MESSAGES);
 
         if (messagesBundle == null || messagesBundle.length == 0) {
-            return false;
+            listener.onMessageRead(/* hasError= */ true);
         }
 
         List<CharSequence> messages = new ArrayList<>();
@@ -107,9 +113,54 @@ public class FallbackAssistant {
         }
 
         long requestId = mRequestIdGenerator.generateRequestId();
-        mPlayMessageRequestTracker.put(requestId, sbn);
 
-        return mTextToSpeechHelper.requestPlay(messages, requestId);
+        if (mTextToSpeechHelper.requestPlay(messages, requestId)) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Requesting TTS to read message with requestId: " + requestId);
+            }
+            mRequestIdToActionRequestInfo.put(requestId, new ActionRequestInfo(sbn, listener));
+        } else {
+            listener.onMessageRead(/* hasError= */ true);
+        }
+    }
+
+    /**
+     * Handles generic (non-read) actions by reading out an error message.
+     *
+     * @param errorMessage the error message to read out
+     */
+    public void handleErrorMessage(CharSequence errorMessage, Listener listener) {
+        if (mTextToSpeechHelper.isSpeaking()) {
+            mTextToSpeechHelper.requestStop();
+        }
+
+        long requestId = mRequestIdGenerator.generateRequestId();
+        if (mTextToSpeechHelper.requestPlay(Collections.singletonList(errorMessage),
+                requestId)) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Requesting TTS to read error with requestId: " + requestId);
+            }
+            mRequestIdToActionRequestInfo.put(requestId, new ActionRequestInfo(
+                    /* statusBarNotification= */ null,
+                    listener));
+        } else {
+            listener.onMessageRead(/* hasError= */ true);
+        }
+    }
+
+    private void finishAction(long requestId, boolean hasError) {
+        if (!mRequestIdToActionRequestInfo.containsKey(requestId)) {
+            Log.w(TAG, "No actionRequestInfo found for requestId: " + requestId);
+            return;
+        }
+
+        ActionRequestInfo info = mRequestIdToActionRequestInfo.remove(requestId);
+
+        if (info.getStatusBarNotification() != null && !hasError) {
+            sendMarkAsReadIntent(info.getStatusBarNotification());
+        }
+
+        info.getListener().onMessageRead(hasError);
     }
 
     private void sendMarkAsReadIntent(StatusBarNotification sbn) {
@@ -142,21 +193,6 @@ public class FallbackAssistant {
         }
     }
 
-    /**
-     * Handles generic (non-read) actions by reading out an error message.
-     *
-     * @param errorMessage the error message to read out
-     * @return true if successful
-     */
-    public boolean handleErrorMessage(CharSequence errorMessage) {
-        if (mTextToSpeechHelper.isSpeaking()) {
-            mTextToSpeechHelper.requestStop();
-        }
-
-        return mTextToSpeechHelper.requestPlay(Collections.singletonList(errorMessage),
-                mRequestIdGenerator.generateRequestId());
-    }
-
     /** Helper class that generates unique IDs per TTS request. **/
     private class RequestIdGenerator {
         private long mCounter;
@@ -167,6 +203,30 @@ public class FallbackAssistant {
 
         public long generateRequestId() {
             return ++mCounter;
+        }
+    }
+
+    /**
+     * Contains all of the information needed to start and finish actions supported by the
+     * FallbackAssistant.
+     **/
+    private class ActionRequestInfo {
+        private final StatusBarNotification mStatusBarNotification;
+        private final Listener mListener;
+
+        ActionRequestInfo(@Nullable StatusBarNotification statusBarNotification,
+                Listener listener) {
+            mStatusBarNotification = statusBarNotification;
+            mListener = listener;
+        }
+
+        @Nullable
+        StatusBarNotification getStatusBarNotification() {
+            return mStatusBarNotification;
+        }
+
+        Listener getListener() {
+            return mListener;
         }
     }
 }
