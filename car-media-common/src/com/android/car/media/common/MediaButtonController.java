@@ -232,6 +232,12 @@ public class MediaButtonController {
                     })
                     .collect(Collectors.toList()));
         }
+        if (!mSkipPrevAdded && !imageButtons.isEmpty()) {
+            mControlBar.setView(imageButtons.remove(0), CarControlBar.SLOT_LEFT);
+        }
+        if (!mSkipNextAdded && !imageButtons.isEmpty()) {
+            mControlBar.setView(imageButtons.remove(0), CarControlBar.SLOT_RIGHT);
+        }
         mControlBar.setViews(imageButtons.toArray(new ImageButton[0]));
     }
 

@@ -230,9 +230,6 @@ public class ControlBar extends RelativeLayout implements ExpandableControlBar {
     }
 
     private void updateViewsLayout() {
-        // TODO(b/128524558): Fix this logic to use custom views in the right order, especially
-        // for the overflow row
-
         // Prepare an array of positions taken
         int totalSlots = mSlots.length;
         View[] slotViews = new View[totalSlots];
