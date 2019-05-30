@@ -47,4 +47,9 @@ public abstract class ScrollBarUI {
      * affect the size of the scrollbar view.
      */
     public abstract void requestLayout();
+
+    /**
+     * Sets the padding of the scrollbar, relative to the padding of the RecyclerView.
+     */
+    public abstract void setPadding(int padddingStart, int paddingEnd);
 }
