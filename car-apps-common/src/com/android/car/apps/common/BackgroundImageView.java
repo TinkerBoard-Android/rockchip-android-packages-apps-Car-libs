@@ -32,13 +32,9 @@ public class BackgroundImageView extends ConstraintLayout {
     private CrossfadeImageView mImageView;
 
     /** Configuration (controlled from resources) */
-    private float mBackgroundBlurRadius;
-    private float mBackgroundBlurScale;
+    private int mBitmapTargetSize;
+    private float mBitmapBlurPercent;
 
-    private float mBackgroundScale = 0;
-    private int mBackgroundImageSize = 0;
-
-    private Bitmap mBitmap;
     private View mDarkeningScrim;
 
     public BackgroundImageView(Context context) {
@@ -57,20 +53,8 @@ public class BackgroundImageView extends ConstraintLayout {
         mImageView = findViewById(R.id.background_image_image);
         mDarkeningScrim = findViewById(R.id.background_image_darkening_scrim);
 
-        mBackgroundScale = getResources().getFloat(R.dimen.background_image_scale);
-
-        mBackgroundBlurRadius = getResources().getFloat(R.dimen.background_image_blur_radius);
-        mBackgroundBlurScale = getResources().getFloat(R.dimen.background_image_blur_scale);
-
-        addOnLayoutChangeListener(
-                (view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-                    int newBackgroundImageSize = Math.round(getHeight() * mBackgroundScale);
-
-                    if (newBackgroundImageSize != mBackgroundImageSize) {
-                        mBackgroundImageSize = newBackgroundImageSize;
-                        setBackgroundImage(mBitmap, false);
-                    }
-                });
+        mBitmapTargetSize = getResources().getInteger(R.integer.background_bitmap_target_size_px);
+        mBitmapBlurPercent = getResources().getFloat(R.dimen.background_bitmap_blur_percent);
     }
 
     /**
@@ -79,48 +63,16 @@ public class BackgroundImageView extends ConstraintLayout {
      * @param showAnimation Whether or not to cross fade to the new image
      */
     public void setBackgroundImage(@Nullable Bitmap bitmap, boolean showAnimation) {
-        // Save the bitmap so that we can reset it when we resize
-        mBitmap = bitmap;
-
         if (bitmap == null) {
             mImageView.setImageBitmap(null, false);
             return;
         }
 
-        if (mBackgroundImageSize == 0) {
-            // We're not set up yet, wait for the OnLayoutChangeListener to set the correct size
-            return;
-        }
-
-        // STOPSHIP(b130576879) Rework this to not be so wasteful
-        // We need to scale it to a reasonable size, because if the image was small
-        // our blur radius would be way to large, comparably.
-        bitmap = Bitmap.createScaledBitmap(bitmap,
-                mBackgroundImageSize,
-                mBackgroundImageSize,
-                false);
-
-        if (bitmap != null) {
-            bitmap = ImageUtils.blur(getContext(), bitmap, mBackgroundBlurScale,
-                    mBackgroundBlurRadius);
-        }
-
-        if (bitmap == null) {
-            showAnimation = false;
-        }
-
+        bitmap = ImageUtils.blur(getContext(), bitmap, mBitmapTargetSize, mBitmapBlurPercent);
         mImageView.setImageBitmap(bitmap, showAnimation);
 
         invalidate();
         requestLayout();
-    }
-
-    /**
-     * Sets the image to display to a bitmap
-     * @param bitmap The image to show. It will be scaled to the correct size and blurred.
-     */
-    public void setBackgroundImage(@Nullable Bitmap bitmap) {
-        setBackgroundImage(bitmap, true);
     }
 
     /** Sets the background to a color */
@@ -129,11 +81,11 @@ public class BackgroundImageView extends ConstraintLayout {
     }
 
     /**
-     * Gets the desired size for an image to pass to {@link #setBackgroundImage(Bitmap, boolean)}
-     * If the image doesn't match this size, it will be scaled to it.
+     * Gets the desired size for an image to pass to {@link #setBackgroundImage}. That size is
+     * defined by R.integer.background_bitmap_target_size_px.
      */
     public int getDesiredBackgroundSize() {
-        return mBackgroundImageSize;
+        return mBitmapTargetSize;
     }
 
     /** Dims/undims the background image by 30% */
