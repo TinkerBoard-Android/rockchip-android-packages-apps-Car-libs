@@ -16,10 +16,13 @@
 
 package com.android.car.media.common;
 
+import static android.graphics.Bitmap.Config.ARGB_8888;
+
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -55,20 +58,21 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Abstract representation of a media item metadata.
+ *
+ * For media art, only local uris are supported so downloads can be attributed to the media app.
+ * Bitmaps are not supported because they slow down the binder.
  */
 public class MediaItemMetadata implements Parcelable {
     private static final String TAG = "MediaItemMetadata";
 
-    // STOPSHIP(arnaudberry) restore remote uri blocking.
-    // To block remote uris: adb shell setprop log.tag.MediaItemRemoteOK 0
-    private static final String ALLOW_REMOTE_URIS_KEY = "log.tag.MediaItemRemoteOK";
+    /**
+     * To red tint invalid art: adb root && adb shell setprop com.android.car.media.FlagInvalidArt 1
+     * Or set R.bool.flag_invalid_media_art to true.
+     */
+    static final String FLAG_INVALID_MEDIA_ART_KEY = "com.android.car.media.FlagInvalidArt";
+    static final int INVALID_MEDIA_ART_TINT_COLOR = Color.argb(200, 255, 0, 0);
 
-    // To red tint bitmaps:  adb shell setprop log.tag.MediaItemFlagBitmaps 1
-    private static final String FLAG_BITMAPS_KEY = "log.tag.MediaItemFlagBitmaps";
-
-    /** Can be used to tint the bitmaps in red so apps switch to content uris. */
-    // STOPSHIP(arnaudberry) decide whether to keep this or not.
-    private static final int BITMAP_WARNING_COLOR = Color.argb(100, 255, 0, 0);
+    private static Boolean sFlagNonLocalMediaArt;
 
     @NonNull
     private final MediaDescriptionCompat mMediaDescription;
@@ -209,12 +213,13 @@ public class MediaItemMetadata implements Parcelable {
                 == MediaDescriptionCompat.STATUS_DOWNLOADED;
     }
 
-    private static boolean allowRemoteUris() {
-        return "1".equals(SystemProperties.get(ALLOW_REMOTE_URIS_KEY, "1"));
-    }
-
-    private static boolean flagBitmaps() {
-        return "1".equals(SystemProperties.get(FLAG_BITMAPS_KEY, "0"));
+    static boolean flagInvalidMediaArt(Context context) {
+        if (sFlagNonLocalMediaArt == null) {
+            Resources res = context.getResources();
+            sFlagNonLocalMediaArt = res.getBoolean(R.bool.flag_invalid_media_art)
+                    || "1".equals(SystemProperties.get(FLAG_INVALID_MEDIA_ART_KEY, "0"));
+        }
+        return sFlagNonLocalMediaArt;
     }
 
     static Drawable getPlaceholderDrawable(Context context,
@@ -258,14 +263,16 @@ public class MediaItemMetadata implements Parcelable {
             imageView.setVisibility(View.GONE);
             return;
         }
-        Bitmap image = metadata.getAlbumArtBitmap();
-        if (image != null) {
-            imageView.setImageBitmap(image);
-            imageView.setVisibility(View.VISIBLE);
-            if (flagBitmaps() && BITMAP_WARNING_COLOR != 0) {
-                imageView.setColorFilter(BITMAP_WARNING_COLOR);
+        boolean flagInvalidArt = flagInvalidMediaArt(context);
+        // Don't even try to get the album art bitmap unless flagging is active.
+        if (flagInvalidArt) {
+            Bitmap image = metadata.getAlbumArtBitmap();
+            if (image != null) {
+                imageView.setImageBitmap(image);
+                imageView.setVisibility(View.VISIBLE);
+                imageView.setColorFilter(INVALID_MEDIA_ART_TINT_COLOR);
+                return;
             }
-            return;
         }
         Uri imageUri = metadata.getAlbumArtUri();
         if (imageUri != null) {
@@ -277,15 +284,18 @@ public class MediaItemMetadata implements Parcelable {
                 } else {
                     Log.e(TAG, "Unable to load resource " + imageUri);
                 }
-            } else if (allowRemoteUris() || UriUtils.isContentUri(imageUri)) {
+            } else if (flagInvalidArt || UriUtils.isContentUri(imageUri)) {
                 Glide.with(context)
                         .load(imageUri)
                         .apply(RequestOptions.placeholderOf(loadingIndicator))
                         .into(imageView);
-            } else if (Log.isLoggable(TAG, Log.DEBUG)) {
-                // Most likely a web uri which is potentially unsafe to process in a system app.
-                Log.d(TAG, "unsupported uri: " + imageUri);
+                if (!UriUtils.isContentUri(imageUri)) {
+                    imageView.setColorFilter(INVALID_MEDIA_ART_TINT_COLOR);
+                }
+            } else {
+                Log.e(TAG, "unsupported uri: " + imageUri);
             }
+
             imageView.setVisibility(View.VISIBLE);
             return;
         }
@@ -315,17 +325,12 @@ public class MediaItemMetadata implements Parcelable {
      */
     public CompletableFuture<Bitmap> getAlbumArt(Context context, int width, int height,
             boolean fit) {
-        Bitmap image = getAlbumArtBitmap();
-        if (image != null) {
-            if (flagBitmaps() && BITMAP_WARNING_COLOR != 0) {
-                Bitmap clone = Bitmap.createBitmap(image.getWidth(), image.getHeight(),
-                        Bitmap.Config.ARGB_8888);
-                Canvas canvas = new Canvas(clone);
-                canvas.drawBitmap(image, 0f, 0f, new Paint());
-                canvas.drawColor(BITMAP_WARNING_COLOR);
-                return CompletableFuture.completedFuture(clone);
-            } else {
-                return CompletableFuture.completedFuture(image);
+        boolean flagInvalidArt = flagInvalidMediaArt(context);
+        // Don't even try to get the album art bitmap unless flagging is active.
+        if (flagInvalidArt) {
+            Bitmap image = getAlbumArtBitmap();
+            if (image != null) {
+                return CompletableFuture.completedFuture(flagBitmap(image));
             }
         }
         Uri imageUri = getAlbumArtUri();
@@ -334,8 +339,7 @@ public class MediaItemMetadata implements Parcelable {
                 // Glide doesn't support loading resources for other applications...
                 Drawable pic = UriUtils.getDrawable(context, UriUtils.getIconResource(imageUri));
                 if (pic != null) {
-                    Bitmap bitmap = Bitmap.createBitmap(image.getWidth(), image.getHeight(),
-                            Bitmap.Config.ARGB_8888);
+                    Bitmap bitmap = Bitmap.createBitmap(width, height, ARGB_8888);
                     Canvas canvas = new Canvas(bitmap);
                     pic.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
                     pic.draw(canvas);
@@ -345,7 +349,7 @@ public class MediaItemMetadata implements Parcelable {
                     Log.e(TAG, errorMessage);
                     return CompletableFuture.failedFuture(new Exception(errorMessage));
                 }
-            } else if (allowRemoteUris() || UriUtils.isContentUri(imageUri)) {
+            } else if (flagInvalidArt || UriUtils.isContentUri(imageUri)) {
                 CompletableFuture<Bitmap> bitmapCompletableFuture = new CompletableFuture<>();
                 RequestBuilder<Bitmap> builder = Glide.with(context)
                         .asBitmap()
@@ -359,6 +363,9 @@ public class MediaItemMetadata implements Parcelable {
                     @Override
                     public void onResourceReady(@NonNull Bitmap bitmap,
                             @Nullable Transition<? super Bitmap> transition) {
+                        if (!UriUtils.isContentUri(imageUri)) {
+                            bitmap = flagBitmap(bitmap);
+                        }
                         bitmapCompletableFuture.complete(bitmap);
                     }
 
@@ -371,15 +378,20 @@ public class MediaItemMetadata implements Parcelable {
                 builder.into(target);
                 return bitmapCompletableFuture;
             } else {
-                // Most likely a web uri which is potentially unsafe to process in a system app.
                 String errorMessage = "unsupported uri: \n" + imageUri;
-                if (Log.isLoggable(TAG, Log.DEBUG)) { // Use debug level to avoid log spam.
-                    Log.d(TAG, errorMessage);
-                }
+                Log.e(TAG, errorMessage);
                 return CompletableFuture.failedFuture(new Exception(errorMessage));
             }
         }
         return CompletableFuture.completedFuture(null);
+    }
+
+    private static Bitmap flagBitmap(Bitmap image) {
+        Bitmap clone = Bitmap.createBitmap(image.getWidth(), image.getHeight(), ARGB_8888);
+        Canvas canvas = new Canvas(clone);
+        canvas.drawBitmap(image, 0f, 0f, new Paint());
+        canvas.drawColor(INVALID_MEDIA_ART_TINT_COLOR);
+        return clone;
     }
 
     public boolean isBrowsable() {
