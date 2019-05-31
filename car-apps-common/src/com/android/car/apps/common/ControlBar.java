@@ -58,8 +58,6 @@ import java.util.Locale;
 public class ControlBar extends RelativeLayout implements ExpandableControlBar {
     private static final String TAG = "ControlBar";
 
-    // ActionBar container
-    private ViewGroup mActionBarWrapper;
     // Rows container
     private ViewGroup mRowsContainer;
     // All slots in this action bar where 0 is the bottom-start corner of the matrix, and
@@ -127,7 +125,6 @@ public class ControlBar extends RelativeLayout implements ExpandableControlBar {
         mExpandEnabled = ta.getBoolean(R.styleable.ControlBar_enableOverflow, true);
         ta.recycle();
 
-        mActionBarWrapper = findViewById(R.id.control_bar_wrapper);
         mRowsContainer = findViewById(R.id.rows_container);
         mNumRows = mRowsContainer.getChildCount();
         Preconditions.checkState(mNumRows > 0, "Must have at least 1 row");
@@ -310,7 +307,7 @@ public class ControlBar extends RelativeLayout implements ExpandableControlBar {
                 .addTransition(new Fade())
                 .setDuration(animationDuration)
                 .setInterpolator(new FastOutSlowInInterpolator());
-        TransitionManager.beginDelayedTransition(mActionBarWrapper, set);
+        TransitionManager.beginDelayedTransition(this, set);
         for (int i = 0; i < mNumExtraRowsInUse; i++) {
             mRowsContainer.getChildAt(i).setVisibility(mIsExpanded ? View.VISIBLE : View.GONE);
         }
@@ -320,7 +317,7 @@ public class ControlBar extends RelativeLayout implements ExpandableControlBar {
      * Returns the view assigned to the given row and column, after layout.
      *
      * @param rowIdx row index from 0 being the top row, and {@link #mNumRows{ -1 being the bottom
-     * row.
+     *               row.
      * @param colIdx column index from 0 on start (left), to {@link #mNumColumns} on end (right)
      */
     @VisibleForTesting
