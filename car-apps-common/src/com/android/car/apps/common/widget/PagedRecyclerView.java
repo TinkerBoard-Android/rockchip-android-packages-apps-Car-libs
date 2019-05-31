@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
 import androidx.annotation.IntDef;
@@ -411,6 +412,15 @@ public final class PagedRecyclerView extends RecyclerView {
             return mNestedRecyclerView.findViewHolderForLayoutPosition(position);
         } else {
             return super.findViewHolderForLayoutPosition(position);
+        }
+    }
+
+    @Override
+    public ViewHolder findContainingViewHolder(View view) {
+        if (mScrollBarEnabled) {
+            return mNestedRecyclerView.findContainingViewHolder(view);
+        } else {
+            return super.findContainingViewHolder(view);
         }
     }
 
