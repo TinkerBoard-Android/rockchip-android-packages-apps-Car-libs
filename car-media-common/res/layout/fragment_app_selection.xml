@@ -49,7 +49,7 @@
         android:background="@drawable/appbar_view_icon_background"
         android:gravity="center" />
 
-    <androidx.recyclerview.widget.RecyclerView
+    <com.android.car.apps.common.widget.PagedRecyclerView
         android:id="@+id/apps_grid"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
