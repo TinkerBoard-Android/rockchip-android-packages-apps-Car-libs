@@ -244,7 +244,7 @@ public final class PagedRecyclerView extends RecyclerView {
                 R.styleable.PagedRecyclerView_scrollBarContainerWidth, carMargin);
 
         mScrollBarPosition = a.getInt(R.styleable.PagedRecyclerView_scrollBarPosition,
-                    ScrollBarPosition.START);
+                ScrollBarPosition.START);
 
         mScrollBarAboveRecyclerView = a.getBoolean(
                 R.styleable.PagedRecyclerView_scrollBarAboveRecyclerView, /* defValue= */true);
@@ -421,6 +421,16 @@ public final class PagedRecyclerView extends RecyclerView {
             return mNestedRecyclerView.findContainingViewHolder(view);
         } else {
             return super.findContainingViewHolder(view);
+        }
+    }
+
+    @Override
+    @Nullable
+    public View findChildViewUnder(float x, float y) {
+        if (mScrollBarEnabled) {
+            return mNestedRecyclerView.findChildViewUnder(x, y);
+        } else {
+            return super.findChildViewUnder(x, y);
         }
     }
 
