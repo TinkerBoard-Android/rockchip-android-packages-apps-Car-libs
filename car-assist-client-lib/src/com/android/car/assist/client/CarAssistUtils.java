@@ -328,18 +328,24 @@ public class CarAssistUtils {
                 handleFallback(sbn, action, callback);
             } else {
                 // If there is an active assistant, alert them to request permissions.
-                callback.onResult(requestHandleMissingPermissions()
-                        ? ActionRequestCallback.RESULT_FAILED_WITH_ERROR_HANDLED
-                        : ActionRequestCallback.RESULT_FAILED);
+                Bundle handleExceptionBundle = BundleBuilder
+                        .buildAssistantHandleExceptionBundle(
+                                EXCEPTION_NOTIFICATION_LISTENER_PERMISSIONS_MISSING);
+                fireAssistantAction(CarVoiceInteractionSession.VOICE_ACTION_HANDLE_EXCEPTION,
+                        handleExceptionBundle, callback);
             }
             return;
         }
 
+        fireAssistantAction(action, payloadArguments, callback);
+    }
+
+    private void fireAssistantAction(String action, Bundle payloadArguments,
+            ActionRequestCallback callback) {
         IVoiceActionCheckCallback actionCheckCallback = new IVoiceActionCheckCallback.Stub() {
             @Override
             public void onComplete(List<String> supportedActions) {
                 String resultState = ActionRequestCallback.RESULT_FAILED;
-                boolean success;
                 if (supportedActions != null && supportedActions.contains(action)) {
                     if (Log.isLoggable(TAG, Log.DEBUG)) {
                         Log.d(TAG, "Launching active Assistant for action: " + action);
@@ -364,15 +370,31 @@ public class CarAssistUtils {
         FallbackAssistant.Listener listener = new FallbackAssistant.Listener() {
             @Override
             public void onMessageRead(boolean hasError) {
-                String resultState = hasError ? ActionRequestCallback.RESULT_FAILED
+                // Tracks if the FallbackAssistant successfully handled the action.
+                final String fallbackActionResult = hasError ? ActionRequestCallback.RESULT_FAILED
                         : ActionRequestCallback.RESULT_SUCCESS;
-                // Only change the resultState if fallback failed, and assistant successfully
-                // alerted to prompt user for permissions.
-                if (hasActiveAssistant() && requestHandleMissingPermissions()
-                        && resultState.equals(ActionRequestCallback.RESULT_FAILED)) {
-                    resultState = ActionRequestCallback.RESULT_FAILED_WITH_ERROR_HANDLED;
+                if (hasActiveAssistant()) {
+                    fireAssistantAction(CarVoiceInteractionSession.VOICE_ACTION_HANDLE_EXCEPTION,
+                            null, new ActionRequestCallback() {
+                                @Override
+                                public void onResult(String requestActionFromAssistantResult) {
+                                    if (fallbackActionResult.equals(
+                                            ActionRequestCallback.RESULT_FAILED)
+                                            && requestActionFromAssistantResult
+                                            == ActionRequestCallback.RESULT_SUCCESS) {
+                                        // Only change the callback.ResultState if fallback failed,
+                                        // and assistant session is shown.
+                                        callback.onResult(
+                                                ActionRequestCallback
+                                                        .RESULT_FAILED_WITH_ERROR_HANDLED);
+                                    } else {
+                                        callback.onResult(fallbackActionResult);
+                                    }
+                                }
+                            });
+                } else {
+                    callback.onResult(fallbackActionResult);
                 }
-                callback.onResult(resultState);
             }
         };
 
@@ -388,22 +410,5 @@ public class CarAssistUtils {
                 callback.onResult(ActionRequestCallback.RESULT_FAILED);
                 return;
         }
-    }
-
-    /**
-     * Requests the active voice service to handle the permissions missing error.
-     *
-     * @return {@code true} if active assistant was successfully alerted.
-     **/
-    private boolean requestHandleMissingPermissions() {
-        Bundle payloadArguments = BundleBuilder
-                .buildAssistantHandleExceptionBundle(
-                        EXCEPTION_NOTIFICATION_LISTENER_PERMISSIONS_MISSING);
-        boolean requestedSuccessfully = mAssistUtils.showSessionForActiveService(payloadArguments,
-                SHOW_SOURCE_NOTIFICATION, null, null);
-        if (!requestedSuccessfully) {
-            Log.w(TAG, "Failed to alert assistant to request permissions from user");
-        }
-        return requestedSuccessfully;
     }
 }
