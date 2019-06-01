@@ -111,7 +111,6 @@ public class MinimizedControlBar extends ConstraintLayout implements CarControlB
     }
 
     private void updateViewsLayout() {
-        // TODO(b/128524558): Fix this logic to use custom views in the right order
         int viewIndex = 0;
         // Fill in slots with provided views
         for (int i = 0; i < NUM_COLUMNS; i++) {
