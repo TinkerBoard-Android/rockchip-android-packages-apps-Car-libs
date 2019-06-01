@@ -16,13 +16,16 @@
 
 package com.android.car.telephony.common;
 
+import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
+import android.provider.CallLog;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.PhoneLookup;
@@ -45,6 +48,8 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /** Helper methods. */
@@ -352,6 +357,47 @@ public class TelecomUtils {
         String[] selectionArgs = new String[]{Long.toString(contact.getId())};
         return context.getContentResolver().update(ContactsContract.Contacts.CONTENT_URI, values,
                 where, selectionArgs);
+    }
+
+    /**
+     * Mark missed call log matching given phone number as read. If phone number string is not
+     * valid, it will mark all new missed call log as read.
+     */
+    public static void markCallLogAsRead(Context context, String phoneNumberString) {
+        if (context.checkSelfPermission(Manifest.permission.WRITE_CALL_LOG)
+                != PackageManager.PERMISSION_GRANTED) {
+            Log.w(TAG, "Missing WRITE_CALL_LOG permission; not marking missed calls as read.");
+            return;
+        }
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(CallLog.Calls.NEW, 0);
+        contentValues.put(CallLog.Calls.IS_READ, 1);
+
+        List<String> selectionArgs = new ArrayList<>();
+        StringBuilder where = new StringBuilder();
+        where.append(CallLog.Calls.NEW);
+        where.append(" = 1 AND ");
+        where.append(CallLog.Calls.TYPE);
+        where.append(" = ?");
+        selectionArgs.add(Integer.toString(CallLog.Calls.MISSED_TYPE));
+        if (!TextUtils.isEmpty(phoneNumberString)) {
+            where.append(" AND ");
+            where.append(CallLog.Calls.NUMBER);
+            where.append(" = ?");
+            selectionArgs.add(phoneNumberString);
+        }
+        String[] selectionArgsArray = new String[0];
+        try {
+            context
+                    .getContentResolver()
+                    .update(
+                            CallLog.Calls.CONTENT_URI,
+                            contentValues,
+                            where.toString(),
+                            selectionArgs.toArray(selectionArgsArray));
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "markCallLogAsRead failed", e);
+        }
     }
 
     private static Uri makeResourceUri(Context context, int resourceId) {
