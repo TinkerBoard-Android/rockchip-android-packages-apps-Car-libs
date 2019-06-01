@@ -23,11 +23,13 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -49,7 +51,7 @@ public final class PagedRecyclerView extends RecyclerView {
 
     private Context mContext;
 
-    private final CarUxRestrictionsUtil mCarUxRestrictionsUtil;
+    private CarUxRestrictionsUtil mCarUxRestrictionsUtil;
     private final CarUxRestrictionsUtil.OnUxRestrictionsChangedListener mListener;
 
     private boolean mScrollBarEnabled;
@@ -57,6 +59,8 @@ public final class PagedRecyclerView extends RecyclerView {
     private @ScrollBarPosition int mScrollBarPosition;
     private boolean mScrollBarAboveRecyclerView;
     private String mScrollBarClass;
+    private int mScrollBarPaddingStart;
+    private int mScrollBarPaddingEnd;
 
     @Gutter
     private int mGutter;
@@ -191,7 +195,11 @@ public final class PagedRecyclerView extends RecyclerView {
     public PagedRecyclerView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        mCarUxRestrictionsUtil = CarUxRestrictionsUtil.getInstance(context);
+        try {
+            mCarUxRestrictionsUtil = CarUxRestrictionsUtil.getInstance(context);
+        } catch (NullPointerException e) {
+            // Do nothing, mCarUxRestrictionsUtil will be null
+        }
         mListener = this::updateCarUxRestrictions;
 
         init(context, attrs, defStyle);
@@ -236,7 +244,7 @@ public final class PagedRecyclerView extends RecyclerView {
                 R.styleable.PagedRecyclerView_scrollBarContainerWidth, carMargin);
 
         mScrollBarPosition = a.getInt(R.styleable.PagedRecyclerView_scrollBarPosition,
-                    ScrollBarPosition.START);
+                ScrollBarPosition.START);
 
         mScrollBarAboveRecyclerView = a.getBoolean(
                 R.styleable.PagedRecyclerView_scrollBarAboveRecyclerView, /* defValue= */true);
@@ -263,13 +271,17 @@ public final class PagedRecyclerView extends RecyclerView {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mCarUxRestrictionsUtil.register(mListener);
+        if (mCarUxRestrictionsUtil != null) {
+            mCarUxRestrictionsUtil.register(mListener);
+        }
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mCarUxRestrictionsUtil.unregister(mListener);
+        if (mCarUxRestrictionsUtil != null) {
+            mCarUxRestrictionsUtil.unregister(mListener);
+        }
     }
 
     private void updateCarUxRestrictions(CarUxRestrictions carUxRestrictions) {
@@ -395,6 +407,43 @@ public final class PagedRecyclerView extends RecyclerView {
     }
 
     @Override
+    public ViewHolder findViewHolderForLayoutPosition(int position) {
+        if (mScrollBarEnabled) {
+            return mNestedRecyclerView.findViewHolderForLayoutPosition(position);
+        } else {
+            return super.findViewHolderForLayoutPosition(position);
+        }
+    }
+
+    @Override
+    public ViewHolder findContainingViewHolder(View view) {
+        if (mScrollBarEnabled) {
+            return mNestedRecyclerView.findContainingViewHolder(view);
+        } else {
+            return super.findContainingViewHolder(view);
+        }
+    }
+
+    @Override
+    @Nullable
+    public View findChildViewUnder(float x, float y) {
+        if (mScrollBarEnabled) {
+            return mNestedRecyclerView.findChildViewUnder(x, y);
+        } else {
+            return super.findChildViewUnder(x, y);
+        }
+    }
+
+    /**
+     * Calls {@link #layout(int, int, int, int)} for both this RecyclerView and the nested one.
+     */
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    public void layoutBothForTesting(int l, int t, int r, int b) {
+        super.layout(l, t, r, b);
+        mNestedRecyclerView.layout(l, t, r, b);
+    }
+
+    @Override
     public int getPaddingStart() {
         return mScrollBarEnabled ? mNestedRecyclerView.getPaddingStart() : super.getPaddingStart();
     }
@@ -457,7 +506,24 @@ public final class PagedRecyclerView extends RecyclerView {
         mScrollBarUI.initialize(mContext, mNestedRecyclerView, mScrollBarContainerWidth,
                 mScrollBarPosition, mScrollBarAboveRecyclerView);
 
+        mScrollBarUI.setPadding(mScrollBarPaddingStart, mScrollBarPaddingEnd);
+
         if (DEBUG) Log.d(TAG, "started " + mScrollBarUI.getClass().getSimpleName());
+    }
+
+    /**
+     * Sets the scrollbar's padding start (top) and end (bottom).
+     * This padding is applied in addition to the padding of the inner RecyclerView.
+     */
+    public void setScrollBarPadding(int paddingStart, int paddingEnd) {
+        if (mScrollBarEnabled) {
+            mScrollBarPaddingStart = paddingStart;
+            mScrollBarPaddingEnd = paddingEnd;
+
+            if (mScrollBarUI != null) {
+                mScrollBarUI.setPadding(paddingStart, paddingEnd);
+            }
+        }
     }
 
     /**
