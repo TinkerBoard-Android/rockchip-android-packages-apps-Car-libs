@@ -121,14 +121,14 @@ public class CarAssistUtils {
      * Returns true if the current active assistant has notification listener permissions.
      */
     public boolean assistantIsNotificationListener() {
-        final String activeComponent = mAssistUtils.getActiveServiceComponentName()
-                .flattenToString();
-        if (activeComponent == null) {
+        if (!hasActiveAssistant()) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "No active assistant was found.");
             }
             return false;
         }
+        final String activeComponent = mAssistUtils.getActiveServiceComponentName()
+                .flattenToString();
         int slashIndex = activeComponent.indexOf("/");
         final String activePackage = activeComponent.substring(0, slashIndex);
 
@@ -309,17 +309,26 @@ public class CarAssistUtils {
 
     private void requestAction(String action, StatusBarNotification sbn, Bundle payloadArguments,
             ActionRequestCallback callback) {
-        if (!assistantIsNotificationListener()) {
+
+        if (!hasActiveAssistant()) {
             if (mIsFallbackAssistantEnabled) {
                 handleFallback(sbn, action, callback);
             } else {
                 // If there is no active assistant, and fallback assistant is not enabled, then
-                // there is nothing for us to do. If there is an active assistant, alert them
-                // to request permissions.
-                String resultState = ActionRequestCallback.RESULT_FAILED;
-                if (hasActiveAssistant() && requestedHandlePermissionsActionSuccessfully()) {
-                    resultState = ActionRequestCallback.RESULT_FAILED_WITH_ERROR_HANDLED;
-                }
+                // there is nothing for us to do.
+                callback.onResult(ActionRequestCallback.RESULT_FAILED);
+            }
+            return;
+        }
+
+        if (!assistantIsNotificationListener()) {
+            if (mIsFallbackAssistantEnabled) {
+                handleFallback(sbn, action, callback);
+            } else {
+                // If there is an active assistant, alert them to request permissions.
+                String resultState = requestHandleMissingPermission()
+                        ? ActionRequestCallback.RESULT_FAILED_WITH_ERROR_HANDLED
+                        : ActionRequestCallback.RESULT_FAILED;
                 callback.onResult(resultState);
             }
             return;
@@ -348,7 +357,7 @@ public class CarAssistUtils {
                         : ActionRequestCallback.RESULT_SUCCESS;
                 // Only change the resultState if fallback failed, and assistant successfully
                 // alerted to prompt user for permissions.
-                if (hasActiveAssistant() && requestedHandlePermissionsActionSuccessfully()
+                if (hasActiveAssistant() && requestHandleMissingPermission()
                         && resultState.equals(ActionRequestCallback.RESULT_FAILED)) {
                     resultState = ActionRequestCallback.RESULT_FAILED_WITH_ERROR_HANDLED;
                 }
@@ -375,7 +384,7 @@ public class CarAssistUtils {
      *
      * @return {@code true} if active assistant was successfully alerted.
      **/
-    private boolean requestedHandlePermissionsActionSuccessfully() {
+    private boolean requestHandleMissingPermission() {
         Bundle payloadArguments = BundleBuilder
                 .buildAssistantHandleExceptionBundle(
                         EXCEPTION_NOTIFICATION_LISTENER_PERMISSIONS_MISSING);
