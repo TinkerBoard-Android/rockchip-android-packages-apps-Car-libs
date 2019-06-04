@@ -48,6 +48,9 @@ import com.android.car.apps.common.UriUtils;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
@@ -276,18 +279,37 @@ public class MediaItemMetadata implements Parcelable {
         }
         Uri imageUri = metadata.getAlbumArtUri();
         if (imageUri != null) {
+            boolean hasArtwork = false;
             if (UriUtils.isAndroidResourceUri(imageUri)) {
                 // Glide doesn't support loading resources from other applications
                 Drawable pic = UriUtils.getDrawable(context, UriUtils.getIconResource(imageUri));
                 if (pic != null) {
+                    hasArtwork = true;
                     imageView.setImageDrawable(pic);
                 } else {
                     Log.e(TAG, "Unable to load resource " + imageUri);
                 }
             } else if (flagInvalidArt || UriUtils.isContentUri(imageUri)) {
+                hasArtwork = true;
                 Glide.with(context)
                         .load(imageUri)
                         .apply(RequestOptions.placeholderOf(loadingIndicator))
+                        .listener(new RequestListener<Drawable>() {
+                            @Override
+                            public boolean onLoadFailed(@Nullable GlideException e, Object model,
+                                    Target<Drawable> target, boolean isFirstResource) {
+                                showPlaceholderOrHideView(context, metadata, imageView,
+                                        showPlaceholder);
+                                return true;
+                            }
+
+                            @Override
+                            public boolean onResourceReady(Drawable resource, Object model,
+                                    Target<Drawable> target, DataSource dataSource,
+                                    boolean isFirstResource) {
+                                return false;
+                            }
+                        })
                         .into(imageView);
                 if (!UriUtils.isContentUri(imageUri)) {
                     imageView.setColorFilter(INVALID_MEDIA_ART_TINT_COLOR);
@@ -296,10 +318,16 @@ public class MediaItemMetadata implements Parcelable {
                 Log.e(TAG, "unsupported uri: " + imageUri);
             }
 
-            imageView.setVisibility(View.VISIBLE);
-            return;
+            if (hasArtwork) {
+                imageView.setVisibility(View.VISIBLE);
+                return;
+            }
         }
+        showPlaceholderOrHideView(context, metadata, imageView, showPlaceholder);
+    }
 
+    private static void showPlaceholderOrHideView(Context context,
+            @Nullable MediaItemMetadata metadata, ImageView imageView, boolean showPlaceholder) {
         if (showPlaceholder) {
             imageView.setImageDrawable(getPlaceholderDrawable(context, metadata));
             imageView.setVisibility(View.VISIBLE);
