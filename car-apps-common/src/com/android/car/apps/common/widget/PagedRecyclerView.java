@@ -332,6 +332,15 @@ public final class PagedRecyclerView extends RecyclerView {
         }
     }
 
+    @Nullable
+    @Override
+    public Adapter getAdapter() {
+        if (mScrollBarEnabled) {
+            return mNestedRecyclerView.getAdapter();
+        }
+        return super.getAdapter();
+    }
+
     @Override
     public void setLayoutManager(@Nullable LayoutManager layout) {
         if (mScrollBarEnabled) {
