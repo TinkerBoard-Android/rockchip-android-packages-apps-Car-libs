@@ -35,10 +35,10 @@ import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.Pair;
 import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
+import androidx.core.util.Pair;
 
 import com.android.car.apps.common.LetterTileDrawable;
 
