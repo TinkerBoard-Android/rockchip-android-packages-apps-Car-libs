@@ -17,6 +17,8 @@
 package com.android.car.assist.client.tts;
 
 import android.content.Context;
+import android.media.AudioAttributes;
+import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
@@ -73,6 +75,8 @@ public class TextToSpeechHelper {
     private final TextToSpeechHelper.Listener mListener;
     private final AudioManager.OnAudioFocusChangeListener mNoOpListener = (f) -> { /* NO-OP */ };
     private final AudioManager mAudioManager;
+    private final AudioAttributes mAudioAttributes;
+    private final AudioFocusRequest mAudioFocusRequest;
     private final long mShutdownDelayMillis;
     private TextToSpeechEngine mTextToSpeechEngine;
     private int mInitStatus;
@@ -104,6 +108,14 @@ public class TextToSpeechHelper {
         // OnInitListener will only set to SUCCESS/ERROR. So we initialize to STOPPED.
         mInitStatus = TextToSpeech.STOPPED;
         mListener = listener;
+        mAudioAttributes =  new AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                .setUsage(AudioAttributes.USAGE_ASSISTANT)
+                .build();
+        mAudioFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+                .setAudioAttributes(mAudioAttributes)
+                .setOnAudioFocusChangeListener(mNoOpListener)
+                .build();
     }
 
     private void maybeInitAndKeepAlive() {
@@ -149,9 +161,7 @@ public class TextToSpeechHelper {
             /* no-op */
             return true;
         }
-        int result = mAudioManager.requestAudioFocus(mNoOpListener,
-                getStream(),
-                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
+        int result = mAudioManager.requestAudioFocus(mAudioFocusRequest);
         if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             return false;
         }
@@ -182,7 +192,7 @@ public class TextToSpeechHelper {
 
     // wrap call back to listener.onTextToSpeechStopped with adandonAudioFocus.
     private void onTtsStopped(long requestId, boolean error) {
-        mAudioManager.abandonAudioFocus(mNoOpListener);
+        mAudioManager.abandonAudioFocusRequest(mAudioFocusRequest);
         mHandler.post(() -> mListener.onTextToSpeechStopped(requestId, error));
     }
 
