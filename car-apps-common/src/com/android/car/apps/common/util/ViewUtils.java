@@ -20,8 +20,10 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.NonNull;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 
 /**
  * Utility methods to operate over views.
@@ -30,7 +32,7 @@ public class ViewUtils {
     /**
      * Hides a view using a fade-out animation
      *
-     * @param view {@link View} to be hidden
+     * @param view     {@link View} to be hidden
      * @param duration animation duration in milliseconds.
      */
     public static void hideViewAnimated(@NonNull View view, int duration) {
@@ -58,7 +60,7 @@ public class ViewUtils {
     /**
      * Shows a view using a fade-in animation
      *
-     * @param view {@link View} to be shown
+     * @param view     {@link View} to be shown
      * @param duration animation duration in milliseconds.
      */
     public static void showViewAnimated(@NonNull View view, int duration) {
@@ -96,6 +98,20 @@ public class ViewUtils {
     public static void setInvisible(@Nullable View view, boolean invisible) {
         if (view != null) {
             view.setVisibility(invisible ? View.INVISIBLE : View.VISIBLE);
+        }
+    }
+
+    /** Sets the text to the (optional) {@link TextView}. */
+    public static void setText(@Nullable TextView view, @StringRes int resId) {
+        if (view != null) {
+            view.setText(resId);
+        }
+    }
+
+    /** Sets the text to the (optional) {@link TextView}. */
+    public static void setText(@Nullable TextView view, CharSequence text) {
+        if (view != null) {
+            view.setText(text);
         }
     }
 }
