@@ -443,6 +443,24 @@ public final class PagedRecyclerView extends RecyclerView {
         }
     }
 
+    @Override
+    public void addOnScrollListener(@NonNull OnScrollListener listener) {
+        if (mScrollBarEnabled) {
+            mNestedRecyclerView.addOnScrollListener(listener);
+        } else {
+            super.addOnScrollListener(listener);
+        }
+    }
+
+    @Override
+    public void removeOnScrollListener(@NonNull OnScrollListener listener) {
+        if (mScrollBarEnabled) {
+            mNestedRecyclerView.removeOnScrollListener(listener);
+        } else {
+            super.removeOnScrollListener(listener);
+        }
+    }
+
     /**
      * Calls {@link #layout(int, int, int, int)} for both this RecyclerView and the nested one.
      */
