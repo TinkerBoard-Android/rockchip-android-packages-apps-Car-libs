@@ -22,6 +22,9 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
+LOCAL_STATIC_ANDROID_LIBRARIES += \
+    androidx.annotation_annotation \
+
 LOCAL_MODULE := car-messaging-lib
 
 LOCAL_MODULE_TAGS := optional
