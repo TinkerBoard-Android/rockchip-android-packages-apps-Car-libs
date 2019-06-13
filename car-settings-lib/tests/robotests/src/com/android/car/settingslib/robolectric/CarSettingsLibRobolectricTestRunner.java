@@ -35,7 +35,8 @@ import java.util.List;
  */
 public class CarSettingsLibRobolectricTestRunner extends RobolectricTestRunner {
 
-    private static final String AAR_VERSION = "1.0.0-alpha1";
+    private static final String AAR_VERSION_APP_COMPAT = "1.0.0-alpha1";
+    private static final String AAR_VERSION_CAR = "1.0.0-alpha3";
     private static final String SUPPORT_RESOURCE_PATH_TEMPLATE =
             "jar:file:prebuilts/sdk/current/androidx/m2repository/androidx/"
                     + "%1$s/%1$s/%2$s/%1$s-%2$s.aar!/res";
@@ -58,8 +59,9 @@ public class CarSettingsLibRobolectricTestRunner extends RobolectricTestRunner {
     /**
      * Create the resource path for a support library component's JAR.
      */
-    private static String createSupportResourcePathFromJar(@NonNull String componentId) {
-        return String.format(SUPPORT_RESOURCE_PATH_TEMPLATE, componentId, AAR_VERSION);
+    private static String createSupportResourcePathFromJar(@NonNull String componentId,
+            @NonNull String version) {
+        return String.format(SUPPORT_RESOURCE_PATH_TEMPLATE, componentId, version);
     }
 
     /**
@@ -85,8 +87,10 @@ public class CarSettingsLibRobolectricTestRunner extends RobolectricTestRunner {
 
                 // Support library resources. These need to point to the prebuilts of support
                 // library and not the source.
-                paths.add(createResourcePath(createSupportResourcePathFromJar("appcompat")));
-                paths.add(createResourcePath(createSupportResourcePathFromJar("car")));
+                paths.add(createResourcePath(createSupportResourcePathFromJar("appcompat",
+                        AAR_VERSION_APP_COMPAT)));
+                paths.add(createResourcePath(createSupportResourcePathFromJar("car",
+                        AAR_VERSION_CAR)));
                 return paths;
             }
         };
