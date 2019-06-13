@@ -22,6 +22,7 @@
         art (see MediaItemMetadata and MediaButtonController).
         The same effect can be achieved with: adb shell setprop log.tag.MediaItemFlagInvalidArt 1
     -->
-    <bool name="flag_invalid_media_art">false</bool>
+    <!-- STOPSHIP(sdai) set this value back to false -->
+    <bool name="flag_invalid_media_art">true</bool>
 
 </resources>

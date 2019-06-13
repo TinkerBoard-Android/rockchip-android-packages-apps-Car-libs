@@ -73,7 +73,8 @@ public class MediaItemMetadata implements Parcelable {
      * Or set R.bool.flag_invalid_media_art to true.
      */
     static final String FLAG_INVALID_MEDIA_ART_KEY = "com.android.car.media.FlagInvalidArt";
-    static final int INVALID_MEDIA_ART_TINT_COLOR = Color.argb(200, 255, 0, 0);
+    // STOPSHIP(sdai) Fix tint color alpha - set to 200
+    static final int INVALID_MEDIA_ART_TINT_COLOR = Color.argb(0, 255, 0, 0);
 
     private static Boolean sFlagNonLocalMediaArt;
 
