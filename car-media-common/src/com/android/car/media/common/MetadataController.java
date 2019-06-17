@@ -17,6 +17,7 @@
 package com.android.car.media.common;
 
 import static com.android.car.arch.common.LiveDataFunctions.combine;
+import static com.android.car.arch.common.LiveDataFunctions.pair;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -92,23 +93,23 @@ public class MetadataController {
         playbackViewModel.getMetadata().observe(lifecycleOwner,
                 metadata -> {
                     if (metadata == null) {
-                        ViewUtils.setInvisible(title, true);
-                        ViewUtils.setInvisible(albumTitle, true);
-                        ViewUtils.setInvisible(artist, true);
-                        ViewUtils.setInvisible(albumArt, true);
+                        ViewUtils.setVisible(title, false);
+                        ViewUtils.setVisible(artist, false);
+                        ViewUtils.setVisible(albumTitle, false);
+                        ViewUtils.setVisible(albumArt, false);
                         return;
                     }
-                    title.setText(metadata.getTitle());
-                    ViewUtils.setInvisible(title, false);
-                    if (albumTitle != null) {
-                        CharSequence albumName = metadata.getAlbumTitle();
-                        albumTitle.setText(albumName);
-                        ViewUtils.setInvisible(albumTitle, TextUtils.isEmpty(albumName));
+                    CharSequence titleName = metadata.getTitle();
+                    if (TextUtils.isEmpty(titleName)) {
+                        titleName = title.getContext().getString(R.string.metadata_default_title);
                     }
+                    title.setText(titleName);
+                    ViewUtils.setVisible(title, true);
+
                     if (artist != null) {
                         CharSequence artistName = metadata.getArtist();
                         artist.setText(artistName);
-                        ViewUtils.setInvisible(artist, TextUtils.isEmpty(artistName));
+                        ViewUtils.setVisible(artist, !TextUtils.isEmpty(artistName));
                     }
                     if (albumArt != null) {
                         // TODO(b/130444922): Clean up bitmap fetching code
@@ -125,16 +126,16 @@ public class MetadataController {
                                             }
                                         }
                         );
-                        ViewUtils.setInvisible(albumArt, false);
+                        ViewUtils.setVisible(albumArt, true);
                     }
                 });
 
         playbackViewModel.getProgress().observe(lifecycleOwner,
                 playbackProgress -> {
                     boolean hasTime = playbackProgress.hasTime();
-                    ViewUtils.setInvisible(currentTime, !hasTime);
-                    ViewUtils.setInvisible(innerSeparator, !hasTime);
-                    ViewUtils.setInvisible(maxTime, !hasTime);
+                    ViewUtils.setVisible(currentTime, hasTime);
+                    ViewUtils.setVisible(innerSeparator, hasTime);
+                    ViewUtils.setVisible(maxTime, hasTime);
 
                     if (currentTime != null) {
                         currentTime.setText(playbackProgress.getCurrentTimeText());
@@ -172,11 +173,31 @@ public class MetadataController {
             combine(playbackViewModel.getMetadata(), playbackViewModel.getProgress(),
                     (metadata, progress) -> metadata != null
                             && !TextUtils.isEmpty(metadata.getAlbumTitle()) && progress.hasTime())
-                    .observe(lifecycleOwner, visible ->
-                            // The text of outerSeparator is not empty. when albumTitle is empty,
-                            // the visibility of outerSeparator should be View.GONE instead of
-                            // View.INVISIBLE so that currentTime can be aligned to the left .
-                            ViewUtils.setVisible(outerSeparator, visible));
+                    .observe(lifecycleOwner,
+                            visible -> ViewUtils.setVisible(outerSeparator, visible));
+        }
+
+        if (albumTitle != null) {
+            pair(playbackViewModel.getMetadata(), playbackViewModel.getProgress()).observe(
+                    lifecycleOwner, pair -> {
+                        CharSequence albumName =
+                                pair.first == null ? null : pair.first.getAlbumTitle();
+                        albumTitle.setText(albumName);
+
+                        boolean hasAlbumName = !TextUtils.isEmpty(albumName);
+                        boolean hasTime = pair.second.hasTime();
+                        if (hasAlbumName) {
+                            ViewUtils.setVisible(albumTitle, true);
+                        } else if (hasTime) {
+                            // In layout file, artist is constrained to albumTitle. When album
+                            // name is empty but progress is not empty, the visibility of
+                            // albumTitle should be INVISIBLE instead of GONE, otherwise the
+                            // constraint will be broken.
+                            ViewUtils.setInvisible(albumTitle, true);
+                        } else {
+                            ViewUtils.setVisible(albumTitle, false);
+                        }
+                    });
         }
     }
 }
