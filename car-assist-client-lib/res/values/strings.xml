@@ -16,4 +16,7 @@ limitations under the License.
 <resources>
     <!-- The toast message shown on Assistant action failures [CHAR_LIMIT=NONE]-->
     <string name="assist_action_failed_toast">Could not request action from Assistant!</string>
+    <!-- The verb meaning "to speak". Used when FallbackAssistant is reading out messages from
+     a sender. (i.e. <Sender_name> says <Message>) [CHAR_LIMIT=NONE]-->
+    <string name="says">says</string>
 </resources>
