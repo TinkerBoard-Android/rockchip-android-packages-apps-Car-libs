@@ -323,6 +323,15 @@ public final class PagedRecyclerView extends RecyclerView {
     }
 
     @Override
+    public void scrollToPosition(int position) {
+        if (mScrollBarEnabled) {
+            mNestedRecyclerView.scrollToPosition(position);
+        } else {
+            super.scrollToPosition(position);
+        }
+    }
+
+    @Override
     public void setAdapter(@Nullable Adapter adapter) {
         mAdapter = adapter;
         if (mScrollBarEnabled) {
