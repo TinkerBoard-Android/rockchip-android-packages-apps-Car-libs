@@ -16,11 +16,13 @@
 
 package com.android.car.assist.client;
 
+
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.Notification.MessagingStyle.Message;
 import android.app.PendingIntent;
+import android.app.Person;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Parcelable;
@@ -53,6 +55,9 @@ public class FallbackAssistant {
     private final TextToSpeechHelper mTextToSpeechHelper;
     private final RequestIdGenerator mRequestIdGenerator;
     private Map<Long, ActionRequestInfo> mRequestIdToActionRequestInfo = new HashMap<>();
+    // String that means "says", to be used when reading out a message (i.e. <Sender> says
+    // <Message).
+    private final String mVerbForSays;
 
     private final TextToSpeechHelper.Listener mListener = new TextToSpeechHelper.Listener() {
         @Override
@@ -88,6 +93,7 @@ public class FallbackAssistant {
         mContext = context;
         mTextToSpeechHelper = new TextToSpeechHelper(context, mListener);
         mRequestIdGenerator = new RequestIdGenerator();
+        mVerbForSays = mContext.getString(R.string.says);
     }
 
     /**
@@ -108,7 +114,15 @@ public class FallbackAssistant {
         }
 
         List<CharSequence> messages = new ArrayList<>();
-        for (Message message : Message.getMessagesFromBundleArray(messagesBundle)) {
+
+        List<Message> messageList = Message.getMessagesFromBundleArray(messagesBundle);
+        // The sender should be the same for all the messages.
+        Person sender = messageList.get(0).getSenderPerson();
+        if (sender != null) {
+            messages.add(sender.getName());
+            messages.add(mVerbForSays);
+        }
+        for (Message message : messageList) {
             messages.add(message.getText());
         }
 
