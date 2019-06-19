@@ -85,7 +85,7 @@ public class PhoneCallLog {
         PhoneCallLog phoneCallLog = new PhoneCallLog();
         phoneCallLog.mId = cursor.getLong(idColumn);
         phoneCallLog.mPhoneNumberString = cursor.getString(numberColumn);
-        phoneCallLog.mI18nPhoneNumberWrapper = I18nPhoneNumberWrapper.newInstance(context,
+        phoneCallLog.mI18nPhoneNumberWrapper = I18nPhoneNumberWrapper.Factory.INSTANCE.get(context,
                 phoneCallLog.mPhoneNumberString);
         Record record = new Record(cursor.getLong(dateColumn), cursor.getInt(callTypeColumn));
         phoneCallLog.mCallRecords.add(record);
