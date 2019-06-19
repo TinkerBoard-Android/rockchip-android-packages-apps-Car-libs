@@ -30,7 +30,10 @@ import androidx.annotation.Nullable;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 
+import java.lang.ref.WeakReference;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -42,19 +45,6 @@ public class I18nPhoneNumberWrapper implements Parcelable {
     private final Phonenumber.PhoneNumber mI18nPhoneNumber;
     private final String mRawNumber;
     private final String mNumber;
-
-    /**
-     * Creates a new instance of {@link I18nPhoneNumberWrapper}.
-     *
-     * @param rawNumber A potential phone number. If it can be parsed as a valid phone number,
-     *                  {@link #getNumber()} will return a formatted number.
-     */
-    public static I18nPhoneNumberWrapper newInstance(@NonNull Context context,
-            @NonNull String rawNumber) {
-        Phonenumber.PhoneNumber i18nPhoneNumber = TelecomUtils.createI18nPhoneNumber(context,
-                rawNumber);
-        return new I18nPhoneNumberWrapper(rawNumber, i18nPhoneNumber);
-    }
 
     private I18nPhoneNumberWrapper(String rawNumber,
             @Nullable Phonenumber.PhoneNumber i18nPhoneNumber) {
@@ -85,7 +75,7 @@ public class I18nPhoneNumberWrapper implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(mI18nPhoneNumber);
+        return Objects.hash(mI18nPhoneNumber, mRawNumber);
     }
 
     /**
@@ -96,8 +86,8 @@ public class I18nPhoneNumberWrapper implements Parcelable {
     }
 
     /**
-     * Returns the formatted number if the raw number passed to {@link #newInstance} is a valid
-     * phone number. Otherwise, returns the raw number.
+     * Returns the formatted number if the raw number passed to {@link Factory#create(Context,
+     * String)} is a valid phone number. Otherwise, returns the raw number.
      *
      * <P>The number is formatted with {@link PhoneNumberUtil.PhoneNumberFormat#INTERNATIONAL
      * international} format.
@@ -131,4 +121,45 @@ public class I18nPhoneNumberWrapper implements Parcelable {
             return new I18nPhoneNumberWrapper[size];
         }
     };
+
+    /**
+     * Caches {@link WeakReference} of {@link I18nPhoneNumberWrapper}s to avoid creating same object
+     * over and over again. It will avoid too many instances getting created during contact sync.
+     */
+    public enum Factory {
+        INSTANCE;
+
+        private final Map<String, WeakReference<I18nPhoneNumberWrapper>> mRecycledPool =
+                new ConcurrentHashMap<>();
+        /**
+         * Returns cached {@link I18nPhoneNumberWrapper} for the given {@code rawNumber}. It will
+         * create a new instance if not present.
+         *
+         * @param rawNumber A potential phone number. If it can be parsed as a valid phone number,
+         *                  {@link #getNumber()} will return a formatted number.
+         */
+        public I18nPhoneNumberWrapper get(@NonNull Context context, @NonNull String rawNumber) {
+            for (String key : mRecycledPool.keySet()) {
+                if (mRecycledPool.get(key).get() == null) {
+                    mRecycledPool.remove(key);
+                }
+            }
+            WeakReference<I18nPhoneNumberWrapper> existingReference = mRecycledPool.get(rawNumber);
+            I18nPhoneNumberWrapper i18nPhoneNumberWrapper =
+                    existingReference == null ? null : existingReference.get();
+            if (i18nPhoneNumberWrapper == null) {
+                i18nPhoneNumberWrapper = create(context, rawNumber);
+                mRecycledPool.put(rawNumber, new WeakReference<>(i18nPhoneNumberWrapper));
+                return i18nPhoneNumberWrapper;
+            }
+            return i18nPhoneNumberWrapper;
+        }
+
+        /** Create a new instance. */
+        private I18nPhoneNumberWrapper create(@NonNull Context context, @NonNull String rawNumber) {
+            Phonenumber.PhoneNumber i18nPhoneNumber = TelecomUtils.createI18nPhoneNumber(context,
+                    rawNumber);
+            return new I18nPhoneNumberWrapper(rawNumber, i18nPhoneNumber);
+        }
+    }
 }
