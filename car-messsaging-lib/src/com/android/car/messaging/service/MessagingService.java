@@ -20,11 +20,23 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.util.ArrayMap;
 import android.util.Log;
+
+import androidx.annotation.MainThread;
+
+import com.android.car.messaging.entity.BaseEntity;
+import com.android.car.messaging.entity.Conversation;
+import com.android.car.messaging.entity.ConversationContainer;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Base class for messaging apps which enables messaging apps to provide their data to authorized
@@ -33,8 +45,23 @@ import android.util.Log;
 public abstract class MessagingService extends Service {
     private static final String TAG = "MessagingService";
 
+    /**
+     * The key for a client to specify the class name of an entity which the client is
+     * subscribed to.
+     */
+    public static final String EXTRA_SUBSCRIBED_CLASS_NAME = "subscribed_class_name";
+
+    /**
+     * The root id for {@link ConversationContainer}.
+     */
+    public static final String CONVERSATION_CONTAINER_ROOT_ID = "conversation_container_id";
+
     private MessagingServiceProviderImpl mMessagingServiceProviderImpl;
     private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
+
+    // TODO: Merging these two Maps into one when there are more attributes to store for an ID.
+    private Map<String, List<IBinder>> mIdToSubscriptionMap = new ArrayMap<>();
+    private Map<String, String> mIdToClassNameMap = new ArrayMap<>();
 
     @Override
     public void onCreate() {
@@ -91,8 +118,8 @@ public abstract class MessagingService extends Service {
                 return false;
             }
 
-            for (int i = 0; i < packages.length; i++) {
-                if (packages[i].equals(pkg)) {
+            for (String aPackage : packages) {
+                if (aPackage.equals(pkg)) {
                     return true;
                 }
             }
@@ -101,6 +128,61 @@ public abstract class MessagingService extends Service {
     }
 
     private class MessagingServiceImpl extends IMessagingService.Stub {
+
+        @Override
+        public void subscribeContent(
+                String id, ILoadEntityContentCallback callback, Bundle options) {
+            mMainThreadHandler.post(() -> {
+                try {
+                    MessagingService.this.subscribeContent(id, callback, options);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Unable to subscribe to content. callback = " + callback);
+                    MessagingService.this.unsubscribeContent(id, callback);
+                }
+            });
+        }
+
+        @Override
+        public void unsubscribeContent(String id, ILoadEntityContentCallback callback) {
+            mMainThreadHandler.post(() -> MessagingService.this.unsubscribeContent(id, callback));
+        }
+    }
+
+    @MainThread
+    private void subscribeContent(String id, ILoadEntityContentCallback callback, Bundle options)
+            throws RemoteException {
+        List<IBinder> allSubscriptions = mIdToSubscriptionMap.computeIfAbsent(
+                id, (key) -> new ArrayList<>());
+
+        if (allSubscriptions.contains(callback.asBinder())) {
+            return;
+        }
+
+        allSubscriptions.add(callback.asBinder());
+        String entityClassName = options.getString(EXTRA_SUBSCRIBED_CLASS_NAME);
+        mIdToClassNameMap.put(id, entityClassName);
+        List<? extends BaseEntity> entities = loadEntityContentList(id, entityClassName);
+        callback.onEntitiesLoaded(entities);
+    }
+
+    @MainThread
+    private void unsubscribeContent(String id, ILoadEntityContentCallback callback) {
+        List<IBinder> allSubscriptions = mIdToSubscriptionMap.computeIfAbsent(
+                id, (key) -> new ArrayList<>());
+        allSubscriptions.remove(callback.asBinder());
+        if (allSubscriptions.isEmpty()) {
+            mIdToClassNameMap.remove(id);
+        }
+    }
+
+    private List<? extends BaseEntity> loadEntityContentList(String id, String className) {
+        if (CONVERSATION_CONTAINER_ROOT_ID.equals(id)) {
+            return onLoadAllConversationContainers();
+        } else if (className.equals(ConversationContainer.class.getName())) {
+            return onLoadConversations(id);
+        }
+
+        return new ArrayList<>();
     }
 
     /**
@@ -110,4 +192,35 @@ public abstract class MessagingService extends Service {
      * @param packageName The calling client's package name.
      */
     protected abstract boolean onAuthenticate(String packageName);
+
+    /**
+     * Called to load all {@link ConversationContainer}s.
+     */
+    protected abstract List<ConversationContainer> onLoadAllConversationContainers();
+
+    /**
+     * Called to load all conversations in a {@link ConversationContainer}.
+     */
+    protected abstract List<Conversation> onLoadConversations(String containerId);
+
+    /**
+     * Notifies the client that content {@link BaseEntity entities} of a {@link BaseEntity} has
+     * changed.
+     */
+    @MainThread
+    public void notifyContentListChanged(String id) {
+        List<IBinder> allSubscriptions = mIdToSubscriptionMap.get(id);
+        if (allSubscriptions == null) {
+            return;
+        }
+        try {
+            for (IBinder callback : allSubscriptions) {
+                List<? extends BaseEntity> entities =
+                        loadEntityContentList(id, mIdToClassNameMap.get(id));
+                ILoadEntityContentCallback.Stub.asInterface(callback).onEntitiesLoaded(entities);
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Unable to call ILoadEntityContentCallback.");
+        }
+    }
 }
