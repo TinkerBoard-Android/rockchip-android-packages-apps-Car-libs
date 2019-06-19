@@ -61,6 +61,7 @@ public final class PagedRecyclerView extends RecyclerView {
     private String mScrollBarClass;
     private int mScrollBarPaddingStart;
     private int mScrollBarPaddingEnd;
+    private boolean mFullyInitialized;
 
     @Gutter
     private int mGutter;
@@ -212,14 +213,15 @@ public final class PagedRecyclerView extends RecyclerView {
 
         mScrollBarEnabled = a.getBoolean(R.styleable.PagedRecyclerView_scrollBarEnabled,
                 /* defValue= */true);
+        mFullyInitialized = false;
 
         if (!mScrollBarEnabled) {
             a.recycle();
+            mFullyInitialized = true;
             return;
         }
 
         mContext = context;
-
         mNestedRecyclerView = new RecyclerView(mContext, attrs,
                 R.style.PagedRecyclerView_NestedRecyclerView);
 
@@ -264,8 +266,28 @@ public final class PagedRecyclerView extends RecyclerView {
                 setNestedViewLayout();
 
                 createScrollBarFromConfig();
+
+                mNestedRecyclerView.getViewTreeObserver().addOnGlobalLayoutListener(
+                        new OnGlobalLayoutListener() {
+                            @Override
+                            public void onGlobalLayout() {
+                                mNestedRecyclerView.getViewTreeObserver()
+                                        .removeOnGlobalLayoutListener(this);
+                                mFullyInitialized = true;
+                            }
+                        });
             }
         });
+    }
+
+    /**
+     * Returns {@code true} if the {@PagedRecyclerView} is fully drawn. Using a global layout
+     * listener may not necessarily signify that this view is fully drawn (i.e. when the
+     * scrollbar is enabled). This is because the inner views (scrollbar and inner recycler view)
+     * are drawn after the outer views are finished.
+     */
+    public boolean fullyInitialized() {
+        return mFullyInitialized;
     }
 
     @Override
@@ -356,6 +378,24 @@ public final class PagedRecyclerView extends RecyclerView {
             mNestedRecyclerView.setLayoutManager(layout);
         } else {
             super.setLayoutManager(layout);
+        }
+    }
+
+    @Nullable
+    @Override
+    public LayoutManager getLayoutManager() {
+        if (mScrollBarEnabled) {
+            return mNestedRecyclerView.getLayoutManager();
+        }
+        return super.getLayoutManager();
+    }
+
+    @Override
+    public void setOnScrollChangeListener(OnScrollChangeListener l) {
+        if (mScrollBarEnabled) {
+            mNestedRecyclerView.setOnScrollChangeListener(l);
+        } else {
+            super.setOnScrollChangeListener(l);
         }
     }
 
