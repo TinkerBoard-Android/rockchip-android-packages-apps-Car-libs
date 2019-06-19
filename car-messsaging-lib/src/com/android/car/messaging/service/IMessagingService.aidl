@@ -16,8 +16,24 @@
 
 package com.android.car.messaging.service;
 
+import android.os.Bundle;
+
+import  com.android.car.messaging.service.ILoadEntityContentCallback;
+
 /**
  * An interface through which clients access to a messaging service.
  */
 interface IMessagingService {
+    /**
+     * Loads the sub content of an entity and subscribes to any changes of the sub content.
+     * Specify the class name of the entity with
+     * {@link MessagingService#EXTRA_SUBSCRIBED_CLASS_NAME} key in the option Bundle.
+     */
+    void subscribeContent(String id, ILoadEntityContentCallback callback, in Bundle options) = 1;
+
+    /**
+     * Unregisters a callback which subscribed to sub content of an entity through
+     * {@link #subscribeContent}.
+     */
+    void unsubscribeContent(String id, ILoadEntityContentCallback callback) = 2;
 }
