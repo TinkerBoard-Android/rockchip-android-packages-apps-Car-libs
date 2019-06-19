@@ -128,8 +128,8 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
             return null;
         }
 
-        I18nPhoneNumberWrapper i18nPhoneNumber = I18nPhoneNumberWrapper.newInstance(mContext,
-                phoneNumber);
+        I18nPhoneNumberWrapper i18nPhoneNumber = I18nPhoneNumberWrapper.Factory.INSTANCE.get(
+                mContext, phoneNumber);
         return mPhoneNumberContactMap.get(i18nPhoneNumber);
     }
 
@@ -154,8 +154,7 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
         mPhoneNumberContactMap.clear();
         for (Contact contact : contacts) {
             for (PhoneNumber phoneNumber : contact.getNumbers()) {
-                mPhoneNumberContactMap.put(phoneNumber.getI18nPhoneNumberWrapper(),
-                        contact);
+                mPhoneNumberContactMap.put(phoneNumber.getI18nPhoneNumberWrapper(), contact);
             }
         }
         return contacts;
