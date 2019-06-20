@@ -372,9 +372,17 @@ public final class PagedRecyclerView extends RecyclerView {
         }
     }
 
+    /**
+     * Returns the {@link LayoutManager} for the {@link RecyclerView} displaying the content.
+     *
+     * <p>In cases where the scroll bar is visible and the nested {@link RecyclerView} is
+     * displaying content, {@link #getLayoutManager()} cannot be used because it returns the
+     * {@link LayoutManager} of the outer {@link RecyclerView}. {@link #getLayoutManager()} could
+     * not be overridden to return the effective manager due to interference with accessibility
+     * node tree traversal.
+     */
     @Nullable
-    @Override
-    public LayoutManager getLayoutManager() {
+    public LayoutManager getEffectiveLayoutManager() {
         if (mScrollBarEnabled) {
             return mNestedRecyclerView.getLayoutManager();
         }
