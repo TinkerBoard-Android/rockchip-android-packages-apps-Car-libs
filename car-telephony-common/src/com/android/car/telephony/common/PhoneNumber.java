@@ -55,8 +55,8 @@ public class PhoneNumber implements Parcelable {
      */
     public static PhoneNumber newInstance(Context context, String rawNumber, int type,
             @Nullable String label, boolean isPrimary, long id, int dataVersion) {
-        I18nPhoneNumberWrapper i18nPhoneNumber = I18nPhoneNumberWrapper.newInstance(context,
-                rawNumber);
+        I18nPhoneNumberWrapper i18nPhoneNumber = I18nPhoneNumberWrapper.Factory.INSTANCE.get(
+                context, rawNumber);
         return new PhoneNumber(i18nPhoneNumber, type, label, isPrimary, id, dataVersion);
     }
 
