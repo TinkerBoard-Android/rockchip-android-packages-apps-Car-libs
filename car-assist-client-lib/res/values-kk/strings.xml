@@ -17,6 +17,5 @@ limitations under the License.
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="assist_action_failed_toast" msgid="3250146468076483714">"Assistant әрекетін сұрау мүмкін болмады."</string>
-    <!-- no translation found for says (8575666015622916107) -->
-    <skip />
+    <string name="says" msgid="8575666015622916107">"былай дейді:"</string>
 </resources>
