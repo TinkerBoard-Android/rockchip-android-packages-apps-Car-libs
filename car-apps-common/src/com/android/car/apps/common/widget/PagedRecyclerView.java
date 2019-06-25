@@ -160,8 +160,8 @@ public final class PagedRecyclerView extends RecyclerView {
      * inner recycler view within its bounds, this layout manager should always have 0 padding.
      */
     private class PagedRecyclerViewLayoutManager extends LinearLayoutManager {
-        PagedRecyclerViewLayoutManager(Context context, int orientation, boolean reverseLayout) {
-            super(context, orientation, reverseLayout);
+        PagedRecyclerViewLayoutManager(Context context) {
+            super(context);
         }
 
         @Override
@@ -182,6 +182,16 @@ public final class PagedRecyclerView extends RecyclerView {
         @Override
         public int getPaddingEnd() {
             return 0;
+        }
+
+        @Override
+        public boolean canScrollHorizontally() {
+            return false;
+        }
+
+        @Override
+        public boolean canScrollVertically() {
+            return false;
         }
     }
 
@@ -225,8 +235,7 @@ public final class PagedRecyclerView extends RecyclerView {
         mNestedRecyclerView = new RecyclerView(mContext, attrs,
                 R.style.PagedRecyclerView_NestedRecyclerView);
 
-        PagedRecyclerViewLayoutManager layoutManager = new PagedRecyclerViewLayoutManager(context,
-                LinearLayoutManager.HORIZONTAL, false);
+        PagedRecyclerViewLayoutManager layoutManager = new PagedRecyclerViewLayoutManager(context);
         super.setLayoutManager(layoutManager);
 
         PagedRecyclerViewAdapter adapter = new PagedRecyclerViewAdapter();
