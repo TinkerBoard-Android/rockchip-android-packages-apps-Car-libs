@@ -90,7 +90,6 @@ public class ControlBar extends RelativeLayout implements ExpandableControlBar {
     // Callback for the expand/collapse button
     private ExpandCollapseCallback mExpandCollapseCallback;
 
-
     // Default number of columns, if unspecified
     private static final int DEFAULT_COLUMNS = 3;
     // Weight for the spacers used between buttons
@@ -267,6 +266,29 @@ public class ControlBar extends RelativeLayout implements ExpandableControlBar {
         }
 
         mNumExtraRowsInUse = lastUsedIndex / mNumColumns;
+        final int lastIndex = lastUsedIndex;
+
+        if (mNumRows > 1) {
+            // Align expanded control bar rows
+            mRowsContainer.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
+                for (int i  = 1; i < mNumRows; i++) {
+                    // mRowsContainer's children are in reverse order (last row is at index 0)
+                    int rowIndex = mNumRows - 1 - i;
+                    if (lastIndex < (i + 1) * mNumColumns) {
+                        // Align the last row's center with the first row by translating the last
+                        // row by half the difference between the two rows' length.
+                        // We use the position of the last slot as a proxy for the length, since the
+                        // slots have the same size, and both rows have the same start point.
+                        float lastRowX = mSlots[lastIndex].getX();
+                        float firstRowX = mSlots[mNumColumns - 1].getX();
+                        mRowsContainer.getChildAt(rowIndex).setTranslationX(
+                                (firstRowX - lastRowX) / 2);
+                    } else {
+                        mRowsContainer.getChildAt(rowIndex).setTranslationX(0);
+                    }
+                }
+            });
+        }
     }
 
     private void setView(@Nullable View view, FrameLayout container) {
