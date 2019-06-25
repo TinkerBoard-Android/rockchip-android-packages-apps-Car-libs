@@ -75,7 +75,10 @@ public class I18nPhoneNumberWrapper implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mI18nPhoneNumber, mRawNumber);
+        if (mI18nPhoneNumber == null) {
+            return Objects.hashCode(mRawNumber);
+        }
+        return Objects.hash(mI18nPhoneNumber);
     }
 
     /**
