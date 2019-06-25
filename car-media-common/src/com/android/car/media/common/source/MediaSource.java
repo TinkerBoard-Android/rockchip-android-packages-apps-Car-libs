@@ -34,6 +34,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.service.media.MediaBrowserService;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.HashSet;
@@ -52,64 +53,83 @@ public class MediaSource {
      * Custom media sources which should not be templatized.
      */
     private static final Set<String> CUSTOM_MEDIA_SOURCES = new HashSet<>();
+
     static {
         CUSTOM_MEDIA_SOURCES.add("com.android.car.radio");
     }
 
+    @NonNull
     private final String mPackageName;
     @Nullable
-    private final String mBrowseServiceClassName;
+    private String mBrowseServiceClassName;
+    @NonNull
     private final Context mContext;
+    @Nullable
+    private final ServiceInfo mServiceInfo;
     private CharSequence mName;
 
     /**
-     * Creates a {@link MediaSource} for the given application package name
+     * Creates a {@link MediaSource} for the given {@link ComponentName}
      */
-    public MediaSource(@NonNull Context context, @NonNull String packageName) {
+    @Nullable
+    public static MediaSource create(@NonNull Context context,
+            @NonNull ComponentName componentName) {
+        MediaSource mediaSource = new MediaSource(context, componentName);
+        if (mediaSource.mBrowseServiceClassName == null) {
+            return null;
+        }
+        return mediaSource;
+    }
+
+    // TODO(b/136274456): Clean up the internals of MediaSource.
+    private MediaSource(@NonNull Context context, @NonNull ComponentName componentName) {
         mContext = context;
-        mPackageName = packageName;
-        mBrowseServiceClassName = getBrowseServiceClassName(packageName);
-        extractComponentInfo(mPackageName, mBrowseServiceClassName);
+        mPackageName = componentName.getPackageName();
+        mServiceInfo = getBrowseServiceInfo(componentName);
+        extractComponentInfo();
     }
 
     /**
-     * @return the classname corresponding to a {@link MediaBrowserService} in the media source, or
-     * null if the media source doesn't implement {@link MediaBrowserService}. A non-null result
-     * doesn't imply that this service is accessible. The consumer code should attempt to connect
-     * and handle rejections gracefully.
+     * @return the {@link ServiceInfo} corresponding to a {@link MediaBrowserService} in the media
+     * source, or null if the media source doesn't implement {@link MediaBrowserService}. A non-null
+     * result doesn't imply that this service is accessible. The consumer code should attempt to
+     * connect and handle rejections gracefully.
      */
     @Nullable
-    private String getBrowseServiceClassName(@NonNull String packageName) {
+    private ServiceInfo getBrowseServiceInfo(@NonNull ComponentName componentName) {
         PackageManager packageManager = mContext.getPackageManager();
         Intent intent = new Intent();
         intent.setAction(MediaBrowserService.SERVICE_INTERFACE);
-        intent.setPackage(packageName);
+        intent.setPackage(componentName.getPackageName());
         List<ResolveInfo> resolveInfos = packageManager.queryIntentServices(intent,
                 PackageManager.GET_RESOLVED_FILTER);
         if (resolveInfos == null || resolveInfos.isEmpty()) {
             return null;
         }
-        return resolveInfos.get(0).serviceInfo.name;
+        String className = componentName.getClassName();
+        if (TextUtils.isEmpty(className)) {
+            return resolveInfos.get(0).serviceInfo;
+        }
+        for (ResolveInfo resolveInfo : resolveInfos) {
+            ServiceInfo result = resolveInfo.serviceInfo;
+            if (result.name.equals(className)) {
+                return result;
+            }
+        }
+        return null;
     }
 
-
-
-    private void extractComponentInfo(@NonNull String packageName,
-            @Nullable String browseServiceClassName) {
+    private void extractComponentInfo() {
+        mBrowseServiceClassName = mServiceInfo != null ? mServiceInfo.name : null;
         try {
-            ApplicationInfo applicationInfo =
-                    mContext.getPackageManager().getApplicationInfo(packageName,
-                            PackageManager.GET_META_DATA);
-            ServiceInfo serviceInfo = browseServiceClassName != null
-                    ? mContext.getPackageManager().getServiceInfo(
-                    new ComponentName(packageName, browseServiceClassName),
-                    PackageManager.GET_META_DATA)
-                    : null;
-
-            // Get the proper app name, check service label, then application label.
-            if (serviceInfo != null && serviceInfo.labelRes != 0) {
-                mName = serviceInfo.loadLabel(mContext.getPackageManager());
+            // Gets a proper app name. Checks service label first. If failed, uses application
+            // label as fallback.
+            if (mServiceInfo != null && mServiceInfo.labelRes != 0) {
+                mName = mServiceInfo.loadLabel(mContext.getPackageManager());
             } else {
+                ApplicationInfo applicationInfo =
+                        mContext.getPackageManager().getApplicationInfo(mPackageName,
+                                PackageManager.GET_META_DATA);
                 mName = applicationInfo.loadLabel(mContext.getPackageManager());
             }
         } catch (PackageManager.NameNotFoundException e) {
@@ -118,14 +138,14 @@ public class MediaSource {
     }
 
     /**
-     * @return media source human readable name.
+     * @return media source human readable name for display.
      */
-    public CharSequence getName() {
+    public CharSequence getDisplayName() {
         return mName;
     }
 
     /**
-     * @return the package name that identifies this media source.
+     * @return the package name of this media source.
      */
     public String getPackageName() {
         return mPackageName;
@@ -145,10 +165,14 @@ public class MediaSource {
     }
 
     /**
-     * Returns this media source's icon as a {@link Drawable}
+     * @return a {@link Drawable} as the media source's icon.
      */
-    public Drawable getPackageIcon() {
+    public Drawable getIcon() {
+        // Checks service icon first. If failed, uses application icon as fallback.
         try {
+            if (mServiceInfo != null) {
+                return mServiceInfo.loadIcon(mContext.getPackageManager());
+            }
             return mContext.getPackageManager().getApplicationIcon(getPackageName());
         } catch (PackageManager.NameNotFoundException e) {
             return null;
@@ -159,10 +183,11 @@ public class MediaSource {
      * Returns this media source's icon cropped to a circle.
      */
     public Bitmap getRoundPackageIcon() {
-        Drawable packageIcon = getPackageIcon();
-        return packageIcon != null
-                ? getRoundCroppedBitmap(drawableToBitmap(getPackageIcon()))
-                : null;
+        Drawable icon = getIcon();
+        if (icon != null) {
+            return getRoundCroppedBitmap(drawableToBitmap(icon));
+        }
+        return null;
     }
 
     /**
@@ -245,7 +270,7 @@ public class MediaSource {
     @Override
     @NonNull
     public String toString() {
-        return getPackageName();
+        return mPackageName + (mBrowseServiceClassName == null ? "" : mBrowseServiceClassName);
     }
 
     /** Returns the package name of the given source, or null. */
