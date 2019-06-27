@@ -111,11 +111,17 @@ public class FallbackAssistant {
 
         if (messagesBundle == null || messagesBundle.length == 0) {
             listener.onMessageRead(/* hasError= */ true);
+            return;
         }
 
         List<CharSequence> messages = new ArrayList<>();
 
         List<Message> messageList = Message.getMessagesFromBundleArray(messagesBundle);
+        if (messageList == null || messageList.isEmpty()) {
+            Log.w(TAG, "No messages could be extracted from the bundle");
+            listener.onMessageRead(/* hasError= */ true);
+            return;
+        }
         // The sender should be the same for all the messages.
         Person sender = messageList.get(0).getSenderPerson();
         if (sender != null) {
