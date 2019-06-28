@@ -48,13 +48,18 @@ public class ViewUtils {
 
         view.animate()
                 .setDuration(duration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        view.setVisibility(View.GONE);
-                    }
-                })
+                .setListener(hideViewAfterAnimation(view))
                 .alpha(0f);
+    }
+
+    /** Returns an AnimatorListener that hides the view at the end. */
+    public static Animator.AnimatorListener hideViewAfterAnimation(View view) {
+        return new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                view.setVisibility(View.GONE);
+            }
+        };
     }
 
     /**
@@ -68,11 +73,8 @@ public class ViewUtils {
         // if show and hide are called at the same time
         view.animate().cancel();
 
-        if (!view.isLaidOut()) {
-            // If the view hasn't been displayed yet, just adjust visibility without animation
-            view.setVisibility(View.VISIBLE);
-            return;
-        }
+        // Do the animation even if the view isn't laid out which is often the case for a view
+        // that isn't shown (otherwise the view just pops onto the screen...
 
         view.animate()
                 .setDuration(duration)
