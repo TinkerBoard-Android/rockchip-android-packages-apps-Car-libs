@@ -27,6 +27,7 @@ import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
@@ -79,8 +80,26 @@ public class Contact implements Parcelable, Comparable<Contact> {
 
     /**
      * The display name.
+     * <p>
+     * The standard text shown as the contact's display name, based on the best
+     * available information for the contact.
+     * </p>
+     *
+     * @see ContactsContract.CommonDataKinds.Phone#DISPLAY_NAME
      */
     private String mDisplayName;
+
+    /**
+     * The alternative display name.
+     * <p>
+     * An alternative representation of the display name, such as "family name first"
+     * instead of "given name first" for Western names.  If an alternative is not
+     * available, the values should be the same as {@link #mDisplayName}.
+     * </p>
+     *
+     * @see ContactsContract.CommonDataKinds.Phone#DISPLAY_NAME_ALTERNATIVE
+     */
+    private String mAltDisplayName;
 
     /**
      * A URI that can be used to retrieve a thumbnail of the contact's photo.
@@ -117,6 +136,8 @@ public class Contact implements Parcelable, Comparable<Contact> {
         int pinnedColumn = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PINNED);
         int displayNameColumn = cursor.getColumnIndex(
                 ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+        int altDisplayNameColumn = cursor.getColumnIndex(
+                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_ALTERNATIVE);
         int avatarUriColumn = cursor.getColumnIndex(
                 ContactsContract.CommonDataKinds.Phone.PHOTO_URI);
         int avatarThumbnailColumn = cursor.getColumnIndex(
@@ -138,6 +159,7 @@ public class Contact implements Parcelable, Comparable<Contact> {
         Contact contact = new Contact();
         contact.mId = cursor.getLong(contactIdColumn);
         contact.mDisplayName = cursor.getString(displayNameColumn);
+        contact.mAltDisplayName = cursor.getString(altDisplayNameColumn);
 
         PhoneNumber number = PhoneNumber.newInstance(
                 context,
@@ -190,6 +212,13 @@ public class Contact implements Parcelable, Comparable<Contact> {
 
     public String getDisplayName() {
         return mDisplayName;
+    }
+
+    /**
+     * Returns alternative display name.
+     */
+    public String getAltDisplayName() {
+        return mAltDisplayName;
     }
 
     public boolean isVoicemail() {
@@ -288,6 +317,7 @@ public class Contact implements Parcelable, Comparable<Contact> {
             dest.writeParcelable(phoneNumber, flags);
         }
         dest.writeString(mDisplayName);
+        dest.writeString(mAltDisplayName);
         dest.writeParcelable(mAvatarThumbnailUri, 0);
         dest.writeParcelable(mAvatarUri, 0);
         dest.writeString(mLookupKey);
@@ -322,6 +352,7 @@ public class Contact implements Parcelable, Comparable<Contact> {
             }
         }
         contact.mDisplayName = source.readString();
+        contact.mAltDisplayName = source.readString();
         contact.mAvatarThumbnailUri = source.readParcelable(Uri.class.getClassLoader());
         contact.mAvatarUri = source.readParcelable(Uri.class.getClassLoader());
         contact.mLookupKey = source.readString();
@@ -332,14 +363,37 @@ public class Contact implements Parcelable, Comparable<Contact> {
     @Override
     public int compareTo(Contact otherContact) {
         // Use a helper function to classify Contacts
-        int type = getNameType(mDisplayName);
-        int otherType = getNameType(otherContact.mDisplayName);
+        // and by default, it should be compared by first name order.
+        return compareByDisplayName(otherContact);
+    }
+
+    /**
+     * Compares contacts by their {@link #mDisplayName} in an order of
+     * letters, numbers, then special characters.
+     */
+    public int compareByDisplayName(@NonNull Contact otherContact) {
+        return compareNames(mDisplayName, otherContact.getDisplayName());
+    }
+
+    /**
+     * Compares contacts by their {@link #mAltDisplayName} in an order of
+     * letters, numbers, then special characters.
+     */
+    public int compareByAltDisplayName(@NonNull Contact otherContact) {
+        return compareNames(mAltDisplayName, otherContact.getAltDisplayName());
+    }
+
+    /**
+     * Compares two strings in an order of letters, numbers, then special characters.
+     */
+    private int compareNames(String name, String otherName) {
+        int type = getNameType(name);
+        int otherType = getNameType(otherName);
         if (type != otherType) {
             return Integer.compare(type, otherType);
         }
         Collator collator = Collator.getInstance();
-        return collator.compare(mDisplayName == null ? "" : mDisplayName,
-                otherContact.mDisplayName == null ? "" : otherContact.mDisplayName);
+        return collator.compare(name == null ? "" : name, otherName == null ? "" : otherName);
     }
 
     private static int getNameType(String displayName) {
