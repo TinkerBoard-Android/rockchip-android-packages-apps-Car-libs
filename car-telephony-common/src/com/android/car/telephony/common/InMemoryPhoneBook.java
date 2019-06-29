@@ -27,7 +27,6 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -149,7 +148,6 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
         }
 
         contacts.addAll(result.values());
-        Collections.sort(contacts);
 
         mPhoneNumberContactMap.clear();
         for (Contact contact : contacts) {
