@@ -34,9 +34,9 @@ public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {
     /**
      * Creates a {@link GridSpacingItemDecoration}.
      *
-     * @param spacing space to add between grid cells, both vertically and horizontally.
+     * @param spacing     space to add between grid cells, both vertically and horizontally.
      * @param startMargin margin on the start side of the grid.
-     * @param endMargin margin on the end side of the grid
+     * @param endMargin   margin on the end side of the grid
      */
     public GridSpacingItemDecoration(int spacing, int startMargin, int endMargin) {
         this.mSpacing = spacing;
@@ -53,9 +53,8 @@ public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {
         int spanCount = layoutManager.getSpanCount();
 
         outRect.left = mStartMargin + column * mSpacing / spanCount
-            - (column + 1) * mStartMargin / spanCount;
+                - (column + 1) * mStartMargin / spanCount;
         outRect.right = mSpacing - (column + 1) * mSpacing / spanCount
-            + (column + 1) * mEndMargin / spanCount;
-        outRect.top = mSpacing;
+                + (column + 1) * mEndMargin / spanCount;
     }
 }
