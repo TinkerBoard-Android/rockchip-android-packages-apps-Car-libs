@@ -144,31 +144,13 @@ public class Contact implements Parcelable, Comparable<Contact> {
                 ContactsContract.CommonDataKinds.Phone.PHOTO_THUMBNAIL_URI);
         int lookupKeyColumn = cursor.getColumnIndex(
                 ContactsContract.CommonDataKinds.Phone.LOOKUP_KEY);
-        int typeColumn = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.TYPE);
-        int labelColumn = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.LABEL);
-        int numberColumn = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-        int rawDataIdColumn = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone._ID);
-        int dataVersionColumn = cursor.getColumnIndex(
-                ContactsContract.CommonDataKinds.Phone.DATA_VERSION);
-        // IS_PRIMARY means primary entry of the raw contact and IS_SUPER_PRIMARY means primary
-        // entry of the aggregated contact. It is guaranteed that only one data entry is super
-        // primary.
-        int isPrimaryColumn = cursor.getColumnIndex(
-                ContactsContract.CommonDataKinds.Phone.IS_SUPER_PRIMARY);
 
         Contact contact = new Contact();
         contact.mId = cursor.getLong(contactIdColumn);
         contact.mDisplayName = cursor.getString(displayNameColumn);
         contact.mAltDisplayName = cursor.getString(altDisplayNameColumn);
 
-        PhoneNumber number = PhoneNumber.newInstance(
-                context,
-                cursor.getString(numberColumn),
-                cursor.getInt(typeColumn),
-                cursor.getString(labelColumn),
-                cursor.getInt(isPrimaryColumn) > 0,
-                cursor.getLong(rawDataIdColumn),
-                cursor.getInt(dataVersionColumn));
+        PhoneNumber number = PhoneNumber.fromCursor(context, cursor);
         contact.mPhoneNumbers.add(number);
         if (number.isPrimary()) {
             contact.mPrimaryPhoneNumber = number;
