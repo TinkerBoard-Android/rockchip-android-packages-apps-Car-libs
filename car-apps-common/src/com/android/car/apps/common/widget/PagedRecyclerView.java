@@ -51,7 +51,7 @@ public final class PagedRecyclerView extends RecyclerView {
 
     private Context mContext;
 
-    private CarUxRestrictionsUtil mCarUxRestrictionsUtil;
+    private final CarUxRestrictionsUtil mCarUxRestrictionsUtil;
     private final CarUxRestrictionsUtil.OnUxRestrictionsChangedListener mListener;
 
     private boolean mScrollBarEnabled;
@@ -206,11 +206,7 @@ public final class PagedRecyclerView extends RecyclerView {
     public PagedRecyclerView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        try {
-            mCarUxRestrictionsUtil = CarUxRestrictionsUtil.getInstance(context);
-        } catch (NullPointerException e) {
-            // Do nothing, mCarUxRestrictionsUtil will be null
-        }
+        mCarUxRestrictionsUtil = CarUxRestrictionsUtil.getInstance(context);
         mListener = this::updateCarUxRestrictions;
 
         init(context, attrs, defStyle);
@@ -302,17 +298,13 @@ public final class PagedRecyclerView extends RecyclerView {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if (mCarUxRestrictionsUtil != null) {
-            mCarUxRestrictionsUtil.register(mListener);
-        }
+        mCarUxRestrictionsUtil.register(mListener);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (mCarUxRestrictionsUtil != null) {
-            mCarUxRestrictionsUtil.unregister(mListener);
-        }
+        mCarUxRestrictionsUtil.unregister(mListener);
     }
 
     private void updateCarUxRestrictions(CarUxRestrictions carUxRestrictions) {
