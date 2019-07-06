@@ -18,8 +18,10 @@ package com.android.car.telephony.common;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 
 import androidx.annotation.Nullable;
@@ -39,6 +41,34 @@ public class PhoneNumber implements Parcelable {
     private boolean mIsPrimary;
     private long mId;
     private int mDataVersion;
+    private String mAccountName;
+    private String mAccountType;
+
+    static PhoneNumber fromCursor(Context context, Cursor cursor) {
+        int typeColumn = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.TYPE);
+        int labelColumn = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.LABEL);
+        int numberColumn = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+        int rawDataIdColumn = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone._ID);
+        int dataVersionColumn = cursor.getColumnIndex(
+                ContactsContract.CommonDataKinds.Phone.DATA_VERSION);
+        // IS_PRIMARY means primary entry of the raw contact and IS_SUPER_PRIMARY means primary
+        // entry of the aggregated contact. It is guaranteed that only one data entry is super
+        // primary.
+        int isPrimaryColumn = cursor.getColumnIndex(
+                ContactsContract.CommonDataKinds.Phone.IS_SUPER_PRIMARY);
+        int accountNameColumn = cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_NAME);
+        int accountTypeColumn = cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_TYPE);
+        return PhoneNumber.newInstance(
+                context,
+                cursor.getString(numberColumn),
+                cursor.getInt(typeColumn),
+                cursor.getString(labelColumn),
+                cursor.getInt(isPrimaryColumn) > 0,
+                cursor.getLong(rawDataIdColumn),
+                cursor.getString(accountNameColumn),
+                cursor.getString(accountTypeColumn),
+                cursor.getInt(dataVersionColumn));
+    }
 
     /**
      * Creates a new {@link PhoneNumber}.
@@ -54,19 +84,23 @@ public class PhoneNumber implements Parcelable {
      *                    Phone#DATA_VERSION}
      */
     public static PhoneNumber newInstance(Context context, String rawNumber, int type,
-            @Nullable String label, boolean isPrimary, long id, int dataVersion) {
+            @Nullable String label, boolean isPrimary, long id, String accountName,
+            String accountType, int dataVersion) {
         I18nPhoneNumberWrapper i18nPhoneNumber = I18nPhoneNumberWrapper.Factory.INSTANCE.get(
                 context, rawNumber);
-        return new PhoneNumber(i18nPhoneNumber, type, label, isPrimary, id, dataVersion);
+        return new PhoneNumber(i18nPhoneNumber, type, label, isPrimary, id, accountName,
+                accountType, dataVersion);
     }
 
     private PhoneNumber(I18nPhoneNumberWrapper i18nNumber, int type, @Nullable String label,
-            boolean isPrimary, long id, int dataVersion) {
+            boolean isPrimary, long id, String accountName, String accountType, int dataVersion) {
         mI18nPhoneNumber = i18nNumber;
         mType = type;
         mLabel = label;
         mIsPrimary = isPrimary;
         mId = id;
+        mAccountName = accountName;
+        mAccountType = accountType;
         mDataVersion = dataVersion;
     }
 
@@ -131,6 +165,16 @@ public class PhoneNumber implements Parcelable {
         return mId;
     }
 
+    @Nullable
+    public String getAccountName() {
+        return mAccountName;
+    }
+
+    @Nullable
+    public String getAccountType() {
+        return mAccountType;
+    }
+
     /**
      * Each contact may have a few sources with the same phone number. Merge same phone numbers as
      * one.
@@ -144,6 +188,8 @@ public class PhoneNumber implements Parcelable {
                 mDataVersion = phoneNumber.mDataVersion;
                 mId = phoneNumber.mId;
                 mIsPrimary |= phoneNumber.mIsPrimary;
+                mAccountName = phoneNumber.mAccountName;
+                mAccountType = phoneNumber.mAccountType;
             }
         }
         return this;
@@ -174,6 +220,8 @@ public class PhoneNumber implements Parcelable {
         dest.writeParcelable(mI18nPhoneNumber, flags);
         dest.writeBoolean(mIsPrimary);
         dest.writeLong(mId);
+        dest.writeString(mAccountName);
+        dest.writeString(mAccountType);
         dest.writeInt(mDataVersion);
     }
 
@@ -186,9 +234,11 @@ public class PhoneNumber implements Parcelable {
                     I18nPhoneNumberWrapper.class.getClassLoader());
             boolean isPrimary = source.readBoolean();
             long id = source.readLong();
+            String accountName = source.readString();
+            String accountType = source.readString();
             int dataVersion = source.readInt();
             PhoneNumber phoneNumber = new PhoneNumber(i18nPhoneNumberWrapper, type, label,
-                    isPrimary, id, dataVersion);
+                    isPrimary, id, accountName, accountType, dataVersion);
             return phoneNumber;
         }
 
