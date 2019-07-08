@@ -26,4 +26,14 @@
         <item>@drawable/ic_placeholder_6</item>
         <item>@drawable/ic_placeholder_7</item>
     </array>
+    <array name="placeholder_colors">
+        <item>@color/placeholder_color_0</item>
+        <item>@color/placeholder_color_1</item>
+        <item>@color/placeholder_color_2</item>
+        <item>@color/placeholder_color_3</item>
+        <item>@color/placeholder_color_4</item>
+        <item>@color/placeholder_color_5</item>
+        <item>@color/placeholder_color_6</item>
+        <item>@color/placeholder_color_7</item>
+    </array>
 </resources>
