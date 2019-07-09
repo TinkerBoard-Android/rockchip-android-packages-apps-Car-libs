@@ -147,4 +147,14 @@ public class CrossfadeImageView extends FrameLayout {
             mInactiveImageView = mImageView2;
         }
     }
+
+    /**
+     * Sets the additional image scale. See {@link
+     * com.android.car.apps.common.CropAlignedImageView#setImageAdditionalScale(float)}
+     * for more details.
+     */
+    public void setImageAdditionalScale(float scale) {
+        mImageView2.setImageAdditionalScale(scale);
+        mImageView1.setImageAdditionalScale(scale);
+    }
 }

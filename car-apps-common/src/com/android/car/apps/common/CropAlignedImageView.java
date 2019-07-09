@@ -33,6 +33,9 @@ public class CropAlignedImageView extends ImageView {
     private static final int ALIGN_HORIZONTAL_RIGHT = 2;
 
     private int mAlignHorizontal;
+    private float mAdditionalScale = 1f;
+    private int mFrameWidth;
+    private int mFrameHeight;
 
     public CropAlignedImageView(Context context) {
         this(context, null);
@@ -64,36 +67,58 @@ public class CropAlignedImageView extends ImageView {
 
     @Override
     protected boolean setFrame(int frameLeft, int frameTop, int frameRight, int frameBottom) {
-        if (getDrawable() != null) {
-            setMatrix(frameRight - frameLeft, frameBottom - frameTop);
-        }
+        mFrameWidth = frameRight - frameLeft;
+        mFrameHeight = frameBottom - frameTop;
+
+        setMatrix();
 
         return super.setFrame(frameLeft, frameTop, frameRight, frameBottom);
     }
 
-    private void setMatrix(int frameWidth, int frameHeight) {
-        float originalImageWidth = (float) getDrawable().getIntrinsicWidth();
-        float originalImageHeight = (float) getDrawable().getIntrinsicHeight();
-        float fitHorizontallyScaleFactor = frameWidth / originalImageWidth;
-        float fitVerticallyScaleFactor = frameHeight / originalImageHeight;
-        float usedScaleFactor = Math.max(fitHorizontallyScaleFactor, fitVerticallyScaleFactor);
-        float newImageWidth = originalImageWidth * usedScaleFactor;
-        float newImageHeight = originalImageHeight * usedScaleFactor;
-        Matrix matrix = getImageMatrix();
-        matrix.setScale(usedScaleFactor, usedScaleFactor, 0, 0);
-        float dx = 0;
-        switch (mAlignHorizontal) {
-            case ALIGN_HORIZONTAL_CENTER:
-                dx = (frameWidth - newImageWidth) / 2;
-                break;
-            case ALIGN_HORIZONTAL_LEFT:
-                dx = 0;
-                break;
-            case ALIGN_HORIZONTAL_RIGHT:
-                dx = (frameWidth - newImageWidth);
-                break;
+    private void setMatrix() {
+        if (getDrawable() != null) {
+            float originalImageWidth = (float) getDrawable().getIntrinsicWidth();
+            float originalImageHeight = (float) getDrawable().getIntrinsicHeight();
+            float fitHorizontallyScaleFactor = mFrameWidth / originalImageWidth;
+            float fitVerticallyScaleFactor = mFrameHeight / originalImageHeight;
+            float usedScaleFactor = Math.max(fitHorizontallyScaleFactor, fitVerticallyScaleFactor);
+
+            // mAdditionalScale isn't factored into the fittedImageWidth
+            // because we want to scale from the center of the fitted image, so our translations
+            // shouldn't take it into effect
+            float fittedImageWidth = originalImageWidth * usedScaleFactor;
+
+            Matrix matrix = new Matrix();
+            matrix.setTranslate(-originalImageWidth / 2f, -originalImageHeight / 2f);
+            matrix.postScale(usedScaleFactor * mAdditionalScale,
+                    usedScaleFactor * mAdditionalScale);
+            float dx = 0;
+            switch (mAlignHorizontal) {
+                case ALIGN_HORIZONTAL_CENTER:
+                    dx = mFrameWidth / 2f;
+                    break;
+                case ALIGN_HORIZONTAL_LEFT:
+                    dx = fittedImageWidth / 2f;
+                    break;
+                case ALIGN_HORIZONTAL_RIGHT:
+                    dx = (mFrameWidth - fittedImageWidth / 2f);
+                    break;
+            }
+            matrix.postTranslate(dx, mFrameHeight / 2f);
+            setImageMatrix(matrix);
         }
-        matrix.postTranslate(dx, (frameHeight - newImageHeight) / 2);
-        setImageMatrix(matrix);
+    }
+
+    /**
+     * Sets a scale to be applied on top of the scaling that was used to fit the
+     * image to the frame of the view.
+     *
+     * This will scale the image from its center. This means it won't translate the image
+     * any further, so if it was aligned to the left, the left of the image will expand past
+     * the left edge of the view. Values <1 will cause black bars to appear.
+     */
+    public void setImageAdditionalScale(float scale) {
+        mAdditionalScale = scale;
+        setMatrix();
     }
 }
