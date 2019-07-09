@@ -16,6 +16,7 @@
 package com.android.car.apps.common;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.util.AttributeSet;
 import android.view.View;
@@ -42,7 +43,7 @@ public class BackgroundImageView extends ConstraintLayout {
     }
 
     public BackgroundImageView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        this(context, attrs, R.attr.backgroundImageViewStyle);
     }
 
     public BackgroundImageView(Context context, AttributeSet attrs, int defStyle) {
@@ -55,6 +56,16 @@ public class BackgroundImageView extends ConstraintLayout {
 
         mBitmapTargetSize = getResources().getInteger(R.integer.background_bitmap_target_size_px);
         mBitmapBlurPercent = getResources().getFloat(R.dimen.background_bitmap_blur_percent);
+
+        TypedArray a = context.getTheme().obtainStyledAttributes(attrs,
+                R.styleable.BackgroundImageView, defStyle, 0);
+
+        try {
+            setImageAdditionalScale(a.getFloat(R.styleable.BackgroundImageView_imageAdditionalScale,
+                    1.05f));
+        } finally {
+            a.recycle();
+        }
     }
 
     /**
@@ -90,6 +101,18 @@ public class BackgroundImageView extends ConstraintLayout {
 
     /** Dims/undims the background image by 30% */
     public void setDimmed(boolean dim) {
-        mDarkeningScrim.setVisibility(dim ?  View.VISIBLE : View.GONE);
+        mDarkeningScrim.setVisibility(dim ? View.VISIBLE : View.GONE);
+    }
+
+    /**
+     * Sets a scale to be applied on top of the scaling that was used to fit the
+     * image to the frame of the view.
+     *
+     * See {@link
+     * com.android.car.apps.common.CropAlignedImageView#setImageAdditionalScale(float)}
+     * for more details.
+     */
+    public void setImageAdditionalScale(float scale) {
+        mImageView.setImageAdditionalScale(scale);
     }
 }
