@@ -109,4 +109,11 @@
         </attr>
         <attr name="state_ux_restricted" format="boolean" />
     </declare-styleable>
+
+    <declare-styleable name="BackgroundImageView">
+        <!-- Sets a scale to be applied on top of the scaling that was used to fit the image to the frame of the view. Defaults to 1.05 -->
+        <attr name="imageAdditionalScale" format="float"/>
+    </declare-styleable>
+    <!-- Attribute for specifying a default style for all BackgroundImageViews -->
+    <attr name="backgroundImageViewStyle" format="reference"/>
 </resources>
