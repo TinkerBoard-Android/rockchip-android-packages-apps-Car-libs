@@ -38,7 +38,7 @@
     <color name="media_source_default_color">@android:color/background_dark</color>
 
     <!-- Color used on the minimized progress bar background -->
-    <color name="minimized_progress_bar_background">#00000000</color>
+    <color name="minimized_progress_bar_background">#464A4D</color>
     <!-- Color used on the minimized progress bar -->
     <color name="minimized_progress_bar_highlight">@color/media_source_default_color</color>
 
