@@ -161,7 +161,8 @@ public class CarAssistUtils {
     public static boolean isCarCompatibleMessagingNotification(StatusBarNotification sbn) {
         return hasMessagingStyle(sbn)
                 && hasRequiredAssistantCallbacks(sbn)
-                && replyCallbackHasRemoteInput(sbn)
+                && ((getReplyAction(sbn.getNotification()) == null)
+                    || replyCallbackHasRemoteInput(sbn))
                 && assistantCallbacksShowNoUi(sbn);
     }
 
@@ -217,6 +218,21 @@ public class CarAssistUtils {
         for (NotificationCompat.Action action : getAllActions(notification)) {
             if (action.getSemanticAction()
                     == NotificationCompat.Action.SEMANTIC_ACTION_MARK_AS_READ) {
+                return action;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves the {@link NotificationCompat.Action} containing the
+     * {@link NotificationCompat.Action#SEMANTIC_ACTION_REPLY} semantic action.
+     */
+    @Nullable
+    private static NotificationCompat.Action getReplyAction(Notification notification) {
+        for (NotificationCompat.Action action : getAllActions(notification)) {
+            if (action.getSemanticAction()
+                    == NotificationCompat.Action.SEMANTIC_ACTION_REPLY) {
                 return action;
             }
         }
