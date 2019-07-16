@@ -52,7 +52,6 @@ public class AppSelectionFragment extends DialogFragment {
     /** The widget that opened this fragment. */
     private final MediaAppSelectorWidget mSelectorWidget;
 
-    private String mOriginSourcePackage;
     private boolean mFullScreenDialog;
 
     /** The widget contained by this fragment UI to display the current source. */
@@ -60,14 +59,13 @@ public class AppSelectionFragment extends DialogFragment {
 
     /**
      * Creates a new {@link AppSelectionFragment}.
+     *
      * @param selectorWidget the widget that is opening this fragment
-     * @param originSourcePackage the media source package shown in the selectorWidget.
      */
     public static AppSelectionFragment create(MediaAppSelectorWidget selectorWidget,
-            String originSourcePackage, boolean fullScreenDialog) {
+            boolean fullScreenDialog) {
         AppSelectionFragment result = new AppSelectionFragment(selectorWidget);
         Bundle bundle = new Bundle(1);
-        bundle.putString(ORIGIN_SOURCE_PACKAGE_KEY, originSourcePackage);
         bundle.putBoolean(FULL_SCREEN_KEY, fullScreenDialog);
         result.setArguments(bundle);
         return result;
@@ -80,7 +78,6 @@ public class AppSelectionFragment extends DialogFragment {
     private AppSelectionFragment(MediaAppSelectorWidget selectorWidget) {
         mSelectorWidget = selectorWidget;
     }
-
 
 
     private class AppGridAdapter extends RecyclerView.Adapter<AppItemViewHolder> {
@@ -138,8 +135,8 @@ public class AppSelectionFragment extends DialogFragment {
                         dismiss();
                     });
 
-            mAppIconView.setImageDrawable(mediaSrc.getPackageIcon());
-            mAppNameView.setText(mediaSrc.getName());
+            mAppIconView.setImageDrawable(mediaSrc.getIcon());
+            mAppNameView.setText(mediaSrc.getDisplayName());
         }
     }
 
@@ -180,7 +177,6 @@ public class AppSelectionFragment extends DialogFragment {
 
         Bundle args = getArguments();
         if (args != null) {
-            mOriginSourcePackage = args.getString(ORIGIN_SOURCE_PACKAGE_KEY);
             mFullScreenDialog = args.getBoolean(FULL_SCREEN_KEY, true);
         }
     }
