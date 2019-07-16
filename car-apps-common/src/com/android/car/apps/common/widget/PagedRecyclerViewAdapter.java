@@ -25,18 +25,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.apps.common.R;
 
-import java.util.ArrayList;
-
 /**
  * The adapter for the parent recyclerview in {@link PagedRecyclerView} widget.
  */
 final class PagedRecyclerViewAdapter
         extends RecyclerView.Adapter<PagedRecyclerViewAdapter.NestedRowViewHolder> {
-    private ArrayList<String> mItem = new ArrayList<>();
-
-    PagedRecyclerViewAdapter() {
-        this.mItem.add("nested_RecyclerView");
-    }
 
     @Override
     public PagedRecyclerViewAdapter.NestedRowViewHolder onCreateViewHolder(ViewGroup parent,
@@ -55,7 +48,7 @@ final class PagedRecyclerViewAdapter
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        return mItem.size();
+        return 1;
     }
 
     /**
