@@ -122,7 +122,7 @@ public class PlaybackFragment extends Fragment {
             mPlaybackViewModel = playbackViewModel;
             mMediaSourceViewModel = mediaSourceViewModel;
             mMediaSource = mMediaSourceViewModel.getPrimaryMediaSource();
-            mAppName = mapNonNull(mMediaSource, MediaSource::getName);
+            mAppName = mapNonNull(mMediaSource, MediaSource::getDisplayName);
             mAppIcon = mapNonNull(mMediaSource, MediaSource::getRoundPackageIcon);
             mTitle = mapNonNull(playbackViewModel.getMetadata(), MediaItemMetadata::getTitle);
             mSubtitle = mapNonNull(playbackViewModel.getMetadata(), MediaItemMetadata::getArtist);
