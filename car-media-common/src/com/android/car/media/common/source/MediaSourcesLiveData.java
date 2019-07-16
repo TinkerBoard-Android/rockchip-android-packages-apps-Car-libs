@@ -18,6 +18,7 @@ package com.android.car.media.common.source;
 
 import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -88,28 +89,32 @@ public class MediaSourcesLiveData {
     /** Returns the alphabetically sorted list of available media sources. */
     public List<MediaSource> getList() {
         if (mMediaSources == null) {
-            mMediaSources = getPackageNames().stream()
+            mMediaSources = getComponentNames().stream()
                     .filter(Objects::nonNull)
-                    .map(packageName -> new MediaSource(mAppContext, packageName))
+                    .map(componentName -> MediaSource.create(mAppContext, componentName))
                     .filter(mediaSource -> {
-                        if (mediaSource.getName() == null) {
-                            Log.w(TAG, "Found media source without name: "
-                                    + mediaSource.getPackageName());
+                        if (mediaSource == null) {
+                            Log.w(TAG, "Media source is null");
+                            return false;
+                        }
+                        if (mediaSource.getDisplayName() == null) {
+                            Log.w(TAG,
+                                    "Found media source without name: " + mediaSource.toString());
                             return false;
                         }
                         return true;
                     })
-                    .sorted(Comparator.comparing(mediaSource -> mediaSource.getName().toString()))
+                    .sorted(Comparator.comparing(
+                            mediaSource -> mediaSource.getDisplayName().toString()))
                     .collect(Collectors.toList());
         }
         return mMediaSources;
     }
 
     /**
-     * Generates a set of all possible apps to choose from, including the ones that are just
-     * media services.
+     * Generates a set of all possible activities and media services to choose from.
      */
-    private Set<String> getPackageNames() {
+    private Set<ComponentName> getComponentNames() {
         PackageManager packageManager = mAppContext.getPackageManager();
         Intent intent = new Intent(Intent.ACTION_MAIN, null);
         intent.addCategory(Intent.CATEGORY_APP_MUSIC);
@@ -121,14 +126,25 @@ public class MediaSourcesLiveData {
         List<ResolveInfo> mediaServices = packageManager.queryIntentServices(mediaIntent,
                 PackageManager.GET_RESOLVED_FILTER);
 
-        Set<String> apps = new HashSet<>();
+        Set<ComponentName> components = new HashSet<>();
+        Set<String> packages = new HashSet<>();
         for (ResolveInfo info : mediaServices) {
-            apps.add(info.serviceInfo.packageName);
+            ComponentName componentName = new ComponentName(info.serviceInfo.packageName,
+                    info.serviceInfo.name);
+            components.add(componentName);
+            packages.add(info.serviceInfo.packageName);
         }
         for (ResolveInfo info : availableActivities) {
-            apps.add(info.activityInfo.packageName);
+            // If a service has been added to the map, don't add the activity belonging to the
+            // same package.
+            if (packages.contains(info.activityInfo.packageName)) {
+                continue;
+            }
+            ComponentName componentName = new ComponentName(info.activityInfo.packageName,
+                    info.activityInfo.name);
+            components.add(componentName);
         }
-        return apps;
+        return components;
     }
 
 }
