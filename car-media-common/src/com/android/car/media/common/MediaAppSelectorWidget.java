@@ -54,8 +54,8 @@ public class MediaAppSelectorWidget extends LinearLayout {
     private FragmentActivity mActivity;
 
     /** The fragment that owns the widget (only set when in display only mode). */
-    @Nullable private AppSelectionFragment mFragmentOwner;
-    private String mDisplayedSourcePackage;
+    @Nullable
+    private AppSelectionFragment mFragmentOwner;
     private boolean mFragmentIsOpen;
 
     public MediaAppSelectorWidget(Context context) {
@@ -107,7 +107,6 @@ public class MediaAppSelectorWidget extends LinearLayout {
             if (source == null) {
                 setAppIcon(null);
             } else {
-                mDisplayedSourcePackage = source.getPackageName();
                 setAppIcon(source.getRoundPackageIcon());
             }
         });
@@ -156,8 +155,7 @@ public class MediaAppSelectorWidget extends LinearLayout {
             mFragmentOwner.dismiss();
         } else {
             setIsOpen(true);
-            AppSelectionFragment newFragment = AppSelectionFragment.create(this,
-                    mDisplayedSourcePackage, mFullScreenDialog);
+            AppSelectionFragment newFragment = AppSelectionFragment.create(this, mFullScreenDialog);
             newFragment.show(mActivity.getSupportFragmentManager(), null);
         }
 
