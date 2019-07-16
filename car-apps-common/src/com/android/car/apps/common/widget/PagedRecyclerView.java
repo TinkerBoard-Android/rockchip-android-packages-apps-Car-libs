@@ -21,8 +21,11 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.car.drivingstate.CarUxRestrictions;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
@@ -48,8 +51,6 @@ public final class PagedRecyclerView extends RecyclerView {
 
     private static final boolean DEBUG = false;
     private static final String TAG = "PagedRecyclerView";
-
-    private Context mContext;
 
     private final CarUxRestrictionsUtil mCarUxRestrictionsUtil;
     private final CarUxRestrictionsUtil.OnUxRestrictionsChangedListener mListener;
@@ -227,26 +228,19 @@ public final class PagedRecyclerView extends RecyclerView {
             return;
         }
 
-        mContext = context;
-        mNestedRecyclerView = new RecyclerView(mContext, attrs,
+        mNestedRecyclerView = new RecyclerView(context, attrs,
                 R.style.PagedRecyclerView_NestedRecyclerView);
 
-        PagedRecyclerViewLayoutManager layoutManager = new PagedRecyclerViewLayoutManager(context);
-        super.setLayoutManager(layoutManager);
-
-        PagedRecyclerViewAdapter adapter = new PagedRecyclerViewAdapter();
-        super.setAdapter(adapter);
-
+        super.setLayoutManager(new PagedRecyclerViewLayoutManager(context));
+        super.setAdapter(new PagedRecyclerViewAdapter());
         super.setNestedScrollingEnabled(false);
         super.setClipToPadding(false);
 
         // Gutter
-        int defaultGutterSize = getResources().getDimensionPixelSize(R.dimen.car_scroll_bar_margin);
         mGutter = a.getInt(R.styleable.PagedRecyclerView_gutter, Gutter.BOTH);
-        mGutterSize = defaultGutterSize;
+        mGutterSize = getResources().getDimensionPixelSize(R.dimen.car_scroll_bar_margin);
 
-        int carMargin = mContext.getResources().getDimensionPixelSize(
-                R.dimen.car_scroll_bar_margin);
+        int carMargin = getResources().getDimensionPixelSize(R.dimen.car_scroll_bar_margin);
         mScrollBarContainerWidth = a.getDimensionPixelSize(
                 R.styleable.PagedRecyclerView_scrollBarContainerWidth, carMargin);
 
@@ -525,7 +519,9 @@ public final class PagedRecyclerView extends RecyclerView {
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     public void layoutBothForTesting(int l, int t, int r, int b) {
         super.layout(l, t, r, b);
-        mNestedRecyclerView.layout(l, t, r, b);
+        if (mScrollBarEnabled) {
+            mNestedRecyclerView.layout(l, t, r, b);
+        }
     }
 
     @Override
@@ -571,14 +567,14 @@ public final class PagedRecyclerView extends RecyclerView {
     private void createScrollBarFromConfig() {
         if (DEBUG) Log.d(TAG, "createScrollBarFromConfig");
         final String clsName = mScrollBarClass == null
-                ? mContext.getString(R.string.config_scrollBarComponent) : mScrollBarClass;
+                ? getContext().getString(R.string.config_scrollBarComponent) : mScrollBarClass;
         if (clsName == null || clsName.length() == 0) {
             throw andLog("No scroll bar component configured", null);
         }
 
         Class<?> cls;
         try {
-            cls = mContext.getClassLoader().loadClass(clsName);
+            cls = getContext().getClassLoader().loadClass(clsName);
         } catch (Throwable t) {
             throw andLog("Error loading scroll bar component: " + clsName, t);
         }
@@ -588,7 +584,7 @@ public final class PagedRecyclerView extends RecyclerView {
             throw andLog("Error creating scroll bar component: " + clsName, t);
         }
 
-        mScrollBarUI.initialize(mContext, mNestedRecyclerView, mScrollBarContainerWidth,
+        mScrollBarUI.initialize(getContext(), mNestedRecyclerView, mScrollBarContainerWidth,
                 mScrollBarPosition, mScrollBarAboveRecyclerView);
 
         mScrollBarUI.setPadding(mScrollBarPaddingStart, mScrollBarPaddingEnd);
@@ -647,5 +643,62 @@ public final class PagedRecyclerView extends RecyclerView {
     private RuntimeException andLog(String msg, Throwable t) {
         Log.e(TAG, msg, t);
         throw new RuntimeException(msg, t);
+    }
+
+    @Override
+    public Parcelable onSaveInstanceState() {
+        Parcelable superState = super.onSaveInstanceState();
+        SavedState ss = new SavedState(superState, getContext());
+        if (mScrollBarEnabled) {
+            mNestedRecyclerView.saveHierarchyState(ss.mNestedRecyclerViewState);
+        }
+        return ss;
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        if (!(state instanceof SavedState)) {
+            Log.w(TAG, "onRestoreInstanceState called with an unsupported state");
+            super.onRestoreInstanceState(state);
+        } else {
+            SavedState ss = (SavedState) state;
+            super.onRestoreInstanceState(ss.getSuperState());
+            if (mScrollBarEnabled) {
+                mNestedRecyclerView.restoreHierarchyState(ss.mNestedRecyclerViewState);
+            }
+        }
+    }
+
+    static class SavedState extends BaseSavedState {
+        SparseArray mNestedRecyclerViewState;
+        Context mContext;
+
+        SavedState(Parcelable superState, Context c) {
+            super(superState);
+            mContext = c;
+            mNestedRecyclerViewState = new SparseArray();
+        }
+
+        private SavedState(Parcel in) {
+            super(in);
+            mNestedRecyclerViewState = in.readSparseArray(mContext.getClassLoader());
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeSparseArray(mNestedRecyclerViewState);
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR =
+                new Parcelable.Creator<SavedState>() {
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
     }
 }
