@@ -17,17 +17,25 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:id="@android:id/background">
-        <shape android:shape="line">
-            <stroke android:width="@dimen/minimized_progress_bar_track_thickness"/>
-        </shape>
+        <shape android:shape="ring"
+               android:thickness="@dimen/minimized_progress_bar_track_thickness"
+               android:useLevel="false"/>
     </item>
 
     <item android:id="@android:id/progress">
-        <clip>
-            <shape android:shape="line">
-                <stroke android:width="@dimen/minimized_progress_bar_track_thickness"/>
+        <rotate android:fromDegrees="270"
+                android:toDegrees="270">
+            <shape android:shape="ring"
+                   android:thickness="@dimen/minimized_progress_bar_track_thickness"
+                   android:useLevel="true">
+                <gradient
+                    android:angle="0"
+                    android:endColor="@color/minimized_progress_bar_highlight"
+                    android:startColor="@color/minimized_progress_bar_highlight"
+                    android:type="sweep"
+                    android:useLevel="false"/>
             </shape>
-        </clip>
+        </rotate>
     </item>
 
 </layer-list>
