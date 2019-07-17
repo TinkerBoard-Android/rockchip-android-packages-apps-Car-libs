@@ -59,6 +59,17 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
         return get();
     }
 
+    /**
+     * Returns if the InMemoryPhoneBook is initialized.
+     * get() won't return null or throw if this is true, but it doesn't
+     * indicate whether or not contacts are loaded yet.
+     *
+     * See also: {@link #isLoaded()}
+     */
+    public static boolean isInitialized() {
+        return sInMemoryPhoneBook != null;
+    }
+
     /** Get the global {@link InMemoryPhoneBook} instance. */
     public static InMemoryPhoneBook get() {
         if (sInMemoryPhoneBook != null) {
