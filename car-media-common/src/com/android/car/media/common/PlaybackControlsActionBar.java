@@ -19,6 +19,7 @@ package com.android.car.media.common;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LifecycleOwner;
@@ -33,8 +34,11 @@ public class PlaybackControlsActionBar extends ControlBar implements PlaybackCon
     private static final String TAG = "PlaybackView";
 
     private ImageButton mOverflowButton;
+    private ProgressBar mCircularProgressBar;
 
     private MediaButtonController mMediaButtonController;
+
+    private boolean mShowCircularProgressBar;
 
     /** Creates a {@link PlaybackControlsActionBar} view */
     public PlaybackControlsActionBar(Context context) {
@@ -65,12 +69,18 @@ public class PlaybackControlsActionBar extends ControlBar implements PlaybackCon
         setExpandCollapseView(mOverflowButton);
 
         mMediaButtonController = new MediaButtonController(context, this,
-                R.color.playback_control_color, R.layout.full_play_pause_stop_button_layout,
+                R.color.playback_control_color, R.layout.play_pause_stop_button_layout,
                 R.drawable.ic_skip_previous, R.drawable.ic_skip_next);
+
+        mShowCircularProgressBar = context.getResources().getBoolean(
+                R.bool.show_circular_progress_bar);
+        mCircularProgressBar = findViewById(R.id.circular_progress_bar);
     }
 
     @Override
     public void setModel(@NonNull PlaybackViewModel model, @NonNull LifecycleOwner owner) {
         mMediaButtonController.setModel(model, owner);
+        ControlBarHelper.initProgressBar(getContext(), owner, model, mCircularProgressBar,
+                mShowCircularProgressBar);
     }
 }
