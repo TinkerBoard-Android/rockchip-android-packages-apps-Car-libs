@@ -19,9 +19,6 @@
     <item name="album_art_scrim_alpha" format="float" type="dimen">0.75</item>
 
     <!-- Fab -->
-    <dimen name="fab_elevation">8dp</dimen>
-    <dimen name="fab_large_size">96dp</dimen>
-    <dimen name="fab_large_padding">27dp</dimen>
     <dimen name="fab_spinner_size">128dp</dimen>
 
     <!-- App bar -->
@@ -61,7 +58,7 @@
     <dimen name="fragment_app_selection_list_top_offset">@*android:dimen/car_padding_5</dimen>
 
     <!-- Minimized Progress Bar -->
-    <dimen name="minimized_progress_bar_track_height">4dp</dimen>
+    <dimen name="minimized_progress_bar_track_thickness">4dp</dimen>
 
     <!-- appbar_view_icon_background.xml -->
     <dimen name="appbar_view_icon_background_radius">48dp</dimen>
