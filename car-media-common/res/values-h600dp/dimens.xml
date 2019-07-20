@@ -15,7 +15,8 @@
   limitations under the License.
 -->
 <resources>
-    <!-- App bar -->
-    <!-- The height of app bar when it expends to 2 rows. Equals 2 * @dimen/appbar_first_row_height. -->
     <dimen name="appbar_2_rows_height">192dp</dimen>
+    <dimen name="appbar_view_icon_touch_target_size">96dp</dimen>
+    <dimen name="appbar_view_icon_padding">26dp</dimen>
+    <dimen name="appbar_view_icon_background_radius">48dp</dimen>
 </resources>
