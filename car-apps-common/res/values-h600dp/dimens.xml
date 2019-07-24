@@ -16,4 +16,6 @@
 -->
 <resources>
     <dimen name="control_bar_button_background_radius">48dp</dimen>
+    <dimen name="control_bar_button_size">96dp</dimen>
+    <dimen name="control_bar_button_padding">26dp</dimen>
 </resources>
