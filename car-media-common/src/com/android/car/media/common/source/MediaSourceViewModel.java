@@ -231,9 +231,6 @@ public class MediaSourceViewModel extends AndroidViewModel {
         }
 
         ComponentName browseService = newMediaSource.getBrowseServiceComponentName();
-        if (browseService == null) {
-            Log.e(TAG, "No browseService for source: " + newMediaSource.getPackageName());
-        }
         mBrowserConnector.connectTo(browseService);
     }
 }

@@ -97,11 +97,6 @@ public class MediaSourcesLiveData {
                             Log.w(TAG, "Media source is null");
                             return false;
                         }
-                        if (mediaSource.getDisplayName() == null) {
-                            Log.w(TAG,
-                                    "Found media source without name: " + mediaSource.toString());
-                            return false;
-                        }
                         return true;
                     })
                     .sorted(Comparator.comparing(
@@ -112,36 +107,19 @@ public class MediaSourcesLiveData {
     }
 
     /**
-     * Generates a set of all possible activities and media services to choose from.
+     * Generates a set of all possible media services to choose from.
      */
     private Set<ComponentName> getComponentNames() {
         PackageManager packageManager = mAppContext.getPackageManager();
-        Intent intent = new Intent(Intent.ACTION_MAIN, null);
-        intent.addCategory(Intent.CATEGORY_APP_MUSIC);
-
         Intent mediaIntent = new Intent();
         mediaIntent.setAction(MediaBrowserService.SERVICE_INTERFACE);
-
-        List<ResolveInfo> availableActivities = packageManager.queryIntentActivities(intent, 0);
         List<ResolveInfo> mediaServices = packageManager.queryIntentServices(mediaIntent,
                 PackageManager.GET_RESOLVED_FILTER);
 
         Set<ComponentName> components = new HashSet<>();
-        Set<String> packages = new HashSet<>();
         for (ResolveInfo info : mediaServices) {
             ComponentName componentName = new ComponentName(info.serviceInfo.packageName,
                     info.serviceInfo.name);
-            components.add(componentName);
-            packages.add(info.serviceInfo.packageName);
-        }
-        for (ResolveInfo info : availableActivities) {
-            // If a service has been added to the map, don't add the activity belonging to the
-            // same package.
-            if (packages.contains(info.activityInfo.packageName)) {
-                continue;
-            }
-            ComponentName componentName = new ComponentName(info.activityInfo.packageName,
-                    info.activityInfo.name);
             components.add(componentName);
         }
         return components;
