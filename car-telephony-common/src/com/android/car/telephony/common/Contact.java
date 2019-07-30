@@ -38,6 +38,8 @@ import java.util.List;
  */
 public class Contact implements Parcelable, Comparable<Contact> {
     private static final String TAG = "CD.Contact";
+    private static final String PHONEBOOK_LABEL = "phonebook_label";
+    private static final String PHONEBOOK_LABEL_ALT = "phonebook_label_alt";
 
     /**
      * Contact belongs to TYPE_LETTER if its display name starts with a letter
@@ -102,6 +104,25 @@ public class Contact implements Parcelable, Comparable<Contact> {
     private String mAltDisplayName;
 
     /**
+     * The phonebook label.
+     * <p>
+     * For {@link #mDisplayName}s starting with letters, label will be the first character of
+     * {@link #mDisplayName}. For {@link #mDisplayName}s starting with numbers, the label will
+     * be "#". For {@link #mDisplayName}s starting with other characters, the label will be "...".
+     * </p>
+     */
+    private String mPhoneBookLabel;
+
+    /**
+     * The alternative phonebook label.
+     * <p>
+     * It is similar with {@link #mPhoneBookLabel}. But instead of generating from
+     * {@link #mDisplayName}, it will use {@link #mAltDisplayName}.
+     * </p>
+     */
+    private String mPhoneBookLabelAlt;
+
+    /**
      * A URI that can be used to retrieve a thumbnail of the contact's photo.
      */
     private Uri mAvatarThumbnailUri;
@@ -138,6 +159,8 @@ public class Contact implements Parcelable, Comparable<Contact> {
                 ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
         int altDisplayNameColumn = cursor.getColumnIndex(
                 ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_ALTERNATIVE);
+        int phoneBookLabelColumn = cursor.getColumnIndex(PHONEBOOK_LABEL);
+        int phoneBookLabelAltColumn = cursor.getColumnIndex(PHONEBOOK_LABEL_ALT);
         int avatarUriColumn = cursor.getColumnIndex(
                 ContactsContract.CommonDataKinds.Phone.PHOTO_URI);
         int avatarThumbnailColumn = cursor.getColumnIndex(
@@ -149,6 +172,8 @@ public class Contact implements Parcelable, Comparable<Contact> {
         contact.mId = cursor.getLong(contactIdColumn);
         contact.mDisplayName = cursor.getString(displayNameColumn);
         contact.mAltDisplayName = cursor.getString(altDisplayNameColumn);
+        contact.mPhoneBookLabel = cursor.getString(phoneBookLabelColumn);
+        contact.mPhoneBookLabelAlt = cursor.getString(phoneBookLabelAltColumn);
 
         PhoneNumber number = PhoneNumber.fromCursor(context, cursor);
         contact.mPhoneNumbers.add(number);
@@ -201,6 +226,20 @@ public class Contact implements Parcelable, Comparable<Contact> {
      */
     public String getAltDisplayName() {
         return mAltDisplayName;
+    }
+
+    /**
+     * Returns {@link #mPhoneBookLabel}
+     */
+    public String getPhonebookLabel() {
+        return mPhoneBookLabel;
+    }
+
+    /**
+     * Returns {@link #mPhoneBookLabelAlt}
+     */
+    public String getPhonebookLabelAlt() {
+        return mPhoneBookLabelAlt;
     }
 
     public boolean isVoicemail() {
@@ -300,6 +339,8 @@ public class Contact implements Parcelable, Comparable<Contact> {
         }
         dest.writeString(mDisplayName);
         dest.writeString(mAltDisplayName);
+        dest.writeString(mPhoneBookLabel);
+        dest.writeString(mPhoneBookLabelAlt);
         dest.writeParcelable(mAvatarThumbnailUri, 0);
         dest.writeParcelable(mAvatarUri, 0);
         dest.writeString(mLookupKey);
@@ -335,6 +376,8 @@ public class Contact implements Parcelable, Comparable<Contact> {
         }
         contact.mDisplayName = source.readString();
         contact.mAltDisplayName = source.readString();
+        contact.mPhoneBookLabel = source.readString();
+        contact.mPhoneBookLabelAlt = source.readString();
         contact.mAvatarThumbnailUri = source.readParcelable(Uri.class.getClassLoader());
         contact.mAvatarUri = source.readParcelable(Uri.class.getClassLoader());
         contact.mLookupKey = source.readString();
@@ -354,7 +397,8 @@ public class Contact implements Parcelable, Comparable<Contact> {
      * letters, numbers, then special characters.
      */
     public int compareByDisplayName(@NonNull Contact otherContact) {
-        return compareNames(mDisplayName, otherContact.getDisplayName());
+        return compareNames(mDisplayName, otherContact.getDisplayName(),
+                mPhoneBookLabel, otherContact.getPhonebookLabel());
     }
 
     /**
@@ -362,15 +406,16 @@ public class Contact implements Parcelable, Comparable<Contact> {
      * letters, numbers, then special characters.
      */
     public int compareByAltDisplayName(@NonNull Contact otherContact) {
-        return compareNames(mAltDisplayName, otherContact.getAltDisplayName());
+        return compareNames(mAltDisplayName, otherContact.getAltDisplayName(),
+                mPhoneBookLabelAlt, otherContact.getPhonebookLabelAlt());
     }
 
     /**
      * Compares two strings in an order of letters, numbers, then special characters.
      */
-    private int compareNames(String name, String otherName) {
-        int type = getNameType(name);
-        int otherType = getNameType(otherName);
+    private int compareNames(String name, String otherName, String label, String otherLabel) {
+        int type = getNameType(label);
+        int otherType = getNameType(otherLabel);
         if (type != otherType) {
             return Integer.compare(type, otherType);
         }
@@ -378,13 +423,17 @@ public class Contact implements Parcelable, Comparable<Contact> {
         return collator.compare(name == null ? "" : name, otherName == null ? "" : otherName);
     }
 
-    private static int getNameType(String displayName) {
+    /**
+     * Returns the type of the name string.
+     * Types can be {@link #TYPE_LETTER}, {@link #TYPE_DIGIT} and {@link #TYPE_OTHER}.
+     */
+    private static int getNameType(String label) {
         // A helper function to classify Contacts
-        if (!TextUtils.isEmpty(displayName)) {
-            if (Character.isLetter(displayName.charAt(0))) {
+        if (!TextUtils.isEmpty(label)) {
+            if (Character.isLetter(label.charAt(0))) {
                 return TYPE_LETTER;
             }
-            if (Character.isDigit(displayName.charAt(0))) {
+            if (label.contains("#")) {
                 return TYPE_DIGIT;
             }
         }
