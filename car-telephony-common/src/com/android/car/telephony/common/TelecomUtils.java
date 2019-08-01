@@ -312,17 +312,10 @@ public class TelecomUtils {
             final String displayName) {
         LetterTileDrawable letterTileDrawable = createLetterTile(context, displayName);
 
-        if (avatarUri != null) {
-            Glide.with(context)
-                    .load(avatarUri)
-                    .apply(new RequestOptions().centerCrop().error(letterTileDrawable))
-                    .into(icon);
-            return;
-        }
-
-        // Use the letter tile as avatar if there is no avatar available from content provider.
-        icon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-        icon.setImageDrawable(letterTileDrawable);
+        Glide.with(context)
+                .load(avatarUri)
+                .apply(new RequestOptions().centerCrop().error(letterTileDrawable))
+                .into(icon);
     }
 
     /** Create a {@link LetterTileDrawable} for the given display name. */
