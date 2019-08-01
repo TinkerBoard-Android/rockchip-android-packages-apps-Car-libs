@@ -28,7 +28,6 @@ import android.car.media.CarMediaManager;
 import android.content.ComponentName;
 import android.media.session.MediaController;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -104,13 +103,7 @@ public class MediaSourceViewModel extends AndroidViewModel {
             @Override
             public MediaControllerCompat getControllerForSession(
                     @Nullable MediaSessionCompat.Token token) {
-                if (token == null) return null;
-                try {
-                    return new MediaControllerCompat(application, token);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Couldn't get MediaControllerCompat", e);
-                    return null;
-                }
+                return token == null ? null : new MediaControllerCompat(application, token);
             }
 
             @Override
