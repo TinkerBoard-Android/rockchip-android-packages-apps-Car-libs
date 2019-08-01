@@ -105,10 +105,12 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
                 ContactsContract.Data.CONTENT_URI,
                 null,
                 ContactsContract.Data.MIMETYPE + " = ? OR "
+                        + ContactsContract.Data.MIMETYPE + " = ? OR "
                         + ContactsContract.Data.MIMETYPE + " = ?",
                 new String[]{
                         ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE,
-                        ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE},
+                        ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE,
+                        ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE},
                 ContactsContract.Contacts.DISPLAY_NAME + " ASC ");
         mContactListAsyncQueryLiveData = new AsyncQueryLiveData<List<Contact>>(mContext,
                 QueryParam.of(contactListQueryParam), Executors.newSingleThreadExecutor()) {
