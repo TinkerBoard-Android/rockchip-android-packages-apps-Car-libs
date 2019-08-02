@@ -77,11 +77,14 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
     private InMemoryPhoneBook(Context context) {
         mContext = context;
 
+        // TODO(b/138749585): clean up filtering once contact cloud sync is disabled.
         QueryParam contactListQueryParam = new QueryParam(
                 ContactsContract.Data.CONTENT_URI,
                 null,
-                ContactsContract.Data.MIMETYPE + " = ?",
-                new String[]{ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE},
+                ContactsContract.Data.MIMETYPE + " = ? and "
+                        + ContactsContract.RawContacts.ACCOUNT_TYPE + " != ?",
+                new String[]{
+                        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE, "com.google"},
                 ContactsContract.Contacts.DISPLAY_NAME + " ASC ");
         mContactListAsyncQueryLiveData = new AsyncQueryLiveData<List<Contact>>(mContext,
                 QueryParam.of(contactListQueryParam)) {
