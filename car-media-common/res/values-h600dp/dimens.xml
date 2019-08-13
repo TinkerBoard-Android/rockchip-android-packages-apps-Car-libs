@@ -19,7 +19,8 @@
     <dimen name="appbar_view_icon_touch_target_size">96dp</dimen>
     <dimen name="appbar_view_icon_padding">26dp</dimen>
     <dimen name="appbar_view_icon_background_radius">48dp</dimen>
-    <dimen name="appbar_view_search_bar_padding">76dp</dimen>
-    <!-- negative margin to overlap icons on search bar -->
-    <dimen name="appbar_view_search_margin">-86dp</dimen>
+    <dimen name="appbar_view_search_bar_padding">62dp</dimen>
+    <!-- negative margins to overlap icons on search bar -->
+    <dimen name="appbar_view_search_app_icon_margin">-76dp</dimen>
+    <dimen name="appbar_view_search_close_icon_margin">-70dp</dimen>
 </resources>

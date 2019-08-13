@@ -49,5 +49,8 @@
             -->
         <attr name="fullScreenDialog" format="boolean"/>
 
+        <!-- The size of the icons used in this widget -->
+        <attr name="appIconSize" format="dimension"/>
+
     </declare-styleable>
 </resources>
