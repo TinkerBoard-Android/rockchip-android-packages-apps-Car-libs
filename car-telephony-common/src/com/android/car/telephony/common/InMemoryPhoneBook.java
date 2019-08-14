@@ -44,6 +44,8 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
     private final AsyncQueryLiveData<List<Contact>> mContactListAsyncQueryLiveData;
     /** A map to speed up phone number searching. */
     private final Map<I18nPhoneNumberWrapper, Contact> mPhoneNumberContactMap = new HashMap<>();
+    /** A map to look up contact by lookup key. */
+    private final Map<String, Contact> mLookupKeyContactMap = new HashMap<>();
     private boolean mIsLoaded = false;
 
     /**
@@ -146,6 +148,23 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
         return mPhoneNumberContactMap.get(i18nPhoneNumber);
     }
 
+    /**
+     * Looks up a {@link Contact} by the given lookup key. Returns null if can't find the contact
+     * entry.
+     */
+    @Nullable
+    public Contact lookupContactByKey(String lookupKey) {
+        if (!isLoaded()) {
+            Log.w(TAG, "looking up a contact while loading.");
+        }
+        if (TextUtils.isEmpty(lookupKey)) {
+            Log.w(TAG, "looking up an empty lookup key.");
+            return null;
+        }
+
+        return mLookupKeyContactMap.get(lookupKey);
+    }
+
     private List<Contact> onCursorLoaded(Cursor cursor) {
         Map<String, Contact> result = new LinkedHashMap<>();
         List<Contact> contacts = new ArrayList<>();
@@ -162,6 +181,9 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
         }
 
         contacts.addAll(result.values());
+
+        mLookupKeyContactMap.clear();
+        mLookupKeyContactMap.putAll(result);
 
         mPhoneNumberContactMap.clear();
         for (Contact contact : contacts) {
