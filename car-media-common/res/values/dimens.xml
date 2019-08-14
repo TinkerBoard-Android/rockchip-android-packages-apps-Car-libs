@@ -44,7 +44,8 @@
 
     <!-- app_switch_widget.xml -->
     <dimen name="app_switch_widget_width">@*android:dimen/car_margin</dimen>
-    <dimen name="app_switch_widget_icon_size">@*android:dimen/car_primary_icon_size</dimen>
+    <dimen name="app_switch_widget_app_icon_size">@*android:dimen/car_primary_icon_size</dimen>
+    <dimen name="app_switch_widget_switch_icon_size">@*android:dimen/car_secondary_icon_size</dimen>
     <dimen name="app_switch_widget_icon_padding">@*android:dimen/car_padding_1</dimen>
 
     <!-- app_selection_item.xml -->
