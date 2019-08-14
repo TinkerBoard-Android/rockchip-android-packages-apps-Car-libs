@@ -48,6 +48,10 @@ public class PhoneNumber implements Parcelable {
     private long mId;
     private int mDataVersion;
 
+    /** The favorite bit is from local database, presenting a
+     *  {@link com.android.car.dialer.storage.FavoriteNumberEntity}. */
+    private boolean mIsFavorite;
+
     static PhoneNumber fromCursor(Context context, Cursor cursor) {
         int typeColumn = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.TYPE);
         int labelColumn = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.LABEL);
@@ -180,6 +184,19 @@ public class PhoneNumber implements Parcelable {
     }
 
     /**
+     * Updates the favorite bit, which is local database. See
+     * {@link com.android.car.dialer.storage.FavoriteNumberDatabase}.
+     */
+    public void setIsFavorite(boolean isFavorite) {
+        mIsFavorite = isFavorite;
+    }
+
+    /** Returns if the phone number is favorite entry. */
+    public boolean isFavorite() {
+        return mIsFavorite;
+    }
+
+    /**
      * Each contact may have a few sources with the same phone number. Merge same phone numbers as
      * one.
      *
@@ -227,6 +244,7 @@ public class PhoneNumber implements Parcelable {
         dest.writeString(mAccountName);
         dest.writeString(mAccountType);
         dest.writeInt(mDataVersion);
+        dest.writeBoolean(mIsFavorite);
     }
 
     public static Creator<PhoneNumber> CREATOR = new Creator<PhoneNumber>() {
@@ -243,6 +261,7 @@ public class PhoneNumber implements Parcelable {
             int dataVersion = source.readInt();
             PhoneNumber phoneNumber = new PhoneNumber(i18nPhoneNumberWrapper, type, label,
                     isPrimary, id, accountName, accountType, dataVersion);
+            phoneNumber.setIsFavorite(source.readBoolean());
             return phoneNumber;
         }
 
