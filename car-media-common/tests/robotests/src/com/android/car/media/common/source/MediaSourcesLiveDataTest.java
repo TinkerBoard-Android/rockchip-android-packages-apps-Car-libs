@@ -111,8 +111,7 @@ public class MediaSourcesLiveDataTest {
         assertThat(
                 observedValue.stream().map(source -> source.getPackageName())
                         .collect(Collectors.toList()))
-                .containsExactly(TEST_ACTIVITY_PACKAGE_1, TEST_SERVICE_PACKAGE_1,
-                        TEST_SERVICE_PACKAGE_WITH_METADATA);
+                .containsExactly(TEST_SERVICE_PACKAGE_1, TEST_SERVICE_PACKAGE_WITH_METADATA);
     }
 
     @Test
@@ -135,8 +134,7 @@ public class MediaSourcesLiveDataTest {
         assertThat(
                 observedValue.stream().map(source -> source.getPackageName())
                         .collect(Collectors.toList()))
-                .containsExactly(TEST_ACTIVITY_PACKAGE_1, TEST_ACTIVITY_PACKAGE_2,
-                        TEST_SERVICE_PACKAGE_1, TEST_SERVICE_PACKAGE_2,
+                .containsExactly(TEST_SERVICE_PACKAGE_1, TEST_SERVICE_PACKAGE_2,
                         TEST_SERVICE_PACKAGE_WITH_METADATA);
     }
 
@@ -159,7 +157,7 @@ public class MediaSourcesLiveDataTest {
         assertThat(
                 observedValue.stream().map(source -> source.getPackageName())
                         .collect(Collectors.toList()))
-                .containsExactly(TEST_ACTIVITY_PACKAGE_1, TEST_SERVICE_PACKAGE_WITH_METADATA);
+                .containsExactly(TEST_SERVICE_PACKAGE_WITH_METADATA);
     }
 
     @NonNull
