@@ -28,10 +28,9 @@ import com.android.car.apps.common.ControlBar;
 import com.android.car.media.common.playback.PlaybackViewModel;
 
 /**
- * Implementation of {@link PlaybackControls} that uses the {@link ControlBar}
+ * Basic playback control bar (doesn't display any metadata).
  */
-public class PlaybackControlsActionBar extends ControlBar implements PlaybackControls {
-    private static final String TAG = "PlaybackView";
+public class PlaybackControlsActionBar extends ControlBar {
 
     private ImageButton mOverflowButton;
     private ProgressBar mCircularProgressBar;
@@ -77,7 +76,6 @@ public class PlaybackControlsActionBar extends ControlBar implements PlaybackCon
         mCircularProgressBar = findViewById(R.id.circular_progress_bar);
     }
 
-    @Override
     public void setModel(@NonNull PlaybackViewModel model, @NonNull LifecycleOwner owner) {
         mMediaButtonController.setModel(model, owner);
         ControlBarHelper.initProgressBar(getContext(), owner, model, mCircularProgressBar,
