@@ -26,4 +26,11 @@
 
     <!-- Number of columns in app selector -->
     <integer name="num_app_selector_columns">3</integer>
+
+    <!-- For the playback widget (com.android.car.media.common.PlaybackFragment), defines the
+        maximum square into which requested media items bitmaps must fit (larger bitmaps are
+        scaled down).
+    -->
+    <integer name="playback_widget_bitmap_max_size_px">256</integer>
+
 </resources>

@@ -18,6 +18,7 @@ package com.android.car.media.common;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Size;
 import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
@@ -30,7 +31,7 @@ import com.android.car.media.common.playback.PlaybackViewModel;
  * This is a CarControlBar used for displaying Media content, including metadata for the currently
  * playing song and basic controls.
  */
-public class MinimizedPlaybackControlBar extends MinimizedControlBar implements PlaybackControls {
+public class MinimizedPlaybackControlBar extends MinimizedControlBar {
 
     private static final String TAG = "Media.ControlBar";
 
@@ -69,13 +70,12 @@ public class MinimizedPlaybackControlBar extends MinimizedControlBar implements 
         mCircularProgressBar = findViewById(R.id.circular_progress_bar);
     }
 
-    @Override
-    public void setModel(@NonNull PlaybackViewModel model, @NonNull LifecycleOwner owner) {
+    /** Connects the bar to the {@link PlaybackViewModel}. */
+    public void setModel(@NonNull PlaybackViewModel model, @NonNull LifecycleOwner owner,
+            @NonNull Size maxArtSize) {
         mMediaButtonController.setModel(model, owner);
         mMetadataController = new MetadataController(owner, model,
-                mTitle, mSubtitle, null, null, null, null, null, null,
-                mContentTile, getContext().getResources().getDimensionPixelSize(
-                R.dimen.minimized_control_bar_content_tile_size));
+                mTitle, mSubtitle, null, null, null, null, null, null, mContentTile, maxArtSize);
         mPlaybackViewModel = model;
 
         ControlBarHelper.initProgressBar(getContext(), owner, mPlaybackViewModel,
