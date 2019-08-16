@@ -23,6 +23,7 @@ import android.car.Car;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,14 +37,16 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.android.car.apps.common.BitmapUtils;
 import com.android.car.apps.common.CrossfadeImageView;
+import com.android.car.apps.common.imaging.ImageBinder;
+import com.android.car.apps.common.imaging.ImageBinder.PlaceholderType;
 import com.android.car.apps.common.util.ViewUtils;
-import com.android.car.media.common.playback.AlbumArtLiveData;
 import com.android.car.media.common.playback.PlaybackViewModel;
 import com.android.car.media.common.source.MediaSource;
 import com.android.car.media.common.source.MediaSourceViewModel;
+import com.android.internal.util.Preconditions;
 
-import com.bumptech.glide.request.target.Target;
 
 /**
  * {@link Fragment} that can be used to display and control the currently playing media item. Its
@@ -53,6 +56,7 @@ import com.bumptech.glide.request.target.Target;
 public class PlaybackFragment extends Fragment {
 
     private MediaSourceViewModel mMediaSourceViewModel;
+    private ImageBinder<MediaItemMetadata.ArtworkRef> mAlbumArtBinder;
 
     @Nullable
     @Override
@@ -83,13 +87,25 @@ public class PlaybackFragment extends Fragment {
         innerViewModel.getSubtitle().observe(getViewLifecycleOwner(), subtitle::setText);
 
         CrossfadeImageView albumBackground = view.findViewById(R.id.album_background);
-        innerViewModel.getAlbumArt().observe(getViewLifecycleOwner(),
-                albumArt -> albumBackground.setImageBitmap(albumArt, true));
         albumBackground.setOnClickListener(
                 // Let the Media center trampoline figure out what to open.
                 v -> startActivity(new Intent(Car.CAR_INTENT_ACTION_MEDIA_TEMPLATE)));
 
+        int max = activity.getResources().getInteger(R.integer.playback_widget_bitmap_max_size_px);
+        Size maxArtSize = new Size(max, max);
+        mAlbumArtBinder = new ImageBinder<>(PlaceholderType.FOREGROUND, maxArtSize,
+                drawable -> {
+                    Bitmap bitmap = (drawable != null)
+                            ? BitmapUtils.fromDrawable(drawable, maxArtSize) : null;
+                    albumBackground.setImageBitmap(bitmap, true);
+                });
+
+        playbackViewModel.getMetadata().observe(getViewLifecycleOwner(),
+                item -> mAlbumArtBinder.setImage(PlaybackFragment.this.getContext(),
+                        item != null ? item.getArtworkKey() : null));
+
         MediaAppSelectorWidget appSelector = view.findViewById(R.id.app_switch_container);
+        Preconditions.checkNotNull(appSelector);
         appSelector.setFragmentActivity(getActivity());
 
         return view;
@@ -105,7 +121,6 @@ public class PlaybackFragment extends Fragment {
         private LiveData<Bitmap> mAppIcon;
         private LiveData<CharSequence> mTitle;
         private LiveData<CharSequence> mSubtitle;
-        private LiveData<Bitmap> mAlbumArt;
 
         private PlaybackViewModel mPlaybackViewModel;
         private MediaSourceViewModel mMediaSourceViewModel;
@@ -126,9 +141,6 @@ public class PlaybackFragment extends Fragment {
             mAppIcon = mapNonNull(mMediaSource, MediaSource::getRoundPackageIcon);
             mTitle = mapNonNull(playbackViewModel.getMetadata(), MediaItemMetadata::getTitle);
             mSubtitle = mapNonNull(playbackViewModel.getMetadata(), MediaItemMetadata::getArtist);
-            mAlbumArt = AlbumArtLiveData.getAlbumArt(getApplication(),
-                    Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL, false,
-                    playbackViewModel.getMetadata());
         }
 
         LiveData<CharSequence> getAppName() {
@@ -145,10 +157,6 @@ public class PlaybackFragment extends Fragment {
 
         LiveData<CharSequence> getSubtitle() {
             return mSubtitle;
-        }
-
-        LiveData<Bitmap> getAlbumArt() {
-            return mAlbumArt;
         }
     }
 }
