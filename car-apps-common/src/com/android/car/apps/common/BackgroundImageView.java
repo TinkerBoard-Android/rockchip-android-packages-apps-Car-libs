@@ -18,7 +18,10 @@ package com.android.car.apps.common;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Size;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -33,7 +36,7 @@ public class BackgroundImageView extends ConstraintLayout {
     private CrossfadeImageView mImageView;
 
     /** Configuration (controlled from resources) */
-    private int mBitmapTargetSize;
+    private Size mBitmapTargetSize;
     private float mBitmapBlurPercent;
 
     private View mDarkeningScrim;
@@ -54,7 +57,8 @@ public class BackgroundImageView extends ConstraintLayout {
         mImageView = findViewById(R.id.background_image_image);
         mDarkeningScrim = findViewById(R.id.background_image_darkening_scrim);
 
-        mBitmapTargetSize = getResources().getInteger(R.integer.background_bitmap_target_size_px);
+        int size = getResources().getInteger(R.integer.background_bitmap_target_size_px);
+        mBitmapTargetSize = new Size(size, size);
         mBitmapBlurPercent = getResources().getFloat(R.dimen.background_bitmap_blur_percent);
 
         TypedArray a = context.getTheme().obtainStyledAttributes(attrs,
@@ -69,19 +73,32 @@ public class BackgroundImageView extends ConstraintLayout {
     }
 
     /**
+     * @deprecated Use {@link #setBackgroundDrawable} instead, and make sure to only call when the
+     * image is actually different! TODO(b/139387273).
      * Sets the image to display to a bitmap
      * @param bitmap The image to show. It will be scaled to the correct size and blurred.
      * @param showAnimation Whether or not to cross fade to the new image
      */
+    @Deprecated
     public void setBackgroundImage(@Nullable Bitmap bitmap, boolean showAnimation) {
-        if (bitmap == null) {
+        Drawable drawable = (bitmap != null) ? new BitmapDrawable(bitmap) : null;
+        updateBlur(drawable, showAnimation);
+    }
+
+    /** Sets the drawable that will be displayed blurred by this view. */
+    public void setBackgroundDrawable(@Nullable Drawable drawable) {
+        updateBlur(drawable, true);
+    }
+
+    private void updateBlur(@Nullable Drawable drawable, boolean showAnimation) {
+        if (drawable == null) {
             mImageView.setImageBitmap(null, false);
             return;
         }
 
-        bitmap = ImageUtils.blur(getContext(), bitmap, mBitmapTargetSize, mBitmapBlurPercent);
-        mImageView.setImageBitmap(bitmap, showAnimation);
-
+        Bitmap src = BitmapUtils.fromDrawable(drawable, mBitmapTargetSize);
+        Bitmap blurred = ImageUtils.blur(getContext(), src, mBitmapTargetSize, mBitmapBlurPercent);
+        mImageView.setImageBitmap(blurred, showAnimation);
         invalidate();
         requestLayout();
     }
@@ -89,14 +106,6 @@ public class BackgroundImageView extends ConstraintLayout {
     /** Sets the background to a color */
     public void setBackgroundColor(int color) {
         mImageView.setBackgroundColor(color);
-    }
-
-    /**
-     * Gets the desired size for an image to pass to {@link #setBackgroundImage}. That size is
-     * defined by R.integer.background_bitmap_target_size_px.
-     */
-    public int getDesiredBackgroundSize() {
-        return mBitmapTargetSize;
     }
 
     /** Dims/undims the background image by 30% */

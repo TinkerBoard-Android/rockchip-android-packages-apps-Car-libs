@@ -35,6 +35,7 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.android.car.apps.common.CarControlBar;
+import com.android.car.apps.common.CommonFlags;
 import com.android.car.apps.common.ControlBar;
 import com.android.car.media.common.playback.PlaybackViewModel;
 import com.android.car.media.common.source.MediaSourceColors;
@@ -138,7 +139,7 @@ public class MediaButtonController {
 
     private ImageButton createIconButton(Drawable icon) {
         ImageButton button = mControlBar.createIconButton(icon);
-        boolean flagInvalidArt = MediaItemMetadata.flagInvalidMediaArt(mContext);
+        boolean flagInvalidArt = CommonFlags.getInstance(mContext).shouldFlagImproperImageRefs();
         if (flagInvalidArt && !(icon instanceof VectorDrawable)) {
             button.setImageTintList(
                     ColorStateList.valueOf(MediaItemMetadata.INVALID_MEDIA_ART_TINT_COLOR));
