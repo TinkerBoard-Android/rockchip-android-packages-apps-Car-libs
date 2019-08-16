@@ -27,7 +27,7 @@ import com.android.car.media.common.playback.PlaybackViewModel.PlaybackStateWrap
 /**
  * Abstract representation of a custom playback action. A custom playback action represents a
  * visual element that can be used to trigger playback actions not included in the standard
- * {@link PlaybackControls} class.
+ * control bar.
  * Custom actions for the current media source are exposed through
  * {@link PlaybackStateWrapper#getCustomActions}
  */
