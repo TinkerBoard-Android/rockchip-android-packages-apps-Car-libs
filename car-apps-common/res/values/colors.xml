@@ -50,7 +50,7 @@
     <color name="car_tab_unselected_color_light">#90FFFFFF</color>
 
     <color name="primary_text_color">#FFFFFFFF</color>
-    <color name="secondary_text_color">#90FFFFFF</color>
+    <color name="secondary_text_color">#B8FFFFFF</color>
 
     <color name="primary_app_icon_color">#FFFFFFFF</color>
     <color name="secondary_app_icon_color">#B8FFFFFF</color>
