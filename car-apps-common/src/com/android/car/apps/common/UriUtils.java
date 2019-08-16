@@ -51,6 +51,11 @@ public final class UriUtils {
      */
     private UriUtils() {}
 
+    /** Returns true if the uri is null or empty. */
+    public static boolean isEmpty(@Nullable Uri uri) {
+        return (uri == null || TextUtils.isEmpty(uri.toString()));
+    }
+
     /**
      * Gets resource uri representation for a resource of a package
      */

@@ -23,6 +23,7 @@ import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
+import android.util.Size;
 
 /**
  * Utility methods to manipulate images.
@@ -37,7 +38,7 @@ public class ImageUtils {
      * blurring radius.
      */
     @NonNull
-    public static Bitmap blur(Context context, @NonNull Bitmap image, int bitmapTargetSize,
+    public static Bitmap blur(Context context, @NonNull Bitmap image, Size bitmapTargetSize,
             float bitmapBlurPercent) {
         image = maybeResize(image, bitmapTargetSize);
         float blurRadius = bitmapBlurPercent * getBitmapDimension(image);
@@ -63,16 +64,21 @@ public class ImageUtils {
         return outputBitmap;
     }
 
-    private static Bitmap maybeResize(@NonNull Bitmap image, int bitmapTargetSize) {
-        int imageDim = getBitmapDimension(image);
-        if (imageDim > bitmapTargetSize) {
-            float scale = bitmapTargetSize / (float) imageDim;
+    private static Bitmap maybeResize(@NonNull Bitmap image, Size bitmapTargetSize) {
+        if (image.getWidth() > bitmapTargetSize.getWidth()
+                || image.getHeight() > bitmapTargetSize.getHeight()) {
+            int imageDim = getBitmapDimension(image);
+            float scale = getAverage(bitmapTargetSize) / (float) imageDim;
             int width = Math.round(scale * image.getWidth());
             int height = Math.round(scale * image.getHeight());
             return Bitmap.createScaledBitmap(image, width, height, false);
         } else {
             return image;
         }
+    }
+
+    private static int getAverage(@NonNull Size size) {
+        return (size.getWidth() + size.getHeight()) / 2;
     }
 
     private static int getBitmapDimension(@NonNull Bitmap image) {
