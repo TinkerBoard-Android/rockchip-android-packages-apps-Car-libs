@@ -23,4 +23,12 @@
     <string name="config_scrollBarComponent" translatable="false">
         com.android.car.apps.common.widget.CarScrollBar
     </string>
+
+
+    <!-- This value must remain false for production builds. It is intended to be overlaid in
+        the simulator, so third party app developers can notice quickly that they are sending
+        improper image references.
+        See: com.android.car.apps.common.CommonFlags#flagImproperImageRefs
+    -->
+    <bool name="flag_improper_image_references">false</bool>
 </resources>

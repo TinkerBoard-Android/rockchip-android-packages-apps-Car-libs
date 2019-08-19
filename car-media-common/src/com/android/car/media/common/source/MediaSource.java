@@ -31,11 +31,12 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.service.media.MediaBrowserService;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.android.car.apps.common.BitmapUtils;
 
 import java.util.HashSet;
 import java.util.List;
@@ -195,7 +196,7 @@ public class MediaSource {
      * Returns this media source's icon cropped to a circle.
      */
     public Bitmap getRoundPackageIcon() {
-        return getRoundCroppedBitmap(drawableToBitmap(mIcon));
+        return getRoundCroppedBitmap(BitmapUtils.fromDrawable(mIcon, null));
     }
 
     /**
@@ -203,29 +204,6 @@ public class MediaSource {
      */
     public boolean isCustom() {
         return CUSTOM_MEDIA_SOURCES.contains(getPackageName());
-    }
-
-    private static Bitmap drawableToBitmap(Drawable drawable) {
-        Bitmap bitmap = null;
-
-        if (drawable instanceof BitmapDrawable) {
-            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-            if (bitmapDrawable.getBitmap() != null) {
-                return bitmapDrawable.getBitmap();
-            }
-        }
-
-        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
-            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-        } else {
-            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
-                    drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        }
-
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-        return bitmap;
     }
 
     private static Bitmap getRoundCroppedBitmap(Bitmap bitmap) {
