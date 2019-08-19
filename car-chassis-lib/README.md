@@ -25,4 +25,4 @@ Here is the process for updating this library:
 4. Back on Gerrit, submit your CL
 5. Back on Google3, run update.sh again and submit
 
-TODO: Automate this process using CaaS
+TODO: Automate this process using CaaS (in progress)
