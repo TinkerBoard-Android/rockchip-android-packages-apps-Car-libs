@@ -155,8 +155,10 @@ public class MediaSource {
     @NonNull
     private static Drawable extractIcon(@NonNull Context context, @Nullable ServiceInfo serviceInfo,
             @NonNull String packageName) throws PackageManager.NameNotFoundException {
-        return serviceInfo != null ? serviceInfo.loadIcon(context.getPackageManager())
+        Drawable appIcon = serviceInfo != null ? serviceInfo.loadIcon(context.getPackageManager())
                 : context.getPackageManager().getApplicationIcon(packageName);
+
+        return BitmapUtils.maybeFlagDrawable(context, appIcon);
     }
 
     /**

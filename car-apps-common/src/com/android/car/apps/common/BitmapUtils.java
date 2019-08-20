@@ -18,7 +18,10 @@ package com.android.car.apps.common;
 import static android.graphics.Bitmap.Config.ARGB_8888;
 
 import android.annotation.ColorInt;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -114,6 +117,21 @@ public class BitmapUtils {
         canvas.drawBitmap(image, 0f, 0f, new Paint());
         canvas.drawColor(colorOverlay);
         return clone;
+    }
+
+    /** Returns a tinted drawable if flagging is enabled and the given drawable is a bitmap. */
+    @NonNull
+    public static Drawable maybeFlagDrawable(@NonNull Context context, @NonNull Drawable drawable) {
+        if (drawable instanceof BitmapDrawable) {
+            CommonFlags flags = CommonFlags.getInstance(context);
+            Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+            if (flags.shouldFlagImproperImageRefs() && bitmap != null) {
+                Resources res = context.getResources();
+                int tint = context.getColor(R.color.improper_image_refs_tint_color);
+                drawable = new BitmapDrawable(res, BitmapUtils.createTintedBitmap(bitmap, tint));
+            }
+        }
+        return drawable;
     }
 
     /** Renders the drawable into a bitmap if needed. */
