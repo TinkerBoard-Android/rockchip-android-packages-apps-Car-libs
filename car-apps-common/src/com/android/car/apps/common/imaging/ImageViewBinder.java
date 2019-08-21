@@ -18,9 +18,14 @@ package com.android.car.apps.common.imaging;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.Size;
 import android.view.View;
 import android.widget.ImageView;
+
+import com.android.car.apps.common.CommonFlags;
+import com.android.car.apps.common.R;
 
 /**
  * Binds images to an image view.
@@ -30,20 +35,42 @@ public class ImageViewBinder<T extends ImageBinder.ImageRef> extends ImageBinder
 
     @Nullable
     private final ImageView mImageView;
+    private final boolean mFlagBitmaps;
 
+    /** See {@link ImageViewBinder} and {@link ImageBinder}. */
     public ImageViewBinder(Size maxImageSize, @Nullable ImageView imageView) {
-        this(PlaceholderType.FOREGROUND, maxImageSize, imageView);
+        this(PlaceholderType.FOREGROUND, maxImageSize, imageView, false);
     }
 
+    /**
+     * See {@link ImageViewBinder} and {@link ImageBinder}.
+     * @param flagBitmaps whether this binder should flag bitmap drawables if flagging is enabled.
+     */
     public ImageViewBinder(PlaceholderType type, Size maxImageSize,
-            @Nullable ImageView imageView) {
-        super(type, maxImageSize, drawable -> {
-            if (imageView != null) {
-                imageView.setImageDrawable(drawable);
-                imageView.setVisibility((drawable != null) ? View.VISIBLE : View.GONE);
-            }
-        });
+            @Nullable ImageView imageView, boolean flagBitmaps) {
+        super(type, maxImageSize);
         mImageView = imageView;
+        mFlagBitmaps = flagBitmaps;
+    }
+
+    @Override
+    protected void setDrawable(@Nullable Drawable drawable) {
+        if (mImageView != null) {
+            mImageView.setImageDrawable(drawable);
+            mImageView.setVisibility((drawable != null) ? View.VISIBLE : View.GONE);
+            if (mFlagBitmaps) {
+                CommonFlags flags = CommonFlags.getInstance(mImageView.getContext());
+                if (flags.shouldFlagImproperImageRefs()) {
+                    if (drawable instanceof BitmapDrawable) {
+                        int tint = mImageView.getContext().getColor(
+                                R.color.improper_image_refs_tint_color);
+                        mImageView.setColorFilter(tint);
+                    } else {
+                        mImageView.clearColorFilter();
+                    }
+                }
+            }
+        }
     }
 
     @Override

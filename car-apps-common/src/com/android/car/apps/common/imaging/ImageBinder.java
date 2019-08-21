@@ -69,6 +69,7 @@ public class ImageBinder<T extends ImageBinder.ImageRef> {
 
     private final PlaceholderType mPlaceholderType;
     private final Size mMaxImageSize;
+    @Nullable
     private final Consumer<Drawable> mClient;
 
     private T mCurrentRef;
@@ -83,6 +84,18 @@ public class ImageBinder<T extends ImageBinder.ImageRef> {
         mClient = checkNotNull(consumer, "Cannot bind a null consumer");
     }
 
+    protected ImageBinder(@NonNull PlaceholderType type, @NonNull Size maxImageSize) {
+        mPlaceholderType = checkNotNull(type, "Need a type");
+        mMaxImageSize = checkNotNull(maxImageSize, "Need a size");
+        mClient = null;
+    }
+
+    protected void setDrawable(@Nullable Drawable drawable) {
+        if (mClient != null) {
+            mClient.accept(drawable);
+        }
+    }
+
     /** Fetches a new image if needed. */
     public void setImage(Context context, @Nullable T newRef) {
         if (isSameImage(context, newRef)) {
@@ -94,11 +107,11 @@ public class ImageBinder<T extends ImageBinder.ImageRef> {
         mCurrentRef = newRef;
 
         if (mCurrentRef == null) {
-            mClient.accept(null);
+            setDrawable(null);
         } else {
             Drawable image = mCurrentRef.getImage(context);
             if (image != null) {
-                mClient.accept(image);
+                setDrawable(image);
                 return;
             }
 
@@ -108,7 +121,7 @@ public class ImageBinder<T extends ImageBinder.ImageRef> {
                             (drawable == null && mPlaceholderType != PlaceholderType.NONE)
                                     ? mCurrentRef.getPlaceholder(context, mPlaceholderType)
                                     : drawable;
-                    mClient.accept(displayed);
+                    setDrawable(displayed);
                     onRequestFinished();
                 }
             };
