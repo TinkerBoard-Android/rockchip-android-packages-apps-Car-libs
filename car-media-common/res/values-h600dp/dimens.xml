@@ -22,5 +22,6 @@
     <dimen name="appbar_view_search_bar_padding">62dp</dimen>
     <!-- negative margins to overlap icons on search bar -->
     <dimen name="appbar_view_search_app_icon_margin">-76dp</dimen>
-    <dimen name="appbar_view_search_close_icon_margin">-70dp</dimen>
+    <dimen name="appbar_view_search_close_icon_margin">-96dp</dimen>
+    <dimen name="appbar_view_search_bar_end_margin">26dp</dimen>
 </resources>
