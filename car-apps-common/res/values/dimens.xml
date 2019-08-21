@@ -77,4 +77,11 @@
         The computed blur radius is capped at 25 pixels. -->
     <item name="background_bitmap_blur_percent" format="float" type="dimen">0.05</item>
 
+    <!-- Dialog and button -->
+    <dimen name="dialog_max_width">706dp</dimen>
+    <dimen name="hero_button_max_width">@dimen/dialog_max_width</dimen>
+    <dimen name="hero_button_min_width">@dimen/touch_target_size</dimen>
+    <dimen name="hero_button_height">@dimen/touch_target_size</dimen>
+    <dimen name="hero_button_corner_radius">38dp</dimen>
+
 </resources>
