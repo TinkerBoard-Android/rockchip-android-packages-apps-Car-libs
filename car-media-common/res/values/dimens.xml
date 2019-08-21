@@ -31,7 +31,8 @@
     <dimen name="appbar_view_icon_size">@*android:dimen/car_primary_icon_size</dimen>
     <!-- Padding of primary icon, equals (@dimen/appbar_view_icon_touch_target_size - @dimen/appbar_view_icon_size) / 2. -->
     <dimen name="appbar_view_icon_padding">16dp</dimen>
-    <dimen name="appbar_view_search_bar_padding">62dp</dimen>
+    <dimen name="appbar_view_search_bar_padding_start">62dp</dimen>
+    <dimen name="appbar_view_search_bar_padding_end">60dp</dimen>
     <dimen name="appbar_view_search_app_icon_size">@*android:dimen/car_secondary_icon_size</dimen>
     <!-- negative margin to overlap icons on search bar -->
     <dimen name="appbar_view_search_app_icon_margin">-66dp</dimen>
