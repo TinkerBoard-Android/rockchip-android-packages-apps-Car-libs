@@ -15,17 +15,12 @@
   limitations under the License.
   -->
 
-<resources>
-    <color name="car_tab_selected_color">@color/car_tab_selected_color_dark</color>
-    <color name="car_tab_unselected_color">@color/car_tab_unselected_color_dark</color>
-    <color name="scrim_overlay_color">#D6000000</color>
-    <color name="minimized_control_bar_background_color">#E00E1013</color>
-
-    <color name="primary_text_color">#E0FFFFFF</color>
-    <color name="secondary_text_color">#99FFFFFF</color>
-
-    <color name="primary_app_icon_color">#E0FFFFFF</color>
-    <color name="secondary_app_icon_color">#99FFFFFF</color>
-
-    <color name="app_bar_background_color">#EB000000</color>
-</resources>
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView
+        android:id="@+id/chassis_tab_item_icon"
+        style="@style/ChassisTabItemIcon"/>
+    <TextView
+        android:id="@+id/chassis_tab_item_text"
+        style="@style/ChassisTabItemText"/>
+</merge>
