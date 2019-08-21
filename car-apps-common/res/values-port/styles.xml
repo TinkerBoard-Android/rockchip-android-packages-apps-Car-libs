@@ -15,12 +15,10 @@
   limitations under the License.
 -->
 <resources>
-    <dimen name="appbar_2_rows_height">192dp</dimen>
-    <dimen name="appbar_view_icon_touch_target_size">96dp</dimen>
-    <dimen name="appbar_view_icon_padding">26dp</dimen>
-    <dimen name="appbar_view_icon_background_radius">48dp</dimen>
-    <!-- negative margins to overlap icons on search bar -->
-    <dimen name="appbar_view_search_app_icon_margin">-76dp</dimen>
-    <dimen name="appbar_view_search_close_icon_margin">-96dp</dimen>
-    <dimen name="appbar_view_search_bar_end_margin">26dp</dimen>
+    <style name="FullScreenErrorMessageStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">@style/TextAppearance.Body1</item>
+        <item name="android:gravity">center</item>
+    </style>
 </resources>
