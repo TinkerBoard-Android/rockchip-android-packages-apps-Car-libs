@@ -14,10 +14,19 @@
  limitations under the License.
 -->
 <resources>
-    <!-- Attributes for the ClickThroughToolbar. -->
-    <declare-styleable name="ClickThroughToolbar">
-        <!-- Whether or not clicks on this toolbar will pass through to an underlying view. This
-             value is false by default. -->
-        <attr name="clickThrough" format="boolean"/>
+    <declare-styleable name="ChassisToolbar">
+        <!-- The title of the toolbar, only displayed in certain conditions -->
+        <attr name="title" format="string"/>
+        <!-- The logo drawable for the toolbar. Appears when there's no back/close button shown -->
+        <attr name="logo" format="reference"/>
+        <!-- The hint for the search bar in the toolbar -->
+        <attr name="searchHint" format="string"/>
+        <!-- The buttons to display, as an array of layout ids. Use @layout/chassis_toolbar_search_button and @layout/chassis_toolbar_settings_button for the search and settings buttons -->
+        <attr name="buttons" format="reference"/>
+        <!-- Whether or not to show the custom buttons while searching. If using chassis_toolbar_search_button, or any other layout with a view with the id of "search", it will always be hidden. -->
+        <attr name="showButtonsWhileSearching" format="boolean"/>
     </declare-styleable>
+
+    <!-- Theme attribute to specifying a default style for all chassisToolbars -->
+    <attr name="chassisToolbarStyle" format="reference"/>
 </resources>
