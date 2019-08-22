@@ -14,5 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <resources>
+    <!-- Search hint, displayed inside the search box [CHAR LIMIT=50] -->
     <string name="chassis_default_search_hint">Search&#8230;</string>
 </resources>
