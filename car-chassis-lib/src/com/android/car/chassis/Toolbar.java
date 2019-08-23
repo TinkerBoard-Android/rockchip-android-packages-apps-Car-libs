@@ -15,7 +15,6 @@
  */
 package com.android.car.chassis;
 
-import android.annotation.StringRes;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -29,13 +28,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 
 /**
  * A toolbar for Android Automotive OS apps.
@@ -70,6 +69,13 @@ public class Toolbar extends FrameLayout {
          * In the SEARCH state, only the back button and the search bar will be visible.
          */
         SEARCH,
+    }
+
+    /**
+     * {@link java.util.function.Consumer} is not available for non-java8 enabled Android targets.
+     */
+    private interface Consumer<T> {
+        void accept(T value);
     }
 
     private ImageView mNavIcon;
@@ -121,6 +127,7 @@ public class Toolbar extends FrameLayout {
         mTitle.setText(a.getString(R.styleable.ChassisToolbar_title));
         setLogo(a.getResourceId(R.styleable.ChassisToolbar_logo, 0));
         setButtons(a.getResourceId(R.styleable.ChassisToolbar_buttons, 0));
+        setBackground(context.getDrawable(R.color.toolbar_background_color));
         mShowButtonsWhileSearching = a.getBoolean(
                 R.styleable.ChassisToolbar_showButtonsWhileSearching, false);
         String searchHint = a.getString(R.styleable.ChassisToolbar_searchHint);
@@ -129,13 +136,6 @@ public class Toolbar extends FrameLayout {
         }
 
         a.recycle();
-
-        // If an android:background attribute wasn't given, set the default one
-        TypedArray viewAttributes = context.obtainStyledAttributes(
-                attrs, com.android.internal.R.styleable.View, defStyleAttr, defStyleRes);
-        if (viewAttributes.getDrawable(com.android.internal.R.styleable.View_background) == null) {
-            setBackground(context.getDrawable(R.color.toolbar_background_color));
-        }
 
         mTabLayout.addListener(new TabLayout.Listener() {
             @Override
