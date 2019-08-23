@@ -108,7 +108,6 @@ public class SearchView extends ConstraintLayout {
     /**
      * Removes a listener.
      * See also {@link #addToolbarListener(Toolbar.Listener)}
-     * @param listener
      */
     public void removeToolbarListener(Toolbar.Listener listener) {
         mListeners.remove(listener);
