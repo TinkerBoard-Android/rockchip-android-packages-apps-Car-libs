@@ -32,6 +32,8 @@
             <enum name="subpage_custom" value="2"/>
             <enum name="search" value="3"/>
         </attr>
+        <!-- Whether or not the toolbar should have a background. Default true. -->
+        <attr name="showBackground" format="boolean"/>
     </declare-styleable>
 
     <!-- Theme attribute to specifying a default style for all chassisToolbars -->
