@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Copyright (C) 2015 The Android Open Source Project
+<!-- Copyright (C) 2019 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,6 +14,12 @@
      limitations under the License.
 -->
 <resources>
-    <color name="chassis_tab_selected_color">@color/chassis_tab_selected_color_dark</color>
-    <color name="chassis_tab_unselected_color">@color/chassis_tab_unselected_color_dark</color>
+    <!-- General -->
+
+    <!-- Main text color (titles, text body, etc.) -->
+    <color name="chassis_primary_text_color">#E2FFFFFF</color>
+    <!-- Text color used in subtitles or other secondary text blocks -->
+    <color name="chassis_secondary_text_color">#80FFFFFF</color>
+    <!-- The ripple color for a card. -->
+    <color name="chassis_card_ripple_background">#8F000000</color>
 </resources>

@@ -17,5 +17,5 @@
   ~
  -->
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-        android:color="@*android:color/car_card_ripple_background"
+        android:color="@color/chassis_card_ripple_background"
         android:radius="@dimen/chassis_toolbar_button_background_radius"/>
