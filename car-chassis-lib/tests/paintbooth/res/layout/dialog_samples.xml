@@ -24,10 +24,10 @@
 
   <com.android.car.chassis.Toolbar
       android:id="@+id/toolbar"
-      android:layout_width="500dp"
-      android:layout_height="200dp"
-      android:background="#FF0000"
-      app:layout_constraintTop_toBottomOf="parent"/>
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      app:layout_constraintTop_toTopOf="parent"
+      app:title="@string/app_name"/>
 
   <Button
       android:id="@+id/show_dialog_bt"
