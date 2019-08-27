@@ -17,8 +17,8 @@
 <ImageView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/settings"
-    android:layout_width="@dimen/touch_target_size"
-    android:layout_height="@dimen/touch_target_size"
-    android:src="@drawable/ic_settings"
+    android:layout_width="@dimen/chassis_touch_target_width"
+    android:layout_height="@dimen/chassis_touch_target_height"
+    android:src="@drawable/chassis_icon_settings"
     android:scaleType="center"
     android:background="@drawable/chassis_toolbar_button_background"/>

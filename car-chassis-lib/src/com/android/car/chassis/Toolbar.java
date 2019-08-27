@@ -127,7 +127,7 @@ public class Toolbar extends FrameLayout {
         mTitle.setText(a.getString(R.styleable.ChassisToolbar_title));
         setLogo(a.getResourceId(R.styleable.ChassisToolbar_logo, 0));
         setButtons(a.getResourceId(R.styleable.ChassisToolbar_buttons, 0));
-        setBackground(context.getDrawable(R.color.toolbar_background_color));
+        setBackground(context.getDrawable(R.color.chassis_toolbar_background_color));
         mShowButtonsWhileSearching = a.getBoolean(
                 R.styleable.ChassisToolbar_showButtonsWhileSearching, false);
         String searchHint = a.getString(R.styleable.ChassisToolbar_searchHint);
@@ -336,7 +336,7 @@ public class Toolbar extends FrameLayout {
 
         View.OnClickListener backClickListener = (v) -> forEachListener(Listener::onBack);
         mNavIcon.setVisibility(state != State.HOME ? VISIBLE : INVISIBLE);
-        mNavIcon.setImageResource(state != State.HOME ? R.drawable.ic_arrow_back : 0);
+        mNavIcon.setImageResource(state != State.HOME ? R.drawable.chassis_icon_arrow_back : 0);
         mLogo.setVisibility(state == State.HOME && mHasLogo ? VISIBLE : INVISIBLE);
         mNavIconContainer.setVisibility(state != State.HOME || mHasLogo ? VISIBLE : GONE);
         mNavIconContainer.setClickable(state != State.HOME);
