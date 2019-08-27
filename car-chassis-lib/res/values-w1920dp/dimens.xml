@@ -15,5 +15,6 @@
   limitations under the License.
   -->
 <resources>
-    <dimen name="chassis_toolbar_second_row_height">@dimen/chassis_app_bar_height</dimen>
+    <!-- Margin -->
+    <dimen name="chassis_margin">192dp</dimen>
 </resources>
