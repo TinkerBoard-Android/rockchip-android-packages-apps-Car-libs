@@ -18,6 +18,7 @@ package com.android.car.chassis;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,6 +47,8 @@ import java.util.Set;
  * The toolbar supports a navigation button, title, tabs, search, and custom buttons.
  */
 public class Toolbar extends FrameLayout {
+
+    private static final String TAG = "ChassisToolbar";
 
     /** Enum of states the toolbar can be in. Controls what elements of the toolbar are displayed */
     public enum State {
@@ -133,6 +136,26 @@ public class Toolbar extends FrameLayout {
         String searchHint = a.getString(R.styleable.ChassisToolbar_searchHint);
         if (searchHint != null) {
             setSearchHint(searchHint);
+        }
+
+        switch (a.getInt(R.styleable.ChassisToolbar_state, 0)) {
+            case 0:
+                setState(State.HOME);
+                break;
+            case 1:
+                setState(State.SUBPAGE);
+                break;
+            case 2:
+                setState(State.SUBPAGE_CUSTOM);
+                break;
+            case 3:
+                setState(State.SEARCH);
+                break;
+            default:
+                if (Log.isLoggable(TAG, Log.WARN)) {
+                    Log.w(TAG, "Unknown initial state");
+                }
+                break;
         }
 
         a.recycle();
