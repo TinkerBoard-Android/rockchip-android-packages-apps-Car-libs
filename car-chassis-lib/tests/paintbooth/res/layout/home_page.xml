@@ -22,6 +22,14 @@
     android:layout_height="match_parent"
     android:background="@color/dialog_activity_background_color">
 
+  <com.android.car.chassis.Toolbar
+      android:id="@+id/toolbar"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      app:layout_constraintTop_toTopOf="parent"
+      app:title="@string/app_name"
+      app:logo="@drawable/ic_launcher"/>
+
   <Button
       android:id="@+id/dialog_samples"
       android:layout_width="wrap_content"
@@ -29,6 +37,6 @@
       android:text="Show Dialog Sample Page"
       app:layout_constraintLeft_toLeftOf="parent"
       app:layout_constraintRight_toRightOf="parent"
-      app:layout_constraintTop_toTopOf="parent"/>
+      app:layout_constraintTop_toBottomOf="@id/toolbar"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
