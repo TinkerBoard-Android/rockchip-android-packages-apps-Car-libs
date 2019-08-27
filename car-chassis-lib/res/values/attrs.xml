@@ -15,16 +15,23 @@
 -->
 <resources>
     <declare-styleable name="ChassisToolbar">
-        <!-- The title of the toolbar, only displayed in certain conditions -->
+        <!-- Title of the toolbar, only displayed in certain conditions -->
         <attr name="title" format="string"/>
-        <!-- The logo drawable for the toolbar. Appears when there's no back/close button shown -->
+        <!-- Logo drawable for the toolbar. Appears when there's no back/close button shown -->
         <attr name="logo" format="reference"/>
-        <!-- The hint for the search bar in the toolbar -->
+        <!-- Hint for the search bar in the toolbar -->
         <attr name="searchHint" format="string"/>
-        <!-- The buttons to display, as an array of layout ids. Use @layout/chassis_toolbar_search_button and @layout/chassis_toolbar_settings_button for the search and settings buttons -->
+        <!-- Buttons to display, as an array of layout ids. Use @layout/chassis_toolbar_search_button and @layout/chassis_toolbar_settings_button for the search and settings buttons -->
         <attr name="buttons" format="reference"/>
         <!-- Whether or not to show the custom buttons while searching. If using chassis_toolbar_search_button, or any other layout with a view with the id of "search", it will always be hidden. -->
         <attr name="showButtonsWhileSearching" format="boolean"/>
+        <!-- Initial state of the toolbar. See the Toolbar.State enum for more information -->
+        <attr name="state" format="enum">
+            <enum name="home" value="0"/>
+            <enum name="subpage" value="1"/>
+            <enum name="subpage_custom" value="2"/>
+            <enum name="search" value="3"/>
+        </attr>
     </declare-styleable>
 
     <!-- Theme attribute to specifying a default style for all chassisToolbars -->
