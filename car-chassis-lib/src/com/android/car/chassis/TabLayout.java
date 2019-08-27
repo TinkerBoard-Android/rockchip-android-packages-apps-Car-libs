@@ -181,7 +181,7 @@ public class TabLayout extends LinearLayout {
     }
 
     private ViewGroup createTabItemView() {
-        LinearLayout tabItemView = new LinearLayout(mContext);
+        LinearLayout tabItemView = new LinearLayout(getContext());
         tabItemView.setOrientation(LinearLayout.VERTICAL);
         tabItemView.setGravity(Gravity.CENTER);
         tabItemView.setPadding(mTabPaddingX, 0, mTabPaddingX, 0);
