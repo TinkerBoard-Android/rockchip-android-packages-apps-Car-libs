@@ -1,0 +1,3 @@
+include ':PaintBooth'
+project(':PaintBooth').projectDir = new File('./tests/paintbooth')
+rootProject.name='Chassis'
