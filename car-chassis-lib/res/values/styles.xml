@@ -19,18 +19,17 @@
     <style name="ChassisTabItemText">
         <item name="android:textAppearance">@style/TextAppearance.Body3</item>
         <item name="android:textColor">@color/chassis_tab_item_selector</item>
-        <item name="android:layout_width">@dimen/chassis_tab_width</item>
+        <item name="android:layout_width">@dimen/chassis_tab_text_width</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:singleLine">true</item>
         <item name="android:gravity">center</item>
     </style>
 
     <style name="ChassisTabItemIcon">
-        <item name="android:layout_width">@dimen/chassis_tab_icon_size</item>
-        <item name="android:layout_height">@dimen/chassis_tab_icon_size</item>
+        <item name="android:layout_width">@dimen/chassis_tab_icon_width</item>
+        <item name="android:layout_height">@dimen/chassis_tab_icon_height</item>
         <item name="android:scaleType">fitCenter</item>
         <item name="android:tint">@color/chassis_tab_item_selector</item>
-        <item name="android:tintMode">src_in</item>
     </style>
 
     <style name="ChassisTabItemBackground">
@@ -67,7 +66,8 @@
         <item name="android:layout_width">@dimen/chassis_toolbar_view_icon_size</item>
         <item name="android:layout_height">@dimen/chassis_toolbar_view_icon_size</item>
         <item name="android:layout_gravity">center</item>
-        <item name="android:src">@drawable/ic_arrow_back</item>
+        <item name="android:tint">@color/chassis_primary_text_color</item>
+        <item name="android:src">@drawable/chassis_icon_arrow_back</item>
         <item name="android:scaleType">fitXY</item>
     </style>
 
@@ -80,17 +80,17 @@
 
     <style name="TextAppearance">
         <item name="android:fontFamily">roboto-regular</item>
-        <item name="android:textColor">@color/primary_text_color</item>
+        <item name="android:textColor">@color/chassis_primary_text_color</item>
     </style>
 
     <style name="TextAppearance.Body1" parent="TextAppearance">
         <item name="android:textSize">32sp</item>
-        <item name="android:letterSpacing">@dimen/letter_spacing_body1</item>
+        <item name="android:letterSpacing">@dimen/chassis_letter_spacing_body1</item>
     </style>
 
     <style name="TextAppearance.Body3" parent="TextAppearance">
         <item name="android:textSize">24sp</item>
-        <item name="android:letterSpacing">@dimen/letter_spacing_body3</item>
+        <item name="android:letterSpacing">@dimen/chassis_letter_spacing_body3</item>
     </style>
 
 </resources>
