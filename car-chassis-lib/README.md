@@ -19,10 +19,10 @@ Target: //google3/third_party/java/android_libs/android_car_chassis_lib
 
 Here is the process for updating this library:
 
-1. Develop, test and create CL in Gerrit with the desired changes
-2. On Google3, run update.sh and test your changes
-3. Iterate until your changes look okay on both places.
-4. Back on Gerrit, submit your CL
-5. Back on Google3, run update.sh again and submit
+1. Develop, test and upload changes to Gerrit
+2. On Google3, run './update.sh review <cl>' (with <cl> being your Gerrit CL #) and test your changes
+3. Repeat #1 and #2 until your changes look okay on both places.
+4. Back on Gerrit, submit your CL.
+5. Back on Google3, run './update.sh manual' submit
 
 TODO: Automate this process using CaaS (in progress)
