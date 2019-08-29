@@ -17,6 +17,7 @@ package com.android.car.chassis;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -130,7 +131,7 @@ public class Toolbar extends FrameLayout {
         mTitle.setText(a.getString(R.styleable.ChassisToolbar_title));
         setLogo(a.getResourceId(R.styleable.ChassisToolbar_logo, 0));
         setButtons(a.getResourceId(R.styleable.ChassisToolbar_buttons, 0));
-        setBackground(context.getDrawable(R.color.chassis_toolbar_background_color));
+        setBackgroundShown(a.getBoolean(R.styleable.ChassisToolbar_showBackground, true));
         mShowButtonsWhileSearching = a.getBoolean(
                 R.styleable.ChassisToolbar_showButtonsWhileSearching, false);
         String searchHint = a.getString(R.styleable.ChassisToolbar_searchHint);
@@ -243,6 +244,27 @@ public class Toolbar extends FrameLayout {
      */
     public void setSearchHint(CharSequence hint) {
         mSearchView.setHint(hint);
+    }
+
+    /**
+     * setBackground is disallowed, to prevent apps from deviating from the intended style too much.
+     */
+    @Override
+    public void setBackground(Drawable d) {
+        throw new UnsupportedOperationException(
+                "You can not change the background of a chassis toolbar, use "
+                + "setBackgroundShown(boolean) or an RRO instead.");
+    }
+
+    /**
+     * Show/hide the background. When hidden, the toolbar is completely transparent.
+     */
+    public void setBackgroundShown(boolean shown) {
+        if (shown) {
+            super.setBackground(getContext().getDrawable(R.color.chassis_toolbar_background_color));
+        } else {
+            super.setBackground(null);
+        }
     }
 
     /**
