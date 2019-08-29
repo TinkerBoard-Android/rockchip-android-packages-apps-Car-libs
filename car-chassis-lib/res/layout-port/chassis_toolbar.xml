@@ -57,7 +57,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/row_separator"
         app:layout_constraintStart_toEndOf="@id/nav_icon_container"
-        app:layout_constraintEnd_toStartOf="@id/buttons_container"/>
+        app:layout_constraintEnd_toStartOf="@id/menu_items_container"/>
 
     <com.android.car.chassis.SearchView
         android:id="@+id/search_view"
@@ -67,7 +67,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/row_separator"
         app:layout_constraintStart_toEndOf="@id/nav_icon_container"
-        app:layout_constraintEnd_toStartOf="@id/buttons_container"/>
+        app:layout_constraintEnd_toStartOf="@id/menu_items_container"/>
 
     <FrameLayout
         android:id="@+id/custom_view_container"
@@ -77,16 +77,36 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/row_separator"
         app:layout_constraintStart_toEndOf="@id/nav_icon_container"
-        app:layout_constraintEnd_toStartOf="@id/buttons_container"/>
+        app:layout_constraintEnd_toStartOf="@id/menu_items_container"/>
 
     <LinearLayout
-        android:id="@+id/buttons_container"
+        android:id="@+id/menu_items_container"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:orientation="horizontal"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/row_separator"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toStartOf="@id/chassis_toolbar_overflow_button"/>
+
+    <FrameLayout
+        android:id="@+id/chassis_toolbar_overflow_button"
+        android:layout_width="@dimen/chassis_touch_target_width"
+        android:layout_height="@dimen/chassis_touch_target_height"
+        android:layout_marginLeft="@dimen/chassis_toolbar_menu_item_margin"
+        android:layout_marginRight="@dimen/chassis_toolbar_menu_item_margin"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/row_separator"
+        app:layout_constraintEnd_toEndOf="parent">
+        <ImageView
+            android:src="@drawable/chassis_icon_overflow_menu"
+            android:layout_width="@dimen/chassis_primary_icon_size"
+            android:layout_height="@dimen/chassis_primary_icon_size"
+            android:layout_gravity="center"
+            android:background="@drawable/chassis_toolbar_icon_background"
+            android:tint="@color/chassis_toolbar_icon_tint"
+            android:tintMode="src_in"/>
+    </FrameLayout>
 
     <com.android.car.chassis.TabLayout
         android:id="@+id/tabs"
