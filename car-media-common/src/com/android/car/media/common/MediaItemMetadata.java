@@ -147,11 +147,15 @@ public class MediaItemMetadata implements Parcelable {
 
             Bitmap myBitmap = getBitmapToFlag(context);
             Bitmap otherBitmap = other.getBitmapToFlag(context);
-            if ((myBitmap != null) && (myBitmap.equals(otherBitmap))) return true;
+            if ((myBitmap != null) || (otherBitmap != null)) {
+                return Objects.equals(myBitmap, otherBitmap);
+            }
 
             Uri myUri = getImageURI();
             Uri otherUri = other.getImageURI();
-            if ((myUri != null) && (myUri.equals(otherUri))) return true;
+            if ((myUri != null) || (otherUri != null)) {
+                return Objects.equals(myUri, otherUri);
+            }
 
             return getPlaceholderHash() == other.getPlaceholderHash();
         }
