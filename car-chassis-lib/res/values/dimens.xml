@@ -59,4 +59,23 @@
 
     <!-- Internal artifacts. Do not overlay -->
     <item name="wrap_content" format="integer" type="dimen">-2</item>
+
+    <!-- Default Scroll Bar for PagedRecyclerView -->
+    <dimen name="chassis_scrollbar_button_size">76dp</dimen>
+    <dimen name="chassis_scrollbar_thumb_width">6dp</dimen>
+    <dimen name="chassis_scrollbar_separator_margin">16dp</dimen>
+    <dimen name="chassis_scrollbar_margin">20dp</dimen>
+    <dimen name="chassis_scrollbar_thumb_radius">100dp</dimen>
+
+    <item name="chassis_button_disabled_alpha" format="float" type="dimen">0.2</item>
+    <item name="chassis_scroller_milliseconds_per_inch" format="float" type="dimen">150</item>
+    <item name="chassis_scroller_deceleration_time_divisor" format="float" type="dimen">0.45</item>
+    <item name="chassis_scroller_interpolator_factor" format="float" type="dimen">1.8</item>
+
+    <item name="chassis_scrollbar_milliseconds_per_inch" format="float" type="dimen">150.0</item>
+    <item name="chassis_scrollbar_deceleration_times_divisor" format="float" type="dimen">0.45</item>
+    <item name="chassis_scrollbar_decelerate_interpolator_factor" format="float" type="dimen">1.8</item>
+
+    <dimen name="chassis_scrollbar_padding_start">0dp</dimen>
+    <dimen name="chassis_scrollbar_padding_end">0dp</dimen>
 </resources>
