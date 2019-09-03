@@ -82,10 +82,11 @@ public class ImageViewBinder<T extends ImageBinder.ImageRef> extends ImageBinder
 
     @Override
     protected void prepareForNewBinding(Context context) {
-        super.prepareForNewBinding(context);
         mImageView.setImageBitmap(null);
         mImageView.setImageDrawable(null);
         mImageView.clearColorFilter();
+        // Call super last to setup the default loading drawable.
+        super.prepareForNewBinding(context);
     }
 
 }
