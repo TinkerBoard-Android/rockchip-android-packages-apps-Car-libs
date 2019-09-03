@@ -38,10 +38,8 @@ import android.util.Log;
 
 import com.android.car.apps.common.BitmapUtils;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * This represents a source of media content. It provides convenient methods to access media source
@@ -49,15 +47,6 @@ import java.util.Set;
  */
 public class MediaSource {
     private static final String TAG = "MediaSource";
-
-    /**
-     * Custom media sources which should not be templatized.
-     */
-    private static final Set<String> CUSTOM_MEDIA_SOURCES = new HashSet<>();
-
-    static {
-        CUSTOM_MEDIA_SOURCES.add("com.android.car.radio");
-    }
 
     @NonNull
     private final ComponentName mBrowseService;
@@ -199,13 +188,6 @@ public class MediaSource {
      */
     public Bitmap getRoundPackageIcon() {
         return getRoundCroppedBitmap(BitmapUtils.fromDrawable(mIcon, null));
-    }
-
-    /**
-     * Returns {@code true} iff this media source should not be templatized.
-     */
-    public boolean isCustom() {
-        return CUSTOM_MEDIA_SOURCES.contains(getPackageName());
     }
 
     private static Bitmap getRoundCroppedBitmap(Bitmap bitmap) {
