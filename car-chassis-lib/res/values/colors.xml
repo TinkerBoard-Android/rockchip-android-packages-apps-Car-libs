@@ -36,4 +36,8 @@
     <color name="chassis_toolbar_search_hint_text_color">#33FFFFFF</color>
     <!-- Toolbar background color -->
     <color name="chassis_toolbar_background_color">#E0000000</color>
+
+    <!--  Paged Recycler View  -->
+    <!-- The color of the scroll bar indicator in the PagedListView. -->
+    <color name="chassis_scrollbar_thumb">#99ffffff</color>
 </resources>

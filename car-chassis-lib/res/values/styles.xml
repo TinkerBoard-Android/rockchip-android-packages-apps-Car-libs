@@ -94,4 +94,8 @@
         <item name="android:letterSpacing">@dimen/chassis_letter_spacing_body3</item>
     </style>
 
+    <style name="PagedRecyclerView">
+    </style>
+    <style name="PagedRecyclerView.NestedRecyclerView">
+    </style>
 </resources>
