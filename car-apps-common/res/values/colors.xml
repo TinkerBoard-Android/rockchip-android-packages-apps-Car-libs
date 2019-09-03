@@ -34,6 +34,7 @@
         <item>#757575</item>
     </array>
 
+    <color name="loading_image_placeholder_color">@*android:color/car_grey_800</color>
     <color name="improper_image_refs_tint_color">#C8FF0000</color>
 
     <color name="control_bar_background_color">@android:color/transparent</color>
