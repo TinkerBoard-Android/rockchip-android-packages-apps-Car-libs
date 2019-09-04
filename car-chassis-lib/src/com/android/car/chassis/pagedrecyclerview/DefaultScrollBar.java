@@ -34,6 +34,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.chassis.R;
 import com.android.car.chassis.pagedrecyclerview.PagedRecyclerView.ScrollBarPosition;
+import com.android.car.chassis.utils.ResourceUtils;
 
 /**
  * The default scroll bar widget for the {@link PagedRecyclerView}.
@@ -41,9 +42,9 @@ import com.android.car.chassis.pagedrecyclerview.PagedRecyclerView.ScrollBarPosi
  * <p>Inspired by {@link androidx.car.widget.PagedListView}. Most pagination and scrolling logic has
  * been ported from the PLV with minor updates.
  */
-class CarScrollBar implements ScrollBar {
+class DefaultScrollBar implements ScrollBar {
     private float mButtonDisabledAlpha;
-    private static final String TAG = "CarScrollBar";
+    private static final String TAG = "DefaultScrollBar";
     private PagedSnapHelper mSnapHelper;
 
     private ImageView mUpButton;
@@ -86,7 +87,8 @@ class CarScrollBar implements ScrollBar {
                 new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
 
         Resources res = rv.getContext().getResources();
-        mButtonDisabledAlpha = res.getFloat(R.dimen.chassis_button_disabled_alpha);
+
+        mButtonDisabledAlpha = ResourceUtils.getFloat(res, R.dimen.chassis_button_disabled_alpha);
 
         if (scrollBarAboveRecyclerView) {
             parent.addView(mScrollView);
