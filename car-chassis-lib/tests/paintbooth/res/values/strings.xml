@@ -16,5 +16,5 @@
   -->
 <resources>
   <!-- Application name [CHAR LIMIT=30] -->
-  <string name="app_name">Paint Booth (Gerrit)</string>
+  <string name="app_name" translatable="false">Paint Booth (Gerrit)</string>
 </resources>
