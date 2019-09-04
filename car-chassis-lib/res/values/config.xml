@@ -18,11 +18,10 @@
     <!--
     Configuration for a default scrollbar for the PagedRecyclerView. This component must inherit
     abstract class ScrollBar. If the ScrollBar is enabled, the component will be initialized from
-    PagedRecyclerView#createScrollBarFromConfig().
+    PagedRecyclerView#createScrollBarFromConfig(). If no component is provided,
+    {@link DefaultScrollbar} class will be used.
     -->
-    <string name="chassis_scrollbar_component" translatable="false">
-        com.google.android.apps.automotive.chassis.libraries.CarScrollBar
-    </string>
+    <string name="chassis_scrollbar_component" translatable="false"/>
 
     <!--
     Whether to include a gutter to the start, end or both sides of the list view items.
@@ -33,16 +32,16 @@
       end = 2
       both = 3
     -->
-    <integer name="chassis_scrollbar_gutter" translatable="false">1</integer>
+    <integer name="chassis_scrollbar_gutter">1</integer>
 
     <!--
     Position of the scrollbar. Default to left. Values are defined as follows:
       start = 0
       end = 1
     -->
-    <integer name="chassis_scrollbar_position" translatable="false">0</integer>
+    <integer name="chassis_scrollbar_position">0</integer>
 
     <!-- Width of the scrollbar container. -->
-    <dimen name="chassis_scrollbar_container_width" translatable="false">@*android:dimen/car_margin</dimen>
+    <dimen name="chassis_scrollbar_container_width" translatable="false">@dimen/chassis_margin</dimen>
 
 </resources>
