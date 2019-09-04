@@ -690,7 +690,9 @@ public final class PagedRecyclerView extends RecyclerView {
 
         Class<?> cls;
         try {
-            cls = getContext().getClassLoader().loadClass(mScrollBarClass);
+            cls = mScrollBarClass != null
+                    ? getContext().getClassLoader().loadClass(mScrollBarClass)
+                    : DefaultScrollBar.class;
         } catch (Throwable t) {
             throw andLog("Error loading scroll bar component: " + mScrollBarClass, t);
         }
@@ -784,15 +786,17 @@ public final class PagedRecyclerView extends RecyclerView {
             mNestedRecyclerViewState = new SparseArray<>();
         }
 
+        @SuppressWarnings("unchecked")
         private SavedState(Parcel in) {
             super(in);
             mNestedRecyclerViewState = in.readSparseArray(mContext.getClassLoader());
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public void writeToParcel(Parcel out, int flags) {
             super.writeToParcel(out, flags);
-            out.writeSparseArray(mNestedRecyclerViewState);
+            out.writeSparseArray((SparseArray<Object>) (Object) mNestedRecyclerViewState);
         }
 
         public static final Parcelable.Creator<SavedState> CREATOR =

@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.chassis.R;
+import com.android.car.chassis.utils.ResourceUtils;
 
 /**
  * Code drop from {androidx.car.widget.PagedSmoothScroller}
@@ -48,17 +49,14 @@ public class PagedSmoothScroller extends LinearSmoothScroller {
     }
 
     private void init(Context context) {
-        mMillisecondsPerInch =
-                context.getResources().getFloat(R.dimen.chassis_scrollbar_milliseconds_per_inch);
-        mDecelerationTimeDivisor =
-                context.getResources().getFloat(
-                        R.dimen.chassis_scrollbar_deceleration_times_divisor);
+        mMillisecondsPerInch = ResourceUtils.getFloat(context.getResources(),
+                R.dimen.chassis_scrollbar_milliseconds_per_inch);
+        mDecelerationTimeDivisor = ResourceUtils.getFloat(context.getResources(),
+                R.dimen.chassis_scrollbar_deceleration_times_divisor);
         mInterpolator =
                 new DecelerateInterpolator(
-                        context
-                                .getResources()
-                                .getFloat(
-                                        R.dimen.chassis_scrollbar_decelerate_interpolator_factor));
+                        ResourceUtils.getFloat(context.getResources(),
+                                R.dimen.chassis_scrollbar_decelerate_interpolator_factor));
     }
 
     @Override
