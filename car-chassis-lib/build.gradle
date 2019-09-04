@@ -65,8 +65,11 @@ android {
     }
 }
 
+def outProduct = System.getenv("ANDROID_PRODUCT_OUT")
+
 dependencies {
     implementation 'androidx.annotation:annotation:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation files(outProduct + '/obj/JAVA_LIBRARIES/android.car-stubs_intermediates/javalib.jar')
 }
