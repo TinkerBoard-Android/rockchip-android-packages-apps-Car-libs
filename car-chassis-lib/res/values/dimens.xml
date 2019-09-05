@@ -26,7 +26,7 @@
     <dimen name="chassis_app_bar_height">80dp</dimen>
 
     <!-- Margin -->
-    <dimen name="chassis_margin">20dp</dimen>
+    <dimen name="chassis_margin">112dp</dimen>
 
     <!-- Paddings -->
     <dimen name="chassis_padding_0">4dp</dimen>
