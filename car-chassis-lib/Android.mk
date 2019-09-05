@@ -38,6 +38,7 @@ LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
 LOCAL_STATIC_ANDROID_LIBRARIES += \
     androidx.annotation_annotation \
+    androidx.appcompat_appcompat \
     androidx-constraintlayout_constraintlayout \
     androidx.preference_preference \
     androidx.recyclerview_recyclerview
