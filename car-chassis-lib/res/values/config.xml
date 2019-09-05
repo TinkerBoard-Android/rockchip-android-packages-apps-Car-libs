@@ -42,6 +42,6 @@
     <integer name="chassis_scrollbar_position">0</integer>
 
     <!-- Width of the scrollbar container. -->
-    <dimen name="chassis_scrollbar_container_width" translatable="false">@dimen/chassis_margin</dimen>
+    <dimen name="chassis_scrollbar_container_width">@dimen/chassis_margin</dimen>
 
 </resources>

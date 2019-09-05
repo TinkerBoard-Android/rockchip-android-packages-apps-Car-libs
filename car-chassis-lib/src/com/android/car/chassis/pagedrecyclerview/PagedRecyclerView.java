@@ -319,8 +319,8 @@ public final class PagedRecyclerView extends RecyclerView {
             if (enableDivider) {
                 mDividerItemDecoration =
                         new GridDividerItemDecoration(
-                                context.getDrawable(R.drawable.divider),
-                                context.getDrawable(R.drawable.divider),
+                                context.getDrawable(R.drawable.chassis_divider),
+                                context.getDrawable(R.drawable.chassis_divider),
                                 mNumOfColumns);
                 super.addItemDecoration(mDividerItemDecoration);
             }
