@@ -18,28 +18,37 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/chassis_toolbar_first_row_height"
-    style="@style/ChassisToolbarContainerStyle">
+    android:layout_height="@dimen/chassis_toolbar_first_row_height">
 
     <FrameLayout
         android:id="@+id/nav_icon_container"
-        style="@style/ChassisToolbarNavIconContainerStyle"
+        android:layout_width="@dimen/chassis_toolbar_nav_button_width"
+        android:layout_height="0dp"
+        android:background="?android:attr/selectableItemBackground"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/bottom_styleable"
         app:layout_constraintStart_toStartOf="parent">
         <ImageView
             android:id="@+id/nav_icon"
-            style="@style/ChassisToolbarNavIconStyle"/>
+            android:layout_width="@dimen/chassis_toolbar_icon_size"
+            android:layout_height="@dimen/chassis_toolbar_icon_size"
+            android:layout_gravity="center"
+            android:scaleType="fitXY"
+            style="@style/Widget.Chassis.Toolbar.NavIcon"/>
         <ImageView
             android:id="@+id/logo"
-            style="@style/ChassisToolbarLogoStyle"/>
+            android:layout_width="@dimen/chassis_toolbar_icon_size"
+            android:layout_height="@dimen/chassis_toolbar_icon_size"
+            android:layout_gravity="center"
+            android:scaleType="fitXY"/>
     </FrameLayout>
 
     <TextView
         android:id="@+id/title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        style="@style/ChassisToolbarTitleStyle"
+        android:layout_marginStart="@dimen/chassis_toolbar_title_margin_start"
+        style="@style/TextAppearance.Chassis.Widget.Toolbar.Title"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/bottom_styleable"
         app:layout_constraintStart_toEndOf="@+id/nav_icon_container"
@@ -105,9 +114,11 @@
         app:layout_constraintStart_toEndOf="@+id/nav_icon_container"
         app:layout_constraintEnd_toStartOf="@+id/menu_items_container"/>
 
+    <!-- can't use 0dp for layout_height or the constraintlayout effect kicks in -->
     <View
         android:id="@+id/bottom_styleable"
-        style="@style/ChassisToolbarBottomStyle"
+        android:layout_width="match_parent"
+        android:layout_height="0.01dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
