@@ -48,7 +48,7 @@
         android:id="@+id/search_close"
         android:layout_width="@dimen/chassis_touch_target_width"
         android:layout_height="@dimen/chassis_touch_target_height"
-        android:background="@drawable/chassis_toolbar_button_background"
+        android:background="@drawable/chassis_toolbar_icon_background"
         android:src="@drawable/chassis_icon_close"
         android:scaleType="center"
         app:layout_constraintTop_toTopOf="parent"

@@ -40,7 +40,7 @@
     <style name="ChassisToolbarTitleStyle">
         <item name="android:textAppearance">@style/TextAppearance.Body1</item>
         <item name="android:singleLine">true</item>
-        <item name="android:layout_marginStart">@dimen/chassis_toolbar_view_title_margin_start</item>
+        <item name="android:layout_marginStart">@dimen/chassis_toolbar_title_margin_start</item>
     </style>
 
     <style name="ChassisToolbarContainerStyle"/>
@@ -58,14 +58,14 @@
     </style>
 
     <style name="ChassisToolbarNavIconContainerStyle">
-        <item name="android:layout_width">@dimen/chassis_toolbar_view_nav_button_width</item>
+        <item name="android:layout_width">@dimen/chassis_toolbar_nav_button_width</item>
         <item name="android:layout_height">0dp</item>
         <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
 
     <style name="ChassisToolbarNavIconStyle">
-        <item name="android:layout_width">@dimen/chassis_toolbar_view_icon_size</item>
-        <item name="android:layout_height">@dimen/chassis_toolbar_view_icon_size</item>
+        <item name="android:layout_width">@dimen/chassis_toolbar_icon_size</item>
+        <item name="android:layout_height">@dimen/chassis_toolbar_icon_size</item>
         <item name="android:layout_gravity">center</item>
         <item name="android:tint">@color/chassis_primary_text_color</item>
         <item name="android:src">@drawable/chassis_icon_arrow_back</item>
@@ -73,10 +73,16 @@
     </style>
 
     <style name="ChassisToolbarLogoStyle">
-        <item name="android:layout_width">@dimen/chassis_toolbar_view_icon_size</item>
-        <item name="android:layout_height">@dimen/chassis_toolbar_view_icon_size</item>
+        <item name="android:layout_width">@dimen/chassis_toolbar_icon_size</item>
+        <item name="android:layout_height">@dimen/chassis_toolbar_icon_size</item>
         <item name="android:layout_gravity">center</item>
         <item name="android:scaleType">fitXY</item>
+    </style>
+
+    <style name="ChassisToolbarTextButtonStyle">
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:textColor">?android:attr/colorAccent</item>
+        <item name="android:textAppearance">@style/TextAppearance.Body3</item>
     </style>
 
     <style name="TextAppearance">
