@@ -22,7 +22,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.car.chassis.Toolbar;
+import com.android.car.chassis.toolbar.Toolbar;
 
 /**
  * Activity that shows different dialogs from the device default theme.
