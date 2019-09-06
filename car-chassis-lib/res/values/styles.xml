@@ -19,6 +19,8 @@
 
     <style name="Widget.CarUi" parent="android:Widget.DeviceDefault"/>
 
+    <style name="Widget.CarUi.Button.Borderless.Colored" parent="android:Widget.DeviceDefault.Button.Borderless.Colored"/>
+
     <style name="Widget.CarUi.Toolbar"/>
 
     <style name="Widget.CarUi.Toolbar.NavIcon">
@@ -26,11 +28,7 @@
         <item name="android:src">@drawable/car_ui_icon_arrow_back</item>
     </style>
 
-    <style name="Widget.CarUi.Toolbar.TextButton">
-        <item name="android:background">?android:attr/selectableItemBackground</item>
-        <item name="android:textColor">?android:attr/colorAccent</item>
-        <item name="android:textAppearance">@style/TextAppearance.CarUi.Widget.Toolbar.Tab</item>
-    </style>
+    <style name="Widget.CarUi.Toolbar.TextButton" parent="Widget.CarUi.Button.Borderless.Colored"/>
 
     <style name="Widget.CarUi.PagedRecyclerView"/>
     <style name="Widget.CarUi.PagedRecyclerView.NestedRecyclerView"/>
@@ -129,7 +127,7 @@
         <item name="android:textSize">@dimen/car_ui_preference_edit_text_dialog_message_text_size</item>
     </style>
 
-    <style name="TextAppearance.CarUi.Widget"/>
+    <style name="TextAppearance.CarUi.Widget" parent="android:TextAppearance.DeviceDefault.Widget"/>
 
     <style name="TextAppearance.CarUi.Widget.Toolbar"/>
 
@@ -142,6 +140,7 @@
     <style name="TextAppearance.CarUi.Widget.Toolbar.Tab">
         <item name="android:textSize">24sp</item>
         <item name="android:letterSpacing">@dimen/car_ui_letter_spacing_body3</item>
+        <item name="android:textColor">@color/car_ui_tab_item_selector</item>
     </style>
 
 </resources>

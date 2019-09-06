@@ -46,26 +46,39 @@ import com.android.car.ui.R;
  */
 public class MenuItem {
 
-    private Context mContext;
+    private final Context mContext;
+    private final boolean mIsCheckable;
+    private final int mCustomLayoutId;
+    private final int mId;
+    private final View.OnClickListener mViewOnClickListener = v -> {
+        if (isCheckable()) {
+            setChecked(!isChecked());
+        }
+
+        if (getOnClickListener() != null) {
+            getOnClickListener().onClick(this);
+        }
+    };
+
     private Listener mListener;
     private CharSequence mTitle;
     private Drawable mIcon;
     private OnClickListener mOnClickListener;
     private DisplayBehavior mDisplayBehavior;
     private boolean mIsEnabled;
-    private boolean mIsCheckable;
     private boolean mIsChecked;
-    private int mId;
     private View mView;
+
 
     private MenuItem(Builder builder) {
         mContext = builder.mContext;
+        mIsCheckable = builder.mIsCheckable;
+        mCustomLayoutId = builder.mCustomLayoutId;
         mTitle = builder.mTitle;
         mIcon = builder.mIcon;
         mOnClickListener = builder.mOnClickListener;
         mDisplayBehavior = builder.mDisplayBehavior;
         mIsEnabled = builder.mIsEnabled;
-        mIsCheckable = builder.mIsCheckable;
         mIsChecked = builder.mIsChecked;
         mId = builder.mId;
     }
@@ -109,12 +122,10 @@ public class MenuItem {
         mIsChecked = checked;
 
         if (mView != null) {
-            Switch s = mView.requireViewById(R.id.car_ui_toolbar_menu_item_switch);
-            s.setChecked(mIsChecked);
-        }
-
-        if (isEnabled() && getOnClickListener() != null) {
-            getOnClickListener().onClick(this);
+            Switch s = mView.findViewById(R.id.car_ui_toolbar_menu_item_switch);
+            if (s != null) {
+                s.setChecked(mIsChecked);
+            }
         }
     }
 
@@ -154,6 +165,11 @@ public class MenuItem {
         mOnClickListener = listener;
     }
 
+    /** Calls the {@link OnClickListener}. */
+    public void performClick() {
+        mViewOnClickListener.onClick(null);
+    }
+
     /** Gets the current {@link DisplayBehavior} */
     public DisplayBehavior getDisplayBehavior() {
         return mDisplayBehavior;
@@ -162,6 +178,16 @@ public class MenuItem {
     /** Gets the current Icon */
     public Drawable getIcon() {
         return mIcon;
+    }
+
+    /**
+     * Gets the custom view specified by {@link Builder#setCustomLayout(int)}
+     *
+     * @return null if {@link Builder#setCustomLayout(int)} was not used when
+     * building this MenuItem.
+     */
+    public View getView() {
+        return mView;
     }
 
     int getId() {
@@ -185,6 +211,7 @@ public class MenuItem {
         private boolean mIsEnabled = true;
         private boolean mIsCheckable = false;
         private boolean mIsChecked = false;
+        private int mCustomLayoutId;
         private int mId;
 
         public Builder(Context c) {
@@ -211,6 +238,21 @@ public class MenuItem {
         /** Sets the icon to a drawable resource id */
         public Builder setIcon(int resId) {
             mIcon = mContext.getDrawable(resId);
+            return this;
+        }
+
+        /**
+         * Sets a custom layout to use for this MenuItem.
+         *
+         * <p>Should not be used in non-system (GAS) apps, as the OEM will not be able to
+         * customize the layout.
+         */
+        public Builder setCustomLayout(int resId) {
+            if (mIsCheckable) {
+                throw new IllegalStateException("Cannot have a checkable custom layout MenuItem");
+            }
+
+            mCustomLayoutId = resId;
             return this;
         }
 
@@ -252,6 +294,11 @@ public class MenuItem {
                 throw new IllegalStateException(
                         "Currently we don't support a checkable overflow item");
             }
+
+            if (mCustomLayoutId != 0) {
+                throw new IllegalStateException("Cannot have a checkable custom layout MenuItem");
+            }
+
             mIsCheckable = true;
             return this;
         }
@@ -332,11 +379,11 @@ public class MenuItem {
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
 
-        if (isCheckable()) {
+        if (mCustomLayoutId != 0) {
+            mView = inflater.inflate(mCustomLayoutId, parent, false);
+        } else if (isCheckable()) {
             mView = inflater.inflate(
                     R.layout.car_ui_toolbar_menu_item_switch, parent, false);
-            Switch s = mView.requireViewById(R.id.car_ui_toolbar_menu_item_switch);
-            s.setChecked(isChecked());
         } else if (getIcon() != null) {
             mView = inflater.inflate(
                     R.layout.car_ui_toolbar_menu_item_icon, parent, false);
@@ -345,8 +392,12 @@ public class MenuItem {
         } else {
             mView = (Button) inflater.inflate(
                     R.layout.car_ui_toolbar_menu_item_text, parent, false);
-            Button button = mView.requireViewById(R.id.car_ui_toolbar_menu_item_text);
-            button.setText(getTitle());
+            setTitle(getTitle());
+        }
+
+        // Both custom and switch layouts can be checkable
+        if (isCheckable()) {
+            setChecked(isChecked());
         }
 
         if (getId() != 0) {
@@ -354,18 +405,7 @@ public class MenuItem {
         }
 
         recursiveSetEnabled(mView, isEnabled());
-        mView.setOnClickListener(v -> {
-            Switch s = v.findViewById(R.id.car_ui_toolbar_menu_item_switch);
-            if (s != null) {
-                s.toggle();
-                setChecked(s.isChecked());
-            }
-
-            if (getOnClickListener() != null) {
-                getOnClickListener().onClick(this);
-            }
-        });
-
+        mView.setOnClickListener(mViewOnClickListener);
         return mView;
     }
 

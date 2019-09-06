@@ -19,15 +19,20 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <ImageView
-        android:id="@+id/icon"
+    <FrameLayout
         android:layout_width="@dimen/car_ui_touch_target_width"
-        android:layout_height="@dimen/car_ui_touch_target_height"
-        android:src="@drawable/car_ui_icon_search"
-        android:scaleType="center"
+        android:layout_height="@dimen/car_ui_touch_target_width"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent">
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="@dimen/car_ui_primary_icon_size"
+            android:layout_height="@dimen/car_ui_primary_icon_size"
+            android:layout_gravity="center"
+            android:src="@drawable/car_ui_icon_search"
+            android:scaleType="fitCenter"/>
+    </FrameLayout>
 
     <EditText
         android:id="@+id/search_bar"
@@ -44,14 +49,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <ImageView
+    <FrameLayout
         android:id="@+id/search_close"
-        android:layout_width="@dimen/car_ui_touch_target_width"
+        android:layout_width="@dimen/car_ui_touch_target_height"
         android:layout_height="@dimen/car_ui_touch_target_height"
-        android:background="@drawable/car_ui_toolbar_icon_background"
-        android:src="@drawable/car_ui_icon_close"
-        android:scaleType="center"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent">
+        <ImageView
+            android:layout_width="@dimen/car_ui_primary_icon_size"
+            android:layout_height="@dimen/car_ui_primary_icon_size"
+            android:layout_gravity="center"
+            android:background="@drawable/car_ui_toolbar_icon_background"
+            android:src="@drawable/car_ui_icon_close"
+            android:scaleType="fitCenter"/>
+    </FrameLayout>
 </merge>
