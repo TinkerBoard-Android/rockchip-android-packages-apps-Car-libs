@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.car.chassis;
+package com.android.car.chassis.toolbar;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -33,6 +33,8 @@ import android.widget.TextView;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.android.car.chassis.R;
 
 import java.util.ArrayList;
 import java.util.List;
