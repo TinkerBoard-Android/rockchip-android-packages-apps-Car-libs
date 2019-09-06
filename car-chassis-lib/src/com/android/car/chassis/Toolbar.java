@@ -15,12 +15,12 @@
  */
 package com.android.car.chassis;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,11 +29,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,11 +42,11 @@ import java.util.Set;
 /**
  * A toolbar for Android Automotive OS apps.
  *
- * This isn't a toolbar in the android framework sense, it's merely a custom view that can be
+ * <p>This isn't a toolbar in the android framework sense, it's merely a custom view that can be
  * added to a layout. (You can't call
  * {@link android.app.Activity#setActionBar(android.widget.Toolbar)} with it)
  *
- * The toolbar supports a navigation button, title, tabs, search, and custom buttons.
+ * <p>The toolbar supports a navigation button, title, tabs, search, and {@link MenuItem MenuItems}
  */
 public class Toolbar extends FrameLayout {
 
@@ -56,12 +57,12 @@ public class Toolbar extends FrameLayout {
         /**
          * In the HOME state, the logo will be displayed if there is one, and no navigation icon
          * will be displayed. The tab bar will be visible. The title will be displayed if there
-         * is space. Custom buttons will be displayed.
+         * is space. MenuItems will be displayed.
          */
         HOME,
         /**
          * In the SUBPAGE state, the logo will be replaced with a back button, the tab bar won't
-         * be visible. The title and custom buttons will be displayed.
+         * be visible. The title and MenuItems will be displayed.
          */
         SUBPAGE,
         /**
@@ -87,15 +88,24 @@ public class Toolbar extends FrameLayout {
     private ViewGroup mNavIconContainer;
     private TextView mTitle;
     private TabLayout mTabLayout;
-    private LinearLayout mButtonsContainer;
+    private LinearLayout mMenuItemsContainer;
     private FrameLayout mCustomViewContainer;
+    private View mOverflowButton;
     private Set<Listener> mListeners = new HashSet<>();
     private SearchView mSearchView;
     private boolean mHasLogo = false;
-    private int[] mCurrentButtons;
-    private boolean mShowButtonsWhileSearching;
+    private boolean mShowMenuItemsWhileSearching;
     private View mSearchButton;
     private State mState = State.HOME;
+    @NonNull
+    private List<MenuItem> mMenuItems = Collections.emptyList();
+    private List<MenuItem> mOverflowItems = new ArrayList<>();
+    private MenuItem.Listener mMenuItemListener = (item, title) -> {
+        if (item.getDisplayBehavior() == MenuItem.DisplayBehavior.NEVER) {
+            createOverflowDialog();
+        }
+    };
+    private AlertDialog mOverflowDialog;
 
     public Toolbar(Context context) {
         this(context, null);
@@ -120,46 +130,48 @@ public class Toolbar extends FrameLayout {
         mNavIcon = requireViewById(R.id.nav_icon);
         mLogo = requireViewById(R.id.logo);
         mNavIconContainer = requireViewById(R.id.nav_icon_container);
-        mButtonsContainer = requireViewById(R.id.buttons_container);
+        mMenuItemsContainer = requireViewById(R.id.menu_items_container);
         mTitle = requireViewById(R.id.title);
         mSearchView = requireViewById(R.id.search_view);
         mCustomViewContainer = requireViewById(R.id.custom_view_container);
+        mOverflowButton = requireViewById(R.id.chassis_toolbar_overflow_button);
 
         TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.ChassisToolbar, defStyleAttr, defStyleRes);
 
-        mTitle.setText(a.getString(R.styleable.ChassisToolbar_title));
-        setLogo(a.getResourceId(R.styleable.ChassisToolbar_logo, 0));
-        setButtons(a.getResourceId(R.styleable.ChassisToolbar_buttons, 0));
-        setBackgroundShown(a.getBoolean(R.styleable.ChassisToolbar_showBackground, true));
-        mShowButtonsWhileSearching = a.getBoolean(
-                R.styleable.ChassisToolbar_showButtonsWhileSearching, false);
-        String searchHint = a.getString(R.styleable.ChassisToolbar_searchHint);
-        if (searchHint != null) {
-            setSearchHint(searchHint);
-        }
+        try {
+            mTitle.setText(a.getString(R.styleable.ChassisToolbar_title));
+            setLogo(a.getResourceId(R.styleable.ChassisToolbar_logo, 0));
+            setBackgroundShown(a.getBoolean(R.styleable.ChassisToolbar_showBackground, true));
+            mShowMenuItemsWhileSearching = a.getBoolean(
+                    R.styleable.ChassisToolbar_showMenuItemsWhileSearching, false);
+            String searchHint = a.getString(R.styleable.ChassisToolbar_searchHint);
+            if (searchHint != null) {
+                setSearchHint(searchHint);
+            }
 
-        switch (a.getInt(R.styleable.ChassisToolbar_state, 0)) {
-            case 0:
-                setState(State.HOME);
-                break;
-            case 1:
-                setState(State.SUBPAGE);
-                break;
-            case 2:
-                setState(State.SUBPAGE_CUSTOM);
-                break;
-            case 3:
-                setState(State.SEARCH);
-                break;
-            default:
-                if (Log.isLoggable(TAG, Log.WARN)) {
-                    Log.w(TAG, "Unknown initial state");
-                }
-                break;
+            switch (a.getInt(R.styleable.ChassisToolbar_state, 0)) {
+                case 0:
+                    setState(State.HOME);
+                    break;
+                case 1:
+                    setState(State.SUBPAGE);
+                    break;
+                case 2:
+                    setState(State.SUBPAGE_CUSTOM);
+                    break;
+                case 3:
+                    setState(State.SEARCH);
+                    break;
+                default:
+                    if (Log.isLoggable(TAG, Log.WARN)) {
+                        Log.w(TAG, "Unknown initial state");
+                    }
+                    break;
+            }
+        } finally {
+            a.recycle();
         }
-
-        a.recycle();
 
         mTabLayout.addListener(new TabLayout.Listener() {
             @Override
@@ -167,12 +179,22 @@ public class Toolbar extends FrameLayout {
                 forEachListener(listener -> listener.onTabSelected(tab));
             }
         });
+
+        mOverflowButton.setOnClickListener(v -> {
+            if (mOverflowDialog == null) {
+                if (Log.isLoggable(TAG, Log.ERROR)) {
+                    Log.e(TAG, "Overflow dialog was null when trying to show it!");
+                }
+            } else {
+                mOverflowDialog.show();
+            }
+        });
     }
 
     /**
      * Sets the title of the toolbar to a string resource.
      *
-     * The title may not always be shown, for example in landscape with tabs.
+     * <p>The title may not always be shown, for example in landscape with tabs.
      */
     public void setTitle(@StringRes int title) {
         mTitle.setText(title);
@@ -181,7 +203,7 @@ public class Toolbar extends FrameLayout {
     /**
      * Sets the title of the toolbar to a CharSequence.
      *
-     * The title may not always be shown, for example in landscape with tabs.
+     * <p>The title may not always be shown, for example in landscape with tabs.
      */
     public void setTitle(CharSequence title) {
         mTitle.setText(title);
@@ -268,84 +290,66 @@ public class Toolbar extends FrameLayout {
     }
 
     /**
-     * Sets the buttons to be shown. Click events for these buttons will be received in
-     * {@link Listener#onCustomButtonPressed(View)}.
-     *
-     * Buttons are encouraged to use @drawable/chassis_toolbar_button_background as their
-     * background. In the default implementation it's a ripple that is sized appropriately to fit
-     * the toolbar.
-     *
-     * R.layout.chassis_toolbar_search_button can be used to add a search button, which will have an
-     * id of R.id.search in {@link Listener#onCustomButtonPressed(View)} callback.
-     *
-     * R.layout.chassis_toolbar_settings_button can be used to add a search button, which will have
-     * an id of R.id.settings in {@link Listener#onCustomButtonPressed(View)} callback.
-     *
-     * @param buttons An array of layout ids specifying the buttons to show. Toolbar will keep
-     *                a reference to this array, so don't modify it afterwards.
+     * Sets the {@link MenuItem Menuitems} to display.
      */
-    public void setButtons(@Nullable int[] buttons) {
-        if (!Arrays.equals(buttons, mCurrentButtons)) {
-            mButtonsContainer.removeAllViews();
+    public void setMenuItems(@Nullable List<MenuItem> items) {
+        if (items == null) {
+            items = Collections.emptyList();
+        }
 
-            if (buttons != null) {
-                LayoutInflater inflater = (LayoutInflater) getContext()
-                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        if (items.equals(mMenuItems)) {
+            return;
+        }
 
-                for (int button : buttons) {
-                    View v = inflater.inflate(button, mButtonsContainer, false);
-                    mButtonsContainer.addView(v);
+        mMenuItems = items;
 
-                    setupCustomButton(v);
-                }
+        mOverflowItems.clear();
+        mMenuItemsContainer.removeAllViews();
+
+        for (MenuItem item : items) {
+            item.setListener(mMenuItemListener);
+            if (item.getDisplayBehavior() == MenuItem.DisplayBehavior.NEVER) {
+                mOverflowItems.add(item);
+            } else {
+                View menuItemView = item.createView(mMenuItemsContainer);
+                mMenuItemsContainer.addView(menuItemView);
             }
-
-            mSearchButton = mButtonsContainer.findViewById(R.id.search);
-            mCurrentButtons = buttons;
-            setState(mState);
         }
+
+        createOverflowDialog();
+
+        mSearchButton = mMenuItemsContainer.findViewById(R.id.search);
+
+        setState(mState);
     }
 
-    private void setButtons(TypedArray buttons) {
-        int[] layouts = new int[buttons.length()];
-        for (int i = 0; i < buttons.length(); ++i) {
-            layouts[i] = buttons.getResourceId(i, 0);
-        }
-        setButtons(layouts);
+    private void createOverflowDialog() {
+        // TODO(b/140564530) Use a chassis alert with a (paged)recyclerview here
+        // TODO(b/140563930) Support enabled/disabled overflow items
+
+        CharSequence[] itemTitles = mOverflowItems.stream()
+                .map(MenuItem::getTitle)
+                .toArray(CharSequence[]::new);
+
+        mOverflowDialog = new AlertDialog.Builder(getContext())
+                .setItems(itemTitles, (dialog, which) -> {
+                    MenuItem item = mOverflowItems.get(which);
+                    MenuItem.OnClickListener listener = item.getOnClickListener();
+                    if (listener != null) {
+                        listener.onClick(item);
+                    }
+                })
+                .create();
     }
 
     /**
-     * Sets the buttons to be shown, based on an XML array of layouts. See
-     * {@link #setButtons(int[])} for more info.
-     *
-     * @param arrayId A resource id of an array of layouts.
+     * Set whether or not to show the {@link MenuItem MenuItems} while searching. Default false.
+     * Even if this is set to true, the {@link MenuItem} created by
+     * {@link MenuItem.Builder#createSearch(Context, MenuItem.OnClickListener)} will still be
+     * hidden.
      */
-    public void setButtons(int arrayId) {
-        if (arrayId == 0) {
-            mButtonsContainer.removeAllViews();
-            mCurrentButtons = null;
-        } else {
-            setButtons(getContext().getResources().obtainTypedArray(arrayId));
-        }
-    }
-
-    private void setupCustomButton(View v) {
-        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) v.getLayoutParams();
-        lp.rightMargin = getContext().getResources().getDimensionPixelSize(
-                R.dimen.chassis_toolbar_custom_button_margin);
-        lp.leftMargin = lp.rightMargin;
-        lp.gravity = Gravity.CENTER_VERTICAL;
-
-        v.setOnClickListener(x -> forEachListener(listener -> listener.onCustomButtonPressed(x)));
-    }
-
-    /**
-     * Set whether or not to show the custom buttons while searching. Default false.
-     * Even if this is set to true, if there is a button with the id "search", such as the button
-     * added by R.layout.chassis_toolbar_search_button, that buttons will always be hidden.
-     */
-    public void setShowButtonsWhileSearching(boolean showButtons) {
-        mShowButtonsWhileSearching = showButtons;
+    public void setShowMenuItemsWhileSearching(boolean showMenuItems) {
+        mShowMenuItemsWhileSearching = showMenuItems;
         setState(mState);
     }
 
@@ -384,13 +388,14 @@ public class Toolbar extends FrameLayout {
         mNavIcon.setImageResource(state != State.HOME ? R.drawable.chassis_icon_arrow_back : 0);
         mLogo.setVisibility(state == State.HOME && mHasLogo ? VISIBLE : INVISIBLE);
         mNavIconContainer.setVisibility(state != State.HOME || mHasLogo ? VISIBLE : GONE);
-        mNavIconContainer.setClickable(state != State.HOME);
         mNavIconContainer.setOnClickListener(state != State.HOME ? backClickListener : null);
+        mNavIconContainer.setClickable(state != State.HOME);
         mTitle.setVisibility(state == State.HOME || state == State.SUBPAGE ? VISIBLE : GONE);
         mTabLayout.setVisibility(state == State.HOME ? VISIBLE : GONE);
         mSearchView.setVisibility(state == State.SEARCH ? VISIBLE : GONE);
-        mButtonsContainer.setVisibility(state != State.SEARCH || mShowButtonsWhileSearching
-                ? VISIBLE : GONE);
+        boolean showButtons = state != State.SEARCH || mShowMenuItemsWhileSearching;
+        mMenuItemsContainer.setVisibility(showButtons ? VISIBLE : GONE);
+        mOverflowButton.setVisibility(showButtons && mOverflowItems.size() > 0 ? VISIBLE : GONE);
         if (mSearchButton != null) {
             mSearchButton.setVisibility(state != State.SEARCH ? VISIBLE : GONE);
         }
@@ -418,12 +423,6 @@ public class Toolbar extends FrameLayout {
          * Invoked when the user submits a search query.
          */
         default void onSearch(String query) {}
-
-        /**
-         * Invoked when the user clicks on a custom button
-         * @param v The button that was clicked
-         */
-        default void onCustomButtonPressed(View v) {}
     }
 
     /**

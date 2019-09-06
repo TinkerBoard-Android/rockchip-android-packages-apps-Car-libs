@@ -20,8 +20,8 @@
     <color name="chassis_primary_text_color">#FFFFFFFF</color>
     <!-- Text color used in subtitles or other secondary text blocks -->
     <color name="chassis_secondary_text_color">#90FFFFFF</color>
-    <!-- The ripple color for a card. -->
-    <color name="chassis_card_ripple_background">#27ffffff</color>
+    <!-- The ripple color. -->
+    <color name="chassis_ripple_color">#27ffffff</color>
 
     <!-- Tabs -->
 
