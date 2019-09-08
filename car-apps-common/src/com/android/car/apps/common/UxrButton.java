@@ -23,7 +23,7 @@ import android.content.res.TypedArray;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 /**
@@ -34,8 +34,11 @@ import android.widget.Toast;
  * If not set, it'll use UX_RESTRICTIONS_FULLY_RESTRICTED as fallback.
  * If no restriction is enforced, this Button will work as a normal Button; otherwise, its
  * OnClickListener will be disabled if any, and a blocking message will be displayed.
+ *
+ * This class extends from TextView instead of Button because only TextView supports gradient
+ * truncate for now.
  */
-public class UxrButton extends Button {
+public class UxrButton extends TextView {
     private static final int[] STATE_UX_RESTRICTED = {R.attr.state_ux_restricted};
 
     private CarUxRestrictionsUtil mCarUxRestrictionsUtil;

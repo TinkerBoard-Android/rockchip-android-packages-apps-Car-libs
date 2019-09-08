@@ -15,7 +15,10 @@
   limitations under the License.
 -->
 <resources>
-    <!-- App bar -->
-    <!-- The height of app bar when it expends to 2 rows. Equals 2 * @dimen/appbar_first_row_height. -->
-    <dimen name="appbar_2_rows_height">192dp</dimen>
+    <style name="FullScreenErrorMessageStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">@style/TextAppearance.Body1</item>
+        <item name="android:gravity">center</item>
+    </style>
 </resources>

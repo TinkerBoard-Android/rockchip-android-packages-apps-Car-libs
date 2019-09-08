@@ -54,8 +54,8 @@ public class MediaAppSelectorWidget extends LinearLayout {
     private FragmentActivity mActivity;
 
     /** The fragment that owns the widget (only set when in display only mode). */
-    @Nullable private AppSelectionFragment mFragmentOwner;
-    private String mDisplayedSourcePackage;
+    @Nullable
+    private AppSelectionFragment mFragmentOwner;
     private boolean mFragmentIsOpen;
 
     public MediaAppSelectorWidget(Context context) {
@@ -78,6 +78,8 @@ public class MediaAppSelectorWidget extends LinearLayout {
                 attrs, R.styleable.MediaAppSelectorWidget, defStyleAttr, 0 /* defStyleRes */);
         mFullScreenDialog = a.getBoolean(R.styleable.MediaAppSelectorWidget_fullScreenDialog, true);
         mSwitchingEnabled = a.getBoolean(R.styleable.MediaAppSelectorWidget_switchingEnabled, true);
+        int size = (int) a.getDimension(R.styleable.MediaAppSelectorWidget_appIconSize,
+                getResources().getDimension(R.dimen.app_switch_widget_app_icon_size));
         a.recycle();
 
         mDefaultIcon = getResources().getDrawable(R.drawable.ic_music);
@@ -89,6 +91,8 @@ public class MediaAppSelectorWidget extends LinearLayout {
         inflater.inflate(R.layout.app_switch_widget, this, true);
 
         mAppIcon = findViewById(R.id.app_icon);
+        mAppIcon.getLayoutParams().height = size;
+        mAppIcon.getLayoutParams().width = size;
         mAppSwitchIcon = findViewById(R.id.app_switch_icon);
 
         setFragmentOwner(null);
@@ -107,7 +111,6 @@ public class MediaAppSelectorWidget extends LinearLayout {
             if (source == null) {
                 setAppIcon(null);
             } else {
-                mDisplayedSourcePackage = source.getPackageName();
                 setAppIcon(source.getRoundPackageIcon());
             }
         });
@@ -156,8 +159,7 @@ public class MediaAppSelectorWidget extends LinearLayout {
             mFragmentOwner.dismiss();
         } else {
             setIsOpen(true);
-            AppSelectionFragment newFragment = AppSelectionFragment.create(this,
-                    mDisplayedSourcePackage, mFullScreenDialog);
+            AppSelectionFragment newFragment = AppSelectionFragment.create(this, mFullScreenDialog);
             newFragment.show(mActivity.getSupportFragmentManager(), null);
         }
 
