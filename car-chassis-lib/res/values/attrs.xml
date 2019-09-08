@@ -21,10 +21,8 @@
         <attr name="logo" format="reference"/>
         <!-- Hint for the search bar in the toolbar -->
         <attr name="searchHint" format="string"/>
-        <!-- Buttons to display, as an array of layout ids. Use @layout/chassis_toolbar_search_button and @layout/chassis_toolbar_settings_button for the search and settings buttons -->
-        <attr name="buttons" format="reference"/>
-        <!-- Whether or not to show the custom buttons while searching. If using chassis_toolbar_search_button, or any other layout with a view with the id of "search", it will always be hidden. -->
-        <attr name="showButtonsWhileSearching" format="boolean"/>
+        <!-- Whether or not to show the MenuItems while searching. Default false. -->
+        <attr name="showMenuItemsWhileSearching" format="boolean"/>
         <!-- Initial state of the toolbar. See the Toolbar.State enum for more information -->
         <attr name="state" format="enum">
             <enum name="home" value="0"/>
