@@ -204,9 +204,25 @@
         <item name="listChoiceIndicatorSingleAnimated">?android:attr/listChoiceIndicatorSingle</item>
         <item name="listChoiceIndicatorMultipleAnimated">?android:attr/listChoiceIndicatorMultiple</item>
 
-        <item name="preferenceTheme">@style/PreferenceThemeOverlay.Chassis</item>
+        <item name="preferenceTheme">@style/ChassisPreferenceTheme</item>
     </style>
 
-    <!-- TODO: remove temporary parent and implement preference theme -->
-    <style name="PreferenceThemeOverlay.Chassis" parent="@android:style/Theme.DeviceDefault"/>
+    <style name="ChassisPreferenceTheme">
+        <item name="checkBoxPreferenceStyle">@style/Preference.Chassis.CheckBoxPreference
+        </item>
+        <item name="dialogPreferenceStyle">@style/Preference.Chassis.DialogPreference</item>
+        <item name="dropdownPreferenceStyle">@style/Preference.Chassis.DropDown</item>
+        <item name="editTextPreferenceStyle">
+            @style/Preference.Chassis.DialogPreference.EditTextPreference
+        </item>
+        <item name="preferenceCategoryStyle">@style/Preference.Chassis.Category</item>
+        <item name="preferenceFragmentCompatStyle">@style/PreferenceFragment.Chassis</item>
+        <item name="preferenceFragmentListStyle">@style/PreferenceFragmentList.Chassis</item>
+        <item name="preferenceFragmentStyle">@style/PreferenceFragment.Chassis</item>
+        <item name="preferenceScreenStyle">@style/Preference.Chassis.PreferenceScreen</item>
+        <item name="preferenceStyle">@style/Preference.Chassis</item>
+        <item name="seekBarPreferenceStyle">@style/Preference.Chassis.SeekBarPreference</item>
+        <item name="switchPreferenceStyle">@style/Preference.Chassis.SwitchPreference</item>
+    </style>
+
 </resources>
