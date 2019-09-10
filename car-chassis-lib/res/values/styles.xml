@@ -16,92 +16,41 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Styles for chassis tab view -->
-    <style name="ChassisTabItemText">
-        <item name="android:textAppearance">@style/TextAppearance.Body3</item>
-        <item name="android:textColor">@color/chassis_tab_item_selector</item>
-        <item name="android:layout_width">@dimen/chassis_tab_text_width</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:gravity">center</item>
-    </style>
 
-    <style name="ChassisTabItemIcon">
-        <item name="android:layout_width">@dimen/chassis_tab_icon_width</item>
-        <item name="android:layout_height">@dimen/chassis_tab_icon_height</item>
-        <item name="android:scaleType">fitCenter</item>
-        <item name="android:tint">@color/chassis_tab_item_selector</item>
-        <item name="android:tintMode">src_in</item>
-    </style>
+    <style name="Widget.Chassis" parent="android:Widget.DeviceDefault"/>
 
-    <style name="ChassisTabItemBackground">
-        <item name="android:background">?android:attr/selectableItemBackground</item>
-    </style>
+    <style name="Widget.Chassis.Toolbar"/>
 
-    <style name="ChassisToolbarTitleStyle">
-        <item name="android:textAppearance">@style/TextAppearance.Body1</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:layout_marginStart">@dimen/chassis_toolbar_title_margin_start</item>
-    </style>
-
-    <style name="ChassisToolbarContainerStyle"/>
-
-    <style name="ChassisToolbarRowSeparatorStyle">
-        <item name="android:layout_width">match_parent</item>
-        <!-- can't use 0dp or the constraintlayout effect kicks in -->
-        <item name="android:layout_height">0.01dp</item>
-    </style>
-
-    <style name="ChassisToolbarBottomStyle">
-        <item name="android:layout_width">match_parent</item>
-        <!-- can't use 0dp or the constraintlayout effect kicks in -->
-        <item name="android:layout_height">0.01dp</item>
-    </style>
-
-    <style name="ChassisToolbarNavIconContainerStyle">
-        <item name="android:layout_width">@dimen/chassis_toolbar_nav_button_width</item>
-        <item name="android:layout_height">0dp</item>
-        <item name="android:background">?android:attr/selectableItemBackground</item>
-    </style>
-
-    <style name="ChassisToolbarNavIconStyle">
-        <item name="android:layout_width">@dimen/chassis_toolbar_icon_size</item>
-        <item name="android:layout_height">@dimen/chassis_toolbar_icon_size</item>
-        <item name="android:layout_gravity">center</item>
+    <style name="Widget.Chassis.Toolbar.NavIcon">
         <item name="android:tint">@color/chassis_primary_text_color</item>
         <item name="android:src">@drawable/chassis_icon_arrow_back</item>
-        <item name="android:scaleType">fitXY</item>
     </style>
 
-    <style name="ChassisToolbarLogoStyle">
-        <item name="android:layout_width">@dimen/chassis_toolbar_icon_size</item>
-        <item name="android:layout_height">@dimen/chassis_toolbar_icon_size</item>
-        <item name="android:layout_gravity">center</item>
-        <item name="android:scaleType">fitXY</item>
-    </style>
-
-    <style name="ChassisToolbarTextButtonStyle">
+    <style name="Widget.Chassis.Toolbar.TextButton">
         <item name="android:background">?android:attr/selectableItemBackground</item>
         <item name="android:textColor">?android:attr/colorAccent</item>
-        <item name="android:textAppearance">@style/TextAppearance.Body3</item>
+        <item name="android:textAppearance">@style/TextAppearance.Chassis.Widget.Toolbar.Tab</item>
     </style>
 
-    <style name="TextAppearance">
-        <item name="android:fontFamily">roboto-regular</item>
-        <item name="android:textColor">@color/chassis_primary_text_color</item>
+    <style name="Widget.Chassis.PagedRecyclerView"/>
+    <style name="Widget.Chassis.PagedRecyclerView.NestedRecyclerView"/>
+
+    <style name="TextAppearance.Chassis" parent="android:TextAppearance.DeviceDefault">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
-    <style name="TextAppearance.Body1" parent="TextAppearance">
+    <style name="TextAppearance.Chassis.Widget"/>
+
+    <style name="TextAppearance.Chassis.Widget.Toolbar"/>
+
+    <style name="TextAppearance.Chassis.Widget.Toolbar.Title">
+        <item name="android:singleLine">true</item>
         <item name="android:textSize">32sp</item>
         <item name="android:letterSpacing">@dimen/chassis_letter_spacing_body1</item>
     </style>
 
-    <style name="TextAppearance.Body3" parent="TextAppearance">
+    <style name="TextAppearance.Chassis.Widget.Toolbar.Tab">
         <item name="android:textSize">24sp</item>
         <item name="android:letterSpacing">@dimen/chassis_letter_spacing_body3</item>
-    </style>
-
-    <style name="PagedRecyclerView">
-    </style>
-    <style name="PagedRecyclerView.NestedRecyclerView">
     </style>
 </resources>

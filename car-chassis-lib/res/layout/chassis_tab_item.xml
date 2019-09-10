@@ -19,8 +19,15 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <ImageView
         android:id="@+id/chassis_tab_item_icon"
-        style="@style/ChassisTabItemIcon"/>
+        android:layout_width="@dimen/chassis_tab_icon_width"
+        android:layout_height="@dimen/chassis_tab_icon_height"
+        android:scaleType="fitCenter"
+        android:tint="@color/chassis_tab_item_selector"/>
     <TextView
         android:id="@+id/chassis_tab_item_text"
-        style="@style/ChassisTabItemText"/>
+        android:layout_width="@dimen/chassis_tab_text_width"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.Chassis.Widget.Toolbar.Tab"/>
 </merge>

@@ -16,11 +16,11 @@
 package com.android.car.chassis.toolbar;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.util.ArraySet;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,7 +56,6 @@ import java.util.Set;
  * can be customized.
  *
  * <p>Touch feedback is using @android:attr/selectableItemBackground.
- *
  */
 public class TabLayout extends LinearLayout {
 
@@ -65,13 +64,16 @@ public class TabLayout extends LinearLayout {
      */
     public interface Listener {
         /** Callback triggered when a tab is selected. */
-        default void onTabSelected(Tab tab) {}
+        default void onTabSelected(Tab tab) {
+        }
 
         /** Callback triggered when a tab is unselected. */
-        default void onTabUnselected(Tab tab) {}
+        default void onTabUnselected(Tab tab) {
+        }
 
         /** Callback triggered when a tab is reselected. */
-        default void onTabReselected(Tab tab) {}
+        default void onTabReselected(Tab tab) {
+        }
     }
 
     // View attributes
@@ -187,11 +189,10 @@ public class TabLayout extends LinearLayout {
         tabItemView.setOrientation(LinearLayout.VERTICAL);
         tabItemView.setGravity(Gravity.CENTER);
         tabItemView.setPadding(mTabPaddingX, 0, mTabPaddingX, 0);
-        TypedArray ta = getContext().obtainStyledAttributes(R.style.ChassisTabItemBackground,
-                new int[]{android.R.attr.background});
-        Drawable backgroundDrawable = ta.getDrawable(0);
-        ta.recycle();
-        tabItemView.setBackground(backgroundDrawable);
+        TypedValue tv = new TypedValue();
+        getContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackground,
+                tv, /* resolveRefs= */ true);
+        tabItemView.setBackgroundResource(tv.resourceId);
         return tabItemView;
     }
 
