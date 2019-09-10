@@ -264,7 +264,7 @@ public final class PagedRecyclerView extends RecyclerView {
         TypedArray a =
                 context.obtainStyledAttributes(
                         attrs, R.styleable.PagedRecyclerView, defStyleAttr,
-                        R.style.PagedRecyclerView);
+                        R.style.Widget_Chassis_PagedRecyclerView);
 
         mScrollBarEnabled = context.getResources().getBoolean(R.bool.chassis_scrollbar_enable);
         mFullyInitialized = false;
@@ -276,7 +276,8 @@ public final class PagedRecyclerView extends RecyclerView {
         }
 
         mNestedRecyclerView =
-                new RecyclerView(context, attrs, R.style.PagedRecyclerView_NestedRecyclerView);
+                new RecyclerView(context, attrs,
+                        R.style.Widget_Chassis_PagedRecyclerView_NestedRecyclerView);
 
         mScrollBarPaddingStart =
                 context.getResources().getDimension(R.dimen.chassis_scrollbar_padding_start);
