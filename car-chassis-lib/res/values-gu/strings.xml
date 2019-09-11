@@ -17,4 +17,8 @@ limitations under the License.
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="chassis_toolbar_default_search_hint" msgid="2195336892707724339">"શોધો…"</string>
+    <string name="chassis_scrollbar_page_down_button" msgid="2748050681084305203">"નીચેની તરફ સ્ક્રોલ કરો"</string>
+    <string name="chassis_scrollbar_page_up_button" msgid="5050821541225294382">"ઉપરની તરફ સ્ક્રોલ કરો"</string>
+    <string name="chassis_toolbar_menu_item_search_title" msgid="3508700860017523722">"શોધ"</string>
+    <string name="chassis_toolbar_menu_item_settings_title" msgid="3273333136171368562">"સેટિંગ"</string>
 </resources>
