@@ -40,4 +40,13 @@
     <!--  Paged Recycler View  -->
     <!-- The color of the scroll bar indicator in the PagedListView. -->
     <color name="chassis_scrollbar_thumb">#99ffffff</color>
+
+    <!-- Preferences -->
+
+    <color name="chassis_preference_category_title_text_color">#ff60a8f0</color>
+    <color name="chassis_preference_summary_text_color">#ffdadce0</color>
+    <color name="chassis_preference_title_text_color">@android:color/white</color>
+    <color name="chassis_preference_edit_text_dialog_message_text_color">#ffdadce0</color>
+
+    <color name="chassis_preference_icon_color">@android:color/white</color>
 </resources>
