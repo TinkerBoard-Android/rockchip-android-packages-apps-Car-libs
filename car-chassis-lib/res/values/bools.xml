@@ -18,14 +18,14 @@
 
     <!-- Whether to display the Scroll Bar or not. Defaults to true. If this is set to false,
          the PagedRecyclerView will behave exactly like the RecyclerView. -->
-    <bool name="chassis_scrollbar_enable">true</bool>
+    <bool name="car_ui_scrollbar_enable">true</bool>
 
     <!-- Whether to place the scrollbar z-index above the recycler view. Defaults to
          true. -->
-    <bool name="chassis_scrollbar_above_recycler_view">true</bool>
+    <bool name="car_ui_scrollbar_above_recycler_view">true</bool>
 
-    <bool name="chassis_preference_allow_divider_above">false</bool>
-    <bool name="chassis_preference_allow_divider_below">false</bool>
-    <bool name="chassis_preference_category_allow_divider_above">false</bool>
-    <bool name="chassis_preference_category_allow_divider_below">false</bool>
+    <bool name="car_ui_preference_allow_divider_above">false</bool>
+    <bool name="car_ui_preference_allow_divider_below">false</bool>
+    <bool name="car_ui_preference_category_allow_divider_above">false</bool>
+    <bool name="car_ui_preference_category_allow_divider_below">false</bool>
 </resources>

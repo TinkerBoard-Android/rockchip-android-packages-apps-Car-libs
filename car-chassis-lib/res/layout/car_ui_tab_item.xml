@@ -18,14 +18,14 @@
 <merge
     xmlns:android="http://schemas.android.com/apk/res/android">
     <ImageView
-        android:id="@+id/chassis_tab_item_icon"
-        android:layout_width="@dimen/chassis_tab_icon_width"
-        android:layout_height="@dimen/chassis_tab_icon_height"
+        android:id="@+id/car_ui_tab_item_icon"
+        android:layout_width="@dimen/car_ui_tab_icon_width"
+        android:layout_height="@dimen/car_ui_tab_icon_height"
         android:scaleType="fitCenter"
-        android:tint="@color/chassis_tab_item_selector"/>
+        android:tint="@color/car_ui_tab_item_selector"/>
     <TextView
-        android:id="@+id/chassis_tab_item_text"
-        android:layout_width="@dimen/chassis_tab_text_width"
+        android:id="@+id/car_ui_tab_item_text"
+        android:layout_width="@dimen/car_ui_tab_text_width"
         android:layout_height="wrap_content"
         android:singleLine="true"
         android:gravity="center"
