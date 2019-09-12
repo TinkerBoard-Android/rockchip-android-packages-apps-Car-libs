@@ -59,10 +59,10 @@
     <item name="wrap_content" format="integer" type="dimen">-2</item>
 
     <!-- Default Scroll Bar for PagedRecyclerView -->
-    <dimen name="chassis_scrollbar_button_size">76dp</dimen>
+    <dimen name="chassis_scrollbar_button_size">@dimen/chassis_touch_target_width</dimen>
     <dimen name="chassis_scrollbar_thumb_width">6dp</dimen>
     <dimen name="chassis_scrollbar_separator_margin">16dp</dimen>
-    <dimen name="chassis_scrollbar_margin">20dp</dimen>
+    <dimen name="chassis_scrollbar_margin">@dimen/chassis_margin</dimen>
     <dimen name="chassis_scrollbar_thumb_radius">100dp</dimen>
 
     <item name="chassis_button_disabled_alpha" format="float" type="dimen">0.2</item>
@@ -76,4 +76,30 @@
 
     <dimen name="chassis_scrollbar_padding_start">0dp</dimen>
     <dimen name="chassis_scrollbar_padding_end">0dp</dimen>
+
+    <!-- Preferences -->
+
+    <dimen name="chassis_preference_category_text_size">24sp</dimen>
+    <dimen name="chassis_preference_summary_text_size">24sp</dimen>
+    <dimen name="chassis_preference_title_text_size">32sp</dimen>
+    <dimen name="chassis_preference_edit_text_dialog_message_text_size">24sp</dimen>
+
+    <dimen name="chassis_preference_content_margin_top">16dp</dimen>
+    <dimen name="chassis_preference_content_margin_bottom">16dp</dimen>
+    <dimen name="chassis_preference_icon_size">44dp</dimen>
+    <dimen name="chassis_preference_icon_margin_end">16dp</dimen>
+
+    <dimen name="chassis_preference_category_min_height">76dp</dimen>
+    <dimen name="chassis_preference_category_icon_size">44dp</dimen>
+    <dimen name="chassis_preference_category_icon_margin_end">16dp</dimen>
+
+    <dimen name="chassis_preference_dropdown_padding_start">112dp</dimen>
+
+    <dimen name="chassis_preference_edit_text_dialog_margin_top">32dp</dimen>
+    <dimen name="chassis_preference_edit_text_dialog_margin_bottom">32dp</dimen>
+    <dimen name="chassis_preference_edit_text_dialog_message_margin_bottom">32dp</dimen>
+    <dimen name="chassis_preference_edit_text_dialog_message_margin_start">24dp</dimen>
+    <dimen name="chassis_preference_edit_text_dialog_message_margin_end">24dp</dimen>
+    <dimen name="chassis_preference_edit_text_dialog_text_margin_start">24dp</dimen>
+    <dimen name="chassis_preference_edit_text_dialog_text_margin_end">24dp</dimen>
 </resources>
