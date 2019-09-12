@@ -22,7 +22,7 @@
     android:layout_height="match_parent"
     android:background="@color/dialog_activity_background_color">
 
-  <com.android.car.chassis.toolbar.Toolbar
+  <com.android.car.ui.toolbar.Toolbar
       android:id="@+id/toolbar"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
