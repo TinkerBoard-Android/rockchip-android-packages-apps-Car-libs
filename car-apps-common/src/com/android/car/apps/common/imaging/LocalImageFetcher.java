@@ -19,6 +19,7 @@ package com.android.car.apps.common.imaging;
 import android.annotation.UiThread;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
@@ -35,8 +36,11 @@ import com.android.car.apps.common.R;
 import com.android.car.apps.common.UriUtils;
 import com.android.car.apps.common.util.CarAppsIOUtils;
 
+import libcore.io.IoUtils;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
@@ -235,8 +239,16 @@ public class LocalImageFetcher {
                     // ImageDecoder doesn't support all resources via the content provider...
                     return UriUtils.getDrawable(context, UriUtils.getIconResource(imageUri));
                 } else if (UriUtils.isContentUri(imageUri)) {
-
                     ContentResolver resolver = context.getContentResolver();
+
+                    // TODO(b/140959390): Remove the check once the bug is fixed in framework.
+                    if (!hasFile(resolver, imageUri)) {
+                        if (L_WARN) {
+                            Log.w(TAG, "File not found in uri: " + imageUri);
+                        }
+                        return null;
+                    }
+
                     ImageDecoder.Source src = ImageDecoder.createSource(resolver, imageUri);
                     return ImageDecoder.decodeDrawable(src, mOnHeaderDecodedListener);
 
@@ -261,6 +273,34 @@ public class LocalImageFetcher {
                 return null;
             }
             return null;
+        }
+
+        private boolean hasFile(ContentResolver resolver, Uri uri) {
+            AssetFileDescriptor assetFd = null;
+            try {
+                if (uri.getScheme() == ContentResolver.SCHEME_CONTENT) {
+                    assetFd = resolver.openTypedAssetFileDescriptor(uri, "image/*", null);
+                } else {
+                    assetFd = resolver.openAssetFileDescriptor(uri, "r");
+                }
+            } catch (FileNotFoundException e) {
+                // Some images cannot be opened as AssetFileDescriptors (e.g.bmp, ico). Open them
+                // as InputStreams.
+                try {
+                    InputStream is = resolver.openInputStream(uri);
+                    if (is != null) {
+                        IoUtils.closeQuietly(is);
+                        return true;
+                    }
+                } catch (IOException exception) {
+                    return false;
+                }
+            }
+            if (assetFd != null) {
+                IoUtils.closeQuietly(assetFd);
+                return true;
+            }
+            return false;
         }
 
         @UiThread
