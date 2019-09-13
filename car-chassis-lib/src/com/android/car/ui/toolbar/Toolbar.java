@@ -329,9 +329,10 @@ public class Toolbar extends FrameLayout {
         // TODO(b/140564530) Use a carui alert with a (paged)recyclerview here
         // TODO(b/140563930) Support enabled/disabled overflow items
 
-        CharSequence[] itemTitles = mOverflowItems.stream()
-                .map(MenuItem::getTitle)
-                .toArray(CharSequence[]::new);
+        CharSequence[] itemTitles = new CharSequence[mOverflowItems.size()];
+        for (int i = 0; i < mOverflowItems.size(); i++) {
+            itemTitles[i] = mOverflowItems.get(i).getTitle();
+        }
 
         mOverflowDialog = new AlertDialog.Builder(getContext())
                 .setItems(itemTitles, (dialog, which) -> {
