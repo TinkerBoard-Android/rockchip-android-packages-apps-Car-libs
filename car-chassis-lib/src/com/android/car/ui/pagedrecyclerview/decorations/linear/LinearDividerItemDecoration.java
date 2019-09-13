@@ -31,9 +31,9 @@ public class LinearDividerItemDecoration extends RecyclerView.ItemDecoration {
 
     /**
      * Sole constructor. Takes in a {@link Drawable} to be used as the interior
-     * chassis_pagedrecyclerview_divider.
+     * car_ui_pagedrecyclerview_divider.
      *
-     * @param divider A chassis_pagedrecyclerview_divider {@code Drawable} to be drawn on the
+     * @param divider A car_ui_pagedrecyclerview_divider {@code Drawable} to be drawn on the
      * RecyclerView
      */
     public LinearDividerItemDecoration(Drawable divider) {

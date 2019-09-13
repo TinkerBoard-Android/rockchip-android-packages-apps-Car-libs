@@ -38,7 +38,7 @@
     <attr name="chassisToolbarStyle" format="reference"/>
 
     <declare-styleable name="PagedRecyclerView">
-        <!-- Whether to enable the chassis_pagedrecyclerview_divider for linear layout or not. -->
+        <!-- Whether to enable the car_ui_pagedrecyclerview_divider for linear layout or not. -->
         <attr name="enableDivider" format="boolean" />
         <!-- Top offset for paged recycler view. -->
         <attr name="startOffset" format="integer" />

@@ -16,17 +16,15 @@
 -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="@dimen/chassis_touch_target_width"
-    android:layout_height="@dimen/chassis_touch_target_height"
-    android:layout_marginLeft="@dimen/chassis_toolbar_menu_item_margin"
-    android:layout_marginRight="@dimen/chassis_toolbar_menu_item_margin"
+    android:layout_width="@dimen/car_ui_touch_target_width"
+    android:layout_height="@dimen/car_ui_touch_target_height"
+    android:layout_marginLeft="@dimen/car_ui_toolbar_menu_item_margin"
+    android:layout_marginRight="@dimen/car_ui_toolbar_menu_item_margin"
     android:layout_gravity="center_vertical">
-    <ImageView
-        android:id="@+id/chassis_toolbar_menu_item_icon"
-        android:layout_width="@dimen/chassis_primary_icon_size"
-        android:layout_height="@dimen/chassis_primary_icon_size"
+    <Switch
+        android:id="@+id/car_ui_toolbar_menu_item_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:background="@drawable/chassis_toolbar_icon_background"
-        android:tint="@color/chassis_toolbar_icon_tint"
-        android:tintMode="src_in"/>
+        android:clickable="false"/>
 </FrameLayout>
