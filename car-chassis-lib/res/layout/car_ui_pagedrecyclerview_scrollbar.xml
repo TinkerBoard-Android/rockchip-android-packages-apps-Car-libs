@@ -24,31 +24,31 @@
 
     <ImageButton
         android:id="@+id/page_up"
-        android:layout_width="@dimen/chassis_scrollbar_button_size"
-        android:layout_height="@dimen/chassis_scrollbar_button_size"
-        android:background="@drawable/chassis_pagedrecyclerview_button_ripple_background"
-        android:contentDescription="@string/chassis_scrollbar_page_up_button"
+        android:layout_width="@dimen/car_ui_scrollbar_button_size"
+        android:layout_height="@dimen/car_ui_scrollbar_button_size"
+        android:background="@drawable/car_ui_pagedrecyclerview_button_ripple_background"
+        android:contentDescription="@string/car_ui_scrollbar_page_up_button"
         android:focusable="false"
         android:hapticFeedbackEnabled="false"
-        android:src="@drawable/chassis_pagedrecyclerview_ic_up"
+        android:src="@drawable/car_ui_pagedrecyclerview_ic_up"
         android:scaleType="centerInside" />
 
     <!-- View height is dynamically calculated during layout. -->
     <View
         android:id="@+id/scrollbar_thumb"
-        android:layout_width="@dimen/chassis_scrollbar_thumb_width"
+        android:layout_width="@dimen/car_ui_scrollbar_thumb_width"
         android:layout_height="0dp"
         android:layout_gravity="center_horizontal"
-        android:background="@drawable/chassis_pagedrecyclerview_scrollbar_thumb" />
+        android:background="@drawable/car_ui_pagedrecyclerview_scrollbar_thumb" />
 
     <ImageButton
         android:id="@+id/page_down"
-        android:layout_width="@dimen/chassis_scrollbar_button_size"
-        android:layout_height="@dimen/chassis_scrollbar_button_size"
-        android:background="@drawable/chassis_pagedrecyclerview_button_ripple_background"
-        android:contentDescription="@string/chassis_scrollbar_page_down_button"
+        android:layout_width="@dimen/car_ui_scrollbar_button_size"
+        android:layout_height="@dimen/car_ui_scrollbar_button_size"
+        android:background="@drawable/car_ui_pagedrecyclerview_button_ripple_background"
+        android:contentDescription="@string/car_ui_scrollbar_page_down_button"
         android:focusable="false"
         android:hapticFeedbackEnabled="false"
-        android:src="@drawable/chassis_pagedrecyclerview_ic_down"
+        android:src="@drawable/car_ui_pagedrecyclerview_ic_down"
         android:scaleType="centerInside" />
 </LinearLayout>

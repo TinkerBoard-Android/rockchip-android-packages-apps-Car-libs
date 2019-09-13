@@ -16,5 +16,5 @@
   -->
 
 <resources>
-    <bool name="chassis_tab_flexible_layout">true</bool>
+    <bool name="car_ui_tab_flexible_layout">true</bool>
 </resources>

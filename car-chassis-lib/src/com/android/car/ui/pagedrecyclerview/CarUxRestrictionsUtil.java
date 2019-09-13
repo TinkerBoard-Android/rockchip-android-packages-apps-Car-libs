@@ -139,11 +139,11 @@ public class CarUxRestrictionsUtil {
             int maxLength =
                     uxr == null
                             ? context.getResources().getInteger(
-                            R.integer.chassis_default_max_string_length)
+                            R.integer.car_ui_default_max_string_length)
                             : uxr.getMaxRestrictedStringLength();
 
             if (str.length() > maxLength) {
-                return str.substring(0, maxLength) + context.getString(R.string.chassis_ellipsis);
+                return str.substring(0, maxLength) + context.getString(R.string.car_ui_ellipsis);
             }
         }
 

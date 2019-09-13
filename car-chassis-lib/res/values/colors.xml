@@ -17,36 +17,36 @@
     <!-- General -->
 
     <!-- Main text color (titles, text body, etc.) -->
-    <color name="chassis_primary_text_color">#FFFFFFFF</color>
+    <color name="car_ui_primary_text_color">#FFFFFFFF</color>
     <!-- Text color used in subtitles or other secondary text blocks -->
-    <color name="chassis_secondary_text_color">#90FFFFFF</color>
+    <color name="car_ui_secondary_text_color">#90FFFFFF</color>
     <!-- The ripple color. -->
-    <color name="chassis_ripple_color">#27ffffff</color>
+    <color name="car_ui_ripple_color">#27ffffff</color>
 
     <!-- Tabs -->
 
     <!-- Selected colors -->
-    <color name="chassis_tab_selected_color">@color/chassis_primary_text_color</color>
+    <color name="car_ui_tab_selected_color">@color/car_ui_primary_text_color</color>
     <!-- Normal colors -->
-    <color name="chassis_tab_unselected_color">@color/chassis_secondary_text_color</color>
+    <color name="car_ui_tab_unselected_color">@color/car_ui_secondary_text_color</color>
 
     <!-- Toolbar -->
 
     <!-- Text color applied to the hint displayed inside the search box -->
-    <color name="chassis_toolbar_search_hint_text_color">#33FFFFFF</color>
+    <color name="car_ui_toolbar_search_hint_text_color">#33FFFFFF</color>
     <!-- Toolbar background color -->
-    <color name="chassis_toolbar_background_color">#E0000000</color>
+    <color name="car_ui_toolbar_background_color">#E0000000</color>
 
     <!--  Paged Recycler View  -->
     <!-- The color of the scroll bar indicator in the PagedListView. -->
-    <color name="chassis_scrollbar_thumb">#99ffffff</color>
+    <color name="car_ui_scrollbar_thumb">#99ffffff</color>
 
     <!-- Preferences -->
 
-    <color name="chassis_preference_category_title_text_color">#ff60a8f0</color>
-    <color name="chassis_preference_summary_text_color">#ffdadce0</color>
-    <color name="chassis_preference_title_text_color">@android:color/white</color>
-    <color name="chassis_preference_edit_text_dialog_message_text_color">#ffdadce0</color>
+    <color name="car_ui_preference_category_title_text_color">#ff60a8f0</color>
+    <color name="car_ui_preference_summary_text_color">#ffdadce0</color>
+    <color name="car_ui_preference_title_text_color">@android:color/white</color>
+    <color name="car_ui_preference_edit_text_dialog_message_text_color">#ffdadce0</color>
 
-    <color name="chassis_preference_icon_color">@android:color/white</color>
+    <color name="car_ui_preference_icon_color">@android:color/white</color>
 </resources>
