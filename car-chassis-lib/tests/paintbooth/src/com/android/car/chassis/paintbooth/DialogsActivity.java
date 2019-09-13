@@ -27,12 +27,12 @@ import com.android.car.chassis.toolbar.Toolbar;
 /**
  * Activity that shows different dialogs from the device default theme.
  */
-public class DialogSamples extends Activity {
+public class DialogsActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.dialog_samples);
+        setContentView(R.layout.dialogs_activity);
 
         Button showDialogButton = findViewById(R.id.show_dialog_bt);
         Button showDialogOnlyPositiveButton = findViewById(R.id.show_dialog_only_positive_bt);

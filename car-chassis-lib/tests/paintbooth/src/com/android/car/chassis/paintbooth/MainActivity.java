@@ -18,27 +18,76 @@ package com.android.car.chassis.paintbooth;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Pair;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.android.car.chassis.pagedrecyclerview.PagedRecyclerView;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Paint booth app
  */
 public class MainActivity extends Activity {
+    /**
+     * List of all sample activities.
+     */
+    private List<Pair<String, Class<? extends Activity>>> mActivities = Arrays.asList(
+            Pair.create("Dialogs sample page", DialogsActivity.class)
+    );
+
+    private class ViewHolder extends RecyclerView.ViewHolder {
+        private Button mButton;
+
+        ViewHolder(@NonNull View itemView) {
+            super(itemView);
+            mButton = itemView.findViewById(R.id.button);
+        }
+
+
+        void update(String title, Class<? extends Activity> activityClass) {
+            mButton.setText(title);
+            mButton.setOnClickListener(e -> {
+                Intent intent = new Intent(mButton.getContext(), activityClass);
+                startActivity(intent);
+            });
+        }
+    }
+
+    private RecyclerView.Adapter mAdapter = new RecyclerView.Adapter() {
+        @NonNull
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View item = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item, parent,
+                    false);
+            return new ViewHolder(item);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+            Pair<String, Class<? extends Activity>> item = mActivities.get(position);
+            ((ViewHolder) holder).update(item.first, item.second);
+        }
+
+        @Override
+        public int getItemCount() {
+            return mActivities.size();
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.home_page);
+        setContentView(R.layout.main_activity);
 
-        Button showDialogSamples = findViewById(R.id.dialog_samples);
-        showDialogSamples.setOnClickListener(v -> startSampleActivity(DialogSamples.class));
-    }
-
-    /**
-     * Launch the given sample activity
-     */
-    private boolean startSampleActivity(Class<?> cls) {
-        Intent intent = new Intent(this, cls);
-        startActivity(intent);
-        return true;
+        PagedRecyclerView prv = findViewById(R.id.activities);
+        prv.setAdapter(mAdapter);
     }
 }
