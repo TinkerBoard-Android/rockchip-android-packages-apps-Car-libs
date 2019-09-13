@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -691,7 +692,7 @@ public final class PagedRecyclerView extends RecyclerView {
 
         Class<?> cls;
         try {
-            cls = mScrollBarClass != null
+            cls = !TextUtils.isEmpty(mScrollBarClass)
                     ? getContext().getClassLoader().loadClass(mScrollBarClass)
                     : DefaultScrollBar.class;
         } catch (Throwable t) {
