@@ -16,7 +16,7 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.car.chassis">
+          package="com.android.car.ui">
   <uses-sdk
       android:minSdkVersion="14"
       android:targetSdkVersion="28" />
