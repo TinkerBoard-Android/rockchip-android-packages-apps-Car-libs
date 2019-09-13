@@ -21,4 +21,12 @@ limitations under the License.
     <string name="chassis_scrollbar_page_up_button" msgid="5050821541225294382">"Desplazarse hacia arriba"</string>
     <string name="chassis_toolbar_menu_item_search_title" msgid="3508700860017523722">"Buscar"</string>
     <string name="chassis_toolbar_menu_item_settings_title" msgid="3273333136171368562">"Configuración"</string>
+    <!-- no translation found for chassis_dialog_preference_positive (8428271311414555967) -->
+    <skip />
+    <!-- no translation found for chassis_dialog_preference_negative (1849907588352106437) -->
+    <skip />
+    <!-- no translation found for chassis_switch_preference_on (5693724143663245244) -->
+    <skip />
+    <!-- no translation found for chassis_switch_preference_off (3924928243297045866) -->
+    <skip />
 </resources>
