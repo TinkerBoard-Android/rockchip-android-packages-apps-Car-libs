@@ -16,5 +16,5 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.car.chassis">
+          package="com.android.car.ui">
 </manifest>
