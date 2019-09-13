@@ -29,5 +29,5 @@
         android:layout_height="wrap_content"
         android:singleLine="true"
         android:gravity="center"
-        android:textAppearance="@style/TextAppearance.Chassis.Widget.Toolbar.Tab"/>
+        android:textAppearance="@style/TextAppearance.CarUi.Widget.Toolbar.Tab"/>
 </merge>

@@ -15,14 +15,14 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Base application theme. -->
-    <style name="ChassisTheme" parent="android:Theme.DeviceDefault">
+    <style name="CarUiTheme" parent="android:Theme.DeviceDefault">
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
     </style>
 
-    <!-- TODO: merge with ChassisTheme and extend DeviceDefault.NoActionBar once toolbar is ready -->
+    <!-- TODO: merge with CarUiTheme and extend DeviceDefault.NoActionBar once toolbar is ready -->
     <!-- TODO: for internal TODOs, expand theme/style to leaf resources as necessary -->
-    <style name="Theme.Chassis" parent="@android:style/Theme.DeviceDefault">
+    <style name="Theme.CarUi" parent="@android:style/Theme.DeviceDefault">
 
         <!-- Attributes from: Base.V7.Theme.AppCompat -->
 
@@ -204,25 +204,25 @@
         <item name="listChoiceIndicatorSingleAnimated">?android:attr/listChoiceIndicatorSingle</item>
         <item name="listChoiceIndicatorMultipleAnimated">?android:attr/listChoiceIndicatorMultiple</item>
 
-        <item name="preferenceTheme">@style/ChassisPreferenceTheme</item>
+        <item name="preferenceTheme">@style/CarUiPreferenceTheme</item>
     </style>
 
-    <style name="ChassisPreferenceTheme">
-        <item name="checkBoxPreferenceStyle">@style/Preference.Chassis.CheckBoxPreference
+    <style name="CarUiPreferenceTheme">
+        <item name="checkBoxPreferenceStyle">@style/Preference.CarUi.CheckBoxPreference
         </item>
-        <item name="dialogPreferenceStyle">@style/Preference.Chassis.DialogPreference</item>
-        <item name="dropdownPreferenceStyle">@style/Preference.Chassis.DropDown</item>
+        <item name="dialogPreferenceStyle">@style/Preference.CarUi.DialogPreference</item>
+        <item name="dropdownPreferenceStyle">@style/Preference.CarUi.DropDown</item>
         <item name="editTextPreferenceStyle">
-            @style/Preference.Chassis.DialogPreference.EditTextPreference
+            @style/Preference.CarUi.DialogPreference.EditTextPreference
         </item>
-        <item name="preferenceCategoryStyle">@style/Preference.Chassis.Category</item>
-        <item name="preferenceFragmentCompatStyle">@style/PreferenceFragment.Chassis</item>
-        <item name="preferenceFragmentListStyle">@style/PreferenceFragmentList.Chassis</item>
-        <item name="preferenceFragmentStyle">@style/PreferenceFragment.Chassis</item>
-        <item name="preferenceScreenStyle">@style/Preference.Chassis.PreferenceScreen</item>
-        <item name="preferenceStyle">@style/Preference.Chassis</item>
-        <item name="seekBarPreferenceStyle">@style/Preference.Chassis.SeekBarPreference</item>
-        <item name="switchPreferenceStyle">@style/Preference.Chassis.SwitchPreference</item>
+        <item name="preferenceCategoryStyle">@style/Preference.CarUi.Category</item>
+        <item name="preferenceFragmentCompatStyle">@style/PreferenceFragment.CarUi</item>
+        <item name="preferenceFragmentListStyle">@style/PreferenceFragmentList.CarUi</item>
+        <item name="preferenceFragmentStyle">@style/PreferenceFragment.CarUi</item>
+        <item name="preferenceScreenStyle">@style/Preference.CarUi.PreferenceScreen</item>
+        <item name="preferenceStyle">@style/Preference.CarUi</item>
+        <item name="seekBarPreferenceStyle">@style/Preference.CarUi.SeekBarPreference</item>
+        <item name="switchPreferenceStyle">@style/Preference.CarUi.SwitchPreference</item>
     </style>
 
 </resources>
