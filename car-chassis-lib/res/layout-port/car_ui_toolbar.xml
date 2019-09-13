@@ -63,7 +63,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/car_ui_toolbar_title_margin_start"
-        style="@style/TextAppearance.Chassis.Widget.Toolbar.Title"
+        style="@style/TextAppearance.CarUi.Widget.Toolbar.Title"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/row_separator"
         app:layout_constraintStart_toEndOf="@id/nav_icon_container"
