@@ -267,7 +267,7 @@ public final class PagedRecyclerView extends RecyclerView {
                         attrs, R.styleable.PagedRecyclerView, defStyleAttr,
                         R.style.Widget_Chassis_PagedRecyclerView);
 
-        mScrollBarEnabled = context.getResources().getBoolean(R.bool.chassis_scrollbar_enable);
+        mScrollBarEnabled = context.getResources().getBoolean(R.bool.car_ui_scrollbar_enable);
         mFullyInitialized = false;
 
         if (!mScrollBarEnabled) {
@@ -281,9 +281,9 @@ public final class PagedRecyclerView extends RecyclerView {
                         R.style.Widget_Chassis_PagedRecyclerView_NestedRecyclerView);
 
         mScrollBarPaddingStart =
-                context.getResources().getDimension(R.dimen.chassis_scrollbar_padding_start);
+                context.getResources().getDimension(R.dimen.car_ui_scrollbar_padding_start);
         mScrollBarPaddingEnd =
-                context.getResources().getDimension(R.dimen.chassis_scrollbar_padding_end);
+                context.getResources().getDimension(R.dimen.car_ui_scrollbar_padding_end);
 
         mPagedRecyclerViewLayout =
                 a.getInt(R.styleable.PagedRecyclerView_layoutStyle, PagedRecyclerViewLayout.LINEAR);
@@ -301,7 +301,7 @@ public final class PagedRecyclerView extends RecyclerView {
             if (enableDivider) {
                 RecyclerView.ItemDecoration dividerItemDecoration =
                         new LinearDividerItemDecoration(
-                                context.getDrawable(R.drawable.chassis_pagedrecyclerview_divider));
+                                context.getDrawable(R.drawable.car_ui_pagedrecyclerview_divider));
                 super.addItemDecoration(dividerItemDecoration);
             }
             RecyclerView.ItemDecoration topOffsetItemDecoration =
@@ -321,8 +321,8 @@ public final class PagedRecyclerView extends RecyclerView {
             if (enableDivider) {
                 mDividerItemDecoration =
                         new GridDividerItemDecoration(
-                                context.getDrawable(R.drawable.chassis_divider),
-                                context.getDrawable(R.drawable.chassis_divider),
+                                context.getDrawable(R.drawable.car_ui_divider),
+                                context.getDrawable(R.drawable.car_ui_divider),
                                 mNumOfColumns);
                 super.addItemDecoration(mDividerItemDecoration);
             }
@@ -344,19 +344,19 @@ public final class PagedRecyclerView extends RecyclerView {
         super.setClipToPadding(false);
 
         // Gutter
-        mGutter = context.getResources().getInteger(R.integer.chassis_scrollbar_gutter);
-        mGutterSize = getResources().getDimensionPixelSize(R.dimen.chassis_scrollbar_margin);
+        mGutter = context.getResources().getInteger(R.integer.car_ui_scrollbar_gutter);
+        mGutterSize = getResources().getDimensionPixelSize(R.dimen.car_ui_scrollbar_margin);
 
         mScrollBarContainerWidth =
                 (int) context.getResources().getDimension(
-                        R.dimen.chassis_scrollbar_container_width);
+                        R.dimen.car_ui_scrollbar_container_width);
 
         mScrollBarPosition = context.getResources().getInteger(
-                R.integer.chassis_scrollbar_position);
+                R.integer.car_ui_scrollbar_position);
 
         mScrollBarAboveRecyclerView =
-                context.getResources().getBoolean(R.bool.chassis_scrollbar_above_recycler_view);
-        mScrollBarClass = context.getResources().getString(R.string.chassis_scrollbar_component);
+                context.getResources().getBoolean(R.bool.car_ui_scrollbar_above_recycler_view);
+        mScrollBarClass = context.getResources().getString(R.string.car_ui_scrollbar_component);
         a.recycle();
         this.mContext = context;
         // Apply inner RV layout changes after the layout has been calculated for this view.

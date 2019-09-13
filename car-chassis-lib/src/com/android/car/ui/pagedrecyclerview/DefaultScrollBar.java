@@ -82,13 +82,13 @@ class DefaultScrollBar implements ScrollBar {
 
         FrameLayout parent = (FrameLayout) getRecyclerView().getParent();
 
-        mScrollView = inflater.inflate(R.layout.chassis_pagedrecyclerview_scrollbar, parent, false);
+        mScrollView = inflater.inflate(R.layout.car_ui_pagedrecyclerview_scrollbar, parent, false);
         mScrollView.setLayoutParams(
                 new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
 
         Resources res = rv.getContext().getResources();
 
-        mButtonDisabledAlpha = ResourceUtils.getFloat(res, R.dimen.chassis_button_disabled_alpha);
+        mButtonDisabledAlpha = ResourceUtils.getFloat(res, R.dimen.car_ui_button_disabled_alpha);
 
         if (scrollBarAboveRecyclerView) {
             parent.addView(mScrollView);
@@ -102,7 +102,7 @@ class DefaultScrollBar implements ScrollBar {
         getRecyclerView().addOnScrollListener(mRecyclerViewOnScrollListener);
         getRecyclerView().getRecycledViewPool().setMaxRecycledViews(0, 12);
 
-        mSeparatingMargin = res.getDimensionPixelSize(R.dimen.chassis_scrollbar_separator_margin);
+        mSeparatingMargin = res.getDimensionPixelSize(R.dimen.car_ui_scrollbar_separator_margin);
 
         mUpButton = mScrollView.findViewById(R.id.page_up);
         PaginateButtonClickListener upButtonClickListener =

@@ -51,8 +51,8 @@ import java.util.Set;
  * <p>Scrolling function is not supported. If a tab item runs out of the tab layout bound, there
  * is no way to access it. It's better to set the layout mode to flexible in this case.
  *
- * <p>Default tab item inflates from R.layout.chassis_tab_item, but it also supports custom layout
- * id, by overlaying R.layout.chassis_tab_item_layout. By doing this, appearance of tab item view
+ * <p>Default tab item inflates from R.layout.car_ui_tab_item, but it also supports custom layout
+ * id, by overlaying R.layout.car_ui_tab_item_layout. By doing this, appearance of tab item view
  * can be customized.
  *
  * <p>Touch feedback is using @android:attr/selectableItemBackground.
@@ -96,10 +96,10 @@ public class TabLayout extends LinearLayout {
         super(context, attrs, defStyle);
         mListeners = new ArraySet<>();
 
-        mTabPaddingX = context.getResources().getDimensionPixelSize(R.dimen.chassis_tab_padding_x);
-        mTabFlexibleLayout = context.getResources().getBoolean(R.bool.chassis_tab_flexible_layout);
+        mTabPaddingX = context.getResources().getDimensionPixelSize(R.dimen.car_ui_tab_padding_x);
+        mTabFlexibleLayout = context.getResources().getBoolean(R.bool.car_ui_tab_flexible_layout);
 
-        mTabAdapter = new TabAdapter(context, R.layout.chassis_tab_item_layout, this);
+        mTabAdapter = new TabAdapter(context, R.layout.car_ui_tab_item_layout, this);
     }
 
     /**
@@ -295,8 +295,8 @@ public class TabLayout extends LinearLayout {
         private void presentTabItemView(int position, @NonNull View tabItemView) {
             Tab tab = mTabList.get(position);
 
-            ImageView iconView = tabItemView.findViewById(R.id.chassis_tab_item_icon);
-            TextView textView = tabItemView.findViewById(R.id.chassis_tab_item_text);
+            ImageView iconView = tabItemView.findViewById(R.id.car_ui_tab_item_icon);
+            TextView textView = tabItemView.findViewById(R.id.car_ui_tab_item_text);
 
             tabItemView.setOnClickListener(view -> selectTab(tab));
             tab.bindText(textView);
