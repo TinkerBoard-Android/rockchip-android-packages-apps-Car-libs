@@ -25,9 +25,9 @@
         android:id="@+id/spinner"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/chassis_preference_dropdown_padding_start"
+        android:layout_marginStart="@dimen/car_ui_preference_dropdown_padding_start"
         android:visibility="invisible"/>
 
-    <include layout="@layout/chassis_preference"/>
+    <include layout="@layout/car_ui_preference"/>
 
 </FrameLayout>

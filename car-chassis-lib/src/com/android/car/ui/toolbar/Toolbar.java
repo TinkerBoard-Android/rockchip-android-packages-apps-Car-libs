@@ -126,7 +126,7 @@ public class Toolbar extends FrameLayout {
 
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(R.layout.chassis_toolbar, this, true);
+        inflater.inflate(R.layout.car_ui_toolbar, this, true);
 
         mTabLayout = requireViewById(R.id.tabs);
         mNavIcon = requireViewById(R.id.nav_icon);
@@ -136,7 +136,7 @@ public class Toolbar extends FrameLayout {
         mTitle = requireViewById(R.id.title);
         mSearchView = requireViewById(R.id.search_view);
         mCustomViewContainer = requireViewById(R.id.custom_view_container);
-        mOverflowButton = requireViewById(R.id.chassis_toolbar_overflow_button);
+        mOverflowButton = requireViewById(R.id.car_ui_toolbar_overflow_button);
 
         TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.ChassisToolbar, defStyleAttr, defStyleRes);
@@ -285,7 +285,7 @@ public class Toolbar extends FrameLayout {
      */
     public void setBackgroundShown(boolean shown) {
         if (shown) {
-            super.setBackground(getContext().getDrawable(R.color.chassis_toolbar_background_color));
+            super.setBackground(getContext().getDrawable(R.color.car_ui_toolbar_background_color));
         } else {
             super.setBackground(null);
         }
@@ -387,7 +387,7 @@ public class Toolbar extends FrameLayout {
 
         View.OnClickListener backClickListener = (v) -> forEachListener(Listener::onBack);
         mNavIcon.setVisibility(state != State.HOME ? VISIBLE : INVISIBLE);
-        mNavIcon.setImageResource(state != State.HOME ? R.drawable.chassis_icon_arrow_back : 0);
+        mNavIcon.setImageResource(state != State.HOME ? R.drawable.car_ui_icon_arrow_back : 0);
         mLogo.setVisibility(state == State.HOME && mHasLogo ? VISIBLE : INVISIBLE);
         mNavIconContainer.setVisibility(state != State.HOME || mHasLogo ? VISIBLE : GONE);
         mNavIconContainer.setOnClickListener(state != State.HOME ? backClickListener : null);

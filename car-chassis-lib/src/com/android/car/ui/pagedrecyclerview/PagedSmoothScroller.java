@@ -50,13 +50,13 @@ public class PagedSmoothScroller extends LinearSmoothScroller {
 
     private void init(Context context) {
         mMillisecondsPerInch = ResourceUtils.getFloat(context.getResources(),
-                R.dimen.chassis_scrollbar_milliseconds_per_inch);
+                R.dimen.car_ui_scrollbar_milliseconds_per_inch);
         mDecelerationTimeDivisor = ResourceUtils.getFloat(context.getResources(),
-                R.dimen.chassis_scrollbar_deceleration_times_divisor);
+                R.dimen.car_ui_scrollbar_deceleration_times_divisor);
         mInterpolator =
                 new DecelerateInterpolator(
                         ResourceUtils.getFloat(context.getResources(),
-                                R.dimen.chassis_scrollbar_decelerate_interpolator_factor));
+                                R.dimen.car_ui_scrollbar_decelerate_interpolator_factor));
     }
 
     @Override

@@ -19,8 +19,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginTop="@dimen/chassis_preference_edit_text_dialog_margin_top"
-    android:layout_marginBottom="@dimen/chassis_preference_edit_text_dialog_margin_bottom"
+    android:layout_marginTop="@dimen/car_ui_preference_edit_text_dialog_margin_top"
+    android:layout_marginBottom="@dimen/car_ui_preference_edit_text_dialog_margin_bottom"
     android:orientation="vertical">
 
     <TextView
@@ -28,16 +28,16 @@
         style="@style/TextAppearance.Chassis.PreferenceEditTextDialogMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/chassis_preference_edit_text_dialog_message_margin_bottom"
-        android:layout_marginStart="@dimen/chassis_preference_edit_text_dialog_message_margin_start"
-        android:layout_marginEnd="@dimen/chassis_preference_edit_text_dialog_message_margin_end"
+        android:layout_marginBottom="@dimen/car_ui_preference_edit_text_dialog_message_margin_bottom"
+        android:layout_marginStart="@dimen/car_ui_preference_edit_text_dialog_message_margin_start"
+        android:layout_marginEnd="@dimen/car_ui_preference_edit_text_dialog_message_margin_end"
         android:visibility="gone"/>
 
     <EditText
         android:id="@android:id/edit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/chassis_preference_edit_text_dialog_text_margin_end"
-        android:layout_marginStart="@dimen/chassis_preference_edit_text_dialog_text_margin_start"/>
+        android:layout_marginEnd="@dimen/car_ui_preference_edit_text_dialog_text_margin_end"
+        android:layout_marginStart="@dimen/car_ui_preference_edit_text_dialog_text_margin_start"/>
 
 </LinearLayout>

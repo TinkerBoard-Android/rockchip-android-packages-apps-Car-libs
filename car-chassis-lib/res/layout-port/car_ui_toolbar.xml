@@ -25,7 +25,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="horizontal"
-        app:layout_constraintGuide_begin="@dimen/chassis_toolbar_first_row_height"/>
+        app:layout_constraintGuide_begin="@dimen/car_ui_toolbar_first_row_height"/>
 
     <!-- can't use 0dp for layout_height or the constraintlayout effect kicks in -->
     <View
@@ -38,7 +38,7 @@
 
     <FrameLayout
         android:id="@+id/nav_icon_container"
-        android:layout_width="@dimen/chassis_toolbar_nav_button_width"
+        android:layout_width="@dimen/car_ui_toolbar_nav_button_width"
         android:layout_height="0dp"
         android:background="?android:attr/selectableItemBackground"
         app:layout_constraintTop_toTopOf="parent"
@@ -46,14 +46,14 @@
         app:layout_constraintStart_toStartOf="parent">
         <ImageView
             android:id="@+id/nav_icon"
-            android:layout_width="@dimen/chassis_toolbar_icon_size"
-            android:layout_height="@dimen/chassis_toolbar_icon_size"
+            android:layout_width="@dimen/car_ui_toolbar_icon_size"
+            android:layout_height="@dimen/car_ui_toolbar_icon_size"
             android:layout_gravity="center"
             android:scaleType="fitXY"/>
         <ImageView
             android:id="@+id/logo"
-            android:layout_width="@dimen/chassis_toolbar_icon_size"
-            android:layout_height="@dimen/chassis_toolbar_icon_size"
+            android:layout_width="@dimen/car_ui_toolbar_icon_size"
+            android:layout_height="@dimen/car_ui_toolbar_icon_size"
             android:layout_gravity="center"
             android:scaleType="fitXY"/>
     </FrameLayout>
@@ -62,7 +62,7 @@
         android:id="@+id/title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/chassis_toolbar_title_margin_start"
+        android:layout_marginStart="@dimen/car_ui_toolbar_title_margin_start"
         style="@style/TextAppearance.Chassis.Widget.Toolbar.Title"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/row_separator"
@@ -96,32 +96,32 @@
         android:orientation="horizontal"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/row_separator"
-        app:layout_constraintEnd_toStartOf="@id/chassis_toolbar_overflow_button"/>
+        app:layout_constraintEnd_toStartOf="@id/car_ui_toolbar_overflow_button"/>
 
     <FrameLayout
-        android:id="@+id/chassis_toolbar_overflow_button"
-        android:layout_width="@dimen/chassis_touch_target_width"
-        android:layout_height="@dimen/chassis_touch_target_height"
-        android:layout_marginLeft="@dimen/chassis_toolbar_menu_item_margin"
-        android:layout_marginRight="@dimen/chassis_toolbar_menu_item_margin"
+        android:id="@+id/car_ui_toolbar_overflow_button"
+        android:layout_width="@dimen/car_ui_touch_target_width"
+        android:layout_height="@dimen/car_ui_touch_target_height"
+        android:layout_marginLeft="@dimen/car_ui_toolbar_menu_item_margin"
+        android:layout_marginRight="@dimen/car_ui_toolbar_menu_item_margin"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/row_separator"
         app:layout_constraintEnd_toEndOf="parent">
         <ImageView
-            android:src="@drawable/chassis_icon_overflow_menu"
-            android:layout_width="@dimen/chassis_primary_icon_size"
-            android:layout_height="@dimen/chassis_primary_icon_size"
+            android:src="@drawable/car_ui_icon_overflow_menu"
+            android:layout_width="@dimen/car_ui_primary_icon_size"
+            android:layout_height="@dimen/car_ui_primary_icon_size"
             android:layout_gravity="center"
-            android:background="@drawable/chassis_toolbar_icon_background"
-            android:tint="@color/chassis_toolbar_icon_tint"
+            android:background="@drawable/car_ui_toolbar_icon_background"
+            android:tint="@color/car_ui_toolbar_icon_tint"
             android:tintMode="src_in"/>
     </FrameLayout>
 
     <com.android.car.ui.toolbar.TabLayout
         android:id="@+id/tabs"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/chassis_toolbar_second_row_height"
+        android:layout_height="@dimen/car_ui_toolbar_second_row_height"
         app:layout_constraintTop_toBottomOf="@id/row_separator"
         app:layout_constraintBottom_toTopOf="@id/bottom_styleable"/>
 
