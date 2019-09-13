@@ -30,13 +30,13 @@
       app:title="@string/app_name"
       app:logo="@drawable/ic_launcher"/>
 
-  <Button
-      android:id="@+id/dialog_samples"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:text="Show Dialog Sample Page"
+  <com.android.car.chassis.pagedrecyclerview.PagedRecyclerView
+      android:id="@+id/activities"
+      android:layout_width="0dp"
+      android:layout_height="0dp"
       app:layout_constraintLeft_toLeftOf="parent"
       app:layout_constraintRight_toRightOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/toolbar"/>
+      app:layout_constraintTop_toBottomOf="@id/toolbar"
+      app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
