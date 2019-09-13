@@ -2,7 +2,7 @@
 Components and resources designed to increase Automotive UI consistency between
 GAS (Google Automotive Services) apps, system-apps and OEM developed apps.
 
-See: go/aae-chassis
+See: go/aae-carui
 
 ## Content
 
