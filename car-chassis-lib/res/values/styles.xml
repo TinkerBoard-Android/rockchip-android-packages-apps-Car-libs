@@ -15,35 +15,35 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Styles for chassis tab view -->
+    <!-- Styles for CarUi tab view -->
 
-    <style name="Widget.Chassis" parent="android:Widget.DeviceDefault"/>
+    <style name="Widget.CarUi" parent="android:Widget.DeviceDefault"/>
 
-    <style name="Widget.Chassis.Toolbar"/>
+    <style name="Widget.CarUi.Toolbar"/>
 
-    <style name="Widget.Chassis.Toolbar.NavIcon">
+    <style name="Widget.CarUi.Toolbar.NavIcon">
         <item name="android:tint">@color/car_ui_primary_text_color</item>
         <item name="android:src">@drawable/car_ui_icon_arrow_back</item>
     </style>
 
-    <style name="Widget.Chassis.Toolbar.TextButton">
+    <style name="Widget.CarUi.Toolbar.TextButton">
         <item name="android:background">?android:attr/selectableItemBackground</item>
         <item name="android:textColor">?android:attr/colorAccent</item>
-        <item name="android:textAppearance">@style/TextAppearance.Chassis.Widget.Toolbar.Tab</item>
+        <item name="android:textAppearance">@style/TextAppearance.CarUi.Widget.Toolbar.Tab</item>
     </style>
 
-    <style name="Widget.Chassis.PagedRecyclerView"/>
-    <style name="Widget.Chassis.PagedRecyclerView.NestedRecyclerView"/>
+    <style name="Widget.CarUi.PagedRecyclerView"/>
+    <style name="Widget.CarUi.PagedRecyclerView.NestedRecyclerView"/>
 
     <!-- Preference Styles -->
 
-    <style name="Preference.Chassis">
+    <style name="Preference.CarUi">
         <item name="android:layout">@layout/car_ui_preference</item>
         <item name="allowDividerAbove">@bool/car_ui_preference_allow_divider_above</item>
         <item name="allowDividerBelow">@bool/car_ui_preference_allow_divider_below</item>
     </style>
 
-    <style name="Preference.Chassis.Category">
+    <style name="Preference.CarUi.Category">
         <item name="android:layout">@layout/car_ui_preference_category</item>
         <!-- The title should not dim if the category is disabled, instead only the preference children should dim. -->
         <item name="android:shouldDisableView">false</item>
@@ -52,48 +52,48 @@
         <item name="allowDividerBelow">@bool/car_ui_preference_category_allow_divider_below</item>
     </style>
 
-    <style name="Preference.Chassis.CheckBoxPreference">
+    <style name="Preference.CarUi.CheckBoxPreference">
         <item name="android:widgetLayout">@layout/car_ui_preference_widget_checkbox</item>
     </style>
 
-    <style name="Preference.Chassis.DialogPreference">
+    <style name="Preference.CarUi.DialogPreference">
         <item name="android:positiveButtonText">@string/car_ui_dialog_preference_positive</item>
         <item name="android:negativeButtonText">@string/car_ui_dialog_preference_negative</item>
     </style>
 
-    <style name="Preference.Chassis.DialogPreference.EditTextPreference">
+    <style name="Preference.CarUi.DialogPreference.EditTextPreference">
         <item name="android:dialogLayout">@layout/car_ui_preference_dialog_edittext</item>
     </style>
 
-    <style name="Preference.Chassis.DropDown">
+    <style name="Preference.CarUi.DropDown">
         <item name="android:layout">@layout/car_ui_preference_dropdown</item>
     </style>
 
-    <style name="Preference.Chassis.Information">
+    <style name="Preference.CarUi.Information">
         <item name="android:enabled">false</item>
         <item name="android:shouldDisableView">false</item>
     </style>
 
-    <style name="Preference.Chassis.PreferenceScreen"/>
+    <style name="Preference.CarUi.PreferenceScreen"/>
 
-    <style name="Preference.Chassis.SeekBarPreference">
+    <style name="Preference.CarUi.SeekBarPreference">
         <item name="android:layout">@layout/car_ui_preference_widget_seekbar</item>
         <item name="adjustable">true</item>
         <item name="showSeekBarValue">false</item>
     </style>
 
-    <style name="Preference.Chassis.SwitchPreference">
+    <style name="Preference.CarUi.SwitchPreference">
         <item name="android:widgetLayout">@layout/car_ui_preference_widget_switch</item>
         <item name="android:switchTextOn">@string/car_ui_switch_preference_on</item>
         <item name="android:switchTextOff">@string/car_ui_switch_preference_off</item>
     </style>
 
-    <style name="PreferenceFragment.Chassis">
+    <style name="PreferenceFragment.CarUi">
         <item name="android:divider">?android:attr/listDivider</item>
         <item name="android:layout">@layout/car_ui_preference_fragment</item>
     </style>
 
-    <style name="PreferenceFragmentList.Chassis">
+    <style name="PreferenceFragmentList.CarUi">
         <item name="android:paddingTop">0dp</item>
         <item name="android:paddingBottom">0dp</item>
         <item name="android:paddingLeft">0dp</item>
@@ -104,42 +104,42 @@
 
     <!-- TextAppearance -->
 
-    <style name="TextAppearance.Chassis" parent="android:TextAppearance.DeviceDefault">
+    <style name="TextAppearance.CarUi" parent="android:TextAppearance.DeviceDefault">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
-    <style name="TextAppearance.Chassis.PreferenceCategoryTitle">
+    <style name="TextAppearance.CarUi.PreferenceCategoryTitle">
         <item name="android:fontFamily">@string/car_ui_preference_category_title_font_family</item>
         <item name="android:textColor">@color/car_ui_preference_category_title_text_color</item>
         <item name="android:textSize">@dimen/car_ui_preference_category_text_size</item>
     </style>
 
-    <style name="TextAppearance.Chassis.PreferenceSummary">
+    <style name="TextAppearance.CarUi.PreferenceSummary">
         <item name="android:textColor">@color/car_ui_preference_summary_text_color</item>
         <item name="android:textSize">@dimen/car_ui_preference_summary_text_size</item>
     </style>
 
-    <style name="TextAppearance.Chassis.PreferenceTitle">
+    <style name="TextAppearance.CarUi.PreferenceTitle">
         <item name="android:textColor">@color/car_ui_preference_title_text_color</item>
         <item name="android:textSize">@dimen/car_ui_preference_title_text_size</item>
     </style>
 
-    <style name="TextAppearance.Chassis.PreferenceEditTextDialogMessage">
+    <style name="TextAppearance.CarUi.PreferenceEditTextDialogMessage">
         <item name="android:textColor">@color/car_ui_preference_edit_text_dialog_message_text_color</item>
         <item name="android:textSize">@dimen/car_ui_preference_edit_text_dialog_message_text_size</item>
     </style>
 
-    <style name="TextAppearance.Chassis.Widget"/>
+    <style name="TextAppearance.CarUi.Widget"/>
 
-    <style name="TextAppearance.Chassis.Widget.Toolbar"/>
+    <style name="TextAppearance.CarUi.Widget.Toolbar"/>
 
-    <style name="TextAppearance.Chassis.Widget.Toolbar.Title">
+    <style name="TextAppearance.CarUi.Widget.Toolbar.Title">
         <item name="android:singleLine">true</item>
         <item name="android:textSize">32sp</item>
         <item name="android:letterSpacing">@dimen/car_ui_letter_spacing_body1</item>
     </style>
 
-    <style name="TextAppearance.Chassis.Widget.Toolbar.Tab">
+    <style name="TextAppearance.CarUi.Widget.Toolbar.Tab">
         <item name="android:textSize">24sp</item>
         <item name="android:letterSpacing">@dimen/car_ui_letter_spacing_body3</item>
     </style>

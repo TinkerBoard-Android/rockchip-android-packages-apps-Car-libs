@@ -14,7 +14,7 @@
  limitations under the License.
 -->
 <resources>
-    <declare-styleable name="ChassisToolbar">
+    <declare-styleable name="CarUiToolbar">
         <!-- Title of the toolbar, only displayed in certain conditions -->
         <attr name="title" format="string"/>
         <!-- Logo drawable for the toolbar. Appears when there's no back/close button shown -->
@@ -34,8 +34,8 @@
         <attr name="showBackground" format="boolean"/>
     </declare-styleable>
 
-    <!-- Theme attribute to specifying a default style for all chassisToolbars -->
-    <attr name="chassisToolbarStyle" format="reference"/>
+    <!-- Theme attribute to specifying a default style for all CarUiToolbars -->
+    <attr name="CarUiToolbarStyle" format="reference"/>
 
     <declare-styleable name="PagedRecyclerView">
         <!-- Whether to enable the car_ui_pagedrecyclerview_divider for linear layout or not. -->
