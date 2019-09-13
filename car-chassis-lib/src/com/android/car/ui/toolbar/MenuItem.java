@@ -109,7 +109,7 @@ public class MenuItem {
         mIsChecked = checked;
 
         if (mView != null) {
-            Switch s = mView.requireViewById(R.id.chassis_toolbar_menu_item_switch);
+            Switch s = mView.requireViewById(R.id.car_ui_toolbar_menu_item_switch);
             s.setChecked(mIsChecked);
         }
 
@@ -128,7 +128,7 @@ public class MenuItem {
         mTitle = title;
 
         if (mView != null) {
-            Button button = mView.findViewById(R.id.chassis_toolbar_menu_item_text);
+            Button button = mView.findViewById(R.id.car_ui_toolbar_menu_item_text);
             if (button != null) {
                 button.setText(mTitle);
             }
@@ -279,8 +279,8 @@ public class MenuItem {
          */
         public static MenuItem createSearch(Context c, OnClickListener listener) {
             return new Builder(c)
-                    .setTitle(R.string.chassis_toolbar_menu_item_search_title)
-                    .setIcon(R.drawable.chassis_icon_search)
+                    .setTitle(R.string.car_ui_toolbar_menu_item_search_title)
+                    .setIcon(R.drawable.car_ui_icon_search)
                     .setOnClickListener(listener)
                     .setId(R.id.search)
                     .build();
@@ -293,8 +293,8 @@ public class MenuItem {
          */
         public static MenuItem createSettings(Context c, OnClickListener listener) {
             return new Builder(c)
-                    .setTitle(R.string.chassis_toolbar_menu_item_settings_title)
-                    .setIcon(R.drawable.chassis_icon_settings)
+                    .setTitle(R.string.car_ui_toolbar_menu_item_settings_title)
+                    .setIcon(R.drawable.car_ui_icon_settings)
                     .setOnClickListener(listener)
                     .build();
         }
@@ -334,18 +334,18 @@ public class MenuItem {
 
         if (isCheckable()) {
             mView = inflater.inflate(
-                    R.layout.chassis_toolbar_menu_item_switch, parent, false);
-            Switch s = mView.requireViewById(R.id.chassis_toolbar_menu_item_switch);
+                    R.layout.car_ui_toolbar_menu_item_switch, parent, false);
+            Switch s = mView.requireViewById(R.id.car_ui_toolbar_menu_item_switch);
             s.setChecked(isChecked());
         } else if (getIcon() != null) {
             mView = inflater.inflate(
-                    R.layout.chassis_toolbar_menu_item_icon, parent, false);
-            ImageView imageView = mView.requireViewById(R.id.chassis_toolbar_menu_item_icon);
+                    R.layout.car_ui_toolbar_menu_item_icon, parent, false);
+            ImageView imageView = mView.requireViewById(R.id.car_ui_toolbar_menu_item_icon);
             imageView.setImageDrawable(getIcon());
         } else {
             mView = (Button) inflater.inflate(
-                    R.layout.chassis_toolbar_menu_item_text, parent, false);
-            Button button = mView.requireViewById(R.id.chassis_toolbar_menu_item_text);
+                    R.layout.car_ui_toolbar_menu_item_text, parent, false);
+            Button button = mView.requireViewById(R.id.car_ui_toolbar_menu_item_text);
             button.setText(getTitle());
         }
 
@@ -355,7 +355,7 @@ public class MenuItem {
 
         recursiveSetEnabled(mView, isEnabled());
         mView.setOnClickListener(v -> {
-            Switch s = v.findViewById(R.id.chassis_toolbar_menu_item_switch);
+            Switch s = v.findViewById(R.id.car_ui_toolbar_menu_item_switch);
             if (s != null) {
                 s.toggle();
                 setChecked(s.isChecked());
