@@ -33,7 +33,7 @@ final class PagedRecyclerViewAdapter
             ViewGroup parent, int viewType) {
         View v =
                 LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.chassis_paged_recycler_view_item, parent, false);
+                        .inflate(R.layout.car_ui_paged_recycler_view_item, parent, false);
         return new NestedRowViewHolder(v);
     }
 
