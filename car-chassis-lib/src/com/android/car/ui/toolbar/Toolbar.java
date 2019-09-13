@@ -52,7 +52,7 @@ import java.util.Set;
  */
 public class Toolbar extends FrameLayout {
 
-    private static final String TAG = "ChassisToolbar";
+    private static final String TAG = "CarUiToolbar";
 
     /** Enum of states the toolbar can be in. Controls what elements of the toolbar are displayed */
     public enum State {
@@ -114,7 +114,7 @@ public class Toolbar extends FrameLayout {
     }
 
     public Toolbar(Context context, AttributeSet attrs) {
-        this(context, attrs, R.attr.chassisToolbarStyle);
+        this(context, attrs, R.attr.CarUiToolbarStyle);
     }
 
     public Toolbar(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -139,20 +139,20 @@ public class Toolbar extends FrameLayout {
         mOverflowButton = requireViewById(R.id.car_ui_toolbar_overflow_button);
 
         TypedArray a = context.obtainStyledAttributes(
-                attrs, R.styleable.ChassisToolbar, defStyleAttr, defStyleRes);
+                attrs, R.styleable.CarUiToolbar, defStyleAttr, defStyleRes);
 
         try {
-            mTitle.setText(a.getString(R.styleable.ChassisToolbar_title));
-            setLogo(a.getResourceId(R.styleable.ChassisToolbar_logo, 0));
-            setBackgroundShown(a.getBoolean(R.styleable.ChassisToolbar_showBackground, true));
+            mTitle.setText(a.getString(R.styleable.CarUiToolbar_title));
+            setLogo(a.getResourceId(R.styleable.CarUiToolbar_logo, 0));
+            setBackgroundShown(a.getBoolean(R.styleable.CarUiToolbar_showBackground, true));
             mShowMenuItemsWhileSearching = a.getBoolean(
-                    R.styleable.ChassisToolbar_showMenuItemsWhileSearching, false);
-            String searchHint = a.getString(R.styleable.ChassisToolbar_searchHint);
+                    R.styleable.CarUiToolbar_showMenuItemsWhileSearching, false);
+            String searchHint = a.getString(R.styleable.CarUiToolbar_searchHint);
             if (searchHint != null) {
                 setSearchHint(searchHint);
             }
 
-            switch (a.getInt(R.styleable.ChassisToolbar_state, 0)) {
+            switch (a.getInt(R.styleable.CarUiToolbar_state, 0)) {
                 case 0:
                     setState(State.HOME);
                     break;
@@ -276,7 +276,7 @@ public class Toolbar extends FrameLayout {
     @Override
     public void setBackground(Drawable d) {
         throw new UnsupportedOperationException(
-                "You can not change the background of a chassis toolbar, use "
+                "You can not change the background of a CarUi toolbar, use "
                 + "setBackgroundShown(boolean) or an RRO instead.");
     }
 
@@ -326,7 +326,7 @@ public class Toolbar extends FrameLayout {
     }
 
     private void createOverflowDialog() {
-        // TODO(b/140564530) Use a chassis alert with a (paged)recyclerview here
+        // TODO(b/140564530) Use a carui alert with a (paged)recyclerview here
         // TODO(b/140563930) Support enabled/disabled overflow items
 
         CharSequence[] itemTitles = mOverflowItems.stream()
