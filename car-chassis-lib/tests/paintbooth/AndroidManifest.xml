@@ -16,7 +16,7 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.car.chassis.paintbooth">
+    package="com.android.car.ui.paintbooth">
 
   <uses-sdk
       android:minSdkVersion="28"
