@@ -56,7 +56,7 @@ public class SearchView extends ConstraintLayout {
         super(context, attrs, defStyleAttr);
 
         LayoutInflater inflater = LayoutInflater.from(context);
-        inflater.inflate(R.layout.chassis_search_view, this, true);
+        inflater.inflate(R.layout.car_ui_search_view, this, true);
 
         mSearchText = requireViewById(R.id.search_bar);
         View closeIcon = requireViewById(R.id.search_close);
