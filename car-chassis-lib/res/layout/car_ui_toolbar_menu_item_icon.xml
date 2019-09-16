@@ -18,8 +18,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="@dimen/car_ui_touch_target_width"
     android:layout_height="@dimen/car_ui_touch_target_height"
-    android:layout_marginLeft="@dimen/car_ui_toolbar_menu_item_margin"
-    android:layout_marginRight="@dimen/car_ui_toolbar_menu_item_margin"
     android:layout_gravity="center_vertical">
     <ImageView
         android:id="@+id/car_ui_toolbar_menu_item_icon"
@@ -27,6 +25,6 @@
         android:layout_height="@dimen/car_ui_primary_icon_size"
         android:layout_gravity="center"
         android:background="@drawable/car_ui_toolbar_icon_background"
-        android:tint="@color/car_ui_toolbar_icon_tint"
+        android:tint="@color/car_ui_toolbar_menu_item_icon_color"
         android:tintMode="src_in"/>
 </FrameLayout>
