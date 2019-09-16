@@ -18,8 +18,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="@dimen/car_ui_touch_target_width"
     android:layout_height="@dimen/car_ui_touch_target_height"
-    android:layout_marginLeft="@dimen/car_ui_toolbar_menu_item_margin"
-    android:layout_marginRight="@dimen/car_ui_toolbar_menu_item_margin"
     android:layout_gravity="center_vertical">
     <Switch
         android:id="@+id/car_ui_toolbar_menu_item_switch"
