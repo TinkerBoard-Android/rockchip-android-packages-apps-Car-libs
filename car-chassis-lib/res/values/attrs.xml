@@ -32,6 +32,11 @@
         </attr>
         <!-- Whether or not the toolbar should have a background. Default true. -->
         <attr name="showBackground" format="boolean"/>
+        <!-- Mode of the navigation button See the Toolbar.NavButtonMode enum for more information -->
+        <attr name="navButtonMode" format="enum">
+            <enum name="back" value="0"/>
+            <enum name="close" value="1"/>
+        </attr>
     </declare-styleable>
 
     <!-- Theme attribute to specifying a default style for all CarUiToolbars -->

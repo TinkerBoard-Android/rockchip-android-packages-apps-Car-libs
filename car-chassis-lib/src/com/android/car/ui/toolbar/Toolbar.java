@@ -78,13 +78,6 @@ public class Toolbar extends FrameLayout {
         SEARCH,
     }
 
-    /**
-     * {@link java.util.function.Consumer} is not available for non-java8 enabled Android targets.
-     */
-    private interface Consumer<T> {
-        void accept(T value);
-    }
-
     private ImageView mNavIcon;
     private ImageView mLogo;
     private ViewGroup mNavIconContainer;
@@ -99,6 +92,7 @@ public class Toolbar extends FrameLayout {
     private boolean mShowMenuItemsWhileSearching;
     private View mSearchButton;
     private State mState = State.HOME;
+    private NavButtonMode mNavButtonMode = NavButtonMode.BACK;
     @NonNull
     private List<MenuItem> mMenuItems = Collections.emptyList();
     private List<MenuItem> mOverflowItems = new ArrayList<>();
@@ -168,6 +162,20 @@ public class Toolbar extends FrameLayout {
                 default:
                     if (Log.isLoggable(TAG, Log.WARN)) {
                         Log.w(TAG, "Unknown initial state");
+                    }
+                    break;
+            }
+
+            switch (a.getInt(R.styleable.CarUiToolbar_navButtonMode, 0)) {
+                case 0:
+                    setNavButtonMode(NavButtonMode.BACK);
+                    break;
+                case 1:
+                    setNavButtonMode(NavButtonMode.CLOSE);
+                    break;
+                default:
+                    if (Log.isLoggable(TAG, Log.WARN)) {
+                        Log.w(TAG, "Unknown navigation button style");
                     }
                     break;
             }
@@ -271,6 +279,30 @@ public class Toolbar extends FrameLayout {
     }
 
     /**
+     * An enum of possible styles the nav button could be in. All styles will still call
+     * {@link Listener#onBack()}.
+     */
+    public enum NavButtonMode {
+        /** Display the nav button as a back button */
+        BACK,
+        /** Display the nav button as a close button */
+        CLOSE
+    }
+
+    /** Sets the {@link NavButtonMode} */
+    public void setNavButtonMode(NavButtonMode style) {
+        if (style != mNavButtonMode) {
+            mNavButtonMode = style;
+            setState(mState);
+        }
+    }
+
+    /**  Gets the {@link NavButtonMode} */
+    public NavButtonMode getNavButtonMode() {
+        return mNavButtonMode;
+    }
+
+    /**
      * setBackground is disallowed, to prevent apps from deviating from the intended style too much.
      */
     @Override
@@ -314,7 +346,9 @@ public class Toolbar extends FrameLayout {
                 mOverflowItems.add(item);
             } else {
                 View menuItemView = item.createView(mMenuItemsContainer);
-                mMenuItemsContainer.addView(menuItemView);
+
+                // Add views with index 0 so that they are added right-to-left
+                mMenuItemsContainer.addView(menuItemView, 0);
             }
         }
 
@@ -323,6 +357,12 @@ public class Toolbar extends FrameLayout {
         mSearchButton = mMenuItemsContainer.findViewById(R.id.search);
 
         setState(mState);
+    }
+
+    /** Gets the {@link MenuItem MenuItems} currently displayed */
+    @NonNull
+    public List<MenuItem> getMenuItems() {
+        return mMenuItems;
     }
 
     private void createOverflowDialog() {
@@ -388,7 +428,9 @@ public class Toolbar extends FrameLayout {
 
         View.OnClickListener backClickListener = (v) -> forEachListener(Listener::onBack);
         mNavIcon.setVisibility(state != State.HOME ? VISIBLE : INVISIBLE);
-        mNavIcon.setImageResource(state != State.HOME ? R.drawable.car_ui_icon_arrow_back : 0);
+        mNavIcon.setImageResource(mNavButtonMode == NavButtonMode.BACK
+                ? R.drawable.car_ui_icon_arrow_back
+                : R.drawable.car_ui_icon_close);
         mLogo.setVisibility(state == State.HOME && mHasLogo ? VISIBLE : INVISIBLE);
         mNavIconContainer.setVisibility(state != State.HOME || mHasLogo ? VISIBLE : GONE);
         mNavIconContainer.setOnClickListener(state != State.HOME ? backClickListener : null);
@@ -406,6 +448,11 @@ public class Toolbar extends FrameLayout {
         if (state != State.SUBPAGE_CUSTOM) {
             mCustomViewContainer.removeAllViews();
         }
+    }
+
+    /** Gets the current {@link State} of the toolbar. */
+    public State getState() {
+        return mState;
     }
 
     /**
@@ -442,6 +489,13 @@ public class Toolbar extends FrameLayout {
     public boolean removeListener(Listener listener) {
         mSearchView.removeToolbarListener(listener);
         return mListeners.remove(listener);
+    }
+
+    /**
+     * {@link java.util.function.Consumer} is not available for non-java8 enabled Android targets.
+     */
+    private interface Consumer<T> {
+        void accept(T value);
     }
 
     private void forEachListener(Consumer<Listener> callback) {

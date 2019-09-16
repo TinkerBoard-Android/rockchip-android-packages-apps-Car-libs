@@ -197,13 +197,10 @@ public class TabLayout extends LinearLayout {
     }
 
     private static class TabAdapter extends BaseAdapter {
-        private static final int MEDIUM_WEIGHT = 500;
         private final Context mContext;
         private final TabLayout mTabLayout;
         @LayoutRes
         private final int mTabItemLayoutRes;
-        private final Typeface mUnselectedTypeface;
-        private final Typeface mSelectedTypeface;
         private final List<Tab> mTabList;
 
         private TabAdapter(Context context, @LayoutRes int res, TabLayout tabLayout) {
@@ -211,9 +208,6 @@ public class TabLayout extends LinearLayout {
             mContext = context;
             mTabItemLayoutRes = res;
             mTabLayout = tabLayout;
-            mUnselectedTypeface = Typeface.defaultFromStyle(Typeface.NORMAL);
-            // TODO: add indirection to allow customization.
-            mSelectedTypeface = Typeface.create(mUnselectedTypeface, MEDIUM_WEIGHT, false);
         }
 
         private void add(@NonNull Tab tab) {
@@ -305,7 +299,8 @@ public class TabLayout extends LinearLayout {
             tabItemView.setSelected(tab.mIsSelected);
             iconView.setSelected(tab.mIsSelected);
             textView.setSelected(tab.mIsSelected);
-            textView.setTypeface(tab.mIsSelected ? mSelectedTypeface : mUnselectedTypeface);
+            // TODO(b/141109269): add indirection to allow customization.
+            textView.setTypeface(null, tab.mIsSelected ? Typeface.BOLD : Typeface.NORMAL);
         }
     }
 
