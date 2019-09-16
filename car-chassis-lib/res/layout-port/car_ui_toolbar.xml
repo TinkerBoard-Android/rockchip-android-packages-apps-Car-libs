@@ -49,7 +49,8 @@
             android:layout_width="@dimen/car_ui_toolbar_icon_size"
             android:layout_height="@dimen/car_ui_toolbar_icon_size"
             android:layout_gravity="center"
-            android:scaleType="fitXY"/>
+            android:scaleType="fitXY"
+            style="@style/Widget.CarUi.Toolbar.NavIcon"/>
         <ImageView
             android:id="@+id/logo"
             android:layout_width="@dimen/car_ui_toolbar_icon_size"
@@ -94,6 +95,8 @@
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:orientation="horizontal"
+        android:divider="@drawable/car_ui_toolbar_menu_item_divider"
+        android:showDividers="beginning|middle|end"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/row_separator"
         app:layout_constraintEnd_toStartOf="@id/car_ui_toolbar_overflow_button"/>
@@ -114,7 +117,7 @@
             android:layout_height="@dimen/car_ui_primary_icon_size"
             android:layout_gravity="center"
             android:background="@drawable/car_ui_toolbar_icon_background"
-            android:tint="@color/car_ui_toolbar_icon_tint"
+            android:tint="@color/car_ui_toolbar_menu_item_icon_color"
             android:tintMode="src_in"/>
     </FrameLayout>
 
