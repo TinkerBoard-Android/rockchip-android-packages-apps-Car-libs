@@ -80,6 +80,8 @@
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:orientation="horizontal"
+        android:divider="@drawable/car_ui_toolbar_menu_item_divider"
+        android:showDividers="beginning|middle|end"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/bottom_styleable"
         app:layout_constraintEnd_toStartOf="@+id/car_ui_toolbar_overflow_button"/>
