@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 
+LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE_CLASS := JAVA_LIBRARIES
