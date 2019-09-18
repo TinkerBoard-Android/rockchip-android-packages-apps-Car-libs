@@ -16,7 +16,6 @@
 package com.android.car.ui.pagedrecyclerview;
 
 import android.content.Context;
-import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -40,8 +39,10 @@ import com.android.car.ui.utils.ResourceUtils;
 public class PagedSmoothScroller extends LinearSmoothScroller {
     private float mMillisecondsPerInch;
     private float mDecelerationTimeDivisor;
+    private float mMillisecondsPerPixel;
 
     private Interpolator mInterpolator;
+    private int mDensityDpi;
 
     public PagedSmoothScroller(Context context) {
         super(context);
@@ -57,6 +58,8 @@ public class PagedSmoothScroller extends LinearSmoothScroller {
                 new DecelerateInterpolator(
                         ResourceUtils.getFloat(context.getResources(),
                                 R.dimen.car_ui_scrollbar_decelerate_interpolator_factor));
+        mDensityDpi = context.getResources().getDisplayMetrics().densityDpi;
+        mMillisecondsPerPixel = mMillisecondsPerInch / mDensityDpi;
     }
 
     @Override
@@ -81,8 +84,8 @@ public class PagedSmoothScroller extends LinearSmoothScroller {
     }
 
     @Override
-    protected float calculateSpeedPerPixel(DisplayMetrics displayMetrics) {
-        return mMillisecondsPerInch / displayMetrics.densityDpi;
+    protected int calculateTimeForScrolling(int dx) {
+        return (int) Math.ceil(Math.abs(dx) * mMillisecondsPerPixel);
     }
 
     @Override
