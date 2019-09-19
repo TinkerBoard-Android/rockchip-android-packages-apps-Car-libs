@@ -53,7 +53,7 @@ import java.lang.annotation.Retention;
  * similar to a {@code RecyclerView} as it takes the same adapter and the layout manager.
  */
 public final class PagedRecyclerView extends RecyclerView implements
-        Toolbar.OnToolbarHeightChangeListener {
+        Toolbar.OnHeightChangedListener {
 
     private static final boolean DEBUG = false;
     private static final String TAG = "PagedRecyclerView";
