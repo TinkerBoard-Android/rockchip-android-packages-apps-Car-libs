@@ -40,7 +40,8 @@ public class MainActivity extends Activity {
      * List of all sample activities.
      */
     private List<Pair<String, Class<? extends Activity>>> mActivities = Arrays.asList(
-            Pair.create("Dialogs sample page", DialogsActivity.class)
+            Pair.create("Dialogs sample page", DialogsActivity.class),
+            Pair.create("PRV sample page", PagedRecyclerViewSamples.class)
     );
 
     private class ViewHolder extends RecyclerView.ViewHolder {
