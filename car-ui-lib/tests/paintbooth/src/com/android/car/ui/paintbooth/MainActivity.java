@@ -62,19 +62,19 @@ public class MainActivity extends Activity {
         }
     }
 
-    private RecyclerView.Adapter mAdapter = new RecyclerView.Adapter() {
+    private RecyclerView.Adapter<ViewHolder> mAdapter = new RecyclerView.Adapter<ViewHolder>() {
         @NonNull
         @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View item = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item, parent,
                     false);
             return new ViewHolder(item);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             Pair<String, Class<? extends Activity>> item = mActivities.get(position);
-            ((ViewHolder) holder).update(item.first, item.second);
+            holder.update(item.first, item.second);
         }
 
         @Override
