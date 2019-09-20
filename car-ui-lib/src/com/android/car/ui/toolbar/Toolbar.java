@@ -21,6 +21,8 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -116,6 +118,8 @@ public class Toolbar extends FrameLayout {
         SEARCH,
     }
 
+    private final boolean mTitleAndTabsAreMutuallyExclusive;
+
     private ImageView mNavIcon;
     private ImageView mLogo;
     private ViewGroup mNavIconContainer;
@@ -178,6 +182,9 @@ public class Toolbar extends FrameLayout {
                 attrs, R.styleable.CarUiToolbar, defStyleAttr, defStyleRes);
 
         try {
+            mTitleAndTabsAreMutuallyExclusive = context.getResources().getBoolean(
+                    R.bool.car_ui_toolbar_title_and_tabs_are_mutually_exclusive);
+
             mTitle.setText(a.getString(R.styleable.CarUiToolbar_title));
             setLogo(a.getResourceId(R.styleable.CarUiToolbar_logo, 0));
             setBackgroundShown(a.getBoolean(R.styleable.CarUiToolbar_showBackground, true));
@@ -247,6 +254,81 @@ public class Toolbar extends FrameLayout {
         handleToolbarHeightChangeListeners(getHeight());
     }
 
+    @Override
+    public Parcelable onSaveInstanceState() {
+        Parcelable superState = super.onSaveInstanceState();
+        SavedState ss = new SavedState(superState);
+        ss.mTitle = getTitle();
+        ss.mNavButtonMode = getNavButtonMode();
+        ss.mSearchHint = getSearchHint();
+        ss.mBackgroundShown = getBackgroundShown();
+        ss.mShowMenuItemsWhileSearching = getShowMenuItemsWhileSearching();
+        ss.mState = getState();
+        return ss;
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        if (!(state instanceof SavedState)) {
+            Log.w(TAG, "onRestoreInstanceState called with an unsupported state");
+            super.onRestoreInstanceState(state);
+        } else {
+            SavedState ss = (SavedState) state;
+            super.onRestoreInstanceState(ss.getSuperState());
+            setTitle(ss.mTitle);
+            setNavButtonMode(ss.mNavButtonMode);
+            setSearchHint(ss.mSearchHint);
+            setBackgroundShown(ss.mBackgroundShown);
+            setShowMenuItemsWhileSearching(ss.mShowMenuItemsWhileSearching);
+            setState(ss.mState);
+        }
+    }
+
+    private static class SavedState extends BaseSavedState {
+        private CharSequence mTitle;
+        private State mState;
+        private NavButtonMode mNavButtonMode;
+        private CharSequence mSearchHint;
+        private boolean mBackgroundShown;
+        private boolean mShowMenuItemsWhileSearching;
+
+        SavedState(Parcelable in) {
+            super(in);
+        }
+
+        SavedState(Parcel in) {
+            super(in);
+            mTitle = in.readCharSequence();
+            mNavButtonMode = NavButtonMode.valueOf(in.readString());
+            mSearchHint = in.readCharSequence();
+            mBackgroundShown = in.readBoolean();
+            mShowMenuItemsWhileSearching = in.readBoolean();
+            mState = State.valueOf(in.readString());
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeCharSequence(mTitle);
+            out.writeString(mNavButtonMode.name());
+            out.writeCharSequence(mSearchHint);
+            out.writeBoolean(mBackgroundShown);
+            out.writeBoolean(mShowMenuItemsWhileSearching);
+            out.writeString(mState.name());
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR =
+                new Parcelable.Creator<SavedState>() {
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+    }
+
     /**
      * Sets the title of the toolbar to a string resource.
      *
@@ -265,6 +347,10 @@ public class Toolbar extends FrameLayout {
         mTitle.setText(title);
     }
 
+    public CharSequence getTitle() {
+        return mTitle.getText();
+    }
+
     /**
      * Gets the {@link TabLayout} for this toolbar.
      */
@@ -278,6 +364,7 @@ public class Toolbar extends FrameLayout {
      */
     public void addTab(TabLayout.Tab tab) {
         mTabLayout.addTab(tab);
+        setState(getState());
     }
 
     /**
@@ -310,18 +397,19 @@ public class Toolbar extends FrameLayout {
         setState(mState);
     }
 
-    /**
-     * Sets the hint for the search bar.
-     */
+    /** Sets the hint for the search bar. */
     public void setSearchHint(int resId) {
         mSearchView.setHint(resId);
     }
 
-    /**
-     * Sets the hint for the search bar.
-     */
+    /** Sets the hint for the search bar. */
     public void setSearchHint(CharSequence hint) {
         mSearchView.setHint(hint);
+    }
+
+    /** Gets the search hint */
+    public CharSequence getSearchHint() {
+        return mSearchView.getHint();
     }
 
     /**
@@ -368,15 +456,18 @@ public class Toolbar extends FrameLayout {
         }
     }
 
-    /**
-     * Show/hide the background. When hidden, the toolbar is completely transparent.
-     */
+    /** Show/hide the background. When hidden, the toolbar is completely transparent. */
     public void setBackgroundShown(boolean shown) {
         if (shown) {
             super.setBackground(getContext().getDrawable(R.color.car_ui_toolbar_background_color));
         } else {
             super.setBackground(null);
         }
+    }
+
+    /** Returns true is the toolbar background is shown */
+    public boolean getBackgroundShown() {
+        return super.getBackground() != null;
     }
 
     /**
@@ -391,7 +482,9 @@ public class Toolbar extends FrameLayout {
             return;
         }
 
-        mMenuItems = items;
+        // Copy the list so that if the list is modified and setMenuItems is called again,
+        // the equals() check will fail. Note that the MenuItems are not copied here.
+        mMenuItems = new ArrayList<>(items);
 
         mOverflowItems.clear();
         mMenuItemsContainer.removeAllViews();
@@ -452,6 +545,11 @@ public class Toolbar extends FrameLayout {
         setState(mState);
     }
 
+    /** Returns if {@link MenuItem MenuItems} are shown while searching */
+    public boolean getShowMenuItemsWhileSearching() {
+        return mShowMenuItemsWhileSearching;
+    }
+
     /**
      * Sets the search query.
      */
@@ -507,6 +605,7 @@ public class Toolbar extends FrameLayout {
                 }
             }
         };
+
         mNavIcon.setVisibility(state != State.HOME ? VISIBLE : INVISIBLE);
         mNavIcon.setImageResource(mNavButtonMode == NavButtonMode.BACK
                 ? R.drawable.car_ui_icon_arrow_back
@@ -515,8 +614,11 @@ public class Toolbar extends FrameLayout {
         mNavIconContainer.setVisibility(state != State.HOME || mHasLogo ? VISIBLE : GONE);
         mNavIconContainer.setOnClickListener(state != State.HOME ? backClickListener : null);
         mNavIconContainer.setClickable(state != State.HOME);
-        mTitle.setVisibility(state == State.HOME || state == State.SUBPAGE ? VISIBLE : GONE);
-        mTabLayout.setVisibility(state == State.HOME ? VISIBLE : GONE);
+        boolean hasTabs = mTabLayout.getTabCount() > 0;
+        boolean showTitle = state == State.SUBPAGE || state == State.HOME
+                && (!mTitleAndTabsAreMutuallyExclusive || !hasTabs);
+        mTitle.setVisibility(showTitle ? VISIBLE : GONE);
+        mTabLayout.setVisibility(state == State.HOME && hasTabs ? VISIBLE : GONE);
         mSearchView.setVisibility(state == State.SEARCH ? VISIBLE : GONE);
         boolean showButtons = state != State.SEARCH || mShowMenuItemsWhileSearching;
         mMenuItemsContainer.setVisibility(showButtons ? VISIBLE : GONE);

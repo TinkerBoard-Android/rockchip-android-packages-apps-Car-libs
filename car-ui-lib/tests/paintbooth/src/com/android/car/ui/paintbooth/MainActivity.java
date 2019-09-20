@@ -33,6 +33,7 @@ import com.android.car.ui.paintbooth.dialogs.DialogsActivity;
 import com.android.car.ui.paintbooth.pagedrecyclerview.GridPagedRecyclerViewActivity;
 import com.android.car.ui.paintbooth.pagedrecyclerview.PagedRecyclerViewActivity;
 import com.android.car.ui.paintbooth.preferences.PreferenceActivity;
+import com.android.car.ui.paintbooth.toolbar.ToolbarActivity;
 
 import java.util.Arrays;
 import java.util.List;
@@ -48,7 +49,8 @@ public class MainActivity extends Activity {
             Pair.create("Dialogs sample", DialogsActivity.class),
             Pair.create("List sample", PagedRecyclerViewActivity.class),
             Pair.create("Grid sample", GridPagedRecyclerViewActivity.class),
-            Pair.create("Preferences sample", PreferenceActivity.class)
+            Pair.create("Preferences sample", PreferenceActivity.class),
+            Pair.create("Toolbar sample", ToolbarActivity.class)
     );
 
     private class ViewHolder extends RecyclerView.ViewHolder {
