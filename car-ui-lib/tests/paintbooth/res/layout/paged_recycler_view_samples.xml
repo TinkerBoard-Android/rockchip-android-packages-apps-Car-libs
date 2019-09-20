@@ -26,7 +26,8 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:title="@string/app_name"/>
+        app:title="@string/app_name"
+        app:state="subpage"/>
 
     <com.android.car.ui.pagedrecyclerview.PagedRecyclerView
         android:id="@+id/list"
