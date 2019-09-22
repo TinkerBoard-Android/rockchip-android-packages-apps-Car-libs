@@ -16,9 +16,13 @@ limitations under the License.
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="chassis_toolbar_default_search_hint" msgid="2195336892707724339">"Αναζήτηση…"</string>
-    <string name="chassis_scrollbar_page_down_button" msgid="2748050681084305203">"Κύλιση προς τα κάτω"</string>
-    <string name="chassis_scrollbar_page_up_button" msgid="5050821541225294382">"Κύλιση προς τα επάνω"</string>
-    <string name="chassis_toolbar_menu_item_search_title" msgid="3508700860017523722">"Αναζήτηση"</string>
-    <string name="chassis_toolbar_menu_item_settings_title" msgid="3273333136171368562">"Ρυθμίσεις"</string>
+    <string name="car_ui_toolbar_default_search_hint" msgid="2207826194657039779">"Αναζήτηση…"</string>
+    <string name="car_ui_scrollbar_page_down_button" msgid="958364812174795322">"Κύλιση προς τα κάτω"</string>
+    <string name="car_ui_scrollbar_page_up_button" msgid="9018869313464053506">"Κύλιση προς τα επάνω"</string>
+    <string name="car_ui_toolbar_menu_item_search_title" msgid="8370833903745321012">"Αναζήτηση"</string>
+    <string name="car_ui_toolbar_menu_item_settings_title" msgid="1979280833948311355">"Ρυθμίσεις"</string>
+    <string name="car_ui_dialog_preference_positive" msgid="452961576396283322">"OK"</string>
+    <string name="car_ui_dialog_preference_negative" msgid="5570382772700131648">"Ακύρωση"</string>
+    <string name="car_ui_switch_preference_on" msgid="1885475675181855321">"Ενεργό"</string>
+    <string name="car_ui_switch_preference_off" msgid="6037715077277362448">"Ανενεργό"</string>
 </resources>
