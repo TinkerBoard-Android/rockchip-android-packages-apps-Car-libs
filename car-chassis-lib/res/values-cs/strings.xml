@@ -16,17 +16,13 @@ limitations under the License.
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="chassis_toolbar_default_search_hint" msgid="2195336892707724339">"Vyhledat…"</string>
-    <string name="chassis_scrollbar_page_down_button" msgid="2748050681084305203">"Posunout dolů"</string>
-    <string name="chassis_scrollbar_page_up_button" msgid="5050821541225294382">"Posunout nahoru"</string>
-    <string name="chassis_toolbar_menu_item_search_title" msgid="3508700860017523722">"Vyhledávání"</string>
-    <string name="chassis_toolbar_menu_item_settings_title" msgid="3273333136171368562">"Nastavení"</string>
-    <!-- no translation found for chassis_dialog_preference_positive (8428271311414555967) -->
-    <skip />
-    <!-- no translation found for chassis_dialog_preference_negative (1849907588352106437) -->
-    <skip />
-    <!-- no translation found for chassis_switch_preference_on (5693724143663245244) -->
-    <skip />
-    <!-- no translation found for chassis_switch_preference_off (3924928243297045866) -->
-    <skip />
+    <string name="car_ui_toolbar_default_search_hint" msgid="2207826194657039779">"Vyhledat…"</string>
+    <string name="car_ui_scrollbar_page_down_button" msgid="958364812174795322">"Posunout dolů"</string>
+    <string name="car_ui_scrollbar_page_up_button" msgid="9018869313464053506">"Posunout nahoru"</string>
+    <string name="car_ui_toolbar_menu_item_search_title" msgid="8370833903745321012">"Hledat"</string>
+    <string name="car_ui_toolbar_menu_item_settings_title" msgid="1979280833948311355">"Nastavení"</string>
+    <string name="car_ui_dialog_preference_positive" msgid="452961576396283322">"OK"</string>
+    <string name="car_ui_dialog_preference_negative" msgid="5570382772700131648">"Zrušit"</string>
+    <string name="car_ui_switch_preference_on" msgid="1885475675181855321">"Zapnuto"</string>
+    <string name="car_ui_switch_preference_off" msgid="6037715077277362448">"Vypnuto"</string>
 </resources>
