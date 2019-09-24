@@ -23,7 +23,6 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.ContactsContract;
-import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -305,9 +304,11 @@ public class Contact implements Parcelable, Comparable<Contact> {
      * null} if this contact doesn't contain the given phone number.
      */
     @Nullable
-    public PhoneNumber getPhoneNumber(String number) {
+    public PhoneNumber getPhoneNumber(Context context, String number) {
+        I18nPhoneNumberWrapper i18nPhoneNumber = I18nPhoneNumberWrapper.Factory.INSTANCE.get(
+                context, number);
         for (PhoneNumber phoneNumber : mPhoneNumbers) {
-            if (PhoneNumberUtils.compare(phoneNumber.getNumber(), number)) {
+            if (phoneNumber.getI18nPhoneNumberWrapper().equals(i18nPhoneNumber)) {
                 return phoneNumber;
             }
         }
