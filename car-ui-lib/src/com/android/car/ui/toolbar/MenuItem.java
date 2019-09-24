@@ -67,6 +67,7 @@ public class MenuItem {
     private DisplayBehavior mDisplayBehavior;
     private boolean mIsEnabled;
     private boolean mIsChecked;
+    private boolean mIsVisible;
     private View mView;
 
 
@@ -80,6 +81,7 @@ public class MenuItem {
         mDisplayBehavior = builder.mDisplayBehavior;
         mIsEnabled = builder.mIsEnabled;
         mIsChecked = builder.mIsChecked;
+        mIsVisible = builder.mIsVisible;
         mId = builder.mId;
     }
 
@@ -129,6 +131,21 @@ public class MenuItem {
         }
     }
 
+    /** Returns whether or not the MenuItem is visible */
+    public boolean isVisible() {
+        return mIsVisible;
+    }
+
+    /** Sets whether or not the MenuItem is visible */
+    public void setVisible(boolean visible) {
+        mIsVisible = visible;
+
+        // The toolbar will change the visibility of the view
+        if (mListener != null) {
+            mListener.onMenuItemChanged(this);
+        }
+    }
+
     /** Gets the title of this MenuItem. */
     public CharSequence getTitle() {
         return mTitle;
@@ -146,7 +163,7 @@ public class MenuItem {
         }
 
         if (mListener != null) {
-            mListener.onMenuItemTitleChanged(this, mTitle);
+            mListener.onMenuItemChanged(this);
         }
     }
 
@@ -211,6 +228,7 @@ public class MenuItem {
         private boolean mIsEnabled = true;
         private boolean mIsCheckable = false;
         private boolean mIsChecked = false;
+        private boolean mIsVisible = true;
         private int mCustomLayoutId;
         private int mId;
 
@@ -238,6 +256,12 @@ public class MenuItem {
         /** Sets the icon to a drawable resource id */
         public Builder setIcon(int resId) {
             mIcon = mContext.getDrawable(resId);
+            return this;
+        }
+
+        /** Sets whether the MenuItem is visible or not. Default true. */
+        public Builder setVisible(boolean visible) {
+            mIsVisible = visible;
             return this;
         }
 
@@ -367,8 +391,8 @@ public class MenuItem {
 
     /** Listener for {@link Toolbar} to update when this MenuItem changes */
     interface Listener {
-        /** Called when the MenuItem's title is changed. For use only by {@link Toolbar} */
-        void onMenuItemTitleChanged(MenuItem item, CharSequence title);
+        /** Called when the MenuItem is changed. For use only by {@link Toolbar} */
+        void onMenuItemChanged(MenuItem item);
     }
 
     void setListener(Listener listener) {
@@ -402,6 +426,10 @@ public class MenuItem {
 
         if (getId() != 0) {
             mView.setId(getId());
+        }
+
+        if (!mIsVisible) {
+            mView.setVisibility(View.GONE);
         }
 
         recursiveSetEnabled(mView, isEnabled());

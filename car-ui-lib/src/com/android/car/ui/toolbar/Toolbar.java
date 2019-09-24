@@ -134,16 +134,27 @@ public class Toolbar extends FrameLayout {
     private SearchView mSearchView;
     private boolean mHasLogo = false;
     private boolean mShowMenuItemsWhileSearching;
-    private View mSearchButton;
+    private MenuItem mSearchMenuItem;
     private State mState = State.HOME;
     private NavButtonMode mNavButtonMode = NavButtonMode.BACK;
     @NonNull
     private List<MenuItem> mMenuItems = Collections.emptyList();
     private List<MenuItem> mOverflowItems = new ArrayList<>();
-    private MenuItem.Listener mMenuItemListener = (item, title) -> {
+    private MenuItem.Listener mMenuItemListener = (item) -> {
         if (item.getDisplayBehavior() == MenuItem.DisplayBehavior.NEVER) {
             createOverflowDialog();
+        } else {
+            View view = item.getView();
+            if (view != null) {
+                if (item.getId() == R.id.search) {
+                    view.setVisibility(mState != State.SEARCH && item.isVisible() ? VISIBLE : GONE);
+                } else {
+                    view.setVisibility(item.isVisible() ? VISIBLE : GONE);
+                }
+            }
         }
+
+        setState(getState());
     };
     private AlertDialog mOverflowDialog;
 
@@ -488,6 +499,7 @@ public class Toolbar extends FrameLayout {
 
         mOverflowItems.clear();
         mMenuItemsContainer.removeAllViews();
+        mSearchMenuItem = null;
 
         for (MenuItem item : items) {
             item.setListener(mMenuItemListener);
@@ -498,12 +510,14 @@ public class Toolbar extends FrameLayout {
 
                 // Add views with index 0 so that they are added right-to-left
                 mMenuItemsContainer.addView(menuItemView, 0);
+
+                if (item.getId() == R.id.search) {
+                    mSearchMenuItem = item;
+                }
             }
         }
 
         createOverflowDialog();
-
-        mSearchButton = mMenuItemsContainer.findViewById(R.id.search);
 
         setState(mState);
     }
@@ -514,13 +528,26 @@ public class Toolbar extends FrameLayout {
         return mMenuItems;
     }
 
+    private int countVisibleOverflowItems() {
+        int numVisibleItems = 0;
+        for (MenuItem item : mOverflowItems) {
+            if (item.isVisible()) {
+                numVisibleItems++;
+            }
+        }
+        return numVisibleItems;
+    }
+
     private void createOverflowDialog() {
         // TODO(b/140564530) Use a carui alert with a (paged)recyclerview here
         // TODO(b/140563930) Support enabled/disabled overflow items
 
-        CharSequence[] itemTitles = new CharSequence[mOverflowItems.size()];
-        for (int i = 0; i < mOverflowItems.size(); i++) {
-            itemTitles[i] = mOverflowItems.get(i).getTitle();
+        CharSequence[] itemTitles = new CharSequence[countVisibleOverflowItems()];
+        int i = 0;
+        for (MenuItem item : mOverflowItems) {
+            if (item.isVisible()) {
+                itemTitles[i++] = item.getTitle();
+            }
         }
 
         mOverflowDialog = new AlertDialog.Builder(getContext())
@@ -622,9 +649,14 @@ public class Toolbar extends FrameLayout {
         mSearchView.setVisibility(state == State.SEARCH ? VISIBLE : GONE);
         boolean showButtons = state != State.SEARCH || mShowMenuItemsWhileSearching;
         mMenuItemsContainer.setVisibility(showButtons ? VISIBLE : GONE);
-        mOverflowButton.setVisibility(showButtons && mOverflowItems.size() > 0 ? VISIBLE : GONE);
-        if (mSearchButton != null) {
-            mSearchButton.setVisibility(state != State.SEARCH ? VISIBLE : GONE);
+        mOverflowButton.setVisibility(showButtons && countVisibleOverflowItems() > 0
+                ? VISIBLE : GONE);
+        if (mSearchMenuItem != null) {
+            View searchView = mSearchMenuItem.getView();
+            if (searchView != null) {
+                searchView.setVisibility(mState != State.SEARCH && mSearchMenuItem.isVisible()
+                        ? VISIBLE : GONE);
+            }
         }
         mCustomViewContainer.setVisibility(state == State.SUBPAGE_CUSTOM ? VISIBLE : GONE);
         if (state != State.SUBPAGE_CUSTOM) {
