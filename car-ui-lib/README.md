@@ -14,7 +14,7 @@ Resource Overlays) by OEMs.
 This library is developed in Gerrit and copied as source to Google3 using
 Copybara (go/copybara).
 
-Source: /packages/apps/Car/libs/car-chassis-lib
+Source: /packages/apps/Car/libs/car-ui-lib
 Target: //google3/third_party/java/android_libs/android_car_chassis_lib
 
 Here is the process for updating this library:
