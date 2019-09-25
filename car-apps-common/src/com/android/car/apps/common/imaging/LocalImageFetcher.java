@@ -241,7 +241,8 @@ public class LocalImageFetcher {
             }
         };
 
-        private @ImageDecoder.Allocator int mAllocatorMode = ImageDecoder.ALLOCATOR_HARDWARE;
+        // ALLOCATOR_HARDWARE causes crashes on some emulators (in media center's queue).
+        private @ImageDecoder.Allocator int mAllocatorMode = ImageDecoder.ALLOCATOR_SOFTWARE;
 
         @Override
         protected Drawable doInBackground(Void... voids) {
