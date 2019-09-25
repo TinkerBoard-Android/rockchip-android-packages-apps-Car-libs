@@ -22,7 +22,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
-LOCAL_MODULE := car-chassis-lib
+LOCAL_MODULE := car-ui-lib
 
 LOCAL_MODULE_TAGS := optional
 
