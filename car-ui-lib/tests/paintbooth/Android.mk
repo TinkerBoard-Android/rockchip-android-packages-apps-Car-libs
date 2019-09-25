@@ -33,7 +33,7 @@ LOCAL_CERTIFICATE := platform
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
-        car-chassis-lib
+        car-ui-lib
 
 LOCAL_USE_AAPT2 := true
 
