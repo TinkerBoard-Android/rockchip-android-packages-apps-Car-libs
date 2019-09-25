@@ -16,11 +16,14 @@
 package com.android.car.ui.paintbooth.toolbar;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -68,6 +71,39 @@ public class ToolbarActivity extends Activity {
             mMenuItems.add(MenuItem.Builder.createSettings(this, i ->
                     Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT).show()));
             toolbar.setMenuItems(mMenuItems);
+        }));
+
+        Mutable<Integer> overflowCounter = new Mutable<>(1);
+        mButtons.add(Pair.create("Add overflow menu item", v -> {
+            mMenuItems.add(new MenuItem.Builder(this)
+                    .setTitle("Foo " + overflowCounter.value)
+                    .setOnClickListener(i ->
+                            Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT).show())
+                    .setDisplayBehavior(MenuItem.DisplayBehavior.NEVER)
+                    .build());
+            toolbar.setMenuItems(mMenuItems);
+            overflowCounter.value++;
+        }));
+
+        mButtons.add(Pair.create("Toggle menu item visibility", v -> {
+            EditText textBox = new EditText(this);
+            textBox.setInputType(InputType.TYPE_CLASS_NUMBER);
+            new AlertDialog.Builder(this)
+                    .setView(textBox)
+                    .setTitle("Enter the index of the MenuItem to toggle")
+                    .setPositiveButton("Ok", ((dialog, which) -> {
+                        try {
+                            MenuItem item = mMenuItems.get(
+                                    Integer.parseInt(textBox.getText().toString()));
+                            item.setVisible(!item.isVisible());
+                        } catch (NumberFormatException | IndexOutOfBoundsException e) {
+                            Toast.makeText(this, "Invalid index \""
+                                    + textBox.getText().toString()
+                                    + "\", valid range is 0 to " + (mMenuItems.size() - 1),
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    }))
+                    .show();
         }));
 
         mButtons.add(Pair.create("Toggle nav button mode", v -> {
@@ -143,4 +179,17 @@ public class ToolbarActivity extends Activity {
             ((ViewHolder) holder).bind(pair.first, pair.second);
         }
     };
+
+    /** For changing values from lambdas */
+    public static final class Mutable<E> {
+        public E value;
+
+        public Mutable() {
+            value = null;
+        }
+
+        public Mutable(E value) {
+            this.value = value;
+        }
+    }
 }
