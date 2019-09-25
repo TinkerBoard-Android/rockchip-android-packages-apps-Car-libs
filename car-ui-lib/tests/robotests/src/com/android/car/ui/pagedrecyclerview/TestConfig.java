@@ -17,7 +17,7 @@
 package com.android.car.ui.pagedrecyclerview;
 
 public class TestConfig {
-    public static final int SDK_VERSION = 23;
+    public static final int SDK_VERSION = 28;
     public static final String MANIFEST_PATH =
-            "packages/apps/Car/car-apps-common/AndroidManifest.xml";
+            "packages/apps/Car/car-ui-lib/AndroidManifest.xml";
 }
