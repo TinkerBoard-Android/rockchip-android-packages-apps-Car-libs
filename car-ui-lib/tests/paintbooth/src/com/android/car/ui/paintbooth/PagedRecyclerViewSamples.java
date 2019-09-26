@@ -22,7 +22,6 @@ import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.android.car.ui.pagedrecyclerview.PagedRecyclerView;
-import com.android.car.ui.toolbar.Toolbar;
 
 import java.util.ArrayList;
 
@@ -43,15 +42,6 @@ public class PagedRecyclerViewSamples extends Activity {
 
         RecyclerViewAdapter adapter = new RecyclerViewAdapter(generateDummyData());
         recyclerView.setAdapter(adapter);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setState(Toolbar.State.SUBPAGE);
-        toolbar.addListener(new Toolbar.Listener() {
-            @Override
-            public void onBack() {
-                finish();
-            }
-        });
     }
 
     private ArrayList<String> generateDummyData() {
