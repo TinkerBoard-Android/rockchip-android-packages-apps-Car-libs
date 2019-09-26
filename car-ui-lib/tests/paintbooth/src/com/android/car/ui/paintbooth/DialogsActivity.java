@@ -42,6 +42,9 @@ public class DialogsActivity extends Activity {
         Button showDialogWithoutTitleButton = findViewById(R.id.show_dialog_without_title);
         showDialogWithoutTitleButton.setOnClickListener(v -> openDialogWithoutTitle());
 
+        Button showDialogWithNoButtonProvided = findViewById(R.id.show_dialog_with_no_button_set);
+        showDialogWithNoButtonProvided.setOnClickListener(v -> openDialogWithNoButtonProvided());
+
         Button showDialogWithCheckboxButton = findViewById(R.id.show_dialog_with_checkbox_bt);
         showDialogWithCheckboxButton.setOnClickListener(v -> openDialog(true));
 
@@ -81,6 +84,11 @@ public class DialogsActivity extends Activity {
                 .setNegativeButton("CANCEL", (dialog, which) -> {
                 });
         builder.show();
+    }
+
+    private void openDialogWithNoButtonProvided() {
+        AlertDialogBuilder builder = new AlertDialogBuilder(this);
+        builder.setTitle("Standard Alert Dialog").show();
     }
 
     private void openDialogWithTextbox() {
