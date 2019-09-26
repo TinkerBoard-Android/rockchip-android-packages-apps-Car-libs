@@ -294,7 +294,7 @@ public final class PagedRecyclerView extends RecyclerView implements
                 a.getInt(R.styleable.PagedRecyclerView_layoutStyle, PagedRecyclerViewLayout.LINEAR);
         mNumOfColumns = a.getInt(R.styleable.PagedRecyclerView_numOfColumns, /* defValue= */ 2);
         boolean enableDivider =
-                a.getBoolean(R.styleable.PagedRecyclerView_enableDivider, /* defValue= */ true);
+                a.getBoolean(R.styleable.PagedRecyclerView_enableDivider, /* defValue= */ false);
 
         if (mPagedRecyclerViewLayout == PagedRecyclerViewLayout.LINEAR) {
 
@@ -427,8 +427,12 @@ public final class PagedRecyclerView extends RecyclerView implements
     /** Sets the number of columns in which grid needs to be divided. */
     public void setNumOfColumns(int numberOfColumns) {
         mNumOfColumns = numberOfColumns;
-        mOffsetItemDecoration.setNumOfColumns(mNumOfColumns);
-        mDividerItemDecoration.setNumOfColumns(mNumOfColumns);
+        if (mOffsetItemDecoration != null) {
+            mOffsetItemDecoration.setNumOfColumns(mNumOfColumns);
+        }
+        if (mDividerItemDecoration != null) {
+            mDividerItemDecoration.setNumOfColumns(mNumOfColumns);
+        }
     }
 
     /**
