@@ -130,6 +130,11 @@ public class SearchView extends ConstraintLayout {
         mSearchText.setHint(hint);
     }
 
+    /** Gets the search hint */
+    public CharSequence getHint() {
+        return mSearchText.getHint();
+    }
+
     /**
      * Sets a custom icon to display in the search box.
      */
