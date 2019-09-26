@@ -43,6 +43,7 @@ import com.android.car.ui.pagedrecyclerview.decorations.grid.GridOffsetItemDecor
 import com.android.car.ui.pagedrecyclerview.decorations.linear.LinearDividerItemDecoration;
 import com.android.car.ui.pagedrecyclerview.decorations.linear.LinearOffsetItemDecoration;
 import com.android.car.ui.pagedrecyclerview.decorations.linear.LinearOffsetItemDecoration.OffsetPosition;
+import com.android.car.ui.toolbar.Toolbar;
 
 import java.lang.annotation.Retention;
 
@@ -51,7 +52,8 @@ import java.lang.annotation.Retention;
  * potentially include a scrollbar that has page up and down arrows. Interaction with this view is
  * similar to a {@code RecyclerView} as it takes the same adapter and the layout manager.
  */
-public final class PagedRecyclerView extends RecyclerView {
+public final class PagedRecyclerView extends RecyclerView implements
+        Toolbar.OnToolbarHeightChangeListener {
 
     private static final boolean DEBUG = false;
     private static final String TAG = "PagedRecyclerView";
@@ -76,6 +78,7 @@ public final class PagedRecyclerView extends RecyclerView {
     private RecyclerView mNestedRecyclerView;
     private Adapter<?> mAdapter;
     private ScrollBar mScrollBar;
+    private int mInitialTopPadding;
 
     private GridOffsetItemDecoration mOffsetItemDecoration;
     private GridDividerItemDecoration mDividerItemDecoration;
@@ -390,11 +393,20 @@ public final class PagedRecyclerView extends RecyclerView {
                                                         params.height = getMeasuredHeight();
                                                         setLayoutParams(params);
                                                         createScrollBarFromConfig();
+                                                        if (mInitialTopPadding == 0) {
+                                                            mInitialTopPadding = getPaddingTop();
+                                                        }
                                                         mFullyInitialized = true;
                                                     }
                                                 });
                             }
                         });
+    }
+
+    @Override
+    public void onHeightChanged(int height) {
+        setPaddingRelative(getPaddingStart(), mInitialTopPadding + height,
+                getPaddingEnd(), getPaddingBottom());
     }
 
     /**
@@ -712,6 +724,21 @@ public final class PagedRecyclerView extends RecyclerView {
 
         if (DEBUG) {
             Log.d(TAG, "started " + mScrollBar.getClass().getSimpleName());
+        }
+    }
+
+    /**
+     * Sets the scrollbar's padding start (top) and end (bottom).
+     * This padding is applied in addition to the padding of the inner RecyclerView.
+     */
+    public void setScrollBarPadding(int paddingStart, int paddingEnd) {
+        if (mScrollBarEnabled) {
+            mScrollBarPaddingStart = paddingStart;
+            mScrollBarPaddingEnd = paddingEnd;
+
+            if (mScrollBar != null) {
+                mScrollBar.setPadding(paddingStart, paddingEnd);
+            }
         }
     }
 
