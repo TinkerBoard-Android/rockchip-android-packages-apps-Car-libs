@@ -256,8 +256,7 @@ class DefaultScrollBar implements ScrollBar {
 
     /**
      * Lays out the given View starting from the given {@code top} value downwards and centered
-     * within
-     * the given {@code availableWidth}.
+     * within the given {@code availableWidth}.
      *
      * @param view The view to lay out.
      * @param top The top value to start laying out from. This value will be the resulting top value
