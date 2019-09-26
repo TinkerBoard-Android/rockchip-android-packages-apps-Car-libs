@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.car.ui.paintbooth;
 
 import android.app.Activity;
@@ -28,6 +29,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.pagedrecyclerview.PagedRecyclerView;
+import com.android.car.ui.paintbooth.dialogs.DialogsActivity;
+import com.android.car.ui.paintbooth.pagedrecyclerview.GridPagedRecyclerViewActivity;
+import com.android.car.ui.paintbooth.pagedrecyclerview.PagedRecyclerViewActivity;
+import com.android.car.ui.paintbooth.preferences.PreferenceActivity;
 
 import java.util.Arrays;
 import java.util.List;
@@ -40,8 +45,10 @@ public class MainActivity extends Activity {
      * List of all sample activities.
      */
     private List<Pair<String, Class<? extends Activity>>> mActivities = Arrays.asList(
-            Pair.create("Dialogs sample page", DialogsActivity.class),
-            Pair.create("PRV sample page", PagedRecyclerViewSamples.class)
+            Pair.create("Dialogs sample", DialogsActivity.class),
+            Pair.create("List sample", PagedRecyclerViewActivity.class),
+            Pair.create("Grid sample", GridPagedRecyclerViewActivity.class),
+            Pair.create("Preferences sample", PreferenceActivity.class)
     );
 
     private class ViewHolder extends RecyclerView.ViewHolder {
