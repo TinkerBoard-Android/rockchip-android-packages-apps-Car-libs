@@ -19,7 +19,8 @@
 
     <style name="Widget.CarUi" parent="android:Widget.DeviceDefault"/>
 
-    <style name="Widget.CarUi.Button.Borderless.Colored" parent="android:Widget.DeviceDefault.Button.Borderless.Colored"/>
+    <style name="Widget.CarUi.Button.Borderless.Colored"
+           parent="android:Widget.DeviceDefault.Button.Borderless.Colored"/>
 
     <style name="Widget.CarUi.Toolbar"/>
 
@@ -30,8 +31,12 @@
 
     <style name="Widget.CarUi.Toolbar.TextButton" parent="Widget.CarUi.Button.Borderless.Colored"/>
 
-    <style name="Widget.CarUi.PagedRecyclerView"/>
-    <style name="Widget.CarUi.PagedRecyclerView.NestedRecyclerView"/>
+    <style name="Widget.CarUi.PagedRecyclerView">
+        <item name="android:scrollbars">vertical</item>
+    </style>
+    <style name="Widget.CarUi.PagedRecyclerView.NestedRecyclerView">
+        <item name="android:scrollbars">none</item>
+    </style>
 
     <!-- Preference Styles -->
 
@@ -123,8 +128,11 @@
     </style>
 
     <style name="TextAppearance.CarUi.PreferenceEditTextDialogMessage">
-        <item name="android:textColor">@color/car_ui_preference_edit_text_dialog_message_text_color</item>
-        <item name="android:textSize">@dimen/car_ui_preference_edit_text_dialog_message_text_size</item>
+        <item name="android:textColor">
+            @color/car_ui_preference_edit_text_dialog_message_text_color
+        </item>
+        <item name="android:textSize">@dimen/car_ui_preference_edit_text_dialog_message_text_size
+        </item>
     </style>
 
     <style name="TextAppearance.CarUi.Widget" parent="android:TextAppearance.DeviceDefault.Widget"/>
