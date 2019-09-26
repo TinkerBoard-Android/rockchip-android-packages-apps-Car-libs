@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.car.ui.paintbooth;
+package com.android.car.ui.paintbooth.pagedrecyclerview;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +23,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.android.car.ui.paintbooth.R;
 
 import java.util.ArrayList;
 
