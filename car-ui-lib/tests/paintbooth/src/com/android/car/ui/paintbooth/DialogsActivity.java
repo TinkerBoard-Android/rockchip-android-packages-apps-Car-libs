@@ -21,7 +21,6 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.android.car.ui.AlertDialogBuilder;
-import com.android.car.ui.toolbar.Toolbar;
 
 /**
  * Activity that shows different dialogs from the device default theme.
@@ -53,14 +52,6 @@ public class DialogsActivity extends Activity {
 
         Button showToast = findViewById(R.id.show_toast);
         showToast.setOnClickListener(v -> showToast());
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setState(Toolbar.State.SUBPAGE);
-        toolbar.addListener(new Toolbar.Listener() {
-            @Override
-            public void onBack() {
-                finish();
-            }
-        });
     }
 
     private void openDialog(boolean showCheckbox) {
