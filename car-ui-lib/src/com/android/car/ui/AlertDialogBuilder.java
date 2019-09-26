@@ -15,10 +15,6 @@
  */
 package com.android.car.ui;
 
-import android.annotation.ArrayRes;
-import android.annotation.AttrRes;
-import android.annotation.DrawableRes;
-import android.annotation.StringRes;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -32,6 +28,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListAdapter;
+
+import androidx.annotation.ArrayRes;
+import androidx.annotation.AttrRes;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.StringRes;
 
 /**
  * Wrapper for AlertDialog.Builder
@@ -493,14 +494,6 @@ public class AlertDialogBuilder {
     public AlertDialogBuilder setOnItemSelectedListener(
             final AdapterView.OnItemSelectedListener listener) {
         mBuilder.setOnItemSelectedListener(listener);
-        return this;
-    }
-
-    /**
-     * @hide
-     */
-    public AlertDialogBuilder setRecycleOnMeasureEnabled(boolean enabled) {
-        mBuilder.setRecycleOnMeasureEnabled(enabled);
         return this;
     }
 
