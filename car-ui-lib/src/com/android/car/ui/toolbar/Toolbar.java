@@ -228,7 +228,9 @@ public class Toolbar extends FrameLayout {
         mTabLayout.addListener(new TabLayout.Listener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                mOnTabSelectedListeners.forEach(listener -> listener.onTabSelected(tab));
+                for (OnTabSelectedListener listener : mOnTabSelectedListeners) {
+                    listener.onTabSelected(tab);
+                }
             }
         });
 
@@ -241,6 +243,8 @@ public class Toolbar extends FrameLayout {
                 mOverflowDialog.show();
             }
         });
+
+        handleToolbarHeightChangeListeners(getHeight());
     }
 
     /**
