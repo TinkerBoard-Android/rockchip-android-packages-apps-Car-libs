@@ -359,8 +359,9 @@ public class Toolbar extends FrameLayout {
      * OnHeightChangedListener}s array.
      */
     private void handleToolbarHeightChangeListeners(int height) {
-        mOnHeightChangedListeners.forEach(
-                listener -> listener.onHeightChanged(height));
+        for (OnHeightChangedListener listener : mOnHeightChangedListeners) {
+            listener.onHeightChanged(height);
+        }
     }
 
     /**
