@@ -15,8 +15,10 @@
  */
 package com.android.car.ui.toolbar;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -52,16 +54,40 @@ import java.util.Set;
  */
 public class Toolbar extends FrameLayout {
 
-    /**
-     * Callback that will be issued whenever the height of toolbar is changed.
-     */
-    public interface OnToolbarHeightChangeListener {
-
+    /** Callback that will be issued whenever the height of toolbar is changed. */
+    public interface OnHeightChangedListener {
         /**
          * Will be called when the height of the toolbar is changed.
          * @param height new height of the toolbar
          */
         void onHeightChanged(int height);
+    }
+
+    /** Back button listener */
+    public interface OnBackListener {
+        /**
+         * Invoked when the user clicks on the back button. By default, the toolbar will call
+         * the Activity's {@link android.app.Activity#onBackPressed()}. Returning true from
+         * this method will absorb the back press and prevent that behavior.
+         */
+        boolean onBack();
+    }
+
+    /** Tab selection listener */
+    public interface OnTabSelectedListener {
+        /** Called when a {@link TabLayout.Tab} is selected */
+        void onTabSelected(TabLayout.Tab tab);
+    }
+
+    /** Search listener */
+    public interface OnSearchListener {
+        /**
+         * Invoked when the user submits a search query.
+         *
+         * <p>This is called for every letter the user types, and also empty strings if the user
+         * erases everything.
+         */
+        void onSearch(String query);
     }
 
     private static final String TAG = "CarUiToolbar";
@@ -98,7 +124,9 @@ public class Toolbar extends FrameLayout {
     private LinearLayout mMenuItemsContainer;
     private FrameLayout mCustomViewContainer;
     private View mOverflowButton;
-    private Set<Listener> mListeners = new HashSet<>();
+    private final Set<OnBackListener> mOnBackListeners = new HashSet<>();
+    private final Set<OnTabSelectedListener> mOnTabSelectedListeners = new HashSet<>();
+    private final Set<OnHeightChangedListener> mOnHeightChangedListeners = new HashSet<>();
     private SearchView mSearchView;
     private boolean mHasLogo = false;
     private boolean mShowMenuItemsWhileSearching;
@@ -115,8 +143,7 @@ public class Toolbar extends FrameLayout {
     };
     private AlertDialog mOverflowDialog;
 
-    private final List<OnToolbarHeightChangeListener> mOnToolbarHeightChangeListeners =
-            new ArrayList<>();
+
 
     public Toolbar(Context context) {
         this(context, null);
@@ -201,7 +228,7 @@ public class Toolbar extends FrameLayout {
         mTabLayout.addListener(new TabLayout.Listener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                forEachListener(listener -> listener.onTabSelected(tab));
+                mOnTabSelectedListeners.forEach(listener -> listener.onTabSelected(tab));
             }
         });
 
@@ -243,7 +270,7 @@ public class Toolbar extends FrameLayout {
 
     /**
      * Adds a tab to this toolbar. You can listen for when it is selected via
-     * {@link #addListener(Listener)}.
+     * {@link #registerOnTabSelectedListener(OnTabSelectedListener)}.
      */
     public void addTab(TabLayout.Tab tab) {
         mTabLayout.addTab(tab);
@@ -295,7 +322,7 @@ public class Toolbar extends FrameLayout {
 
     /**
      * An enum of possible styles the nav button could be in. All styles will still call
-     * {@link Listener#onBack()}.
+     * {@link OnBackListener#onBack()}.
      */
     public enum NavButtonMode {
         /** Display the nav button as a back button */
@@ -328,33 +355,11 @@ public class Toolbar extends FrameLayout {
     }
 
     /**
-     * Registers a new {@link OnToolbarHeightChangeListener} to the list of listeners. Register a
-     * {@link com.android.car.ui.pagedrecyclerview.PagedRecyclerView} only if there is a toolbar at
-     * the top and a {@link com.android.car.ui.pagedrecyclerview.PagedRecyclerView} in the view and
-     * nothing else. {@link com.android.car.ui.pagedrecyclerview.PagedRecyclerView} will
-     * automatically adjust its height according to the height of the Toolbar.
-     */
-    public void registerToolbarHeightChangeListener(
-            OnToolbarHeightChangeListener listener) {
-        if (!mOnToolbarHeightChangeListeners.contains(listener)) {
-            mOnToolbarHeightChangeListeners.add(listener);
-        }
-    }
-
-    /**
-     * Unregisters a {@link OnToolbarHeightChangeListener} from the list of listeners.
-     */
-    public void unregisterToolbarHeightChangeListener(
-            OnToolbarHeightChangeListener listener) {
-        mOnToolbarHeightChangeListeners.remove(listener);
-    }
-
-    /**
      * Invokes all OnToolbarHeightChangeListener handlers registered in {@link
-     * OnToolbarHeightChangeListener}s array.
+     * OnHeightChangedListener}s array.
      */
     private void handleToolbarHeightChangeListeners(int height) {
-        mOnToolbarHeightChangeListeners.forEach(
+        mOnHeightChangedListeners.forEach(
                 listener -> listener.onHeightChanged(height));
     }
 
@@ -465,6 +470,17 @@ public class Toolbar extends FrameLayout {
         return v;
     }
 
+    private Activity getActivity() {
+        Context context = getContext();
+        while (context instanceof ContextWrapper) {
+            if (context instanceof Activity) {
+                return (Activity) context;
+            }
+            context = ((ContextWrapper) context).getBaseContext();
+        }
+        return null;
+    }
+
     /**
      * Sets the state of the toolbar. This will show/hide the appropriate elements of the toolbar
      * for the desired state.
@@ -472,7 +488,20 @@ public class Toolbar extends FrameLayout {
     public void setState(State state) {
         mState = state;
 
-        View.OnClickListener backClickListener = (v) -> forEachListener(Listener::onBack);
+        View.OnClickListener backClickListener = (v) -> {
+            boolean absorbed = false;
+            List<OnBackListener> listenersCopy = new ArrayList<>(mOnBackListeners);
+            for (OnBackListener listener : listenersCopy) {
+                absorbed = absorbed || listener.onBack();
+            }
+
+            if (!absorbed) {
+                Activity activity = getActivity();
+                if (activity != null) {
+                    activity.onBackPressed();
+                }
+            }
+        };
         mNavIcon.setVisibility(state != State.HOME ? VISIBLE : INVISIBLE);
         mNavIcon.setImageResource(mNavButtonMode == NavButtonMode.BACK
                 ? R.drawable.car_ui_icon_arrow_back
@@ -502,55 +531,50 @@ public class Toolbar extends FrameLayout {
     }
 
     /**
-     * Toolbar listener.
+     * Registers a new {@link OnHeightChangedListener} to the list of listeners. Register a
+     * {@link com.android.car.ui.pagedrecyclerview.PagedRecyclerView} only if there is a toolbar at
+     * the top and a {@link com.android.car.ui.pagedrecyclerview.PagedRecyclerView} in the view and
+     * nothing else. {@link com.android.car.ui.pagedrecyclerview.PagedRecyclerView} will
+     * automatically adjust its height according to the height of the Toolbar.
      */
-    public interface Listener {
-        /**
-         * Invoked when the user selects an item from the tabs
-         */
-        default void onTabSelected(TabLayout.Tab item) {
-        }
-
-        /**
-         * Invoked when the user clicks on the back button
-         */
-        default void onBack() {
-        }
-
-        /**
-         * Invoked when the user submits a search query.
-         */
-        default void onSearch(String query) {
-        }
+    public void registerToolbarHeightChangeListener(
+            OnHeightChangedListener listener) {
+        mOnHeightChangedListeners.add(listener);
     }
 
-    /**
-     * Adds a {@link Listener} to this toolbar.
-     */
-    public void addListener(Listener listener) {
-        mListeners.add(listener);
-        mSearchView.addToolbarListener(listener);
+    /** Unregisters a {@link OnHeightChangedListener} from the list of listeners. */
+    public boolean unregisterToolbarHeightChangeListener(
+            OnHeightChangedListener listener) {
+        return mOnHeightChangedListeners.remove(listener);
     }
 
-    /**
-     * Removes a {@link Listener} from this toolbar.
-     */
-    public boolean removeListener(Listener listener) {
-        mSearchView.removeToolbarListener(listener);
-        return mListeners.remove(listener);
+    /** Registers a new {@link OnTabSelectedListener} to the list of listeners. */
+    public void registerOnTabSelectedListener(OnTabSelectedListener listener) {
+        mOnTabSelectedListeners.add(listener);
     }
 
-    /**
-     * {@link java.util.function.Consumer} is not available for non-java8 enabled Android targets.
-     */
-    private interface Consumer<T> {
-        void accept(T value);
+    /** Unregisters a new {@link OnTabSelectedListener} from the list of listeners. */
+    public boolean unregisterOnTabSelectedListener(OnTabSelectedListener listener) {
+        return mOnTabSelectedListeners.remove(listener);
     }
 
-    private void forEachListener(Consumer<Listener> callback) {
-        List<Listener> listenersCopy = new ArrayList<>(mListeners);
-        for (Listener listener : listenersCopy) {
-            callback.accept(listener);
-        }
+    /** Registers a new {@link OnSearchListener} to the list of listeners. */
+    public void registerOnSearchListener(OnSearchListener listener) {
+        mSearchView.registerOnSearchListener(listener);
+    }
+
+    /** Unregisters a new {@link OnSearchListener} from the list of listeners. */
+    public boolean unregisterOnSearchListener(OnSearchListener listener) {
+        return mSearchView.unregisterOnSearchListener(listener);
+    }
+
+    /** Registers a new {@link OnBackListener} to the list of listeners. */
+    public void registerOnBackListener(OnBackListener listener) {
+        mOnBackListeners.add(listener);
+    }
+
+    /** Unregisters a new {@link OnTabSelectedListener} from the list of listeners. */
+    public boolean unregisterOnBackListener(OnBackListener listener) {
+        return mOnBackListeners.remove(listener);
     }
 }
