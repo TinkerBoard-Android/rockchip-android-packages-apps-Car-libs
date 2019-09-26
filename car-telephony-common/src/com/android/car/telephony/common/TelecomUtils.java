@@ -212,7 +212,7 @@ public class TelecomUtils {
                     name = context.getString(R.string.unknown);
                 }
 
-                PhoneNumber phoneNumber = contact.getPhoneNumber(number);
+                PhoneNumber phoneNumber = contact.getPhoneNumber(context, number);
                 CharSequence typeLabel = "";
                 if (phoneNumber != null) {
                     typeLabel = Phone.getTypeLabel(context.getResources(),
