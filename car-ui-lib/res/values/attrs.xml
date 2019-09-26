@@ -65,4 +65,6 @@
     <declare-styleable name="PagedRecyclerViewTheme">
         <attr name="pagedRecyclerViewStyle" format="reference" />
     </declare-styleable>
+
+    <attr name="state_ux_restricted" format="boolean" />
 </resources>
