@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.car.ui.paintbooth;
+
+package com.android.car.ui.paintbooth.dialogs;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -21,6 +22,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.android.car.ui.AlertDialogBuilder;
+import com.android.car.ui.paintbooth.R;
 
 /**
  * Activity that shows different dialogs from the device default theme.
