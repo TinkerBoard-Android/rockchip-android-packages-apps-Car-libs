@@ -40,9 +40,6 @@ LOCAL_STATIC_ANDROID_LIBRARIES += \
     car-arch-common
 
 LOCAL_STATIC_JAVA_LIBRARIES += \
-    car-media-common-glide-target \
-    car-media-common-gifdecoder-target \
-    car-media-common-disklrucache-target \
     androidx-constraintlayout_constraintlayout-solver
 
 LOCAL_USE_AAPT2 := true
