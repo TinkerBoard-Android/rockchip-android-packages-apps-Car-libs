@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <!-- Used for the entries in a list preference [CHAR_LIMIT=NONE]-->
+  <string-array name="entries">
+    <!-- The first sample choice [CHAR_LIMIT=NONE]-->
+    <item>Choose me!</item>
+    <!-- The second sample choice [CHAR_LIMIT=NONE]-->
+    <item>No, me!</item>
+    <!-- The third sample choice [CHAR_LIMIT=NONE]-->
+    <item>What about me?!</item>
+  </string-array>
+
+  <!-- Used for the values in a list preference -->
+  <string-array name="entry_values" translatable="false">
+    <!-- The first sample value -->
+    <item>alpha</item>
+    <!-- The second sample value -->
+    <item>beta</item>
+    <!-- The third sample value -->
+    <item>charlie</item>
+  </string-array>
+</resources>
