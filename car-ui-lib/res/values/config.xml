@@ -44,4 +44,7 @@
     <!-- Width of the scrollbar container. -->
     <dimen name="car_ui_scrollbar_container_width">@dimen/car_ui_margin</dimen>
 
+    <!-- Whether or not the toolbar title and tabs can be shown at the same time -->
+    <bool name="car_ui_toolbar_title_and_tabs_are_mutually_exclusive">true</bool>
+
 </resources>
