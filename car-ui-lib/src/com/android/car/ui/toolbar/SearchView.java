@@ -41,8 +41,7 @@ import java.util.Set;
 public class SearchView extends ConstraintLayout {
     private final ImageView mIcon;
     private final EditText mSearchText;
-
-    private Set<Toolbar.Listener> mListeners = new HashSet<>();
+    private final Set<Toolbar.OnSearchListener> mListeners = new HashSet<>();
 
     public SearchView(Context context) {
         this(context, null);
@@ -101,18 +100,18 @@ public class SearchView extends ConstraintLayout {
 
     /**
      * Adds a listener for the search text changing.
-     * See also {@link #removeToolbarListener(Toolbar.Listener)}
+     * See also {@link #unregisterOnSearchListener(Toolbar.OnSearchListener)}
      */
-    public void addToolbarListener(Toolbar.Listener listener) {
+    public void registerOnSearchListener(Toolbar.OnSearchListener listener) {
         mListeners.add(listener);
     }
 
     /**
      * Removes a listener.
-     * See also {@link #addToolbarListener(Toolbar.Listener)}
+     * See also {@link #registerOnSearchListener(Toolbar.OnSearchListener)}
      */
-    public void removeToolbarListener(Toolbar.Listener listener) {
-        mListeners.remove(listener);
+    public boolean unregisterOnSearchListener(Toolbar.OnSearchListener listener) {
+        return mListeners.remove(listener);
     }
 
     /**
@@ -153,7 +152,7 @@ public class SearchView extends ConstraintLayout {
     }
 
     private void onSearch(String query) {
-        for (Toolbar.Listener listener : mListeners) {
+        for (Toolbar.OnSearchListener listener : mListeners) {
             listener.onSearch(query);
         }
     }
