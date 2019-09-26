@@ -76,6 +76,7 @@ public class PagedSnapHelper extends LinearSnapHelper {
         int position = findTargetSnapPosition(mRecyclerView.getLayoutManager(), scrollDistance);
         if (position == RecyclerView.NO_POSITION) {
             mRecyclerView.smoothScrollBy(0, scrollDistance);
+            return;
         }
         mSmoothScroller.setTargetPosition(position);
         mRecyclerView.getLayoutManager().startSmoothScroll(mSmoothScroller);
