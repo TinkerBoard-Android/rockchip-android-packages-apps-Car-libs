@@ -52,6 +52,18 @@ import java.util.Set;
  */
 public class Toolbar extends FrameLayout {
 
+    /**
+     * Callback that will be issued whenever the height of toolbar is changed.
+     */
+    public interface OnToolbarHeightChangeListener {
+
+        /**
+         * Will be called when the height of the toolbar is changed.
+         * @param height new height of the toolbar
+         */
+        void onHeightChanged(int height);
+    }
+
     private static final String TAG = "CarUiToolbar";
 
     /** Enum of states the toolbar can be in. Controls what elements of the toolbar are displayed */
@@ -102,6 +114,9 @@ public class Toolbar extends FrameLayout {
         }
     };
     private AlertDialog mOverflowDialog;
+
+    private final List<OnToolbarHeightChangeListener> mOnToolbarHeightChangeListeners =
+            new ArrayList<>();
 
     public Toolbar(Context context) {
         this(context, null);
@@ -297,7 +312,7 @@ public class Toolbar extends FrameLayout {
         }
     }
 
-    /**  Gets the {@link NavButtonMode} */
+    /** Gets the {@link NavButtonMode} */
     public NavButtonMode getNavButtonMode() {
         return mNavButtonMode;
     }
@@ -309,7 +324,38 @@ public class Toolbar extends FrameLayout {
     public void setBackground(Drawable d) {
         throw new UnsupportedOperationException(
                 "You can not change the background of a CarUi toolbar, use "
-                + "setBackgroundShown(boolean) or an RRO instead.");
+                        + "setBackgroundShown(boolean) or an RRO instead.");
+    }
+
+    /**
+     * Registers a new {@link OnToolbarHeightChangeListener} to the list of listeners. Register a
+     * {@link com.android.car.ui.pagedrecyclerview.PagedRecyclerView} only if there is a toolbar at
+     * the top and a {@link com.android.car.ui.pagedrecyclerview.PagedRecyclerView} in the view and
+     * nothing else. {@link com.android.car.ui.pagedrecyclerview.PagedRecyclerView} will
+     * automatically adjust its height according to the height of the Toolbar.
+     */
+    public void registerToolbarHeightChangeListener(
+            OnToolbarHeightChangeListener listener) {
+        if (!mOnToolbarHeightChangeListeners.contains(listener)) {
+            mOnToolbarHeightChangeListeners.add(listener);
+        }
+    }
+
+    /**
+     * Unregisters a {@link OnToolbarHeightChangeListener} from the list of listeners.
+     */
+    public void unregisterToolbarHeightChangeListener(
+            OnToolbarHeightChangeListener listener) {
+        mOnToolbarHeightChangeListeners.remove(listener);
+    }
+
+    /**
+     * Invokes all OnToolbarHeightChangeListener handlers registered in {@link
+     * OnToolbarHeightChangeListener}s array.
+     */
+    private void handleToolbarHeightChangeListeners(int height) {
+        mOnToolbarHeightChangeListeners.forEach(
+                listener -> listener.onHeightChanged(height));
     }
 
     /**
@@ -462,17 +508,20 @@ public class Toolbar extends FrameLayout {
         /**
          * Invoked when the user selects an item from the tabs
          */
-        default void onTabSelected(TabLayout.Tab item) {}
+        default void onTabSelected(TabLayout.Tab item) {
+        }
 
         /**
          * Invoked when the user clicks on the back button
          */
-        default void onBack() {}
+        default void onBack() {
+        }
 
         /**
          * Invoked when the user submits a search query.
          */
-        default void onSearch(String query) {}
+        default void onSearch(String query) {
+        }
     }
 
     /**
