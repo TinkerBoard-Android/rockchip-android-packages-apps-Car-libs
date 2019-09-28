@@ -14,6 +14,27 @@
 # limitations under the License.
 #
 
+# Including generate_rros.mk utility.
+# Usage:
+#
+# LOCAL_PATH := $(call my-dir)
+#
+# CAR_UI_RRO_SET_NAME := sample
+# CAR_UI_RESOURCE_DIR := $(LOCAL_PATH)/res
+# CAR_UI_RRO_TARGETS := \
+#   com.your.package.name.1 \
+#   com.your.package.name.2 \
+#   com.your.package.name.3
+#
+# include $(CAR_UI_GENERATE_RRO_SET)
+#
+# Your AndroidManifest must use {{TARGET_PACKAGE_NAME}} and {{RRO_PACKAGE_NAME}}
+# tags, which will be replaced accordingly during build.
+
+CAR_UI_GENERATE_RRO_SET := $(call my-dir)/generate_rros.mk
+
+# Build car-ui library
+
 LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
