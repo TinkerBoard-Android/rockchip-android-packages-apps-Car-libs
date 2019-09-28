@@ -40,15 +40,20 @@ public class AlertDialogBuilder {
 
     private AlertDialog.Builder mBuilder;
     private Context mContext;
+    private boolean mPositiveButtonSet;
+    private boolean mNeutralButtonSet;
+    private boolean mNegativeButtonSet;
+    private String mDefaultButtonText;
 
     public AlertDialogBuilder(Context context) {
-        mBuilder = new AlertDialog.Builder(context);
-        mContext = context;
+        // Resource id specified as 0 uses the parent contexts resolved value for alertDialogTheme.
+        this(context, /* themeResId= */0);
     }
 
     public AlertDialogBuilder(Context context, int themeResId) {
         mBuilder = new AlertDialog.Builder(context, themeResId);
         mContext = context;
+        mDefaultButtonText = context.getString(R.string.car_ui_alert_dialog_default_button);
     }
 
     public Context getContext() {
@@ -146,6 +151,7 @@ public class AlertDialogBuilder {
     public AlertDialogBuilder setPositiveButton(@StringRes int textId,
             final DialogInterface.OnClickListener listener) {
         mBuilder.setPositiveButton(textId, listener);
+        mPositiveButtonSet = true;
         return this;
     }
 
@@ -159,6 +165,7 @@ public class AlertDialogBuilder {
     public AlertDialogBuilder setPositiveButton(CharSequence text,
             final DialogInterface.OnClickListener listener) {
         mBuilder.setPositiveButton(text, listener);
+        mPositiveButtonSet = true;
         return this;
     }
 
@@ -172,6 +179,7 @@ public class AlertDialogBuilder {
     public AlertDialogBuilder setNegativeButton(@StringRes int textId,
             final DialogInterface.OnClickListener listener) {
         mBuilder.setNegativeButton(textId, listener);
+        mNegativeButtonSet = true;
         return this;
     }
 
@@ -185,6 +193,7 @@ public class AlertDialogBuilder {
     public AlertDialogBuilder setNegativeButton(CharSequence text,
             final DialogInterface.OnClickListener listener) {
         mBuilder.setNegativeButton(text, listener);
+        mNegativeButtonSet = true;
         return this;
     }
 
@@ -198,6 +207,7 @@ public class AlertDialogBuilder {
     public AlertDialogBuilder setNeutralButton(@StringRes int textId,
             final DialogInterface.OnClickListener listener) {
         mBuilder.setNeutralButton(textId, listener);
+        mNeutralButtonSet = true;
         return this;
     }
 
@@ -211,6 +221,7 @@ public class AlertDialogBuilder {
     public AlertDialogBuilder setNeutralButton(CharSequence text,
             final DialogInterface.OnClickListener listener) {
         mBuilder.setPositiveButton(text, listener);
+        mNeutralButtonSet = true;
         return this;
     }
 
@@ -548,6 +559,12 @@ public class AlertDialogBuilder {
      * </pre>
      */
     public AlertDialog show() {
+        if (mNeutralButtonSet || mNegativeButtonSet || mPositiveButtonSet) {
+            return mBuilder.show();
+        }
+
+        mBuilder.setNegativeButton(mDefaultButtonText, (dialog, which) -> {
+        });
         return mBuilder.show();
     }
 }
