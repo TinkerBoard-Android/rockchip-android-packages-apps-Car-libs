@@ -26,6 +26,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
@@ -280,9 +281,10 @@ public final class PagedRecyclerView extends RecyclerView implements
         }
 
         mNestedRecyclerView =
-                new RecyclerView(context, attrs,
+                new RecyclerView(new ContextThemeWrapper(context,
+                        R.style.Widget_CarUi_PagedRecyclerView_NestedRecyclerView), attrs,
                         R.style.Widget_CarUi_PagedRecyclerView_NestedRecyclerView);
-
+        mNestedRecyclerView.setVerticalScrollBarEnabled(false);
         mScrollBarPaddingStart =
                 context.getResources().getDimension(R.dimen.car_ui_scrollbar_padding_start);
         mScrollBarPaddingEnd =
@@ -447,6 +449,14 @@ public final class PagedRecyclerView extends RecyclerView implements
     }
 
     @Override
+    public LayoutManager getLayoutManager() {
+        if (mScrollBarEnabled) {
+            return mNestedRecyclerView.getLayoutManager();
+        }
+        return super.getLayoutManager();
+    }
+
+    @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mCarUxRestrictionsUtil.register(mListener);
@@ -499,10 +509,16 @@ public final class PagedRecyclerView extends RecyclerView implements
     @Override
     public void setAdapter(@Nullable Adapter adapter) {
 
-        if (mPagedRecyclerViewLayout == PagedRecyclerViewLayout.LINEAR) {
+        if (mScrollBarEnabled && mPagedRecyclerViewLayout == PagedRecyclerViewLayout.LINEAR) {
             mNestedRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-        } else {
+        } else if (mPagedRecyclerViewLayout == PagedRecyclerViewLayout.LINEAR) {
+            super.setLayoutManager(new LinearLayoutManager(mContext));
+        } else if (mScrollBarEnabled) {
             mNestedRecyclerView.setLayoutManager(
+                    new GridPagedRecyclerViewLayoutManager(mContext, mNumOfColumns));
+            setNumOfColumns(mNumOfColumns);
+        } else {
+            super.setLayoutManager(
                     new GridPagedRecyclerViewLayoutManager(mContext, mNumOfColumns));
             setNumOfColumns(mNumOfColumns);
         }
