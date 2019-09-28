@@ -51,5 +51,9 @@
         android:name=".preferences.PreferenceActivity"
         android:exported="false"
         android:parentActivityName=".MainActivity"/>
+    <activity
+        android:name=".toolbar.ToolbarActivity"
+        android:exported="false"
+        android:parentActivityName=".MainActivity"/>
   </application>
 </manifest>

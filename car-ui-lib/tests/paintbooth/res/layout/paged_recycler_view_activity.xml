@@ -27,6 +27,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:title="@string/app_name"
+        app:logo="@drawable/ic_launcher"
         app:state="subpage"/>
 
     <com.android.car.ui.pagedrecyclerview.PagedRecyclerView
