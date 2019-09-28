@@ -120,7 +120,8 @@ public class PagedSnapHelper extends LinearSnapHelper {
             return RecyclerView.NO_POSITION;
         }
 
-        int vDeltaJump, hDeltaJump;
+        int vDeltaJump;
+        int hDeltaJump;
         if (layoutManager.canScrollHorizontally()) {
             hDeltaJump = estimateNextPositionDiffForFling(layoutManager,
                     getHorizontalHelper(layoutManager), scrollDistance);
