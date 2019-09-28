@@ -16,12 +16,11 @@
 package com.android.car.ui.paintbooth;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.car.ui.AlertDialogBuilder;
 import com.android.car.ui.toolbar.Toolbar;
 
 /**
@@ -35,13 +34,20 @@ public class DialogsActivity extends Activity {
         setContentView(R.layout.dialogs_activity);
 
         Button showDialogButton = findViewById(R.id.show_dialog_bt);
-        Button showDialogOnlyPositiveButton = findViewById(R.id.show_dialog_only_positive_bt);
-        Button showDialogWithoutTitleButton = findViewById(R.id.show_dialog_without_title);
-        Button showDialogWithCheckboxButton = findViewById(R.id.show_dialog_with_checkbox_bt);
         showDialogButton.setOnClickListener(v -> openDialog(false));
+
+        Button showDialogOnlyPositiveButton = findViewById(R.id.show_dialog_only_positive_bt);
         showDialogOnlyPositiveButton.setOnClickListener(v -> openDialogWithOnlyPositiveButton());
+
+        Button showDialogWithoutTitleButton = findViewById(R.id.show_dialog_without_title);
         showDialogWithoutTitleButton.setOnClickListener(v -> openDialogWithoutTitle());
+
+        Button showDialogWithCheckboxButton = findViewById(R.id.show_dialog_with_checkbox_bt);
         showDialogWithCheckboxButton.setOnClickListener(v -> openDialog(true));
+
+        Button showDialogWithTextbox = findViewById(R.id.show_dialog_with_textbox);
+        showDialogWithTextbox.setOnClickListener(v -> openDialogWithTextbox());
+
         Button showToast = findViewById(R.id.show_toast);
         showToast.setOnClickListener(v -> showToast());
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -55,14 +61,11 @@ public class DialogsActivity extends Activity {
     }
 
     private void openDialog(boolean showCheckbox) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialogBuilder builder = new AlertDialogBuilder(this);
 
         if (showCheckbox) {
             // Set Custom Title
-            TextView title = new TextView(this);
-            // Title Properties
-            title.setText("Custom Dialog Box");
-            builder.setCustomTitle(title);
+            builder.setTitle("Custom Dialog Box");
             builder.setMultiChoiceItems(
                     new CharSequence[]{"I am a checkbox"},
                     new boolean[]{false},
@@ -80,8 +83,16 @@ public class DialogsActivity extends Activity {
         builder.show();
     }
 
+    private void openDialogWithTextbox() {
+        AlertDialogBuilder builder = new AlertDialogBuilder(this);
+        builder.setTitle("Standard Alert Dialog").setEditBox("Edit me please", null, null);
+        builder.setPositiveButton("OK", (dialoginterface, i) -> {
+        });
+        builder.show();
+    }
+
     private void openDialogWithOnlyPositiveButton() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialogBuilder builder = new AlertDialogBuilder(this);
         builder.setTitle("Standard Alert Dialog").setMessage("With a message to show.");
         builder.setPositiveButton("OK", (dialoginterface, i) -> {
         });
@@ -89,8 +100,8 @@ public class DialogsActivity extends Activity {
     }
 
     private void openDialogWithoutTitle() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("I dont have a titile.");
+        AlertDialogBuilder builder = new AlertDialogBuilder(this);
+        builder.setMessage("I dont have a title.");
         builder
                 .setPositiveButton("OK", (dialoginterface, i) -> {
                 })
