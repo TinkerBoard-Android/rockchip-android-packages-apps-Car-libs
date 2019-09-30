@@ -120,6 +120,8 @@ public class MetadataController {
                         ViewUtils.setVisible(artist, !TextUtils.isEmpty(artistName));
                     }
 
+                    ViewUtils.setVisible(albumArt, true);
+
                     mAlbumArtBinder.setImage(context, metadata.getArtworkKey());
                 });
 
