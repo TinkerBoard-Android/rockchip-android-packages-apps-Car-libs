@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-# Generates one RRO for a given package
+# Generates one RRO for a given package.
 # $(1) target package name
 # $(2) name of the RRO set (e.g. "base")
 # $(3) resources folder
@@ -23,8 +23,8 @@ define generate-rro
 
   rro_package_name := $(2)-$(subst .,-,$(1))
   LOCAL_RESOURCE_DIR := $(3)
+  LOCAL_RRO_THEME := $$(rro_package_name)
   LOCAL_PACKAGE_NAME := $$(rro_package_name)
-  LOCAL_PRODUCT_MODULE := true
   LOCAL_CERTIFICATE := platform
   LOCAL_SDK_VERSION := current
 
