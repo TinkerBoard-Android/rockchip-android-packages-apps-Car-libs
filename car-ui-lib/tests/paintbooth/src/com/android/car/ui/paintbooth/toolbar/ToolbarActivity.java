@@ -19,6 +19,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +28,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.util.Pair;
 
 import com.android.car.ui.pagedrecyclerview.PagedRecyclerView;
 import com.android.car.ui.paintbooth.R;
@@ -91,7 +91,7 @@ public class ToolbarActivity extends Activity {
             new AlertDialog.Builder(this)
                     .setView(textBox)
                     .setTitle("Enter the index of the MenuItem to toggle")
-                    .setPositiveButton("Ok", ((dialog, which) -> {
+                    .setPositiveButton("Ok", (dialog, which) -> {
                         try {
                             MenuItem item = mMenuItems.get(
                                     Integer.parseInt(textBox.getText().toString()));
@@ -102,7 +102,7 @@ public class ToolbarActivity extends Activity {
                                     + "\", valid range is 0 to " + (mMenuItems.size() - 1),
                                     Toast.LENGTH_LONG).show();
                         }
-                    }))
+                    })
                     .show();
         }));
 
@@ -161,7 +161,7 @@ public class ToolbarActivity extends Activity {
     }
 
     private PagedRecyclerView.Adapter mAdapter = new PagedRecyclerView.Adapter() {
-
+        @Override
         public int getItemCount() {
             return mButtons.size();
         }
