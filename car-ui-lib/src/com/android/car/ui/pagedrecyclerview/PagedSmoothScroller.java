@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.R;
 import com.android.car.ui.utils.ResourceUtils;
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * Code drop from {androidx.car.widget.PagedSmoothScroller}
@@ -37,12 +38,16 @@ import com.android.car.ui.utils.ResourceUtils;
  * </ul>
  */
 public class PagedSmoothScroller extends LinearSmoothScroller {
-    private float mMillisecondsPerInch;
-    private float mDecelerationTimeDivisor;
-    private float mMillisecondsPerPixel;
-
-    private Interpolator mInterpolator;
-    private int mDensityDpi;
+    @VisibleForTesting
+    float mMillisecondsPerInch;
+    @VisibleForTesting
+    float mDecelerationTimeDivisor;
+    @VisibleForTesting
+    float mMillisecondsPerPixel;
+    @VisibleForTesting
+    Interpolator mInterpolator;
+    @VisibleForTesting
+    int mDensityDpi;
 
     public PagedSmoothScroller(Context context) {
         super(context);
