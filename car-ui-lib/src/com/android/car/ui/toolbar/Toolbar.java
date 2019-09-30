@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -61,6 +62,7 @@ public class Toolbar extends FrameLayout {
     public interface OnHeightChangedListener {
         /**
          * Will be called when the height of the toolbar is changed.
+         *
          * @param height new height of the toolbar
          */
         void onHeightChanged(int height);
@@ -158,8 +160,6 @@ public class Toolbar extends FrameLayout {
         setState(getState());
     };
     private AlertDialog mOverflowDialog;
-
-
 
     public Toolbar(Context context) {
         this(context, null);
@@ -263,7 +263,15 @@ public class Toolbar extends FrameLayout {
             }
         });
 
-        handleToolbarHeightChangeListeners(getHeight());
+        getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        for (OnHeightChangedListener listener : mOnHeightChangedListeners) {
+                            listener.onHeightChanged(getHeight());
+                        }
+                    }
+                });
     }
 
     @Override
