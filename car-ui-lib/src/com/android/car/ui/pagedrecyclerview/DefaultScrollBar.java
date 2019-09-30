@@ -29,6 +29,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import androidx.annotation.IntRange;
+import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.OrientationHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -43,16 +44,19 @@ import com.android.car.ui.utils.ResourceUtils;
  * been ported from the PLV with minor updates.
  */
 class DefaultScrollBar implements ScrollBar {
+
+    @VisibleForTesting
+    int mPaddingStart;
+    @VisibleForTesting
+    int mPaddingEnd;
+
     private float mButtonDisabledAlpha;
-    private static final String TAG = "DefaultScrollBar";
     private PagedSnapHelper mSnapHelper;
 
     private ImageView mUpButton;
     private View mScrollView;
     private View mScrollThumb;
     private ImageView mDownButton;
-    private int mPaddingStart;
-    private int mPaddingEnd;
 
     private int mSeparatingMargin;
 
@@ -75,7 +79,7 @@ class DefaultScrollBar implements ScrollBar {
             @ScrollBarPosition int scrollBarPosition,
             boolean scrollBarAboveRecyclerView) {
 
-        this.mRecyclerView = rv;
+        mRecyclerView = rv;
 
         LayoutInflater inflater =
                 (LayoutInflater) rv.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -84,7 +88,7 @@ class DefaultScrollBar implements ScrollBar {
 
         mScrollView = inflater.inflate(R.layout.car_ui_pagedrecyclerview_scrollbar, parent, false);
         mScrollView.setLayoutParams(
-                new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
+                new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
 
         Resources res = rv.getContext().getResources();
 
