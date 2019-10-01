@@ -373,6 +373,13 @@ public class PlaybackViewModel extends AndroidViewModel {
         }
 
         /**
+         * Returns the currently supported playback actions
+         */
+        public long getSupportedActions() {
+            return mState.getActions();
+        }
+
+        /**
          * Returns the duration of the media item in milliseconds. The current position in this
          * duration can be obtained by calling {@link #getProgress()}.
          */
