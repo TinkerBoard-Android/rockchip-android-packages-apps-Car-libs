@@ -37,7 +37,7 @@
         android:title="@string/title_checkbox_preference"
         android:summary="@string/summary_checkbox_preference"/>
 
-    <SwitchPreferenceCompat
+    <SwitchPreference
         android:key="switch"
         android:title="@string/title_switch_preference"
         android:summary="@string/summary_switch_preference"/>
@@ -101,18 +101,18 @@
 
     </Preference>
 
-    <SwitchPreferenceCompat
+    <SwitchPreference
         android:key="parent"
         android:title="@string/title_parent_preference"
         android:summary="@string/summary_parent_preference"/>
 
-    <SwitchPreferenceCompat
+    <SwitchPreference
         android:key="child"
         android:dependency="parent"
         android:title="@string/title_child_preference"
         android:summary="@string/summary_child_preference"/>
 
-    <SwitchPreferenceCompat
+    <SwitchPreference
         android:key="toggle_summary"
         android:title="@string/title_toggle_summary_preference"
         android:summaryOn="@string/summary_on_toggle_summary_preference"
