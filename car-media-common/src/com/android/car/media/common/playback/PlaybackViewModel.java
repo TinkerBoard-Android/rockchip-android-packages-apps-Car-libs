@@ -598,12 +598,12 @@ public class PlaybackViewModel extends AndroidViewModel {
         }
 
         /**
-         * Starts playing a given media item. This id corresponds to {@link
-         * MediaItemMetadata#getId()}.
+         * Starts playing a given media item.
          */
-        public void playItem(String mediaItemId) {
+        public void playItem(MediaItemMetadata item) {
             if (mMediaController != null) {
-                mMediaController.getTransportControls().playFromMediaId(mediaItemId, null);
+                mMediaController.getTransportControls().playFromMediaId(item.getId(),
+                        item.getExtras());
             }
         }
 
