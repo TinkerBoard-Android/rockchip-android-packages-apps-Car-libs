@@ -20,6 +20,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <!-- When the user finishes searching, we call clearFocus() on the editText in the search bar.
+         clearFocus() will actually send the focus to the first focusable thing in the layout.
+         If that focusable thing is still the search bar it will just reselect it, and the user won't
+         be able to deselect. So make a focusable view here to guarantee that we can clear the focus -->
+    <View
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true"/>
+
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/row_separator_guideline"
         android:layout_width="0dp"
