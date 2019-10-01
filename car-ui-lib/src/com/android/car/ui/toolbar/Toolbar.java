@@ -478,16 +478,6 @@ public class Toolbar extends FrameLayout {
                         + "setBackgroundShown(boolean) or an RRO instead.");
     }
 
-    /**
-     * Invokes all OnToolbarHeightChangeListener handlers registered in {@link
-     * OnHeightChangedListener}s array.
-     */
-    private void handleToolbarHeightChangeListeners(int height) {
-        for (OnHeightChangedListener listener : mOnHeightChangedListeners) {
-            listener.onHeightChanged(height);
-        }
-    }
-
     /** Show/hide the background. When hidden, the toolbar is completely transparent. */
     public void setBackgroundShown(boolean shown) {
         if (shown) {

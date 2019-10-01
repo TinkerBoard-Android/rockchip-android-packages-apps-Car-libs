@@ -123,7 +123,7 @@ public class ToolbarActivity extends Activity {
         }));
 
         mButtons.add(Pair.create("Toggle search hint", v -> {
-            if (toolbar.getSearchHint().equals("Foo")) {
+            if (toolbar.getSearchHint().toString().contentEquals("Foo")) {
                 toolbar.setSearchHint("Bar");
             } else {
                 toolbar.setSearchHint("Foo");
