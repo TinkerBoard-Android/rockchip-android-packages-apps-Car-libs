@@ -236,6 +236,13 @@ public class MediaItemMetadata implements Parcelable {
     }
 
     /**
+     * @return optional extras that can include extra information about the media item to be played.
+     */
+    public Bundle getExtras() {
+        return mMediaDescription.getExtras();
+    }
+
+    /**
      * @return boolean that indicate if media is explicit.
      */
     public boolean isExplicit() {
