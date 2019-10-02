@@ -45,6 +45,7 @@ import com.android.car.ui.pagedrecyclerview.decorations.linear.LinearDividerItem
 import com.android.car.ui.pagedrecyclerview.decorations.linear.LinearOffsetItemDecoration;
 import com.android.car.ui.pagedrecyclerview.decorations.linear.LinearOffsetItemDecoration.OffsetPosition;
 import com.android.car.ui.toolbar.Toolbar;
+import com.android.car.ui.utils.CarUxRestrictionsUtil;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
