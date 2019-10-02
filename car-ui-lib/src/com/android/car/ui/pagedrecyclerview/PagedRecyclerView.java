@@ -34,6 +34,7 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -46,7 +47,6 @@ import com.android.car.ui.pagedrecyclerview.decorations.linear.LinearOffsetItemD
 import com.android.car.ui.pagedrecyclerview.decorations.linear.LinearOffsetItemDecoration.OffsetPosition;
 import com.android.car.ui.toolbar.Toolbar;
 import com.android.car.ui.utils.CarUxRestrictionsUtil;
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 
