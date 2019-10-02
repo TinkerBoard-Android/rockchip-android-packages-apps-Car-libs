@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.car.ui.pagedrecyclerview;
+package com.android.car.ui.utils;
 
 import static android.car.drivingstate.CarUxRestrictions.UX_RESTRICTIONS_LIMIT_STRING_LENGTH;
 
@@ -56,13 +56,13 @@ public class CarUxRestrictionsUtil {
         CarUxRestrictionsManager.OnUxRestrictionsChangedListener listener =
                 (carUxRestrictions) -> {
                     if (carUxRestrictions == null) {
-                        this.mCarUxRestrictions = getDefaultRestrictions();
+                        mCarUxRestrictions = getDefaultRestrictions();
                     } else {
-                        this.mCarUxRestrictions = carUxRestrictions;
+                        mCarUxRestrictions = carUxRestrictions;
                     }
 
                     for (OnUxRestrictionsChangedListener observer : mObservers) {
-                        observer.onRestrictionsChanged(this.mCarUxRestrictions);
+                        observer.onRestrictionsChanged(mCarUxRestrictions);
                     }
                 };
 
@@ -121,7 +121,7 @@ public class CarUxRestrictionsUtil {
     }
 
     /**
-     * Returns whether any of the given flags is blocked by the current restrictions. If null is
+     * Returns whether any of the given flags are blocked by the specified restrictions. If null is
      * given, the method returns true for safety.
      */
     public static boolean isRestricted(
