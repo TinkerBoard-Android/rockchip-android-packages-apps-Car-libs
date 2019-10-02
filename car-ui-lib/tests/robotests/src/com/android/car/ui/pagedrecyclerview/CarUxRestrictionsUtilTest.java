@@ -20,6 +20,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.car.drivingstate.CarUxRestrictions;
 
+import com.android.car.ui.TestConfig;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
