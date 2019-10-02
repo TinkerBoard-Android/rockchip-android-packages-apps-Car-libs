@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.car.ui.pagedrecyclerview;
+package com.android.car.ui.utils;
 
 import static com.google.common.truth.Truth.assertThat;
 
