@@ -30,6 +30,7 @@ import android.widget.FrameLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.CarUiRobolectricTestRunner;
+import com.android.car.ui.TestConfig;
 
 import org.junit.Before;
 import org.junit.Test;
