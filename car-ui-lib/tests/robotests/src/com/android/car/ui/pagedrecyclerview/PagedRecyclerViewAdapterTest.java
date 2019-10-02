@@ -25,6 +25,7 @@ import android.content.Context;
 import android.view.ViewGroup;
 
 import com.android.car.ui.CarUiRobolectricTestRunner;
+import com.android.car.ui.TestConfig;
 
 import org.junit.Before;
 import org.junit.Test;
