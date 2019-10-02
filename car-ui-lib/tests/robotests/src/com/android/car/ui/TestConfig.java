@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.car.ui.pagedrecyclerview;
+package com.android.car.ui;
 
 public class TestConfig {
     public static final int SDK_VERSION = 28;
