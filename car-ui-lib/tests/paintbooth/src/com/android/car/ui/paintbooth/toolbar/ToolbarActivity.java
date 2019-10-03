@@ -114,6 +114,12 @@ public class ToolbarActivity extends Activity {
             }
         }));
 
+        Mutable<Boolean> hasLogo = new Mutable<>(true);
+        mButtons.add(Pair.create("Toggle logo", v -> {
+            toolbar.setLogo(hasLogo.value ? 0 : R.drawable.ic_launcher);
+            hasLogo.value = !hasLogo.value;
+        }));
+
         mButtons.add(Pair.create("Toggle state", v -> {
             if (toolbar.getState() == Toolbar.State.SUBPAGE) {
                 toolbar.setState(Toolbar.State.HOME);

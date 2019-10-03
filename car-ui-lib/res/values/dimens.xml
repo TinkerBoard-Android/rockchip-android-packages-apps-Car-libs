@@ -49,11 +49,11 @@
     <dimen name="car_ui_toolbar_row_height">96dp</dimen>
     <dimen name="car_ui_toolbar_first_row_height">@dimen/car_ui_toolbar_row_height</dimen>
     <dimen name="car_ui_toolbar_second_row_height">@dimen/car_ui_toolbar_row_height</dimen>
-    <dimen name="car_ui_toolbar_nav_button_width">@dimen/car_ui_margin</dimen>
     <dimen name="car_ui_toolbar_start_inset">0dp</dimen>
     <dimen name="car_ui_toolbar_end_inset">0dp</dimen>
     <dimen name="car_ui_toolbar_top_inset">0dp</dimen>
     <dimen name="car_ui_toolbar_bottom_inset">0dp</dimen>
+    <dimen name="car_ui_toolbar_margin">@dimen/car_ui_margin</dimen>
     <dimen name="car_ui_toolbar_icon_size">@dimen/car_ui_primary_icon_size</dimen>
     <dimen name="car_ui_toolbar_title_margin_start">@dimen/car_ui_padding_2</dimen>
     <dimen name="car_ui_toolbar_menu_item_margin">@dimen/car_ui_padding_2</dimen>
