@@ -28,7 +28,6 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.ContextThemeWrapper;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
 import androidx.annotation.IntDef;
@@ -392,10 +391,6 @@ public final class PagedRecyclerView extends RecyclerView implements
                                                         mNestedRecyclerView
                                                                 .getViewTreeObserver()
                                                                 .removeOnGlobalLayoutListener(this);
-                                                        ViewGroup.LayoutParams params =
-                                                                getLayoutParams();
-                                                        params.height = getMeasuredHeight();
-                                                        setLayoutParams(params);
                                                         createScrollBarFromConfig();
                                                         if (mInitialTopPadding == 0) {
                                                             mInitialTopPadding = getPaddingTop();
@@ -454,11 +449,11 @@ public final class PagedRecyclerView extends RecyclerView implements
         return super.getLayoutManager();
     }
 
+    /**
+     * Refer to {@link PagedRecyclerView#getEffectiveLayoutManager()} for usage in applications.
+     */
     @Override
     public LayoutManager getLayoutManager() {
-        if (mScrollBarEnabled) {
-            return mNestedRecyclerView.getLayoutManager();
-        }
         return super.getLayoutManager();
     }
 
