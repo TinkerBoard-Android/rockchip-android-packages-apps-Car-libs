@@ -42,6 +42,7 @@ import java.util.List;
  * Paint booth app
  */
 public class MainActivity extends Activity {
+
     /**
      * List of all sample activities.
      */
@@ -50,6 +51,7 @@ public class MainActivity extends Activity {
             Pair.create("List sample", CarUiRecyclerViewActivity.class),
             Pair.create("Grid sample", GridCarUiRecyclerViewActivity.class),
             Pair.create("Preferences sample", PreferenceActivity.class),
+            Pair.create("Overlays", OverlayActivity.class),
             Pair.create("Toolbar sample", ToolbarActivity.class)
     );
 
@@ -60,7 +62,6 @@ public class MainActivity extends Activity {
             super(itemView);
             mButton = itemView.findViewById(R.id.button);
         }
-
 
         void update(String title, Class<? extends Activity> activityClass) {
             mButton.setText(title);
