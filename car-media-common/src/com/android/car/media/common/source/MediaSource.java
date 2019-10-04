@@ -167,8 +167,7 @@ public class MediaSource {
     }
 
     /**
-     * @return a {@link ComponentName} referencing this media source's {@link MediaBrowserService},
-     * or NULL if this media source doesn't implement such service.
+     * @return a {@link ComponentName} referencing this media source's {@link MediaBrowserService}.
      */
     @NonNull
     public ComponentName getBrowseServiceComponentName() {
