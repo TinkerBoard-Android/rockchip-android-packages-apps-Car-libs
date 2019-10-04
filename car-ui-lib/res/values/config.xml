@@ -32,7 +32,7 @@
       end = 2
       both = 3
     -->
-    <integer name="car_ui_scrollbar_gutter">1</integer>
+    <integer name="car_ui_scrollbar_gutter">3</integer>
 
     <!--
     Position of the scrollbar. Default to left. Values are defined as follows:
