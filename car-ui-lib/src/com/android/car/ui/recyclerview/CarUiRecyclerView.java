@@ -220,11 +220,11 @@ public final class CarUiRecyclerView extends RecyclerView implements
     }
 
     public CarUiRecyclerView(@NonNull Context context) {
-        this(context, null, 0);
+        this(context, null);
     }
 
     public CarUiRecyclerView(@NonNull Context context, @Nullable AttributeSet attrs) {
-        this(context, attrs, 0);
+        this(context, attrs, R.attr.carUiRecyclerViewStyle);
     }
 
     public CarUiRecyclerView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyle) {
@@ -237,10 +237,11 @@ public final class CarUiRecyclerView extends RecyclerView implements
     }
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr) {
-        TypedArray a =
-                context.obtainStyledAttributes(
-                        attrs, R.styleable.CarUiRecyclerView, defStyleAttr,
-                        R.style.Widget_CarUi_CarUiRecyclerView);
+        TypedArray a = context.obtainStyledAttributes(
+                attrs,
+                R.styleable.CarUiRecyclerView,
+                defStyleAttr,
+                R.style.Widget_CarUi_CarUiRecyclerView);
 
         mScrollBarEnabled = context.getResources().getBoolean(R.bool.car_ui_scrollbar_enable);
         mFullyInitialized = false;
