@@ -49,4 +49,7 @@
     <color name="car_ui_preference_edit_text_dialog_message_text_color">#ffdadce0</color>
 
     <color name="car_ui_preference_icon_color">@android:color/white</color>
+
+    <color name="car_ui_preference_switch_text_color">#000000</color>
+
 </resources>
