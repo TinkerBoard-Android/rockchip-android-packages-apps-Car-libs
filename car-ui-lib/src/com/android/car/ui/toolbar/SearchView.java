@@ -19,6 +19,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -41,7 +42,22 @@ import java.util.Set;
 public class SearchView extends ConstraintLayout {
     private final ImageView mIcon;
     private final EditText mSearchText;
+    private final View mCloseIcon;
     private final Set<Toolbar.OnSearchListener> mListeners = new HashSet<>();
+    private final TextWatcher mTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            onSearch(editable.toString());
+        }
+    };
 
     public SearchView(Context context) {
         this(context, null);
@@ -58,9 +74,9 @@ public class SearchView extends ConstraintLayout {
         inflater.inflate(R.layout.car_ui_search_view, this, true);
 
         mSearchText = requireViewById(R.id.search_bar);
-        View closeIcon = requireViewById(R.id.search_close);
-        closeIcon.setOnClickListener(view -> mSearchText.getText().clear());
         mIcon = requireViewById(R.id.icon);
+        mCloseIcon = requireViewById(R.id.search_close);
+        mCloseIcon.setOnClickListener(view -> mSearchText.getText().clear());
 
         mSearchText.setOnFocusChangeListener(
                 (view, hasFocus) -> {
@@ -74,20 +90,8 @@ public class SearchView extends ConstraintLayout {
                                 .hideSoftInputFromWindow(view.getWindowToken(), 0);
                     }
                 });
-        mSearchText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
 
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                onSearch(editable.toString());
-            }
-        });
+        mSearchText.addTextChangedListener(mTextWatcher);
 
         mSearchText.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE
@@ -96,6 +100,22 @@ public class SearchView extends ConstraintLayout {
             }
             return false;
         });
+    }
+
+    @Override
+    public void setVisibility(int visibility) {
+        boolean showing = visibility == View.VISIBLE && getVisibility() != View.VISIBLE;
+
+        super.setVisibility(visibility);
+
+        if (showing) {
+            mSearchText.removeTextChangedListener(mTextWatcher);
+            mSearchText.getText().clear();
+            mSearchText.addTextChangedListener(mTextWatcher);
+            mCloseIcon.setVisibility(View.GONE);
+
+            mSearchText.requestFocus();
+        }
     }
 
     /**
@@ -157,6 +177,8 @@ public class SearchView extends ConstraintLayout {
     }
 
     private void onSearch(String query) {
+        mCloseIcon.setVisibility(TextUtils.isEmpty(query) ? View.GONE : View.VISIBLE);
+
         for (Toolbar.OnSearchListener listener : mListeners) {
             listener.onSearch(query);
         }
