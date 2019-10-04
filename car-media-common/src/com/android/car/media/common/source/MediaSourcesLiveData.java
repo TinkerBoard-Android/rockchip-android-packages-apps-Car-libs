@@ -30,7 +30,12 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.car.media.common.R;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -86,10 +91,27 @@ public class MediaSourcesLiveData {
         mAppContext.registerReceiver(mAppInstallUninstallReceiver, filter);
     }
 
-    /** Returns the alphabetically sorted list of available media sources. */
+    /**
+     * Returns the sorted list of available media sources. Sources listed in the array resource
+     * R.array.preferred_media_sources are included first. Other sources follow in alphabetical
+     * order.
+     */
     public List<MediaSource> getList() {
         if (mMediaSources == null) {
-            mMediaSources = getComponentNames().stream()
+            // Get the flattened components to display first.
+            String[] preferredFlats = mAppContext.getResources().getStringArray(
+                    R.array.preferred_media_sources);
+
+            // Make a map of components to display first (the value is the component's index).
+            HashMap<ComponentName, Integer> preferredComps = new HashMap<>(preferredFlats.length);
+            for (int i = 0; i < preferredFlats.length; i++) {
+                preferredComps.put(ComponentName.unflattenFromString(preferredFlats[i]), i);
+            }
+
+            // Prepare an array of the sources to display first (unavailable preferred components
+            // will be excluded).
+            MediaSource[] preferredSources = new MediaSource[preferredFlats.length];
+            List<MediaSource> sortedSources = getComponentNames().stream()
                     .filter(Objects::nonNull)
                     .map(componentName -> MediaSource.create(mAppContext, componentName))
                     .filter(mediaSource -> {
@@ -97,11 +119,23 @@ public class MediaSourcesLiveData {
                             Log.w(TAG, "Media source is null");
                             return false;
                         }
+                        ComponentName srcComp = mediaSource.getBrowseServiceComponentName();
+                        if (preferredComps.containsKey(srcComp)) {
+                            // Record the source in the preferred array...
+                            preferredSources[preferredComps.get(srcComp)] = mediaSource;
+                            // And exclude it from the alpha sort.
+                            return false;
+                        }
                         return true;
                     })
                     .sorted(Comparator.comparing(
                             mediaSource -> mediaSource.getDisplayName().toString()))
                     .collect(Collectors.toList());
+
+            // Concatenate the non null preferred sources and the sorted ones into the result.
+            mMediaSources = new ArrayList<>(sortedSources.size() + preferredFlats.length);
+            Arrays.stream(preferredSources).filter(Objects::nonNull).forEach(mMediaSources::add);
+            mMediaSources.addAll(sortedSources);
         }
         return mMediaSources;
     }
