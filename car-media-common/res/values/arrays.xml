@@ -36,4 +36,12 @@
         <item>@color/placeholder_color_6</item>
         <item>@color/placeholder_color_7</item>
     </array>
+
+
+    <!-- These media sources are displayed by the AppSelectionFragment in the order defined here.
+        Other sources follow in alphabetical order. -->
+    <string-array name="preferred_media_sources" translatable="false">
+        <item>com.android.car.radio/.service.RadioAppService</item>
+    </string-array>
+
 </resources>
