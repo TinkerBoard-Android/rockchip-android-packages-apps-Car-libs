@@ -16,9 +16,9 @@
 
 <resources>
     <!--
-    Configuration for a default scrollbar for the PagedRecyclerView. This component must inherit
+    Configuration for a default scrollbar for the CarUiRecyclerView. This component must inherit
     abstract class ScrollBar. If the ScrollBar is enabled, the component will be initialized from
-    PagedRecyclerView#createScrollBarFromConfig(). If no component is provided,
+    CarUiRecyclerView#createScrollBarFromConfig(). If no component is provided,
     {@link DefaultScrollbar} class will be used.
     -->
     <string name="car_ui_scrollbar_component" translatable="false"/>

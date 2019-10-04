@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project.
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,41 +14,35 @@
  * limitations under the License.
  */
 
-package com.android.car.ui.paintbooth.pagedrecyclerview;
+package com.android.car.ui.paintbooth.caruirecyclerview;
 
 import android.app.Activity;
 import android.os.Bundle;
 
-import androidx.recyclerview.widget.LinearLayoutManager;
-
-import com.android.car.ui.pagedrecyclerview.PagedRecyclerView;
 import com.android.car.ui.paintbooth.R;
+import com.android.car.ui.recyclerview.CarUiRecyclerView;
 
 import java.util.ArrayList;
 
-/**
- * Activity that shows PagedRecyclerView example with dummy data.
- */
-public class PagedRecyclerViewActivity extends Activity {
+/** Activity that shows GridCarUiRecyclerView example with dummy data. */
+public class GridCarUiRecyclerViewActivity extends Activity {
     private final ArrayList<String> mData = new ArrayList<>();
-    private final int mDataToGenerate = 15;
+    private final int mDataToGenerate = 50;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.paged_recycler_view_activity);
-        PagedRecyclerView recyclerView = findViewById(R.id.list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        setContentView(R.layout.grid_car_ui_recycler_view_activity);
+        CarUiRecyclerView recyclerView = findViewById(R.id.grid_list);
 
         RecyclerViewAdapter adapter = new RecyclerViewAdapter(generateDummyData());
         recyclerView.setAdapter(adapter);
     }
 
     private ArrayList<String> generateDummyData() {
-        for (int i = 0; i <= mDataToGenerate; i++) {
+        for (int i = 1; i <= mDataToGenerate; i++) {
             mData.add("data" + i);
         }
         return mData;
     }
 }
-

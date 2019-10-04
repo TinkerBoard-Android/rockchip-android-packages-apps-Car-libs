@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.car.ui.pagedrecyclerview;
+package com.android.car.ui.recyclerview;
 
 import android.content.Context;
 import android.graphics.PointF;
@@ -34,15 +34,15 @@ import androidx.recyclerview.widget.RecyclerView.LayoutManager;
  * the RecyclerView is scrolling vertically; it is defined as the left (or right if RTL) if the
  * RecyclerView is scrolling horizontally.
  */
-public class PagedSnapHelper extends LinearSnapHelper {
+public class CarUiSnapHelper extends LinearSnapHelper {
 
     private final Context mContext;
     private RecyclerView mRecyclerView;
     private RecyclerView.SmoothScroller mSmoothScroller;
 
-    public PagedSnapHelper(Context context) {
+    public CarUiSnapHelper(Context context) {
         this.mContext = context;
-        mSmoothScroller = new PagedSmoothScroller(mContext);
+        mSmoothScroller = new CarUiSmoothScroller(mContext);
     }
 
     // Orientation helpers are lazily created per LayoutManager.
@@ -267,7 +267,7 @@ public class PagedSnapHelper extends LinearSnapHelper {
     }
 
     /**
-     * Returns a scroller specific to this {@code PagedSnapHelper}. This scroller is used for all
+     * Returns a scroller specific to this {@code CarUiSnapHelper}. This scroller is used for all
      * smooth scrolling operations, including flings.
      *
      * @param layoutManager The {@link RecyclerView.LayoutManager} associated with the attached

@@ -42,18 +42,18 @@
     <!-- Theme attribute to specifying a default style for all CarUiToolbars -->
     <attr name="CarUiToolbarStyle" format="reference"/>
 
-    <declare-styleable name="PagedRecyclerView">
-        <!-- Whether to enable the car_ui_pagedrecyclerview_divider for linear layout or not. -->
+    <declare-styleable name="CarUiRecyclerView">
+        <!-- Whether to enable the car_ui_recyclerview_divider for linear layout or not. -->
         <attr name="enableDivider" format="boolean" />
-        <!-- Top offset for paged recycler view. -->
+        <!-- Top offset for car ui recycler view. -->
         <attr name="startOffset" format="integer" />
-        <!-- Bottom offset for paged recycler view for linear layout. -->
+        <!-- Bottom offset for car ui recycler view for linear layout. -->
         <attr name="endOffset" format="integer" />
 
         <!-- Number of columns in a grid layout. -->
         <attr name="numOfColumns" format="integer" />
 
-        <!-- Paged recycler view layout. -->
+        <!-- car ui recycler view layout. -->
         <attr name="layoutStyle" format="enum">
             <!-- linear layout -->
             <enum name="linear" value="0" />
@@ -62,7 +62,7 @@
         </attr>
     </declare-styleable>
 
-    <declare-styleable name="PagedRecyclerViewTheme">
-        <attr name="pagedRecyclerViewStyle" format="reference" />
+    <declare-styleable name="CarUiRecyclerViewTheme">
+        <attr name="carUiRecyclerViewStyle" format="reference" />
     </declare-styleable>
 </resources>
