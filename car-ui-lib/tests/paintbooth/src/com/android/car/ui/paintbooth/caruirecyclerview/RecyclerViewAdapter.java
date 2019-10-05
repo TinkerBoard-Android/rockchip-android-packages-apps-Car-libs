@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.car.ui.paintbooth.pagedrecyclerview;
+package com.android.car.ui.paintbooth.caruirecyclerview;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,7 +44,7 @@ public class RecyclerViewAdapter extends
     @Override
     public RecyclerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflator = LayoutInflater.from(parent.getContext());
-        View view = inflator.inflate(R.layout.paged_recycler_view_list_item, parent, false);
+        View view = inflator.inflate(R.layout.car_ui_recycler_view_list_item, parent, false);
         return new RecyclerViewHolder(view);
     }
 
