@@ -29,8 +29,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.android.car.ui.pagedrecyclerview.PagedRecyclerView;
 import com.android.car.ui.paintbooth.R;
+import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.MenuItem;
 import com.android.car.ui.toolbar.TabLayout;
 import com.android.car.ui.toolbar.Toolbar;
@@ -46,7 +46,7 @@ public class ToolbarActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.paged_recycler_view_activity);
+        setContentView(R.layout.car_ui_recycler_view_activity);
 
         Toolbar toolbar = requireViewById(R.id.toolbar);
         toolbar.registerOnBackListener(() -> {
@@ -98,8 +98,8 @@ public class ToolbarActivity extends Activity {
                             item.setVisible(!item.isVisible());
                         } catch (NumberFormatException | IndexOutOfBoundsException e) {
                             Toast.makeText(this, "Invalid index \""
-                                    + textBox.getText().toString()
-                                    + "\", valid range is 0 to " + (mMenuItems.size() - 1),
+                                            + textBox.getText().toString()
+                                            + "\", valid range is 0 to " + (mMenuItems.size() - 1),
                                     Toast.LENGTH_LONG).show();
                         }
                     })
@@ -142,11 +142,11 @@ public class ToolbarActivity extends Activity {
         mButtons.add(Pair.create("Add tab", v ->
                 toolbar.addTab(new TabLayout.Tab(getDrawable(R.drawable.ic_launcher), "Foo"))));
 
-        PagedRecyclerView prv = requireViewById(R.id.list);
+        CarUiRecyclerView prv = requireViewById(R.id.list);
         prv.setAdapter(mAdapter);
     }
 
-    private static class ViewHolder extends PagedRecyclerView.ViewHolder {
+    private static class ViewHolder extends CarUiRecyclerView.ViewHolder {
         private final Button mButton;
 
         ViewHolder(View itemView) {
@@ -160,7 +160,7 @@ public class ToolbarActivity extends Activity {
         }
     }
 
-    private PagedRecyclerView.Adapter mAdapter = new PagedRecyclerView.Adapter() {
+    private CarUiRecyclerView.Adapter mAdapter = new CarUiRecyclerView.Adapter() {
         @Override
         public int getItemCount() {
             return mButtons.size();
@@ -174,7 +174,7 @@ public class ToolbarActivity extends Activity {
         }
 
         @Override
-        public void onBindViewHolder(@NonNull PagedRecyclerView.ViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull CarUiRecyclerView.ViewHolder holder, int position) {
             Pair<CharSequence, View.OnClickListener> pair = mButtons.get(position);
             ((ViewHolder) holder).bind(pair.first, pair.second);
         }

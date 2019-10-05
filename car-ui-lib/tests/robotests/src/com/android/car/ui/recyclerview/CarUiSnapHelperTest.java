@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.car.ui.pagedrecyclerview;
+package com.android.car.ui.recyclerview;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -42,10 +42,10 @@ import org.robolectric.annotation.Config;
 
 @RunWith(CarUiRobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
-public class PagedSnapHelperTest {
+public class CarUiSnapHelperTest {
 
     private Context mContext;
-    private PagedSnapHelper mPagedSnapHelper;
+    private CarUiSnapHelper mCarUiSnapHelper;
 
     @Mock
     private RecyclerView mRecyclerView;
@@ -63,17 +63,17 @@ public class PagedSnapHelperTest {
         MockitoAnnotations.initMocks(this);
         mContext = RuntimeEnvironment.application;
 
-        mPagedSnapHelper = new PagedSnapHelper(mContext);
+        mCarUiSnapHelper = new CarUiSnapHelper(mContext);
 
         when(mRecyclerView.getContext()).thenReturn(mContext);
-        mPagedSnapHelper.attachToRecyclerView(mRecyclerView);
+        mCarUiSnapHelper.attachToRecyclerView(mRecyclerView);
     }
 
     @Test
     public void smoothScrollBy_invalidSnapPosition_shouldCallRecylerViewSmoothScrollBy() {
         when(mRecyclerView.getLayoutManager()).thenReturn(mLayoutManager);
 
-        mPagedSnapHelper.smoothScrollBy(10);
+        mCarUiSnapHelper.smoothScrollBy(10);
 
         verify(mRecyclerView).smoothScrollBy(0, 10);
     }
@@ -83,7 +83,7 @@ public class PagedSnapHelperTest {
         when(mRecyclerView.getLayoutManager()).thenReturn(mLayoutManager);
         when(mLayoutManager.getItemCount()).thenReturn(0);
 
-        mPagedSnapHelper.smoothScrollBy(10);
+        mCarUiSnapHelper.smoothScrollBy(10);
 
         verify(mRecyclerView).smoothScrollBy(0, 10);
     }
@@ -95,7 +95,7 @@ public class PagedSnapHelperTest {
         when(mLayoutManager.canScrollVertically()).thenReturn(false);
         when(mLayoutManager.canScrollHorizontally()).thenReturn(false);
 
-        mPagedSnapHelper.smoothScrollBy(10);
+        mCarUiSnapHelper.smoothScrollBy(10);
 
         verify(mRecyclerView).smoothScrollBy(0, 10);
     }
@@ -109,7 +109,7 @@ public class PagedSnapHelperTest {
         when(mChild.getLayoutParams()).thenReturn(mLayoutParams);
         when(mLayoutManager.getChildAt(0)).thenReturn(mChild);
 
-        mPagedSnapHelper.smoothScrollBy(10);
+        mCarUiSnapHelper.smoothScrollBy(10);
 
         verify(mRecyclerView).smoothScrollBy(0, 10);
     }
@@ -128,7 +128,7 @@ public class PagedSnapHelperTest {
         PointF vectorForEnd = new PointF(100, 100);
         when(mLayoutManager.computeScrollVectorForPosition(0)).thenReturn(vectorForEnd);
 
-        mPagedSnapHelper.smoothScrollBy(10);
+        mCarUiSnapHelper.smoothScrollBy(10);
 
         verify(mRecyclerView).smoothScrollBy(0, 10);
     }
@@ -147,7 +147,7 @@ public class PagedSnapHelperTest {
         PointF vectorForEnd = new PointF(100, 100);
         when(mLayoutManager.computeScrollVectorForPosition(0)).thenReturn(vectorForEnd);
 
-        mPagedSnapHelper.smoothScrollBy(10);
+        mCarUiSnapHelper.smoothScrollBy(10);
 
         verify(mLayoutManager).startSmoothScroll(any(RecyclerView.SmoothScroller.class));
     }
@@ -162,7 +162,7 @@ public class PagedSnapHelperTest {
         when(mLayoutManager.getDecoratedTop(any())).thenReturn(10);
         when(mChild.getLayoutParams()).thenReturn(mLayoutParams);
 
-        int[] distance = mPagedSnapHelper.calculateDistanceToFinalSnap(mLayoutManager, mChild);
+        int[] distance = mCarUiSnapHelper.calculateDistanceToFinalSnap(mLayoutManager, mChild);
 
         assertThat(distance[1]).isEqualTo(10);
     }
@@ -179,7 +179,7 @@ public class PagedSnapHelperTest {
         when(mLayoutManager.getChildAt(0)).thenReturn(mChild);
         when(mLayoutManager.getHeight()).thenReturn(-50);
 
-        int[] distance = mPagedSnapHelper.calculateScrollDistance(0, 10);
+        int[] distance = mCarUiSnapHelper.calculateScrollDistance(0, 10);
 
         assertThat(distance[1]).isEqualTo(50);
     }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.car.ui.pagedrecyclerview;
+package com.android.car.ui.recyclerview;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -39,11 +39,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.R;
-import com.android.car.ui.pagedrecyclerview.decorations.grid.GridDividerItemDecoration;
-import com.android.car.ui.pagedrecyclerview.decorations.grid.GridOffsetItemDecoration;
-import com.android.car.ui.pagedrecyclerview.decorations.linear.LinearDividerItemDecoration;
-import com.android.car.ui.pagedrecyclerview.decorations.linear.LinearOffsetItemDecoration;
-import com.android.car.ui.pagedrecyclerview.decorations.linear.LinearOffsetItemDecoration.OffsetPosition;
+import com.android.car.ui.recyclerview.decorations.grid.GridDividerItemDecoration;
+import com.android.car.ui.recyclerview.decorations.grid.GridOffsetItemDecoration;
+import com.android.car.ui.recyclerview.decorations.linear.LinearDividerItemDecoration;
+import com.android.car.ui.recyclerview.decorations.linear.LinearOffsetItemDecoration;
+import com.android.car.ui.recyclerview.decorations.linear.LinearOffsetItemDecoration.OffsetPosition;
 import com.android.car.ui.toolbar.Toolbar;
 import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
@@ -54,11 +54,11 @@ import java.lang.annotation.Retention;
  * potentially include a scrollbar that has page up and down arrows. Interaction with this view is
  * similar to a {@code RecyclerView} as it takes the same adapter and the layout manager.
  */
-public final class PagedRecyclerView extends RecyclerView implements
+public final class CarUiRecyclerView extends RecyclerView implements
         Toolbar.OnHeightChangedListener {
 
     private static final boolean DEBUG = false;
-    private static final String TAG = "PagedRecyclerView";
+    private static final String TAG = "CarUiRecyclerView";
 
     private final CarUxRestrictionsUtil mCarUxRestrictionsUtil;
     private final CarUxRestrictionsUtil.OnUxRestrictionsChangedListener mListener;
@@ -85,13 +85,13 @@ public final class PagedRecyclerView extends RecyclerView implements
 
     private GridOffsetItemDecoration mOffsetItemDecoration;
     private GridDividerItemDecoration mDividerItemDecoration;
-    @PagedRecyclerViewLayout
-    int mPagedRecyclerViewLayout;
+    @CarUiRecyclerViewLayout
+    int mCarUiRecyclerViewLayout;
     private int mNumOfColumns;
 
     /**
      * The possible values for @{link #setGutter}. The default value is actually {@link
-     * PagedRecyclerView.Gutter#BOTH}.
+     * CarUiRecyclerView.Gutter#BOTH}.
      */
     @IntDef({
             Gutter.NONE,
@@ -119,7 +119,7 @@ public final class PagedRecyclerView extends RecyclerView implements
 
     /**
      * The possible values for setScrollbarPosition. The default value is actually {@link
-     * PagedRecyclerView.ScrollBarPosition#START}.
+     * CarUiRecyclerView.ScrollBarPosition#START}.
      */
     @IntDef({
             ScrollBarPosition.START,
@@ -136,14 +136,14 @@ public final class PagedRecyclerView extends RecyclerView implements
 
     /**
      * The possible values for setScrollbarPosition. The default value is actually {@link
-     * PagedRecyclerViewLayout#LINEAR}.
+     * CarUiRecyclerViewLayout#LINEAR}.
      */
     @IntDef({
-            PagedRecyclerViewLayout.LINEAR,
-            PagedRecyclerViewLayout.GRID,
+            CarUiRecyclerViewLayout.LINEAR,
+            CarUiRecyclerViewLayout.GRID,
     })
     @Retention(SOURCE)
-    public @interface PagedRecyclerViewLayout {
+    public @interface CarUiRecyclerViewLayout {
         /** Position the scrollbar to the left of the screen. This is default. */
         int LINEAR = 0;
 
@@ -183,8 +183,8 @@ public final class PagedRecyclerView extends RecyclerView implements
      * inner
      * recycler view within its bounds, this layout manager should always have 0 padding.
      */
-    private static class PagedRecyclerViewLayoutManager extends LinearLayoutManager {
-        PagedRecyclerViewLayoutManager(Context context) {
+    private static class CarUiRecyclerViewLayoutManager extends LinearLayoutManager {
+        CarUiRecyclerViewLayoutManager(Context context) {
             super(context);
         }
 
@@ -224,8 +224,8 @@ public final class PagedRecyclerView extends RecyclerView implements
      * inner
      * recycler view within its bounds, this layout manager should always have 0 padding.
      */
-    private static class GridPagedRecyclerViewLayoutManager extends GridLayoutManager {
-        GridPagedRecyclerViewLayoutManager(Context context, int numOfColumns) {
+    private static class GridCarUiRecyclerViewLayoutManager extends GridLayoutManager {
+        GridCarUiRecyclerViewLayoutManager(Context context, int numOfColumns) {
             super(context, numOfColumns);
         }
 
@@ -250,15 +250,15 @@ public final class PagedRecyclerView extends RecyclerView implements
         }
     }
 
-    public PagedRecyclerView(@NonNull Context context) {
+    public CarUiRecyclerView(@NonNull Context context) {
         this(context, null, 0);
     }
 
-    public PagedRecyclerView(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public CarUiRecyclerView(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public PagedRecyclerView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyle) {
+    public CarUiRecyclerView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
         mCarUxRestrictionsUtil = CarUxRestrictionsUtil.getInstance(context);
@@ -270,8 +270,8 @@ public final class PagedRecyclerView extends RecyclerView implements
     private void init(Context context, AttributeSet attrs, int defStyleAttr) {
         TypedArray a =
                 context.obtainStyledAttributes(
-                        attrs, R.styleable.PagedRecyclerView, defStyleAttr,
-                        R.style.Widget_CarUi_PagedRecyclerView);
+                        attrs, R.styleable.CarUiRecyclerView, defStyleAttr,
+                        R.style.Widget_CarUi_CarUiRecyclerView);
 
         mScrollBarEnabled = context.getResources().getBoolean(R.bool.car_ui_scrollbar_enable);
         mFullyInitialized = false;
@@ -284,31 +284,31 @@ public final class PagedRecyclerView extends RecyclerView implements
 
         mNestedRecyclerView =
                 new RecyclerView(new ContextThemeWrapper(context,
-                        R.style.Widget_CarUi_PagedRecyclerView_NestedRecyclerView), attrs,
-                        R.style.Widget_CarUi_PagedRecyclerView_NestedRecyclerView);
+                        R.style.Widget_CarUi_CarUiRecyclerView_NestedRecyclerView), attrs,
+                        R.style.Widget_CarUi_CarUiRecyclerView_NestedRecyclerView);
         mNestedRecyclerView.setVerticalScrollBarEnabled(false);
         mScrollBarPaddingStart =
                 context.getResources().getDimension(R.dimen.car_ui_scrollbar_padding_start);
         mScrollBarPaddingEnd =
                 context.getResources().getDimension(R.dimen.car_ui_scrollbar_padding_end);
 
-        mPagedRecyclerViewLayout =
-                a.getInt(R.styleable.PagedRecyclerView_layoutStyle, PagedRecyclerViewLayout.LINEAR);
-        mNumOfColumns = a.getInt(R.styleable.PagedRecyclerView_numOfColumns, /* defValue= */ 2);
+        mCarUiRecyclerViewLayout =
+                a.getInt(R.styleable.CarUiRecyclerView_layoutStyle, CarUiRecyclerViewLayout.LINEAR);
+        mNumOfColumns = a.getInt(R.styleable.CarUiRecyclerView_numOfColumns, /* defValue= */ 2);
         boolean enableDivider =
-                a.getBoolean(R.styleable.PagedRecyclerView_enableDivider, /* defValue= */ false);
+                a.getBoolean(R.styleable.CarUiRecyclerView_enableDivider, /* defValue= */ false);
 
-        if (mPagedRecyclerViewLayout == PagedRecyclerViewLayout.LINEAR) {
+        if (mCarUiRecyclerViewLayout == CarUiRecyclerViewLayout.LINEAR) {
 
             int linearTopOffset =
-                    a.getInteger(R.styleable.PagedRecyclerView_startOffset, /* defValue= */ 0);
+                    a.getInteger(R.styleable.CarUiRecyclerView_startOffset, /* defValue= */ 0);
             int linearBottomOffset =
-                    a.getInteger(R.styleable.PagedRecyclerView_endOffset, /* defValue= */ 0);
+                    a.getInteger(R.styleable.CarUiRecyclerView_endOffset, /* defValue= */ 0);
 
             if (enableDivider) {
                 RecyclerView.ItemDecoration dividerItemDecoration =
                         new LinearDividerItemDecoration(
-                                context.getDrawable(R.drawable.car_ui_pagedrecyclerview_divider));
+                                context.getDrawable(R.drawable.car_ui_recyclerview_divider));
                 super.addItemDecoration(dividerItemDecoration);
             }
             RecyclerView.ItemDecoration topOffsetItemDecoration =
@@ -321,9 +321,9 @@ public final class PagedRecyclerView extends RecyclerView implements
         } else {
 
             int gridTopOffset =
-                    a.getInteger(R.styleable.PagedRecyclerView_startOffset, /* defValue= */ 0);
+                    a.getInteger(R.styleable.CarUiRecyclerView_startOffset, /* defValue= */ 0);
             int gridBottomOffset =
-                    a.getInteger(R.styleable.PagedRecyclerView_endOffset, /* defValue= */ 0);
+                    a.getInteger(R.styleable.CarUiRecyclerView_endOffset, /* defValue= */ 0);
 
             if (enableDivider) {
                 mDividerItemDecoration =
@@ -345,8 +345,8 @@ public final class PagedRecyclerView extends RecyclerView implements
             super.addItemDecoration(bottomOffsetItemDecoration);
         }
 
-        super.setLayoutManager(new PagedRecyclerViewLayoutManager(context));
-        super.setAdapter(new PagedRecyclerViewAdapter());
+        super.setLayoutManager(new CarUiRecyclerViewLayoutManager(context));
+        super.setAdapter(new CarUiRecyclerViewAdapter());
         super.setNestedScrollingEnabled(false);
         super.setClipToPadding(false);
 
@@ -373,11 +373,11 @@ public final class PagedRecyclerView extends RecyclerView implements
                             @Override
                             public void onGlobalLayout() {
                                 // View holder layout is still pending.
-                                if (PagedRecyclerView.this.findViewHolderForAdapterPosition(0)
+                                if (CarUiRecyclerView.this.findViewHolderForAdapterPosition(0)
                                         == null) {
                                     return;
                                 }
-                                PagedRecyclerView.this.getViewTreeObserver()
+                                CarUiRecyclerView.this.getViewTreeObserver()
                                         .removeOnGlobalLayoutListener(this);
                                 initNestedRecyclerView();
                                 setNestedViewLayout();
@@ -409,7 +409,7 @@ public final class PagedRecyclerView extends RecyclerView implements
     }
 
     /**
-     * Returns {@code true} if the {@PagedRecyclerView} is fully drawn. Using a global layout
+     * Returns {@code true} if the {@CarUiRecyclerView} is fully drawn. Using a global layout
      * mListener
      * may not necessarily signify that this view is fully drawn (i.e. when the scrollbar is
      * enabled).
@@ -450,7 +450,7 @@ public final class PagedRecyclerView extends RecyclerView implements
     }
 
     /**
-     * Refer to {@link PagedRecyclerView#getEffectiveLayoutManager()} for usage in applications.
+     * Refer to {@link CarUiRecyclerView#getEffectiveLayoutManager()} for usage in applications.
      */
     @Override
     public LayoutManager getLayoutManager() {
@@ -510,17 +510,17 @@ public final class PagedRecyclerView extends RecyclerView implements
     @Override
     public void setAdapter(@Nullable Adapter adapter) {
 
-        if (mScrollBarEnabled && mPagedRecyclerViewLayout == PagedRecyclerViewLayout.LINEAR) {
+        if (mScrollBarEnabled && mCarUiRecyclerViewLayout == CarUiRecyclerViewLayout.LINEAR) {
             mNestedRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-        } else if (mPagedRecyclerViewLayout == PagedRecyclerViewLayout.LINEAR) {
+        } else if (mCarUiRecyclerViewLayout == CarUiRecyclerViewLayout.LINEAR) {
             super.setLayoutManager(new LinearLayoutManager(mContext));
         } else if (mScrollBarEnabled) {
             mNestedRecyclerView.setLayoutManager(
-                    new GridPagedRecyclerViewLayoutManager(mContext, mNumOfColumns));
+                    new GridCarUiRecyclerViewLayoutManager(mContext, mNumOfColumns));
             setNumOfColumns(mNumOfColumns);
         } else {
             super.setLayoutManager(
-                    new GridPagedRecyclerViewLayoutManager(mContext, mNumOfColumns));
+                    new GridCarUiRecyclerViewLayoutManager(mContext, mNumOfColumns));
             setNumOfColumns(mNumOfColumns);
         }
 
@@ -704,8 +704,8 @@ public final class PagedRecyclerView extends RecyclerView implements
     }
 
     private void initNestedRecyclerView() {
-        PagedRecyclerViewAdapter.NestedRowViewHolder vh =
-                (PagedRecyclerViewAdapter.NestedRowViewHolder)
+        CarUiRecyclerViewAdapter.NestedRowViewHolder vh =
+                (CarUiRecyclerViewAdapter.NestedRowViewHolder)
                         this.findViewHolderForAdapterPosition(0);
         if (vh == null) {
             throw new Error("Outer RecyclerView failed to initialize.");

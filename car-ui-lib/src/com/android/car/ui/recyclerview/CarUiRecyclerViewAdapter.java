@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.car.ui.pagedrecyclerview;
+package com.android.car.ui.recyclerview;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,16 +24,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.R;
 
-/** The adapter for the parent recyclerview in {@link PagedRecyclerView} widget. */
-final class PagedRecyclerViewAdapter
-        extends RecyclerView.Adapter<PagedRecyclerViewAdapter.NestedRowViewHolder> {
+/** The adapter for the parent recyclerview in {@link CarUiRecyclerView} widget. */
+final class CarUiRecyclerViewAdapter
+        extends RecyclerView.Adapter<CarUiRecyclerViewAdapter.NestedRowViewHolder> {
 
     @Override
-    public PagedRecyclerViewAdapter.NestedRowViewHolder onCreateViewHolder(
+    public CarUiRecyclerViewAdapter.NestedRowViewHolder onCreateViewHolder(
             ViewGroup parent, int viewType) {
         View v =
                 LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.car_ui_paged_recycler_view_item, parent, false);
+                        .inflate(R.layout.car_ui_recycler_view_item, parent, false);
         return new NestedRowViewHolder(v);
     }
 
