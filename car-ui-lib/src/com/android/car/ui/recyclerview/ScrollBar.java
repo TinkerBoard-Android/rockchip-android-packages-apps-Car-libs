@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.car.ui.pagedrecyclerview;
+package com.android.car.ui.recyclerview;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.car.ui.pagedrecyclerview.PagedRecyclerView.ScrollBarPosition;
+import com.android.car.ui.recyclerview.CarUiRecyclerView.ScrollBarPosition;
 
 /**
  * An abstract class that defines required contract for a custom scroll bar for the {@link
- * PagedRecyclerView}. All custom scroll bar must inherit from this class.
+ * CarUiRecyclerView}. All custom scroll bar must inherit from this class.
  */
 public interface ScrollBar {
     /**

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.car.ui.pagedrecyclerview;
+package com.android.car.ui.recyclerview;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -37,10 +37,10 @@ import org.robolectric.annotation.Config;
 
 @RunWith(CarUiRobolectricTestRunner.class)
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
-public class PagedRecyclerViewAdapterTest {
+public class CarUiRecyclerViewAdapterTest {
 
     private Context mContext;
-    private PagedRecyclerViewAdapter mPagedRecyclerViewAdapter;
+    private CarUiRecyclerViewAdapter mCarUiRecyclerViewAdapter;
 
     @Mock
     private ViewGroup mParent;
@@ -52,12 +52,12 @@ public class PagedRecyclerViewAdapterTest {
         MockitoAnnotations.initMocks(this);
 
         mContext = RuntimeEnvironment.application;
-        mPagedRecyclerViewAdapter = new PagedRecyclerViewAdapter();
+        mCarUiRecyclerViewAdapter = new CarUiRecyclerViewAdapter();
     }
 
     @Test
     public void getItemCount_shouldAlwaysBeOne() {
-        assertThat(mPagedRecyclerViewAdapter.getItemCount()).isEqualTo(1);
+        assertThat(mCarUiRecyclerViewAdapter.getItemCount()).isEqualTo(1);
     }
 
     @Test
@@ -66,8 +66,8 @@ public class PagedRecyclerViewAdapterTest {
         when(mParent.getContext()).thenReturn(mContext);
         when(mParent.generateLayoutParams(any())).thenReturn(mLayoutParams);
 
-        PagedRecyclerViewAdapter.NestedRowViewHolder nestedRowViewHolder =
-                mPagedRecyclerViewAdapter.onCreateViewHolder(mParent, 0);
+        CarUiRecyclerViewAdapter.NestedRowViewHolder nestedRowViewHolder =
+                mCarUiRecyclerViewAdapter.onCreateViewHolder(mParent, 0);
 
         assertThat(nestedRowViewHolder.frameLayout).isNotNull();
     }

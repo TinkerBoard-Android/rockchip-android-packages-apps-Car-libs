@@ -12,7 +12,7 @@
       app:title="@string/app_name"
       app:state="subpage"/>
 
-  <com.android.car.ui.pagedrecyclerview.PagedRecyclerView
+  <com.android.car.ui.recyclerview.CarUiRecyclerView
       android:id="@+id/grid_list"
       app:layoutStyle="grid"
       app:numOfColumns="4"
