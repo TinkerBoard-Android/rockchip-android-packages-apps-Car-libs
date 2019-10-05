@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.car.ui.pagedrecyclerview;
+package com.android.car.ui.recyclerview;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -71,7 +71,7 @@ public class DefaultScrollBarTest {
         when(mRecyclerView.getRecycledViewPool()).thenReturn(mRecycledViewPool);
         when(mParent.generateLayoutParams(any())).thenReturn(mLayoutParams);
 
-        mScrollBar.initialize(mRecyclerView, 10, PagedRecyclerView.ScrollBarPosition.START, true);
+        mScrollBar.initialize(mRecyclerView, 10, CarUiRecyclerView.ScrollBarPosition.START, true);
 
         // called once in DefaultScrollBar and once in SnapHelper while setting up the call backs
         // when we use attachToRecyclerView(recyclerview)
@@ -86,7 +86,7 @@ public class DefaultScrollBarTest {
         when(mRecyclerView.getRecycledViewPool()).thenReturn(mRecycledViewPool);
         when(mParent.generateLayoutParams(any())).thenReturn(mLayoutParams);
 
-        mScrollBar.initialize(mRecyclerView, 10, PagedRecyclerView.ScrollBarPosition.START, true);
+        mScrollBar.initialize(mRecyclerView, 10, CarUiRecyclerView.ScrollBarPosition.START, true);
 
         verify(mRecycledViewPool).setMaxRecycledViews(0, 12);
     }
@@ -98,7 +98,7 @@ public class DefaultScrollBarTest {
         when(mRecyclerView.getRecycledViewPool()).thenReturn(mRecycledViewPool);
         when(mParent.generateLayoutParams(any())).thenReturn(mLayoutParams);
 
-        mScrollBar.initialize(mRecyclerView, 10, PagedRecyclerView.ScrollBarPosition.START, true);
+        mScrollBar.initialize(mRecyclerView, 10, CarUiRecyclerView.ScrollBarPosition.START, true);
 
         verify(mRecyclerView).setOnFlingListener(null);
     }
@@ -110,7 +110,7 @@ public class DefaultScrollBarTest {
         when(mRecyclerView.getRecycledViewPool()).thenReturn(mRecycledViewPool);
         when(mParent.generateLayoutParams(any())).thenReturn(mLayoutParams);
 
-        mScrollBar.initialize(mRecyclerView, 10, PagedRecyclerView.ScrollBarPosition.START, true);
+        mScrollBar.initialize(mRecyclerView, 10, CarUiRecyclerView.ScrollBarPosition.START, true);
         mScrollBar.setPadding(10, 20);
 
         DefaultScrollBar defaultScrollBar = (DefaultScrollBar) mScrollBar;

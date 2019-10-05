@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.car.ui.pagedrecyclerview;
+package com.android.car.ui.recyclerview;
 
 import static androidx.recyclerview.widget.LinearSmoothScroller.SNAP_TO_START;
 
@@ -30,39 +30,39 @@ import org.junit.runner.RunWith;
 import org.robolectric.RuntimeEnvironment;
 
 @RunWith(CarUiRobolectricTestRunner.class)
-public class PagedSmoothScrollerTest {
+public class CarUiSmoothScrollerTest {
 
     private Context mContext;
-    private PagedSmoothScroller mPagedSmoothScroller;
+    private CarUiSmoothScroller mCarUiSmoothScroller;
 
     @Before
     public void setUp() {
         mContext = RuntimeEnvironment.application;
-        mPagedSmoothScroller = new PagedSmoothScroller(mContext);
+        mCarUiSmoothScroller = new CarUiSmoothScroller(mContext);
     }
 
     @Test
     public void calculateTimeForScrolling_shouldInitializeAllValues() {
-        assertThat(mPagedSmoothScroller.mMillisecondsPerInch).isNotEqualTo(0);
-        assertThat(mPagedSmoothScroller.mDecelerationTimeDivisor).isNotEqualTo(0);
-        assertThat(mPagedSmoothScroller.mMillisecondsPerPixel).isNotEqualTo(0);
-        assertThat(mPagedSmoothScroller.mInterpolator).isNotNull();
-        assertThat(mPagedSmoothScroller.mDensityDpi).isNotEqualTo(0);
+        assertThat(mCarUiSmoothScroller.mMillisecondsPerInch).isNotEqualTo(0);
+        assertThat(mCarUiSmoothScroller.mDecelerationTimeDivisor).isNotEqualTo(0);
+        assertThat(mCarUiSmoothScroller.mMillisecondsPerPixel).isNotEqualTo(0);
+        assertThat(mCarUiSmoothScroller.mInterpolator).isNotNull();
+        assertThat(mCarUiSmoothScroller.mDensityDpi).isNotEqualTo(0);
     }
 
     @Test
     public void getVerticalSnapPreference_shouldReturnSnapToStart() {
-        assertThat(mPagedSmoothScroller.getVerticalSnapPreference()).isEqualTo(SNAP_TO_START);
+        assertThat(mCarUiSmoothScroller.getVerticalSnapPreference()).isEqualTo(SNAP_TO_START);
     }
 
     @Test
     public void calculateTimeForScrolling_shouldReturnMultiplierOfMillisecondsPerPixel() {
-        assertThat(mPagedSmoothScroller.calculateTimeForScrolling(20)).isEqualTo(
-                (int) Math.ceil(Math.abs(20) * mPagedSmoothScroller.mMillisecondsPerPixel));
+        assertThat(mCarUiSmoothScroller.calculateTimeForScrolling(20)).isEqualTo(
+                (int) Math.ceil(Math.abs(20) * mCarUiSmoothScroller.mMillisecondsPerPixel));
     }
 
     @Test
     public void calculateTimeForDeceleration_shouldReturnNotBeZero() {
-        assertThat(mPagedSmoothScroller.calculateTimeForDeceleration(20)).isNotEqualTo(0);
+        assertThat(mCarUiSmoothScroller.calculateTimeForDeceleration(20)).isNotEqualTo(0);
     }
 }

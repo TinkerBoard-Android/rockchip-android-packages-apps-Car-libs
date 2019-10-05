@@ -31,10 +31,10 @@
 
     <style name="Widget.CarUi.Toolbar.TextButton" parent="Widget.CarUi.Button.Borderless.Colored"/>
 
-    <style name="Widget.CarUi.PagedRecyclerView">
+    <style name="Widget.CarUi.CarUiRecyclerView">
         <item name="android:scrollbars">vertical</item>
     </style>
-    <style name="Widget.CarUi.PagedRecyclerView.NestedRecyclerView">
+    <style name="Widget.CarUi.CarUiRecyclerView.NestedRecyclerView">
         <item name="android:scrollbars">none</item>
     </style>
 
