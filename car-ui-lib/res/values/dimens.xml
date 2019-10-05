@@ -62,7 +62,7 @@
     <!-- Internal artifacts. Do not overlay -->
     <item name="wrap_content" format="integer" type="dimen">-2</item>
 
-    <!-- Default Scroll Bar for PagedRecyclerView -->
+    <!-- Default Scroll Bar for CarUiRecyclerView -->
     <dimen name="car_ui_scrollbar_button_size">@dimen/car_ui_touch_target_width</dimen>
     <dimen name="car_ui_scrollbar_thumb_width">7dp</dimen>
     <dimen name="car_ui_scrollbar_separator_margin">16dp</dimen>

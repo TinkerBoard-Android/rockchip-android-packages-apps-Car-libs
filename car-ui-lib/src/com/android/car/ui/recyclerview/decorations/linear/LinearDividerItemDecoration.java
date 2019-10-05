@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.car.ui.pagedrecyclerview.decorations.linear;
+package com.android.car.ui.recyclerview.decorations.linear;
 
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -31,9 +31,9 @@ public class LinearDividerItemDecoration extends RecyclerView.ItemDecoration {
 
     /**
      * Sole constructor. Takes in a {@link Drawable} to be used as the interior
-     * car_ui_pagedrecyclerview_divider.
+     * car_ui_recyclerview_divider.
      *
-     * @param divider A car_ui_pagedrecyclerview_divider {@code Drawable} to be drawn on the
+     * @param divider A car_ui_recyclerview_divider {@code Drawable} to be drawn on the
      * RecyclerView
      */
     public LinearDividerItemDecoration(Drawable divider) {

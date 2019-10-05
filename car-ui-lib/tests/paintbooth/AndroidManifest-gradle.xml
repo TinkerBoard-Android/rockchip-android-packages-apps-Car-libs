@@ -36,11 +36,11 @@
         android:exported="false"
         android:parentActivityName=".MainActivity"/>
     <activity
-        android:name=".pagedrecyclerview.PagedRecyclerViewActivity"
+        android:name=".caruirecyclerview.CarUiRecyclerViewActivity"
         android:exported="false"
         android:parentActivityName=".MainActivity"/>
     <activity
-        android:name=".pagedrecyclerview.GridPagedRecyclerViewActivity"
+        android:name=".caruirecyclerview.GridCarUiRecyclerViewActivity"
         android:exported="false"
         android:parentActivityName=".MainActivity"/>
     <activity
