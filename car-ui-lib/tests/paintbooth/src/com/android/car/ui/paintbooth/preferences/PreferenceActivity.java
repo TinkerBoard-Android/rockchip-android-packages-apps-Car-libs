@@ -19,9 +19,9 @@ package com.android.car.ui.paintbooth.preferences;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.preference.PreferenceFragmentCompat;
 
 import com.android.car.ui.paintbooth.R;
+import com.android.car.ui.preference.PreferenceFragment;
 
 /** Displays samples of all types of Preferences to help with verifying style changes. */
 public class PreferenceActivity extends AppCompatActivity {
@@ -44,8 +44,8 @@ public class PreferenceActivity extends AppCompatActivity {
         return true;
     }
 
-    /** PreferenceFragmentCompat that sets the preference hierarchy from XML */
-    public static class DemoFragment extends PreferenceFragmentCompat {
+    /** PreferenceFragment that sets the preference hierarchy from XML */
+    public static class DemoFragment extends PreferenceFragment {
 
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
