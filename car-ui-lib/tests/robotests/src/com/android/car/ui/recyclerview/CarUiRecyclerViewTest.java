@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.car.ui.pagedrecyclerview;
+package com.android.car.ui.recyclerview;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -37,11 +37,11 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
 
 @RunWith(CarUiRobolectricTestRunner.class)
-public class PagedRecyclerViewTest {
+public class CarUiRecyclerViewTest {
 
     private Context mContext;
     private View mView;
-    private PagedRecyclerView mPagedRecyclerView;
+    private CarUiRecyclerView mCarUiRecyclerView;
 
     @Mock
     private RecyclerView.Adapter mAdapter;
@@ -56,52 +56,52 @@ public class PagedRecyclerViewTest {
     @Test
     public void onHeightChanged_shouldAddTheValueToInitialTopValue() {
         mView = LayoutInflater.from(mContext)
-                .inflate(R.layout.test_linear_paged_recycler_view, null);
+                .inflate(R.layout.test_linear_car_ui_recycler_view, null);
 
-        mPagedRecyclerView = mView.findViewById(R.id.test_prv);
+        mCarUiRecyclerView = mView.findViewById(R.id.test_prv);
 
-        assertThat(mPagedRecyclerView.getPaddingBottom()).isEqualTo(0);
-        assertThat(mPagedRecyclerView.getPaddingTop()).isEqualTo(0);
-        assertThat(mPagedRecyclerView.getPaddingStart()).isEqualTo(0);
-        assertThat(mPagedRecyclerView.getPaddingEnd()).isEqualTo(0);
+        assertThat(mCarUiRecyclerView.getPaddingBottom()).isEqualTo(0);
+        assertThat(mCarUiRecyclerView.getPaddingTop()).isEqualTo(0);
+        assertThat(mCarUiRecyclerView.getPaddingStart()).isEqualTo(0);
+        assertThat(mCarUiRecyclerView.getPaddingEnd()).isEqualTo(0);
 
-        mPagedRecyclerView.onHeightChanged(10);
+        mCarUiRecyclerView.onHeightChanged(10);
 
-        assertThat(mPagedRecyclerView.getPaddingTop()).isEqualTo(10);
-        assertThat(mPagedRecyclerView.getPaddingBottom()).isEqualTo(0);
-        assertThat(mPagedRecyclerView.getPaddingStart()).isEqualTo(0);
-        assertThat(mPagedRecyclerView.getPaddingEnd()).isEqualTo(0);
+        assertThat(mCarUiRecyclerView.getPaddingTop()).isEqualTo(10);
+        assertThat(mCarUiRecyclerView.getPaddingBottom()).isEqualTo(0);
+        assertThat(mCarUiRecyclerView.getPaddingStart()).isEqualTo(0);
+        assertThat(mCarUiRecyclerView.getPaddingEnd()).isEqualTo(0);
     }
 
     @Test
     public void setAdapter_shouldInitializeLinearLayoutManager() {
         mView = LayoutInflater.from(mContext)
-                .inflate(R.layout.test_linear_paged_recycler_view, null);
+                .inflate(R.layout.test_linear_car_ui_recycler_view, null);
 
-        mPagedRecyclerView = mView.findViewById(R.id.test_prv);
-        mPagedRecyclerView.setAdapter(mAdapter);
+        mCarUiRecyclerView = mView.findViewById(R.id.test_prv);
+        mCarUiRecyclerView.setAdapter(mAdapter);
 
-        assertThat(mPagedRecyclerView.getLayoutManager()).isInstanceOf(LinearLayoutManager.class);
+        assertThat(mCarUiRecyclerView.getLayoutManager()).isInstanceOf(LinearLayoutManager.class);
     }
 
     @Test
     public void setAdapter_shouldInitializeGridLayoutManager() {
         mView = LayoutInflater.from(mContext)
-                .inflate(R.layout.test_grid_paged_recycler_view, null);
+                .inflate(R.layout.test_grid_car_ui_recycler_view, null);
 
-        mPagedRecyclerView = mView.findViewById(R.id.test_prv);
-        mPagedRecyclerView.setAdapter(mAdapter);
+        mCarUiRecyclerView = mView.findViewById(R.id.test_prv);
+        mCarUiRecyclerView.setAdapter(mAdapter);
 
-        assertThat(mPagedRecyclerView.getLayoutManager()).isInstanceOf(GridLayoutManager.class);
+        assertThat(mCarUiRecyclerView.getLayoutManager()).isInstanceOf(GridLayoutManager.class);
     }
 
     @Test
     public void init_shouldContainNestedRecyclerView() {
         mView = LayoutInflater.from(mContext)
-                .inflate(R.layout.test_grid_paged_recycler_view, null);
+                .inflate(R.layout.test_grid_car_ui_recycler_view, null);
 
-        mPagedRecyclerView = mView.findViewById(R.id.test_prv);
+        mCarUiRecyclerView = mView.findViewById(R.id.test_prv);
 
-        assertThat(mPagedRecyclerView.mNestedRecyclerView).isNotNull();
+        assertThat(mCarUiRecyclerView.mNestedRecyclerView).isNotNull();
     }
 }

@@ -18,9 +18,9 @@ limitations under the License.
     <string name="car_ui_toolbar_default_search_hint">Search&#8230;</string>
     <!-- CarUxRestrictions Utility -->
     <string name="car_ui_ellipsis" translatable="false">&#8230;</string>
-    <!-- Content description for paged recycler view scroll bar down arrow [CHAR LIMIT=30] -->
+    <!-- Content description for car ui recycler view scroll bar down arrow [CHAR LIMIT=30] -->
     <string name="car_ui_scrollbar_page_down_button">Scroll down</string>
-    <!-- Content description for paged recycler view scroll bar up arrow [CHAR LIMIT=30] -->
+    <!-- Content description for car ui recycler view scroll bar up arrow [CHAR LIMIT=30] -->
     <string name="car_ui_scrollbar_page_up_button">Scroll up</string>
     <!-- Title of the search menu item. Will be displayed if the button is in the overflow menu. [CHAR_LIMIT=50] -->
     <string name="car_ui_toolbar_menu_item_search_title">Search</string>

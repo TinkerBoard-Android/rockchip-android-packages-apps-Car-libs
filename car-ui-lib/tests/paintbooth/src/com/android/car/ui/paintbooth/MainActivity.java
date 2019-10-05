@@ -28,12 +28,12 @@ import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.car.ui.pagedrecyclerview.PagedRecyclerView;
+import com.android.car.ui.paintbooth.caruirecyclerview.CarUiRecyclerViewActivity;
+import com.android.car.ui.paintbooth.caruirecyclerview.GridCarUiRecyclerViewActivity;
 import com.android.car.ui.paintbooth.dialogs.DialogsActivity;
-import com.android.car.ui.paintbooth.pagedrecyclerview.GridPagedRecyclerViewActivity;
-import com.android.car.ui.paintbooth.pagedrecyclerview.PagedRecyclerViewActivity;
 import com.android.car.ui.paintbooth.preferences.PreferenceActivity;
 import com.android.car.ui.paintbooth.toolbar.ToolbarActivity;
+import com.android.car.ui.recyclerview.CarUiRecyclerView;
 
 import java.util.Arrays;
 import java.util.List;
@@ -47,8 +47,8 @@ public class MainActivity extends Activity {
      */
     private List<Pair<String, Class<? extends Activity>>> mActivities = Arrays.asList(
             Pair.create("Dialogs sample", DialogsActivity.class),
-            Pair.create("List sample", PagedRecyclerViewActivity.class),
-            Pair.create("Grid sample", GridPagedRecyclerViewActivity.class),
+            Pair.create("List sample", CarUiRecyclerViewActivity.class),
+            Pair.create("Grid sample", GridCarUiRecyclerViewActivity.class),
             Pair.create("Preferences sample", PreferenceActivity.class),
             Pair.create("Toolbar sample", ToolbarActivity.class)
     );
@@ -97,7 +97,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
 
-        PagedRecyclerView prv = findViewById(R.id.activities);
+        CarUiRecyclerView prv = findViewById(R.id.activities);
         prv.setAdapter(mAdapter);
     }
 }
