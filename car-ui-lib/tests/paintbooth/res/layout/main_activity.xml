@@ -30,7 +30,7 @@
       app:title="@string/app_name"
       app:logo="@drawable/ic_launcher"/>
 
-  <com.android.car.ui.pagedrecyclerview.PagedRecyclerView
+  <com.android.car.ui.recyclerview.CarUiRecyclerView
       android:id="@+id/activities"
       android:layout_width="0dp"
       android:layout_height="0dp"

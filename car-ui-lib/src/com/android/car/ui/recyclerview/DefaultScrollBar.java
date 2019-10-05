@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.car.ui.pagedrecyclerview;
+package com.android.car.ui.recyclerview;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -34,11 +34,11 @@ import androidx.recyclerview.widget.OrientationHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.R;
-import com.android.car.ui.pagedrecyclerview.PagedRecyclerView.ScrollBarPosition;
+import com.android.car.ui.recyclerview.CarUiRecyclerView.ScrollBarPosition;
 import com.android.car.ui.utils.ResourceUtils;
 
 /**
- * The default scroll bar widget for the {@link PagedRecyclerView}.
+ * The default scroll bar widget for the {@link CarUiRecyclerView}.
  *
  * <p>Inspired by {@link androidx.car.widget.PagedListView}. Most pagination and scrolling logic has
  * been ported from the PLV with minor updates.
@@ -51,7 +51,7 @@ class DefaultScrollBar implements ScrollBar {
     int mPaddingEnd;
 
     private float mButtonDisabledAlpha;
-    private PagedSnapHelper mSnapHelper;
+    private CarUiSnapHelper mSnapHelper;
 
     private ImageView mUpButton;
     private View mScrollView;
@@ -86,7 +86,7 @@ class DefaultScrollBar implements ScrollBar {
 
         FrameLayout parent = (FrameLayout) getRecyclerView().getParent();
 
-        mScrollView = inflater.inflate(R.layout.car_ui_pagedrecyclerview_scrollbar, parent, false);
+        mScrollView = inflater.inflate(R.layout.car_ui_recyclerview_scrollbar, parent, false);
         mScrollView.setLayoutParams(
                 new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
 
@@ -120,7 +120,7 @@ class DefaultScrollBar implements ScrollBar {
 
         mScrollThumb = mScrollView.findViewById(R.id.scrollbar_thumb);
 
-        mSnapHelper = new PagedSnapHelper(rv.getContext());
+        mSnapHelper = new CarUiSnapHelper(rv.getContext());
         getRecyclerView().setOnFlingListener(null);
         mSnapHelper.attachToRecyclerView(getRecyclerView());
 
@@ -419,7 +419,7 @@ class DefaultScrollBar implements ScrollBar {
 
     private OrientationHelper getOrientationHelper(RecyclerView.LayoutManager layoutManager) {
         if (mOrientationHelper == null || mOrientationHelper.getLayoutManager() != layoutManager) {
-            // PagedRecyclerView is assumed to be a list that always vertically scrolls.
+            // CarUiRecyclerView is assumed to be a list that always vertically scrolls.
             mOrientationHelper = OrientationHelper.createVerticalHelper(layoutManager);
         }
         return mOrientationHelper;
@@ -427,12 +427,12 @@ class DefaultScrollBar implements ScrollBar {
 
     /**
      * Scrolls the contents of the RecyclerView up a page. A page is defined as the height of the
-     * {@code PagedRecyclerView}.
+     * {@code CarUiRecyclerView}.
      *
      * <p>The resulting first item in the list will be snapped to so that it is completely visible.
      * If
      * this is not possible due to the first item being taller than the containing {@code
-     * PagedRecyclerView}, then the snapping will not occur.
+     * CarUiRecyclerView}, then the snapping will not occur.
      */
     void pageUp() {
         int currentOffset = getRecyclerView().computeVerticalScrollOffset();
@@ -478,10 +478,10 @@ class DefaultScrollBar implements ScrollBar {
 
     /**
      * Scrolls the contents of the RecyclerView down a page. A page is defined as the height of the
-     * {@code PagedRecyclerView}.
+     * {@code CarUiRecyclerView}.
      *
      * <p>This method will attempt to bring the last item in the list as the first item. If the
-     * current first item in the list is taller than the {@code PagedRecyclerView}, then it will be
+     * current first item in the list is taller than the {@code CarUiRecyclerView}, then it will be
      * scrolled the length of a page, but not snapped to.
      */
     void pageDown() {
