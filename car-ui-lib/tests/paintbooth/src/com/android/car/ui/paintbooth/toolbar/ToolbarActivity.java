@@ -128,9 +128,12 @@ public class ToolbarActivity extends Activity {
         mButtons.add(Pair.create("MenuItem: Toggle show while searching", v ->
                 toolbar.setShowMenuItemsWhileSearching(!toolbar.getShowMenuItemsWhileSearching())));
 
-        mButtons.add(Pair.create("Toggle nav button mode", v -> {
-            if (toolbar.getNavButtonMode() == Toolbar.NavButtonMode.BACK) {
+        mButtons.add(Pair.create("Cycle nav button mode", v -> {
+            Toolbar.NavButtonMode mode = toolbar.getNavButtonMode();
+            if (mode == Toolbar.NavButtonMode.BACK) {
                 toolbar.setNavButtonMode(Toolbar.NavButtonMode.CLOSE);
+            } else if (mode == Toolbar.NavButtonMode.CLOSE) {
+                toolbar.setNavButtonMode(Toolbar.NavButtonMode.DOWN);
             } else {
                 toolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
             }
