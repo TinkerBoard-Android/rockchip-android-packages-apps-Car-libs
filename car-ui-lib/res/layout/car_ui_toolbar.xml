@@ -57,14 +57,26 @@
         android:id="@+id/toolbar_bottom_guideline"
         app:layout_constraintGuide_end="@dimen/car_ui_toolbar_bottom_inset"
         android:orientation="horizontal"/>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/toolbar_start_margin_guideline"
+        app:layout_constraintGuide_begin="@dimen/car_ui_toolbar_margin"
+        android:orientation="vertical"/>
+
+    <!-- The horizontal bias here is so that when you set this view as GONE, it will be
+         treated as if it's all the way to the left instead of centered in the margin -->
     <FrameLayout
         android:id="@+id/nav_icon_container"
-        android:layout_width="@dimen/car_ui_toolbar_nav_button_width"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="?android:attr/selectableItemBackground"
         app:layout_constraintTop_toTopOf="@id/toolbar_top_guideline"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_styleable"
-        app:layout_constraintStart_toStartOf="@id/toolbar_start_guideline">
+        app:layout_constraintBottom_toTopOf="@id/toolbar_bottom_guideline"
+        app:layout_constraintStart_toEndOf="@id/toolbar_start_guideline"
+        app:layout_constraintEnd_toStartOf="@id/toolbar_start_margin_guideline"
+        app:layout_constraintHorizontal_bias="0.0">
         <ImageView
             android:id="@+id/nav_icon"
             android:layout_width="@dimen/car_ui_toolbar_icon_size"
@@ -87,17 +99,16 @@
         android:layout_marginStart="@dimen/car_ui_toolbar_title_margin_start"
         style="@style/TextAppearance.CarUi.Widget.Toolbar.Title"
         app:layout_constraintTop_toTopOf="@id/toolbar_top_guideline"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_styleable"
-        app:layout_constraintStart_toEndOf="@+id/nav_icon_container"
+        app:layout_constraintBottom_toTopOf="@id/toolbar_bottom_guideline"
+        app:layout_constraintStart_toEndOf="@+id/toolbar_start_margin_guideline"
         app:layout_constraintEnd_toStartOf="@+id/menu_items_container"/>
 
     <com.android.car.ui.toolbar.TabLayout
         android:id="@+id/tabs"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:layout_marginEnd="@dimen/car_ui_toolbar_menu_item_margin"
         app:layout_constraintTop_toTopOf="@id/toolbar_top_guideline"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_styleable"
+        app:layout_constraintBottom_toTopOf="@id/toolbar_bottom_guideline"
         app:layout_constraintStart_toEndOf="@+id/nav_icon_container"
         app:layout_constraintEnd_toStartOf="@+id/menu_items_container"
         app:layout_constraintHorizontal_bias="0.0"/>
@@ -108,7 +119,7 @@
         android:layout_height="0dp"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="@id/toolbar_top_guideline"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_styleable"
+        app:layout_constraintBottom_toTopOf="@id/toolbar_bottom_guideline"
         app:layout_constraintStart_toEndOf="@+id/nav_icon_container"
         app:layout_constraintEnd_toStartOf="@+id/menu_items_container"/>
 
@@ -120,7 +131,7 @@
         android:divider="@drawable/car_ui_toolbar_menu_item_divider"
         android:showDividers="beginning|middle|end"
         app:layout_constraintTop_toTopOf="@id/toolbar_top_guideline"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_styleable"
+        app:layout_constraintBottom_toTopOf="@id/toolbar_bottom_guideline"
         app:layout_constraintEnd_toStartOf="@+id/car_ui_toolbar_overflow_button"/>
 
     <FrameLayout
@@ -149,7 +160,7 @@
         android:layout_height="match_parent"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="@id/toolbar_top_guideline"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_styleable"
+        app:layout_constraintBottom_toTopOf="@id/toolbar_bottom_guideline"
         app:layout_constraintStart_toEndOf="@+id/nav_icon_container"
         app:layout_constraintEnd_toStartOf="@+id/menu_items_container"/>
 
@@ -158,7 +169,7 @@
         android:id="@+id/bottom_styleable"
         android:layout_width="match_parent"
         android:layout_height="0.01dp"
-        app:layout_constraintBottom_toBottomOf="@id/toolbar_bottom_guideline"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
