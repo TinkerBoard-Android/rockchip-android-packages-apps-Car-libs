@@ -19,12 +19,4 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/switch_widget"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="@drawable/car_ui_switch_preference_background_drawable"
-    android:foreground="?android:attr/selectableItemBackground"
-    android:showText="@bool/car_ui_preference_switch_toggle_show_text"
-    android:textColor="@color/car_ui_preference_switch_text_color"
-    android:textOff="@string/car_ui_switch_preference_off"
-    android:textOn="@string/car_ui_switch_preference_on"
-    android:thumb="@drawable/car_ui_switch_preference_toggle_thumb_drawable"
-    android:track="@drawable/car_ui_switch_preference_toggle_track_drawable"/>
+    android:layout_height="wrap_content"/>
