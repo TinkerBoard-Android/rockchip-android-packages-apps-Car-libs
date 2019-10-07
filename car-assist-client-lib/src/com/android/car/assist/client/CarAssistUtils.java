@@ -403,7 +403,8 @@ public class CarAssistUtils {
     private boolean requestHandleMissingPermission() {
         Bundle payloadArguments = BundleBuilder
                 .buildAssistantHandleExceptionBundle(
-                        EXCEPTION_NOTIFICATION_LISTENER_PERMISSIONS_MISSING);
+                        EXCEPTION_NOTIFICATION_LISTENER_PERMISSIONS_MISSING,
+                        mIsFallbackAssistantEnabled);
         boolean requestedSuccessfully = mAssistUtils.showSessionForActiveService(payloadArguments,
                 CarVoiceInteractionSession.SHOW_SOURCE_NOTIFICATION, null, null);
         if (!requestedSuccessfully) {
