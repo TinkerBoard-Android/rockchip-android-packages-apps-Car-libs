@@ -219,37 +219,6 @@ public final class CarUiRecyclerView extends RecyclerView implements
         }
     }
 
-    /**
-     * Custom layout manager for the outer recyclerview. Since paddings should be applied by the
-     * inner
-     * recycler view within its bounds, this layout manager should always have 0 padding.
-     */
-    private static class GridCarUiRecyclerViewLayoutManager extends GridLayoutManager {
-        GridCarUiRecyclerViewLayoutManager(Context context, int numOfColumns) {
-            super(context, numOfColumns);
-        }
-
-        @Override
-        public int getPaddingTop() {
-            return 0;
-        }
-
-        @Override
-        public int getPaddingBottom() {
-            return 0;
-        }
-
-        @Override
-        public int getPaddingStart() {
-            return 0;
-        }
-
-        @Override
-        public int getPaddingEnd() {
-            return 0;
-        }
-    }
-
     public CarUiRecyclerView(@NonNull Context context) {
         this(context, null, 0);
     }
@@ -276,17 +245,14 @@ public final class CarUiRecyclerView extends RecyclerView implements
         mScrollBarEnabled = context.getResources().getBoolean(R.bool.car_ui_scrollbar_enable);
         mFullyInitialized = false;
 
-        if (!mScrollBarEnabled) {
-            a.recycle();
-            mFullyInitialized = true;
-            return;
+        if (mScrollBarEnabled) {
+            mNestedRecyclerView =
+                    new RecyclerView(new ContextThemeWrapper(context,
+                            R.style.Widget_CarUi_CarUiRecyclerView_NestedRecyclerView), attrs,
+                            R.style.Widget_CarUi_CarUiRecyclerView_NestedRecyclerView);
+            mNestedRecyclerView.setVerticalScrollBarEnabled(false);
         }
 
-        mNestedRecyclerView =
-                new RecyclerView(new ContextThemeWrapper(context,
-                        R.style.Widget_CarUi_CarUiRecyclerView_NestedRecyclerView), attrs,
-                        R.style.Widget_CarUi_CarUiRecyclerView_NestedRecyclerView);
-        mNestedRecyclerView.setVerticalScrollBarEnabled(false);
         mScrollBarPaddingStart =
                 context.getResources().getDimension(R.dimen.car_ui_scrollbar_padding_start);
         mScrollBarPaddingEnd =
@@ -309,17 +275,18 @@ public final class CarUiRecyclerView extends RecyclerView implements
                 RecyclerView.ItemDecoration dividerItemDecoration =
                         new LinearDividerItemDecoration(
                                 context.getDrawable(R.drawable.car_ui_recyclerview_divider));
-                super.addItemDecoration(dividerItemDecoration);
+                addItemDecoration(dividerItemDecoration);
             }
             RecyclerView.ItemDecoration topOffsetItemDecoration =
                     new LinearOffsetItemDecoration(linearTopOffset, OffsetPosition.START);
-            super.addItemDecoration(topOffsetItemDecoration);
 
             RecyclerView.ItemDecoration bottomOffsetItemDecoration =
                     new LinearOffsetItemDecoration(linearBottomOffset, OffsetPosition.END);
-            super.addItemDecoration(bottomOffsetItemDecoration);
-        } else {
 
+            addItemDecoration(topOffsetItemDecoration);
+            addItemDecoration(bottomOffsetItemDecoration);
+            setLayoutManager(new LinearLayoutManager(mContext));
+        } else {
             int gridTopOffset =
                     a.getInteger(R.styleable.CarUiRecyclerView_startOffset, /* defValue= */ 0);
             int gridBottomOffset =
@@ -331,18 +298,27 @@ public final class CarUiRecyclerView extends RecyclerView implements
                                 context.getDrawable(R.drawable.car_ui_divider),
                                 context.getDrawable(R.drawable.car_ui_divider),
                                 mNumOfColumns);
-                super.addItemDecoration(mDividerItemDecoration);
+                addItemDecoration(mDividerItemDecoration);
             }
 
             mOffsetItemDecoration =
                     new GridOffsetItemDecoration(gridTopOffset, mNumOfColumns,
                             OffsetPosition.START);
-            super.addItemDecoration(mOffsetItemDecoration);
 
             GridOffsetItemDecoration bottomOffsetItemDecoration =
                     new GridOffsetItemDecoration(gridBottomOffset, mNumOfColumns,
                             OffsetPosition.END);
-            super.addItemDecoration(bottomOffsetItemDecoration);
+
+            addItemDecoration(mOffsetItemDecoration);
+            addItemDecoration(bottomOffsetItemDecoration);
+            setLayoutManager(new GridLayoutManager(mContext, mNumOfColumns));
+            setNumOfColumns(mNumOfColumns);
+        }
+
+        if (!mScrollBarEnabled) {
+            a.recycle();
+            mFullyInitialized = true;
+            return;
         }
 
         super.setLayoutManager(new CarUiRecyclerViewLayoutManager(context));
@@ -509,20 +485,6 @@ public final class CarUiRecyclerView extends RecyclerView implements
     @SuppressWarnings("rawtypes")
     @Override
     public void setAdapter(@Nullable Adapter adapter) {
-
-        if (mScrollBarEnabled && mCarUiRecyclerViewLayout == CarUiRecyclerViewLayout.LINEAR) {
-            mNestedRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-        } else if (mCarUiRecyclerViewLayout == CarUiRecyclerViewLayout.LINEAR) {
-            super.setLayoutManager(new LinearLayoutManager(mContext));
-        } else if (mScrollBarEnabled) {
-            mNestedRecyclerView.setLayoutManager(
-                    new GridCarUiRecyclerViewLayoutManager(mContext, mNumOfColumns));
-            setNumOfColumns(mNumOfColumns);
-        } else {
-            super.setLayoutManager(
-                    new GridCarUiRecyclerViewLayoutManager(mContext, mNumOfColumns));
-            setNumOfColumns(mNumOfColumns);
-        }
 
         this.mAdapter = adapter;
         if (mScrollBarEnabled) {
