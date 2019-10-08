@@ -22,6 +22,8 @@ import android.view.View;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.car.ui.R;
+
 /** Adds interior dividers to a RecyclerView with a GridLayoutManager. */
 public class GridDividerItemDecoration extends RecyclerView.ItemDecoration {
 
@@ -99,10 +101,14 @@ public class GridDividerItemDecoration extends RecyclerView.ItemDecoration {
             View firstRowChild = parent.getChildAt(i);
             View lastRowChild = parent.getChildAt(lastRowChildIndex);
 
-            int dividerTop = firstRowChild.getTop();
+            int dividerTop =
+                    firstRowChild.getTop() + (int) parent.getContext().getResources().getDimension(
+                            R.dimen.car_ui_recyclerview_divider_top_margin);
             int dividerRight = firstRowChild.getLeft();
             int dividerLeft = dividerRight - mHorizontalDivider.getIntrinsicWidth();
-            int dividerBottom = lastRowChild.getBottom();
+            int dividerBottom = lastRowChild.getBottom()
+                    - (int) parent.getContext().getResources().getDimension(
+                    R.dimen.car_ui_recyclerview_divider_bottom_margin);
 
             mHorizontalDivider.setBounds(dividerLeft, dividerTop, dividerRight, dividerBottom);
             mHorizontalDivider.draw(canvas);
@@ -138,10 +144,14 @@ public class GridDividerItemDecoration extends RecyclerView.ItemDecoration {
             View rightmostChild = parent.getChildAt(rightmostChildIndex);
 
             // draws on top of each row.
-            int dividerLeft = leftmostChild.getLeft();
+            int dividerLeft =
+                    leftmostChild.getLeft() + (int) parent.getContext().getResources().getDimension(
+                            R.dimen.car_ui_recyclerview_divider_start_margin);
             int dividerBottom = leftmostChild.getTop();
             int dividerTop = dividerBottom - mVerticalDivider.getIntrinsicHeight();
-            int dividerRight = rightmostChild.getRight();
+            int dividerRight = rightmostChild.getRight()
+                    - (int) parent.getContext().getResources().getDimension(
+                    R.dimen.car_ui_recyclerview_divider_end_margin);
 
             mVerticalDivider.setBounds(dividerLeft, dividerTop, dividerRight, dividerBottom);
             mVerticalDivider.draw(canvas);
