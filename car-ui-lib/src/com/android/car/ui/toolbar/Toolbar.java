@@ -17,6 +17,7 @@ package com.android.car.ui.toolbar;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.car.drivingstate.CarUxRestrictions;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.TypedArray;
@@ -40,6 +41,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
 import com.android.car.ui.R;
+import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -137,28 +139,12 @@ public class Toolbar extends FrameLayout {
     private SearchView mSearchView;
     private boolean mHasLogo = false;
     private boolean mShowMenuItemsWhileSearching;
-    private MenuItem mSearchMenuItem;
     private State mState = State.HOME;
     private NavButtonMode mNavButtonMode = NavButtonMode.BACK;
     @NonNull
     private List<MenuItem> mMenuItems = Collections.emptyList();
     private List<MenuItem> mOverflowItems = new ArrayList<>();
-    private MenuItem.Listener mMenuItemListener = (item) -> {
-        if (item.getDisplayBehavior() == MenuItem.DisplayBehavior.NEVER) {
-            createOverflowDialog();
-        } else {
-            View view = item.getView();
-            if (view != null) {
-                if (item.getId() == R.id.search) {
-                    view.setVisibility(mState != State.SEARCH && item.isVisible() ? VISIBLE : GONE);
-                } else {
-                    view.setVisibility(item.isVisible() ? VISIBLE : GONE);
-                }
-            }
-        }
-
-        setState(getState());
-    };
+    private List<MenuItemRenderer> mMenuItemRenderers = new ArrayList<>();
     private AlertDialog mOverflowDialog;
 
     public Toolbar(Context context) {
@@ -361,6 +347,26 @@ public class Toolbar extends FrameLayout {
         }
     }
 
+    private void onCarUxRestrictionsChanged(CarUxRestrictions restrictions) {
+        for (MenuItemRenderer renderer : mMenuItemRenderers) {
+            renderer.setUxRestrictions(restrictions);
+        }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        CarUxRestrictionsUtil.getInstance(getContext())
+                .register(this::onCarUxRestrictionsChanged);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        CarUxRestrictionsUtil.getInstance(getContext())
+                .unregister(this::onCarUxRestrictionsChanged);
+    }
+
     /**
      * Sets the title of the toolbar to a string resource.
      *
@@ -509,22 +515,34 @@ public class Toolbar extends FrameLayout {
         mMenuItems = new ArrayList<>(items);
 
         mOverflowItems.clear();
+        mMenuItemRenderers.clear();
         mMenuItemsContainer.removeAllViews();
-        mSearchMenuItem = null;
 
         for (MenuItem item : items) {
-            item.setListener(mMenuItemListener);
             if (item.getDisplayBehavior() == MenuItem.DisplayBehavior.NEVER) {
                 mOverflowItems.add(item);
+                item.setListener(new MenuItem.Listener() {
+                    @Override
+                    public void onMenuItemChanged() {
+                        createOverflowDialog();
+                        setState(getState());
+                    }
+
+                    @Override
+                    public void performClick() {
+                        Log.w(TAG, "performClick on overflow MenuItems not yet implemented");
+                    }
+
+                    @Override
+                    public View getView() {
+                        return null;
+                    }
+                });
             } else {
-                View menuItemView = item.createView(mMenuItemsContainer);
+                MenuItemRenderer renderer = new MenuItemRenderer(item, mMenuItemsContainer);
+                mMenuItemRenderers.add(renderer);
 
-                // Add views with index 0 so that they are added right-to-left
-                mMenuItemsContainer.addView(menuItemView, 0);
-
-                if (item.getId() == R.id.search) {
-                    mSearchMenuItem = item;
-                }
+                mMenuItemsContainer.addView(renderer.createView());
             }
         }
 
@@ -629,6 +647,10 @@ public class Toolbar extends FrameLayout {
     public void setState(State state) {
         mState = state;
 
+        for (MenuItemRenderer renderer : mMenuItemRenderers) {
+            renderer.setToolbarState(mState);
+        }
+
         View.OnClickListener backClickListener = (v) -> {
             boolean absorbed = false;
             List<OnBackListener> listenersCopy = new ArrayList<>(mOnBackListeners);
@@ -662,13 +684,6 @@ public class Toolbar extends FrameLayout {
         mMenuItemsContainer.setVisibility(showButtons ? VISIBLE : GONE);
         mOverflowButton.setVisibility(showButtons && countVisibleOverflowItems() > 0
                 ? VISIBLE : GONE);
-        if (mSearchMenuItem != null) {
-            View searchView = mSearchMenuItem.getView();
-            if (searchView != null) {
-                searchView.setVisibility(mState != State.SEARCH && mSearchMenuItem.isVisible()
-                        ? VISIBLE : GONE);
-            }
-        }
         mCustomViewContainer.setVisibility(state == State.SUBPAGE_CUSTOM ? VISIBLE : GONE);
         if (state != State.SUBPAGE_CUSTOM) {
             mCustomViewContainer.removeAllViews();
