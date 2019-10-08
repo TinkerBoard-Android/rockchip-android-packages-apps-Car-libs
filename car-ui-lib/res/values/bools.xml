@@ -29,7 +29,6 @@
     <bool name="car_ui_preference_category_allow_divider_above">false</bool>
     <bool name="car_ui_preference_category_allow_divider_below">false</bool>
 
-    <bool name="car_ui_preference_switch_toggle_show_text">false</bool>
     <bool name="car_ui_preference_switch_toggle_show_animation">true</bool>
     <bool name="car_ui_preference_show_chevron">false</bool>
 </resources>

@@ -28,11 +28,11 @@ import com.android.car.ui.R;
  */
 public class PreferenceSwitchWidget extends Switch {
 
-    private Context mContext;
+    private boolean mEnableAnimation = true;
 
     public PreferenceSwitchWidget(Context context) {
         super(context);
-        mContext = context;
+        init(context);
     }
 
     public PreferenceSwitchWidget(Context context, AttributeSet attrs) {
@@ -42,26 +42,25 @@ public class PreferenceSwitchWidget extends Switch {
 
     public PreferenceSwitchWidget(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        mContext = context;
+        init(context);
     }
 
     public PreferenceSwitchWidget(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mContext = context;
+        init(context);
+    }
+
+    private void init(Context context) {
+        mEnableAnimation = context.getResources().getBoolean(
+                R.bool.car_ui_preference_switch_toggle_show_animation);
     }
 
     @Override
     public void setChecked(boolean checked) {
         super.setChecked(checked);
 
-        if (mContext == null) {
-            return;
-        }
-
-        boolean enableAnimation = mContext.getResources().getBoolean(
-                R.bool.car_ui_preference_switch_toggle_show_animation);
-        if (!enableAnimation) {
+        if (!mEnableAnimation) {
             jumpDrawablesToCurrentState();
         }
     }
