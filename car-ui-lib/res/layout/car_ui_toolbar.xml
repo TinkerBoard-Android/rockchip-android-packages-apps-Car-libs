@@ -142,7 +142,7 @@
         android:layout_marginRight="@dimen/car_ui_toolbar_menu_item_margin"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="@id/toolbar_top_guideline"
-        app:layout_constraintBottom_toTopOf="@id/bottom_styleable"
+        app:layout_constraintBottom_toTopOf="@id/toolbar_bottom_guideline"
         app:layout_constraintEnd_toEndOf="@id/toolbar_end_guideline">
         <ImageView
             android:src="@drawable/car_ui_icon_overflow_menu"
