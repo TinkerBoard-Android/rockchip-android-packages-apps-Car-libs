@@ -23,6 +23,8 @@ import android.view.View;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.car.ui.R;
+
 /** Adds interior dividers to a RecyclerView with a LinearLayoutManager or its subclass. */
 public class LinearDividerItemDecoration extends RecyclerView.ItemDecoration {
 
@@ -89,8 +91,12 @@ public class LinearDividerItemDecoration extends RecyclerView.ItemDecoration {
      * @param parent The RecyclerView onto which horizontal dividers are being added
      */
     private void drawHorizontalDividers(Canvas canvas, RecyclerView parent) {
-        int parentTop = parent.getPaddingTop();
-        int parentBottom = parent.getHeight() - parent.getPaddingBottom();
+        int parentTop =
+                parent.getPaddingTop() + (int) parent.getContext().getResources().getDimension(
+                        R.dimen.car_ui_recyclerview_divider_top_margin);
+        int parentBottom = parent.getHeight() - parent.getPaddingBottom()
+                - (int) parent.getContext().getResources().getDimension(
+                R.dimen.car_ui_recyclerview_divider_bottom_margin);
 
         int childCount = parent.getChildCount();
         for (int i = 0; i < childCount - 1; i++) {
@@ -114,8 +120,12 @@ public class LinearDividerItemDecoration extends RecyclerView.ItemDecoration {
      * @param parent The RecyclerView onto which vertical dividers are being added
      */
     private void drawVerticalDividers(Canvas canvas, RecyclerView parent) {
-        int parentLeft = parent.getPaddingLeft();
-        int parentRight = parent.getWidth() - parent.getPaddingRight();
+        int parentLeft =
+                parent.getPaddingLeft() + (int) parent.getContext().getResources().getDimension(
+                        R.dimen.car_ui_recyclerview_divider_start_margin);
+        int parentRight = parent.getWidth() - parent.getPaddingRight()
+                - (int) parent.getContext().getResources().getDimension(
+                R.dimen.car_ui_recyclerview_divider_end_margin);
 
         int childCount = parent.getChildCount();
         for (int i = 0; i < childCount - 1; i++) {
