@@ -35,6 +35,9 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_STATIC_ANDROID_LIBRARIES := \
         car-ui-lib
 
+LOCAL_STATIC_JAVA_LIBRARIES += \
+    android.car.userlib \
+
 LOCAL_USE_AAPT2 := true
 
 LOCAL_PROGUARD_ENABLED := disabled
