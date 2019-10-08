@@ -22,4 +22,5 @@
     <item name="car_ui_switch_preference_toggle_thumb_drawable" type="drawable">@*android:drawable/switch_thumb_material_anim</item>
     <item name="car_ui_switch_preference_toggle_track_drawable" type="drawable">@*android:drawable/switch_track_material</item>
     <item name="car_ui_switch_preference_background_drawable" type="drawable">@null</item>
+    <item name="car_ui_preference_icon_chevron_drawable" type="drawable">@null</item>
 </resources>
