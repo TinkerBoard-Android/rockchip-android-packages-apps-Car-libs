@@ -19,7 +19,7 @@
     android:layout_width="@dimen/car_ui_touch_target_width"
     android:layout_height="@dimen/car_ui_touch_target_height"
     android:layout_gravity="center_vertical">
-    <Switch
+    <com.android.car.ui.uxr.DrawableStateSwitch
         android:id="@+id/car_ui_toolbar_menu_item_switch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
