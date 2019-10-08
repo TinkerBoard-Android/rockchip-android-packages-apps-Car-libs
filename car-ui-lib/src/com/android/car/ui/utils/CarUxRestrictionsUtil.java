@@ -120,6 +120,11 @@ public class CarUxRestrictionsUtil {
         mObservers.remove(listener);
     }
 
+    @NonNull
+    public CarUxRestrictions getCurrentRestrictions() {
+        return mCarUxRestrictions;
+    }
+
     /**
      * Returns whether any of the given flags are blocked by the specified restrictions. If null is
      * given, the method returns true for safety.
