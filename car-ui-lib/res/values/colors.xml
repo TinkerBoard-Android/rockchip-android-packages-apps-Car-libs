@@ -50,6 +50,4 @@
 
     <color name="car_ui_preference_icon_color">@android:color/white</color>
 
-    <color name="car_ui_preference_switch_text_color">#000000</color>
-
 </resources>

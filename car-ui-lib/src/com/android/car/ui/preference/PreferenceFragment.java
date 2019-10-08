@@ -48,17 +48,9 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat {
     @Override
     public void onDisplayPreferenceDialog(Preference preference) {
 
-        boolean handled = false;
-        if (getCallbackFragment() instanceof OnPreferenceDisplayDialogCallback) {
-            handled = ((OnPreferenceDisplayDialogCallback) getCallbackFragment())
-                    .onPreferenceDisplayDialog(this, preference);
-        }
-        if (!handled && getActivity() instanceof OnPreferenceDisplayDialogCallback) {
-            handled = ((OnPreferenceDisplayDialogCallback) getActivity())
-                    .onPreferenceDisplayDialog(this, preference);
-        }
-
-        if (handled) {
+        if (getActivity() instanceof OnPreferenceDisplayDialogCallback
+                && ((OnPreferenceDisplayDialogCallback) getActivity())
+                .onPreferenceDisplayDialog(this, preference)) {
             return;
         }
 
