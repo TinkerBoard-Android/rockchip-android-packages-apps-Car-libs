@@ -67,14 +67,14 @@ public class ToolbarActivity extends Activity {
         mButtons.add(Pair.create("Change title", v ->
                 toolbar.setTitle(toolbar.getTitle() + " X")));
 
-        mButtons.add(Pair.create("Add menu item", v -> {
+        mButtons.add(Pair.create("MenuItem: Add Icon", v -> {
             mMenuItems.add(MenuItem.Builder.createSettings(this, i ->
                     Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT).show()));
             toolbar.setMenuItems(mMenuItems);
         }));
 
         Mutable<Integer> overflowCounter = new Mutable<>(1);
-        mButtons.add(Pair.create("Add overflow menu item", v -> {
+        mButtons.add(Pair.create("MenuItem: Add Overflow", v -> {
             mMenuItems.add(new MenuItem.Builder(this)
                     .setTitle("Foo " + overflowCounter.value)
                     .setOnClickListener(i ->
@@ -85,7 +85,26 @@ public class ToolbarActivity extends Activity {
             overflowCounter.value++;
         }));
 
-        mButtons.add(Pair.create("Toggle menu item visibility", v -> {
+        mButtons.add(Pair.create("MenuItem: Add Switch", v -> {
+            mMenuItems.add(new MenuItem.Builder(this)
+                    .setCheckable()
+                    .setOnClickListener(i ->
+                            Toast.makeText(this, "Checked? " + i.isChecked(),
+                                    Toast.LENGTH_SHORT).show())
+                    .build());
+            toolbar.setMenuItems(mMenuItems);
+        }));
+
+        mButtons.add(Pair.create("MenuItem: Add text", v -> {
+            mMenuItems.add(new MenuItem.Builder(this)
+                    .setTitle("Baz")
+                    .setOnClickListener(i ->
+                            Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT).show())
+                    .build());
+            toolbar.setMenuItems(mMenuItems);
+        }));
+
+        mButtons.add(Pair.create("MenuItem: Toggle Visibility", v -> {
             EditText textBox = new EditText(this);
             textBox.setInputType(InputType.TYPE_CLASS_NUMBER);
             new AlertDialog.Builder(this)
@@ -105,6 +124,9 @@ public class ToolbarActivity extends Activity {
                     })
                     .show();
         }));
+
+        mButtons.add(Pair.create("MenuItem: Toggle show while searching", v ->
+                toolbar.setShowMenuItemsWhileSearching(!toolbar.getShowMenuItemsWhileSearching())));
 
         mButtons.add(Pair.create("Toggle nav button mode", v -> {
             if (toolbar.getNavButtonMode() == Toolbar.NavButtonMode.BACK) {
@@ -138,9 +160,6 @@ public class ToolbarActivity extends Activity {
 
         mButtons.add(Pair.create("Toggle background", v ->
                 toolbar.setBackgroundShown(!toolbar.getBackgroundShown())));
-
-        mButtons.add(Pair.create("Toggle show menu items while searching", v ->
-                toolbar.setShowMenuItemsWhileSearching(!toolbar.getShowMenuItemsWhileSearching())));
 
         mButtons.add(Pair.create("Show custom view", v ->
                 toolbar.setCustomView(R.layout.toolbar_custom_view)));
