@@ -15,14 +15,10 @@
  */
 package com.android.car.ui.toolbar;
 
+import android.car.drivingstate.CarUxRestrictions;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.Switch;
 
 import com.android.car.ui.R;
 
@@ -48,17 +44,10 @@ public class MenuItem {
 
     private final Context mContext;
     private final boolean mIsCheckable;
-    private final int mCustomLayoutId;
-    private final int mId;
-    private final View.OnClickListener mViewOnClickListener = v -> {
-        if (isCheckable()) {
-            setChecked(!isChecked());
-        }
-
-        if (getOnClickListener() != null) {
-            getOnClickListener().onClick(this);
-        }
-    };
+    final int mCustomLayoutId;
+    private final boolean mIsSearch;
+    @CarUxRestrictions.CarUxRestrictionsInfo
+    private int mUxRestrictions;
 
     private Listener mListener;
     private CharSequence mTitle;
@@ -68,8 +57,6 @@ public class MenuItem {
     private boolean mIsEnabled;
     private boolean mIsChecked;
     private boolean mIsVisible;
-    private View mView;
-
 
     private MenuItem(Builder builder) {
         mContext = builder.mContext;
@@ -82,7 +69,14 @@ public class MenuItem {
         mIsEnabled = builder.mIsEnabled;
         mIsChecked = builder.mIsChecked;
         mIsVisible = builder.mIsVisible;
-        mId = builder.mId;
+        mIsSearch = builder.mIsSearch;
+        mUxRestrictions = builder.mUxRestrictions;
+    }
+
+    private void update() {
+        if (mListener != null) {
+            mListener.onMenuItemChanged();
+        }
     }
 
     /** Returns whether the MenuItem is enabled */
@@ -94,9 +88,7 @@ public class MenuItem {
     public void setEnabled(boolean enabled) {
         mIsEnabled = enabled;
 
-        if (mView != null) {
-            recursiveSetEnabled(mView, mIsEnabled);
-        }
+        update();
     }
 
     /** Returns whether the MenuItem is checkable. If it is, it will be displayed as a switch. */
@@ -123,12 +115,7 @@ public class MenuItem {
 
         mIsChecked = checked;
 
-        if (mView != null) {
-            Switch s = mView.findViewById(R.id.car_ui_toolbar_menu_item_switch);
-            if (s != null) {
-                s.setChecked(mIsChecked);
-            }
-        }
+        update();
     }
 
     /** Returns whether or not the MenuItem is visible */
@@ -140,10 +127,7 @@ public class MenuItem {
     public void setVisible(boolean visible) {
         mIsVisible = visible;
 
-        // The toolbar will change the visibility of the view
-        if (mListener != null) {
-            mListener.onMenuItemChanged(this);
-        }
+        update();
     }
 
     /** Gets the title of this MenuItem. */
@@ -155,21 +139,17 @@ public class MenuItem {
     public void setTitle(CharSequence title) {
         mTitle = title;
 
-        if (mView != null) {
-            Button button = mView.findViewById(R.id.car_ui_toolbar_menu_item_text);
-            if (button != null) {
-                button.setText(mTitle);
-            }
-        }
-
-        if (mListener != null) {
-            mListener.onMenuItemChanged(this);
-        }
+        update();
     }
 
     /** Sets the title of this MenuItem to a string resource. */
     public void setTitle(int resId) {
         setTitle(mContext.getString(resId));
+    }
+
+    @CarUxRestrictions.CarUxRestrictionsInfo
+    public int getUxRestrictions() {
+        return mUxRestrictions;
     }
 
     /** Gets the current {@link OnClickListener} */
@@ -180,11 +160,15 @@ public class MenuItem {
     /** Sets the {@link OnClickListener} */
     public void setOnClickListener(OnClickListener listener) {
         mOnClickListener = listener;
+
+        update();
     }
 
     /** Calls the {@link OnClickListener}. */
     public void performClick() {
-        mViewOnClickListener.onClick(null);
+        if (mListener != null) {
+            mListener.performClick();
+        }
     }
 
     /** Gets the current {@link DisplayBehavior} */
@@ -204,11 +188,15 @@ public class MenuItem {
      * building this MenuItem.
      */
     public View getView() {
-        return mView;
+        if (mListener != null) {
+            return mListener.getView();
+        }
+        return null;
     }
 
-    int getId() {
-        return mId;
+    /** Returns if this is the search MenuItem, which has special behavior when searching */
+    boolean isSearch() {
+        return mIsSearch;
     }
 
     /**
@@ -230,7 +218,9 @@ public class MenuItem {
         private boolean mIsChecked = false;
         private boolean mIsVisible = true;
         private int mCustomLayoutId;
-        private int mId;
+        private boolean mIsSearch = false;
+        @CarUxRestrictions.CarUxRestrictionsInfo
+        private int mUxRestrictions = CarUxRestrictions.UX_RESTRICTIONS_BASELINE;
 
         public Builder(Context c) {
             mContext = c;
@@ -336,8 +326,19 @@ public class MenuItem {
             return this;
         }
 
-        private Builder setId(int id) {
-            mId = id;
+        /**
+         * Sets under what {@link android.car.drivingstate.CarUxRestrictions.CarUxRestrictionsInfo}
+         * the MenuItem should be restricted.
+         */
+        public Builder setUxRestrictions(
+                @CarUxRestrictions.CarUxRestrictionsInfo int restrictions) {
+            mUxRestrictions = restrictions;
+            return this;
+        }
+
+        /** Sets that this is the search MenuItem, which has special behavior while searching */
+        private Builder setSearch() {
+            mIsSearch = true;
             return this;
         }
 
@@ -353,20 +354,23 @@ public class MenuItem {
                     .setTitle(R.string.car_ui_toolbar_menu_item_search_title)
                     .setIcon(R.drawable.car_ui_icon_search)
                     .setOnClickListener(listener)
-                    .setId(R.id.search)
+                    .setSearch()
                     .build();
         }
 
         /**
          * Creates a settings MenuItem.
          *
-         * <p>The advantage of this over creating your own is getting an OEM-styled settings icon.
+         * <p>The advantage of this over creating your own is getting an OEM-styled settings icon,
+         * and that the MenuItem will be restricted based on
+         * {@link CarUxRestrictions#UX_RESTRICTIONS_NO_SETUP}
          */
         public static MenuItem createSettings(Context c, OnClickListener listener) {
             return new Builder(c)
                     .setTitle(R.string.car_ui_toolbar_menu_item_settings_title)
                     .setIcon(R.drawable.car_ui_icon_settings)
                     .setOnClickListener(listener)
+                    .setUxRestrictions(CarUxRestrictions.UX_RESTRICTIONS_NO_SETUP)
                     .build();
         }
     }
@@ -392,58 +396,16 @@ public class MenuItem {
     /** Listener for {@link Toolbar} to update when this MenuItem changes */
     interface Listener {
         /** Called when the MenuItem is changed. For use only by {@link Toolbar} */
-        void onMenuItemChanged(MenuItem item);
+        void onMenuItemChanged();
+
+        /** Called when {@link MenuItem#performClick()} is called */
+        void performClick();
+
+        /** Used to get the custom view, if there is one */
+        View getView();
     }
 
     void setListener(Listener listener) {
         mListener = listener;
-    }
-
-    View createView(ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
-                Context.LAYOUT_INFLATER_SERVICE);
-
-        if (mCustomLayoutId != 0) {
-            mView = inflater.inflate(mCustomLayoutId, parent, false);
-        } else if (isCheckable()) {
-            mView = inflater.inflate(
-                    R.layout.car_ui_toolbar_menu_item_switch, parent, false);
-        } else if (getIcon() != null) {
-            mView = inflater.inflate(
-                    R.layout.car_ui_toolbar_menu_item_icon, parent, false);
-            ImageView imageView = mView.requireViewById(R.id.car_ui_toolbar_menu_item_icon);
-            imageView.setImageDrawable(getIcon());
-        } else {
-            mView = (Button) inflater.inflate(
-                    R.layout.car_ui_toolbar_menu_item_text, parent, false);
-            setTitle(getTitle());
-        }
-
-        // Both custom and switch layouts can be checkable
-        if (isCheckable()) {
-            setChecked(isChecked());
-        }
-
-        if (getId() != 0) {
-            mView.setId(getId());
-        }
-
-        if (!mIsVisible) {
-            mView.setVisibility(View.GONE);
-        }
-
-        recursiveSetEnabled(mView, isEnabled());
-        mView.setOnClickListener(mViewOnClickListener);
-        return mView;
-    }
-
-    private void recursiveSetEnabled(View view, boolean enabled) {
-        view.setEnabled(enabled);
-        if (view instanceof ViewGroup) {
-            ViewGroup viewGroup = ((ViewGroup) view);
-            for (int i = 0; i < viewGroup.getChildCount(); i++) {
-                recursiveSetEnabled(viewGroup.getChildAt(i), enabled);
-            }
-        }
     }
 }
