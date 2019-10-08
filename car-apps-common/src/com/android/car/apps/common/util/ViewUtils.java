@@ -116,4 +116,18 @@ public class ViewUtils {
             view.setText(text);
         }
     }
+
+    /** Sets the enabled state of the (optional) view. */
+    public static void setEnabled(@Nullable View view, boolean enabled) {
+        if (view != null) {
+            view.setEnabled(enabled);
+        }
+    }
+
+    /** Sets onClickListener for the (optional) view. */
+    public static void setOnClickListener(@Nullable View view, @Nullable View.OnClickListener l) {
+        if (view != null) {
+            view.setOnClickListener(l);
+        }
+    }
 }
