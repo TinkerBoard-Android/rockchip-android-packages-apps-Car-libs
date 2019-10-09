@@ -25,17 +25,10 @@
     <!-- The ripple color. -->
     <color name="car_ui_ripple_color">#27ffffff</color>
 
-    <!-- Tabs -->
-
-    <!-- Selected colors -->
-    <color name="car_ui_tab_selected_color">@color/car_ui_primary_text_color</color>
-    <!-- Normal colors -->
-    <color name="car_ui_tab_unselected_color">@color/car_ui_secondary_text_color</color>
-
     <!-- Toolbar -->
 
     <!-- Color used on the navigation icon -->
-    <color name="car_ui_nav_icon_color">@color/car_ui_primary_text_color</color>
+    <color name="car_ui_toolbar_nav_icon_color">@color/car_ui_primary_text_color</color>
     <!-- Text color applied to the hint displayed inside the search box -->
     <color name="car_ui_toolbar_search_hint_text_color">#33FFFFFF</color>
     <!-- Menu item colors -->
@@ -48,6 +41,10 @@
     <color name="car_ui_toolbar_menu_item_icon_background_disabled_color">@color/car_ui_toolbar_menu_item_icon_disabled_color</color>
     <color name="car_ui_toolbar_menu_item_icon_background_restricted_color">@color/car_ui_toolbar_menu_item_icon_restricted_color</color>
     <color name="car_ui_toolbar_menu_item_icon_background_activated_color">@color/car_ui_primary_text_color</color>
+    <!-- Tab selected color -->
+    <color name="car_ui_toolbar_tab_selected_color">@color/car_ui_primary_text_color</color>
+    <!-- Tab normal color -->
+    <color name="car_ui_toolbar_tab_unselected_color">@color/car_ui_secondary_text_color</color>
 
     <!-- Recycler View  -->
 

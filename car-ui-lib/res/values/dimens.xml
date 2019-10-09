@@ -37,13 +37,13 @@
     <!-- Tabs -->
 
     <!-- Exact size of the tab textbox. Use @dimen/wrap_content if this must be flexible -->
-    <dimen name="car_ui_tab_text_width">135dp</dimen>
+    <dimen name="car_ui_toolbar_tab_text_width">135dp</dimen>
     <!-- Horizontal padding between tabs -->
-    <dimen name="car_ui_tab_padding_x">12dp</dimen>
+    <dimen name="car_ui_toolbar_tab_padding_x">12dp</dimen>
     <!-- Tab icon width (if icons are enabled) -->
-    <dimen name="car_ui_tab_icon_width">36dp</dimen>
+    <dimen name="car_ui_toolbar_tab_icon_width">36dp</dimen>
     <!-- Tab icon height (if icons are enabled) -->
-    <dimen name="car_ui_tab_icon_height">36dp</dimen>
+    <dimen name="car_ui_toolbar_tab_icon_height">36dp</dimen>
 
     <!-- Toolbar -->
     <dimen name="car_ui_toolbar_row_height">96dp</dimen>
