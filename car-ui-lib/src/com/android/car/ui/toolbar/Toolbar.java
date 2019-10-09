@@ -30,7 +30,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -164,7 +163,7 @@ public class Toolbar extends FrameLayout {
 
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(R.layout.car_ui_toolbar, this, true);
+        inflater.inflate(getToolbarLayout(), this, true);
 
         mTabLayout = requireViewById(R.id.tabs);
         mNavIcon = requireViewById(R.id.nav_icon);
@@ -220,6 +219,9 @@ public class Toolbar extends FrameLayout {
                 case 1:
                     setNavButtonMode(NavButtonMode.CLOSE);
                     break;
+                case 2:
+                    setNavButtonMode(NavButtonMode.DOWN);
+                    break;
                 default:
                     if (Log.isLoggable(TAG, Log.WARN)) {
                         Log.w(TAG, "Unknown navigation button style");
@@ -249,15 +251,20 @@ public class Toolbar extends FrameLayout {
             }
         });
 
-        getViewTreeObserver().addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        for (OnHeightChangedListener listener : mOnHeightChangedListeners) {
-                            listener.onHeightChanged(getHeight());
-                        }
-                    }
-                });
+        getViewTreeObserver().addOnGlobalLayoutListener(() -> {
+            for (OnHeightChangedListener listener : mOnHeightChangedListeners) {
+                listener.onHeightChanged(getHeight());
+            }
+        });
+    }
+
+    /**
+     * Override this in a subclass to allow for different toolbar layouts within a single app.
+     *
+     * <p>Non-system apps should not use this, as customising the layout isn't possible with RROs
+     */
+    protected int getToolbarLayout() {
+        return R.layout.car_ui_toolbar;
     }
 
     @Override
@@ -455,10 +462,12 @@ public class Toolbar extends FrameLayout {
      * {@link OnBackListener#onBack()}.
      */
     public enum NavButtonMode {
-        /** Display the nav button as a back button */
+        /** A back button */
         BACK,
-        /** Display the nav button as a close button */
-        CLOSE
+        /** A close button */
+        CLOSE,
+        /** A down button, used to indicate that the page will animate down when navigating away */
+        DOWN
     }
 
     /** Sets the {@link NavButtonMode} */
@@ -666,10 +675,19 @@ public class Toolbar extends FrameLayout {
             }
         };
 
+        switch (mNavButtonMode) {
+            case CLOSE:
+                mNavIcon.setImageResource(R.drawable.car_ui_icon_close);
+                break;
+            case DOWN:
+                mNavIcon.setImageResource(R.drawable.car_ui_icon_down);
+                break;
+            default:
+                mNavIcon.setImageResource(R.drawable.car_ui_icon_arrow_back);
+                break;
+        }
+
         mNavIcon.setVisibility(state != State.HOME ? VISIBLE : INVISIBLE);
-        mNavIcon.setImageResource(mNavButtonMode == NavButtonMode.BACK
-                ? R.drawable.car_ui_icon_arrow_back
-                : R.drawable.car_ui_icon_close);
         mLogo.setVisibility(state == State.HOME && mHasLogo ? VISIBLE : INVISIBLE);
         mNavIconContainer.setVisibility(state != State.HOME || mHasLogo ? VISIBLE : GONE);
         mNavIconContainer.setOnClickListener(state != State.HOME ? backClickListener : null);
