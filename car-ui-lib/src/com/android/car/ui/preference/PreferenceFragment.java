@@ -16,12 +16,21 @@
 
 package com.android.car.ui.preference;
 
+import android.os.Bundle;
+import android.view.View;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.MultiSelectListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.android.car.ui.R;
+import com.android.car.ui.toolbar.Toolbar;
 
 /**
  * A PreferenceFragmentCompat is the entry point to using the Preference library.
@@ -34,6 +43,21 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat {
 
     private static final String DIALOG_FRAGMENT_TAG =
             "com.android.car.ui.PreferenceFragment.DIALOG";
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        final RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
+        final Toolbar toolbar = view.findViewById(R.id.toolbar);
+        if (recyclerView == null || toolbar == null) {
+            return;
+        }
+
+        recyclerView.setPadding(0, toolbar.getHeight(), 0, 0);
+        toolbar.registerToolbarHeightChangeListener(height -> {
+            recyclerView.setPadding(0, height, 0, 0);
+        });
+    }
 
     /**
      * Called when a preference in the tree requests to display a dialog. Subclasses should override
