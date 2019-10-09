@@ -36,6 +36,7 @@
         <attr name="navButtonMode" format="enum">
             <enum name="back" value="0"/>
             <enum name="close" value="1"/>
+            <enum name="down" value="2"/>
         </attr>
     </declare-styleable>
 
