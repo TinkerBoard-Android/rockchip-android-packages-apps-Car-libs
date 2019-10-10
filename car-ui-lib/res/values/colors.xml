@@ -16,6 +16,8 @@
 <resources>
     <!-- General -->
 
+    <!-- Background color to use on full screen activities -->
+    <color name="car_ui_activity_background_color">#000000</color>
     <!-- Main text color (titles, text body, etc.) -->
     <color name="car_ui_primary_text_color">#FFFFFFFF</color>
     <!-- Text color used in subtitles or other secondary text blocks -->
@@ -32,22 +34,27 @@
 
     <!-- Toolbar -->
 
+    <!-- Color used on the navigation icon -->
+    <color name="car_ui_nav_icon_color">@color/car_ui_primary_text_color</color>
     <!-- Text color applied to the hint displayed inside the search box -->
     <color name="car_ui_toolbar_search_hint_text_color">#33FFFFFF</color>
-    <!-- Toolbar background color -->
-    <color name="car_ui_toolbar_background_color">#E0000000</color>
+    <!-- Menu item colors -->
     <color name="car_ui_toolbar_menu_item_icon_deactivated_color">@color/car_ui_primary_text_color</color>
     <color name="car_ui_toolbar_menu_item_icon_disabled_color">@color/car_ui_secondary_text_color</color>
     <color name="car_ui_toolbar_menu_item_icon_restricted_color">@color/car_ui_secondary_text_color</color>
     <color name="car_ui_toolbar_menu_item_icon_activated_color">#FF000000</color>
+    <!-- Menu item background colors -->
     <color name="car_ui_toolbar_menu_item_icon_background_deactivated_color">@android:color/transparent</color>
     <color name="car_ui_toolbar_menu_item_icon_background_disabled_color">@color/car_ui_toolbar_menu_item_icon_disabled_color</color>
     <color name="car_ui_toolbar_menu_item_icon_background_restricted_color">@color/car_ui_toolbar_menu_item_icon_restricted_color</color>
     <color name="car_ui_toolbar_menu_item_icon_background_activated_color">@color/car_ui_primary_text_color</color>
 
-    <!--  Car UI Recycler View  -->
-    <!-- The color of the scroll bar indicator in the CarUiRecyclerView. -->
+    <!-- Recycler View  -->
+
+    <!-- Color of the scroll bar indicator in the CarUiRecyclerView. -->
     <color name="car_ui_scrollbar_thumb">#99ffffff</color>
+    <!-- Color of the divider views between CarUiRecyclerView items -->
+    <color name="car_ui_recyclerview_divider_color">@android:color/transparent</color>
 
     <!-- Preferences -->
 
@@ -55,7 +62,6 @@
     <color name="car_ui_preference_summary_text_color">#ffdadce0</color>
     <color name="car_ui_preference_title_text_color">@android:color/white</color>
     <color name="car_ui_preference_edit_text_dialog_message_text_color">#ffdadce0</color>
-
     <color name="car_ui_preference_icon_color">@android:color/white</color>
-
+    <color name="car_ui_preference_switch_track_text_color">@android:color/white</color>
 </resources>
