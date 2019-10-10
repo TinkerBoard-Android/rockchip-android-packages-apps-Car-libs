@@ -135,6 +135,7 @@ class MenuItemRenderer implements MenuItem.Listener {
         }
 
         recursiveSetEnabledAndDrawableState(mView);
+        mView.setActivated(mMenuItem.isActivated());
 
         MenuItem.OnClickListener onClickListener = mMenuItem.getOnClickListener();
         if (onClickListener != null || mMenuItem.isCheckable()) {
@@ -143,6 +144,10 @@ class MenuItemRenderer implements MenuItem.Listener {
                         R.string.car_ui_restricted_while_driving, Toast.LENGTH_LONG).show());
             } else {
                 mView.setOnClickListener(v -> {
+                    if (mMenuItem.isActivatable()) {
+                        mMenuItem.setActivated(!mMenuItem.isActivated());
+                    }
+
                     if (mMenuItem.isCheckable()) {
                         mMenuItem.setChecked(!mMenuItem.isChecked());
                     }
