@@ -36,6 +36,14 @@
     <color name="car_ui_toolbar_search_hint_text_color">#33FFFFFF</color>
     <!-- Toolbar background color -->
     <color name="car_ui_toolbar_background_color">#E0000000</color>
+    <color name="car_ui_toolbar_menu_item_icon_deactivated_color">@color/car_ui_primary_text_color</color>
+    <color name="car_ui_toolbar_menu_item_icon_disabled_color">@color/car_ui_secondary_text_color</color>
+    <color name="car_ui_toolbar_menu_item_icon_restricted_color">@color/car_ui_secondary_text_color</color>
+    <color name="car_ui_toolbar_menu_item_icon_activated_color">#FF000000</color>
+    <color name="car_ui_toolbar_menu_item_icon_background_deactivated_color">@android:color/transparent</color>
+    <color name="car_ui_toolbar_menu_item_icon_background_disabled_color">@color/car_ui_toolbar_menu_item_icon_disabled_color</color>
+    <color name="car_ui_toolbar_menu_item_icon_background_restricted_color">@color/car_ui_toolbar_menu_item_icon_restricted_color</color>
+    <color name="car_ui_toolbar_menu_item_icon_background_activated_color">@color/car_ui_primary_text_color</color>
 
     <!--  Car UI Recycler View  -->
     <!-- The color of the scroll bar indicator in the CarUiRecyclerView. -->

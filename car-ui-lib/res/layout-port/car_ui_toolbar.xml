@@ -162,7 +162,7 @@
             android:layout_width="@dimen/car_ui_primary_icon_size"
             android:layout_height="@dimen/car_ui_primary_icon_size"
             android:layout_gravity="center"
-            android:background="@drawable/car_ui_toolbar_icon_background"
+            android:background="@drawable/car_ui_toolbar_menu_item_icon_ripple"
             android:tint="@color/car_ui_toolbar_menu_item_icon_color"
             android:tintMode="src_in"/>
     </FrameLayout>
