@@ -197,6 +197,9 @@
         <item name="listChoiceIndicatorMultipleAnimated">?android:attr/listChoiceIndicatorMultiple</item>
 
         <item name="preferenceTheme">@style/CarUiPreferenceTheme</item>
+
+        <!-- Used by CarUiRecyclerView -->
+        <item name="carUiRecyclerViewStyle">@style/Widget.CarUi.CarUiRecyclerView</item>
     </style>
 
     <style name="CarUiPreferenceTheme">

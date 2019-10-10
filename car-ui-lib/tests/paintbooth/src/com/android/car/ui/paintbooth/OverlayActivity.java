@@ -27,8 +27,9 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreference;
+
+import com.android.car.ui.preference.PreferenceFragment;
 
 import java.util.Collections;
 import java.util.List;
@@ -56,7 +57,7 @@ public class OverlayActivity extends AppCompatActivity {
     }
 
     /** PreferenceFragmentCompat that sets the preference hierarchy from XML */
-    public static class OverlayFragment extends PreferenceFragmentCompat {
+    public static class OverlayFragment extends PreferenceFragment {
 
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {

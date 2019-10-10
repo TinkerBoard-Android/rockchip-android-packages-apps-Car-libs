@@ -97,6 +97,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/car_ui_toolbar_title_margin_start"
+        android:singleLine="true"
         style="@style/TextAppearance.CarUi.Widget.Toolbar.Title"
         app:layout_constraintTop_toTopOf="@id/toolbar_top_guideline"
         app:layout_constraintBottom_toTopOf="@id/toolbar_bottom_guideline"
@@ -166,10 +167,21 @@
 
     <!-- can't use 0dp for layout_height or the constraintlayout effect kicks in -->
     <View
+        android:id="@+id/row_separator"
+        android:layout_width="match_parent"
+        android:layout_height="0.01dp"
+        style="@style/Widget.CarUi.Toolbar.SeparatorView"
+        app:layout_constraintTop_toBottomOf="@id/toolbar_top_guideline"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- can't use 0dp for layout_height or the constraintlayout effect kicks in -->
+    <View
         android:id="@+id/bottom_styleable"
         android:layout_width="match_parent"
         android:layout_height="0.01dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        style="@style/Widget.CarUi.Toolbar.BottomView"
+        app:layout_constraintTop_toBottomOf="@+id/row_separator"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

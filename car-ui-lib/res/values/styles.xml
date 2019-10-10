@@ -25,15 +25,32 @@
     <style name="Widget.CarUi.Toolbar"/>
 
     <style name="Widget.CarUi.Toolbar.NavIcon">
-        <item name="android:tint">@color/car_ui_primary_text_color</item>
+        <item name="android:tint">@color/car_ui_nav_icon_color</item>
         <item name="android:src">@drawable/car_ui_icon_arrow_back</item>
     </style>
 
     <style name="Widget.CarUi.Toolbar.TextButton" parent="Widget.CarUi.Button.Borderless.Colored"/>
 
+    <!-- Style applied to the decoration view between toolbar rows -->
+    <style name="Widget.CarUi.Toolbar.SeparatorView">
+        <item name="android:height">0.01dp</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
+    <!-- Style applied to the decoration view below the toolbar -->
+    <style name="Widget.CarUi.Toolbar.BottomView">
+        <item name="android:height">0.01dp</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
+    <!-- Style applied to the edit box inside the toolbar search area -->
+    <style name="Widget.CarUi.Toolbar.Search.EditText"
+        parent="android:Widget.DeviceDefault.EditText"/>
+
     <style name="Widget.CarUi.CarUiRecyclerView">
         <item name="android:scrollbars">vertical</item>
     </style>
+
     <style name="Widget.CarUi.CarUiRecyclerView.NestedRecyclerView">
         <item name="android:scrollbars">none</item>
     </style>
@@ -87,6 +104,8 @@
 
     <style name="Preference.CarUi.SwitchPreference">
         <item name="android:widgetLayout">@layout/car_ui_preference_widget_switch</item>
+        <item name="android:switchTextOn">@string/car_ui_preference_switch_on</item>
+        <item name="android:switchTextOff">@string/car_ui_preference_switch_off</item>
     </style>
 
     <style name="PreferenceFragment.CarUi">
