@@ -16,7 +16,8 @@
   -->
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:title="@string/preferences_screen_title">
 
   <PreferenceCategory
       android:title="@string/basic_preferences">
@@ -35,12 +36,17 @@
         android:key="icon"
         android:title="@string/title_icon_preference"
         android:summary="@string/summary_icon_preference"
-        android:icon="@android:drawable/ic_menu_camera"/>
+        android:icon="@drawable/ic_settings_wifi"/>
 
     <Preference
         android:key="single_line_title"
         android:title="@string/title_single_line_title_preference"
         android:summary="@string/summary_single_line_title_preference"
+        app:singleLineTitle="true"/>
+
+    <Preference
+        android:key="single_line_no_summary"
+        android:title="@string/title_single_line_no_summary"
         app:singleLineTitle="true"/>
   </PreferenceCategory>
 
@@ -57,7 +63,7 @@
         android:title="@string/title_switch_preference"
         android:summary="@string/summary_switch_preference"/>
 
-    <DropDownPreference
+    <com.android.car.ui.preference.CarUiDropDownPreference
         android:key="dropdown"
         android:title="@string/title_dropdown_preference"
         android:entries="@array/entries"
@@ -74,13 +80,13 @@
   <PreferenceCategory
       android:title="@string/dialogs">
 
-    <EditTextPreference
+    <com.android.car.ui.preference.CarUiEditTextPreference
         android:key="edittext"
         android:title="@string/title_edittext_preference"
         app:useSimpleSummaryProvider="true"
         android:dialogTitle="@string/dialog_title_edittext_preference"/>
 
-    <ListPreference
+    <com.android.car.ui.preference.CarUiListPreference
         android:key="list"
         android:title="@string/title_list_preference"
         app:useSimpleSummaryProvider="true"
@@ -88,7 +94,7 @@
         android:entryValues="@array/entry_values"
         android:dialogTitle="@string/dialog_title_list_preference"/>
 
-    <MultiSelectListPreference
+    <com.android.car.ui.preference.CarUiMultiSelectListPreference
         android:key="multi_select_list"
         android:title="@string/title_multi_list_preference"
         android:summary="@string/summary_multi_list_preference"
@@ -102,19 +108,19 @@
       android:title="@string/advanced_attributes"
       app:initialExpandedChildrenCount="1">
 
-    <Preference
+    <com.android.car.ui.preference.CarUiPreference
         android:key="expandable"
         android:title="@string/title_expandable_preference"
         android:summary="@string/summary_expandable_preference"/>
 
-    <Preference
+    <com.android.car.ui.preference.CarUiPreference
         android:title="@string/title_intent_preference"
         android:summary="@string/summary_intent_preference">
 
       <intent android:action="android.intent.action.VIEW"
           android:data="http://www.android.com"/>
 
-    </Preference>
+    </com.android.car.ui.preference.CarUiPreference>
 
     <SwitchPreference
         android:key="parent"
