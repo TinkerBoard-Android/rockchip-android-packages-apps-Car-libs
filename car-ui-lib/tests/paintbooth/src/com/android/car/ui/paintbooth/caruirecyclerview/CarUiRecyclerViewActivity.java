@@ -31,7 +31,7 @@ import java.util.ArrayList;
  */
 public class CarUiRecyclerViewActivity extends Activity {
     private final ArrayList<String> mData = new ArrayList<>();
-    private final int mDataToGenerate = 15;
+    private final int mDataToGenerate = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

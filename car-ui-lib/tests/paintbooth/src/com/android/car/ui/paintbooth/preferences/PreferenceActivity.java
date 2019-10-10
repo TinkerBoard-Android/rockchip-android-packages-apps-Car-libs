@@ -38,15 +38,8 @@ public class PreferenceActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        onBackPressed();
-        return true;
-    }
-
     /** PreferenceFragment that sets the preference hierarchy from XML */
     public static class DemoFragment extends PreferenceFragment {
-
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             // Load the preferences from an XML resource

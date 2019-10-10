@@ -37,7 +37,7 @@ public class PreferenceSwitchWidget extends Switch {
 
     public PreferenceSwitchWidget(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mContext = context;
+        init(context);
     }
 
     public PreferenceSwitchWidget(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -54,6 +54,11 @@ public class PreferenceSwitchWidget extends Switch {
     private void init(Context context) {
         mEnableAnimation = context.getResources().getBoolean(
                 R.bool.car_ui_preference_switch_toggle_show_animation);
+        boolean textBackground = context.getResources().getBoolean(
+                R.bool.car_ui_preference_switch_toggle_use_text_track);
+        if (textBackground) {
+            setTrackDrawable(context.getDrawable(R.drawable.car_ui_preference_switch_text_track));
+        }
     }
 
     @Override

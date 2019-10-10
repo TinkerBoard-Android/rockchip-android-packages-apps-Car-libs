@@ -18,4 +18,4 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal"
-    android:src="@drawable/car_ui_preference_icon_chevron_drawable"/>
+    android:src="@drawable/car_ui_preference_icon_chevron"/>
