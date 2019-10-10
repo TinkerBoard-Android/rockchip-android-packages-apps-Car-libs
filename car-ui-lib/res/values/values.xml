@@ -16,8 +16,15 @@
   -->
 
 <resources>
+    <!-- Toolbar -->
+
+    <!-- Whether tabs should use flex layout or not -->
     <bool name="car_ui_tab_flexible_layout">false</bool>
+    <!-- Layout to be used for toolbar tabs -->
     <item name="car_ui_tab_item_layout" type="layout">@layout/car_ui_tab_item</item>
 
-    <item name="car_ui_preference_icon_chevron_drawable" type="drawable">@null</item>
+    <!-- Preferences -->
+
+    <!-- Overlayable drawable to use for the preference chevron -->
+    <item name="car_ui_preference_icon_chevron" type="drawable">@null</item>
 </resources>

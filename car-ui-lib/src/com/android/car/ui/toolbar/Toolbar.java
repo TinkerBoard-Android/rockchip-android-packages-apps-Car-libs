@@ -496,7 +496,7 @@ public class Toolbar extends FrameLayout {
     /** Show/hide the background. When hidden, the toolbar is completely transparent. */
     public void setBackgroundShown(boolean shown) {
         if (shown) {
-            super.setBackground(getContext().getDrawable(R.color.car_ui_toolbar_background_color));
+            super.setBackground(getContext().getDrawable(R.drawable.car_ui_toolbar_background));
         } else {
             super.setBackground(null);
         }
