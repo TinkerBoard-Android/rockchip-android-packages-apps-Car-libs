@@ -19,6 +19,23 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <EditText
+        android:id="@+id/search_bar"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:paddingStart="@dimen/car_ui_touch_target_width"
+        android:paddingEnd="@dimen/car_ui_touch_target_width"
+        android:hint="@string/car_ui_toolbar_default_search_hint"
+        android:textColorHint="@color/car_ui_toolbar_search_hint_text_color"
+        android:inputType="text"
+        android:singleLine="true"
+        android:imeOptions="actionSearch"
+        style="@style/Widget.CarUi.Toolbar.Search.EditText"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <FrameLayout
         android:layout_width="@dimen/car_ui_touch_target_width"
         android:layout_height="@dimen/car_ui_touch_target_height"
@@ -33,22 +50,6 @@
             android:src="@drawable/car_ui_icon_search"
             android:scaleType="fitCenter"/>
     </FrameLayout>
-
-    <EditText
-        android:id="@+id/search_bar"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        android:paddingStart="@dimen/car_ui_touch_target_width"
-        android:paddingEnd="@dimen/car_ui_touch_target_width"
-        android:hint="@string/car_ui_toolbar_default_search_hint"
-        android:textColorHint="@color/car_ui_toolbar_search_hint_text_color"
-        android:inputType="text"
-        android:singleLine="true"
-        android:imeOptions="actionSearch"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
 
     <FrameLayout
         android:id="@+id/search_close"
