@@ -31,4 +31,8 @@
         See: com.android.car.apps.common.CommonFlags#flagImproperImageRefs
     -->
     <bool name="flag_improper_image_references">false</bool>
+
+    <string name="config_letter_tile_font_family" translatable="false">sans-serif-light</string>
+    <!-- Typeface.NORMAL=0; Typeface.BOLD=1; Typeface.ITALIC=2; Typeface.BOLD_ITALIC=3-->
+    <integer name="config_letter_tile_text_style">0</integer>
 </resources>
