@@ -20,6 +20,10 @@
 
   <!-- Strings for Preference Samples -->
   <eat-comment/>
+
+  <!-- Preferences page title [CHAR_LIMIT=NONE] -->
+  <string name="preferences_screen_title">Settings</string>
+
   <!--This section is for basic attributes -->
   <eat-comment/>
   <!-- Category title for basic preferences [CHAR_LIMIT=NONE]-->
@@ -43,6 +47,9 @@
   <string name="title_single_line_title_preference">Single line title preference - no matter how long the title is it will never wrap to multiple lines</string>
   <!-- Summary of a single line title preference [CHAR_LIMIT=NONE]-->
   <string name="summary_single_line_title_preference">This title will be ellipsized instead of wrapping to another line</string>
+
+  <!-- Title of a single line title preference without summary [CHAR_LIMIT=NONE]-->
+  <string name="title_single_line_no_summary">Single line preference - no summary</string>
 
   <!--This section is for preferences that contain a widget in their layout -->
   <eat-comment/>
@@ -123,4 +130,5 @@
   <string name="title_copyable_preference">Copyable preference</string>
   <!-- Summary of a copyable preference [CHAR_LIMIT=NONE]-->
   <string name="summary_copyable_preference">Long press on this preference to copy its summary</string>
+    <string name="preference_title">Settings</string>
 </resources>

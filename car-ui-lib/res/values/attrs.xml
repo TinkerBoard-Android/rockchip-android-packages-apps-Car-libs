@@ -63,8 +63,19 @@
         </attr>
     </declare-styleable>
 
-    <declare-styleable name="CarUiRecyclerViewTheme">
-        <attr name="carUiRecyclerViewStyle" format="reference" />
+    <!-- Theme attribute to specify a default style for all CarUiRecyclerViews -->
+    <attr name="carUiRecyclerViewStyle" format="reference" />
+
+    <!-- TODO: Replace this with the Android default text styleable -->
+    <declare-styleable name="CarUiTextDrawable">
+        <!-- Text to be rendered by the drawable -->
+        <attr name="text" format="string" />
+        <!-- Font size -->
+        <attr name="textSize" format="dimension" />
+        <!-- Text color -->
+        <attr name="textColor" format="color" />
+        <!-- Type face to use -->
+        <attr name="typeface" format="string" />
     </declare-styleable>
 
     <attr name="state_ux_restricted" format="boolean" />

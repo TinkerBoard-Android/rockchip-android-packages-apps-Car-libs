@@ -27,6 +27,7 @@ define generate-rro
   LOCAL_PACKAGE_NAME := $$(rro_package_name)
   LOCAL_CERTIFICATE := platform
   LOCAL_SDK_VERSION := current
+  LOCAL_USE_AAPT2 := true
 
   gen := $$(call intermediates-dir-for,ETC,$$(rro_package_name))/AndroidManifest.xml
   $$(gen): $(LOCAL_PATH)/AndroidManifest.xml

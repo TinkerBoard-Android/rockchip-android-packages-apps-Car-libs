@@ -45,7 +45,7 @@
     <!-- Tab icon height (if icons are enabled) -->
     <dimen name="car_ui_tab_icon_height">36dp</dimen>
 
-    <!-- Car toolbar -->
+    <!-- Toolbar -->
     <dimen name="car_ui_toolbar_row_height">96dp</dimen>
     <dimen name="car_ui_toolbar_first_row_height">@dimen/car_ui_toolbar_row_height</dimen>
     <dimen name="car_ui_toolbar_second_row_height">@dimen/car_ui_toolbar_row_height</dimen>
@@ -63,6 +63,9 @@
 
     <!-- Internal artifacts. Do not overlay -->
     <item name="wrap_content" format="integer" type="dimen">-2</item>
+
+    <!-- CarUiRecyclerView -->
+    <dimen name="car_ui_recyclerview_divider_height">0dp</dimen>
 
     <!-- Default Scroll Bar for CarUiRecyclerView -->
     <dimen name="car_ui_scrollbar_button_size">@dimen/car_ui_touch_target_width</dimen>
@@ -104,6 +107,11 @@
     <dimen name="car_ui_preference_edit_text_dialog_message_margin_end">24dp</dimen>
     <dimen name="car_ui_preference_edit_text_dialog_text_margin_start">24dp</dimen>
     <dimen name="car_ui_preference_edit_text_dialog_text_margin_end">24dp</dimen>
+
+    <dimen name="car_ui_preference_switch_text_size">30sp</dimen>
+    <dimen name="car_ui_preference_switch_width">288dp</dimen>
+    <dimen name="car_ui_preference_switch_width_half">144dp</dimen>
+    <dimen name="car_ui_preference_switch_height">101dp</dimen>
 
     <!-- Alert dialog   -->
 

@@ -27,7 +27,7 @@ import java.util.ArrayList;
 /** Activity that shows GridCarUiRecyclerView example with dummy data. */
 public class GridCarUiRecyclerViewActivity extends Activity {
     private final ArrayList<String> mData = new ArrayList<>();
-    private final int mDataToGenerate = 50;
+    private final int mDataToGenerate = 200;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
