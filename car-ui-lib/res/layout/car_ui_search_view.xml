@@ -21,7 +21,7 @@
 
     <FrameLayout
         android:layout_width="@dimen/car_ui_touch_target_width"
-        android:layout_height="@dimen/car_ui_touch_target_width"
+        android:layout_height="@dimen/car_ui_touch_target_height"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -52,7 +52,7 @@
 
     <FrameLayout
         android:id="@+id/search_close"
-        android:layout_width="@dimen/car_ui_touch_target_height"
+        android:layout_width="@dimen/car_ui_touch_target_width"
         android:layout_height="@dimen/car_ui_touch_target_height"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -61,7 +61,7 @@
             android:layout_width="@dimen/car_ui_primary_icon_size"
             android:layout_height="@dimen/car_ui_primary_icon_size"
             android:layout_gravity="center"
-            android:background="@drawable/car_ui_toolbar_icon_background"
+            android:background="@drawable/car_ui_toolbar_menu_item_icon_ripple"
             android:src="@drawable/car_ui_icon_close"
             android:scaleType="fitCenter"/>
     </FrameLayout>
