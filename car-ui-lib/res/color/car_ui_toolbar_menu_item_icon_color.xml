@@ -17,7 +17,8 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:color="@color/car_ui_tab_unselected_color" android:state_enabled="false"/>
-    <item android:color="@color/car_ui_tab_unselected_color" app:state_ux_restricted="true"/>
-    <item android:color="@color/car_ui_tab_selected_color"/>
+    <item android:color="@color/car_ui_toolbar_menu_item_icon_activated_color" android:state_activated="true"/>
+    <item android:color="@color/car_ui_toolbar_menu_item_icon_disabled_color" android:state_enabled="false"/>
+    <item android:color="@color/car_ui_toolbar_menu_item_icon_restricted_color" app:state_ux_restricted="true"/>
+    <item android:color="@color/car_ui_toolbar_menu_item_icon_deactivated_color"/>
 </selector>

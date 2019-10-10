@@ -15,7 +15,10 @@
   limitations under the License.
   -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:color="@color/car_ui_tab_selected_color" android:state_enabled="true"/>
-    <item android:color="@color/car_ui_tab_unselected_color"/>
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:color="@color/car_ui_toolbar_menu_item_icon_background_deactivated_color" android:state_activated="false"/>
+    <item android:color="@color/car_ui_toolbar_menu_item_icon_background_disabled_color" android:state_enabled="false"/>
+    <item android:color="@color/car_ui_toolbar_menu_item_icon_background_restricted_color" app:state_ux_restricted="true"/>
+    <item android:color="@color/car_ui_toolbar_menu_item_icon_background_activated_color"/>
 </selector>
