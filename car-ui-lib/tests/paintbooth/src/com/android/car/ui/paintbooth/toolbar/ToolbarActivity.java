@@ -104,6 +104,16 @@ public class ToolbarActivity extends Activity {
             toolbar.setMenuItems(mMenuItems);
         }));
 
+        mButtons.add(Pair.create("MenuItem: Add activatable", v -> {
+            mMenuItems.add(new MenuItem.Builder(this)
+                    .setIcon(R.drawable.ic_tracklist)
+                    .setActivatable()
+                    .setOnClickListener(i ->
+                            Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT).show())
+                    .build());
+            toolbar.setMenuItems(mMenuItems);
+        }));
+
         mButtons.add(Pair.create("MenuItem: Toggle Visibility", v -> {
             EditText textBox = new EditText(this);
             textBox.setInputType(InputType.TYPE_CLASS_NUMBER);

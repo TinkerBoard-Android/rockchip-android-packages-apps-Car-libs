@@ -20,11 +20,16 @@
     android:layout_height="@dimen/car_ui_touch_target_height"
     android:layout_gravity="center_vertical">
     <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/car_ui_toolbar_menu_item_icon_background"
+        android:background="@drawable/car_ui_toolbar_menu_item_icon_ripple"
+        android:scaleType="center"/>
+    <ImageView
         android:id="@+id/car_ui_toolbar_menu_item_icon"
-        android:layout_width="@dimen/car_ui_primary_icon_size"
-        android:layout_height="@dimen/car_ui_primary_icon_size"
+        android:layout_width="@dimen/car_ui_toolbar_menu_item_icon_size"
+        android:layout_height="@dimen/car_ui_toolbar_menu_item_icon_size"
         android:layout_gravity="center"
-        android:background="@drawable/car_ui_toolbar_icon_background"
         android:tint="@color/car_ui_toolbar_menu_item_icon_color"
         android:tintMode="src_in"/>
 </FrameLayout>

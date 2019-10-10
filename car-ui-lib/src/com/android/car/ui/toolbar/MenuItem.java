@@ -44,6 +44,7 @@ public class MenuItem {
 
     private final Context mContext;
     private final boolean mIsCheckable;
+    private final boolean mIsActivatable;
     final int mCustomLayoutId;
     private final boolean mIsSearch;
     @CarUxRestrictions.CarUxRestrictionsInfo
@@ -57,10 +58,12 @@ public class MenuItem {
     private boolean mIsEnabled;
     private boolean mIsChecked;
     private boolean mIsVisible;
+    private boolean mIsActivated;
 
     private MenuItem(Builder builder) {
         mContext = builder.mContext;
         mIsCheckable = builder.mIsCheckable;
+        mIsActivatable = builder.mIsActivatable;
         mCustomLayoutId = builder.mCustomLayoutId;
         mTitle = builder.mTitle;
         mIcon = builder.mIcon;
@@ -69,6 +72,7 @@ public class MenuItem {
         mIsEnabled = builder.mIsEnabled;
         mIsChecked = builder.mIsChecked;
         mIsVisible = builder.mIsVisible;
+        mIsActivated = builder.mIsActivated;
         mIsSearch = builder.mIsSearch;
         mUxRestrictions = builder.mUxRestrictions;
     }
@@ -126,6 +130,31 @@ public class MenuItem {
     /** Sets whether or not the MenuItem is visible */
     public void setVisible(boolean visible) {
         mIsVisible = visible;
+
+        update();
+    }
+
+    /**
+     * Returns whether the MenuItem is activatable. If it is, it's every click will toggle
+     * the MenuItem's View to appear activated or not.
+     */
+    public boolean isActivatable() {
+        return mIsActivatable;
+    }
+
+    /** Returns whether or not this view is selected. Toggles after every click */
+    public boolean isActivated() {
+        return mIsActivated;
+    }
+
+    /** Sets the MenuItem as activated and updates it's View to the activated state */
+    public void setActivated(boolean activated) {
+        if (!isActivatable()) {
+            throw new IllegalStateException(
+                    "Cannot call setActivated() on a non-activatable MenuItem");
+        }
+
+        mIsActivated = activated;
 
         update();
     }
@@ -217,6 +246,8 @@ public class MenuItem {
         private boolean mIsCheckable = false;
         private boolean mIsChecked = false;
         private boolean mIsVisible = true;
+        private boolean mIsActivatable = false;
+        private boolean mIsActivated = false;
         private int mCustomLayoutId;
         private boolean mIsSearch = false;
         @CarUxRestrictions.CarUxRestrictionsInfo
@@ -243,7 +274,11 @@ public class MenuItem {
             return this;
         }
 
-        /** Sets the icon to a drawable resource id */
+        /**
+         * Sets the icon to a drawable resource id.
+         *
+         * <p>The icon's color and size will be changed to match the other MenuItems.
+         */
         public Builder setIcon(int resId) {
             mIcon = mContext.getDrawable(resId);
             return this;
@@ -252,6 +287,25 @@ public class MenuItem {
         /** Sets whether the MenuItem is visible or not. Default true. */
         public Builder setVisible(boolean visible) {
             mIsVisible = visible;
+            return this;
+        }
+
+        /**
+         * Makes the MenuItem activatable, which means it will toggle it's visual state after
+         *  every click.
+         */
+        public Builder setActivatable() {
+            mIsActivatable = true;
+            return this;
+        }
+
+        /**
+         * Sets whether or not the MenuItem is selected. If it is,
+         * {@link View#setSelected(boolean)} will be called on its View.
+         */
+        public Builder setActivated(boolean activated) {
+            setActivatable();
+            mIsActivated = activated;
             return this;
         }
 
