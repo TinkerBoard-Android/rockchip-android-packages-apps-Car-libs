@@ -32,4 +32,6 @@
     <bool name="car_ui_preference_switch_toggle_show_animation">true</bool>
     <bool name="car_ui_preference_switch_toggle_use_text_track">false</bool>
     <bool name="car_ui_preference_show_chevron">false</bool>
+
+    <bool name="car_ui_preference_list_show_full_screen">true</bool>
 </resources>
