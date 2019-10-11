@@ -79,9 +79,9 @@ public class CarUiRecyclerViewTest {
                 .inflate(R.layout.test_linear_car_ui_recycler_view, null);
 
         mCarUiRecyclerView = mView.findViewById(R.id.test_prv);
-        mCarUiRecyclerView.setAdapter(mAdapter);
 
-        assertThat(mCarUiRecyclerView.getLayoutManager()).isInstanceOf(LinearLayoutManager.class);
+        assertThat(mCarUiRecyclerView.getEffectiveLayoutManager()).isInstanceOf(
+                LinearLayoutManager.class);
     }
 
     @Test
@@ -90,9 +90,9 @@ public class CarUiRecyclerViewTest {
                 .inflate(R.layout.test_grid_car_ui_recycler_view, null);
 
         mCarUiRecyclerView = mView.findViewById(R.id.test_prv);
-        mCarUiRecyclerView.setAdapter(mAdapter);
 
-        assertThat(mCarUiRecyclerView.getLayoutManager()).isInstanceOf(GridLayoutManager.class);
+        assertThat(mCarUiRecyclerView.getEffectiveLayoutManager()).isInstanceOf(
+                GridLayoutManager.class);
     }
 
     @Test
