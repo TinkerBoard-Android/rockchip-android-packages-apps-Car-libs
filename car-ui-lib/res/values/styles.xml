@@ -55,6 +55,13 @@
         <item name="android:scrollbars">none</item>
     </style>
 
+    <style name="Preference.CarUi.ListPreference" parent="android:Theme.DeviceDefault.Dialog">
+        <item name="android:windowNoTitle">true</item>
+        <!-- Set this to true if you want Full Screen without status bar -->
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowIsFloating">false</item>
+    </style>
+
     <!-- Preference Styles -->
 
     <style name="Preference.CarUi">
@@ -111,6 +118,10 @@
     <style name="PreferenceFragment.CarUi">
         <item name="android:divider">?android:attr/listDivider</item>
         <item name="android:layout">@layout/car_ui_preference_fragment</item>
+    </style>
+
+    <style name="RadioButton.CarUi" parent="android:Widget.DeviceDefault.Light.CompoundButton.RadioButton">
+        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
     </style>
 
     <style name="PreferenceFragmentList.CarUi">
