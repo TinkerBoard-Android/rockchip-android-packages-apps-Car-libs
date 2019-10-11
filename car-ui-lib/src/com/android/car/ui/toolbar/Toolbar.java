@@ -165,14 +165,14 @@ public class Toolbar extends FrameLayout {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(getToolbarLayout(), this, true);
 
-        mTabLayout = requireViewById(R.id.tabs);
-        mNavIcon = requireViewById(R.id.nav_icon);
-        mLogo = requireViewById(R.id.logo);
-        mNavIconContainer = requireViewById(R.id.nav_icon_container);
-        mMenuItemsContainer = requireViewById(R.id.menu_items_container);
-        mTitle = requireViewById(R.id.title);
-        mSearchView = requireViewById(R.id.search_view);
-        mCustomViewContainer = requireViewById(R.id.custom_view_container);
+        mTabLayout = requireViewById(R.id.car_ui_toolbar_tabs);
+        mNavIcon = requireViewById(R.id.car_ui_toolbar_nav_icon);
+        mLogo = requireViewById(R.id.car_ui_toolbar_logo);
+        mNavIconContainer = requireViewById(R.id.car_ui_toolbar_nav_icon_container);
+        mMenuItemsContainer = requireViewById(R.id.car_ui_toolbar_menu_items_container);
+        mTitle = requireViewById(R.id.car_ui_toolbar_title);
+        mSearchView = requireViewById(R.id.car_ui_toolbar_search_view);
+        mCustomViewContainer = requireViewById(R.id.car_ui_toolbar_custom_view_container);
         mOverflowButton = requireViewById(R.id.car_ui_toolbar_overflow_button);
 
         TypedArray a = context.obtainStyledAttributes(

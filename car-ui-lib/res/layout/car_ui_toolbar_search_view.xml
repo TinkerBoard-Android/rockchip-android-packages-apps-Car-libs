@@ -20,7 +20,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <EditText
-        android:id="@+id/search_bar"
+        android:id="@+id/car_ui_toolbar_search_bar"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:paddingStart="@dimen/car_ui_touch_target_width"
@@ -43,7 +43,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent">
         <ImageView
-            android:id="@+id/icon"
+            android:id="@+id/car_ui_toolbar_search_icon"
             android:layout_width="@dimen/car_ui_primary_icon_size"
             android:layout_height="@dimen/car_ui_primary_icon_size"
             android:layout_gravity="center"
@@ -52,7 +52,7 @@
     </FrameLayout>
 
     <FrameLayout
-        android:id="@+id/search_close"
+        android:id="@+id/car_ui_toolbar_search_close"
         android:layout_width="@dimen/car_ui_touch_target_width"
         android:layout_height="@dimen/car_ui_touch_target_height"
         app:layout_constraintTop_toTopOf="parent"
