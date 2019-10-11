@@ -16,11 +16,22 @@
 
 package com.android.car.media.common;
 
+import androidx.media.MediaBrowserServiceCompat;
+
 /**
  * Holds constants used when dealing with MediaBrowserServices that support the
  * content style API for media.
  */
 public final class MediaConstants {
+
+    /**
+     * Integer extra indicating the recommended size (in pixels) for media art bitmaps. The value
+     * is passed in the rootHints Bundle of {@link MediaBrowserServiceCompat#onGetRoot} and can be
+     * retrieved with: rootHints.getInt("android.media.extras.MEDIA_ART_SIZE_HINT_PIXELS", 0).
+     */
+    public static final String EXTRA_MEDIA_ART_SIZE_HINT_PIXELS =
+            "android.media.extras.MEDIA_ART_SIZE_HINT_PIXELS";
+
     /**
      * Bundle extra holding the Pending Intent to launch to let users resolve the current error.
      * See {@link #ERROR_RESOLUTION_ACTION_LABEL} for more details.
