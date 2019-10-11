@@ -66,8 +66,6 @@
 
     <style name="Preference.CarUi">
         <item name="android:layout">@layout/car_ui_preference</item>
-        <item name="allowDividerAbove">@bool/car_ui_preference_allow_divider_above</item>
-        <item name="allowDividerBelow">@bool/car_ui_preference_allow_divider_below</item>
     </style>
 
     <style name="Preference.CarUi.Category">
@@ -75,8 +73,6 @@
         <!-- The title should not dim if the category is disabled, instead only the preference children should dim. -->
         <item name="android:shouldDisableView">false</item>
         <item name="android:selectable">false</item>
-        <item name="allowDividerAbove">@bool/car_ui_preference_category_allow_divider_above</item>
-        <item name="allowDividerBelow">@bool/car_ui_preference_category_allow_divider_below</item>
     </style>
 
     <style name="Preference.CarUi.CheckBoxPreference">
