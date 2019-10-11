@@ -22,8 +22,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Bundle;
 import android.support.v4.media.MediaBrowserCompat;
 import android.util.Log;
+
+import com.android.car.media.common.MediaConstants;
 
 /**
  * A helper class to connect to a single {@link MediaBrowserCompat}. Connecting to a new one
@@ -43,6 +46,7 @@ public class MediaBrowserConnector {
 
     private final Context mContext;
     private final Callback mCallback;
+    private final int mMaxBitmapSizePx;
 
     @Nullable private ComponentName mBrowseService;
     @Nullable private MediaBrowserCompat mBrowser;
@@ -55,6 +59,8 @@ public class MediaBrowserConnector {
     MediaBrowserConnector(@NonNull Context context, @NonNull Callback callback) {
         mContext = context;
         mCallback = callback;
+        mMaxBitmapSizePx = mContext.getResources().getInteger(
+                com.android.car.media.common.R.integer.media_items_bitmap_max_size_px);
     }
 
     /** Counter so callbacks from obsolete connections can be ignored. */
@@ -139,6 +145,8 @@ public class MediaBrowserConnector {
     @NonNull
     protected MediaBrowserCompat createMediaBrowser(@NonNull ComponentName browseService,
             @NonNull MediaBrowserCompat.ConnectionCallback callback) {
-        return new MediaBrowserCompat(mContext, browseService, callback, null);
+        Bundle rootHints = new Bundle();
+        rootHints.putInt(MediaConstants.EXTRA_MEDIA_ART_SIZE_HINT_PIXELS, mMaxBitmapSizePx);
+        return new MediaBrowserCompat(mContext, browseService, callback, rootHints);
     }
 }
