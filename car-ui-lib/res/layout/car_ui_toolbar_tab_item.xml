@@ -18,15 +18,15 @@
 <merge
     xmlns:android="http://schemas.android.com/apk/res/android">
     <ImageView
-        android:id="@+id/car_ui_tab_item_icon"
-        android:layout_width="@dimen/car_ui_tab_icon_width"
-        android:layout_height="@dimen/car_ui_tab_icon_height"
+        android:id="@+id/car_ui_toolbar_tab_item_icon"
+        android:layout_width="@dimen/car_ui_toolbar_tab_icon_width"
+        android:layout_height="@dimen/car_ui_toolbar_tab_icon_height"
         android:scaleType="fitCenter"
-        android:tint="@color/car_ui_tab_item_selector"
+        android:tint="@color/car_ui_toolbar_tab_item_selector"
         android:tintMode="src_in"/>
     <TextView
-        android:id="@+id/car_ui_tab_item_text"
-        android:layout_width="@dimen/car_ui_tab_text_width"
+        android:id="@+id/car_ui_toolbar_tab_item_text"
+        android:layout_width="@dimen/car_ui_toolbar_tab_text_width"
         android:layout_height="wrap_content"
         android:singleLine="true"
         android:gravity="center"
