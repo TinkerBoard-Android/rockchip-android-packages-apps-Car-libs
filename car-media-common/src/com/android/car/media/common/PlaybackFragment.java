@@ -91,7 +91,7 @@ public class PlaybackFragment extends Fragment {
                 // Let the Media center trampoline figure out what to open.
                 v -> startActivity(new Intent(Car.CAR_INTENT_ACTION_MEDIA_TEMPLATE)));
 
-        int max = activity.getResources().getInteger(R.integer.playback_widget_bitmap_max_size_px);
+        int max = activity.getResources().getInteger(R.integer.media_items_bitmap_max_size_px);
         Size maxArtSize = new Size(max, max);
         mAlbumArtBinder = new ImageBinder<>(PlaceholderType.FOREGROUND, maxArtSize,
                 drawable -> {
