@@ -16,6 +16,7 @@
 package com.android.car.ui.toolbar;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.util.ArraySet;
@@ -80,7 +81,7 @@ public class TabLayout extends LinearLayout {
     private final boolean mTabFlexibleLayout;
     private final int mTabPaddingX;
 
-    private final Set<Listener> mListeners;
+    private final Set<Listener> mListeners = new ArraySet<>();
 
     private final TabAdapter mTabAdapter;
 
@@ -94,12 +95,12 @@ public class TabLayout extends LinearLayout {
 
     public TabLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        mListeners = new ArraySet<>();
+        Resources resources = context.getResources();
 
-        mTabPaddingX = context.getResources().getDimensionPixelSize(R.dimen.car_ui_tab_padding_x);
-        mTabFlexibleLayout = context.getResources().getBoolean(R.bool.car_ui_tab_flexible_layout);
+        mTabPaddingX = resources.getDimensionPixelSize(R.dimen.car_ui_toolbar_tab_padding_x);
+        mTabFlexibleLayout = resources.getBoolean(R.bool.car_ui_toolbar_tab_flexible_layout);
 
-        mTabAdapter = new TabAdapter(context, R.layout.car_ui_tab_item_layout, this);
+        mTabAdapter = new TabAdapter(context, R.layout.car_ui_toolbar_tab_item_layout, this);
     }
 
     /**
@@ -289,8 +290,8 @@ public class TabLayout extends LinearLayout {
         private void presentTabItemView(int position, @NonNull View tabItemView) {
             Tab tab = mTabList.get(position);
 
-            ImageView iconView = tabItemView.findViewById(R.id.car_ui_tab_item_icon);
-            TextView textView = tabItemView.findViewById(R.id.car_ui_tab_item_text);
+            ImageView iconView = tabItemView.findViewById(R.id.car_ui_toolbar_tab_item_icon);
+            TextView textView = tabItemView.findViewById(R.id.car_ui_toolbar_tab_item_text);
 
             tabItemView.setOnClickListener(view -> selectTab(tab));
             tab.bindText(textView);
