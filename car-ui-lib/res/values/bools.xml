@@ -24,11 +24,6 @@
          true. -->
     <bool name="car_ui_scrollbar_above_recycler_view">true</bool>
 
-    <bool name="car_ui_preference_allow_divider_above">false</bool>
-    <bool name="car_ui_preference_allow_divider_below">false</bool>
-    <bool name="car_ui_preference_category_allow_divider_above">false</bool>
-    <bool name="car_ui_preference_category_allow_divider_below">false</bool>
-
     <bool name="car_ui_preference_switch_toggle_show_animation">true</bool>
     <bool name="car_ui_preference_switch_toggle_use_text_track">false</bool>
     <bool name="car_ui_preference_show_chevron">false</bool>
