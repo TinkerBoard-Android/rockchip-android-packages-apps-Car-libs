@@ -113,7 +113,7 @@ public class ToolbarTest {
         mToolbar.setState(Toolbar.State.HOME);
         mToolbar.setLogo(R.drawable.test_ic_launcher);
 
-        assertThat(mToolbar.findViewById(R.id.logo).isShown()).isTrue();
+        assertThat(mToolbar.findViewById(R.id.car_ui_toolbar_logo).isShown()).isTrue();
     }
 
     @Test
@@ -121,7 +121,7 @@ public class ToolbarTest {
         mToolbar.setState(Toolbar.State.SUBPAGE);
         mToolbar.setLogo(R.drawable.test_ic_launcher);
 
-        assertThat(mToolbar.findViewById(R.id.logo).isShown()).isFalse();
+        assertThat(mToolbar.findViewById(R.id.car_ui_toolbar_logo).isShown()).isFalse();
     }
 
     @Test
@@ -129,7 +129,7 @@ public class ToolbarTest {
         mToolbar.setState(Toolbar.State.HOME);
         mToolbar.setLogo(0);
 
-        assertThat(mToolbar.findViewById(R.id.logo).isShown()).isFalse();
+        assertThat(mToolbar.findViewById(R.id.car_ui_toolbar_logo).isShown()).isFalse();
     }
 
     @Test
@@ -137,7 +137,7 @@ public class ToolbarTest {
         mToolbar.setState(Toolbar.State.SUBPAGE);
         mToolbar.setLogo(0);
 
-        assertThat(mToolbar.findViewById(R.id.logo).isShown()).isFalse();
+        assertThat(mToolbar.findViewById(R.id.car_ui_toolbar_logo).isShown()).isFalse();
     }
 
     @Test
@@ -203,8 +203,7 @@ public class ToolbarTest {
 
     @Test
     public void menuItems_whenClicked_shouldCallListener() {
-        assertThat(((ViewGroup) mToolbar.findViewById(R.id.menu_items_container)).getChildCount())
-                .isEqualTo(0);
+        assertThat(getMenuItemViewCount()).isEqualTo(0);
 
         Mutable<Boolean> button1Clicked = new Mutable<>(false);
         Mutable<Boolean> button2Clicked = new Mutable<>(false);
@@ -212,16 +211,13 @@ public class ToolbarTest {
                 createMenuItem(i -> button1Clicked.value = true),
                 createMenuItem(i -> button2Clicked.value = true)));
 
-        assertThat(((ViewGroup) mToolbar.findViewById(R.id.menu_items_container)).getChildCount())
-                .isEqualTo(2);
+        assertThat(getMenuItemViewCount()).isEqualTo(2);
 
-        ((ViewGroup) mToolbar.findViewById(R.id.menu_items_container))
-                .getChildAt(0).performClick();
+        getMenuItemView(0).performClick();
 
         assertThat(button1Clicked.value).isTrue();
 
-        ((ViewGroup) mToolbar.findViewById(R.id.menu_items_container))
-                .getChildAt(1).performClick();
+        getMenuItemView(1).performClick();
 
         assertThat(button2Clicked.value).isTrue();
     }
@@ -232,13 +228,11 @@ public class ToolbarTest {
                 createMenuItem(i -> { }),
                 createMenuItem(i -> { })));
 
-        assertThat(((ViewGroup) mToolbar.findViewById(R.id.menu_items_container)).getChildCount())
-                .isEqualTo(2);
+        assertThat(getMenuItemViewCount()).isEqualTo(2);
 
         mToolbar.setMenuItems(null);
 
-        assertThat(((ViewGroup) mToolbar.findViewById(R.id.menu_items_container)).getChildCount())
-                .isEqualTo(0);
+        assertThat(getMenuItemViewCount()).isEqualTo(0);
     }
 
     @Test
@@ -246,10 +240,7 @@ public class ToolbarTest {
         MenuItem item = createMenuItem(i -> { });
         mToolbar.setMenuItems(Collections.singletonList(item));
 
-        View itemView = ((ViewGroup) mToolbar.findViewById(R.id.menu_items_container))
-                .getChildAt(0);
-
-        assertThat(itemView.isShown()).isTrue();
+        assertThat(getMenuItemView(0).isShown()).isTrue();
     }
 
     @Test
@@ -257,11 +248,8 @@ public class ToolbarTest {
         MenuItem item = createMenuItem(i -> { });
         mToolbar.setMenuItems(Collections.singletonList(item));
 
-        View itemView = ((ViewGroup) mToolbar.findViewById(R.id.menu_items_container))
-                .getChildAt(0);
-
         item.setVisible(false);
-        assertThat(itemView.isShown()).isFalse();
+        assertThat(getMenuItemView(0).isShown()).isFalse();
     }
 
     @Test
@@ -269,12 +257,9 @@ public class ToolbarTest {
         MenuItem item = createMenuItem(i -> { });
         mToolbar.setMenuItems(Collections.singletonList(item));
 
-        View itemView = ((ViewGroup) mToolbar.findViewById(R.id.menu_items_container))
-                .getChildAt(0);
-
         item.setVisible(false);
         item.setVisible(true);
-        assertThat(itemView.isShown()).isTrue();
+        assertThat(getMenuItemView(0).isShown()).isTrue();
     }
 
     @Test
@@ -284,16 +269,13 @@ public class ToolbarTest {
                 createMenuItem(i -> { }));
         mToolbar.setMenuItems(menuItems);
 
-        assertThat(((ViewGroup) mToolbar.findViewById(R.id.menu_items_container)).getChildCount())
-                .isEqualTo(2);
+        assertThat(getMenuItemViewCount()).isEqualTo(2);
 
-        View firstMenuItemView = ((ViewGroup) mToolbar.findViewById(R.id.menu_items_container))
-                .getChildAt(0);
+        View firstMenuItemView = getMenuItemView(0);
 
         mToolbar.setMenuItems(menuItems);
 
-        assertThat(firstMenuItemView).isSameAs(((ViewGroup) mToolbar
-                .findViewById(R.id.menu_items_container)).getChildAt(0));
+        assertThat(firstMenuItemView).isSameAs(getMenuItemView(0));
     }
 
     @Test
@@ -305,10 +287,8 @@ public class ToolbarTest {
         mToolbar.setShowMenuItemsWhileSearching(false);
         mToolbar.setState(Toolbar.State.SEARCH);
 
-        assertThat(((ViewGroup) mToolbar.findViewById(R.id.menu_items_container))
-                .getChildAt(0).isShown()).isFalse();
-        assertThat(((ViewGroup) mToolbar.findViewById(R.id.menu_items_container))
-                .getChildAt(1).isShown()).isFalse();
+        assertThat(getMenuItemView(0).isShown()).isFalse();
+        assertThat(getMenuItemView(1).isShown()).isFalse();
     }
 
     @Test
@@ -320,10 +300,8 @@ public class ToolbarTest {
         mToolbar.setShowMenuItemsWhileSearching(true);
         mToolbar.setState(Toolbar.State.SEARCH);
 
-        assertThat(((ViewGroup) mToolbar.findViewById(R.id.menu_items_container))
-                .getChildAt(0).isShown()).isFalse();
-        assertThat(((ViewGroup) mToolbar.findViewById(R.id.menu_items_container))
-                .getChildAt(1).isShown()).isTrue();
+        assertThat(getMenuItemView(0).isShown()).isFalse();
+        assertThat(getMenuItemView(1).isShown()).isTrue();
     }
 
     private MenuItem createMenuItem(MenuItem.OnClickListener listener) {
@@ -333,8 +311,20 @@ public class ToolbarTest {
                 .build();
     }
 
+    private int getMenuItemViewCount() {
+        return ((ViewGroup) mToolbar
+                .findViewById(R.id.car_ui_toolbar_menu_items_container))
+                .getChildCount();
+    }
+
+    private View getMenuItemView(int index) {
+        return ((ViewGroup) mToolbar
+                .findViewById(R.id.car_ui_toolbar_menu_items_container))
+                .getChildAt(index);
+    }
+
     private void pressBack() {
-        mToolbar.findViewById(R.id.nav_icon_container).performClick();
+        mToolbar.findViewById(R.id.car_ui_toolbar_nav_icon_container).performClick();
     }
 
     private static class Mutable<T> {
