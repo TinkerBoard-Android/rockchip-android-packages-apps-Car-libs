@@ -15,10 +15,11 @@
  */
 package com.android.car.ui.uxr;
 
-import android.annotation.Nullable;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.Switch;
+
+import androidx.annotation.Nullable;
 
 /**
  * A {@link Switch} that implements {@link DrawableStateView}, for allowing additional states
