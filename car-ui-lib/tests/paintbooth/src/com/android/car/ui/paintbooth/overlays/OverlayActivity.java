@@ -14,24 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.car.ui.paintbooth;
+package com.android.car.ui.paintbooth.overlays;
 
-import android.car.userlib.CarUserManagerHelper;
-import android.content.Context;
-import android.content.om.IOverlayManager;
-import android.content.om.OverlayInfo;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.SwitchPreference;
 
+import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.preference.PreferenceFragment;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +35,6 @@ import java.util.Map;
  * name as the summary with a toggle switch to enable/disable the overlays.
  */
 public class OverlayActivity extends AppCompatActivity {
-
     private static final String TAG = OverlayActivity.class.getSimpleName();
 
     @Override
@@ -58,52 +52,43 @@ public class OverlayActivity extends AppCompatActivity {
 
     /** PreferenceFragmentCompat that sets the preference hierarchy from XML */
     public static class OverlayFragment extends PreferenceFragment {
+        private OverlayManager mOverlayManager;
 
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-            // Load the preferences from an XML resource
-            setPreferencesFromResource(R.xml.preference_overlays, rootKey);
-
-            CarUserManagerHelper carUserManagerHelper = new CarUserManagerHelper(getContext());
-
-            final IOverlayManager overlayManager = IOverlayManager.Stub.asInterface(
-                    ServiceManager.getService(Context.OVERLAY_SERVICE));
-
-            Map<String, List<OverlayInfo>> overlays = Collections.emptyMap();
             try {
-                overlays = overlayManager.getAllOverlays(
-                        carUserManagerHelper.getCurrentForegroundUserId());
+                mOverlayManager = OverlayManager.getInstance(getContext());
+                setPreferencesFromResource(R.xml.preference_overlays, rootKey);
+
+                Map<String, List<OverlayManager.OverlayInfo>> overlays =
+                        OverlayManager.getInstance(getContext()).getOverlays();
+
+                for (String targetPackage : overlays.keySet()) {
+                    for (OverlayManager.OverlayInfo overlayPackage : overlays.get(targetPackage)) {
+                        SwitchPreference switchPreference = new SwitchPreference(getContext());
+                        switchPreference.setKey(overlayPackage.getPackageName());
+                        switchPreference.setTitle(overlayPackage.getPackageName());
+                        switchPreference.setSummary(targetPackage);
+                        switchPreference.setChecked(overlayPackage.isEnabled());
+
+                        switchPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                            applyOverlay(overlayPackage.getPackageName(), (boolean) newValue);
+                            return true;
+                        });
+
+                        getPreferenceScreen().addPreference(switchPreference);
+                    }
+                }
             } catch (RemoteException e) {
                 Toast.makeText(getContext(), "Something went wrong internally.",
                         Toast.LENGTH_LONG).show();
                 Log.e(TAG, "can't apply overlay: ", e);
             }
-
-            for (String targetPackage : overlays.keySet()) {
-
-                for (OverlayInfo overlayPackage : overlays.get(targetPackage)) {
-                    SwitchPreference switchPreference = new SwitchPreference(getContext());
-                    switchPreference.setKey(overlayPackage.packageName);
-                    switchPreference.setTitle(overlayPackage.packageName);
-                    switchPreference.setSummary(targetPackage);
-                    switchPreference.setChecked(overlayPackage.state == OverlayInfo.STATE_ENABLED);
-
-                    switchPreference.setOnPreferenceChangeListener((preference, newValue) -> {
-                        applyOverlay(overlayPackage.packageName, (boolean) newValue, overlayManager,
-                                carUserManagerHelper);
-                        return true;
-                    });
-
-                    getPreferenceScreen().addPreference(switchPreference);
-                }
-            }
         }
 
-        private void applyOverlay(String overlayPackage, boolean enableOverlay,
-                IOverlayManager overlayManager, CarUserManagerHelper carUserManagerHelper) {
+        private void applyOverlay(String overlayPackage, boolean enableOverlay) {
             try {
-                overlayManager.setEnabled(overlayPackage, enableOverlay,
-                        carUserManagerHelper.getCurrentForegroundUserId());
+                mOverlayManager.applyOverlay(overlayPackage, enableOverlay);
             } catch (RemoteException e) {
                 Toast.makeText(getContext(), "Something went wrong internally.",
                         Toast.LENGTH_LONG).show();
