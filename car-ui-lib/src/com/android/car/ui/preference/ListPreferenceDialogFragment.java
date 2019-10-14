@@ -113,8 +113,8 @@ public class ListPreferenceDialogFragment extends PreferenceDialogFragment imple
         toolbar.registerOnBackListener(this);
 
         ArrayList<String> entries = new ArrayList<>();
-        for (int i = 0; i < mEntries.length; i++) {
-            entries.add(mEntries[i].toString());
+        for (CharSequence element : mEntries) {
+            entries.add(element.toString());
         }
 
         mCarUiRecyclerView = mDialogView.findViewById(R.id.radio_list);
