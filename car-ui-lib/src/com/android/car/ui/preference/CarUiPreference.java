@@ -29,7 +29,7 @@ import com.android.car.ui.R;
  */
 public class CarUiPreference extends Preference {
 
-    private Context mContext;
+    private final Context mContext;
 
     public CarUiPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {

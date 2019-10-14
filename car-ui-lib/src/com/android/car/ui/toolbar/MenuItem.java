@@ -48,7 +48,7 @@ public class MenuItem {
     final int mCustomLayoutId;
     private final boolean mIsSearch;
     @CarUxRestrictions.CarUxRestrictionsInfo
-    private int mUxRestrictions;
+    private final int mUxRestrictions;
 
     private Listener mListener;
     private CharSequence mTitle;
