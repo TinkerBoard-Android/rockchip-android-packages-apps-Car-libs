@@ -29,7 +29,7 @@ import com.android.car.ui.R;
  */
 public class CarUiEditTextPreference extends EditTextPreference {
 
-    private Context mContext;
+    private final Context mContext;
 
     public CarUiEditTextPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
