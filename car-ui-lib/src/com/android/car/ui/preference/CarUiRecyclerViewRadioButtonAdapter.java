@@ -47,7 +47,7 @@ public class CarUiRecyclerViewRadioButtonAdapter extends
 
     private OnRadioButtonClickedListener mOnRadioButtonClickedListener;
 
-    private List<String> mList;
+    private final List<String> mList;
     private int mSelectedPosition = -1;
 
     public CarUiRecyclerViewRadioButtonAdapter(List<String> list, int position) {
