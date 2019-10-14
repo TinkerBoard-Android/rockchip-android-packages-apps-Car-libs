@@ -63,11 +63,12 @@ import java.io.IOException;
  * cause the target application to crash.</b>
  */
 public class CarUiTextDrawable extends Drawable {
-    private TextPaint mPaint = new TextPaint();
-    private Rect mTextBounds = new Rect(); // Minimum bounds of the text only.
+    private final TextPaint mPaint = new TextPaint();
+    private final Rect mTextBounds = new Rect(); // Minimum bounds of the text only.
 
     // Attributes initialized during inflation
-    private @Nullable String mText;
+    @Nullable
+    private String mText;
     private Typeface mTypeface = Typeface.DEFAULT;
     private float mTextSize = 10;
     private int mTextColor = Color.WHITE;
@@ -170,7 +171,8 @@ public class CarUiTextDrawable extends Drawable {
      * Text height is calculated based on a fixed sample text (to avoid height
      * changing every time a different text is rendered)
      */
-    private void calculateTextBounds(TextPaint paint, @Nullable String text, Rect outBounds) {
+    private static void calculateTextBounds(TextPaint paint, @Nullable String text,
+                                            Rect outBounds) {
         outBounds.setEmpty();
         paint.getTextBounds(TEXT_HEIGHT_SAMPLE, 0, TEXT_HEIGHT_SAMPLE.length(), outBounds);
 
@@ -192,10 +194,11 @@ public class CarUiTextDrawable extends Drawable {
         }
     }
 
-    private @NonNull TypedArray themedObtainAttributes(@NonNull Resources res,
-                                                          @Nullable Resources.Theme theme,
-                                                          @NonNull AttributeSet set,
-                                                          @NonNull int[] attrs) {
+    @NonNull
+    private static TypedArray themedObtainAttributes(@NonNull Resources res,
+                                              @Nullable Resources.Theme theme,
+                                              @NonNull AttributeSet set,
+                                              @NonNull int[] attrs) {
         if (theme == null) {
             return res.obtainAttributes(set, attrs);
         }
