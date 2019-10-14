@@ -143,7 +143,7 @@ public class Toolbar extends FrameLayout {
     @NonNull
     private List<MenuItem> mMenuItems = Collections.emptyList();
     private List<MenuItem> mOverflowItems = new ArrayList<>();
-    private List<MenuItemRenderer> mMenuItemRenderers = new ArrayList<>();
+    private final List<MenuItemRenderer> mMenuItemRenderers = new ArrayList<>();
     private AlertDialog mOverflowDialog;
 
     public Toolbar(Context context) {
