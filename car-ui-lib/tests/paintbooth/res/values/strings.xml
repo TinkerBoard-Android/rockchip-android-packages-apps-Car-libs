@@ -130,5 +130,5 @@
   <string name="title_copyable_preference">Copyable preference</string>
   <!-- Summary of a copyable preference [CHAR_LIMIT=NONE]-->
   <string name="summary_copyable_preference">Long press on this preference to copy its summary</string>
-    <string name="preference_title">Settings</string>
+
 </resources>
