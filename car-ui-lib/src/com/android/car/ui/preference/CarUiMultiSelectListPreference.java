@@ -29,7 +29,7 @@ import com.android.car.ui.R;
  */
 public class CarUiMultiSelectListPreference extends MultiSelectListPreference {
 
-    private Context mContext;
+    private final Context mContext;
 
     public CarUiMultiSelectListPreference(Context context) {
         super(context);

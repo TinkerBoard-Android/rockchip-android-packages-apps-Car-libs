@@ -29,7 +29,7 @@ import com.android.car.ui.R;
  */
 public class CarUiDropDownPreference extends DropDownPreference {
 
-    private Context mContext;
+    private final Context mContext;
 
     public CarUiDropDownPreference(Context context) {
         super(context);

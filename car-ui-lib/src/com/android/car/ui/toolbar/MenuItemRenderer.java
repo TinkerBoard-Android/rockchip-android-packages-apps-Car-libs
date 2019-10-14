@@ -36,8 +36,8 @@ class MenuItemRenderer implements MenuItem.Listener {
     private Toolbar.State mToolbarState;
     private CarUxRestrictions mUxRestrictions;
 
-    private MenuItem mMenuItem;
-    private ViewGroup mParentView;
+    private final MenuItem mMenuItem;
+    private final ViewGroup mParentView;
     private View mView;
     private boolean mPreviouslySetOnClickListener = false;
 
