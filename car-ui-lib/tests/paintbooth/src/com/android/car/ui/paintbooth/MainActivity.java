@@ -33,6 +33,7 @@ import com.android.car.ui.paintbooth.caruirecyclerview.GridCarUiRecyclerViewActi
 import com.android.car.ui.paintbooth.dialogs.DialogsActivity;
 import com.android.car.ui.paintbooth.preferences.PreferenceActivity;
 import com.android.car.ui.paintbooth.toolbar.ToolbarActivity;
+import com.android.car.ui.paintbooth.widgets.WidgetActivity;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 
 import java.util.Arrays;
@@ -52,7 +53,8 @@ public class MainActivity extends Activity {
             Pair.create("Grid sample", GridCarUiRecyclerViewActivity.class),
             Pair.create("Preferences sample", PreferenceActivity.class),
             Pair.create("Overlays", OverlayActivity.class),
-            Pair.create("Toolbar sample", ToolbarActivity.class)
+            Pair.create("Toolbar sample", ToolbarActivity.class),
+            Pair.create("Widget sample", WidgetActivity.class)
     );
 
     private class ViewHolder extends RecyclerView.ViewHolder {
