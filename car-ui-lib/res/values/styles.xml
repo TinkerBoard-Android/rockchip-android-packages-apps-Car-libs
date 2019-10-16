@@ -173,6 +173,12 @@
         <item name="android:textSize">24sp</item>
         <item name="android:letterSpacing">@dimen/car_ui_letter_spacing_body3</item>
         <item name="android:textColor">@color/car_ui_toolbar_tab_item_selector</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textFontWeight">400</item>
+    </style>
+
+    <style name="TextAppearance.CarUi.Widget.Toolbar.Tab.Selected">
+        <item name="android:textFontWeight">500</item>
     </style>
 
 </resources>
