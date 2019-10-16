@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 
 import com.android.car.ui.CarUiRobolectricTestRunner;
 import com.android.car.ui.R;
+import com.android.car.ui.utils.ShadowTypeface;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -38,7 +39,7 @@ import java.util.Collections;
 import java.util.List;
 
 @RunWith(CarUiRobolectricTestRunner.class)
-@Config(qualifiers = "land")
+@Config(qualifiers = "land", shadows = ShadowTypeface.class)
 public class ToolbarTest {
 
     private Context mContext;
