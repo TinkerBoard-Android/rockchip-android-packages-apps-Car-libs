@@ -16,19 +16,20 @@
 package com.android.car.ui.paintbooth.toolbar;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.android.car.ui.AlertDialogBuilder;
 import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.MenuItem;
@@ -115,19 +116,17 @@ public class ToolbarActivity extends Activity {
         }));
 
         mButtons.add(Pair.create("MenuItem: Toggle Visibility", v -> {
-            EditText textBox = new EditText(this);
-            textBox.setInputType(InputType.TYPE_CLASS_NUMBER);
-            new AlertDialog.Builder(this)
-                    .setView(textBox)
+            SimpleTextWatcher textWatcher = new SimpleTextWatcher();
+            new AlertDialogBuilder(this)
+                    .setEditBox("", textWatcher, null, InputType.TYPE_CLASS_NUMBER)
                     .setTitle("Enter the index of the MenuItem to toggle")
                     .setPositiveButton("Ok", (dialog, which) -> {
                         try {
-                            MenuItem item = mMenuItems.get(
-                                    Integer.parseInt(textBox.getText().toString()));
+                            MenuItem item = mMenuItems.get(Integer.parseInt(textWatcher.getText()));
                             item.setVisible(!item.isVisible());
                         } catch (NumberFormatException | IndexOutOfBoundsException e) {
                             Toast.makeText(this, "Invalid index \""
-                                            + textBox.getText().toString()
+                                            + textWatcher.getText()
                                             + "\", valid range is 0 to " + (mMenuItems.size() - 1),
                                     Toast.LENGTH_LONG).show();
                         }
@@ -180,6 +179,17 @@ public class ToolbarActivity extends Activity {
         mButtons.add(Pair.create("Add tab", v ->
                 toolbar.addTab(new TabLayout.Tab(getDrawable(R.drawable.ic_launcher), "Foo"))));
 
+        mButtons.add(Pair.create("Add tab with custom text", v -> {
+            SimpleTextWatcher textWatcher = new SimpleTextWatcher();
+            new AlertDialogBuilder(this)
+                    .setEditBox(null, textWatcher, null)
+                    .setTitle("Enter the text for the title")
+                    .setPositiveButton("Ok", (dialog, which) ->
+                        toolbar.addTab(new TabLayout.Tab(getDrawable(R.drawable.ic_launcher),
+                                textWatcher.getText())))
+                    .show();
+        }));
+
         CarUiRecyclerView prv = requireViewById(R.id.list);
         prv.setAdapter(mAdapter);
     }
@@ -220,15 +230,38 @@ public class ToolbarActivity extends Activity {
     };
 
     /** For changing values from lambdas */
-    public static final class Mutable<E> {
+    private static final class Mutable<E> {
         public E value;
 
-        public Mutable() {
+        Mutable() {
             value = null;
         }
 
-        public Mutable(E value) {
+        Mutable(E value) {
             this.value = value;
+        }
+    }
+
+    /** Used for getting text from a dialog. */
+    private static final class SimpleTextWatcher implements TextWatcher {
+
+        private String mValue;
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            mValue = s.toString();
+        }
+
+        public String getText() {
+            return mValue;
         }
     }
 }
