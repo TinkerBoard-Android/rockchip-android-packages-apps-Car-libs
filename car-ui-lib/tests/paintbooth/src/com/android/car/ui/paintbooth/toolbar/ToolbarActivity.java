@@ -67,8 +67,18 @@ public class ToolbarActivity extends Activity {
 
         toolbar.setMenuItems(mMenuItems);
 
-        mButtons.add(Pair.create(getString(R.string.toolbar_change_title),
-                v -> toolbar.setTitle(toolbar.getTitle() + " X")));
+        mButtons.add(Pair.create("Toggle progress bar", v -> {
+            if (toolbar.getProgressBar().getVisibility() == View.GONE) {
+                toolbar.showProgressBar();
+                Toast.makeText(this, "showing progress bar", Toast.LENGTH_SHORT).show();
+            } else {
+                toolbar.hideProgressBar();
+                Toast.makeText(this, "hiding progress bar", Toast.LENGTH_SHORT).show();
+            }
+        }));
+
+        mButtons.add(Pair.create("Change title", v ->
+                toolbar.setTitle(toolbar.getTitle() + " X")));
 
         mButtons.add(Pair.create(getString(R.string.toolbar_set_xml_resource), v -> {
             mMenuItems.clear();

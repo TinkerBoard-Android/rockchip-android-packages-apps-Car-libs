@@ -2,6 +2,7 @@
 <!--This file is AUTO GENERATED, DO NOT EDIT MANUALLY.-->
 <resources>
   <public type="attr" name="CarUiToolbarStyle"/>
+  <public type="attr" name="carUiPreferenceStyle"/>
   <public type="attr" name="carUiRecyclerViewStyle"/>
   <public type="attr" name="state_ux_restricted"/>
   <public type="bool" name="car_ui_list_item_single_line_title"/>
@@ -183,8 +184,10 @@
   <public type="style" name="Preference.CarUi.DialogPreference"/>
   <public type="style" name="Preference.CarUi.DialogPreference.EditTextPreference"/>
   <public type="style" name="Preference.CarUi.DropDown"/>
+  <public type="style" name="Preference.CarUi.Icon"/>
   <public type="style" name="Preference.CarUi.Information"/>
   <public type="style" name="Preference.CarUi.ListPreference"/>
+  <public type="style" name="Preference.CarUi.Preference"/>
   <public type="style" name="Preference.CarUi.PreferenceScreen"/>
   <public type="style" name="Preference.CarUi.SeekBarPreference"/>
   <public type="style" name="Preference.CarUi.SwitchPreference"/>
@@ -216,6 +219,7 @@
   <public type="style" name="Widget.CarUi.Toolbar.MenuItem.Container"/>
   <public type="style" name="Widget.CarUi.Toolbar.NavIcon"/>
   <public type="style" name="Widget.CarUi.Toolbar.NavIconContainer"/>
+  <public type="style" name="Widget.CarUi.Toolbar.ProgressBar"/>
   <public type="style" name="Widget.CarUi.Toolbar.Search.CloseIcon"/>
   <public type="style" name="Widget.CarUi.Toolbar.Search.EditText"/>
   <public type="style" name="Widget.CarUi.Toolbar.Search.SearchIcon"/>

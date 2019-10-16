@@ -17,6 +17,7 @@
 package com.android.car.ui.preference;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 
 import androidx.preference.Preference;
@@ -29,37 +30,47 @@ import com.android.car.ui.R;
  */
 public class CarUiPreference extends Preference {
 
-    private final Context mContext;
+    private Context mContext;
+    private boolean mShowChevron;
 
     public CarUiPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mContext = context;
+        init(context, attrs, defStyleAttr, defStyleRes);
     }
 
     public CarUiPreference(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        mContext = context;
+        this(context, attrs, defStyleAttr, R.style.Preference_CarUi_Preference);
     }
 
     public CarUiPreference(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        mContext = context;
+        this(context, attrs, R.attr.carUiPreferenceStyle);
     }
 
     public CarUiPreference(Context context) {
-        super(context);
+        this(context, null);
+    }
+
+    public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         mContext = context;
+
+        TypedArray a = getContext().obtainStyledAttributes(
+                attrs,
+                R.styleable.CarUiPreference,
+                defStyleAttr,
+                defStyleRes);
+
+        mShowChevron = a.getBoolean(R.styleable.CarUiPreference_showChevron, true);
     }
 
     @Override
     public void onAttached() {
         super.onAttached();
 
-        boolean showChevron = mContext.getResources().getBoolean(
+        boolean allowChevron = mContext.getResources().getBoolean(
                 R.bool.car_ui_preference_show_chevron);
 
-        if (!showChevron || getWidgetLayoutResource() != 0) {
+        if (!allowChevron || !mShowChevron) {
             return;
         }
 
@@ -67,5 +78,9 @@ public class CarUiPreference extends Preference {
                 || getFragment() != null) {
             setWidgetLayoutResource(R.layout.car_ui_preference_chevron);
         }
+    }
+
+    public void setShowChevron(boolean showChevron) {
+        mShowChevron = showChevron;
     }
 }

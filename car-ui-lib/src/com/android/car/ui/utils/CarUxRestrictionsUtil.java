@@ -27,6 +27,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.car.ui.R;
 
@@ -153,5 +154,11 @@ public class CarUxRestrictionsUtil {
         }
 
         return str;
+    }
+
+    /** Sets car UX restrictions. Only used for testing. */
+    @VisibleForTesting
+    public void setUxRestrictions(CarUxRestrictions carUxRestrictions) {
+        mCarUxRestrictions = carUxRestrictions;
     }
 }
