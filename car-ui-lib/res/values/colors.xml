@@ -23,6 +23,8 @@
 
     <!-- Toolbar -->
 
+    <!-- Color used on the search icon -->
+    <color name="car_ui_toolbar_search_icon_color">@color/car_ui_primary_text_color</color>
     <!-- Color used on the navigation icon -->
     <color name="car_ui_toolbar_nav_icon_color">@color/car_ui_primary_text_color</color>
     <!-- Text color applied to the hint displayed inside the search box -->
