@@ -34,7 +34,10 @@ android {
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest-gradle.xml'
-            java.srcDirs = ['src']
+            java {
+                srcDirs = ['src']
+                filter.excludes = ["com/android/car/ui/paintbooth/overlays/OverlayManagerImpl.java"]
+            }
             res.srcDirs = ['res']
         }
     }
