@@ -764,7 +764,7 @@ public final class CarUiRecyclerView extends RecyclerView implements
     @Override
     public Parcelable onSaveInstanceState() {
         Parcelable superState = super.onSaveInstanceState();
-        SavedState ss = new SavedState(superState, getContext());
+        SavedState ss = new SavedState(superState);
         if (mScrollBarEnabled) {
             mNestedRecyclerView.saveHierarchyState(ss.mNestedRecyclerViewState);
         }
@@ -787,18 +787,16 @@ public final class CarUiRecyclerView extends RecyclerView implements
 
     static class SavedState extends BaseSavedState {
         SparseArray<Parcelable> mNestedRecyclerViewState;
-        Context mContext;
 
-        SavedState(Parcelable superState, Context c) {
+        SavedState(Parcelable superState) {
             super(superState);
-            mContext = c;
             mNestedRecyclerViewState = new SparseArray<>();
         }
 
         @SuppressWarnings("unchecked")
-        private SavedState(Parcel in) {
-            super(in);
-            mNestedRecyclerViewState = in.readSparseArray(mContext.getClassLoader());
+        private SavedState(Parcel in, ClassLoader classLoader) {
+            super(in, classLoader);
+            mNestedRecyclerViewState = in.readSparseArray(classLoader);
         }
 
         @SuppressWarnings("unchecked")
@@ -812,7 +810,7 @@ public final class CarUiRecyclerView extends RecyclerView implements
                 new Parcelable.Creator<SavedState>() {
                     @Override
                     public SavedState createFromParcel(Parcel in) {
-                        return new SavedState(in);
+                        return new SavedState(in, getClass().getClassLoader());
                     }
 
                     @Override
