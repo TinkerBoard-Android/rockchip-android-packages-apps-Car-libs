@@ -91,6 +91,13 @@ public class Contact implements Parcelable, Comparable<Contact> {
     private String mDisplayName;
 
     /**
+     * Sort key that takes into account locale-based traditions for sorting names in address books.
+     *
+     * @see ContactsContract.CommonDataKinds.Phone#SORT_KEY_PRIMARY
+     */
+    private String mSortKeyPrimary;
+
+    /**
      * The alternative display name.
      * <p>
      * An alternative representation of the display name, such as "family name first"
@@ -101,6 +108,13 @@ public class Contact implements Parcelable, Comparable<Contact> {
      * @see ContactsContract.CommonDataKinds.Phone#DISPLAY_NAME_ALTERNATIVE
      */
     private String mAltDisplayName;
+
+    /**
+     * Sort key based on the alternative representation of the full name.
+     *
+     * @see ContactsContract.CommonDataKinds.Phone#SORT_KEY_ALTERNATIVE
+     */
+    private String mAltSortKey;
 
     /**
      * The phonebook label.
@@ -166,11 +180,17 @@ public class Contact implements Parcelable, Comparable<Contact> {
                 ContactsContract.CommonDataKinds.Phone.PHOTO_THUMBNAIL_URI);
         int lookupKeyColumn = cursor.getColumnIndex(
                 ContactsContract.CommonDataKinds.Phone.LOOKUP_KEY);
+        int sortKeyPrimaryColumn = cursor.getColumnIndex(
+                ContactsContract.CommonDataKinds.Phone.SORT_KEY_PRIMARY);
+        int sortKeyAltColumn = cursor.getColumnIndex(
+                ContactsContract.CommonDataKinds.Phone.SORT_KEY_ALTERNATIVE);
 
         Contact contact = new Contact();
         contact.mId = cursor.getLong(contactIdColumn);
         contact.mDisplayName = cursor.getString(displayNameColumn);
+        contact.mSortKeyPrimary = cursor.getString(sortKeyPrimaryColumn);
         contact.mAltDisplayName = cursor.getString(altDisplayNameColumn);
+        contact.mAltSortKey = cursor.getString(sortKeyAltColumn);
         contact.mPhoneBookLabel = cursor.getString(phoneBookLabelColumn);
         contact.mPhoneBookLabelAlt = cursor.getString(phoneBookLabelAltColumn);
 
@@ -339,7 +359,9 @@ public class Contact implements Parcelable, Comparable<Contact> {
             dest.writeParcelable(phoneNumber, flags);
         }
         dest.writeString(mDisplayName);
+        dest.writeString(mSortKeyPrimary);
         dest.writeString(mAltDisplayName);
+        dest.writeString(mAltSortKey);
         dest.writeString(mPhoneBookLabel);
         dest.writeString(mPhoneBookLabelAlt);
         dest.writeParcelable(mAvatarThumbnailUri, 0);
@@ -376,7 +398,9 @@ public class Contact implements Parcelable, Comparable<Contact> {
             }
         }
         contact.mDisplayName = source.readString();
+        contact.mSortKeyPrimary = source.readString();
         contact.mAltDisplayName = source.readString();
+        contact.mAltSortKey = source.readString();
         contact.mPhoneBookLabel = source.readString();
         contact.mPhoneBookLabelAlt = source.readString();
         contact.mAvatarThumbnailUri = source.readParcelable(Uri.class.getClassLoader());
@@ -398,8 +422,8 @@ public class Contact implements Parcelable, Comparable<Contact> {
      * letters, numbers, then special characters.
      */
     public int compareByDisplayName(@NonNull Contact otherContact) {
-        return compareNames(mDisplayName, otherContact.getDisplayName(),
-                mPhoneBookLabel, otherContact.getPhonebookLabel());
+        return compareNames(mSortKeyPrimary, otherContact.mSortKeyPrimary, mPhoneBookLabel,
+                otherContact.getPhonebookLabel());
     }
 
     /**
@@ -407,7 +431,7 @@ public class Contact implements Parcelable, Comparable<Contact> {
      * letters, numbers, then special characters.
      */
     public int compareByAltDisplayName(@NonNull Contact otherContact) {
-        return compareNames(mAltDisplayName, otherContact.getAltDisplayName(),
+        return compareNames(mAltSortKey, otherContact.mAltSortKey,
                 mPhoneBookLabelAlt, otherContact.getPhonebookLabelAlt());
     }
 
