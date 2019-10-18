@@ -95,7 +95,9 @@ public class LetterTileDrawable extends Drawable {
             sDefaultPersonAvatar = res.getDrawable(R.drawable.ic_person, null /* theme */);
             sDefaultBusinessAvatar = res.getDrawable(R.drawable.ic_person, null /* theme */);
             sDefaultVoicemailAvatar = res.getDrawable(R.drawable.ic_person, null /* theme */);
-            sPaint.setTypeface(Typeface.create("sans-serif-light", Typeface.NORMAL));
+            sPaint.setTypeface(
+                    Typeface.create(res.getString(R.string.config_letter_tile_font_family),
+                            res.getInteger(R.integer.config_letter_tile_text_style)));
             sPaint.setTextAlign(Align.CENTER);
             sPaint.setAntiAlias(true);
         }
