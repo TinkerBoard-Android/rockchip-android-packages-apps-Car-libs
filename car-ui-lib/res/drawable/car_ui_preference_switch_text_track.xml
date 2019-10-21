@@ -35,7 +35,7 @@
         android:left="@dimen/car_ui_preference_switch_width_half">
         <drawable
             class="com.android.car.ui.drawable.CarUiTextDrawable"
-            app:text="@string/car_ui_preference_switch_on"
+            app:renderedText="@string/car_ui_preference_switch_on"
             app:textColor="@color/car_ui_preference_switch_track_text_color"
             app:textSize="@dimen/car_ui_preference_switch_text_size">
         </drawable>
@@ -48,7 +48,7 @@
         android:right="@dimen/car_ui_preference_switch_width_half">
         <drawable
             class="com.android.car.ui.drawable.CarUiTextDrawable"
-            app:text="@string/car_ui_preference_switch_off"
+            app:renderedText="@string/car_ui_preference_switch_off"
             app:textColor="@color/car_ui_preference_switch_track_text_color"
             app:textSize="@dimen/car_ui_preference_switch_text_size">
         </drawable>

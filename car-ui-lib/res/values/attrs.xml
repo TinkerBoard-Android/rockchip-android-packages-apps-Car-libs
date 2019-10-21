@@ -69,7 +69,7 @@
     <!-- TODO: Replace this with the Android default text styleable -->
     <declare-styleable name="CarUiTextDrawable">
         <!-- Text to be rendered by the drawable -->
-        <attr name="text" format="string" />
+        <attr name="renderedText" format="string" />
         <!-- Font size -->
         <attr name="textSize" format="dimension" />
         <!-- Text color -->
