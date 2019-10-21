@@ -210,7 +210,7 @@ public class CarUiTextDrawable extends Drawable {
                         @NonNull AttributeSet attrs, @Nullable Resources.Theme theme)
             throws XmlPullParserException, IOException {
         final TypedArray a = themedObtainAttributes(r, theme, attrs, R.styleable.CarUiTextDrawable);
-        mText = a.getString(R.styleable.CarUiTextDrawable_text);
+        mText = a.getString(R.styleable.CarUiTextDrawable_renderedText);
         mTypeface = Typeface.create(a.getString(R.styleable.CarUiTextDrawable_typeface),
                 Typeface.NORMAL);
         mTextSize = a.getDimension(R.styleable.CarUiTextDrawable_textSize, 10);
