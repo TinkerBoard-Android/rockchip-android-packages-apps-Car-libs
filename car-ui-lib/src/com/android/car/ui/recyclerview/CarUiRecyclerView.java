@@ -359,6 +359,7 @@ public final class CarUiRecyclerView extends RecyclerView implements
                                 initNestedRecyclerView();
                                 setNestedViewLayout();
 
+                                mNestedRecyclerView.setHasFixedSize(true);
                                 mNestedRecyclerView
                                         .getViewTreeObserver()
                                         .addOnGlobalLayoutListener(
