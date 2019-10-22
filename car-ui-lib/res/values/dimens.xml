@@ -22,7 +22,8 @@
     <item name="car_ui_letter_spacing_body1" format="float" type="dimen">0.0</item>
     <item name="car_ui_letter_spacing_body3" format="float" type="dimen">0.0</item>
 
-    <!-- Margin -->
+    <!-- Horizontal margin between screen content and display border. In reference
+     implementation, this value matches the CarUiRecyclerView scrollbar width -->
     <dimen name="car_ui_margin">112dp</dimen>
 
     <!-- Paddings -->
@@ -46,28 +47,55 @@
     <dimen name="car_ui_toolbar_tab_icon_height">36dp</dimen>
 
     <!-- Toolbar -->
+
+    <!-- Default height for both toolbar rows. See car_ui_toolbar_first_row_height and
+     car_ui_toolbar_second_row_height -->
     <dimen name="car_ui_toolbar_row_height">96dp</dimen>
+    <!-- Height of the top toolbar row. This can be customized independently. -->
     <dimen name="car_ui_toolbar_first_row_height">@dimen/car_ui_toolbar_row_height</dimen>
+    <!-- Height of the bottom toolbar row (if the toolbar is used in two-rows mode. -->
     <dimen name="car_ui_toolbar_second_row_height">@dimen/car_ui_toolbar_row_height</dimen>
+    <!-- Padding on the toolbar start (e.g.: distance between the container start and the start of
+    nav icon or logo) -->
     <dimen name="car_ui_toolbar_start_inset">0dp</dimen>
+    <!-- End padding (e.g.: distance between the container end and the end of the menu items) -->
     <dimen name="car_ui_toolbar_end_inset">0dp</dimen>
+    <!-- Top padding -->
     <dimen name="car_ui_toolbar_top_inset">0dp</dimen>
+    <!-- Bottom padding -->
     <dimen name="car_ui_toolbar_bottom_inset">0dp</dimen>
+    <!-- Toolbar title/tabs start margin. Toolbar navigation icon (or logo if no navigation icon is
+    used) will be centered in this space, and the title will start from here -->
     <dimen name="car_ui_toolbar_margin">@dimen/car_ui_margin</dimen>
+    <!-- Navigation icon or logo size -->
     <dimen name="car_ui_toolbar_icon_size">@dimen/car_ui_primary_icon_size</dimen>
+    <!-- Margin between the logo and the title, when both logo and navigation icons are used -->
+    <dimen name="car_ui_toolbar_title_logo_padding">0dp</dimen>
+    <!-- Margin at the start of the title -->
     <dimen name="car_ui_toolbar_title_margin_start">@dimen/car_ui_padding_2</dimen>
+    <!-- Space at the end and in between menu items -->
     <dimen name="car_ui_toolbar_menu_item_margin">@dimen/car_ui_padding_2</dimen>
+    <!-- Ripple effect radius for icon menu items -->
     <dimen name="car_ui_toolbar_menu_item_icon_ripple_radius">48dp</dimen>
+    <!-- Icon size for icon menu items -->
     <dimen name="car_ui_toolbar_menu_item_icon_size">@dimen/car_ui_primary_icon_size</dimen>
+    <!-- Icon background size for icon menu items -->
     <dimen name="car_ui_toolbar_menu_item_icon_background_size">54dp</dimen>
 
     <!-- Internal artifacts. Do not overlay -->
     <item name="wrap_content" format="integer" type="dimen">-2</item>
 
     <!-- CarUiRecyclerView -->
-    <dimen name="car_ui_recyclerview_divider_height">0dp</dimen>
 
-    <!-- Default Scroll Bar for CarUiRecyclerView -->
+    <dimen name="car_ui_recyclerview_divider_height">0dp</dimen>
+    <dimen name="car_ui_recyclerview_divider_start_margin">0dp</dimen>
+    <dimen name="car_ui_recyclerview_divider_end_margin">0dp</dimen>
+    <dimen name="car_ui_recyclerview_divider_top_margin">0dp</dimen>
+    <dimen name="car_ui_recyclerview_divider_bottom_margin">0dp</dimen>
+
+    <!-- CarUiRecyclerView default scrollbar -->
+
+    <dimen name="car_ui_scrollbar_container_width">@dimen/car_ui_margin</dimen>
     <dimen name="car_ui_scrollbar_button_size">@dimen/car_ui_touch_target_width</dimen>
     <dimen name="car_ui_scrollbar_thumb_width">7dp</dimen>
     <dimen name="car_ui_scrollbar_separator_margin">16dp</dimen>

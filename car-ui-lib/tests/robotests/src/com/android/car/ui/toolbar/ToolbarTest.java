@@ -103,46 +103,39 @@ public class ToolbarTest {
     }
 
     @Test
-    public void setCustomView_shouldInflateViewIntoToolbar() {
-        mToolbar.setCustomView(R.layout.test_custom_view);
-
-        View v = mToolbar.findViewById(R.id.text_box_1);
-
-        assertThat(v).isNotNull();
-        assertThat(mToolbar.getState()).isEquivalentAccordingToCompareTo(
-                Toolbar.State.SUBPAGE_CUSTOM);
-    }
-
-    @Test
     public void showLogo_whenSet_andStateIsHome() {
         mToolbar.setState(Toolbar.State.HOME);
         mToolbar.setLogo(R.drawable.test_ic_launcher);
 
         assertThat(mToolbar.findViewById(R.id.car_ui_toolbar_logo).isShown()).isTrue();
+        assertThat(mToolbar.findViewById(R.id.car_ui_toolbar_title_logo).isShown()).isFalse();
     }
 
     @Test
-    public void hideLogo_whenSet_andStateIsNotHome() {
+    public void showTitleLogo_whenSet_andStateIsNotHome() {
         mToolbar.setState(Toolbar.State.SUBPAGE);
         mToolbar.setLogo(R.drawable.test_ic_launcher);
 
         assertThat(mToolbar.findViewById(R.id.car_ui_toolbar_logo).isShown()).isFalse();
+        assertThat(mToolbar.findViewById(R.id.car_ui_toolbar_title_logo).isShown()).isTrue();
     }
 
     @Test
-    public void hideLogo_whenNotSet_andStateIsHome() {
+    public void hideLogo_andTitleLogo_whenNotSet_andStateIsHome() {
         mToolbar.setState(Toolbar.State.HOME);
         mToolbar.setLogo(0);
 
         assertThat(mToolbar.findViewById(R.id.car_ui_toolbar_logo).isShown()).isFalse();
+        assertThat(mToolbar.findViewById(R.id.car_ui_toolbar_title_logo).isShown()).isFalse();
     }
 
     @Test
-    public void hideLogo_whenNotSet_andStateIsNotHome() {
+    public void hideLogo_andTitleLogo_whenNotSet_andStateIsNotHome() {
         mToolbar.setState(Toolbar.State.SUBPAGE);
         mToolbar.setLogo(0);
 
         assertThat(mToolbar.findViewById(R.id.car_ui_toolbar_logo).isShown()).isFalse();
+        assertThat(mToolbar.findViewById(R.id.car_ui_toolbar_title_logo).isShown()).isFalse();
     }
 
     @Test
