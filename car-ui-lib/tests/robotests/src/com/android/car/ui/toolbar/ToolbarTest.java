@@ -18,7 +18,11 @@ package com.android.car.ui.toolbar;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
 import android.content.Context;
+import android.content.res.Resources;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -42,6 +46,7 @@ import java.util.List;
 public class ToolbarTest {
 
     private Context mContext;
+    private Resources mResources;
     private ActivityController<TestActivity> mActivityController;
     private TestActivity mActivity;
     private Toolbar mToolbar;
@@ -49,10 +54,9 @@ public class ToolbarTest {
     @Before
     public void setUp() {
         mContext = RuntimeEnvironment.application;
-
+        mResources = mContext.getResources();
         mActivityController = Robolectric.buildActivity(TestActivity.class);
         mActivityController.setup();
-
         mActivity = mActivityController.get();
         mToolbar = mActivity.findViewById(R.id.toolbar);
     }
@@ -169,6 +173,117 @@ public class ToolbarTest {
     }
 
     @Test
+    public void testState_twoRow_withTitle_withTabs() {
+        mockResources();
+        when(mResources.getBoolean(R.bool.car_ui_toolbar_tabs_on_second_row)).thenReturn(true);
+
+        Toolbar toolbar = new Toolbar(mContext);
+        assertThat(toolbar.isTabsInSecondRow()).isTrue();
+
+        // Set title and tabs for toolbar.
+        toolbar.setTitle("Test title");
+        toolbar.addTab(new TabLayout.Tab(mContext.getDrawable(R.drawable.test_ic_launcher), "Foo"));
+        toolbar.addTab(new TabLayout.Tab(mContext.getDrawable(R.drawable.test_ic_launcher), "Foo"));
+
+        // Toolbar should display two rows, showing both title and tabs.
+        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_tabs).getVisibility()).isEqualTo(
+                View.VISIBLE);
+        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_title).getVisibility()).isEqualTo(
+                View.VISIBLE);
+    }
+
+    @Test
+    public void testState_twoRow_withTitle()  {
+        mockResources();
+        when(mResources.getBoolean(R.bool.car_ui_toolbar_tabs_on_second_row)).thenReturn(true);
+
+        Toolbar toolbar = new Toolbar(mContext);
+        assertThat(toolbar.isTabsInSecondRow()).isTrue();
+
+        toolbar.setTitle("Test title");
+
+        // Toolbar should display two rows, but no tabs are set so they should not be visible.
+        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_title).getVisibility()).isEqualTo(
+                View.VISIBLE);
+        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_tabs).getVisibility()).isNotEqualTo(
+                View.VISIBLE);
+    }
+
+    @Test
+    public void testState_twoRow_withTabs() {
+        mockResources();
+        when(mResources.getBoolean(R.bool.car_ui_toolbar_tabs_on_second_row)).thenReturn(true);
+
+        Toolbar toolbar = new Toolbar(mContext);
+        assertThat(toolbar.isTabsInSecondRow()).isTrue();
+        toolbar.addTab(new TabLayout.Tab(mContext.getDrawable(R.drawable.test_ic_launcher), "Foo"));
+        toolbar.addTab(new TabLayout.Tab(mContext.getDrawable(R.drawable.test_ic_launcher), "Foo"));
+
+        // Toolbar should display two rows with an empty title and tabs.
+        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_tabs).getVisibility()).isEqualTo(
+                View.VISIBLE);
+        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_title).getVisibility()).isEqualTo(
+                View.VISIBLE);
+    }
+
+    @Test
+    public void testState_oneRow_withTitle_withTabs() {
+        mockResources();
+        when(mResources.getBoolean(R.bool.car_ui_toolbar_tabs_on_second_row)).thenReturn(false);
+
+        Toolbar toolbar = new Toolbar(mContext);
+        assertThat(toolbar.isTabsInSecondRow()).isFalse();
+
+        // Set title and tabs for toolbar.
+        toolbar.setTitle("Test title");
+        toolbar.addTab(new TabLayout.Tab(mContext.getDrawable(R.drawable.test_ic_launcher), "Foo"));
+        toolbar.addTab(new TabLayout.Tab(mContext.getDrawable(R.drawable.test_ic_launcher), "Foo"));
+
+        // With only one row available, toolbar will only show tabs and not the title.
+        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_tabs).getVisibility()).isEqualTo(
+                View.VISIBLE);
+        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_title).getVisibility()).isNotEqualTo(
+                View.VISIBLE);
+    }
+
+    @Test
+    public void testState_oneRow_withTitle() {
+        mockResources();
+        when(mResources.getBoolean(R.bool.car_ui_toolbar_tabs_on_second_row)).thenReturn(false);
+
+
+        Toolbar toolbar = new Toolbar(mContext);
+        assertThat(toolbar.isTabsInSecondRow()).isFalse();
+
+        toolbar.setTitle("Test title");
+
+        // Toolbar should display one row with the title and no tabs.
+        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_tabs).getVisibility()).isNotEqualTo(
+                View.VISIBLE);
+        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_title).getVisibility()).isEqualTo(
+                View.VISIBLE);
+    }
+
+    @Test
+    public void testState_oneRow_withTabs() {
+        mockResources();
+        when(mResources.getBoolean(R.bool.car_ui_toolbar_tabs_on_second_row)).thenReturn(false);
+
+
+        Toolbar toolbar = new Toolbar(mContext);
+        assertThat(toolbar.isTabsInSecondRow()).isFalse();
+
+        toolbar.addTab(new TabLayout.Tab(mContext.getDrawable(R.drawable.test_ic_launcher), "Foo"));
+        toolbar.addTab(new TabLayout.Tab(mContext.getDrawable(R.drawable.test_ic_launcher), "Foo"));
+
+        // Toolbar should display one row with only tabs.
+        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_tabs).getVisibility()).isEqualTo(
+                View.VISIBLE);
+        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_title).getVisibility()).isNotEqualTo(
+                View.VISIBLE);
+    }
+
+    @Test
     public void registerOnBackListener_whenListenerRegisteredTwice_shouldntCallListenerTwice() {
         mToolbar.setState(Toolbar.State.SUBPAGE);
         Mutable<Integer> timesBackPressed = new Mutable<>(0);
@@ -225,8 +340,10 @@ public class ToolbarTest {
     @Test
     public void menuItems_null_shouldRemoveExistingMenuItems() {
         mToolbar.setMenuItems(Arrays.asList(
-                createMenuItem(i -> { }),
-                createMenuItem(i -> { })));
+                createMenuItem(i -> {
+                }),
+                createMenuItem(i -> {
+                })));
 
         assertThat(getMenuItemViewCount()).isEqualTo(2);
 
@@ -237,7 +354,8 @@ public class ToolbarTest {
 
     @Test
     public void menuItems_setVisibility_shouldDefaultToShown() {
-        MenuItem item = createMenuItem(i -> { });
+        MenuItem item = createMenuItem(i -> {
+        });
         mToolbar.setMenuItems(Collections.singletonList(item));
 
         assertThat(getMenuItemView(0).isShown()).isTrue();
@@ -245,7 +363,8 @@ public class ToolbarTest {
 
     @Test
     public void menuItems_setVisibility_shouldHide() {
-        MenuItem item = createMenuItem(i -> { });
+        MenuItem item = createMenuItem(i -> {
+        });
         mToolbar.setMenuItems(Collections.singletonList(item));
 
         item.setVisible(false);
@@ -254,7 +373,8 @@ public class ToolbarTest {
 
     @Test
     public void menuItems_setVisibility_shouldReshowAfterHiding() {
-        MenuItem item = createMenuItem(i -> { });
+        MenuItem item = createMenuItem(i -> {
+        });
         mToolbar.setMenuItems(Collections.singletonList(item));
 
         item.setVisible(false);
@@ -265,8 +385,10 @@ public class ToolbarTest {
     @Test
     public void menuItems_equalItems_shouldntRecreateViews() {
         List<MenuItem> menuItems = Arrays.asList(
-                createMenuItem(i -> { }),
-                createMenuItem(i -> { }));
+                createMenuItem(i -> {
+                }),
+                createMenuItem(i -> {
+                }));
         mToolbar.setMenuItems(menuItems);
 
         assertThat(getMenuItemViewCount()).isEqualTo(2);
@@ -281,8 +403,10 @@ public class ToolbarTest {
     @Test
     public void menuItems_searchScreen_shouldHideMenuItems() {
         mToolbar.setMenuItems(Arrays.asList(
-                MenuItem.Builder.createSearch(mContext, i -> { }),
-                createMenuItem(i -> { })));
+                MenuItem.Builder.createSearch(mContext, i -> {
+                }),
+                createMenuItem(i -> {
+                })));
 
         mToolbar.setShowMenuItemsWhileSearching(false);
         mToolbar.setState(Toolbar.State.SEARCH);
@@ -294,8 +418,10 @@ public class ToolbarTest {
     @Test
     public void menuItems_showMenuItemsWhileSearching() {
         mToolbar.setMenuItems(Arrays.asList(
-                MenuItem.Builder.createSearch(mContext, i -> { }),
-                createMenuItem(i -> { })));
+                MenuItem.Builder.createSearch(mContext, i -> {
+                }),
+                createMenuItem(i -> {
+                })));
 
         mToolbar.setShowMenuItemsWhileSearching(true);
         mToolbar.setState(Toolbar.State.SEARCH);
@@ -309,6 +435,12 @@ public class ToolbarTest {
                 .setTitle("Button!")
                 .setOnClickListener(listener)
                 .build();
+    }
+
+    private void mockResources() {
+        mContext = spy(RuntimeEnvironment.application);
+        mResources = spy(mContext.getResources());
+        when(mContext.getResources()).thenReturn(mResources);
     }
 
     private int getMenuItemViewCount() {
