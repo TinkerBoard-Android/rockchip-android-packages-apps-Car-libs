@@ -49,7 +49,5 @@
     <dimen name="car_ui_recyclerview_divider_top_margin">0dp</dimen>
     <dimen name="car_ui_recyclerview_divider_bottom_margin">0dp</dimen>
 
-    <!-- Whether or not the toolbar title and tabs can be shown at the same time -->
-    <bool name="car_ui_toolbar_title_and_tabs_are_mutually_exclusive">true</bool>
-
+    <bool name="car_ui_toolbar_tabs_on_second_row">true</bool>
 </resources>
