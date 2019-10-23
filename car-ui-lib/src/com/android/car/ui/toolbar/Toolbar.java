@@ -122,7 +122,7 @@ public class Toolbar extends FrameLayout {
         SEARCH,
     }
 
-    private final boolean mTitleAndTabsAreMutuallyExclusive;
+    private final boolean mIsTabsInSecondRow;
 
     private ImageView mNavIcon;
     private ImageView mLogo;
@@ -161,26 +161,27 @@ public class Toolbar extends FrameLayout {
     public Toolbar(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        LayoutInflater inflater = (LayoutInflater) context
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(getToolbarLayout(), this, true);
-
-        mTabLayout = requireViewById(R.id.car_ui_toolbar_tabs);
-        mNavIcon = requireViewById(R.id.car_ui_toolbar_nav_icon);
-        mLogo = requireViewById(R.id.car_ui_toolbar_logo);
-        mNavIconContainer = requireViewById(R.id.car_ui_toolbar_nav_icon_container);
-        mMenuItemsContainer = requireViewById(R.id.car_ui_toolbar_menu_items_container);
-        mTitle = requireViewById(R.id.car_ui_toolbar_title);
-        mSearchView = requireViewById(R.id.car_ui_toolbar_search_view);
-        mCustomViewContainer = requireViewById(R.id.car_ui_toolbar_custom_view_container);
-        mOverflowButton = requireViewById(R.id.car_ui_toolbar_overflow_button);
-
         TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.CarUiToolbar, defStyleAttr, defStyleRes);
 
         try {
-            mTitleAndTabsAreMutuallyExclusive = context.getResources().getBoolean(
-                    R.bool.car_ui_toolbar_title_and_tabs_are_mutually_exclusive);
+
+            mIsTabsInSecondRow = context.getResources().getBoolean(
+                    R.bool.car_ui_toolbar_tabs_on_second_row);
+
+            LayoutInflater inflater = (LayoutInflater) context
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            inflater.inflate(getToolbarLayout(), this, true);
+
+            mTabLayout = requireViewById(R.id.car_ui_toolbar_tabs);
+            mNavIcon = requireViewById(R.id.car_ui_toolbar_nav_icon);
+            mLogo = requireViewById(R.id.car_ui_toolbar_logo);
+            mNavIconContainer = requireViewById(R.id.car_ui_toolbar_nav_icon_container);
+            mMenuItemsContainer = requireViewById(R.id.car_ui_toolbar_menu_items_container);
+            mTitle = requireViewById(R.id.car_ui_toolbar_title);
+            mSearchView = requireViewById(R.id.car_ui_toolbar_search_view);
+            mCustomViewContainer = requireViewById(R.id.car_ui_toolbar_custom_view_container);
+            mOverflowButton = requireViewById(R.id.car_ui_toolbar_overflow_button);
 
             mTitle.setText(a.getString(R.styleable.CarUiToolbar_title));
             setLogo(a.getResourceId(R.styleable.CarUiToolbar_logo, 0));
@@ -264,7 +265,18 @@ public class Toolbar extends FrameLayout {
      * <p>Non-system apps should not use this, as customising the layout isn't possible with RROs
      */
     protected int getToolbarLayout() {
+        if (mIsTabsInSecondRow) {
+            return R.layout.car_ui_toolbar_two_row;
+        }
+
         return R.layout.car_ui_toolbar;
+    }
+
+    /**
+     * Returns {@code true} if a two row layout in enabled for the toolbar.
+     */
+    public boolean isTabsInSecondRow() {
+        return mIsTabsInSecondRow;
     }
 
     @Override
@@ -332,16 +344,16 @@ public class Toolbar extends FrameLayout {
 
         public static final Parcelable.Creator<SavedState> CREATOR =
                 new Parcelable.Creator<SavedState>() {
-            @Override
-            public SavedState createFromParcel(Parcel in) {
-                return new SavedState(in);
-            }
+                    @Override
+                    public SavedState createFromParcel(Parcel in) {
+                        return new SavedState(in);
+                    }
 
-            @Override
-            public SavedState[] newArray(int size) {
-                return new SavedState[size];
-            }
-        };
+                    @Override
+                    public SavedState[] newArray(int size) {
+                        return new SavedState[size];
+                    }
+                };
 
         /** Replacement of hidden Parcel#readCharSequence(Parcel) */
         private static CharSequence readCharSequence(Parcel in) {
@@ -377,19 +389,21 @@ public class Toolbar extends FrameLayout {
     /**
      * Sets the title of the toolbar to a string resource.
      *
-     * <p>The title may not always be shown, for example in landscape with tabs.
+     * <p>The title may not always be shown, for example with one row layout with tabs.
      */
     public void setTitle(@StringRes int title) {
         mTitle.setText(title);
+        setState(getState());
     }
 
     /**
      * Sets the title of the toolbar to a CharSequence.
      *
-     * <p>The title may not always be shown, for example in landscape with tabs.
+     * <p>The title may not always be shown, for example with one row layout with tabs.
      */
     public void setTitle(CharSequence title) {
         mTitle.setText(title);
+        setState(getState());
     }
 
     public CharSequence getTitle() {
@@ -694,7 +708,7 @@ public class Toolbar extends FrameLayout {
         mNavIconContainer.setClickable(state != State.HOME);
         boolean hasTabs = mTabLayout.getTabCount() > 0;
         boolean showTitle = state == State.SUBPAGE
-                || (state == State.HOME && (!mTitleAndTabsAreMutuallyExclusive || !hasTabs));
+                || (state == State.HOME && (!hasTabs || mIsTabsInSecondRow));
         mTitle.setVisibility(showTitle ? VISIBLE : GONE);
         mTabLayout.setVisibility(state == State.HOME && hasTabs ? VISIBLE : GONE);
         mSearchView.setVisibility(state == State.SEARCH ? VISIBLE : GONE);
