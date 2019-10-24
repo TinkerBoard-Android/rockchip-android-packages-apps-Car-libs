@@ -22,8 +22,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.util.ArraySet;
 import android.util.AttributeSet;
-import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -187,18 +185,6 @@ public class TabLayout extends LinearLayout {
         addView(tabView, position, layoutParams);
     }
 
-    private ViewGroup createTabItemView() {
-        LinearLayout tabItemView = new LinearLayout(getContext());
-        tabItemView.setOrientation(LinearLayout.VERTICAL);
-        tabItemView.setGravity(Gravity.CENTER);
-        tabItemView.setPadding(mTabPaddingX, 0, mTabPaddingX, 0);
-        TypedValue tv = new TypedValue();
-        getContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackground,
-                tv, /* resolveRefs= */ true);
-        tabItemView.setBackgroundResource(tv.resourceId);
-        return tabItemView;
-    }
-
     private static class TabAdapter extends BaseAdapter {
         private final Context mContext;
         private final TabLayout mTabLayout;
@@ -251,8 +237,8 @@ public class TabLayout extends LinearLayout {
         @Override
         @NonNull
         public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-            ViewGroup tabItemView = mTabLayout.createTabItemView();
-            LayoutInflater.from(mContext).inflate(mTabItemLayoutRes, tabItemView, true);
+            View tabItemView = LayoutInflater.from(mContext)
+                    .inflate(mTabItemLayoutRes, parent, false);
 
             presentTabItemView(position, tabItemView);
             return tabItemView;
@@ -304,10 +290,7 @@ public class TabLayout extends LinearLayout {
             tabItemView.setOnClickListener(view -> selectTab(tab));
             tab.bindText(textView);
             tab.bindIcon(iconView);
-
-            tabItemView.setSelected(tab.mIsSelected);
-            iconView.setSelected(tab.mIsSelected);
-            textView.setSelected(tab.mIsSelected);
+            tabItemView.setActivated(tab.mIsSelected);
             textView.setTypeface(tab.mIsSelected ? mSelectedTypeface : mUnselectedTypeface);
         }
 
