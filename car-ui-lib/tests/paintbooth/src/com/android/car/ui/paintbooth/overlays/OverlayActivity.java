@@ -17,7 +17,6 @@
 package com.android.car.ui.paintbooth.overlays;
 
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -79,20 +78,20 @@ public class OverlayActivity extends AppCompatActivity {
                         getPreferenceScreen().addPreference(switchPreference);
                     }
                 }
-            } catch (RemoteException e) {
-                Toast.makeText(getContext(), "Something went wrong internally.",
+            } catch (Exception e) {
+                Toast.makeText(getContext(), "Error: " + e.getMessage(),
                         Toast.LENGTH_LONG).show();
-                Log.e(TAG, "can't apply overlay: ", e);
+                Log.e(TAG, "Can't load overlays: ", e);
             }
         }
 
         private void applyOverlay(String overlayPackage, boolean enableOverlay) {
             try {
                 mOverlayManager.applyOverlay(overlayPackage, enableOverlay);
-            } catch (RemoteException e) {
-                Toast.makeText(getContext(), "Something went wrong internally.",
+            } catch (Exception e) {
+                Toast.makeText(getContext(), "Error: " + e.getMessage(),
                         Toast.LENGTH_LONG).show();
-                Log.w(TAG, "Can't change theme", e);
+                Log.e(TAG, "Can't apply overlay: ", e);
             }
         }
     }
