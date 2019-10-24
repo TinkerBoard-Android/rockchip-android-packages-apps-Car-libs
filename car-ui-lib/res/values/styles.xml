@@ -47,6 +47,28 @@
     <style name="Widget.CarUi.Toolbar.Search.EditText"
         parent="android:Widget.DeviceDefault.EditText"/>
 
+    <style name="Widget.CarUi.Toolbar.Tab"/>
+
+    <style name="Widget.CarUi.Toolbar.Tab.Container">
+        <item name="android:orientation">vertical</item>
+        <item name="android:paddingStart">@dimen/car_ui_toolbar_tab_padding_x</item>
+        <item name="android:paddingEnd">@dimen/car_ui_toolbar_tab_padding_x</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+    </style>
+
+    <style name="Widget.CarUi.Toolbar.Tab.Icon">
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:tint">@color/car_ui_toolbar_tab_item_selector</item>
+        <item name="android:tintMode">src_in</item>
+    </style>
+
+    <style name="Widget.CarUi.Toolbar.Tab.Text">
+        <item name="android:singleLine">true</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAppearance">@style/TextAppearance.CarUi.Widget.Toolbar.Tab</item>
+    </style>
+
     <style name="Widget.CarUi.CarUiRecyclerView">
         <item name="android:scrollbars">vertical</item>
     </style>
