@@ -500,17 +500,18 @@ public class AlertDialogBuilder {
      * @param textChangedListener textWatcher whose methods are called whenever this TextView's text
      * changes {@link null} otherwise.
      * @param inputFilters list of input filters, {@link null} if no filter is needed
-     * @return this Builder object to allow for chaining of calls to set
-     * methods
+     * @param inputType See {@link EditText#setInputType(int)}, except
+     *                  {@link android.text.InputType#TYPE_NULL} will not be set.
+     * @return this Builder object to allow for chaining of calls to set methods
      */
     public AlertDialogBuilder setEditBox(String prompt, TextWatcher textChangedListener,
-            InputFilter[] inputFilters) {
+            InputFilter[] inputFilters, int inputType) {
         LayoutInflater layoutInflater =
                 (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View contentView = layoutInflater.inflate(R.layout.car_ui_alert_dialog_edit_text,
                 null);
 
-        EditText editText = contentView.findViewById(R.id.textbox);
+        EditText editText = contentView.requireViewById(R.id.textbox);
         editText.setText(prompt);
 
         if (textChangedListener != null) {
@@ -521,8 +522,26 @@ public class AlertDialogBuilder {
             editText.setFilters(inputFilters);
         }
 
+        if (inputType != 0) {
+            editText.setInputType(inputType);
+        }
+
         mBuilder.setView(contentView);
         return this;
+    }
+
+    /**
+     * Sets a custom edit text box within the alert dialog.
+     *
+     * @param prompt the string that will be set on the edit text view
+     * @param textChangedListener textWatcher whose methods are called whenever this TextView's text
+     * changes {@link null} otherwise.
+     * @param inputFilters list of input filters, {@link null} if no filter is needed
+     * @return this Builder object to allow for chaining of calls to set methods
+     */
+    public AlertDialogBuilder setEditBox(String prompt, TextWatcher textChangedListener,
+            InputFilter[] inputFilters) {
+        return setEditBox(prompt, textChangedListener, inputFilters, 0);
     }
 
     /**
