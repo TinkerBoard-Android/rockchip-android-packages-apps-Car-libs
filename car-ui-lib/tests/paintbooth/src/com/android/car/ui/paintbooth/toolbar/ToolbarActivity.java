@@ -174,9 +174,6 @@ public class ToolbarActivity extends Activity {
         mButtons.add(Pair.create("Toggle background", v ->
                 toolbar.setBackgroundShown(!toolbar.getBackgroundShown())));
 
-        mButtons.add(Pair.create("Show custom view", v ->
-                toolbar.setCustomView(R.layout.toolbar_custom_view)));
-
         mButtons.add(Pair.create("Add tab", v ->
                 toolbar.addTab(new TabLayout.Tab(getDrawable(R.drawable.ic_launcher), "Foo"))));
 

@@ -27,8 +27,7 @@
         <attr name="state" format="enum">
             <enum name="home" value="0"/>
             <enum name="subpage" value="1"/>
-            <enum name="subpage_custom" value="2"/>
-            <enum name="search" value="3"/>
+            <enum name="search" value="2"/>
         </attr>
         <!-- Whether or not the toolbar should have a background. Default true. -->
         <attr name="showBackground" format="boolean"/>
