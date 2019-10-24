@@ -92,6 +92,23 @@
             android:scaleType="fitXY"/>
     </FrameLayout>
 
+    <FrameLayout
+        android:id="@+id/car_ui_toolbar_title_logo_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingEnd="@dimen/car_ui_toolbar_title_logo_padding"
+        app:layout_constraintTop_toTopOf="@id/car_ui_toolbar_top_guideline"
+        app:layout_constraintBottom_toTopOf="@id/car_ui_toolbar_bottom_guideline"
+        app:layout_constraintStart_toEndOf="@id/car_ui_toolbar_start_margin_guideline">
+
+        <ImageView
+            android:id="@+id/car_ui_toolbar_title_logo"
+            android:layout_width="@dimen/car_ui_primary_icon_size"
+            android:layout_height="@dimen/car_ui_primary_icon_size"
+            android:layout_gravity="center"
+            android:scaleType="fitXY"/>
+    </FrameLayout>
+
     <TextView
         android:id="@+id/car_ui_toolbar_title"
         android:layout_width="0dp"
@@ -101,7 +118,7 @@
         style="@style/TextAppearance.CarUi.Widget.Toolbar.Title"
         app:layout_constraintTop_toTopOf="@id/car_ui_toolbar_top_guideline"
         app:layout_constraintBottom_toTopOf="@id/car_ui_toolbar_bottom_guideline"
-        app:layout_constraintStart_toEndOf="@+id/car_ui_toolbar_start_margin_guideline"
+        app:layout_constraintStart_toEndOf="@+id/car_ui_toolbar_title_logo_container"
         app:layout_constraintEnd_toStartOf="@+id/car_ui_toolbar_menu_items_container"/>
 
     <com.android.car.ui.toolbar.TabLayout
@@ -113,16 +130,6 @@
         app:layout_constraintStart_toEndOf="@+id/car_ui_toolbar_nav_icon_container"
         app:layout_constraintEnd_toStartOf="@+id/car_ui_toolbar_menu_items_container"
         app:layout_constraintHorizontal_bias="0.0"/>
-
-    <FrameLayout
-        android:id="@+id/car_ui_toolbar_custom_view_container"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        app:layout_constraintTop_toTopOf="@id/car_ui_toolbar_top_guideline"
-        app:layout_constraintBottom_toTopOf="@id/car_ui_toolbar_bottom_guideline"
-        app:layout_constraintStart_toEndOf="@+id/car_ui_toolbar_nav_icon_container"
-        app:layout_constraintEnd_toStartOf="@+id/car_ui_toolbar_menu_items_container"/>
 
     <LinearLayout
         android:id="@+id/car_ui_toolbar_menu_items_container"

@@ -41,13 +41,5 @@
     -->
     <integer name="car_ui_scrollbar_position">0</integer>
 
-    <!-- Width of the scrollbar container. -->
-    <dimen name="car_ui_scrollbar_container_width">@dimen/car_ui_margin</dimen>
-
-    <dimen name="car_ui_recyclerview_divider_start_margin">0dp</dimen>
-    <dimen name="car_ui_recyclerview_divider_end_margin">0dp</dimen>
-    <dimen name="car_ui_recyclerview_divider_top_margin">0dp</dimen>
-    <dimen name="car_ui_recyclerview_divider_bottom_margin">0dp</dimen>
-
     <bool name="car_ui_toolbar_tabs_on_second_row">true</bool>
 </resources>
