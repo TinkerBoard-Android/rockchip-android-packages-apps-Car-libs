@@ -27,10 +27,11 @@
     <dimen name="control_bar_margin_x">@*android:dimen/car_margin</dimen>
     <dimen name="control_bar_margin_bottom">@*android:dimen/car_padding_2</dimen>
     <dimen name="control_bar_button_size">76dp</dimen>
-    <dimen name="control_bar_button_slot_size">@dimen/control_bar_height</dimen>
+    <dimen name="control_bar_button_slot_height">@dimen/control_bar_height</dimen>
+    <dimen name="control_bar_button_slot_width">@dimen/control_bar_button_size</dimen>
     <dimen name="control_bar_elevation">0dp</dimen>
     <dimen name="control_bar_button_padding">16dp</dimen>
-    <dimen name="control_bar_button_background_radius">48dp</dimen>
+    <dimen name="control_bar_button_background_radius">38dp</dimen>
 
     <!-- Overflow button in control Bar -->
     <dimen name="overflow_button_icon_size">44dp</dimen>
@@ -75,5 +76,12 @@
     <!-- Value used to blur background images, the blur radius is P * (W + H)/2.
         The computed blur radius is capped at 25 pixels. -->
     <item name="background_bitmap_blur_percent" format="float" type="dimen">0.05</item>
+
+    <!-- Dialog and button -->
+    <dimen name="dialog_max_width">706dp</dimen>
+    <dimen name="hero_button_max_width">@dimen/dialog_max_width</dimen>
+    <dimen name="hero_button_min_width">@dimen/touch_target_size</dimen>
+    <dimen name="hero_button_height">@dimen/touch_target_size</dimen>
+    <dimen name="hero_button_corner_radius">38dp</dimen>
 
 </resources>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright 2019 The Android Open Source Project
+  ~
+  ~ Copyright (C) 2019 Google Inc.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -13,13 +14,8 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  -->
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/play_pause_container"
-    android:clipChildren="false"
-    android:focusable="false"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
-    <include layout="@layout/play_pause_stop_button_layout"/>
-</FrameLayout>
+  ~
+ -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+        android:color="@*android:color/car_card_ripple_background"
+        android:radius="@dimen/chassis_toolbar_button_background_radius"/>

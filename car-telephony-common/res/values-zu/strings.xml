@@ -19,11 +19,11 @@
     <string name="unknown" msgid="3237922751873109097">"Akwaziwa"</string>
     <string name="voicemail" msgid="2125552157407909509">"Ivoyisimeyili"</string>
     <string name="phone_label_with_info" msgid="4652109530699808645">"<xliff:g id="LABEL">%1$s</xliff:g>  ·  <xliff:g id="DURATION">%2$s</xliff:g>"</string>
-    <string name="call_state_connecting" msgid="6844097368588248151">"Iyaxhuma"</string>
-    <string name="call_state_dialing" msgid="4397655224585553327">"Iyadayela"</string>
+    <string name="call_state_connecting" msgid="5930724746375294866">"Iyaxhuma…"</string>
+    <string name="call_state_dialing" msgid="1534599871716648114">"Iyadayela…"</string>
     <string name="call_state_hold" msgid="6834028102796624100">"Ibanjiwe"</string>
     <string name="call_state_call_ended" msgid="4159349597599886429">"Ikholi iqediwe"</string>
     <string name="call_state_call_active" msgid="2769644783657864202">"Ixhunyiwe"</string>
-    <string name="call_state_call_ringing" msgid="2115824593555284816">"Iyakhala"</string>
-    <string name="call_state_call_ending" msgid="738099494362020903">"Iyanqamula"</string>
+    <string name="call_state_call_ringing" msgid="4618803402954375017">"Iyakhala…"</string>
+    <string name="call_state_call_ending" msgid="5037498349965472247">"Iyanqamula…"</string>
 </resources>

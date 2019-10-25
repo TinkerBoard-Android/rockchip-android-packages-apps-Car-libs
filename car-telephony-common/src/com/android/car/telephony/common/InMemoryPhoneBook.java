@@ -44,6 +44,8 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
     private final AsyncQueryLiveData<List<Contact>> mContactListAsyncQueryLiveData;
     /** A map to speed up phone number searching. */
     private final Map<I18nPhoneNumberWrapper, Contact> mPhoneNumberContactMap = new HashMap<>();
+    /** A map to look up contact by lookup key. */
+    private final Map<String, Contact> mLookupKeyContactMap = new HashMap<>();
     private boolean mIsLoaded = false;
 
     /**
@@ -57,6 +59,17 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
             sInMemoryPhoneBook.onInit();
         }
         return get();
+    }
+
+    /**
+     * Returns if the InMemoryPhoneBook is initialized.
+     * get() won't return null or throw if this is true, but it doesn't
+     * indicate whether or not contacts are loaded yet.
+     *
+     * See also: {@link #isLoaded()}
+     */
+    public static boolean isInitialized() {
+        return sInMemoryPhoneBook != null;
     }
 
     /** Get the global {@link InMemoryPhoneBook} instance. */
@@ -77,11 +90,14 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
     private InMemoryPhoneBook(Context context) {
         mContext = context;
 
+        // TODO(b/138749585): clean up filtering once contact cloud sync is disabled.
         QueryParam contactListQueryParam = new QueryParam(
                 ContactsContract.Data.CONTENT_URI,
                 null,
-                ContactsContract.Data.MIMETYPE + " = ?",
-                new String[]{ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE},
+                ContactsContract.Data.MIMETYPE + " = ? and "
+                        + ContactsContract.RawContacts.ACCOUNT_TYPE + " != ?",
+                new String[]{
+                        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE, "com.google"},
                 ContactsContract.Contacts.DISPLAY_NAME + " ASC ");
         mContactListAsyncQueryLiveData = new AsyncQueryLiveData<List<Contact>>(mContext,
                 QueryParam.of(contactListQueryParam)) {
@@ -132,6 +148,23 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
         return mPhoneNumberContactMap.get(i18nPhoneNumber);
     }
 
+    /**
+     * Looks up a {@link Contact} by the given lookup key. Returns null if can't find the contact
+     * entry.
+     */
+    @Nullable
+    public Contact lookupContactByKey(String lookupKey) {
+        if (!isLoaded()) {
+            Log.w(TAG, "looking up a contact while loading.");
+        }
+        if (TextUtils.isEmpty(lookupKey)) {
+            Log.w(TAG, "looking up an empty lookup key.");
+            return null;
+        }
+
+        return mLookupKeyContactMap.get(lookupKey);
+    }
+
     private List<Contact> onCursorLoaded(Cursor cursor) {
         Map<String, Contact> result = new LinkedHashMap<>();
         List<Contact> contacts = new ArrayList<>();
@@ -148,6 +181,9 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
         }
 
         contacts.addAll(result.values());
+
+        mLookupKeyContactMap.clear();
+        mLookupKeyContactMap.putAll(result);
 
         mPhoneNumberContactMap.clear();
         for (Contact contact : contacts) {

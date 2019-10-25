@@ -122,7 +122,7 @@ public class MediaSourceViewModelTest {
             }
 
             @Override
-            public MediaSource getMediaSource(String packageName) {
+            public MediaSource getMediaSource(ComponentName componentName) {
                 return mMediaSource;
             }
         });
