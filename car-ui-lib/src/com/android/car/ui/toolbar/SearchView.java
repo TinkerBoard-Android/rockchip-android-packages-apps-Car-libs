@@ -16,7 +16,6 @@
 package com.android.car.ui.toolbar;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -158,22 +157,23 @@ public class SearchView extends ConstraintLayout {
     /**
      * Sets a custom icon to display in the search box.
      */
-    public void setIcon(Bitmap b) {
-        mIcon.setImageBitmap(b);
-    }
-
-    /**
-     * Sets a custom icon to display in the search box.
-     */
     public void setIcon(Drawable d) {
-        mIcon.setImageDrawable(d);
+        if (d == null) {
+            mIcon.setImageResource(R.drawable.car_ui_icon_search);
+        } else {
+            mIcon.setImageDrawable(d);
+        }
     }
 
     /**
      * Sets a custom icon to display in the search box.
      */
     public void setIcon(int resId) {
-        mIcon.setImageResource(resId);
+        if (resId == 0) {
+            mIcon.setImageResource(R.drawable.car_ui_icon_search);
+        } else {
+            mIcon.setImageResource(resId);
+        }
     }
 
     private void onSearch(String query) {
