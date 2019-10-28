@@ -10,8 +10,9 @@
     <public name="car_ui_preference_switch_toggle_use_text_track" type="bool"/>
     <public name="car_ui_scrollbar_above_recycler_view" type="bool"/>
     <public name="car_ui_scrollbar_enable" type="bool"/>
+    <public name="car_ui_tab_flexible_layout" type="bool"/>
     <public name="car_ui_toolbar_tab_flexible_layout" type="bool"/>
-    <public name="car_ui_toolbar_title_and_tabs_are_mutually_exclusive" type="bool"/>
+    <public name="car_ui_toolbar_tabs_on_second_row" type="bool"/>
     <public name="car_ui_activity_background_color" type="color"/>
     <public name="car_ui_preference_category_title_text_color" type="color"/>
     <public name="car_ui_preference_edit_text_dialog_message_text_color" type="color"/>
