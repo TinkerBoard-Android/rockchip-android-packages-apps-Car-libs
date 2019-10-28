@@ -220,6 +220,18 @@ public class MenuItem {
         return mIcon;
     }
 
+    /** Sets the Icon of this MenuItem. */
+    public void setIcon(Drawable icon) {
+        mIcon = icon;
+
+        update();
+    }
+
+    /** Sets the Icon of this MenuItem to a drawable resource. */
+    public void setIcon(int resId) {
+        setIcon(mContext.getDrawable(resId));
+    }
+
     /** Returns if this is the search MenuItem, which has special behavior when searching */
     boolean isSearch() {
         return mIsSearch;
