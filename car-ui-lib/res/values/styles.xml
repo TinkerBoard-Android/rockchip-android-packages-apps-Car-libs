@@ -29,7 +29,14 @@
         <item name="android:src">@drawable/car_ui_icon_arrow_back</item>
     </style>
 
-    <style name="Widget.CarUi.Toolbar.TextButton" parent="Widget.CarUi.Button.Borderless.Colored"/>
+    <style name="Widget.CarUi.Toolbar.TextButton" parent="Widget.CarUi.Button.Borderless.Colored">
+        <item name="android:drawableTint">@color/car_ui_toolbar_menu_item_icon_color</item>
+        <item name="android:drawablePadding">10dp</item>
+    </style>
+
+    <style name="Widget.CarUi.Toolbar.TextButton.WithIcon">
+        <item name="android:textColor">@color/car_ui_toolbar_menu_item_icon_color</item>
+    </style>
 
     <!-- Style applied to the decoration view between toolbar rows -->
     <style name="Widget.CarUi.Toolbar.SeparatorView">
