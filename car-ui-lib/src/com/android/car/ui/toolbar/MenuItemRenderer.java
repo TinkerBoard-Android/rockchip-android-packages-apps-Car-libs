@@ -77,23 +77,16 @@ class MenuItemRenderer implements MenuItem.Listener {
         updateView();
     }
 
-    @Override
-    public View getView() {
-        if (mMenuItem.mCustomLayoutId != 0) {
-            return mView;
-        }
-        return null;
-    }
-
     View createView() {
         LayoutInflater inflater = (LayoutInflater) mParentView.getContext().getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
 
-        if (mMenuItem.mCustomLayoutId != 0) {
-            mView = inflater.inflate(mMenuItem.mCustomLayoutId, mParentView, false);
-        } else if (mMenuItem.isCheckable()) {
+        if (mMenuItem.isCheckable()) {
             mView = inflater.inflate(
                     R.layout.car_ui_toolbar_menu_item_switch, mParentView, false);
+        } else if (mMenuItem.isShowingIconAndTitle()) {
+            mView = inflater.inflate(
+                    R.layout.car_ui_toolbar_menu_item_icon_and_text, mParentView, false);
         } else if (mMenuItem.getIcon() != null) {
             mView = inflater.inflate(
                     R.layout.car_ui_toolbar_menu_item_icon, mParentView, false);
@@ -127,11 +120,24 @@ class MenuItemRenderer implements MenuItem.Listener {
         TextView textView = mView.findViewById(R.id.car_ui_toolbar_menu_item_text);
         if (textView != null) {
             textView.setText(mMenuItem.getTitle());
+
+            if (mMenuItem.isShowingIconAndTitle() && imageView == null) {
+                int menuItemIconSize = mView.getContext().getResources()
+                        .getDimensionPixelSize(R.dimen.car_ui_toolbar_menu_item_icon_size);
+
+                mMenuItem.getIcon().setBounds(0, 0, menuItemIconSize, menuItemIconSize);
+
+                textView.setCompoundDrawables(mMenuItem.getIcon(), null, null, null);
+            }
         }
 
         Switch s = mView.findViewById(R.id.car_ui_toolbar_menu_item_switch);
         if (s != null) {
             s.setChecked(mMenuItem.isChecked());
+        }
+
+        if (!mMenuItem.isTinted()) {
+            mMenuItem.getIcon().setTintList(null);
         }
 
         recursiveSetEnabledAndDrawableState(mView);
