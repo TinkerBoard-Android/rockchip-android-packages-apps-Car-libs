@@ -16,6 +16,21 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.car.connecteddevice.tests.unit">
+
+    <!--  Needed for BLE scanning/advertising -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+
+    <!--  Needed for detecting foreground user -->
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS"/>
+    <uses-permission android:name="android.permission.MANAGE_USERS" />
+
+    <application android:testOnly="true"
+                 android:debuggable="true">
+        <uses-library android:name="android.test.runner" />
+    </application>
+
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
                      android:targetPackage="com.android.car.connecteddevice.tests.unit"
                      android:label="Connected Device Lib Test Cases" />

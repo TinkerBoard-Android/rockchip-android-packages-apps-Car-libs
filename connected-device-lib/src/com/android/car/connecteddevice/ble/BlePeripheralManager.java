@@ -73,7 +73,7 @@ public class BlePeripheralManager {
     private static final UUID DEVICE_NAME_UUID =
             UUID.fromString("00002a00-0000-1000-8000-00805f9b34fb");
 
-    private final Handler mHandler = new Handler();
+    private final Handler mHandler;
 
     private final Context mContext;
     private final Set<Callback> mCallbacks = new CopyOnWriteArraySet<>();
@@ -94,6 +94,7 @@ public class BlePeripheralManager {
 
     public BlePeripheralManager(Context context) {
         mContext = context;
+        mHandler = new Handler(mContext.getMainLooper());
     }
 
     /**
