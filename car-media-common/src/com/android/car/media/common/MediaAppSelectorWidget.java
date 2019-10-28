@@ -78,8 +78,6 @@ public class MediaAppSelectorWidget extends LinearLayout {
                 attrs, R.styleable.MediaAppSelectorWidget, defStyleAttr, 0 /* defStyleRes */);
         mFullScreenDialog = a.getBoolean(R.styleable.MediaAppSelectorWidget_fullScreenDialog, true);
         mSwitchingEnabled = a.getBoolean(R.styleable.MediaAppSelectorWidget_switchingEnabled, true);
-        int size = (int) a.getDimension(R.styleable.MediaAppSelectorWidget_appIconSize,
-                getResources().getDimension(R.dimen.app_switch_widget_app_icon_size));
         a.recycle();
 
         mDefaultIcon = getResources().getDrawable(R.drawable.ic_music);
@@ -91,8 +89,6 @@ public class MediaAppSelectorWidget extends LinearLayout {
         inflater.inflate(R.layout.app_switch_widget, this, true);
 
         mAppIcon = findViewById(R.id.app_icon);
-        mAppIcon.getLayoutParams().height = size;
-        mAppIcon.getLayoutParams().width = size;
         mAppSwitchIcon = findViewById(R.id.app_switch_icon);
 
         setFragmentOwner(null);

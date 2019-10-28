@@ -34,6 +34,7 @@ import android.widget.TextView;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StyleRes;
 
 import com.android.car.apps.common.R;
 import com.android.car.apps.common.util.Themes;
@@ -59,7 +60,7 @@ import java.util.Set;
  * <p>Touch feedback is using @android:attr/selectableItemBackground.
  *
  * @param <T> Presents a CarTab entity
- * @deprecated Use {@link com.android.car.chassis.TabLayout} instead
+ * @deprecated Use {@link com.android.car.ui.TabLayout} instead
  */
 @Deprecated
 public class CarTabLayout<T extends CarTabLayout.CarTab> extends LinearLayout {
@@ -233,7 +234,6 @@ public class CarTabLayout<T extends CarTabLayout.CarTab> extends LinearLayout {
     }
 
     private static class CarTabAdapter<T extends CarTab> extends BaseAdapter {
-        private static final int MEDIUM_WEIGHT = 500;
         private final Context mContext;
         private final CarTabLayout mCarTabLayout;
         @LayoutRes
@@ -247,9 +247,8 @@ public class CarTabLayout<T extends CarTabLayout.CarTab> extends LinearLayout {
             mContext = context;
             mCarTabItemLayoutRes = res;
             mCarTabLayout = carTabLayout;
-            mUnselectedTypeface = Typeface.defaultFromStyle(Typeface.NORMAL);
-            // TODO: add indirection to allow customization.
-            mSelectedTypeface = Typeface.create(mUnselectedTypeface, MEDIUM_WEIGHT, false);
+            mUnselectedTypeface = createStyledTypeface(context, R.style.CarTabItemText);
+            mSelectedTypeface = createStyledTypeface(context, R.style.CarTabSelectedTextTypeface);
         }
 
         private void add(@NonNull T carTab) {
@@ -342,6 +341,16 @@ public class CarTabLayout<T extends CarTabLayout.CarTab> extends LinearLayout {
             iconView.setSelected(carTab.mIsSelected);
             textView.setSelected(carTab.mIsSelected);
             textView.setTypeface(carTab.mIsSelected ? mSelectedTypeface : mUnselectedTypeface);
+        }
+
+        private static Typeface createStyledTypeface(Context context, @StyleRes int styleResId) {
+            // If not specified, default to 0, which stands for normal.
+            int textStyle = Themes.getAttrInteger(context, styleResId, android.R.attr.textStyle);
+            // If not specified, default value will be 0 which is a light font.
+            int textFontWeight = Themes.getAttrInteger(context, styleResId,
+                    android.R.attr.textFontWeight);
+            return Typeface.create(Typeface.defaultFromStyle(textStyle), textFontWeight,
+                    (textStyle & Typeface.ITALIC) != 0);
         }
     }
 

@@ -1,0 +1,12 @@
+# Local configuration
+local.properties
+gradle-wrapper.properties
+
+# Gradle
+gradle/
+.gradle/
+build/
+
+# IntelliJ
+.idea/
+*.iml

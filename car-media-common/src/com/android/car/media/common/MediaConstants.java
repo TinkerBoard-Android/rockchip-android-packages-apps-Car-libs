@@ -16,11 +16,22 @@
 
 package com.android.car.media.common;
 
+import androidx.media.MediaBrowserServiceCompat;
+
 /**
  * Holds constants used when dealing with MediaBrowserServices that support the
  * content style API for media.
  */
 public final class MediaConstants {
+
+    /**
+     * Integer extra indicating the recommended size (in pixels) for media art bitmaps. The value
+     * is passed in the rootHints Bundle of {@link MediaBrowserServiceCompat#onGetRoot} and can be
+     * retrieved with: rootHints.getInt("android.media.extras.MEDIA_ART_SIZE_HINT_PIXELS", 0).
+     */
+    public static final String EXTRA_MEDIA_ART_SIZE_HINT_PIXELS =
+            "android.media.extras.MEDIA_ART_SIZE_HINT_PIXELS";
+
     /**
      * Bundle extra holding the Pending Intent to launch to let users resolve the current error.
      * See {@link #ERROR_RESOLUTION_ACTION_LABEL} for more details.
@@ -120,13 +131,35 @@ public final class MediaConstants {
     /**
      * These constants are from
      * @see <a href=https://developer.android.com/training/auto/audio/#required-actions></a>
+     *
+     * @deprecated this flag has been replaced by {@link #PLAYBACK_SLOT_RESERVATION_SKIP_TO_NEXT}
      */
+    @Deprecated
     public static final String SLOT_RESERVATION_SKIP_TO_NEXT =
             "com.google.android.gms.car.media.ALWAYS_RESERVE_SPACE_FOR.ACTION_SKIP_TO_NEXT";
+    /**
+     * @deprecated this flag has been replaced by {@link #PLAYBACK_SLOT_RESERVATION_SKIP_TO_NEXT}
+     */
+    @Deprecated
     public static final String SLOT_RESERVATION_SKIP_TO_PREV =
             "com.google.android.gms.car.media.ALWAYS_RESERVE_SPACE_FOR.ACTION_SKIP_TO_PREVIOUS";
+    /**
+     * @deprecated this flag has been replaced by {@link #PLAYBACK_SLOT_RESERVATION_SKIP_TO_NEXT}
+     */
+    @Deprecated
     public static final String SLOT_RESERVATION_QUEUE =
             "com.google.android.gms.car.media.ALWAYS_RESERVE_SPACE_FOR.ACTION_QUEUE";
+
+    /**
+     * These constants are from
+     * @see <a href=https://developer.android.com/training/auto/audio/#required-actions></a>
+     */
+    public static final String PLAYBACK_SLOT_RESERVATION_SKIP_TO_NEXT =
+            "android.media.playback.ALWAYS_RESERVE_SPACE_FOR.ACTION_SKIP_TO_NEXT";
+    public static final String PLAYBACK_SLOT_RESERVATION_SKIP_TO_PREV =
+            "android.media.playback.ALWAYS_RESERVE_SPACE_FOR.ACTION_SKIP_TO_PREVIOUS";
+    public static final String PLAYBACK_SLOT_RESERVATION_QUEUE =
+            "android.media.playback.ALWAYS_RESERVE_SPACE_FOR.ACTION_QUEUE";
 
     /**
      * Bundle extra of type 'boolean' indicating that an item should show the 'explicit' symbol.

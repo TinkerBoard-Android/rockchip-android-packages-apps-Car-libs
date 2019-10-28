@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 /**
  * A singleton statically accessible helper class which pre-loads contacts list into memory so
@@ -98,7 +99,7 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
                         ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE},
                 ContactsContract.Contacts.DISPLAY_NAME + " ASC ");
         mContactListAsyncQueryLiveData = new AsyncQueryLiveData<List<Contact>>(mContext,
-                QueryParam.of(contactListQueryParam)) {
+                QueryParam.of(contactListQueryParam), Executors.newSingleThreadExecutor()) {
             @Override
             protected List<Contact> convertToEntity(Cursor cursor) {
                 return onCursorLoaded(cursor);
