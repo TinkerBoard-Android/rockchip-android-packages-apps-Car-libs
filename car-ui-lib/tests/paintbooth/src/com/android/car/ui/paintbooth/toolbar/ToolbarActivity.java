@@ -74,6 +74,16 @@ public class ToolbarActivity extends Activity {
             toolbar.setMenuItems(mMenuItems);
         }));
 
+        mButtons.add(Pair.create("MenuItem: Add untinted icon", v -> {
+            mMenuItems.add(new MenuItem.Builder(this)
+                    .setIcon(R.drawable.ic_tracklist)
+                    .setTinted(false)
+                    .setOnClickListener(i ->
+                            Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT).show())
+                    .build());
+            toolbar.setMenuItems(mMenuItems);
+        }));
+
         Mutable<Integer> overflowCounter = new Mutable<>(1);
         mButtons.add(Pair.create("MenuItem: Add Overflow", v -> {
             mMenuItems.add(new MenuItem.Builder(this)
@@ -99,6 +109,29 @@ public class ToolbarActivity extends Activity {
         mButtons.add(Pair.create("MenuItem: Add text", v -> {
             mMenuItems.add(new MenuItem.Builder(this)
                     .setTitle("Baz")
+                    .setOnClickListener(i ->
+                            Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT).show())
+                    .build());
+            toolbar.setMenuItems(mMenuItems);
+        }));
+
+        mButtons.add(Pair.create("MenuItem: Add icon and text", v -> {
+            mMenuItems.add(new MenuItem.Builder(this)
+                    .setIcon(R.drawable.ic_tracklist)
+                    .setTitle("Bar")
+                    .setShowIconAndTitle(true)
+                    .setOnClickListener(i ->
+                            Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT).show())
+                    .build());
+            toolbar.setMenuItems(mMenuItems);
+        }));
+
+        mButtons.add(Pair.create("MenuItem: Add untinted icon and text", v -> {
+            mMenuItems.add(new MenuItem.Builder(this)
+                    .setIcon(R.drawable.ic_tracklist)
+                    .setTitle("Bar")
+                    .setShowIconAndTitle(true)
+                    .setTinted(false)
                     .setOnClickListener(i ->
                             Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT).show())
                     .build());
@@ -182,9 +215,19 @@ public class ToolbarActivity extends Activity {
                     .setEditBox(null, textWatcher, null)
                     .setTitle("Enter the text for the title")
                     .setPositiveButton("Ok", (dialog, which) ->
-                        toolbar.addTab(new TabLayout.Tab(getDrawable(R.drawable.ic_launcher),
-                                textWatcher.getText())))
+                            toolbar.addTab(new TabLayout.Tab(getDrawable(R.drawable.ic_launcher),
+                                    textWatcher.getText())))
                     .show();
+        }));
+
+        Mutable<Boolean> showingLauncherIcon = new Mutable<>(false);
+        mButtons.add(Pair.create("Toggle search icon", v -> {
+            if (showingLauncherIcon.value) {
+                toolbar.setSearchIcon(0);
+            } else {
+                toolbar.setSearchIcon(R.drawable.ic_launcher);
+            }
+            showingLauncherIcon.value = !showingLauncherIcon.value;
         }));
 
         CarUiRecyclerView prv = requireViewById(R.id.list);
