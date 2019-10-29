@@ -154,12 +154,16 @@ public class ToolbarActivity extends Activity {
         mButtons.add(Pair.create("MenuItem: Toggle Visibility", v ->
                 getMenuItem(item -> item.setVisible(!item.isVisible()))));
 
-        Drawable altIcon = getDrawable(R.drawable.ic_cut);
+        final Drawable altIcon = getDrawable(R.drawable.ic_cut);
         Map<MenuItem, Drawable> iconBackups = new HashMap<>();
         mButtons.add(Pair.create("MenuItem: Toggle Icon", v ->
                 getMenuItem(item -> {
                     Drawable currentIcon = item.getIcon();
-                    item.setIcon(iconBackups.getOrDefault(item, altIcon));
+                    Drawable newIcon = altIcon;
+                    if (iconBackups.containsKey(item)) {
+                        newIcon = iconBackups.get(item);
+                    }
+                    item.setIcon(newIcon);
                     iconBackups.put(item, currentIcon);
                 })));
 
