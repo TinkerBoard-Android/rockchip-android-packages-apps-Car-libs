@@ -40,7 +40,7 @@ private const val RETRY_INTERVAL_MS = 1000
 /**
  * Class that manages BLE scanning operations.
  */
-open class BleCentralManager(val context: Context) {
+class BleCentralManager(private val context: Context) {
 
     private var scanFilters: List<ScanFilter>? = null
     private var scanSettings: ScanSettings? = null

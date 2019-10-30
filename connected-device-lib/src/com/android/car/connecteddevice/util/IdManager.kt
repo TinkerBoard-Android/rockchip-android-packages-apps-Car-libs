@@ -19,7 +19,7 @@ package com.android.car.connecteddevice.util
 import com.android.internal.annotations.GuardedBy
 
 /** Class for managing unique numeric ids. */
-class IdManager {
+internal class IdManager {
 
     private val lock = object
     @Volatile

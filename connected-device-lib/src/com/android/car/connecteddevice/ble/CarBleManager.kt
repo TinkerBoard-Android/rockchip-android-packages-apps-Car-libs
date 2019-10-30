@@ -33,8 +33,8 @@ private const val TAG = "CarBleManager"
  *
  * @param carCompanionDeviceStorage Shared [CarCompanionDeviceStorage] for companion features.
  */
-abstract class CarBleManager(
-    protected val carCompanionDeviceStorage: CarCompanionDeviceStorage
+internal abstract class CarBleManager(
+    private val carCompanionDeviceStorage: CarCompanionDeviceStorage
 ) {
 
     protected val connectedDevices = CopyOnWriteArraySet<BleDevice>()

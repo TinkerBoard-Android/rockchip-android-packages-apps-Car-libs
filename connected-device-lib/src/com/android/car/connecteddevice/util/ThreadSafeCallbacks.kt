@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
 
 /** Class for issuing thread-safe callbacks. */
-class ThreadSafeCallbacks<T> {
+internal class ThreadSafeCallbacks<T> {
 
     private val callbacks = ConcurrentHashMap<T, Executor>()
 
@@ -44,7 +44,7 @@ class ThreadSafeCallbacks<T> {
 
     /** Invoke [notification] on all callbacks with their supplied [Executor]. */
     fun invoke(notification: (T) -> Unit) {
-        callbacks.forEach { callback, executor ->
+        callbacks.forEach { (callback, executor) ->
             executor.execute { notification(callback) }
         }
     }

@@ -53,7 +53,7 @@ private const val THROTTLE_DEFAULT = 10L
 private const val THROTTLE_WAIT = 75L
 
 /** BLE message stream to a device. */
-open class BleDeviceMessageStream(
+internal class BleDeviceMessageStream(
     private val blePeripheralManager: BlePeripheralManager,
     private val device: BluetoothDevice,
     private val writeCharacteristic: BluetoothGattCharacteristic,

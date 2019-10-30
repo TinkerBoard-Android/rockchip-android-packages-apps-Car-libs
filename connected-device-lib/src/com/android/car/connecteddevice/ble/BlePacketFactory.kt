@@ -46,7 +46,7 @@ private const val PACKET_NUMBER_ENCODING_SIZE = FIXED_32_SIZE + FIELD_NUMBER_ENC
  * @param maxSize The maximum size of each chunk.
  * @return A list of [BlePacket]s.
  */
-fun makeBlePackets(payload: ByteArray, messageId: Int, maxSize: Int): List<BlePacket> {
+internal fun makeBlePackets(payload: ByteArray, messageId: Int, maxSize: Int): List<BlePacket> {
     val blePackets = mutableListOf<BlePacket>()
     val payloadSize = payload.size
     val totalPackets = getTotalPacketNumber(messageId, payloadSize, maxSize)

@@ -54,7 +54,7 @@ private val CHARACTERISTIC_CONFIG = UUID.fromString("00002902-0000-1000-8000-008
  * @param writeCharacteristicUuid [UUID] of characteristic the car will write to.
  * @param readCharacteristicUuid [UUID] of characteristic the device will write to.
  */
-open class CarBleCentralManager(
+internal class CarBleCentralManager(
     private val context: Context,
     private val bleCentralManager: BleCentralManager,
     carCompanionDeviceStorage: CarCompanionDeviceStorage,

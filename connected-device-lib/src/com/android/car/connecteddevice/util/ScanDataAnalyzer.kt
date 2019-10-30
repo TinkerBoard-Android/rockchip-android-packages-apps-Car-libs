@@ -66,7 +66,7 @@ private const val IOS_OVERFLOW_CONTENT_LENGTH =
  * Other similar reverse engineering:
  * http://www.pagepinner.com/2014/04/how-to-get-ble-overflow-hash-bit-from.html
  */
-fun containsUuidsInOverflow(scanData: ByteArray, serviceUuidMask: BigInteger): Boolean {
+internal fun containsUuidsInOverflow(scanData: ByteArray, serviceUuidMask: BigInteger): Boolean {
     val overflowBytes = ByteArray(IOS_OVERFLOW_CONTENT_LENGTH)
     var outPtr = 0
     var overflowPtr = 0
