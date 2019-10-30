@@ -476,6 +476,26 @@ public class Toolbar extends FrameLayout {
     }
 
     /**
+     * Sets the icon to display in the search box.
+     *
+     * <p>The icon will be lost on configuration change, make sure to set it in onCreate() or
+     * a similar place.
+     */
+    public void setSearchIcon(int resId) {
+        mSearchView.setIcon(resId);
+    }
+
+    /**
+     * Sets the icon to display in the search box.
+     *
+     * <p>The icon will be lost on configuration change, make sure to set it in onCreate() or
+     * a similar place.
+     */
+    public void setSearchIcon(Drawable d) {
+        mSearchView.setIcon(d);
+    }
+
+    /**
      * An enum of possible styles the nav button could be in. All styles will still call
      * {@link OnBackListener#onBack()}.
      */
@@ -558,11 +578,6 @@ public class Toolbar extends FrameLayout {
                     @Override
                     public void performClick() {
                         Log.w(TAG, "performClick on overflow MenuItems not yet implemented");
-                    }
-
-                    @Override
-                    public View getView() {
-                        return null;
                     }
                 });
             } else {
