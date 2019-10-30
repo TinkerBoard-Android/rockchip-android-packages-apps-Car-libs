@@ -478,7 +478,7 @@ public class Toolbar extends FrameLayout {
     /**
      * Sets the icon to display in the search box.
      *
-     * @note The icon will be lost on configuration change, make sure to set it in onCreate() or
+     * <p>The icon will be lost on configuration change, make sure to set it in onCreate() or
      * a similar place.
      */
     public void setSearchIcon(int resId) {
@@ -488,7 +488,7 @@ public class Toolbar extends FrameLayout {
     /**
      * Sets the icon to display in the search box.
      *
-     * @note The icon will be lost on configuration change, make sure to set it in onCreate() or
+     * <p>The icon will be lost on configuration change, make sure to set it in onCreate() or
      * a similar place.
      */
     public void setSearchIcon(Drawable d) {
