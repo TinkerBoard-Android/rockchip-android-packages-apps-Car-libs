@@ -46,7 +46,7 @@ Example usage: python auto-generate-resources.py current.xml
 def main():
     parser = argparse.ArgumentParser(description='Check if any existing resources are modified.')
     parser.add_argument('-f', '--file', default='current.xml', help='Name of output file.')
-    parser.add_argument('-c', '--compare', type=bool, nargs='?', const=True, default=False,
+    parser.add_argument('-c', '--compare', action='store_true',
                         help="Pass this flag if resources need to be compared.")
     args = vars(parser.parse_args())
 
@@ -102,13 +102,13 @@ def read_xml(file_path, resource_mapping):
 
 
 def write_xml(data, args):
-    xml_tag = "<?xml version='1.0' encoding='utf-8'?>"
-    header = "<!-- This file is AUTO GENERATED, DO NOT EDIT MANUALLY. -->"
-    data_string = ET.tostring(data)
-    output_file_name = OUTPUT_FILE_PATH + args['file']
-    output_file = open(output_file_name, "w")
-    data_string = xml_tag + header + data_string
-    output_file.write(data_string)
+    comment = "This file is AUTO GENERATED, DO NOT EDIT MANUALLY."
+
+    doc = minidom.parseString(ET.tostring(data))
+    doc.insertBefore(doc.createComment(comment), doc.getElementsByTagName('resources')[0])
+
+    with open(OUTPUT_FILE_PATH + args['file'], "w") as f:
+        doc.writexml(f, addindent="    ", newl="\n", encoding="utf-8")
 
 
 def create_resource(data, resource_mapping):
