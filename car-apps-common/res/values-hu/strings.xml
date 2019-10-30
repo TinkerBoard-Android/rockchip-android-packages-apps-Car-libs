@@ -19,7 +19,4 @@ limitations under the License.
     <string name="control_bar_expand_collapse_button" msgid="3420351169078117938">"Gomb kibontása/összecsukása"</string>
     <string name="car_drawer_open" msgid="2676372472514742324">"Fiók megnyitása"</string>
     <string name="car_drawer_close" msgid="5329374630462464855">"Fiók bezárása"</string>
-    <string name="restricted_while_driving" msgid="2278031053760704437">"Vezetés közben nem áll rendelkezésre a funkció."</string>
-    <string name="scroll_bar_page_down_button" msgid="8633547153186948066">"Görgetés lefelé"</string>
-    <string name="scroll_bar_page_up_button" msgid="8306413844913744345">"Görgetés felfelé"</string>
 </resources>

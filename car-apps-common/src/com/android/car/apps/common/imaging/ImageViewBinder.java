@@ -21,7 +21,6 @@ import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.Size;
-import android.view.View;
 import android.widget.ImageView;
 
 import com.android.car.apps.common.CommonFlags;
@@ -57,7 +56,6 @@ public class ImageViewBinder<T extends ImageBinder.ImageRef> extends ImageBinder
     protected void setDrawable(@Nullable Drawable drawable) {
         if (mImageView != null) {
             mImageView.setImageDrawable(drawable);
-            mImageView.setVisibility((drawable != null) ? View.VISIBLE : View.GONE);
             if (mFlagBitmaps) {
                 CommonFlags flags = CommonFlags.getInstance(mImageView.getContext());
                 if (flags.shouldFlagImproperImageRefs()) {
@@ -82,10 +80,11 @@ public class ImageViewBinder<T extends ImageBinder.ImageRef> extends ImageBinder
 
     @Override
     protected void prepareForNewBinding(Context context) {
-        super.prepareForNewBinding(context);
         mImageView.setImageBitmap(null);
         mImageView.setImageDrawable(null);
         mImageView.clearColorFilter();
+        // Call super last to setup the default loading drawable.
+        super.prepareForNewBinding(context);
     }
 
 }

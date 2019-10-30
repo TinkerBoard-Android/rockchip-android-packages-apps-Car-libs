@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+  <com.android.car.ui.toolbar.Toolbar
+      android:id="@+id/toolbar"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      app:title="@string/app_name"
+      app:state="subpage"/>
+
+  <com.android.car.ui.pagedrecyclerview.PagedRecyclerView
+      android:id="@+id/grid_list"
+      app:layoutStyle="grid"
+      app:numOfColumns="4"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent" />
+</LinearLayout>

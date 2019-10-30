@@ -22,10 +22,12 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.Size;
 
+import com.android.car.apps.common.R;
 import com.android.car.apps.common.UriUtils;
 
 import java.util.Objects;
@@ -75,6 +77,7 @@ public class ImageBinder<T extends ImageBinder.ImageRef> {
     private T mCurrentRef;
     private ImageKey mCurrentKey;
     private BiConsumer<ImageKey, Drawable> mFetchReceiver;
+    private Drawable mLoadingDrawable;
 
 
     public ImageBinder(@NonNull PlaceholderType type, @NonNull Size maxImageSize,
@@ -155,10 +158,19 @@ public class ImageBinder<T extends ImageBinder.ImageRef> {
             getImageFetcher(context).cancelRequest(mCurrentKey, mFetchReceiver);
             onRequestFinished();
         }
+        setDrawable(getLoadingDrawable(context));
     }
 
     private void onRequestFinished() {
         mCurrentKey = null;
         mFetchReceiver = null;
+    }
+
+    private Drawable getLoadingDrawable(Context context) {
+        if (mLoadingDrawable == null) {
+            int color = context.getColor(R.color.loading_image_placeholder_color);
+            mLoadingDrawable = new ColorDrawable(color);
+        }
+        return mLoadingDrawable;
     }
 }
