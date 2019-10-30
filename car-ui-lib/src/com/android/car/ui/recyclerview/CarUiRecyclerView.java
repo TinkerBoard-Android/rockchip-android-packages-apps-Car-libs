@@ -794,7 +794,6 @@ public final class CarUiRecyclerView extends RecyclerView implements
             mNestedRecyclerViewState = new SparseArray<>();
         }
 
-        @SuppressWarnings("unchecked")
         private SavedState(Parcel in, ClassLoader classLoader) {
             super(in, classLoader);
             mNestedRecyclerViewState = in.readSparseArray(classLoader);

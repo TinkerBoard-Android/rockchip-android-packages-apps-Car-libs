@@ -79,7 +79,6 @@ public class TabLayout extends LinearLayout {
 
     // View attributes
     private final boolean mTabFlexibleLayout;
-    private final int mTabPaddingX;
 
     private final Set<Listener> mListeners = new ArraySet<>();
 
@@ -97,7 +96,6 @@ public class TabLayout extends LinearLayout {
         super(context, attrs, defStyle);
         Resources resources = context.getResources();
 
-        mTabPaddingX = resources.getDimensionPixelSize(R.dimen.car_ui_toolbar_tab_padding_x);
         mTabFlexibleLayout = resources.getBoolean(R.bool.car_ui_toolbar_tab_flexible_layout);
 
         mTabAdapter = new TabAdapter(context, R.layout.car_ui_toolbar_tab_item_layout, this);
