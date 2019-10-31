@@ -113,7 +113,11 @@ internal class BleDeviceMessageStream(
         }
         val bleDeviceMessage = builder.build()
         val rawBytes = bleDeviceMessage.toByteArray()
-        val blePackets = makeBlePackets(rawBytes, messageIdGenerator.next(), maxWriteSize)
+        val blePackets = BlePacketFactory.makeBlePackets(
+            rawBytes,
+            messageIdGenerator.next(),
+            maxWriteSize
+        )
         packetQueue.addAll(blePackets)
         writeNextMessageInQueue()
     }
