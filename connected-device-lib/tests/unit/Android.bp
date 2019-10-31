@@ -31,8 +31,21 @@ android_test {
         "androidx.test.ext.junit",
         "androidx.test.rules",
         "connected-device-lib",
-        "mockito-target-extended",
-        "testng",
+        "kotlin-reflect",
+        "mockito-target-extended-minus-junit4",
+        "testables",
         "truth-prebuilt",
     ],
+
+    jni_libs: [
+        // For mockito extended
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
+    ],
+
+    platform_apis: true,
+
+    certificate: "platform",
+
+    privileged: true,
 }

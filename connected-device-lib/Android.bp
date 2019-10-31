@@ -31,4 +31,6 @@ android_library {
         "EncryptionRunner",
         "connected-device-protos",
     ],
+
+    platform_apis: true,
 }

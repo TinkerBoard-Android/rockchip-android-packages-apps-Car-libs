@@ -6,7 +6,7 @@
 
 ### Install resulting apk on device
 
-`adb install -r $OUT/testcases/connected-device-lib-unit-tests/arm64/connected-device-lib-unit-tests.apk`
+`adb install -r -t $OUT/testcases/connected-device-lib-unit-tests/arm64/connected-device-lib-unit-tests.apk`
 
 ### Run all tests
 

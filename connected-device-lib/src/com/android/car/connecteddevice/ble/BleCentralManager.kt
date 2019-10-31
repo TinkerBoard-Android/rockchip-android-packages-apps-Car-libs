@@ -40,14 +40,14 @@ private const val RETRY_INTERVAL_MS = 1000
 /**
  * Class that manages BLE scanning operations.
  */
-class BleCentralManager(private val context: Context) {
+internal class BleCentralManager(private val context: Context) {
 
     private var scanFilters: List<ScanFilter>? = null
     private var scanSettings: ScanSettings? = null
     private var scanCallback: ScanCallback? = null
     private var scanner: BluetoothLeScanner? = null
     private var scannerStartCount = 0
-    private val handler = Handler()
+    private val handler = Handler(context.mainLooper)
 
     // Internally track scanner state to avoid restarting a stopped scanner
     private enum class ScannerState {
