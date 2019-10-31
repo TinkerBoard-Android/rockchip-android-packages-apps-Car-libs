@@ -28,6 +28,7 @@ import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.car.ui.paintbooth.caruirecyclerview.CarUiListItemActivity;
 import com.android.car.ui.paintbooth.caruirecyclerview.CarUiRecyclerViewActivity;
 import com.android.car.ui.paintbooth.caruirecyclerview.GridCarUiRecyclerViewActivity;
 import com.android.car.ui.paintbooth.dialogs.DialogsActivity;
@@ -55,7 +56,8 @@ public class MainActivity extends Activity {
             Pair.create("Preferences sample", PreferenceActivity.class),
             Pair.create("Overlays", OverlayActivity.class),
             Pair.create("Toolbar sample", ToolbarActivity.class),
-            Pair.create("Widget sample", WidgetActivity.class)
+            Pair.create("Widget sample", WidgetActivity.class),
+            Pair.create("ListItem sample", CarUiListItemActivity.class)
     );
 
     private class ViewHolder extends RecyclerView.ViewHolder {
