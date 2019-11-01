@@ -23,5 +23,5 @@
     <string name="car_secure_read_uuid" translatable="false">5e2a68a2-27be-43f9-8d1e-4546976fabd7</string>
     <string name="car_secure_write_uuid" translatable="false">5e2a68a3-27be-43f9-8d1e-4546976fabd7</string>
 
-    <string name="token_handle_shared_preferences" translatable="false">com.android.car.batmobile.TOKEN_HANDLE</string>
+    <string name="connected_device_shared_preferences" translatable="false">com.android.car.connecteddevice</string>
 </resources>

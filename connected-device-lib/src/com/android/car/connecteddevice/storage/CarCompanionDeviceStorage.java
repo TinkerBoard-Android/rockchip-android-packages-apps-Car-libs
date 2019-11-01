@@ -91,7 +91,7 @@ public class CarCompanionDeviceStorage {
         }
         mSharedPreferences =
                 mContext.getSharedPreferences(
-                        mContext.getString(R.string.token_handle_shared_preferences),
+                        mContext.getString(R.string.connected_device_shared_preferences),
                         Context.MODE_PRIVATE);
         return mSharedPreferences;
     }
