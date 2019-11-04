@@ -724,6 +724,17 @@ public final class CarUiRecyclerView extends RecyclerView implements
     }
 
     /**
+     * Calls {@link #layout(int, int, int, int)} for both this RecyclerView and the nested one.
+     */
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    public void layoutBothForTesting(int l, int t, int r, int b) {
+        super.layout(l, t, r, b);
+        if (mScrollBarEnabled) {
+            mNestedRecyclerView.layout(l, t, r, b);
+        }
+    }
+
+    /**
      * Set the nested view's layout to the specified value.
      *
      * <p>The mGutter is the space to the start/end of the list view items and will be equal in size
