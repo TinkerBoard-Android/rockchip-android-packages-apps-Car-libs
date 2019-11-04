@@ -21,6 +21,7 @@ import static com.android.car.connecteddevice.util.SafeLog.loge;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.car.trust.TrustedDeviceInfo;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -289,12 +290,12 @@ public class CarCompanionDeviceStorage {
     /**
      * Returns a list of device ids of trusted devices for the given user.
      *
-     * @param uid the user id for whom we want to know the device ids.
+     * @param userId the user id for whom we want to know the device ids.
      * @return list of device ids
      */
-    public List<String> getTrustedDevicesForUser(int uid) {
+    public List<String> getTrustedDevicesForUser(int userId) {
         SharedPreferences sharedPrefs = getSharedPrefs();
-        Set<String> deviceInfos = sharedPrefs.getStringSet(String.valueOf(uid), new HashSet<>());
+        Set<String> deviceInfos = sharedPrefs.getStringSet(String.valueOf(userId), new HashSet<>());
         return deviceInfos.stream()
                 .map(CarCompanionDeviceStorage::extractDeviceId)
                 .filter(Objects::nonNull)
@@ -302,8 +303,8 @@ public class CarCompanionDeviceStorage {
     }
 
     /**
-     * Currently, we store a map of uid -> a set of deviceId+deviceInfo strings This method extracts
-     * deviceInfo from a device+deviceInfo string, which should be created by {@link
+     * Currently, we store a map of userId -> a set of deviceId+deviceInfo strings This method
+     * extracts deviceInfo from a device+deviceInfo string, which should be created by {@link
      * #serializeDeviceInfoWithId(TrustedDeviceInfo, String)}
      *
      * @param deviceInfoWithId deviceId+deviceInfo string
@@ -340,6 +341,40 @@ public class CarCompanionDeviceStorage {
      */
     public static String serializeDeviceInfoWithId(TrustedDeviceInfo info, String id) {
         return id + DEVICE_INFO_DELIMITER + info.serialize();
+    }
+
+    /**
+     * Add the associated device of the given deviceId for the given user.
+     *
+     * @param deviceId The identifier of the device to be cleared.
+     */
+    public void addAssociatedDeviceForActiveUser(@NonNull String deviceId) {
+        int userId = ActivityManager.getCurrentUser();
+        SharedPreferences sharedPrefs = getSharedPrefs();
+        if (sharedPrefs.contains(deviceId)) {
+            clearAssociatedDevice(userId, deviceId);
+        }
+        Set<String> deviceIds = sharedPrefs.getStringSet(String.valueOf(userId), new HashSet<>());
+        deviceIds.add(deviceId);
+        sharedPrefs.edit()
+            .putStringSet(String.valueOf(userId), deviceIds)
+            .apply();
+    }
+
+    /**
+     * Clear the associated device of the given deviceId for the given user.
+     *
+     * @param userId The identifier of the user.
+     * @param deviceId The identifier of the device to be cleared.
+     */
+    public void clearAssociatedDevice(int userId, @NonNull String deviceId) {
+        SharedPreferences sharedPrefs = getSharedPrefs();
+        clearEncryptionKey(deviceId);
+        Set<String> deviceIds = sharedPrefs.getStringSet(String.valueOf(userId), new HashSet<>());
+        deviceIds.remove(deviceId);
+        sharedPrefs.edit()
+            .putStringSet(String.valueOf(userId), deviceIds)
+            .apply();
     }
 
     private static String createSharedPrefKey(@NonNull String deviceId) {
