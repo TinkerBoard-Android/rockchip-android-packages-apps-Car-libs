@@ -143,7 +143,10 @@ internal class CarBlePeripheralManager(
                 stop()
             }
 
-            override fun onEstablishSecureChannelFailure() {
+            // TODO(b/143879960): Extend the callbacks from here to continue up the chain
+            override fun onEstablishSecureChannelFailure(
+                @SecureBleChannel.ChannelError error: Int
+            ) {
                 val deviceId = connectedDevice?.deviceId
                 if (deviceId != null) {
                     callbacks.invoke { it.onSecureChannelError(deviceId) }

@@ -16,6 +16,7 @@
 
 package com.android.car.connecteddevice.ble
 
+import android.annotation.IntDef
 import android.car.encryptionrunner.EncryptionRunner
 import android.car.encryptionrunner.EncryptionRunnerFactory
 import android.car.encryptionrunner.HandshakeException
@@ -27,10 +28,13 @@ import com.android.car.connecteddevice.util.ByteUtils
 import com.android.car.connecteddevice.util.logd
 import com.android.car.connecteddevice.util.loge
 import com.android.car.connecteddevice.util.logw
+import java.lang.Exception
 import java.security.SignatureException
+import kotlin.annotation.Retention
 import kotlin.concurrent.thread
 
 private const val TAG = "SecureBleChannel"
+val CONFIRMATION_SIGNAL = "True".toByteArray()
 
 /**
  * Establishes a secure channel with [EncryptionRunner] over [BleDeviceMessageStream] as server
@@ -42,9 +46,22 @@ internal class SecureBleChannel(
     internal val stream: BleDeviceMessageStream,
     private val storage: CarCompanionDeviceStorage,
     private val callback: Callback,
-    private var encryptionKey: Key? = null
-) {
+    private val isReconnect: Boolean = true,
     private val runner: EncryptionRunner = EncryptionRunnerFactory.newRunner()
+) {
+    @IntDef(
+            CHANNEL_ERROR_INVALID_HANDSHAKE,
+            CHANNEL_ERROR_INVALID_MSG,
+            CHANNEL_ERROR_INVALID_DEVICE_ID,
+            CHANNEL_ERROR_INVALID_VERIFICATION,
+            CHANNEL_ERROR_INVALID_STATE,
+            CHANNEL_ERROR_INVALID_ENCRYPTION_KEY,
+            CHANNEL_ERROR_STORAGE_ERROR
+    )
+    @Retention(AnnotationRetention.SOURCE)
+    annotation class ChannelError
+
+    private var encryptionKey: Key? = null
     private val isSecureChannelEstablished get() = encryptionKey != null
     private val streamListener = object : BleDeviceMessageStream.MessageReceivedListener {
         override fun onMessageReceived(deviceMessage: DeviceMessage) {
@@ -70,7 +87,9 @@ internal class SecureBleChannel(
                     processHandshake(payload)
                 } catch (e: HandshakeException) {
                     loge(TAG, "Handshake failed.", e)
-                    notifyCallback { it.onEstablishSecureChannelFailure() }
+                    notifyCallback {
+                        it.onEstablishSecureChannelFailure(CHANNEL_ERROR_INVALID_HANDSHAKE)
+                    }
                 }
             }
         }
@@ -78,12 +97,11 @@ internal class SecureBleChannel(
 
     private var deviceId: String? = null
     private var state = HandshakeState.UNKNOWN
+    /** Listener that notifies to show verification code. */
+    var showVerificationCodeListener: ShowVerificationCodeListener? = null
 
     init {
-        // This channel is only for communication between IHU and a client that has been
-        // associated before. The first connect happens in association. So it is always a reconnect
-        // in this channel.
-        runner.setIsReconnect(true)
+        runner.setIsReconnect(isReconnect)
         stream.messageReceivedListener = streamListener
     }
 
@@ -103,45 +121,76 @@ internal class SecureBleChannel(
                     return
                 }
                 deviceId = id
-                if (hasEncryptionKey(id)) {
-                    notifyCallback { it.onDeviceIdReceived(id) }
-                    sendUniqueIdToClient()
-                } else {
-                    loge(TAG, "this client has not been associated before.")
-                    notifyCallback { it.onEstablishSecureChannelFailure() }
+                if (isReconnect && !hasEncryptionKey(id)) {
+                    loge(TAG, "This client has not been associated before.")
+                    notifyCallback {
+                        it.onEstablishSecureChannelFailure(CHANNEL_ERROR_INVALID_DEVICE_ID)
+                    }
                 }
+                notifyCallback { it.onDeviceIdReceived(id) }
+                sendUniqueIdToClient()
             }
             HandshakeState.IN_PROGRESS -> {
                 logd(TAG, "Continuing handshake.")
                 val handshakeMessage = runner.continueHandshake(message)
                 state = handshakeMessage.handshakeState
-                if (state != HandshakeState.RESUMING_SESSION) {
+                val isValidStateForAssociation = !isReconnect &&
+                        (state == HandshakeState.VERIFICATION_NEEDED)
+                val isValidStateForReconnect = isReconnect &&
+                        (state == HandshakeState.RESUMING_SESSION)
+                if (!isValidStateForAssociation && !isValidStateForReconnect) {
                     loge(TAG, "Encounter unexpected handshake state: $state.")
-                    notifyCallback { it.onEstablishSecureChannelFailure() }
+                    notifyCallback {
+                        it.onEstablishSecureChannelFailure(CHANNEL_ERROR_INVALID_STATE)
+                    }
+                    return
                 }
+                if (!isValidStateForAssociation) {
+                    return
+                }
+                val code = handshakeMessage.verificationCode
+                if (code == null) {
+                    loge(TAG, "Unable to get verification code.")
+                    notifyCallback {
+                        it.onEstablishSecureChannelFailure(CHANNEL_ERROR_INVALID_VERIFICATION)
+                    }
+                    return
+                }
+                showVerificationCodeListener?.showVerificationCode(code)
             }
             HandshakeState.RESUMING_SESSION -> {
                 logd(TAG, "Start reconnection authentication.")
-                val id = deviceId ?: run {
+                val id = deviceId
+                if (id == null) {
                     loge(TAG, "Unable to resume session, device id is null.")
-                    notifyCallback { it.onEstablishSecureChannelFailure() }
+                    notifyCallback {
+                        it.onEstablishSecureChannelFailure(CHANNEL_ERROR_INVALID_DEVICE_ID)
+                    }
                     return
                 }
-                val previousKey = storage.getEncryptionKey(id) ?: run {
+                val previousKey = storage.getEncryptionKey(id)
+                if (previousKey == null) {
                     loge(TAG, "Unable to resume session, previous key is null.")
-                    notifyCallback { it.onEstablishSecureChannelFailure() }
+                    notifyCallback {
+                        it.onEstablishSecureChannelFailure(CHANNEL_ERROR_INVALID_ENCRYPTION_KEY)
+                    }
                     return
                 }
                 val handshakeMessage = runner.authenticateReconnection(message, previousKey)
                 state = handshakeMessage.handshakeState
                 if (state != HandshakeState.FINISHED) {
                     loge(TAG, "Unable to resume session, unexpected next handshake state: $state.")
-                    notifyCallback { it.onEstablishSecureChannelFailure() }
+                    notifyCallback {
+                        it.onEstablishSecureChannelFailure(CHANNEL_ERROR_INVALID_STATE)
+                    }
                     return
                 }
-                val newKey = handshakeMessage.key ?: run {
+                val newKey = handshakeMessage.key
+                if (newKey == null) {
                     loge(TAG, "Unable to resume session, new key is null.")
-                    notifyCallback { it.onEstablishSecureChannelFailure() }
+                    notifyCallback {
+                        it.onEstablishSecureChannelFailure(CHANNEL_ERROR_INVALID_ENCRYPTION_KEY)
+                    }
                     return
                 }
                 storage.saveEncryptionKey(id, newKey.asBytes())
@@ -151,14 +200,14 @@ internal class SecureBleChannel(
             }
             HandshakeState.INVALID, HandshakeState.FINISHED,
             HandshakeState.VERIFICATION_NEEDED -> {
-                loge(TAG, "Encountered unexpected handshake state: $state. Received message: " +
-                    "$message.")
-                notifyCallback { it.onEstablishSecureChannelFailure() }
+                loge(TAG, "Encountered unexpected handshake state: $state." +
+                    " Received message: $message.")
+                notifyCallback { it.onEstablishSecureChannelFailure(CHANNEL_ERROR_INVALID_STATE) }
             }
             else -> {
-                loge(TAG, "Encountered unrecognized handshake state: $state. Received message: " +
-                    "$message.")
-                notifyCallback { it.onEstablishSecureChannelFailure() }
+                loge(TAG, "Encountered unrecognized handshake state: $state." +
+                        " Received message: $message.")
+                notifyCallback { it.onEstablishSecureChannelFailure(CHANNEL_ERROR_INVALID_STATE) }
             }
         }
     }
@@ -193,7 +242,7 @@ internal class SecureBleChannel(
             )
         } else {
             loge(TAG, "Unable to send next handshake message, message is null.")
-            notifyCallback { it.onEstablishSecureChannelFailure() }
+            notifyCallback { it.onEstablishSecureChannelFailure(CHANNEL_ERROR_INVALID_MSG) }
         }
     }
 
@@ -205,7 +254,7 @@ internal class SecureBleChannel(
             )
         } else {
             loge(TAG, "Unable to send server authentication message to client, message is null.")
-            notifyCallback { it.onEstablishSecureChannelFailure() }
+            notifyCallback { it.onEstablishSecureChannelFailure(CHANNEL_ERROR_INVALID_MSG) }
         }
     }
 
@@ -228,6 +277,57 @@ internal class SecureBleChannel(
         }
     }
 
+    /**
+     * Called by the client to notify that the user has accepted a pairing code or any out-of-band
+     * confirmation, and send confirmation signals to remote bluetooth device.
+     */
+    fun notifyOutOfBandAccepted() {
+        val deviceMessage = DeviceMessage(
+            recipient = null,
+            isMessageEncrypted = false,
+            message = CONFIRMATION_SIGNAL
+        )
+        stream.writeMessage(deviceMessage, operationType = OperationType.ENCRYPTION_HANDSHAKE)
+        val message = try {
+            runner.verifyPin()
+        } catch (e: HandshakeException) {
+            loge(TAG, "Error during PIN verification", e)
+            notifyCallback {
+                it.onEstablishSecureChannelFailure(CHANNEL_ERROR_INVALID_VERIFICATION)
+            }
+            return
+        }
+        if (message.handshakeState != HandshakeState.FINISHED) {
+            loge(TAG, "Handshake not finished after calling verify PIN." +
+                    " Instead got state: $message.handshakeState")
+            notifyCallback { it.onEstablishSecureChannelFailure(CHANNEL_ERROR_INVALID_STATE) }
+            return
+        }
+        state = message.handshakeState
+        encryptionKey = message.key
+        val localDeviceId = deviceId
+        if (localDeviceId == null) {
+            loge(TAG, "Unable to finish association, device id is null.")
+            notifyCallback { it.onEstablishSecureChannelFailure(CHANNEL_ERROR_INVALID_DEVICE_ID) }
+            return
+        }
+        val localKey = encryptionKey
+        if (localKey == null) {
+            loge(TAG, "Unable to finish association, generated key is null.")
+            notifyCallback {
+                it.onEstablishSecureChannelFailure(CHANNEL_ERROR_INVALID_ENCRYPTION_KEY)
+            }
+            return
+        }
+        if (!storage.saveEncryptionKey(localDeviceId, localKey.asBytes())) {
+            loge(TAG, "Failed to save encryption key.")
+            notifyCallback { it.onEstablishSecureChannelFailure(CHANNEL_ERROR_STORAGE_ERROR) }
+            return
+        }
+        storage.addAssociatedDeviceForActiveUser(localDeviceId)
+        notifyCallback { it.onSecureChannelEstablished(localKey) }
+    }
+
     private fun notifyCallback(notification: (Callback) -> Unit) {
         thread(start = true) { notification(callback) }
     }
@@ -245,9 +345,12 @@ internal class SecureBleChannel(
         fun onSecureChannelEstablished(encryptionKey: Key)
 
         /**
-         * Invoked when an error has been encountered in attempting to establish a secure channel.
+         * Invoked when an [ChannelError] has been encountered in attempting to establish
+         * a secure channel.
+         *
+         * @param error The failure indication.
          */
-        fun onEstablishSecureChannelFailure()
+        fun onEstablishSecureChannelFailure(@ChannelError error: Int)
 
         /**
          * Invoked when a complete message is received securely from the client and decrypted.
@@ -259,15 +362,44 @@ internal class SecureBleChannel(
         /**
          * Invoked when there was an error during a processing or decrypting of a client message.
          *
-         * @param[exception] The error.
+         * @param exception The error.
          */
         fun onMessageReceivedError(exception: Exception)
 
         /**
          * Invoked when the device id was received from the client.
          *
-         * @param[deviceId] The unique device id of client.
+         * @param deviceId The unique device id of client.
          */
         fun onDeviceIdReceived(deviceId: String)
+    }
+
+    /**
+     * Listener that will be invoked to display verification code.
+     */
+    interface ShowVerificationCodeListener {
+        /**
+         * Invoke when a verification need to be displayed during device association.
+         *
+         * @param code The verification code to show.
+         */
+        fun showVerificationCode(code: String)
+    }
+
+    companion object {
+        /** Indicates an error during a Handshake of EncryptionRunner. */
+        const val CHANNEL_ERROR_INVALID_HANDSHAKE = 0
+        /** Received an invalid handshake message or has an invalid handshake message to send. */
+        const val CHANNEL_ERROR_INVALID_MSG = 1
+        /** Unable to retrieve a valid id. */
+        const val CHANNEL_ERROR_INVALID_DEVICE_ID = 2
+        /** Unable to get verification code ot there's a error during pin verification. */
+        const val CHANNEL_ERROR_INVALID_VERIFICATION = 3
+        /** Encountered an unexpected handshake state. */
+        const val CHANNEL_ERROR_INVALID_STATE = 4
+        /** Failed to get a valid previous/new encryption key.*/
+        const val CHANNEL_ERROR_INVALID_ENCRYPTION_KEY = 5
+        /** Failed to save the encryption key*/
+        const val CHANNEL_ERROR_STORAGE_ERROR = 6
     }
 }
