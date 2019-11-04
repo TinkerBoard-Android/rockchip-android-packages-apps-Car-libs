@@ -19,6 +19,8 @@ android_library {
 
     srcs: ["src/**/*.java", "src/**/*.kt"],
 
+    manifest: "AndroidManifest.xml",
+
     resource_dirs: ["res"],
 
     optimize: {
