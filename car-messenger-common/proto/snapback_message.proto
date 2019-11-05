@@ -1,0 +1,157 @@
+/*
+ * Copyright (C) 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package com.android.car.messenger.proto;
+
+option java_package = "com.android.car.messenger.SnapbackProtos";
+
+message SnapbackPhoneToCarMessage {
+  // The unique ID of the message notification, same in phone and car.
+  // This will be the StatusBarNotification id of the original message notification posted on the
+  // phone. In the car logic, to differentiate between notifications from multiple phones, the
+  // phone's Batmobile device id might be appended to the end of this ID. However, this should be
+  // removed before sending it back to the phone.
+  string notification_id = 1;
+
+  // Categorizing what type of message this is, so the receiver understands what type of
+  // message_data is being sent, and the purpose of the message. The expected message_type(s) with
+  // their message_data type (for now) are:
+  //    "NEW_CONVERSATION" - SnapbackConversationNotification expected,
+  //    "NEW_MESSAGE" - MessagingStyleMessageProto expected,
+  //    "ACTION_STATUS_UPDATE" - ActionStatusUpdate expected,
+  //    "OTHER" - metadata expected.
+  //
+  // The message_type field is a string and not an enum so that new message types can be added in a
+  // backwards compatible way. New message types that require a message_data structure that was
+  // introduced in later releases will be put in the metadata field.
+  //
+  // NOTE: while a message type like "NEW_CONVERSATION" is required to have a
+  // SnapbackConversationNotification message, it may also have a metadata message as well.
+  string message_type = 2;
+
+  oneof message_data {
+    SnapbackConversationNotification conversation = 3;
+    MessagingStyleMessageProto message = 4;
+    ActionStatusUpdate status_update = 5;
+  }
+
+  // A byte array containing an undefined message. This field may contain supplemental information
+  //  for a message_data, or contain all of the data for the SnapbackPhoneToCarMessage.
+  bytes metadata = 6;
+}
+
+message SnapbackCarToPhoneMessage {
+  // The unique ID of the message notification, same in phone and car.
+  // This will be the StatusBarNotification id of the original message notification posted on the
+  // phone. In the car logic, to differentiate between notifications from multiple phones, the
+  // phone's Batmobile device id might be appended to the end of this ID. However, this should be
+  // removed before sending it back to the phone.
+  string notification_id = 1;
+
+  Action action_request = 2;
+
+  bytes metadata = 3;
+}
+
+message ActionStatusUpdate {
+  enum Status {
+    SUCCESSFUL = 0;
+    ERROR = 1;
+  }
+
+  // Unique ID of the action
+  int64 request_id = 1;
+
+  Status status = 2;
+
+  string error_explanation = 3;
+}
+
+// A message notification originating from the user's phone, sent across the Batmobile channel.
+message SnapbackConversationNotification {
+
+  // Display name of the application that posted this notification.
+  string messaging_app_display_name = 2;
+
+  // Package name of the application that posted this notification.
+  string messaging_app_package_name = 3;
+
+  MessagingStyleProto messaging_style = 4;
+
+  // The time, in milliseconds, this message notification was last updated.
+  int64 time_ms = 5;
+
+  // Id of the phone where the message came from
+  string phone_device_id = 6;
+
+
+  repeated Action action = 7;
+
+  bytes app_icon = 8;
+}
+
+message MessagingStyleProto {
+  repeated MessagingStyleMessageProto messaging_style_msg = 1;
+
+  string convo_title = 2;
+
+  // String of the user, needed for MessagingStyle
+  string user_display_name = 3;
+
+  bool is_group_convo = 4;
+}
+
+message MessagingStyleMessageProto {
+  string text_message = 1;
+
+  int64 timestamp = 2;
+
+  Person sender = 3;
+
+  bool is_read = 4;
+}
+
+message Person {
+  string name = 1;
+
+  bytes icon = 2;
+}
+
+message Action {
+  enum ActionName {
+    MARK_AS_READ = 0;
+    REPLY = 1;
+    DISMISS = 2;
+  }
+
+  // Same as the SnapbackPhoneToCar and SnapbackCarToPhone messages's notification_id.
+  // As mentioned above, this notification id should be the same on the phone and the car.
+  // This will be the StatusBarNotification id of the original message notification posted on the
+  // phone. In the car logic, to differentiate between notifications from multiple phones, the
+  // phone's Batmobile device id might be appended to the end of this ID. However, this should be
+  // removed before sending it back to the phone.
+  string notification_id = 1;
+
+  //Optional, used to capture data like the reply string.
+  map<string, string> action_data = 2;
+
+  ActionName action_name = 3;
+
+  // Unique id of this action.
+  int64 request_id = 4;
+}
