@@ -229,7 +229,9 @@ public class MenuItem {
 
     /** Sets the Icon of this MenuItem to a drawable resource. */
     public void setIcon(int resId) {
-        setIcon(mContext.getDrawable(resId));
+        setIcon(resId == 0
+                ? null
+                : mContext.getDrawable(resId));
     }
 
     /** Returns if this is the search MenuItem, which has special behavior when searching */
@@ -300,7 +302,19 @@ public class MenuItem {
          * <p>The icon's color and size will be changed to match the other MenuItems.
          */
         public Builder setIcon(int resId) {
-            mIcon = mContext.getDrawable(resId);
+            mIcon = resId == 0
+                    ? null
+                    : mContext.getDrawable(resId);
+            return this;
+        }
+
+        /**
+         * Sets the icon to a drawable.
+         *
+         * <p>The icon's color and size will be changed to match the other MenuItems.
+         */
+        public Builder setIcon(Drawable icon) {
+            mIcon = icon;
             return this;
         }
 

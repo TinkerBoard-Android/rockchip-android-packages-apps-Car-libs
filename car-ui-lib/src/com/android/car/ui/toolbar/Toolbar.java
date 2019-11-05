@@ -19,7 +19,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.car.drivingstate.CarUxRestrictions;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
@@ -39,8 +38,10 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+import androidx.annotation.XmlRes;
 
 import com.android.car.ui.R;
+import com.android.car.ui.utils.CarUiUtils;
 import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
 import java.util.ArrayList;
@@ -184,6 +185,7 @@ public class Toolbar extends FrameLayout {
             mTitle.setText(a.getString(R.styleable.CarUiToolbar_title));
             setLogo(a.getResourceId(R.styleable.CarUiToolbar_logo, 0));
             setBackgroundShown(a.getBoolean(R.styleable.CarUiToolbar_showBackground, true));
+            setMenuItems(a.getResourceId(R.styleable.CarUiToolbar_menuItems, 0));
             mShowMenuItemsWhileSearching = a.getBoolean(
                     R.styleable.CarUiToolbar_showMenuItemsWhileSearching, false);
             String searchHint = a.getString(R.styleable.CarUiToolbar_searchHint);
@@ -593,6 +595,38 @@ public class Toolbar extends FrameLayout {
         setState(mState);
     }
 
+    /**
+     * Sets the {@link MenuItem Menuitems} to display to a list defined in XML.
+     *
+     * The XML file must have one <MenuItems> tag, with a variable number of <MenuItem>
+     * child tags. See CarUiToolbarMenuItem in CarUi's attrs.xml for a list of available attributes.
+     *
+     * Example:
+     * <pre>
+     * <MenuItems>
+     *     <MenuItem
+     *         app:title="Foo"/>
+     *     <MenuItem
+     *         app:title="Bar"
+     *         app:icon="@drawable/ic_tracklist"
+     *         app:onClick="xmlMenuItemClicked"/>
+     *     <MenuItem
+     *         app:title="Bar"
+     *         app:checkable="true"
+     *         app:uxRestrictions="FULLY_RESTRICTED"
+     *         app:onClick="xmlMenuItemClicked"/>
+     * </MenuItems>
+     * </pre>
+     *
+     * @see #setMenuItems(List)
+     * @return The MenuItems that were loaded from XML.
+     */
+    public List<MenuItem> setMenuItems(@XmlRes int resId) {
+        List<MenuItem> menuItems = MenuItemRenderer.readMenuItemList(mContext, resId);
+        setMenuItems(menuItems);
+        return menuItems;
+    }
+
     /** Gets the {@link MenuItem MenuItems} currently displayed */
     @NonNull
     public List<MenuItem> getMenuItems() {
@@ -655,17 +689,6 @@ public class Toolbar extends FrameLayout {
         mSearchView.setSearchQuery(query);
     }
 
-    private Activity getActivity() {
-        Context context = getContext();
-        while (context instanceof ContextWrapper) {
-            if (context instanceof Activity) {
-                return (Activity) context;
-            }
-            context = ((ContextWrapper) context).getBaseContext();
-        }
-        return null;
-    }
-
     /**
      * Sets the state of the toolbar. This will show/hide the appropriate elements of the toolbar
      * for the desired state.
@@ -685,7 +708,7 @@ public class Toolbar extends FrameLayout {
             }
 
             if (!absorbed) {
-                Activity activity = getActivity();
+                Activity activity = CarUiUtils.getActivity(getContext());
                 if (activity != null) {
                     activity.onBackPressed();
                 }
