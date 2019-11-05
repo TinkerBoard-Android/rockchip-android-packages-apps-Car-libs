@@ -25,7 +25,7 @@ import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.R;
-import com.android.car.ui.utils.ResourceUtils;
+import com.android.car.ui.utils.CarUiUtils;
 /**
  * Code drop from {androidx.car.widget.CarUiSmoothScroller}
  *
@@ -54,13 +54,13 @@ public class CarUiSmoothScroller extends LinearSmoothScroller {
     }
 
     private void init(Context context) {
-        mMillisecondsPerInch = ResourceUtils.getFloat(context.getResources(),
+        mMillisecondsPerInch = CarUiUtils.getFloat(context.getResources(),
                 R.dimen.car_ui_scrollbar_milliseconds_per_inch);
-        mDecelerationTimeDivisor = ResourceUtils.getFloat(context.getResources(),
+        mDecelerationTimeDivisor = CarUiUtils.getFloat(context.getResources(),
                 R.dimen.car_ui_scrollbar_deceleration_times_divisor);
         mInterpolator =
                 new DecelerateInterpolator(
-                        ResourceUtils.getFloat(context.getResources(),
+                        CarUiUtils.getFloat(context.getResources(),
                                 R.dimen.car_ui_scrollbar_decelerate_interpolator_factor));
         mDensityDpi = context.getResources().getDisplayMetrics().densityDpi;
         mMillisecondsPerPixel = mMillisecondsPerInch / mDensityDpi;

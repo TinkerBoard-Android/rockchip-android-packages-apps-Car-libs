@@ -37,6 +37,51 @@
             <enum name="close" value="1"/>
             <enum name="down" value="2"/>
         </attr>
+        <!-- XML resource of MenuItems. See Toolbar.setMenuItems(int) for more information. -->
+        <attr name="menuItems" format="reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="CarUiToolbarMenuItem">
+        <!-- Show/hide the MenuItem -->
+        <attr name="visible" format="boolean"/>
+        <!-- Title -->
+        <attr name="title" format="string"/>
+        <!-- Icon -->
+        <attr name="icon" format="reference"/>
+        <!-- True to tint the icon to a consistent color. Default true, all the other booleans default to false -->
+        <attr name="tinted" format="boolean"/>
+        <!-- Show both the icon and title at the same time -->
+        <attr name="showIconAndTitle" format="boolean"/>
+        <!-- True if this MenuItem should be a switch -->
+        <attr name="checkable" format="boolean"/>
+        <!-- Whether the switch should be checked or not. Setting this implies checkable=true -->
+        <attr name="checked" format="boolean"/>
+        <!-- True if this MenuItem should be activatable, in which case it will visually toggle states when clicked -->
+        <attr name="activatable" format="boolean"/>
+        <!-- Whether the MenuItem starts activated. Setting this implies activatable=true -->
+        <attr name="activated" format="boolean"/>
+        <!-- How to display the MenuItem. "always" means always show it on the toolbar, "never" means never show it on the toolbar and instead show it in the overflow menu -->
+        <attr name="displayBehavior" format="enum">
+            <enum name="always" value="0"/>
+            <enum name="never" value="1"/>
+        </attr>
+        <!-- Ux restrictions required to interact with this MenuItem -->
+        <attr name="uxRestrictions">
+            <!-- Values are copied from android.car.drivingstate.CarUxRestrictions. Note:
+            UX_RESTRICTIONS_BASELINE is not allowed here because it's useless and confusing. -->
+            <flag name="UX_RESTRICTIONS_NO_DIALPAD" value="1"/>
+            <flag name="UX_RESTRICTIONS_NO_FILTERING" value="2"/>
+            <flag name="UX_RESTRICTIONS_LIMIT_STRING_LENGTH" value="4"/>
+            <flag name="UX_RESTRICTIONS_NO_KEYBOARD" value="8"/>
+            <flag name="UX_RESTRICTIONS_NO_VIDEO" value="16"/>
+            <flag name="UX_RESTRICTIONS_LIMIT_CONTENT" value="32"/>
+            <flag name="UX_RESTRICTIONS_NO_SETUP" value="64"/>
+            <flag name="UX_RESTRICTIONS_NO_TEXT_MESSAGE" value="128"/>
+            <flag name="UX_RESTRICTIONS_NO_VOICE_TRANSCRIPTION" value="256"/>
+            <flag name="UX_RESTRICTIONS_FULLY_RESTRICTED" value="511"/>
+        </attr>
+        <!-- The name of a method that takes a MenuItem as an argument in you'r toolbar's Activity. Will be called when the MenuItem is clicked -->
+        <attr name="onClick" format="string"/>
     </declare-styleable>
 
     <!-- Theme attribute to specifying a default style for all CarUiToolbars -->
