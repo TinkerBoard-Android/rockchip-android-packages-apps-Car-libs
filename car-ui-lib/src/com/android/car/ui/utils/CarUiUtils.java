@@ -15,17 +15,21 @@
  */
 package com.android.car.ui.utils;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.res.Resources;
 import android.util.TypedValue;
 
 import androidx.annotation.DimenRes;
+import androidx.annotation.Nullable;
 
 /**
- * Collection of resource utility methods
+ * Collection of utility methods
  */
-public final class ResourceUtils {
+public final class CarUiUtils {
     /** This is a utility class */
-    private ResourceUtils() {}
+    private CarUiUtils() {}
 
     /**
      * Reads a float value from a dimens resource. This is necessary as {@link Resources#getFloat}
@@ -38,5 +42,22 @@ public final class ResourceUtils {
         TypedValue outValue = new TypedValue();
         res.getValue(resId, outValue, true);
         return outValue.getFloat();
+    }
+
+    /**
+     * Gets the {@link Activity} for a certain {@link Context}.
+     *
+     * <p>It is possible the Context is not associated with an Activity, in which case
+     * this method will return null.
+     */
+    @Nullable
+    public static Activity getActivity(Context context) {
+        while (context instanceof ContextWrapper) {
+            if (context instanceof Activity) {
+                return (Activity) context;
+            }
+            context = ((ContextWrapper) context).getBaseContext();
+        }
+        return null;
     }
 }
