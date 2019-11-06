@@ -210,4 +210,15 @@
         <item name="android:textFontWeight">500</item>
     </style>
 
+    <style name="TextAppearance.CarUi.ListItem">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">@dimen/car_ui_body1_size</item>
+        <item name="android:textColor">@color/car_ui_primary_text_color</item>
+    </style>
+
+    <style name="TextAppearance.CarUi.ListItem.Body">
+        <item name="android:textSize">@dimen/car_ui_body3_size</item>
+        <item name="android:textColor">@color/car_ui_secondary_text_color</item>
+    </style>
+
 </resources>

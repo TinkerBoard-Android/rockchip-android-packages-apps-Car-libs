@@ -35,7 +35,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.R;
 import com.android.car.ui.recyclerview.CarUiRecyclerView.ScrollBarPosition;
-import com.android.car.ui.utils.ResourceUtils;
+import com.android.car.ui.utils.CarUiUtils;
 
 /**
  * The default scroll bar widget for the {@link CarUiRecyclerView}.
@@ -92,7 +92,7 @@ class DefaultScrollBar implements ScrollBar {
 
         Resources res = rv.getContext().getResources();
 
-        mButtonDisabledAlpha = ResourceUtils.getFloat(res, R.dimen.car_ui_button_disabled_alpha);
+        mButtonDisabledAlpha = CarUiUtils.getFloat(res, R.dimen.car_ui_button_disabled_alpha);
 
         if (scrollBarAboveRecyclerView) {
             parent.addView(mScrollView);
