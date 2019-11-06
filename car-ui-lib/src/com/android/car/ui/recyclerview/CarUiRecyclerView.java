@@ -79,6 +79,7 @@ public final class CarUiRecyclerView extends RecyclerView implements
     private int mGutterSize;
     @VisibleForTesting
     RecyclerView mNestedRecyclerView;
+    private boolean mIsNestedRecyclerViewInitialized;
     private Adapter<?> mAdapter;
     private ScrollBar mScrollBar;
     private int mInitialTopPadding;
@@ -602,6 +603,15 @@ public final class CarUiRecyclerView extends RecyclerView implements
     }
 
     @Override
+    public ViewHolder findViewHolderForAdapterPosition(int position) {
+        if (mScrollBarEnabled && mIsNestedRecyclerViewInitialized) {
+            return mNestedRecyclerView.findViewHolderForAdapterPosition(position);
+        } else {
+            return super.findViewHolderForAdapterPosition(position);
+        }
+    }
+
+    @Override
     public ViewHolder findContainingViewHolder(View view) {
         if (mScrollBarEnabled) {
             return mNestedRecyclerView.findContainingViewHolder(view);
@@ -676,6 +686,7 @@ public final class CarUiRecyclerView extends RecyclerView implements
         }
 
         vh.frameLayout.addView(mNestedRecyclerView);
+        mIsNestedRecyclerViewInitialized = true;
     }
 
     private void createScrollBarFromConfig() {

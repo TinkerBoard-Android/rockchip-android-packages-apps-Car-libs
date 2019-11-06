@@ -40,6 +40,10 @@
         android:exported="false"
         android:parentActivityName=".MainActivity"/>
     <activity
+        android:name=".caruirecyclerview.CarUiListItemActivity"
+        android:exported="false"
+        android:parentActivityName=".MainActivity"/>
+    <activity
         android:name=".caruirecyclerview.GridCarUiRecyclerViewActivity"
         android:exported="false"
         android:parentActivityName=".MainActivity"/>

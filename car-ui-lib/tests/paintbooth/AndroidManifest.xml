@@ -72,5 +72,9 @@
         android:name=".widgets.WidgetActivity"
         android:exported="false"
         android:parentActivityName=".MainActivity"/>
+    <activity
+        android:name=".caruirecyclerview.CarUiListItemActivity"
+        android:exported="false"
+        android:parentActivityName=".MainActivity"/>
   </application>
 </manifest>
