@@ -14,27 +14,21 @@
     <public name="car_ui_toolbar_tab_flexible_layout" type="bool"/>
     <public name="car_ui_toolbar_tabs_on_second_row" type="bool"/>
     <public name="car_ui_activity_background_color" type="color"/>
+    <public name="car_ui_color_accent" type="color"/>
     <public name="car_ui_preference_category_title_text_color" type="color"/>
     <public name="car_ui_preference_edit_text_dialog_message_text_color" type="color"/>
     <public name="car_ui_preference_icon_color" type="color"/>
     <public name="car_ui_preference_summary_text_color" type="color"/>
     <public name="car_ui_preference_switch_track_text_color" type="color"/>
     <public name="car_ui_preference_title_text_color" type="color"/>
-    <public name="car_ui_primary_text_color" type="color"/>
     <public name="car_ui_recyclerview_divider_color" type="color"/>
     <public name="car_ui_ripple_color" type="color"/>
     <public name="car_ui_scrollbar_thumb" type="color"/>
-    <public name="car_ui_secondary_text_color" type="color"/>
-    <public name="car_ui_toolbar_menu_item_icon_activated_color" type="color"/>
-    <public name="car_ui_toolbar_menu_item_icon_background_activated_color" type="color"/>
+    <public name="car_ui_text_color_hint" type="color"/>
+    <public name="car_ui_text_color_primary" type="color"/>
+    <public name="car_ui_text_color_secondary" type="color"/>
     <public name="car_ui_toolbar_menu_item_icon_background_color" type="color"/>
-    <public name="car_ui_toolbar_menu_item_icon_background_deactivated_color" type="color"/>
-    <public name="car_ui_toolbar_menu_item_icon_background_disabled_color" type="color"/>
-    <public name="car_ui_toolbar_menu_item_icon_background_restricted_color" type="color"/>
     <public name="car_ui_toolbar_menu_item_icon_color" type="color"/>
-    <public name="car_ui_toolbar_menu_item_icon_deactivated_color" type="color"/>
-    <public name="car_ui_toolbar_menu_item_icon_disabled_color" type="color"/>
-    <public name="car_ui_toolbar_menu_item_icon_restricted_color" type="color"/>
     <public name="car_ui_toolbar_nav_icon_color" type="color"/>
     <public name="car_ui_toolbar_search_hint_text_color" type="color"/>
     <public name="car_ui_toolbar_tab_item_selector" type="color"/>
