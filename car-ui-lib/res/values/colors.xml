@@ -24,23 +24,13 @@
     <!-- Toolbar -->
 
     <!-- Color used on the navigation icon -->
-    <color name="car_ui_toolbar_nav_icon_color">@color/car_ui_primary_text_color</color>
+    <color name="car_ui_toolbar_nav_icon_color">@color/car_ui_text_color_primary</color>
     <!-- Text color applied to the hint displayed inside the search box -->
-    <color name="car_ui_toolbar_search_hint_text_color">#33FFFFFF</color>
-    <!-- Menu item colors -->
-    <color name="car_ui_toolbar_menu_item_icon_deactivated_color">@color/car_ui_primary_text_color</color>
-    <color name="car_ui_toolbar_menu_item_icon_disabled_color">@color/car_ui_secondary_text_color</color>
-    <color name="car_ui_toolbar_menu_item_icon_restricted_color">@color/car_ui_secondary_text_color</color>
-    <color name="car_ui_toolbar_menu_item_icon_activated_color">#FF000000</color>
-    <!-- Menu item background colors -->
-    <color name="car_ui_toolbar_menu_item_icon_background_deactivated_color">@android:color/transparent</color>
-    <color name="car_ui_toolbar_menu_item_icon_background_disabled_color">@color/car_ui_toolbar_menu_item_icon_disabled_color</color>
-    <color name="car_ui_toolbar_menu_item_icon_background_restricted_color">@color/car_ui_toolbar_menu_item_icon_restricted_color</color>
-    <color name="car_ui_toolbar_menu_item_icon_background_activated_color">@color/car_ui_primary_text_color</color>
+    <color name="car_ui_toolbar_search_hint_text_color">@color/car_ui_text_color_hint</color>
     <!-- Tab selected color -->
-    <color name="car_ui_toolbar_tab_selected_color">@color/car_ui_primary_text_color</color>
+    <color name="car_ui_toolbar_tab_selected_color">@color/car_ui_text_color_primary</color>
     <!-- Tab normal color -->
-    <color name="car_ui_toolbar_tab_unselected_color">@color/car_ui_secondary_text_color</color>
+    <color name="car_ui_toolbar_tab_unselected_color">@color/car_ui_text_color_secondary</color>
 
     <!-- Recycler View  -->
 
@@ -51,10 +41,10 @@
 
     <!-- Preferences -->
 
-    <color name="car_ui_preference_category_title_text_color">#ff60a8f0</color>
-    <color name="car_ui_preference_summary_text_color">@color/car_ui_secondary_text_color</color>
-    <color name="car_ui_preference_title_text_color">@color/car_ui_primary_text_color</color>
-    <color name="car_ui_preference_edit_text_dialog_message_text_color">#ffdadce0</color>
-    <color name="car_ui_preference_icon_color">@android:color/white</color>
-    <color name="car_ui_preference_switch_track_text_color">@android:color/white</color>
+    <color name="car_ui_preference_category_title_text_color">@color/car_ui_color_accent</color>
+    <color name="car_ui_preference_summary_text_color">@color/car_ui_text_color_secondary</color>
+    <color name="car_ui_preference_title_text_color">@color/car_ui_text_color_primary</color>
+    <color name="car_ui_preference_edit_text_dialog_message_text_color">@color/car_ui_text_color_primary</color>
+    <color name="car_ui_preference_icon_color">@color/car_ui_text_color_primary</color>
+    <color name="car_ui_preference_switch_track_text_color">@color/car_ui_text_color_primary</color>
 </resources>
