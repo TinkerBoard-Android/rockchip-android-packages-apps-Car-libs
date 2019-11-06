@@ -19,7 +19,7 @@ package com.android.car.connecteddevice.ble
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import com.android.car.connecteddevice.storage.CarCompanionDeviceStorage
-import com.android.car.connecteddevice.util.ThreadSafeCallbacks
+import com.android.car.connecteddevice.util.ThreadSafeCallbacksKt
 import com.android.car.connecteddevice.util.logd
 import com.android.car.connecteddevice.util.logw
 import java.util.concurrent.CopyOnWriteArraySet
@@ -39,7 +39,7 @@ internal abstract class CarBleManager(
 
     protected val connectedDevices = CopyOnWriteArraySet<BleDevice>()
 
-    protected val callbacks = ThreadSafeCallbacks<Callback>()
+    protected val callbacks = ThreadSafeCallbacksKt<Callback>()
 
     open fun start() {
     }

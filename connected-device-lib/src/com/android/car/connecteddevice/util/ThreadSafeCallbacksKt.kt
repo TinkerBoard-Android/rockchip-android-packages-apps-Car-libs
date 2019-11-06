@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
 
 /** Class for issuing thread-safe callbacks. */
-internal class ThreadSafeCallbacks<T> {
+internal class ThreadSafeCallbacksKt<T> {
 
     private val callbacks = ConcurrentHashMap<T, Executor>()
 
