@@ -72,8 +72,10 @@
     <!-- Toolbar title/tabs start margin. Toolbar navigation icon (or logo if no navigation icon is
     used) will be centered in this space, and the title will start from here -->
     <dimen name="car_ui_toolbar_margin">@dimen/car_ui_margin</dimen>
-    <!-- Navigation icon or logo size -->
+    <!-- Navigation icon -->
     <dimen name="car_ui_toolbar_icon_size">@dimen/car_ui_primary_icon_size</dimen>
+    <!-- Logo -->
+    <dimen name="car_ui_toolbar_logo_size">@dimen/car_ui_primary_icon_size</dimen>
     <!-- Margin between the logo and the title, when both logo and navigation icons are used -->
     <dimen name="car_ui_toolbar_title_logo_padding">0dp</dimen>
     <!-- Margin at the start of the title -->
