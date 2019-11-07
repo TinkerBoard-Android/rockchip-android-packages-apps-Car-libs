@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 
 # Copyright 2019, The Android Open Source Project
 #
@@ -24,8 +24,6 @@
 #
 
 import os
-import sys
-import lxml.etree as etree
 
 class ResourceLocation:
     def __init__(self, file, line=None):
@@ -47,9 +45,13 @@ class Resource:
             self.locations.append(location)
 
     def __eq__(self, other):
+        if isinstance(other, _Grab):
+            return other == self
         return self.name == other.name and self.type == other.type
 
     def __ne__(self, other):
+        if isinstance(other, _Grab):
+            return other != self
         return self.name != other.name or self.type != other.type
 
     def __hash__(self):
@@ -91,6 +93,9 @@ def get_all_resources(resDir):
     return resources
 
 def get_resources_from_single_file(filename):
+    # defer importing lxml to here so that people who aren't editing chassis don't have to have
+    # lxml installed
+    import lxml.etree as etree
     doc = etree.parse(filename)
     resourceTag = doc.getroot()
     result = set()
@@ -132,5 +137,6 @@ def add_resource_to_set(resourceset, resource):
     else:
         resourceset.update([resource])
 
-if __name__ == '__main__':
-    print(get_all_resources(sys.argv[1]))
+def merge_resources(set1, set2):
+    for resource in set2:
+        add_resource_to_set(set1, resource)
