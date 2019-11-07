@@ -86,8 +86,8 @@
             style="@style/Widget.CarUi.Toolbar.NavIcon"/>
         <ImageView
             android:id="@+id/car_ui_toolbar_logo"
-            android:layout_width="@dimen/car_ui_toolbar_icon_size"
-            android:layout_height="@dimen/car_ui_toolbar_icon_size"
+            android:layout_width="@dimen/car_ui_toolbar_logo_size"
+            android:layout_height="@dimen/car_ui_toolbar_logo_size"
             android:layout_gravity="center"
             android:scaleType="fitXY"/>
     </FrameLayout>
@@ -103,8 +103,8 @@
 
         <ImageView
             android:id="@+id/car_ui_toolbar_title_logo"
-            android:layout_width="@dimen/car_ui_primary_icon_size"
-            android:layout_height="@dimen/car_ui_primary_icon_size"
+            android:layout_width="@dimen/car_ui_toolbar_logo_size"
+            android:layout_height="@dimen/car_ui_toolbar_logo_size"
             android:layout_gravity="center"
             android:scaleType="fitXY"/>
     </FrameLayout>
