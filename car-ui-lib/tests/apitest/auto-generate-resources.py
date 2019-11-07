@@ -24,13 +24,10 @@
 #
 
 import argparse
-import operator
 import os
-from os import listdir
-from os.path import isfile, join
 import sys
-from xml.dom import minidom
-import xml.etree.ElementTree as ET
+import lxml.etree as etree
+from resource_utils import get_all_resources, get_resources_from_single_file, remove_layout_resources
 
 # path to 'packages/apps/Car/libs/car-ui-lib/'
 ROOT_FOLDER = os.path.dirname(os.path.abspath(__file__)) + '/../..'
@@ -47,99 +44,46 @@ def main():
     parser = argparse.ArgumentParser(description='Check if any existing resources are modified.')
     parser.add_argument('-f', '--file', default='current.xml', help='Name of output file.')
     parser.add_argument('-c', '--compare', action='store_true',
-                        help="Pass this flag if resources need to be compared.")
-    args = vars(parser.parse_args())
+                        help='Pass this flag if resources need to be compared.')
+    args = parser.parse_args()
 
-    path_to_color = join(ROOT_FOLDER + '/res/color/')
-    file_color = [f for f in listdir(path_to_color) if isfile(join(path_to_color, f))]
-    path_to_drawable = join(ROOT_FOLDER + '/res/drawable/')
-    file_drawable = [f for f in listdir(path_to_drawable) if isfile(join(path_to_drawable, f))]
-    path_to_values = join(ROOT_FOLDER + '/res/values/')
-    file_values = [f for f in listdir(path_to_values) if isfile(join(path_to_values, f))]
-    path_to_values_port = join(ROOT_FOLDER + '/res/values-port/')
-    file_values_port = [f for f in listdir(path_to_values_port) if isfile(join(path_to_values_port, f))]
+    output_file = args.file or 'current.xml'
+    if args.compare:
+        compare_resources(ROOT_FOLDER+'/res', OUTPUT_FILE_PATH + 'current.xml')
+    else:
+        generate_current_file(ROOT_FOLDER+'/res', output_file)
 
-    # Outermost tag for the generated xml file.
-    data = ET.Element('resources')
-    resource_mapping = {}
+def generate_current_file(res_folder, output_file='current.xml'):
+    resources = remove_layout_resources(get_all_resources(res_folder))
+    resources = sorted(resources, key=lambda x: x.type + x.name)
 
-    for file in file_values:
-        # Complete file path.
-        file_path = join(path_to_values, file)
-        read_xml(file_path, resource_mapping)
+    root = etree.Element('resources')
 
-    for file in file_values_port:
-        file_path = join(path_to_values_port, file)
-        read_xml(file_path, resource_mapping)
+    root.addprevious(etree.Comment('This file is AUTO GENERATED, DO NOT EDIT MANUALLY.'))
+    for resource in resources:
+        item = etree.SubElement(root, 'public')
+        item.set('type', resource.type)
+        item.set('name', resource.name)
 
-    for file in file_color:
-        resource_mapping.update({file[:-4]: 'color'})
+    data = etree.ElementTree(root)
 
-    for file in file_drawable:
-        resource_mapping.update({file[:-4]: 'drawable'})
+    with open(OUTPUT_FILE_PATH + output_file, 'w') as f:
+        data.write(f, pretty_print=True, xml_declaration=True, encoding='utf-8')
 
-    create_resource(data, resource_mapping)
-    write_xml(data, args)
+def compare_resources(res_folder, res_public_file):
+    old_mapping = get_resources_from_single_file(res_public_file)
 
-    if args['compare']:
-        compare_resources(args)
+    new_mapping = remove_layout_resources(get_all_resources(res_folder))
 
+    removed = old_mapping.difference(new_mapping)
+    added = new_mapping.difference(old_mapping)
+    if len(removed) > 0:
+        print('Resources removed:\n' + '\n'.join(map(lambda x: str(x), removed)))
+    if len(added) > 0:
+        print('Resources added:\n' + '\n'.join(map(lambda x: str(x), added)))
 
-def read_xml(file_path, resource_mapping):
-    doc = minidom.parse(file_path)
-
-    items = doc.getElementsByTagName('resources')
-
-    for res in items[0].childNodes:
-        # Exclude an node other than element node. such as text, comment etc.
-        if res.nodeType != res.ELEMENT_NODE or res.tagName == 'declare-styleable':
-            continue
-
-        if res.tagName == 'item' or res.tagName == 'public':
-            resource_mapping.update({res.attributes['name'].value: res.attributes['type'].value})
-        else:
-            resource_mapping.update({res.attributes['name'].value: res.tagName})
-
-
-def write_xml(data, args):
-    comment = "This file is AUTO GENERATED, DO NOT EDIT MANUALLY."
-
-    doc = minidom.parseString(ET.tostring(data))
-    doc.insertBefore(doc.createComment(comment), doc.getElementsByTagName('resources')[0])
-
-    with open(OUTPUT_FILE_PATH + args['file'], "w") as f:
-        doc.writexml(f, addindent="    ", newl="\n", encoding="utf-8")
-
-
-def create_resource(data, resource_mapping):
-    sorted_resources = sorted(resource_mapping.items(), key=lambda x: x[1] + x[0])
-
-    for resource in sorted_resources:
-        item = ET.SubElement(data, 'public')
-        item.set('type', resource[1])
-        item.set('name', resource[0])
-
-
-def compare_resources(args):
-    old_mapping = {}
-    read_xml(OUTPUT_FILE_PATH + 'current.xml', old_mapping)
-
-    new_mapping = {}
-    read_xml(OUTPUT_FILE_PATH + args['file'], new_mapping)
-
-    os.remove(OUTPUT_FILE_PATH + args['file'])
-    if len(old_mapping) != len(new_mapping):
-        print("Some resource have been added or removed. If this is intentional please " +
-              "run 'python auto-generate-resources.py' again and submit the new current.xml")
-        sys.exit(1);
-
-    if old_mapping != new_mapping:
-        print("Some resource have been modified. If this is intentional please " +
-              "run 'python auto-generate-resources.py' again and submit the new current.xml")
-        sys.exit(1);
-
-    return
-
+    if len(added) + len(removed) > 0:
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()

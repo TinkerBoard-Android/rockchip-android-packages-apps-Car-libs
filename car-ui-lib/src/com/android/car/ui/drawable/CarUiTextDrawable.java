@@ -215,7 +215,7 @@ public class CarUiTextDrawable extends Drawable {
                 Typeface.NORMAL);
         mTextSize = a.getDimension(R.styleable.CarUiTextDrawable_textSize, 10);
         mTextColor = a.getColor(R.styleable.CarUiTextDrawable_textColor,
-                r.getColor(R.color.car_ui_primary_text_color, theme));
+                r.getColor(R.color.car_ui_text_color_primary, theme));
         a.recycle();
         refreshTextBoundsAndInvalidate();
         super.inflate(r, parser, attrs, theme);
