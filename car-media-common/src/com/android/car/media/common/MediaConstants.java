@@ -143,12 +143,6 @@ public final class MediaConstants {
     @Deprecated
     public static final String SLOT_RESERVATION_SKIP_TO_PREV =
             "com.google.android.gms.car.media.ALWAYS_RESERVE_SPACE_FOR.ACTION_SKIP_TO_PREVIOUS";
-    /**
-     * @deprecated this flag has been replaced by {@link #PLAYBACK_SLOT_RESERVATION_SKIP_TO_NEXT}
-     */
-    @Deprecated
-    public static final String SLOT_RESERVATION_QUEUE =
-            "com.google.android.gms.car.media.ALWAYS_RESERVE_SPACE_FOR.ACTION_QUEUE";
 
     /**
      * These constants are from
@@ -158,8 +152,6 @@ public final class MediaConstants {
             "android.media.playback.ALWAYS_RESERVE_SPACE_FOR.ACTION_SKIP_TO_NEXT";
     public static final String PLAYBACK_SLOT_RESERVATION_SKIP_TO_PREV =
             "android.media.playback.ALWAYS_RESERVE_SPACE_FOR.ACTION_SKIP_TO_PREVIOUS";
-    public static final String PLAYBACK_SLOT_RESERVATION_QUEUE =
-            "android.media.playback.ALWAYS_RESERVE_SPACE_FOR.ACTION_QUEUE";
 
     /**
      * Bundle extra of type 'boolean' indicating that an item should show the 'explicit' symbol.
