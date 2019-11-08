@@ -19,7 +19,17 @@
     <!-- Background drawable to use on full screen activities -->
     <drawable name="car_ui_activity_background">@color/car_ui_activity_background_color</drawable>
 
+    <!-- Toolbar -->
+
     <!-- Toolbar background color -->
     <drawable name="car_ui_toolbar_background">#E0000000</drawable>
+    <!-- Search icon shown inside the search box in the toolbar -->
+    <drawable name="car_ui_toolbar_search_search_icon">@drawable/car_ui_icon_search</drawable>
+    <!-- Icon used for clearing the search box in toolbar -->
+    <drawable name="car_ui_toolbar_search_close_icon">@drawable/car_ui_icon_close</drawable>
 
+    <!-- Preferences -->
+
+    <!-- Overlayable drawable to use for the preference chevron -->
+    <item name="car_ui_preference_icon_chevron" type="drawable">@null</item>
 </resources>
