@@ -26,8 +26,12 @@
     <!-- The amount of time it takes for a new image in a CrossfadeImageView to fade in. -->
     <integer name="crossfade_image_view_fade_in_duration">250</integer>
 
-    <!-- The number of threads used to fetch (local) images. -->
-    <integer name="image_fetcher_thread_pool_size">5</integer>
+    <!-- The maximum number of thread pools used to fetch images. Applications don't share
+        pools to prevent one bad app from starving others. -->
+    <integer name="image_fetcher_thread_pools_max_count">5</integer>
+
+    <!-- The number of threads in each pool used to fetch images. -->
+    <integer name="image_fetcher_thread_pool_size">3</integer>
 
     <!-- The amount of memory (in megabytes) LocalImageFetcher allocates to caching bitmaps
         (and drawables) in memory. -->

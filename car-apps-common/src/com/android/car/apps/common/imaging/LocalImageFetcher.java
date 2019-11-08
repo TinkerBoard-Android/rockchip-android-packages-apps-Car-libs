@@ -77,7 +77,9 @@ public class LocalImageFetcher {
         return sInstance;
     }
 
-    private final Executor mThreadPool;
+    private final int mPoolSize;
+
+    private final LruCache<String, Executor> mThreadPools;
 
     private final Map<ImageKey, HashSet<BiConsumer<ImageKey, Drawable>>> mConsumers =
             new HashMap<>(20);
@@ -90,8 +92,9 @@ public class LocalImageFetcher {
     @UiThread
     private LocalImageFetcher(Context context) {
         Resources res = context.getResources();
-        int poolSize = res.getInteger(R.integer.image_fetcher_thread_pool_size);
-        mThreadPool = Executors.newFixedThreadPool(poolSize);
+        int maxPools = res.getInteger(R.integer.image_fetcher_thread_pools_max_count);
+        mPoolSize = res.getInteger(R.integer.image_fetcher_thread_pool_size);
+        mThreadPools = new LruCache<>(maxPools);
 
         int cacheSizeMB = res.getInteger(R.integer.bitmap_memory_cache_max_size_mb);
         int drawableDefaultWeightKB = res.getInteger(R.integer.drawable_default_weight_kb);
@@ -109,6 +112,15 @@ public class LocalImageFetcher {
         };
 
         mFlagRemoteImages = CommonFlags.getInstance(context).shouldFlagImproperImageRefs();
+    }
+
+    private Executor getThreadPool(String packageName) {
+        Executor result = mThreadPools.get(packageName);
+        if (result == null) {
+            result = Executors.newFixedThreadPool(mPoolSize);
+            mThreadPools.put(packageName, result);
+        }
+        return result;
     }
 
     /** Fetches an image. The resulting drawable may be null. */
@@ -133,9 +145,14 @@ public class LocalImageFetcher {
         consumers.add(consumer);
 
         if (task == null) {
-            task = new ImageLoadingTask(context, key, mFlagRemoteImages);
-            mTasks.put(key, task);
-            task.executeOnExecutor(mThreadPool);
+            String packageName = UriUtils.getPackageName(context, key.mImageUri);
+            if (packageName != null) {
+                task = new ImageLoadingTask(context, key, mFlagRemoteImages);
+                mTasks.put(key, task);
+                task.executeOnExecutor(getThreadPool(packageName));
+            } else {
+                Log.e(TAG, "No package for " + key.mImageUri);
+            }
         }
     }
 
@@ -237,7 +254,8 @@ public class LocalImageFetcher {
 
                 if (UriUtils.isAndroidResourceUri(imageUri)) {
                     // ImageDecoder doesn't support all resources via the content provider...
-                    return UriUtils.getDrawable(context, UriUtils.getIconResource(imageUri));
+                    return UriUtils.getDrawable(context,
+                            UriUtils.getIconResource(context, imageUri));
                 } else if (UriUtils.isContentUri(imageUri)) {
                     ContentResolver resolver = context.getContentResolver();
 
