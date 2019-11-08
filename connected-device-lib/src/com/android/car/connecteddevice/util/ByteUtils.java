@@ -122,6 +122,19 @@ public final class ByteUtils {
     }
 
     /**
+     * Generate a {@link byte[]} with random bytes.
+     *
+     * @param size of array to generate.
+     * @return generated {@link byte[]}.
+     */
+    @NonNull
+    public static byte[] randomBytes(int size) {
+        byte[] array = new byte[size];
+        ThreadLocalRandom.current().nextBytes(array);
+        return array;
+    }
+
+    /**
      * Concatentate the given 2 byte arrays
      *
      * @param a input array 1

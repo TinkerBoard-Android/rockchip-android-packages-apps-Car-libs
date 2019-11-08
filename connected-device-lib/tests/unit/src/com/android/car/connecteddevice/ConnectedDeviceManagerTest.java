@@ -42,6 +42,7 @@ import com.android.car.connecteddevice.ble.CarBlePeripheralManager;
 import com.android.car.connecteddevice.ble.DeviceMessage;
 import com.android.car.connecteddevice.model.ConnectedDevice;
 import com.android.car.connecteddevice.storage.CarCompanionDeviceStorage;
+import com.android.car.connecteddevice.util.ByteUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -58,7 +59,6 @@ import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
@@ -160,8 +160,7 @@ public class ConnectedDeviceManagerTest {
         connectNewDevice(mMockCentralManager);
         ConnectedDevice device = mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
         UUID recipientId = UUID.randomUUID();
-        byte[] message = new byte[10];
-        ThreadLocalRandom.current().nextBytes(message);
+        byte[] message = ByteUtils.randomBytes(10);
         mConnectedDeviceManager.sendMessageSecurely(device, recipientId, message);
     }
 
@@ -171,8 +170,7 @@ public class ConnectedDeviceManagerTest {
         mConnectedDeviceManager.onSecureChannelEstablished(deviceId, mMockCentralManager);
         ConnectedDevice device = mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
         UUID recipientId = UUID.randomUUID();
-        byte[] message = new byte[10];
-        ThreadLocalRandom.current().nextBytes(message);
+        byte[] message = ByteUtils.randomBytes(10);
         mConnectedDeviceManager.sendMessageSecurely(device, recipientId, message);
         ArgumentCaptor<DeviceMessage> messageCaptor = ArgumentCaptor.forClass(DeviceMessage.class);
         verify(mMockCentralManager).sendMessage(eq(deviceId), messageCaptor.capture());
@@ -185,8 +183,7 @@ public class ConnectedDeviceManagerTest {
         ConnectedDevice device = mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
         mConnectedDeviceManager.removeConnectedDevice(deviceId, mMockCentralManager);
         UUID recipientId = UUID.randomUUID();
-        byte[] message = new byte[10];
-        ThreadLocalRandom.current().nextBytes(message);
+        byte[] message = ByteUtils.randomBytes(10);
         mConnectedDeviceManager.sendMessageSecurely(device, recipientId, message);
         verify(mMockCentralManager, times(0)).sendMessage(eq(deviceId), any(DeviceMessage.class));
     }
@@ -196,8 +193,7 @@ public class ConnectedDeviceManagerTest {
         String deviceId = connectNewDevice(mMockCentralManager);
         ConnectedDevice device = mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
         UUID recipientId = UUID.randomUUID();
-        byte[] message = new byte[10];
-        ThreadLocalRandom.current().nextBytes(message);
+        byte[] message = ByteUtils.randomBytes(10);
         mConnectedDeviceManager.sendMessageUnsecurely(device, recipientId, message);
         ArgumentCaptor<DeviceMessage> messageCaptor = ArgumentCaptor.forClass(DeviceMessage.class);
         verify(mMockCentralManager).sendMessage(eq(deviceId), messageCaptor.capture());
@@ -374,8 +370,7 @@ public class ConnectedDeviceManagerTest {
         DeviceCallback deviceCallback = createDeviceCallback(semaphore);
         mConnectedDeviceManager.registerDeviceCallback(connectedDevice, mRecipientId,
                 deviceCallback, mCallbackExecutor);
-        byte[] payload = new byte[10];
-        ThreadLocalRandom.current().nextBytes(payload);
+        byte[] payload = ByteUtils.randomBytes(10);
         DeviceMessage message = new DeviceMessage(mRecipientId, false, payload);
         mConnectedDeviceManager.onMessageReceived(connectedDevice.getDeviceId(), message);
         assertThat(tryAcquire(semaphore)).isTrue();
@@ -392,8 +387,7 @@ public class ConnectedDeviceManagerTest {
         DeviceCallback deviceCallback = createDeviceCallback(semaphore);
         mConnectedDeviceManager.registerDeviceCallback(connectedDevice, mRecipientId,
                 deviceCallback, mCallbackExecutor);
-        byte[] payload = new byte[10];
-        ThreadLocalRandom.current().nextBytes(payload);
+        byte[] payload = ByteUtils.randomBytes(10);
         DeviceMessage message = new DeviceMessage(UUID.randomUUID(), false, payload);
         mConnectedDeviceManager.onMessageReceived(connectedDevice.getDeviceId(), message);
         assertThat(tryAcquire(semaphore)).isFalse();
