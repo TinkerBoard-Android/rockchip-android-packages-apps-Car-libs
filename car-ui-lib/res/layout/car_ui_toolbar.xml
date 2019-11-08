@@ -58,29 +58,22 @@
         app:layout_constraintGuide_end="@dimen/car_ui_toolbar_bottom_inset"
         android:orientation="horizontal"/>
 
-    <androidx.constraintlayout.widget.Guideline
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/car_ui_toolbar_start_margin_guideline"
-        app:layout_constraintGuide_begin="@dimen/car_ui_toolbar_margin"
-        android:orientation="vertical"/>
-
     <!-- The horizontal bias here is so that when you set this view as GONE, it will be
          treated as if it's all the way to the left instead of centered in the margin -->
     <FrameLayout
         android:id="@+id/car_ui_toolbar_nav_icon_container"
-        android:layout_width="0dp"
+        android:layout_width="@dimen/car_ui_toolbar_margin"
         android:layout_height="0dp"
         android:background="?android:attr/selectableItemBackground"
+        style="@style/Widget.CarUi.Toolbar.NavIconContainer"
         app:layout_constraintTop_toTopOf="@id/car_ui_toolbar_top_guideline"
         app:layout_constraintBottom_toTopOf="@id/car_ui_toolbar_bottom_guideline"
         app:layout_constraintStart_toEndOf="@id/car_ui_toolbar_start_guideline"
-        app:layout_constraintEnd_toStartOf="@id/car_ui_toolbar_start_margin_guideline"
         app:layout_constraintHorizontal_bias="0.0">
         <ImageView
             android:id="@+id/car_ui_toolbar_nav_icon"
-            android:layout_width="@dimen/car_ui_toolbar_icon_size"
-            android:layout_height="@dimen/car_ui_toolbar_icon_size"
+            android:layout_width="@dimen/car_ui_toolbar_nav_icon_size"
+            android:layout_height="@dimen/car_ui_toolbar_nav_icon_size"
             android:layout_gravity="center"
             android:scaleType="fitXY"
             style="@style/Widget.CarUi.Toolbar.NavIcon"/>
@@ -96,24 +89,24 @@
         android:id="@+id/car_ui_toolbar_title_logo_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingEnd="@dimen/car_ui_toolbar_title_logo_padding"
+        style="@style/Widget.CarUi.Toolbar.LogoContainer"
         app:layout_constraintTop_toTopOf="@id/car_ui_toolbar_top_guideline"
         app:layout_constraintBottom_toTopOf="@id/car_ui_toolbar_bottom_guideline"
-        app:layout_constraintStart_toEndOf="@id/car_ui_toolbar_start_margin_guideline">
+        app:layout_constraintStart_toEndOf="@id/car_ui_toolbar_nav_icon_container">
 
         <ImageView
             android:id="@+id/car_ui_toolbar_title_logo"
             android:layout_width="@dimen/car_ui_toolbar_logo_size"
             android:layout_height="@dimen/car_ui_toolbar_logo_size"
+            android:scaleType="fitXY"
             android:layout_gravity="center"
-            android:scaleType="fitXY"/>
+            style="@style/Widget.CarUi.Toolbar.Logo"/>
     </FrameLayout>
 
     <TextView
         android:id="@+id/car_ui_toolbar_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/car_ui_toolbar_title_margin_start"
         android:singleLine="true"
         style="@style/TextAppearance.CarUi.Widget.Toolbar.Title"
         app:layout_constraintTop_toTopOf="@id/car_ui_toolbar_top_guideline"
@@ -127,7 +120,7 @@
         android:layout_height="0dp"
         app:layout_constraintTop_toTopOf="@id/car_ui_toolbar_top_guideline"
         app:layout_constraintBottom_toTopOf="@id/car_ui_toolbar_bottom_guideline"
-        app:layout_constraintStart_toEndOf="@+id/car_ui_toolbar_nav_icon_container"
+        app:layout_constraintStart_toEndOf="@+id/car_ui_toolbar_title_logo_container"
         app:layout_constraintEnd_toStartOf="@+id/car_ui_toolbar_menu_items_container"
         app:layout_constraintHorizontal_bias="0.0"/>
 
@@ -136,8 +129,7 @@
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:orientation="horizontal"
-        android:divider="@drawable/car_ui_toolbar_menu_item_divider"
-        android:showDividers="beginning|middle|end"
+        style="@style/Widget.CarUi.Toolbar.MenuItem.Container"
         app:layout_constraintTop_toTopOf="@id/car_ui_toolbar_top_guideline"
         app:layout_constraintBottom_toTopOf="@id/car_ui_toolbar_bottom_guideline"
         app:layout_constraintEnd_toStartOf="@+id/car_ui_toolbar_overflow_button"/>
@@ -165,28 +157,26 @@
     <com.android.car.ui.toolbar.SearchView
         android:id="@+id/car_ui_toolbar_search_view"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="@dimen/car_ui_toolbar_search_height"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="@id/car_ui_toolbar_top_guideline"
         app:layout_constraintBottom_toTopOf="@id/car_ui_toolbar_bottom_guideline"
         app:layout_constraintStart_toEndOf="@+id/car_ui_toolbar_nav_icon_container"
         app:layout_constraintEnd_toStartOf="@+id/car_ui_toolbar_menu_items_container"/>
 
-    <!-- can't use 0dp for layout_height or the constraintlayout effect kicks in -->
     <View
         android:id="@+id/car_ui_toolbar_row_separator"
         android:layout_width="match_parent"
-        android:layout_height="0.01dp"
+        android:layout_height="@dimen/car_ui_toolbar_separator_height"
         style="@style/Widget.CarUi.Toolbar.SeparatorView"
         app:layout_constraintTop_toBottomOf="@id/car_ui_toolbar_bottom_guideline"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- can't use 0dp for layout_height or the constraintlayout effect kicks in -->
     <View
         android:id="@+id/car_ui_toolbar_bottom_styleable"
         android:layout_width="match_parent"
-        android:layout_height="0.01dp"
+        android:layout_height="@dimen/car_ui_toolbar_bottom_view_height"
         style="@style/Widget.CarUi.Toolbar.BottomView"
         app:layout_constraintTop_toBottomOf="@+id/car_ui_toolbar_row_separator"
         app:layout_constraintStart_toStartOf="parent"

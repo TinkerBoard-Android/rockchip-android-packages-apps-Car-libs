@@ -122,7 +122,7 @@ public class Toolbar extends FrameLayout {
     private final boolean mIsTabsInSecondRow;
 
     private ImageView mNavIcon;
-    private ImageView mLogo;
+    private ImageView mLogoInNavIconSpace;
     private ViewGroup mNavIconContainer;
     private TextView mTitle;
     private ImageView mTitleLogo;
@@ -143,6 +143,8 @@ public class Toolbar extends FrameLayout {
     private List<MenuItem> mOverflowItems = new ArrayList<>();
     private final List<MenuItemRenderer> mMenuItemRenderers = new ArrayList<>();
     private AlertDialog mOverflowDialog;
+    private boolean mNavIconSpaceReserved;
+    private boolean mLogoFillsNavIconSpace;
 
     public Toolbar(Context context) {
         this(context, null);
@@ -166,6 +168,10 @@ public class Toolbar extends FrameLayout {
 
             mIsTabsInSecondRow = context.getResources().getBoolean(
                     R.bool.car_ui_toolbar_tabs_on_second_row);
+            mNavIconSpaceReserved = context.getResources().getBoolean(
+                    R.bool.car_ui_toolbar_nav_icon_reserve_space);
+            mLogoFillsNavIconSpace = context.getResources().getBoolean(
+                    R.bool.car_ui_toolbar_logo_fills_nav_icon_space);
 
             LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -173,7 +179,7 @@ public class Toolbar extends FrameLayout {
 
             mTabLayout = requireViewById(R.id.car_ui_toolbar_tabs);
             mNavIcon = requireViewById(R.id.car_ui_toolbar_nav_icon);
-            mLogo = requireViewById(R.id.car_ui_toolbar_logo);
+            mLogoInNavIconSpace = requireViewById(R.id.car_ui_toolbar_logo);
             mNavIconContainer = requireViewById(R.id.car_ui_toolbar_nav_icon_container);
             mMenuItemsContainer = requireViewById(R.id.car_ui_toolbar_menu_items_container);
             mTitle = requireViewById(R.id.car_ui_toolbar_title);
@@ -453,7 +459,7 @@ public class Toolbar extends FrameLayout {
      */
     public void setLogo(Drawable drawable) {
         if (drawable != null) {
-            mLogo.setImageDrawable(drawable);
+            mLogoInNavIconSpace.setImageDrawable(drawable);
             mTitleLogo.setImageDrawable(drawable);
             mHasLogo = true;
         } else {
@@ -719,18 +725,39 @@ public class Toolbar extends FrameLayout {
                 break;
         }
 
-        mNavIcon.setVisibility(state != State.HOME ? VISIBLE : INVISIBLE);
-        mLogo.setVisibility(state == State.HOME && mHasLogo ? VISIBLE : INVISIBLE);
-        mTitleLogoContainer.setVisibility(state == State.SUBPAGE && mHasLogo ? VISIBLE : GONE);
-        mNavIconContainer.setVisibility(state != State.HOME || mHasLogo ? VISIBLE : GONE);
+        mNavIcon.setVisibility(state != State.HOME ? VISIBLE : GONE);
+
+        // Show the logo in the nav space if that's enabled, we have a logo,
+        // and we're in the Home state.
+        mLogoInNavIconSpace.setVisibility(mHasLogo
+                && state == State.HOME
+                && mLogoFillsNavIconSpace
+                ? VISIBLE : INVISIBLE);
+
+        // Show logo next to the title if we're in the subpage state or we're configured to not show
+        // the logo in the nav icon space.
+        mTitleLogoContainer.setVisibility(mHasLogo
+                && (state == State.SUBPAGE || !mLogoFillsNavIconSpace)
+                ? VISIBLE : GONE);
+
+        // Show the nav icon container if we're not in the home space or the logo fills the nav icon
+        // container. If car_ui_toolbar_nav_icon_reserve_space is true, hiding it will still reserve
+        // its space
+        mNavIconContainer.setVisibility(state != State.HOME || (mHasLogo && mLogoFillsNavIconSpace)
+                ? VISIBLE : (mNavIconSpaceReserved ? INVISIBLE : GONE));
         mNavIconContainer.setOnClickListener(state != State.HOME ? backClickListener : null);
         mNavIconContainer.setClickable(state != State.HOME);
+
         boolean hasTabs = mTabLayout.getTabCount() > 0;
-        boolean showTitle = state == State.SUBPAGE
-                || (state == State.HOME && (!hasTabs || mIsTabsInSecondRow));
-        mTitle.setVisibility(showTitle ? VISIBLE : GONE);
+        // Show the title if we're in the subpage state, or in the home state with no tabs or tabs
+        // on the second row
+        mTitle.setVisibility(state == State.SUBPAGE
+                || (state == State.HOME && (!hasTabs || mIsTabsInSecondRow))
+                ? VISIBLE : GONE);
         mTabLayout.setVisibility(state == State.HOME && hasTabs ? VISIBLE : GONE);
+
         mSearchView.setVisibility(state == State.SEARCH ? VISIBLE : GONE);
+
         boolean showButtons = state != State.SEARCH || mShowMenuItemsWhileSearching;
         mMenuItemsContainer.setVisibility(showButtons ? VISIBLE : GONE);
         mOverflowButton.setVisibility(showButtons && countVisibleOverflowItems() > 0
