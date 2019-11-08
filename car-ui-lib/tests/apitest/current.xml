@@ -11,7 +11,8 @@
   <public type="bool" name="car_ui_preference_switch_toggle_use_text_track"/>
   <public type="bool" name="car_ui_scrollbar_above_recycler_view"/>
   <public type="bool" name="car_ui_scrollbar_enable"/>
-  <public type="bool" name="car_ui_tab_flexible_layout"/>
+  <public type="bool" name="car_ui_toolbar_logo_fills_nav_icon_space"/>
+  <public type="bool" name="car_ui_toolbar_nav_icon_reserve_space"/>
   <public type="bool" name="car_ui_toolbar_tab_flexible_layout"/>
   <public type="bool" name="car_ui_toolbar_tabs_on_second_row"/>
   <public type="color" name="car_ui_activity_background_color"/>
@@ -102,16 +103,24 @@
   <public type="dimen" name="car_ui_scrollbar_thumb_radius"/>
   <public type="dimen" name="car_ui_scrollbar_thumb_width"/>
   <public type="dimen" name="car_ui_toolbar_bottom_inset"/>
+  <public type="dimen" name="car_ui_toolbar_bottom_view_height"/>
   <public type="dimen" name="car_ui_toolbar_end_inset"/>
   <public type="dimen" name="car_ui_toolbar_first_row_height"/>
-  <public type="dimen" name="car_ui_toolbar_icon_size"/>
+  <public type="dimen" name="car_ui_toolbar_logo_size"/>
   <public type="dimen" name="car_ui_toolbar_margin"/>
   <public type="dimen" name="car_ui_toolbar_menu_item_icon_background_size"/>
   <public type="dimen" name="car_ui_toolbar_menu_item_icon_ripple_radius"/>
   <public type="dimen" name="car_ui_toolbar_menu_item_icon_size"/>
   <public type="dimen" name="car_ui_toolbar_menu_item_margin"/>
+  <public type="dimen" name="car_ui_toolbar_nav_icon_size"/>
   <public type="dimen" name="car_ui_toolbar_row_height"/>
+  <public type="dimen" name="car_ui_toolbar_search_close_icon_container_width"/>
+  <public type="dimen" name="car_ui_toolbar_search_close_icon_size"/>
+  <public type="dimen" name="car_ui_toolbar_search_height"/>
+  <public type="dimen" name="car_ui_toolbar_search_search_icon_container_width"/>
+  <public type="dimen" name="car_ui_toolbar_search_search_icon_size"/>
   <public type="dimen" name="car_ui_toolbar_second_row_height"/>
+  <public type="dimen" name="car_ui_toolbar_separator_height"/>
   <public type="dimen" name="car_ui_toolbar_start_inset"/>
   <public type="dimen" name="car_ui_toolbar_tab_icon_height"/>
   <public type="dimen" name="car_ui_toolbar_tab_icon_width"/>
@@ -142,6 +151,8 @@
   <public type="drawable" name="car_ui_toolbar_menu_item_divider"/>
   <public type="drawable" name="car_ui_toolbar_menu_item_icon_background"/>
   <public type="drawable" name="car_ui_toolbar_menu_item_icon_ripple"/>
+  <public type="drawable" name="car_ui_toolbar_search_close_icon"/>
+  <public type="drawable" name="car_ui_toolbar_search_search_icon"/>
   <public type="id" name="search"/>
   <public type="integer" name="car_ui_default_max_string_length"/>
   <public type="integer" name="car_ui_scrollbar_gutter"/>
@@ -194,8 +205,14 @@
   <public type="style" name="Widget.CarUi.CarUiRecyclerView.NestedRecyclerView"/>
   <public type="style" name="Widget.CarUi.Toolbar"/>
   <public type="style" name="Widget.CarUi.Toolbar.BottomView"/>
+  <public type="style" name="Widget.CarUi.Toolbar.Logo"/>
+  <public type="style" name="Widget.CarUi.Toolbar.LogoContainer"/>
+  <public type="style" name="Widget.CarUi.Toolbar.MenuItem.Container"/>
   <public type="style" name="Widget.CarUi.Toolbar.NavIcon"/>
+  <public type="style" name="Widget.CarUi.Toolbar.NavIconContainer"/>
+  <public type="style" name="Widget.CarUi.Toolbar.Search.CloseIcon"/>
   <public type="style" name="Widget.CarUi.Toolbar.Search.EditText"/>
+  <public type="style" name="Widget.CarUi.Toolbar.Search.SearchIcon"/>
   <public type="style" name="Widget.CarUi.Toolbar.SeparatorView"/>
   <public type="style" name="Widget.CarUi.Toolbar.Tab"/>
   <public type="style" name="Widget.CarUi.Toolbar.Tab.Container"/>
@@ -203,4 +220,5 @@
   <public type="style" name="Widget.CarUi.Toolbar.Tab.Text"/>
   <public type="style" name="Widget.CarUi.Toolbar.TextButton"/>
   <public type="style" name="Widget.CarUi.Toolbar.TextButton.WithIcon"/>
+  <public type="style" name="Widget.CarUi.Toolbar.Title"/>
 </resources>

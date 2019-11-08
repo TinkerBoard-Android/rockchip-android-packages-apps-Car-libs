@@ -14,6 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <resources>
+    <!--
+    Configuration for a default scrollbar for the CarUiRecyclerView. This component must inherit
+    abstract class ScrollBar. If the ScrollBar is enabled, the component will be initialized from
+    CarUiRecyclerView#createScrollBarFromConfig(). If no component is provided,
+    {@link DefaultScrollbar} class will be used.
+    -->
+    <string name="car_ui_scrollbar_component" translatable="false"/>
     <!-- Search hint, displayed inside the search box [CHAR LIMIT=50] -->
     <string name="car_ui_toolbar_default_search_hint">Search&#8230;</string>
     <!-- CarUxRestrictions Utility -->

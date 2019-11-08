@@ -15,6 +15,20 @@
 -->
 
 <resources>
+    <!-- Toolbar -->
+
+    <!-- Whether tabs should use flex layout or not -->
+    <bool name="car_ui_toolbar_tab_flexible_layout">false</bool>
+    <!-- Whether the space for nav icon should be reserved, even if the nav icon is not visible -->
+    <bool name="car_ui_toolbar_nav_icon_reserve_space">true</bool>
+    <!-- Whether the logo (if provided) should be used in place of the nav icon when nav icon is
+         not visible -->
+    <bool name="car_ui_toolbar_logo_fills_nav_icon_space">true</bool>
+    <!-- Whether tabs should be displayed on a second row, or they should be placed in the first
+         row, replacing the title -->
+    <bool name="car_ui_toolbar_tabs_on_second_row">true</bool>
+
+    <!-- CarUiRecyclerView -->
 
     <!-- Whether to display the Scroll Bar or not. Defaults to true. If this is set to false,
          the CarUiRecyclerView will behave exactly like the RecyclerView. -->
@@ -24,11 +38,14 @@
          true. -->
     <bool name="car_ui_scrollbar_above_recycler_view">true</bool>
 
+    <!-- Preferences -->
+
     <bool name="car_ui_preference_switch_toggle_show_animation">true</bool>
     <bool name="car_ui_preference_switch_toggle_use_text_track">false</bool>
     <bool name="car_ui_preference_show_chevron">false</bool>
-
     <bool name="car_ui_preference_list_show_full_screen">true</bool>
+
+    <!-- List items -->
 
     <bool name="car_ui_list_item_single_line_title">true</bool>
 </resources>

@@ -61,8 +61,6 @@ public class ToolbarActivity extends Activity {
             return false;
         });
 
-        toolbar.getRootView().setBackgroundColor(0xFFFFFF00);
-
         mMenuItems.add(MenuItem.Builder.createSearch(this, i ->
                 toolbar.setState(Toolbar.State.SEARCH)));
 
