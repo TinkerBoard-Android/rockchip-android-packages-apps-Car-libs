@@ -622,7 +622,7 @@ public class Toolbar extends FrameLayout {
      * @return The MenuItems that were loaded from XML.
      */
     public List<MenuItem> setMenuItems(@XmlRes int resId) {
-        List<MenuItem> menuItems = MenuItemRenderer.readMenuItemList(mContext, resId);
+        List<MenuItem> menuItems = MenuItemRenderer.readMenuItemList(getContext(), resId);
         setMenuItems(menuItems);
         return menuItems;
     }

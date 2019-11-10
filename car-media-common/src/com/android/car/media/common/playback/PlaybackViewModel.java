@@ -415,8 +415,10 @@ public class PlaybackViewModel extends AndroidViewModel {
         /** Returns whether the media source requires reserved space for the skip to next action. */
         public boolean isSkipNextReserved() {
             return mMediaController.getExtras() != null
-                    && mMediaController.getExtras().getBoolean(
-                    MediaConstants.SLOT_RESERVATION_SKIP_TO_NEXT);
+                    && (mMediaController.getExtras().getBoolean(
+                    MediaConstants.SLOT_RESERVATION_SKIP_TO_NEXT)
+                    || mMediaController.getExtras().getBoolean(
+                    MediaConstants.PLAYBACK_SLOT_RESERVATION_SKIP_TO_NEXT));
         }
 
         /**
@@ -424,8 +426,10 @@ public class PlaybackViewModel extends AndroidViewModel {
          */
         public boolean iSkipPreviousReserved() {
             return mMediaController.getExtras() != null
-                    && mMediaController.getExtras().getBoolean(
-                    MediaConstants.SLOT_RESERVATION_SKIP_TO_PREV);
+                    && (mMediaController.getExtras().getBoolean(
+                    MediaConstants.SLOT_RESERVATION_SKIP_TO_PREV)
+                    || mMediaController.getExtras().getBoolean(
+                    MediaConstants.PLAYBACK_SLOT_RESERVATION_SKIP_TO_PREV));
         }
 
         /** Returns whether the media source is loading (e.g.: buffering, connecting, etc.). */
