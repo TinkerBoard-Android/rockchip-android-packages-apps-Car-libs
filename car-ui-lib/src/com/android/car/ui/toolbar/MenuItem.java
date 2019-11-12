@@ -19,8 +19,10 @@ import android.car.drivingstate.CarUxRestrictions;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.View;
+import android.widget.Toast;
 
 import com.android.car.ui.R;
+import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
 /**
  * Represents a button to display in the {@link Toolbar}.
@@ -51,6 +53,7 @@ public class MenuItem {
     @CarUxRestrictions.CarUxRestrictionsInfo
     private final int mUxRestrictions;
 
+    private CarUxRestrictions mCurrentRestrictions;
     private Listener mListener;
     private CharSequence mTitle;
     private Drawable mIcon;
@@ -77,6 +80,8 @@ public class MenuItem {
         mShowIconAndTitle = builder.mShowIconAndTitle;
         mIsTinted = builder.mIsTinted;
         mUxRestrictions = builder.mUxRestrictions;
+
+        mCurrentRestrictions = CarUxRestrictionsUtil.getInstance(mContext).getCurrentRestrictions();
     }
 
     private void update() {
@@ -203,10 +208,36 @@ public class MenuItem {
         update();
     }
 
+    /* package */ void setUxRestrictions(CarUxRestrictions restrictions) {
+        boolean wasRestricted = isRestricted();
+        mCurrentRestrictions = restrictions;
+
+        if (isRestricted() != wasRestricted) {
+            update();
+        }
+    }
+
+    /* package */ boolean isRestricted() {
+        return CarUxRestrictionsUtil.isRestricted(mUxRestrictions, mCurrentRestrictions);
+    }
+
     /** Calls the {@link OnClickListener}. */
     public void performClick() {
-        if (mListener != null) {
-            mListener.performClick();
+        if (isRestricted()) {
+            Toast.makeText(mContext,
+                    R.string.car_ui_restricted_while_driving, Toast.LENGTH_LONG).show();
+        } else {
+            if (isActivatable()) {
+                setActivated(!isActivated());
+            }
+
+            if (isCheckable()) {
+                setChecked(!isChecked());
+            }
+
+            if (mOnClickListener != null) {
+                mOnClickListener.onClick(this);
+            }
         }
     }
 
@@ -480,9 +511,6 @@ public class MenuItem {
     interface Listener {
         /** Called when the MenuItem is changed. For use only by {@link Toolbar} */
         void onMenuItemChanged();
-
-        /** Called when {@link MenuItem#performClick()} is called */
-        void performClick();
     }
 
     void setListener(Listener listener) {
