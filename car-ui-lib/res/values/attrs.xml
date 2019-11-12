@@ -45,7 +45,7 @@
         <!-- Show/hide the MenuItem -->
         <attr name="visible" format="boolean"/>
         <!-- Title -->
-        <attr name="title" format="string"/>
+        <attr name="title"/>
         <!-- Icon -->
         <attr name="icon" format="reference"/>
         <!-- True to tint the icon to a consistent color. Default true, all the other booleans default to false -->
