@@ -98,8 +98,12 @@ public class CarUiListItemAdapter extends
             holder.getIconContainer().setVisibility(View.GONE);
         }
 
+        holder.getActionDivider().setVisibility(
+                item.isActionDividerVisible() ? View.VISIBLE : View.GONE);
+
         Switch switchWidget = holder.getSwitch();
         CheckBox checkBox = holder.getCheckBox();
+        ImageView supplementalIcon = holder.getSupplementalIcon();
         ViewGroup actionContainer = holder.getActionContainer();
 
         switch (item.getAction()) {
@@ -119,6 +123,7 @@ public class CarUiListItemAdapter extends
                             }
                         });
                 checkBox.setVisibility(View.GONE);
+                supplementalIcon.setVisibility(View.GONE);
                 actionContainer.setVisibility(View.VISIBLE);
                 break;
             case CHECK_BOX:
@@ -134,6 +139,20 @@ public class CarUiListItemAdapter extends
                             }
                         });
                 switchWidget.setVisibility(View.GONE);
+                supplementalIcon.setVisibility(View.GONE);
+                actionContainer.setVisibility(View.VISIBLE);
+                break;
+            case ICON:
+                supplementalIcon.setVisibility(View.VISIBLE);
+                supplementalIcon.setImageDrawable(item.getSupplementalIcon());
+                supplementalIcon.setOnClickListener(
+                        (iconView) -> {
+                            if (item.getSupplementalIconOnClickListener() != null) {
+                                item.getSupplementalIconOnClickListener().onClick(iconView);
+                            }
+                        });
+                switchWidget.setVisibility(View.GONE);
+                checkBox.setVisibility(View.GONE);
                 actionContainer.setVisibility(View.VISIBLE);
                 break;
             default:
@@ -163,8 +182,10 @@ public class CarUiListItemAdapter extends
         private ImageView mIcon;
         private ViewGroup mIconContainer;
         private ViewGroup mActionContainer;
+        private View mActionDivider;
         private Switch mSwitch;
         private CheckBox mCheckBox;
+        private ImageView mSupplementalIcon;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -173,8 +194,10 @@ public class CarUiListItemAdapter extends
             mIcon = itemView.requireViewById(R.id.icon);
             mIconContainer = itemView.requireViewById(R.id.icon_container);
             mActionContainer = itemView.requireViewById(R.id.action_container);
+            mActionDivider = itemView.requireViewById(R.id.action_divider);
             mSwitch = itemView.requireViewById(R.id.switch_widget);
             mCheckBox = itemView.requireViewById(R.id.checkbox_widget);
+            mSupplementalIcon = itemView.requireViewById(R.id.supplemental_icon);
         }
 
         @NonNull
@@ -203,6 +226,11 @@ public class CarUiListItemAdapter extends
         }
 
         @NonNull
+        View getActionDivider() {
+            return mActionDivider;
+        }
+
+        @NonNull
         Switch getSwitch() {
             return mSwitch;
         }
@@ -211,5 +239,11 @@ public class CarUiListItemAdapter extends
         CheckBox getCheckBox() {
             return mCheckBox;
         }
+
+        @NonNull
+        ImageView getSupplementalIcon() {
+            return mSupplementalIcon;
+        }
+
     }
 }

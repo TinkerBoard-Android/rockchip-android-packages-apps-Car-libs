@@ -82,7 +82,8 @@ public class CarUiListItemActivity extends Activity {
 
         item = new CarUiListItem();
         item.setIcon(getDrawable(R.drawable.ic_launcher));
-        item.setBody("Body -- Item with switch");
+        item.setBody("Body -- Item with switch -- and divider");
+        item.setActionDividerVisible(true);
         item.setAction(CarUiListItem.Action.SWITCH);
         mData.add(item);
 
@@ -91,6 +92,30 @@ public class CarUiListItemActivity extends Activity {
         item.setTitle("Title -- Item with checkbox");
         item.setBody("Item is initially checked");
         item.setAction(CarUiListItem.Action.CHECK_BOX);
+        item.setChecked(true);
+        mData.add(item);
+
+        item = new CarUiListItem();
+        item.setIcon(getDrawable(R.drawable.ic_launcher));
+        item.setTitle("Title");
+        item.setBody("Random body text -- with action divider");
+        item.setActionDividerVisible(true);
+        item.setSupplementalIcon(getDrawable(R.drawable.ic_launcher));
+        item.setChecked(true);
+        mData.add(item);
+
+        item = new CarUiListItem();
+        item.setIcon(getDrawable(R.drawable.ic_launcher));
+        item.setTitle("Null supplemental icon");
+        item.setAction(CarUiListItem.Action.ICON);
+        item.setChecked(true);
+        mData.add(item);
+
+        item = new CarUiListItem();
+        item.setTitle("Supplemental icon with listener");
+        item.setSupplementalIcon(getDrawable(R.drawable.ic_launcher),
+                v -> Toast.makeText(context, "Clicked supplemental icon",
+                        Toast.LENGTH_SHORT).show());
         item.setChecked(true);
         mData.add(item);
 
