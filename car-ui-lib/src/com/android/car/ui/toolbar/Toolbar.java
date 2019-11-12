@@ -570,17 +570,9 @@ public class Toolbar extends FrameLayout {
         for (MenuItem item : items) {
             if (item.getDisplayBehavior() == MenuItem.DisplayBehavior.NEVER) {
                 mOverflowItems.add(item);
-                item.setListener(new MenuItem.Listener() {
-                    @Override
-                    public void onMenuItemChanged() {
-                        createOverflowDialog();
-                        setState(getState());
-                    }
-
-                    @Override
-                    public void performClick() {
-                        Log.w(TAG, "performClick on overflow MenuItems not yet implemented");
-                    }
+                item.setListener(() -> {
+                    createOverflowDialog();
+                    setState(getState());
                 });
             } else {
                 MenuItemRenderer renderer = new MenuItemRenderer(item, mMenuItemsContainer);

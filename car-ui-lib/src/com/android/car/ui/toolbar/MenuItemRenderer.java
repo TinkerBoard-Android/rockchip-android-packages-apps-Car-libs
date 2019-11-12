@@ -29,13 +29,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.XmlRes;
 
 import com.android.car.ui.R;
 import com.android.car.ui.utils.CarUiUtils;
-import com.android.car.ui.utils.CarUxRestrictionsUtil;
 import com.android.car.ui.uxr.DrawableStateView;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -53,18 +51,14 @@ class MenuItemRenderer implements MenuItem.Listener {
     private static final int[] RESTRICTED_STATE = new int[] {R.attr.state_ux_restricted};
 
     private Toolbar.State mToolbarState;
-    private CarUxRestrictions mUxRestrictions;
 
     private final MenuItem mMenuItem;
     private final ViewGroup mParentView;
     private View mView;
-    private boolean mPreviouslySetOnClickListener = false;
 
     MenuItemRenderer(MenuItem item, ViewGroup parentView) {
         mMenuItem = item;
         mParentView = parentView;
-        mUxRestrictions = CarUxRestrictionsUtil.getInstance(parentView.getContext())
-                .getCurrentRestrictions();
         mMenuItem.setListener(this);
     }
 
@@ -77,18 +71,7 @@ class MenuItemRenderer implements MenuItem.Listener {
     }
 
     void setUxRestrictions(CarUxRestrictions restrictions) {
-        mUxRestrictions = restrictions;
-
-        if (mMenuItem.getUxRestrictions() != CarUxRestrictions.UX_RESTRICTIONS_BASELINE) {
-            updateView();
-        }
-    }
-
-    @Override
-    public void performClick() {
-        if (!isRestricted() && mView != null) {
-            mView.performClick();
-        }
+        mMenuItem.setUxRestrictions(restrictions);
     }
 
     @Override
@@ -162,44 +145,24 @@ class MenuItemRenderer implements MenuItem.Listener {
         recursiveSetEnabledAndDrawableState(mView);
         mView.setActivated(mMenuItem.isActivated());
 
-        MenuItem.OnClickListener onClickListener = mMenuItem.getOnClickListener();
-        if (onClickListener != null || mMenuItem.isCheckable()) {
-            if (isRestricted()) {
-                mView.setOnClickListener(v -> Toast.makeText(mView.getContext(),
-                        R.string.car_ui_restricted_while_driving, Toast.LENGTH_LONG).show());
-            } else {
-                mView.setOnClickListener(v -> {
-                    if (mMenuItem.isActivatable()) {
-                        mMenuItem.setActivated(!mMenuItem.isActivated());
-                    }
-
-                    if (mMenuItem.isCheckable()) {
-                        mMenuItem.setChecked(!mMenuItem.isChecked());
-                    }
-
-                    if (onClickListener != null) {
-                        onClickListener.onClick(mMenuItem);
-                    }
-                });
-            }
-
-            mPreviouslySetOnClickListener = true;
-        } else if (mPreviouslySetOnClickListener) {
-            // We should only set this stuff to null if we had previously set our own listener
-            // to avoid overwriting a custom view's onClickListener
+        if (mMenuItem.getOnClickListener() != null
+                || mMenuItem.isCheckable()
+                || mMenuItem.isActivatable()) {
+            mView.setOnClickListener(v -> mMenuItem.performClick());
+        } else {
             mView.setOnClickListener(null);
             mView.setClickable(false);
-            mPreviouslySetOnClickListener = false;
         }
     }
 
     private void recursiveSetEnabledAndDrawableState(View view) {
         view.setEnabled(mMenuItem.isEnabled());
 
+        int[] drawableState = mMenuItem.isRestricted() ? RESTRICTED_STATE : null;
         if (view instanceof ImageView) {
-            ((ImageView) view).setImageState(isRestricted() ? RESTRICTED_STATE : null, true);
+            ((ImageView) view).setImageState(drawableState, true);
         } else if (view instanceof DrawableStateView) {
-            ((DrawableStateView) view).setDrawableState(isRestricted() ? RESTRICTED_STATE : null);
+            ((DrawableStateView) view).setDrawableState(drawableState);
         }
 
         if (view instanceof ViewGroup) {
@@ -208,10 +171,6 @@ class MenuItemRenderer implements MenuItem.Listener {
                 recursiveSetEnabledAndDrawableState(viewGroup.getChildAt(i));
             }
         }
-    }
-
-    private boolean isRestricted() {
-        return CarUxRestrictionsUtil.isRestricted(mMenuItem.getUxRestrictions(), mUxRestrictions);
     }
 
     static List<MenuItem> readMenuItemList(Context c, @XmlRes int resId) {
