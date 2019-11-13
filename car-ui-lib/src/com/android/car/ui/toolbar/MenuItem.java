@@ -223,21 +223,26 @@ public class MenuItem {
 
     /** Calls the {@link OnClickListener}. */
     public void performClick() {
+        if (!isEnabled() || !isVisible()) {
+            return;
+        }
+
         if (isRestricted()) {
             Toast.makeText(mContext,
                     R.string.car_ui_restricted_while_driving, Toast.LENGTH_LONG).show();
-        } else {
-            if (isActivatable()) {
-                setActivated(!isActivated());
-            }
+            return;
+        }
 
-            if (isCheckable()) {
-                setChecked(!isChecked());
-            }
+        if (isActivatable()) {
+            setActivated(!isActivated());
+        }
 
-            if (mOnClickListener != null) {
-                mOnClickListener.onClick(this);
-            }
+        if (isCheckable()) {
+            setChecked(!isChecked());
+        }
+
+        if (mOnClickListener != null) {
+            mOnClickListener.onClick(this);
         }
     }
 
