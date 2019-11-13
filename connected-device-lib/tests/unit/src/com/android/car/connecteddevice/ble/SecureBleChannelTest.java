@@ -32,6 +32,7 @@ import android.car.encryptionrunner.Key;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.android.car.connecteddevice.BleStreamProtos.BleOperationProto.OperationType;
 import com.android.car.connecteddevice.ble.BleDeviceMessageStream.MessageReceivedListener;
 import com.android.car.connecteddevice.storage.CarCompanionDeviceStorage;
 import com.android.car.connecteddevice.util.ByteUtils;
@@ -97,7 +98,6 @@ public final class SecureBleChannelTest {
         verify(mStreamMock, times(3)).writeMessage(messageCaptor.capture(), any());
         byte[] confirmMessage = messageCaptor.getValue().getMessage();
         assertThat(confirmMessage).isEqualTo(SecureBleChannelKt.getCONFIRMATION_SIGNAL());
-        verify(mStorageMock).addAssociatedDeviceForActiveUser(eq(CLIENT_DEVICE_ID.toString()));
         assertThat(semaphore.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
         verify(callbackSpy).onSecureChannelEstablished(any());
     }
@@ -144,10 +144,10 @@ public final class SecureBleChannelTest {
         mChannel = new SecureBleChannel(
                 mStreamMock,
                 mStorageMock,
-                callback,
                 /* isReconnect = */ false,
                 EncryptionRunnerFactory.newDummyRunner()
         );
+        mChannel.setChannelCallback(callback);
         mChannel.setShowVerificationCodeListener(mShowVerificationCodeListenerMock);
         ArgumentCaptor<MessageReceivedListener> listenerCaptor =
                 ArgumentCaptor.forClass(MessageReceivedListener.class);
@@ -161,7 +161,7 @@ public final class SecureBleChannelTest {
                 /* isMessageEncrypted = */ false,
                 ByteUtils.uuidToBytes(CLIENT_DEVICE_ID)
         );
-        mMessageReceivedListener.onMessageReceived(message);
+        mMessageReceivedListener.onMessageReceived(message, OperationType.ENCRYPTION_HANDSHAKE);
     }
 
     private void initHandshakeMessage() {
@@ -170,7 +170,7 @@ public final class SecureBleChannelTest {
                 /* isMessageEncrypted = */ false,
                 DummyEncryptionRunner.INIT.getBytes()
         );
-        mMessageReceivedListener.onMessageReceived(message);
+        mMessageReceivedListener.onMessageReceived(message, OperationType.ENCRYPTION_HANDSHAKE);
     }
 
     private void respondToContinueMessage() {
@@ -179,7 +179,7 @@ public final class SecureBleChannelTest {
                 /* isMessageEncrypted = */ false,
                 DummyEncryptionRunner.CLIENT_RESPONSE.getBytes()
         );
-        mMessageReceivedListener.onMessageReceived(message);
+        mMessageReceivedListener.onMessageReceived(message, OperationType.ENCRYPTION_HANDSHAKE);
     }
 
     /**

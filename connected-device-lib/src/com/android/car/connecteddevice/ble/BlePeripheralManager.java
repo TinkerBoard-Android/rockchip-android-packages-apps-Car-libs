@@ -178,12 +178,14 @@ public class BlePeripheralManager {
             loge(TAG, "Attempted start advertising, but system does not support BLE. Ignoring.");
             return;
         }
-
+        // Clears previous session before starting advertising.
+        cleanup();
         mBluetoothGattService = service;
-        this.mAdvertiseCallback = advertiseCallback;
+        mAdvertiseCallback = advertiseCallback;
         mAdvertiseData = data;
         mGattServerRetryStartCount = 0;
         mBluetoothManager = (BluetoothManager) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
+        mGattServer = mBluetoothManager.openGattServer(mContext, mGattServerCallback);
         openGattServer();
     }
 
@@ -240,6 +242,10 @@ public class BlePeripheralManager {
         if (mAdvertiser != null) {
             mAdvertiser.stopAdvertising(mAdvertiseCallback);
         }
+        // Clears all registered listeners. IHU only supports single connection in peripheral role.
+        mReadListeners.clear();
+        mWriteListeners.clear();
+        mAdvertiser = null;
 
         if (mGattServer == null) {
             return;
@@ -266,8 +272,10 @@ public class BlePeripheralManager {
         }
         logd(TAG, "stopGattServer");
         if (mBluetoothGatt != null) {
+            mGattServer.cancelConnection(mBluetoothGatt.getDevice());
             mBluetoothGatt.disconnect();
         }
+        mGattServer.clearServices();
         mGattServer.close();
         mGattServer = null;
     }
@@ -375,12 +383,10 @@ public class BlePeripheralManager {
                         boolean responseNeeded,
                         int offset,
                         byte[] value) {
-                    logd(
-                            TAG,
-                            "Write request for descriptor: "
-                                    + descriptor.getUuid()
-                                    + "; value: "
-                                    + ByteUtils.byteArrayToHexString(value));
+                    logd(TAG, "Write request for descriptor: "
+                            + descriptor.getUuid()
+                            + "; value: "
+                            + ByteUtils.byteArrayToHexString(value));
 
                     mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset,
                             value);
@@ -400,8 +406,15 @@ public class BlePeripheralManager {
                 @Override
                 public void onNotificationSent(BluetoothDevice device, int status) {
                     super.onNotificationSent(device, status);
-                    for (OnCharacteristicReadListener listener : mReadListeners) {
-                        listener.onCharacteristicRead(device);
+                    if (status == BluetoothGatt.GATT_SUCCESS) {
+                        logd(TAG, "Notification sent successfully. Device: " + device.getAddress()
+                                + ", Status: " + status + ". Notifying all listeners.");
+                        for (OnCharacteristicReadListener listener : mReadListeners) {
+                            listener.onCharacteristicRead(device);
+                        }
+                    } else {
+                        loge(TAG, "Notification failed. Device: " + device + ", Status: "
+                                + status);
                     }
                 }
             };

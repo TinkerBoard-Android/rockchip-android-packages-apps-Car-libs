@@ -30,6 +30,7 @@ import android.security.keystore.KeyProperties;
 import android.util.Base64;
 
 import com.android.car.connecteddevice.R;
+import com.android.car.connecteddevice.model.AssociatedDevice;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -41,6 +42,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -293,6 +295,7 @@ public class CarCompanionDeviceStorage {
      * @param userId the user id for whom we want to know the device ids.
      * @return list of device ids
      */
+    @NonNull
     public List<String> getTrustedDevicesForUser(int userId) {
         SharedPreferences sharedPrefs = getSharedPrefs();
         Set<String> deviceInfos = sharedPrefs.getStringSet(String.valueOf(userId), new HashSet<>());
@@ -337,7 +340,7 @@ public class CarCompanionDeviceStorage {
      * Create deviceId+deviceInfo string
      * @param info {@link TrustedDeviceInfo}
      * @param id Device id
-     * @return Serialized String wtih device id and info
+     * @return Serialized String with device id and info
      */
     public static String serializeDeviceInfoWithId(TrustedDeviceInfo info, String id) {
         return id + DEVICE_INFO_DELIMITER + info.serialize();
@@ -346,19 +349,71 @@ public class CarCompanionDeviceStorage {
     /**
      * Add the associated device of the given deviceId for the given user.
      *
-     * @param deviceId The identifier of the device to be cleared.
+     * @param device New associated device to be added.
      */
-    public void addAssociatedDeviceForActiveUser(@NonNull String deviceId) {
+    public void addAssociatedDeviceForActiveUser(@NonNull AssociatedDevice device) {
         int userId = ActivityManager.getCurrentUser();
         SharedPreferences sharedPrefs = getSharedPrefs();
-        if (sharedPrefs.contains(deviceId)) {
-            clearAssociatedDevice(userId, deviceId);
+        if (sharedPrefs.contains(device.getDeviceId())) {
+            clearAssociatedDevice(userId, device.getDeviceId());
         }
-        Set<String> deviceIds = sharedPrefs.getStringSet(String.valueOf(userId), new HashSet<>());
-        deviceIds.add(deviceId);
+        Set<String> devices = sharedPrefs.getStringSet(String.valueOf(userId), new HashSet<>());
+        devices.add(device.serialize());
         sharedPrefs.edit()
-            .putStringSet(String.valueOf(userId), deviceIds)
+            .putStringSet(String.valueOf(userId), devices)
             .apply();
+    }
+
+    /**
+     * Get a list of associated devices for the given user.
+     *
+     * @param userId The identifier of the user.
+     * @return Associated device list.
+     */
+    @NonNull
+    public List<AssociatedDevice> getAssociatedDevicesForUser(@NonNull int userId) {
+        SharedPreferences sharedPrefs = getSharedPrefs();
+        Set<String> devices = sharedPrefs.getStringSet(String.valueOf(userId), new HashSet<>());
+        return devices.stream()
+                .map(AssociatedDevice.Companion::deserialize)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get a list of associated devices for the current user.
+     *
+     * @return Associated device list.
+     */
+    @NonNull
+    public List<AssociatedDevice> getActiveUserAssociatedDevices() {
+        return getAssociatedDevicesForUser(ActivityManager.getCurrentUser());
+    }
+
+    /**
+     * Returns a list of device ids of associated devices for the given user.
+     *
+     * @param userId The user id for whom we want to know the device ids.
+     * @return List of device ids.
+     */
+    @NonNull
+    public List<String> getAssociatedDeviceIdsForUser(@NonNull int userId) {
+        SharedPreferences sharedPrefs = getSharedPrefs();
+        Set<String> devices = sharedPrefs.getStringSet(String.valueOf(userId), new HashSet<>());
+        List<String> deviceIds = new ArrayList<>();
+        for (String device: devices) {
+            deviceIds.add(AssociatedDevice.deserialize(device).getDeviceId());
+        }
+        return deviceIds;
+    }
+
+    /**
+     * Returns a list of device ids of associated devices for the current user.
+     *
+     * @return List of device ids.
+     */
+    @NonNull
+    public List<String> getActiveUserAssociatedDeviceIds() {
+        return getAssociatedDeviceIdsForUser(ActivityManager.getCurrentUser());
     }
 
     /**
