@@ -24,9 +24,21 @@
 
     <style name="Widget.CarUi.Toolbar"/>
 
+    <style name="Widget.CarUi.Toolbar.NavIconContainer"/>
+
+    <style name="Widget.CarUi.Toolbar.Logo"/>
+
+    <style name="Widget.CarUi.Toolbar.LogoContainer">
+        <item name="android:paddingEnd">@dimen/car_ui_toolbar_title_logo_padding</item>
+    </style>
+
     <style name="Widget.CarUi.Toolbar.NavIcon">
         <item name="android:tint">@color/car_ui_toolbar_nav_icon_color</item>
         <item name="android:src">@drawable/car_ui_icon_arrow_back</item>
+    </style>
+
+    <style name="Widget.CarUi.Toolbar.Title">
+        <item name="android:layout_marginStart">@dimen/car_ui_toolbar_title_margin_start</item>
     </style>
 
     <style name="Widget.CarUi.Toolbar.TextButton" parent="Widget.CarUi.Button.Borderless.Colored">
@@ -50,9 +62,20 @@
         <item name="android:background">@android:color/transparent</item>
     </style>
 
+    <style name="Widget.CarUi.Toolbar.MenuItem.Container" parent="@style/Widget.CarUi.Toolbar">
+        <item name="android:divider">@drawable/car_ui_toolbar_menu_item_divider</item>
+        <item name="android:showDividers">beginning|middle</item>
+    </style>
+
     <!-- Style applied to the edit box inside the toolbar search area -->
     <style name="Widget.CarUi.Toolbar.Search.EditText"
         parent="android:Widget.DeviceDefault.EditText"/>
+
+    <style name="Widget.CarUi.Toolbar.Search.SearchIcon" parent="Widget.CarUi.Toolbar"/>
+
+    <style name="Widget.CarUi.Toolbar.Search.CloseIcon" parent="Widget.CarUi.Toolbar">
+        <item name="android:background">@drawable/car_ui_toolbar_menu_item_icon_ripple</item>
+    </style>
 
     <style name="Widget.CarUi.Toolbar.Tab"/>
 
