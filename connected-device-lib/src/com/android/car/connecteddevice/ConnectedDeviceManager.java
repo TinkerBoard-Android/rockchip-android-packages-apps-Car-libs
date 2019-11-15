@@ -35,8 +35,10 @@ import com.android.car.connecteddevice.ble.CarBleCentralManager;
 import com.android.car.connecteddevice.ble.CarBleManager;
 import com.android.car.connecteddevice.ble.CarBlePeripheralManager;
 import com.android.car.connecteddevice.ble.DeviceMessage;
+import com.android.car.connecteddevice.model.AssociatedDevice;
 import com.android.car.connecteddevice.model.ConnectedDevice;
 import com.android.car.connecteddevice.storage.CarCompanionDeviceStorage;
+import com.android.car.connecteddevice.util.ByteUtils;
 import com.android.car.connecteddevice.util.ThreadSafeCallbacks;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -60,6 +62,16 @@ import java.util.function.Consumer;
 public class ConnectedDeviceManager {
 
     private static final String TAG = "ConnectedDeviceManager";
+
+    // Device name length is limited by available bytes in BLE advertisement data packet.
+    //
+    // BLE advertisement limits data packet length to 31
+    // Currently we send:
+    // - 18 bytes for 16 chars UUID: 16 bytes + 2 bytes for header;
+    // - 3 bytes for advertisement being connectable;
+    // which leaves 10 bytes.
+    // Subtracting 2 bytes used by header, we have 8 bytes for device name.
+    private static final int DEVICE_NAME_LENGTH_LIMIT = 8;
 
     private final CarCompanionDeviceStorage mStorage;
 
@@ -91,21 +103,38 @@ public class ConnectedDeviceManager {
     @GuardedBy("mLock")
     private volatile boolean mIsConnectingToUserDevice = false;
 
+    private String mNameForAssociation;
+
     @Retention(SOURCE)
     @IntDef(prefix = { "DEVICE_ERROR_" },
             value = {
+                    DEVICE_ERROR_INVALID_HANDSHAKE,
+                    DEVICE_ERROR_INVALID_MSG,
+                    DEVICE_ERROR_INVALID_DEVICE_ID,
+                    DEVICE_ERROR_INVALID_VERIFICATION,
+                    DEVICE_ERROR_INVALID_CHANNEL_STATE,
+                    DEVICE_ERROR_INVALID_ENCRYPTION_KEY,
+                    DEVICE_ERROR_STORAGE_FAILURE,
                     DEVICE_ERROR_INVALID_SECURITY_KEY,
                     DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED
             }
     )
     public @interface DeviceError {}
-    public static final int DEVICE_ERROR_INVALID_SECURITY_KEY = 0;
-    public static final int DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED = 1;
+    public static final int DEVICE_ERROR_INVALID_HANDSHAKE = 0;
+    public static final int DEVICE_ERROR_INVALID_MSG = 1;
+    public static final int DEVICE_ERROR_INVALID_DEVICE_ID = 2;
+    public static final int DEVICE_ERROR_INVALID_VERIFICATION = 3;
+    public static final int DEVICE_ERROR_INVALID_CHANNEL_STATE = 4;
+    public static final int DEVICE_ERROR_INVALID_ENCRYPTION_KEY = 5;
+    public static final int DEVICE_ERROR_STORAGE_FAILURE = 6;
+    public static final int DEVICE_ERROR_INVALID_SECURITY_KEY = 7;
+    public static final int DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED = 8;
 
     public ConnectedDeviceManager(@NonNull Context context) {
         this(context, new CarCompanionDeviceStorage(context), new BleCentralManager(context),
                 new BlePeripheralManager(context),
                 UUID.fromString(context.getString(R.string.car_service_uuid)),
+                UUID.fromString(context.getString(R.string.car_association_service_uuid)),
                 context.getString(R.string.car_bg_mask),
                 UUID.fromString(context.getString(R.string.car_secure_write_uuid)),
                 UUID.fromString(context.getString(R.string.car_secure_read_uuid)));
@@ -117,14 +146,15 @@ public class ConnectedDeviceManager {
             @NonNull BleCentralManager bleCentralManager,
             @NonNull BlePeripheralManager blePeripheralManager,
             @NonNull UUID serviceUuid,
+            @NonNull UUID associationServiceUuid,
             @NonNull String bgMask,
             @NonNull UUID writeCharacteristicUuid,
             @NonNull UUID readCharacteristicUuid) {
         this(storage,
                 new CarBleCentralManager(context, bleCentralManager, storage, serviceUuid, bgMask,
                         writeCharacteristicUuid, readCharacteristicUuid),
-                new CarBlePeripheralManager(blePeripheralManager, storage, writeCharacteristicUuid,
-                        readCharacteristicUuid));
+                new CarBlePeripheralManager(blePeripheralManager, storage, associationServiceUuid,
+                        writeCharacteristicUuid, readCharacteristicUuid));
     }
 
     @VisibleForTesting
@@ -147,7 +177,7 @@ public class ConnectedDeviceManager {
      */
     public void start() {
         logd(TAG, "Starting ConnectedDeviceManager.");
-        mCentralManager.start();
+        //mCentralManager.start();
         mPeripheralManager.start();
     }
 
@@ -203,7 +233,7 @@ public class ConnectedDeviceManager {
                 // Already connecting, no further action needed.
                 return;
             }
-            List<String> userDeviceIds = getActiveUserDeviceIds();
+            List<String> userDeviceIds = mStorage.getActiveUserAssociatedDeviceIds();
             if (userDeviceIds.isEmpty()) {
                 logw(TAG, "No devices associated with active user. Ignoring.");
                 return;
@@ -220,6 +250,35 @@ public class ConnectedDeviceManager {
         } finally {
             mLock.unlock();
         }
+    }
+
+    /**
+     * Start the association with a new device.
+     *
+     * @param callback Callback for association events.
+     */
+    public void startAssociation(@NonNull AssociationCallback callback) {
+        mPeripheralManager.startAssociation(getNameForAssociation(), callback);
+    }
+
+    /** Stop the association with any device. */
+    public void stopAssociation(@NonNull AssociationCallback callback) {
+        mPeripheralManager.stopAssociation(callback);
+    }
+
+    /**
+     * Get a list of associated devices for the given user.
+     *
+     * @return Associated device list.
+     */
+    @NonNull
+    public List<AssociatedDevice> getActiveUserAssociatedDevices() {
+        return mStorage.getActiveUserAssociatedDevices();
+    }
+
+    /** Notify that the user has accepted a pairing code or any out-of-band confirmation. */
+    public void notifyOutOfBandAccepted() {
+        mPeripheralManager.notifyOutOfBandAccepted();
     }
 
     /**
@@ -320,8 +379,9 @@ public class ConnectedDeviceManager {
     private void sendMessage(@NonNull ConnectedDevice device, @NonNull UUID recipientId,
             @NonNull byte[] message, boolean isEncrypted) throws IllegalStateException {
         String deviceId = device.getDeviceId();
-        logd(TAG, "Sending new message to device $deviceId for " + recipientId + " containing "
-                + message.length + ". Message will be sent securely: " + isEncrypted + ".");
+        logd(TAG, "Sending new message to device " + deviceId + " for " + recipientId
+                + " containing " + message.length + ". Message will be sent securely: "
+                + isEncrypted + ".");
 
         InternalConnectedDevice connectedDevice = mConnectedDevices.get(deviceId);
         if (connectedDevice == null) {
@@ -376,8 +436,12 @@ public class ConnectedDeviceManager {
             return;
         }
         logd(TAG, "New device with id " + deviceId + " connected.");
-        ConnectedDevice connectedDevice = new ConnectedDevice(deviceId, /* deviceName = */ null,
-                getActiveUserDeviceIds().contains(deviceId), /* hasSecureChannel = */ false);
+        ConnectedDevice connectedDevice = new ConnectedDevice(
+                deviceId,
+                /* deviceName = */ null,
+                mStorage.getActiveUserAssociatedDeviceIds().contains(deviceId),
+                /* hasSecureChannel = */ false
+        );
 
         mConnectedDevices.put(deviceId, new InternalConnectedDevice(connectedDevice, bleManager));
         invokeConnectionCallbacks(connectedDevice.getBelongsToActiveUser(),
@@ -386,6 +450,7 @@ public class ConnectedDeviceManager {
 
     @VisibleForTesting
     void removeConnectedDevice(@NonNull String deviceId, @NonNull CarBleManager bleManager) {
+        logd(TAG, "Device " + deviceId + " disconnected from manager " + bleManager);
         InternalConnectedDevice connectedDevice = getConnectedDeviceForManager(deviceId,
                 bleManager);
         if (connectedDevice != null) {
@@ -425,7 +490,7 @@ public class ConnectedDeviceManager {
 
         mConnectedDevices.put(deviceId,
                 new InternalConnectedDevice(updatedConnectedDevice, bleManager));
-        logd(TAG, "Secure channel established to $deviceId. Notifying callbacks: "
+        logd(TAG, "Secure channel established to " + deviceId + " . Notifying callbacks: "
                 + notifyCallbacks + ".");
         if (notifyCallbacks) {
             notifyAllDeviceCallbacks(deviceId,
@@ -435,7 +500,7 @@ public class ConnectedDeviceManager {
 
     @VisibleForTesting
     void onMessageReceived(@NonNull String deviceId, @NonNull DeviceMessage message) {
-        logd(TAG, "New message received from device $deviceId intended for "
+        logd(TAG, "New message received from device " + deviceId + " intended for "
                 + message.getRecipient() + "containing " + message.getMessage().length + " bytes.");
 
         InternalConnectedDevice connectedDevice = mConnectedDevices.get(deviceId);
@@ -475,7 +540,7 @@ public class ConnectedDeviceManager {
 
     @NonNull
     private List<String> getActiveUserDeviceIds() {
-        return mStorage.getTrustedDevicesForUser(ActivityManager.getCurrentUser());
+        return mStorage.getAssociatedDeviceIdsForUser(ActivityManager.getCurrentUser());
     }
 
     @Nullable
@@ -511,6 +576,19 @@ public class ConnectedDeviceManager {
         for (ThreadSafeCallbacks<DeviceCallback> callbacks : deviceCallbacks.values()) {
             callbacks.invoke(notification);
         }
+    }
+
+    /**
+     * Returns the name that should be used for the device during enrollment of a trusted device.
+     *
+     * <p>The returned name will be a combination of a prefix sysprop and randomized digits.
+     */
+    @NonNull
+    private String getNameForAssociation() {
+        if (mNameForAssociation == null) {
+            mNameForAssociation = ByteUtils.generateRandomNumberString(DEVICE_NAME_LENGTH_LIMIT);
+        }
+        return mNameForAssociation;
     }
 
     @NonNull

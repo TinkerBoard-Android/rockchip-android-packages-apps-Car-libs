@@ -35,6 +35,7 @@ import java.io.ByteArrayOutputStream
 import java.lang.IllegalStateException
 import java.util.ArrayDeque
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
@@ -68,9 +69,9 @@ internal class BleDeviceMessageStream(
     private val pendingData = mutableMapOf<Int, ByteArrayOutputStream>()
     private val messageIdGenerator = MessageIdGenerator()
     private val handler = Handler(Looper.getMainLooper())
-    private var isInSending = false
     private var isVersionExchanged = false
     private var messageReceivedErrorListener: MessageReceivedErrorListener? = null
+    private var isSendingInProgress = AtomicBoolean(false)
     private var throttleDelay = AtomicLong(THROTTLE_DEFAULT)
 
     /**
@@ -100,7 +101,7 @@ internal class BleDeviceMessageStream(
         deviceMessage: DeviceMessage,
         operationType: OperationType = OperationType.CLIENT_MESSAGE
     ) {
-        logd(TAG, "Writing message to device: ${device.name}")
+        logd(TAG, "Writing message to device: ${device.address}")
         val builder =
             BleDeviceMessage.newBuilder()
                 .setOperation(operationType)
@@ -125,9 +126,10 @@ internal class BleDeviceMessageStream(
     private fun writeNextMessageInQueue() {
         handler.postDelayed(
             postDelayed@{
-                if (isInSending || packetQueue.isEmpty()) {
+                if (packetQueue.isEmpty() || isSendingInProgress.get()) {
                     return@postDelayed
                 }
+                isSendingInProgress.set(true)
                 val packet = packetQueue.remove()
                 logd(
                     TAG,
@@ -136,7 +138,6 @@ internal class BleDeviceMessageStream(
                 )
                 writeCharacteristic.setValue(packet.toByteArray())
                 blePeripheralManager.notifyCharacteristicChanged(device, writeCharacteristic, false)
-                isInSending = true
             },
             throttleDelay.get()
         )
@@ -149,12 +150,13 @@ internal class BleDeviceMessageStream(
         if (this.device != device) {
             logw(
                 TAG,
-                "Received a message from a device (${device.address}) that is not the " +
+                "Received a read notification from a device (${device.address}) that is not the " +
                     "expected device (${device.address}) registered to this stream. Ignoring."
             )
             return
         }
-        isInSending = false
+        logd(TAG, "Releasing lock on characteristic.")
+        isSendingInProgress.set(false)
         writeNextMessageInQueue()
     }
 
@@ -167,6 +169,7 @@ internal class BleDeviceMessageStream(
         characteristic: BluetoothGattCharacteristic,
         value: ByteArray
     ) {
+        logd(TAG, "Received a message from a device (${device.address}).")
         if (this.device != device) {
             logw(
                 TAG,
@@ -195,7 +198,6 @@ internal class BleDeviceMessageStream(
             messageReceivedErrorListener?.onMessageReceivedError(e)
             return
         }
-
         processPacket(packet)
     }
 
@@ -240,8 +242,8 @@ internal class BleDeviceMessageStream(
     }
 
     private fun processPacket(packet: BlePacket) {
-        // Messages are coming in. Need to throttle outgoing messages to allow outgoing notifications
-        // to make it to the device.
+        // Messages are coming in. Need to throttle outgoing messages to allow outgoing
+        // notifications to make it to the device.
         throttleDelay.set(THROTTLE_WAIT)
         val messageId = packet.messageId
         val currentPayloadStream = pendingData.getOrPut(
@@ -280,7 +282,7 @@ internal class BleDeviceMessageStream(
             bleDeviceMessage.isPayloadEncrypted,
             bleDeviceMessage.payload.toByteArray()
         )
-        messageReceivedListener?.onMessageReceived(deviceMessage)
+        messageReceivedListener?.onMessageReceived(deviceMessage, bleDeviceMessage.operation)
     }
 
     /**
@@ -301,7 +303,7 @@ internal class BleDeviceMessageStream(
          *
          * @param deviceMessage The message received from the client.
          */
-        fun onMessageReceived(deviceMessage: DeviceMessage)
+        fun onMessageReceived(deviceMessage: DeviceMessage, operationType: OperationType)
     }
 
     /**

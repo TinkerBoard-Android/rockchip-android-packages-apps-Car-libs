@@ -22,7 +22,6 @@ import static com.android.car.connecteddevice.ConnectedDeviceManager.DEVICE_ERRO
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mockitoSession;
 import static org.mockito.Mockito.spy;
@@ -117,7 +116,7 @@ public class ConnectedDeviceManagerTest {
     public void getActiveUserConnectedDevices_excludesDevicesNotBelongingToActiveUser() {
         String deviceId = UUID.randomUUID().toString();
         String otherUserDeviceId = UUID.randomUUID().toString();
-        when(mMockStorage.getTrustedDevicesForUser(anyInt())).thenReturn(
+        when(mMockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(
                 Collections.singletonList(otherUserDeviceId));
         mConnectedDeviceManager.addConnectedDevice(deviceId, mMockCentralManager);
         assertThat(mConnectedDeviceManager.getActiveUserConnectedDevices()).isEmpty();
@@ -149,7 +148,7 @@ public class ConnectedDeviceManagerTest {
     @Test
     public void connectToActiveUserDevice_startsAdvertisingWithDeviceId() {
         UUID deviceId = UUID.randomUUID();
-        when(mMockStorage.getTrustedDevicesForUser(anyInt())).thenReturn(
+        when(mMockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(
                 Collections.singletonList(deviceId.toString()));
         mConnectedDeviceManager.connectToActiveUserDevice();
         verify(mMockPeripheralManager).connectToDevice(deviceId);
@@ -226,7 +225,7 @@ public class ConnectedDeviceManagerTest {
                 mCallbackExecutor);
         String deviceId = UUID.randomUUID().toString();
         String otherUserDeviceId = UUID.randomUUID().toString();
-        when(mMockStorage.getTrustedDevicesForUser(anyInt())).thenReturn(
+        when(mMockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(
                 Collections.singletonList(otherUserDeviceId));
         mConnectedDeviceManager.addConnectedDevice(deviceId, mMockCentralManager);
         assertThat(tryAcquire(semaphore)).isFalse();
@@ -431,7 +430,7 @@ public class ConnectedDeviceManagerTest {
     @NonNull
     private String connectNewDevice(@NonNull CarBleManager carBleManager) {
         String deviceId = UUID.randomUUID().toString();
-        when(mMockStorage.getTrustedDevicesForUser(anyInt())).thenReturn(
+        when(mMockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(
                 Collections.singletonList(deviceId));
         mConnectedDeviceManager.addConnectedDevice(deviceId, carBleManager);
         return deviceId;
