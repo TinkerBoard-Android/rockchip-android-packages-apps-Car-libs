@@ -46,11 +46,13 @@
   <public type="dimen" name="car_ui_dialog_edittext_margin_end"/>
   <public type="dimen" name="car_ui_dialog_edittext_margin_start"/>
   <public type="dimen" name="car_ui_dialog_edittext_margin_top"/>
+  <public type="dimen" name="car_ui_header_list_item_height"/>
   <public type="dimen" name="car_ui_letter_spacing_body1"/>
   <public type="dimen" name="car_ui_letter_spacing_body3"/>
   <public type="dimen" name="car_ui_list_item_action_divider_height"/>
   <public type="dimen" name="car_ui_list_item_action_divider_width"/>
   <public type="dimen" name="car_ui_list_item_end_inset"/>
+  <public type="dimen" name="car_ui_list_item_header_start_inset"/>
   <public type="dimen" name="car_ui_list_item_height"/>
   <public type="dimen" name="car_ui_list_item_icon_container_width"/>
   <public type="dimen" name="car_ui_list_item_icon_size"/>

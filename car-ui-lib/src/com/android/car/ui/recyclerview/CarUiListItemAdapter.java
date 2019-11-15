@@ -34,15 +34,19 @@ import com.android.car.ui.R;
 import java.util.List;
 
 /**
- * Adapter for {@link CarUiRecyclerView} to display {@link CarUiListItem}.
+ * Adapter for {@link CarUiRecyclerView} to display {@link CarUiContentListItem} and {@link
+ * CarUiHeaderListItem}.
  *
  * <ul>
  * <li> Implements {@link CarUiRecyclerView.ItemCap} - defaults to unlimited item count.
  * </ul>
  */
 public class CarUiListItemAdapter extends
-        RecyclerView.Adapter<CarUiListItemAdapter.ViewHolder> implements
+        RecyclerView.Adapter<RecyclerView.ViewHolder> implements
         CarUiRecyclerView.ItemCap {
+
+    private static final int VIEW_TYPE_LIST_ITEM = 1;
+    private static final int VIEW_TYPE_LIST_HEADER = 2;
 
     private List<CarUiListItem> mItems;
     private int mMaxItems = CarUiRecyclerView.ItemCap.UNLIMITED;
@@ -53,11 +57,20 @@ public class CarUiListItemAdapter extends
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(
+    public RecyclerView.ViewHolder onCreateViewHolder(
             @NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View view = inflater.inflate(R.layout.car_ui_list_item, parent, false);
-        return new ViewHolder(view);
+
+        switch (viewType) {
+            case VIEW_TYPE_LIST_ITEM:
+                return new ListItemViewHolder(
+                        inflater.inflate(R.layout.car_ui_list_item, parent, false));
+            case VIEW_TYPE_LIST_HEADER:
+                return new HeaderViewHolder(
+                        inflater.inflate(R.layout.car_ui_header_list_item, parent, false));
+            default:
+                throw new IllegalStateException("Unknown item type.");
+        }
     }
 
     /**
@@ -72,8 +85,54 @@ public class CarUiListItemAdapter extends
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        CarUiListItem item = mItems.get(position);
+    public int getItemViewType(int position) {
+        if (mItems.get(position) instanceof CarUiContentListItem) {
+            return VIEW_TYPE_LIST_ITEM;
+        } else if (mItems.get(position) instanceof CarUiHeaderListItem) {
+            return VIEW_TYPE_LIST_HEADER;
+        }
+
+        throw new IllegalStateException("Unknown view type.");
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        switch (holder.getItemViewType()) {
+            case VIEW_TYPE_LIST_ITEM:
+                if (!(holder instanceof ListItemViewHolder)) {
+                    throw new IllegalStateException("Incorrect view holder type for list item.");
+                }
+
+                CarUiListItem item = mItems.get(position);
+                if (!(item instanceof CarUiContentListItem)) {
+                    throw new IllegalStateException(
+                            "Expected item to be bound to viewholder to be instance of "
+                                    + "CarUiContentListItem.");
+                }
+
+                onBindListItemViewHolder((ListItemViewHolder) holder, (CarUiContentListItem) item);
+                break;
+            case VIEW_TYPE_LIST_HEADER:
+                if (!(holder instanceof HeaderViewHolder)) {
+                    throw new IllegalStateException("Incorrect view holder type for list item.");
+                }
+
+                CarUiListItem header = mItems.get(position);
+                if (!(header instanceof CarUiHeaderListItem)) {
+                    throw new IllegalStateException(
+                            "Expected item to be bound to viewholder to be instance of "
+                                    + "CarUiHeaderListItem.");
+                }
+
+                onBindHeaderViewHolder((HeaderViewHolder) holder, (CarUiHeaderListItem) header);
+                break;
+            default:
+                throw new IllegalStateException("Unknown item view type.");
+        }
+    }
+
+    private void onBindListItemViewHolder(@NonNull ListItemViewHolder holder,
+            @NonNull CarUiContentListItem item) {
         CharSequence title = item.getTitle();
         CharSequence body = item.getBody();
         Drawable icon = item.getIcon();
@@ -116,7 +175,7 @@ public class CarUiListItemAdapter extends
                 switchWidget.setOnCheckedChangeListener(
                         (buttonView, isChecked) -> {
                             item.setChecked(isChecked);
-                            CarUiListItem.OnCheckedChangedListener itemListener =
+                            CarUiContentListItem.OnCheckedChangedListener itemListener =
                                     item.getOnCheckedChangedListener();
                             if (itemListener != null) {
                                 itemListener.onCheckedChanged(isChecked);
@@ -132,7 +191,7 @@ public class CarUiListItemAdapter extends
                 checkBox.setOnCheckedChangeListener(
                         (buttonView, isChecked) -> {
                             item.setChecked(isChecked);
-                            CarUiListItem.OnCheckedChangedListener itemListener =
+                            CarUiContentListItem.OnCheckedChangedListener itemListener =
                                     item.getOnCheckedChangedListener();
                             if (itemListener != null) {
                                 itemListener.onCheckedChanged(isChecked);
@@ -160,6 +219,18 @@ public class CarUiListItemAdapter extends
         }
     }
 
+    private void onBindHeaderViewHolder(@NonNull HeaderViewHolder holder,
+            @NonNull CarUiHeaderListItem item) {
+        holder.getTitle().setText(item.getTitle());
+
+        CharSequence body = item.getBody();
+        if (!TextUtils.isEmpty(body)) {
+            holder.getBody().setText(body);
+        } else {
+            holder.getBody().setVisibility(View.GONE);
+        }
+    }
+
     @Override
     public int getItemCount() {
         return mMaxItems == CarUiRecyclerView.ItemCap.UNLIMITED
@@ -173,9 +244,9 @@ public class CarUiListItemAdapter extends
     }
 
     /**
-     * Holds views of {@link CarUiListItem}.
+     * Holds views of {@link CarUiContentListItem}.
      */
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    static class ListItemViewHolder extends RecyclerView.ViewHolder {
 
         private TextView mTitle;
         private TextView mBody;
@@ -187,7 +258,7 @@ public class CarUiListItemAdapter extends
         private CheckBox mCheckBox;
         private ImageView mSupplementalIcon;
 
-        ViewHolder(@NonNull View itemView) {
+        ListItemViewHolder(@NonNull View itemView) {
             super(itemView);
             mTitle = itemView.requireViewById(R.id.title);
             mBody = itemView.requireViewById(R.id.body);
@@ -245,5 +316,30 @@ public class CarUiListItemAdapter extends
             return mSupplementalIcon;
         }
 
+    }
+
+    /**
+     * Holds views of {@link CarUiHeaderListItem}.
+     */
+    static class HeaderViewHolder extends RecyclerView.ViewHolder {
+
+        private TextView mTitle;
+        private TextView mBody;
+
+        HeaderViewHolder(@NonNull View itemView) {
+            super(itemView);
+            mTitle = itemView.requireViewById(R.id.title);
+            mBody = itemView.requireViewById(R.id.body);
+        }
+
+        @NonNull
+        TextView getTitle() {
+            return mTitle;
+        }
+
+        @NonNull
+        TextView getBody() {
+            return mBody;
+        }
     }
 }
