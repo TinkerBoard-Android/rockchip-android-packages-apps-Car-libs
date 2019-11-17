@@ -73,7 +73,7 @@
     used) will be centered in this space, and the title will start from here -->
     <dimen name="car_ui_toolbar_margin">@dimen/car_ui_margin</dimen>
     <!-- Navigation icon -->
-    <dimen name="car_ui_toolbar_icon_size">@dimen/car_ui_primary_icon_size</dimen>
+    <dimen name="car_ui_toolbar_nav_icon_size">@dimen/car_ui_primary_icon_size</dimen>
     <!-- Logo -->
     <dimen name="car_ui_toolbar_logo_size">@dimen/car_ui_primary_icon_size</dimen>
     <!-- Margin between the logo and the title, when both logo and navigation icons are used -->
@@ -88,6 +88,23 @@
     <dimen name="car_ui_toolbar_menu_item_icon_size">@dimen/car_ui_primary_icon_size</dimen>
     <!-- Icon background size for icon menu items -->
     <dimen name="car_ui_toolbar_menu_item_icon_background_size">54dp</dimen>
+    <!-- Height of the decoration view between the two rows of the toolbar (or below the toolbar
+    if this is a single row one -->
+    <!-- can't use 0dp for layout_height or the constraintlayout effect kicks in -->
+    <dimen name="car_ui_toolbar_separator_height">0.1dp</dimen>
+    <!-- Height of the decoration view below the toolbar -->
+    <!-- can't use 0dp for layout_height or the constraintlayout effect kicks in -->
+    <dimen name="car_ui_toolbar_bottom_view_height">0.1dp</dimen>
+    <!-- Height of the search box -->
+    <dimen name="car_ui_toolbar_search_height">0dp</dimen>
+    <!-- Space before the text search area, where the search icon is located -->
+    <dimen name="car_ui_toolbar_search_search_icon_container_width">@dimen/car_ui_touch_target_width</dimen>
+    <!-- Space after the text search area, where the cancel icon is located -->
+    <dimen name="car_ui_toolbar_search_close_icon_container_width">@dimen/car_ui_touch_target_width</dimen>
+    <!-- Size of the search icon inside the search box -->
+    <dimen name="car_ui_toolbar_search_search_icon_size">@dimen/car_ui_primary_icon_size</dimen>
+    <!-- Size of the close icon inside the search box -->
+    <dimen name="car_ui_toolbar_search_close_icon_size">@dimen/car_ui_primary_icon_size</dimen>
 
     <!-- Internal artifacts. Do not overlay -->
     <item name="wrap_content" format="integer" type="dimen">-2</item>
