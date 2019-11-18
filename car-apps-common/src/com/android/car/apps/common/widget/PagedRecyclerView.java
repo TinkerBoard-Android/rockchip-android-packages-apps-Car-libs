@@ -679,9 +679,9 @@ public final class PagedRecyclerView extends RecyclerView {
             mNestedRecyclerViewState = new SparseArray();
         }
 
-        private SavedState(Parcel in) {
-            super(in);
-            mNestedRecyclerViewState = in.readSparseArray(mContext.getClassLoader());
+        private SavedState(Parcel source, ClassLoader loader) {
+            super(source, loader);
+            mNestedRecyclerViewState = source.readSparseArray(loader);
         }
 
         @Override
@@ -693,7 +693,7 @@ public final class PagedRecyclerView extends RecyclerView {
         public static final Parcelable.Creator<SavedState> CREATOR =
                 new Parcelable.Creator<SavedState>() {
             public SavedState createFromParcel(Parcel in) {
-                return new SavedState(in);
+                return new SavedState(in, getClass().getClassLoader());
             }
 
             public SavedState[] newArray(int size) {
