@@ -17,7 +17,6 @@ package com.android.car.ui.toolbar;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.car.drivingstate.CarUxRestrictions;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -369,24 +368,25 @@ public class Toolbar extends FrameLayout {
         }
     }
 
-    private void onCarUxRestrictionsChanged(CarUxRestrictions restrictions) {
-        for (MenuItemRenderer renderer : mMenuItemRenderers) {
-            renderer.setUxRestrictions(restrictions);
-        }
-    }
+    private final CarUxRestrictionsUtil.OnUxRestrictionsChangedListener
+            mOnUxRestrictionsChangedListener = restrictions -> {
+                for (MenuItemRenderer renderer : mMenuItemRenderers) {
+                    renderer.setUxRestrictions(restrictions);
+                }
+            };
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         CarUxRestrictionsUtil.getInstance(getContext())
-                .register(this::onCarUxRestrictionsChanged);
+                .register(mOnUxRestrictionsChangedListener);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         CarUxRestrictionsUtil.getInstance(getContext())
-                .unregister(this::onCarUxRestrictionsChanged);
+                .unregister(mOnUxRestrictionsChangedListener);
     }
 
     /**

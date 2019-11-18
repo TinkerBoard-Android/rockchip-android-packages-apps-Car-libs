@@ -107,8 +107,8 @@ public class CarUxRestrictionsUtil {
 
     /**
      * Registers a listener on this class for updates to CarUxRestrictions. Multiple listeners may
-     * be
-     * registered.
+     * be registered. Note that this class will only hold a weak reference to the listener, you
+     * must maintain a strong reference to it elsewhere.
      */
     public void register(OnUxRestrictionsChangedListener listener) {
         mObservers.add(listener);

@@ -154,6 +154,15 @@ public class ToolbarActivity extends Activity {
             toolbar.setMenuItems(mMenuItems);
         }));
 
+        mButtons.add(Pair.create("MenuItem: Add morphing", v -> {
+            mMenuItems.add(new MenuItem.Builder(this)
+                    .setTitle("Become icon")
+                    .setOnClickListener(i ->
+                            i.setIcon(i.getIcon() == null ? R.drawable.ic_tracklist : 0))
+                    .build());
+            toolbar.setMenuItems(mMenuItems);
+        }));
+
         mButtons.add(Pair.create("MenuItem: Toggle Visibility", v ->
                 getMenuItem(item -> item.setVisible(!item.isVisible()))));
 
