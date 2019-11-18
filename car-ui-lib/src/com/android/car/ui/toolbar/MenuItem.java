@@ -21,6 +21,8 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.car.ui.R;
 import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
@@ -222,6 +224,7 @@ public class MenuItem {
     }
 
     /** Calls the {@link OnClickListener}. */
+    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
     public void performClick() {
         if (!isEnabled() || !isVisible()) {
             return;
