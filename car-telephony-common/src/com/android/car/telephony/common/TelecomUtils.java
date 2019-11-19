@@ -147,13 +147,15 @@ public class TelecomUtils {
     public static final class PhoneNumberInfo {
         private final String mPhoneNumber;
         private final String mDisplayName;
+        private final String mInitials;
         private final Uri mAvatarUri;
         private final String mTypeLabel;
 
         public PhoneNumberInfo(String phoneNumber, String displayName,
-                Uri avatarUri, String typeLabel) {
+                String initials, Uri avatarUri, String typeLabel) {
             mPhoneNumber = phoneNumber;
             mDisplayName = displayName;
+            mInitials = initials;
             mAvatarUri = avatarUri;
             mTypeLabel = typeLabel;
         }
@@ -166,6 +168,16 @@ public class TelecomUtils {
             return mDisplayName;
         }
 
+        /**
+         * Returns the initials of the contact related to the phone number. Returns null if there is
+         * no related contact.
+         */
+        @Nullable
+        public String getInitials() {
+            return mInitials;
+        }
+
+        @Nullable
         public Uri getAvatarUri() {
             return mAvatarUri;
         }
@@ -189,6 +201,7 @@ public class TelecomUtils {
                     number,
                     context.getString(R.string.unknown),
                     null,
+                    null,
                     ""));
         }
 
@@ -196,6 +209,7 @@ public class TelecomUtils {
             return CompletableFuture.completedFuture(new PhoneNumberInfo(
                     number,
                     context.getString(R.string.voicemail),
+                    null,
                     makeResourceUri(context, R.drawable.ic_voicemail),
                     ""));
         }
@@ -223,6 +237,7 @@ public class TelecomUtils {
                 return CompletableFuture.completedFuture(new PhoneNumberInfo(
                         number,
                         name,
+                        contact.getInitials(),
                         contact.getAvatarUri(),
                         typeLabel.toString()));
             }
@@ -230,13 +245,16 @@ public class TelecomUtils {
 
         return CompletableFuture.supplyAsync(() -> {
             String name = null;
+            String nameAlt = null;
             String photoUriString = null;
             CharSequence typeLabel = "";
             ContentResolver cr = context.getContentResolver();
+            String initials;
             try (Cursor cursor = cr.query(
                     Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number)),
-                    new String[] {
+                    new String[]{
                             PhoneLookup.DISPLAY_NAME,
+                            PhoneLookup.DISPLAY_NAME_ALTERNATIVE,
                             PhoneLookup.PHOTO_URI,
                             PhoneLookup.TYPE,
                             PhoneLookup.LABEL,
@@ -244,13 +262,22 @@ public class TelecomUtils {
                     null, null, null)) {
 
                 if (cursor != null && cursor.moveToFirst()) {
-                    name = cursor.getString(0);
-                    photoUriString = cursor.getString(1);
-                    int type = cursor.getInt(2);
-                    String label = cursor.getString(3);
+                    int nameColumn = cursor.getColumnIndex(PhoneLookup.DISPLAY_NAME);
+                    int altNameColumn = cursor.getColumnIndex(PhoneLookup.DISPLAY_NAME_ALTERNATIVE);
+                    int photoUriColumn = cursor.getColumnIndex(PhoneLookup.PHOTO_URI);
+                    int typeColumn = cursor.getColumnIndex(PhoneLookup.TYPE);
+                    int labelColumn = cursor.getColumnIndex(PhoneLookup.LABEL);
+
+                    name = cursor.getString(nameColumn);
+                    nameAlt = cursor.getString(altNameColumn);
+                    photoUriString = cursor.getString(photoUriColumn);
+                    int type = cursor.getInt(typeColumn);
+                    String label = cursor.getString(labelColumn);
                     typeLabel = Phone.getTypeLabel(context.getResources(), type, label);
                 }
             }
+
+            initials = getInitials(name, nameAlt);
 
             if (name == null) {
                 name = getFormattedNumber(context, number);
@@ -260,7 +287,7 @@ public class TelecomUtils {
                 name = context.getString(R.string.unknown);
             }
 
-            return new PhoneNumberInfo(number, name,
+            return new PhoneNumberInfo(number, name, initials,
                     TextUtils.isEmpty(photoUriString) ? null : Uri.parse(photoUriString),
                     typeLabel.toString());
         });
@@ -312,31 +339,50 @@ public class TelecomUtils {
     }
 
     /**
-     * Sets a Contact avatar onto the provided {@code icon}. The first letter of the contact's
-     * display name or {@code fallbackDisplayName} will be used as a fallback resource if avatar
-     * loading fails.
+     * Sets a Contact avatar onto the provided {@code icon}. The first letter or both letters
+     * of the contact's initials.
      */
     public static void setContactBitmapAsync(
             Context context,
-            final ImageView icon,
-            @Nullable final Contact contact,
-            @Nullable final String fallbackDisplayName) {
-        Uri avatarUri = contact != null ? contact.getAvatarUri() : null;
-        String displayName = contact != null ? contact.getDisplayName() : fallbackDisplayName;
-
-        setContactBitmapAsync(context, icon, avatarUri, displayName);
+            @Nullable final ImageView icon,
+            @Nullable final Contact contact) {
+        setContactBitmapAsync(context, icon, contact, null);
     }
 
     /**
-     * Sets a Contact avatar onto the provided {@code icon}. The first letter of the contact's
-     * display name will be used as a fallback resource if avatar loading fails.
+     * Sets a Contact avatar onto the provided {@code icon}. The first letter or both letters
+     * of the contact's initials or {@code fallbackDisplayName} will be used as a fallback resource
+     * if avatar loading fails.
      */
     public static void setContactBitmapAsync(
             Context context,
-            final ImageView icon,
-            final Uri avatarUri,
-            final String displayName) {
-        LetterTileDrawable letterTileDrawable = createLetterTile(context, displayName);
+            @Nullable final ImageView icon,
+            @Nullable final Contact contact,
+            @Nullable final String fallbackDisplayName) {
+        Uri avatarUri = contact != null ? contact.getAvatarUri() : null;
+        String initials = contact != null
+                ? contact.getInitials() : fallbackDisplayName.substring(0, 1);
+        String identifier = TextUtils.isEmpty(initials) ? fallbackDisplayName : initials;
+
+        setContactBitmapAsync(context, icon, avatarUri, initials, identifier);
+    }
+
+    /**
+     * Sets a Contact avatar onto the provided {@code icon}. A letter tile base on the contact's
+     * initials and identifier will be used as a fallback resource if avatar loading fails.
+     */
+    public static void setContactBitmapAsync(
+            Context context,
+            @Nullable final ImageView icon,
+            @Nullable final Uri avatarUri,
+            @Nullable final String initials,
+            final String identifier) {
+        if (icon == null) {
+            return;
+        }
+
+        LetterTileDrawable letterTileDrawable = createLetterTile(context, initials,
+                TextUtils.isEmpty(initials) ? identifier : initials);
 
         Glide.with(context)
                 .load(avatarUri)
@@ -344,11 +390,25 @@ public class TelecomUtils {
                 .into(icon);
     }
 
-    /** Create a {@link LetterTileDrawable} for the given display name. */
-    public static LetterTileDrawable createLetterTile(Context context, String displayName) {
-        LetterTileDrawable letterTileDrawable = new LetterTileDrawable(context.getResources());
-        letterTileDrawable.setContactDetails(displayName, displayName);
-        return  letterTileDrawable;
+    /**
+     * Create a {@link LetterTileDrawable} for the given initials.
+     *
+     * @param initials   is the letters that will be drawn on the canvas. If it is null, then
+     *                   an avatar anonymous icon will be drawn
+     * @param identifier will decide the color for the drawable. If null, a default color will
+     *                   be used.
+     */
+    public static LetterTileDrawable createLetterTile(
+            Context context,
+            @Nullable String initials,
+            @Nullable String identifier) {
+        int numberOfLetter = context.getResources().getInteger(
+                R.integer.config_number_of_letters_shown_for_avatar);
+        String letters = initials != null
+                ? initials.substring(0, Math.min(initials.length(), numberOfLetter)) : null;
+        LetterTileDrawable letterTileDrawable = new LetterTileDrawable(context.getResources(),
+                letters, identifier);
+        return letterTileDrawable;
     }
 
     /** Set the given phone number as the primary phone number for its associated contact. */
@@ -417,6 +477,19 @@ public class TelecomUtils {
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "markCallLogAsRead failed", e);
         }
+    }
+
+    static String getInitials(String name, String nameAlt) {
+        StringBuilder initials = new StringBuilder();
+        if (!TextUtils.isEmpty(name) && Character.isLetter(name.charAt(0))) {
+            initials.append(Character.toUpperCase(name.charAt(0)));
+        }
+        if (!TextUtils.isEmpty(nameAlt)
+                && !TextUtils.equals(name, nameAlt)
+                && Character.isLetter(nameAlt.charAt(0))) {
+            initials.append(Character.toUpperCase(nameAlt.charAt(0)));
+        }
+        return initials.toString();
     }
 
     private static Uri makeResourceUri(Context context, int resourceId) {
