@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Xml;
 import android.view.LayoutInflater;
@@ -50,16 +51,26 @@ class MenuItemRenderer implements MenuItem.Listener {
 
     private static final int[] RESTRICTED_STATE = new int[] {R.attr.state_ux_restricted};
 
+    private final int mMenuItemIconSize;
+
     private Toolbar.State mToolbarState;
 
     private final MenuItem mMenuItem;
     private final ViewGroup mParentView;
     private View mView;
+    private View mIconContainer;
+    private ImageView mIconView;
+    private Switch mSwitch;
+    private TextView mTextView;
+    private TextView mTextWithIconView;
 
     MenuItemRenderer(MenuItem item, ViewGroup parentView) {
         mMenuItem = item;
         mParentView = parentView;
         mMenuItem.setListener(this);
+
+        mMenuItemIconSize = parentView.getContext().getResources()
+                .getDimensionPixelSize(R.dimen.car_ui_toolbar_menu_item_icon_size);
     }
 
     void setToolbarState(Toolbar.State state) {
@@ -83,19 +94,13 @@ class MenuItemRenderer implements MenuItem.Listener {
         LayoutInflater inflater = (LayoutInflater) mParentView.getContext().getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
 
-        if (mMenuItem.isCheckable()) {
-            mView = inflater.inflate(
-                    R.layout.car_ui_toolbar_menu_item_switch, mParentView, false);
-        } else if (mMenuItem.isShowingIconAndTitle()) {
-            mView = inflater.inflate(
-                    R.layout.car_ui_toolbar_menu_item_icon_and_text, mParentView, false);
-        } else if (mMenuItem.getIcon() != null) {
-            mView = inflater.inflate(
-                    R.layout.car_ui_toolbar_menu_item_icon, mParentView, false);
-        } else {
-            mView = inflater.inflate(
-                    R.layout.car_ui_toolbar_menu_item_text, mParentView, false);
-        }
+        mView = inflater.inflate(R.layout.car_ui_toolbar_menu_item, mParentView, false);
+
+        mIconContainer = mView.requireViewById(R.id.car_ui_toolbar_menu_item_icon_container);
+        mIconView = mView.requireViewById(R.id.car_ui_toolbar_menu_item_icon);
+        mSwitch = mView.requireViewById(R.id.car_ui_toolbar_menu_item_switch);
+        mTextView = mView.requireViewById(R.id.car_ui_toolbar_menu_item_text);
+        mTextWithIconView = mView.requireViewById(R.id.car_ui_toolbar_menu_item_text_with_icon);
 
         updateView();
         return mView;
@@ -106,39 +111,40 @@ class MenuItemRenderer implements MenuItem.Listener {
             return;
         }
 
+        boolean hasIcon = mMenuItem.getIcon() != null;
+        boolean hasText = !TextUtils.isEmpty(mMenuItem.getTitle());
+        boolean textAndIcon = mMenuItem.isShowingIconAndTitle();
+        boolean checkable = mMenuItem.isCheckable();
+
         if (!mMenuItem.isVisible()
-                || (mMenuItem.isSearch() && mToolbarState == Toolbar.State.SEARCH)) {
+                || (mMenuItem.isSearch() && mToolbarState == Toolbar.State.SEARCH)
+                || (!checkable && !hasIcon && !hasText)) {
             mView.setVisibility(View.GONE);
             return;
         }
-
         mView.setVisibility(View.VISIBLE);
 
-        ImageView imageView = mView.findViewById(R.id.car_ui_toolbar_menu_item_icon);
-        if (imageView != null) {
-            imageView.setImageDrawable(mMenuItem.getIcon());
+        mIconContainer.setVisibility(View.GONE);
+        mTextView.setVisibility(View.GONE);
+        mTextWithIconView.setVisibility(View.GONE);
+        mSwitch.setVisibility(View.GONE);
+        if (checkable) {
+            mSwitch.setChecked(mMenuItem.isChecked());
+            mSwitch.setVisibility(View.VISIBLE);
+        } else if (hasText && hasIcon && textAndIcon) {
+            mMenuItem.getIcon().setBounds(0, 0, mMenuItemIconSize, mMenuItemIconSize);
+            mTextWithIconView.setCompoundDrawables(mMenuItem.getIcon(), null, null, null);
+            mTextWithIconView.setText(mMenuItem.getTitle());
+            mTextWithIconView.setVisibility(View.VISIBLE);
+        } else if (hasIcon) {
+            mIconView.setImageDrawable(mMenuItem.getIcon());
+            mIconContainer.setVisibility(View.VISIBLE);
+        } else { // hasText will be true
+            mTextView.setText(mMenuItem.getTitle());
+            mTextView.setVisibility(View.VISIBLE);
         }
 
-        TextView textView = mView.findViewById(R.id.car_ui_toolbar_menu_item_text);
-        if (textView != null) {
-            textView.setText(mMenuItem.getTitle());
-
-            if (mMenuItem.isShowingIconAndTitle() && imageView == null) {
-                int menuItemIconSize = mView.getContext().getResources()
-                        .getDimensionPixelSize(R.dimen.car_ui_toolbar_menu_item_icon_size);
-
-                mMenuItem.getIcon().setBounds(0, 0, menuItemIconSize, menuItemIconSize);
-
-                textView.setCompoundDrawables(mMenuItem.getIcon(), null, null, null);
-            }
-        }
-
-        Switch s = mView.findViewById(R.id.car_ui_toolbar_menu_item_switch);
-        if (s != null) {
-            s.setChecked(mMenuItem.isChecked());
-        }
-
-        if (!mMenuItem.isTinted()) {
+        if (!mMenuItem.isTinted() && hasIcon) {
             mMenuItem.getIcon().setTintList(null);
         }
 
