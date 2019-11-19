@@ -17,6 +17,7 @@
 package com.android.car.ui.recyclerview;
 
 import android.graphics.drawable.Drawable;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,7 +28,7 @@ import androidx.annotation.Nullable;
 public class CarUiListItem {
 
     /**
-     *  Callback to be invoked when the checked state of a list item changed.
+     * Callback to be invoked when the checked state of a list item changed.
      */
     public interface OnCheckedChangedListener {
         /**
@@ -55,14 +56,22 @@ public class CarUiListItem {
          * item.
          */
         CHECK_BOX,
+        /**
+         * For an action value of ICON, an icon is shown for the action element of the list item.
+         */
+        ICON
     }
 
     private Drawable mIcon;
+    @Nullable
+    private Drawable mSupplementalIcon;
     private CharSequence mTitle;
     private CharSequence mBody;
     private Action mAction;
+    private boolean mIsActionDividerVisible;
     private boolean mIsChecked;
     private OnCheckedChangedListener mOnCheckedChangedListener;
+    private View.OnClickListener mSupplementalIconOnClickListener;
 
     public CarUiListItem() {
         mAction = Action.NONE;
@@ -133,7 +142,26 @@ public class CarUiListItem {
      * @param checked the checked state for the item.
      */
     public void setChecked(boolean checked) {
-        mIsChecked = checked;
+        // Checked state can only be set when action type is checkbox or switch.
+        if (mAction == Action.CHECK_BOX || mAction == Action.SWITCH) {
+            mIsChecked = checked;
+        }
+    }
+
+    /**
+     * Sets the visibility of the action divider.
+     *
+     * @param visible visibility of the action divider.
+     */
+    public void setActionDividerVisible(boolean visible) {
+        mIsActionDividerVisible = visible;
+    }
+
+    /**
+     * Returns {@code true} if the action divider is visible.
+     */
+    public boolean isActionDividerVisible() {
+        return mIsActionDividerVisible;
     }
 
     /**
@@ -151,10 +179,52 @@ public class CarUiListItem {
     public void setAction(Action action) {
         mAction = action;
 
-        // Cannot have checked state be true when there is no action.
-        if (mAction == Action.NONE) {
+        // Cannot have checked state be true when there action type is not checkbox or switch.
+        if (mAction != Action.CHECK_BOX && mAction != Action.SWITCH) {
             mIsChecked = false;
         }
+    }
+
+    /**
+     * Returns the supplemental icon for the item.
+     */
+    @Nullable
+    public Drawable getSupplementalIcon() {
+        if (mAction != Action.ICON) {
+            return null;
+        }
+
+        return mSupplementalIcon;
+    }
+
+    /**
+     * Sets supplemental icon to be displayed in a list item.
+     *
+     * @param icon the Drawable to set as the icon, or null to clear the content.
+     */
+    public void setSupplementalIcon(@Nullable Drawable icon) {
+        setSupplementalIcon(icon, null);
+    }
+
+    /**
+     * Sets supplemental icon to be displayed in a list item.
+     *
+     * @param icon the Drawable to set as the icon, or null to clear the content.
+     * @param listener the callback that is invoked when the icon is clicked.
+     */
+    public void setSupplementalIcon(@Nullable Drawable icon,
+            @Nullable View.OnClickListener listener) {
+        mAction = Action.ICON;
+
+        // Cannot have checked state when action type is {@code Action.ICON}.
+        mIsChecked = false;
+
+        mSupplementalIcon = icon;
+        mSupplementalIconOnClickListener = listener;
+    }
+
+    View.OnClickListener getSupplementalIconOnClickListener() {
+        return mSupplementalIconOnClickListener;
     }
 
     /**
