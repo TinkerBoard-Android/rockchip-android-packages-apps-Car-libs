@@ -31,5 +31,5 @@
         android:id="@+id/check"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="i am a check box"/>
+        android:text="@string/widget_checkbox_text"/>
 </LinearLayout>
