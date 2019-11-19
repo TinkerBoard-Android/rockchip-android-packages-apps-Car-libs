@@ -181,5 +181,8 @@
     <dimen name="car_ui_list_item_text_start_margin">0dp</dimen>
     <dimen name="car_ui_list_item_text_no_icon_start_margin">24dp</dimen>
     <dimen name="car_ui_list_item_icon_size">@dimen/car_ui_primary_icon_size</dimen>
+    <dimen name="car_ui_list_item_supplemental_icon_size">@dimen/car_ui_primary_icon_size</dimen>
     <dimen name="car_ui_list_item_icon_container_width">112dp</dimen>
+    <dimen name="car_ui_list_item_action_divider_width">1dp</dimen>
+    <dimen name="car_ui_list_item_action_divider_height">60dp</dimen>
 </resources>
