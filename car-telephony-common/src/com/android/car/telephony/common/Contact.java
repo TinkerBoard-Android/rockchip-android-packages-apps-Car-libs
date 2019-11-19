@@ -161,6 +161,11 @@ public class Contact implements Parcelable, Comparable<Contact> {
     private PhoneNumber mPrimaryPhoneNumber;
 
     /**
+     * The initials of the contact's name.
+     */
+    private String mInitials;
+
+    /**
      * Parses a Contact entry for a Cursor loaded from the Contact Database.
      */
     public static Contact fromCursor(Context context, Cursor cursor) {
@@ -294,6 +299,19 @@ public class Contact implements Parcelable, Comparable<Contact> {
 
     public int getPinnedPosition() {
         return mPinnedPosition;
+    }
+
+    /**
+     * Returns the initials of the contact's name.
+     */
+    //TODO: update how to get initials after refactoring. Could use last name and first name to
+    // get initials after refactoring to avoid error for those names with prefix.
+    public String getInitials() {
+        if (mInitials == null) {
+            mInitials = TelecomUtils.getInitials(mDisplayName, mAltDisplayName);
+        }
+
+        return mInitials;
     }
 
     /**
