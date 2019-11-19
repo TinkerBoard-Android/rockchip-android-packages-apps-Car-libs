@@ -35,4 +35,10 @@
     <string name="config_letter_tile_font_family" translatable="false">sans-serif-light</string>
     <!-- Typeface.NORMAL=0; Typeface.BOLD=1; Typeface.ITALIC=2; Typeface.BOLD_ITALIC=3-->
     <integer name="config_letter_tile_text_style">0</integer>
+
+    <!-- This value will determine how many letters to show in a letter tile drawable for
+         the contacts that don't have avatars. The value can be 2 (show initials),
+         1 (show one letter) or 0 (show avatar anonymous icon)
+    -->
+    <integer name="config_number_of_letters_shown_for_avatar">1</integer>
 </resources>
