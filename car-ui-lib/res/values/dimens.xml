@@ -176,6 +176,8 @@
     <!-- List item  -->
 
     <dimen name="car_ui_list_item_height">116dp</dimen>
+    <dimen name="car_ui_header_list_item_height">116dp</dimen>
+    <dimen name="car_ui_list_item_header_start_inset">0dp</dimen>
     <dimen name="car_ui_list_item_start_inset">0dp</dimen>
     <dimen name="car_ui_list_item_end_inset">0dp</dimen>
     <dimen name="car_ui_list_item_text_start_margin">0dp</dimen>
