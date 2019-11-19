@@ -22,13 +22,17 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import com.android.car.ui.paintbooth.R;
+import com.android.car.ui.recyclerview.CarUiContentListItem;
+import com.android.car.ui.recyclerview.CarUiHeaderListItem;
 import com.android.car.ui.recyclerview.CarUiListItem;
 import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 
 import java.util.ArrayList;
 
-/** Activity that shows {@link CarUiRecyclerView} with dummy {@link CarUiListItem} entries. */
+/**
+ * Activity that shows {@link CarUiRecyclerView} with dummy {@link CarUiContentListItem} entries
+ */
 public class CarUiListItemActivity extends Activity {
 
     private final ArrayList<CarUiListItem> mData = new ArrayList<>();
@@ -46,56 +50,61 @@ public class CarUiListItemActivity extends Activity {
     private ArrayList<CarUiListItem> generateDummyData() {
         Context context = this;
 
-        CarUiListItem item = new CarUiListItem();
+        CarUiHeaderListItem header = new CarUiHeaderListItem("First header");
+        mData.add(header);
+
+        CarUiContentListItem item = new CarUiContentListItem();
         item.setTitle("Test title");
         item.setBody("Test body");
         mData.add(item);
 
-        item = new CarUiListItem();
+        item = new CarUiContentListItem();
         item.setTitle("Test title with no body");
         mData.add(item);
 
-        item = new CarUiListItem();
+        header = new CarUiHeaderListItem("Random header", "with header body");
+        mData.add(header);
+
+        item = new CarUiContentListItem();
         item.setBody("Test body with no title");
         mData.add(item);
 
-        item = new CarUiListItem();
+        item = new CarUiContentListItem();
         item.setTitle("Test Title");
         item.setIcon(getDrawable(R.drawable.ic_launcher));
         mData.add(item);
 
-        item = new CarUiListItem();
+        item = new CarUiContentListItem();
         item.setTitle("Test Title");
         item.setBody("Test body text");
         item.setIcon(getDrawable(R.drawable.ic_launcher));
         mData.add(item);
 
-        item = new CarUiListItem();
+        item = new CarUiContentListItem();
         item.setIcon(getDrawable(R.drawable.ic_launcher));
         item.setTitle("Title -- Item with checkbox");
         item.setBody("Will present toast on change of selection state.");
         item.setOnCheckedChangedListener(
                 (isChecked) -> Toast.makeText(context,
                         "Item checked state is: " + isChecked, Toast.LENGTH_SHORT).show());
-        item.setAction(CarUiListItem.Action.CHECK_BOX);
+        item.setAction(CarUiContentListItem.Action.CHECK_BOX);
         mData.add(item);
 
-        item = new CarUiListItem();
+        item = new CarUiContentListItem();
         item.setIcon(getDrawable(R.drawable.ic_launcher));
-        item.setBody("Body -- Item with switch -- and divider");
-        item.setActionDividerVisible(true);
-        item.setAction(CarUiListItem.Action.SWITCH);
+        item.setBody("Body -- Item with switch");
+        item.setAction(CarUiContentListItem.Action.SWITCH);
         mData.add(item);
 
-        item = new CarUiListItem();
+        item = new CarUiContentListItem();
         item.setIcon(getDrawable(R.drawable.ic_launcher));
         item.setTitle("Title -- Item with checkbox");
         item.setBody("Item is initially checked");
-        item.setAction(CarUiListItem.Action.CHECK_BOX);
+        item.setAction(CarUiContentListItem.Action.CHECK_BOX);
         item.setChecked(true);
         mData.add(item);
 
-        item = new CarUiListItem();
+        item = new CarUiContentListItem();
         item.setIcon(getDrawable(R.drawable.ic_launcher));
         item.setTitle("Title");
         item.setBody("Random body text -- with action divider");
@@ -104,14 +113,14 @@ public class CarUiListItemActivity extends Activity {
         item.setChecked(true);
         mData.add(item);
 
-        item = new CarUiListItem();
+        item = new CarUiContentListItem();
         item.setIcon(getDrawable(R.drawable.ic_launcher));
         item.setTitle("Null supplemental icon");
-        item.setAction(CarUiListItem.Action.ICON);
+        item.setAction(CarUiContentListItem.Action.ICON);
         item.setChecked(true);
         mData.add(item);
 
-        item = new CarUiListItem();
+        item = new CarUiContentListItem();
         item.setTitle("Supplemental icon with listener");
         item.setSupplementalIcon(getDrawable(R.drawable.ic_launcher),
                 v -> Toast.makeText(context, "Clicked supplemental icon",
