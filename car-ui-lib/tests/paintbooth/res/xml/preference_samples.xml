@@ -104,7 +104,7 @@
   </PreferenceCategory>
 
   <PreferenceCategory
-      android:key="advanced"
+      android:key="@string/advanced_preference"
       android:title="@string/advanced_attributes"
       app:initialExpandedChildrenCount="1">
 

@@ -53,108 +53,119 @@ public class ToolbarActivity extends Activity {
         setContentView(R.layout.car_ui_recycler_view_activity);
 
         Toolbar toolbar = requireViewById(R.id.toolbar);
-        toolbar.registerOnBackListener(() -> {
-            if (toolbar.getState() == Toolbar.State.SEARCH) {
-                toolbar.setState(Toolbar.State.SUBPAGE);
-                return true;
-            }
-            return false;
-        });
+        toolbar.registerOnBackListener(
+                () -> {
+                    if (toolbar.getState() == Toolbar.State.SEARCH) {
+                        toolbar.setState(Toolbar.State.SUBPAGE);
+                        return true;
+                    }
+                    return false;
+                });
 
-        mMenuItems.add(MenuItem.Builder.createSearch(this, i ->
-                toolbar.setState(Toolbar.State.SEARCH)));
+        mMenuItems.add(
+                MenuItem.Builder.createSearch(this, i -> toolbar.setState(Toolbar.State.SEARCH)));
 
         toolbar.setMenuItems(mMenuItems);
 
-        mButtons.add(Pair.create("Change title", v ->
-                toolbar.setTitle(toolbar.getTitle() + " X")));
+        mButtons.add(Pair.create(getString(R.string.toolbar_change_title),
+                v -> toolbar.setTitle(toolbar.getTitle() + " X")));
 
-        mButtons.add(Pair.create("MenuItem: Set to XML source", v -> {
+        mButtons.add(Pair.create(getString(R.string.toolbar_set_xml_resource), v -> {
             mMenuItems.clear();
             toolbar.setMenuItems(R.xml.menuitems);
         }));
 
-        mButtons.add(Pair.create("MenuItem: Add Icon", v -> {
-            mMenuItems.add(MenuItem.Builder.createSettings(this, i ->
-                    Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT).show()));
+        mButtons.add(Pair.create(getString(R.string.toolbar_add_icon), v -> {
+            mMenuItems.add(MenuItem.Builder.createSettings(
+                    this, i -> Toast.makeText(this, "Clicked",
+                            Toast.LENGTH_SHORT).show()));
             toolbar.setMenuItems(mMenuItems);
         }));
 
-        mButtons.add(Pair.create("MenuItem: Add untinted icon", v -> {
+        mButtons.add(Pair.create(getString(R.string.toolbar_add_untined_icon), v -> {
             mMenuItems.add(new MenuItem.Builder(this)
                     .setIcon(R.drawable.ic_tracklist)
                     .setTinted(false)
-                    .setOnClickListener(i ->
-                            Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT).show())
+                    .setOnClickListener(
+                            i -> Toast.makeText(this, "Clicked",
+                                    Toast.LENGTH_SHORT).show())
                     .build());
             toolbar.setMenuItems(mMenuItems);
         }));
 
         Mutable<Integer> overflowCounter = new Mutable<>(1);
-        mButtons.add(Pair.create("MenuItem: Add Overflow", v -> {
+        mButtons.add(Pair.create(getString(R.string.toolbar_add_overflow), v -> {
             mMenuItems.add(new MenuItem.Builder(this)
                     .setTitle("Foo " + overflowCounter.value)
-                    .setOnClickListener(i ->
-                            Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT).show())
+                    .setOnClickListener(
+                            i -> Toast.makeText(this, "Clicked",
+                                    Toast.LENGTH_SHORT).show())
                     .setDisplayBehavior(MenuItem.DisplayBehavior.NEVER)
                     .build());
             toolbar.setMenuItems(mMenuItems);
             overflowCounter.value++;
         }));
 
-        mButtons.add(Pair.create("MenuItem: Add Switch", v -> {
+        mButtons.add(Pair.create(getString(R.string.toolbar_add_switch), v -> {
             mMenuItems.add(new MenuItem.Builder(this)
                     .setCheckable()
-                    .setOnClickListener(i ->
-                            Toast.makeText(this, "Checked? " + i.isChecked(),
+                    .setOnClickListener(
+                            i ->
+                                    Toast.makeText(this,
+                                            "Checked? " + i.isChecked(),
+                                            Toast.LENGTH_SHORT)
+                                            .show())
+                    .build());
+            toolbar.setMenuItems(mMenuItems);
+        }));
+
+        mButtons.add(Pair.create(getString(R.string.toolbar_add_text), v -> {
+            mMenuItems.add(new MenuItem.Builder(this)
+                    .setTitle("Baz")
+                    .setOnClickListener(
+                            i -> Toast.makeText(this, "Clicked",
                                     Toast.LENGTH_SHORT).show())
                     .build());
             toolbar.setMenuItems(mMenuItems);
         }));
 
-        mButtons.add(Pair.create("MenuItem: Add text", v -> {
-            mMenuItems.add(new MenuItem.Builder(this)
-                    .setTitle("Baz")
-                    .setOnClickListener(i ->
-                            Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT).show())
-                    .build());
-            toolbar.setMenuItems(mMenuItems);
-        }));
-
-        mButtons.add(Pair.create("MenuItem: Add icon and text", v -> {
+        mButtons.add(Pair.create(getString(R.string.toolbar_add_icon_text), v -> {
             mMenuItems.add(new MenuItem.Builder(this)
                     .setIcon(R.drawable.ic_tracklist)
                     .setTitle("Bar")
                     .setShowIconAndTitle(true)
-                    .setOnClickListener(i ->
-                            Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT).show())
+                    .setOnClickListener(
+                            i -> Toast.makeText(this, "Clicked",
+                                    Toast.LENGTH_SHORT).show())
                     .build());
             toolbar.setMenuItems(mMenuItems);
         }));
 
-        mButtons.add(Pair.create("MenuItem: Add untinted icon and text", v -> {
+        mButtons.add(Pair.create(getString(R.string.toolbar_add_untinted_icon_and_text), v -> {
             mMenuItems.add(new MenuItem.Builder(this)
                     .setIcon(R.drawable.ic_tracklist)
                     .setTitle("Bar")
                     .setShowIconAndTitle(true)
                     .setTinted(false)
-                    .setOnClickListener(i ->
-                            Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT).show())
+                    .setOnClickListener(
+                            i -> Toast.makeText(this, "Clicked",
+                                    Toast.LENGTH_SHORT).show())
                     .build());
             toolbar.setMenuItems(mMenuItems);
         }));
 
-        mButtons.add(Pair.create("MenuItem: Add activatable", v -> {
+        mButtons.add(Pair.create(getString(R.string.toolbar_add_activatable), v -> {
             mMenuItems.add(new MenuItem.Builder(this)
                     .setIcon(R.drawable.ic_tracklist)
                     .setActivatable()
-                    .setOnClickListener(i ->
-                            Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT).show())
+                    .setOnClickListener(
+                            i -> Toast.makeText(this, "Clicked",
+                                    Toast.LENGTH_SHORT).show())
                     .build());
             toolbar.setMenuItems(mMenuItems);
         }));
 
-        mButtons.add(Pair.create("MenuItem: Add morphing", v -> {
+        mButtons.add(Pair.create(getString(R.string.toolbar_add_morphing), v -> {
             mMenuItems.add(new MenuItem.Builder(this)
                     .setTitle("Become icon")
                     .setOnClickListener(i ->
@@ -163,18 +174,18 @@ public class ToolbarActivity extends Activity {
             toolbar.setMenuItems(mMenuItems);
         }));
 
-        mButtons.add(Pair.create("MenuItem: Toggle Visibility", v ->
-                getMenuItem(item -> item.setVisible(!item.isVisible()))));
+        mButtons.add(Pair.create(getString(R.string.toolbar_toggle_visibility),
+                v -> getMenuItem(item -> item.setVisible(!item.isVisible()))));
 
-        mButtons.add(Pair.create("MenuItem: Toggle Enabled", v ->
-                getMenuItem(item -> item.setEnabled(!item.isEnabled()))));
+        mButtons.add(Pair.create(getString(R.string.toolbar_toggle_enable),
+                v -> getMenuItem(item -> item.setEnabled(!item.isEnabled()))));
 
-        mButtons.add(Pair.create("MenuItem: Call performClick()", v ->
-                getMenuItem(MenuItem::performClick)));
+        mButtons.add(Pair.create(getString(R.string.toolbar_toggle_perform_click),
+                v -> getMenuItem(MenuItem::performClick)));
 
         final Drawable altIcon = getDrawable(R.drawable.ic_cut);
         Map<MenuItem, Drawable> iconBackups = new HashMap<>();
-        mButtons.add(Pair.create("MenuItem: Toggle Icon", v ->
+        mButtons.add(Pair.create(getString(R.string.toolbar_toggle_icon), v ->
                 getMenuItem(item -> {
                     Drawable currentIcon = item.getIcon();
                     Drawable newIcon = altIcon;
@@ -185,10 +196,11 @@ public class ToolbarActivity extends Activity {
                     iconBackups.put(item, currentIcon);
                 })));
 
-        mButtons.add(Pair.create("MenuItem: Toggle show while searching", v ->
-                toolbar.setShowMenuItemsWhileSearching(!toolbar.getShowMenuItemsWhileSearching())));
+        mButtons.add(Pair.create(getString(R.string.toolbar_toggle_show_while_search), v ->
+                toolbar.setShowMenuItemsWhileSearching(
+                        !toolbar.getShowMenuItemsWhileSearching())));
 
-        mButtons.add(Pair.create("Cycle nav button mode", v -> {
+        mButtons.add(Pair.create(getString(R.string.toolbar_cycle_nav_button), v -> {
             Toolbar.NavButtonMode mode = toolbar.getNavButtonMode();
             if (mode == Toolbar.NavButtonMode.BACK) {
                 toolbar.setNavButtonMode(Toolbar.NavButtonMode.CLOSE);
@@ -200,12 +212,12 @@ public class ToolbarActivity extends Activity {
         }));
 
         Mutable<Boolean> hasLogo = new Mutable<>(true);
-        mButtons.add(Pair.create("Toggle logo", v -> {
+        mButtons.add(Pair.create(getString(R.string.toolbar_toggle_logo), v -> {
             toolbar.setLogo(hasLogo.value ? 0 : R.drawable.ic_launcher);
             hasLogo.value = !hasLogo.value;
         }));
 
-        mButtons.add(Pair.create("Toggle state", v -> {
+        mButtons.add(Pair.create(getString(R.string.toolbar_toggle_state), v -> {
             if (toolbar.getState() == Toolbar.State.SUBPAGE) {
                 toolbar.setState(Toolbar.State.HOME);
             } else {
@@ -213,7 +225,7 @@ public class ToolbarActivity extends Activity {
             }
         }));
 
-        mButtons.add(Pair.create("Toggle search hint", v -> {
+        mButtons.add(Pair.create(getString(R.string.toolbar_toggle_search_hint), v -> {
             if (toolbar.getSearchHint().toString().contentEquals("Foo")) {
                 toolbar.setSearchHint("Bar");
             } else {
@@ -221,25 +233,28 @@ public class ToolbarActivity extends Activity {
             }
         }));
 
-        mButtons.add(Pair.create("Toggle background", v ->
-                toolbar.setBackgroundShown(!toolbar.getBackgroundShown())));
+        mButtons.add(Pair.create(getString(R.string.toolbar_toggle_background),
+                v -> toolbar.setBackgroundShown(!toolbar.getBackgroundShown())));
 
-        mButtons.add(Pair.create("Add tab", v ->
-                toolbar.addTab(new TabLayout.Tab(getDrawable(R.drawable.ic_launcher), "Foo"))));
+        mButtons.add(Pair.create(getString(R.string.toolbar_add_tab), v -> toolbar.addTab(
+                new TabLayout.Tab(getDrawable(R.drawable.ic_launcher), "Foo"))));
 
-        mButtons.add(Pair.create("Add tab with custom text", v -> {
+        mButtons.add(Pair.create(getString(R.string.toolbar_add_tab_with_custom_text), v -> {
             SimpleTextWatcher textWatcher = new SimpleTextWatcher();
             new AlertDialogBuilder(this)
                     .setEditBox(null, textWatcher, null)
                     .setTitle("Enter the text for the title")
                     .setPositiveButton("Ok", (dialog, which) ->
-                            toolbar.addTab(new TabLayout.Tab(getDrawable(R.drawable.ic_launcher),
-                                    textWatcher.getText())))
+                            toolbar.addTab(
+                                    new TabLayout.Tab(
+                                            getDrawable(
+                                                    R.drawable.ic_launcher),
+                                            textWatcher.getText())))
                     .show();
         }));
 
         Mutable<Boolean> showingLauncherIcon = new Mutable<>(false);
-        mButtons.add(Pair.create("Toggle search icon", v -> {
+        mButtons.add(Pair.create(getString(R.string.toolbar_toggle_search_icon), v -> {
             if (showingLauncherIcon.value) {
                 toolbar.setSearchIcon(0);
             } else {
@@ -253,8 +268,7 @@ public class ToolbarActivity extends Activity {
     }
 
     public void xmlMenuItemClicked(MenuItem item) {
-        Toast.makeText(this, "Xml item clicked! " + item.getTitle(),
-                Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Xml item clicked! " + item.getTitle(), Toast.LENGTH_SHORT).show();
     }
 
     private void getMenuItem(MenuItem.OnClickListener listener) {
@@ -269,19 +283,19 @@ public class ToolbarActivity extends Activity {
                 .setTitle("Enter the index of the MenuItem")
                 .setPositiveButton("Ok", (dialog, which) -> {
                     try {
-                        MenuItem item = mMenuItems.get(Integer.parseInt(textWatcher.getText()));
+                        MenuItem item = mMenuItems.get(
+                                Integer.parseInt(textWatcher.getText()));
                         listener.onClick(item);
                     } catch (NumberFormatException | IndexOutOfBoundsException e) {
-                        Toast.makeText(this, "Invalid index \""
-                                        + textWatcher.getText()
+                        Toast.makeText(this, "Invalid index \"" + textWatcher.getText()
                                         + "\", valid range is 0 to " + (mMenuItems.size() - 1),
                                 Toast.LENGTH_LONG).show();
                     }
-                })
-                .show();
+                }).show();
     }
 
     private static class ViewHolder extends CarUiRecyclerView.ViewHolder {
+
         private final Button mButton;
 
         ViewHolder(View itemView) {
@@ -297,27 +311,31 @@ public class ToolbarActivity extends Activity {
 
     private CarUiRecyclerView.Adapter<ViewHolder> mAdapter =
             new CarUiRecyclerView.Adapter<ViewHolder>() {
-        @Override
-        public int getItemCount() {
-            return mButtons.size();
-        }
+                @Override
+                public int getItemCount() {
+                    return mButtons.size();
+                }
 
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int position) {
-            View item = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item, parent,
-                    false);
-            return new ViewHolder(item);
-        }
+                @Override
+                public ViewHolder onCreateViewHolder(ViewGroup parent, int position) {
+                    View item =
+                            LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item,
+                                    parent, false);
+                    return new ViewHolder(item);
+                }
 
-        @Override
-        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            Pair<CharSequence, View.OnClickListener> pair = mButtons.get(position);
-            holder.bind(pair.first, pair.second);
-        }
-    };
+                @Override
+                public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+                    Pair<CharSequence, View.OnClickListener> pair = mButtons.get(position);
+                    holder.bind(pair.first, pair.second);
+                }
+            };
 
-    /** For changing values from lambdas */
+    /**
+     * For changing values from lambdas
+     */
     private static final class Mutable<E> {
+
         public E value;
 
         Mutable() {
@@ -329,7 +347,9 @@ public class ToolbarActivity extends Activity {
         }
     }
 
-    /** Used for getting text from a dialog. */
+    /**
+     * Used for getting text from a dialog.
+     */
     private static final class SimpleTextWatcher implements TextWatcher {
 
         private String mValue;
