@@ -311,6 +311,26 @@ public class ToolbarTest {
     }
 
     @Test
+    public void menuItems_builder_id() {
+        MenuItem item = MenuItem.builder(mContext)
+                .setId(5)
+                .build();
+
+        assertThat(item.getId()).isEqualTo(5);
+    }
+
+    @Test
+    public void menuItems_setId_shouldWork() {
+        MenuItem item = MenuItem.builder(mContext).build();
+
+        assertThat(item.getId()).isEqualTo(0);
+
+        item.setId(7);
+
+        assertThat(item.getId()).isEqualTo(7);
+    }
+
+    @Test
     public void menuItems_whenClicked_shouldCallListener() {
         assertThat(getMenuItemViewCount()).isEqualTo(0);
 
