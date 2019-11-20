@@ -37,9 +37,12 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.car.apps.common.BitmapUtils;
+import com.android.car.media.common.R;
 
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Objects;
+
 
 /**
  * This represents a source of media content. It provides convenient methods to access media source
@@ -225,5 +228,24 @@ public class MediaSource {
     @NonNull
     public String toString() {
         return mBrowseService.flattenToString();
+    }
+
+    /**
+     * @return an intent to open the media source selector, or null if no source selector is
+     * configured.
+     * @param popup Whether the intent should point to the regular app selector (false), which
+     *              would open the selected media source in Media Center, or the "popup" version
+     *              (true), which would just select the source and dismiss itself.
+     */
+    @Nullable
+    public static Intent getSourceSelectorIntent(Context context, boolean popup) {
+        String uri = context.getString(popup ? R.string.launcher_popup_intent
+                : R.string.launcher_intent);
+        try {
+            return uri != null && !uri.isEmpty() ? Intent.parseUri(uri, Intent.URI_INTENT_SCHEME)
+                    : null;
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException("Wrong app-launcher intent: " + uri, e);
+        }
     }
 }
