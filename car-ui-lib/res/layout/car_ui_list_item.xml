@@ -33,7 +33,7 @@
         android:layout_height="0dp"
         android:background="?android:attr/selectableItemBackground"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@id/car_ui_list_item_start_guideline"
+        app:layout_constraintStart_toStartOf="@+id/car_ui_list_item_start_guideline"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
@@ -52,8 +52,8 @@
         android:singleLine="@bool/car_ui_list_item_single_line_title"
         android:textAppearance="@style/TextAppearance.CarUi.ListItem"
         app:layout_constraintBottom_toTopOf="@+id/body"
-        app:layout_constraintEnd_toStartOf="@id/action_container"
-        app:layout_constraintStart_toEndOf="@id/icon_container"
+        app:layout_constraintEnd_toStartOf="@+id/action_container"
+        app:layout_constraintStart_toEndOf="@+id/icon_container"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
         app:layout_goneMarginStart="@dimen/car_ui_list_item_text_no_icon_start_margin" />
@@ -65,8 +65,8 @@
         android:layout_marginStart="@dimen/car_ui_list_item_text_start_margin"
         android:textAppearance="@style/TextAppearance.CarUi.ListItem.Body"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/action_container"
-        app:layout_constraintStart_toEndOf="@id/icon_container"
+        app:layout_constraintEnd_toStartOf="@+id/action_container"
+        app:layout_constraintStart_toEndOf="@+id/icon_container"
         app:layout_constraintTop_toBottomOf="@+id/title"
         app:layout_goneMarginStart="@dimen/car_ui_list_item_text_no_icon_start_margin" />
 
@@ -76,7 +76,7 @@
         android:layout_height="0dp"
         android:background="?android:attr/selectableItemBackground"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@id/car_ui_list_item_end_guideline"
+        app:layout_constraintEnd_toEndOf="@+id/car_ui_list_item_end_guideline"
         app:layout_constraintTop_toTopOf="parent">
 
         <View
