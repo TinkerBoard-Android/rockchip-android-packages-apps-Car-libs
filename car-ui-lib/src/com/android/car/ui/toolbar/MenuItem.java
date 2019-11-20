@@ -55,6 +55,7 @@ public class MenuItem {
     @CarUxRestrictions.CarUxRestrictionsInfo
     private final int mUxRestrictions;
 
+    private int mId;
     private CarUxRestrictions mCurrentRestrictions;
     private Listener mListener;
     private CharSequence mTitle;
@@ -68,6 +69,7 @@ public class MenuItem {
 
     private MenuItem(Builder builder) {
         mContext = builder.mContext;
+        mId = builder.mId;
         mIsCheckable = builder.mIsCheckable;
         mIsActivatable = builder.mIsActivatable;
         mTitle = builder.mTitle;
@@ -90,6 +92,16 @@ public class MenuItem {
         if (mListener != null) {
             mListener.onMenuItemChanged();
         }
+    }
+
+    /** Sets the id, which is purely for the client to distinguish MenuItems with.  */
+    public void setId(int id) {
+        mId = id;
+    }
+
+    /** Gets the id, which is purely for the client to distinguish MenuItems with. */
+    public int getId() {
+        return mId;
     }
 
     /** Returns whether the MenuItem is enabled */
@@ -288,6 +300,7 @@ public class MenuItem {
     public static final class Builder {
         private Context mContext;
 
+        private int mId;
         private CharSequence mTitle;
         private Drawable mIcon;
         private OnClickListener mOnClickListener;
@@ -321,6 +334,12 @@ public class MenuItem {
             }
 
             return new MenuItem(this);
+        }
+
+        /** Sets the id, which is purely for the client to distinguish MenuItems with. */
+        public Builder setId(int id) {
+            mId = id;
+            return this;
         }
 
         /** Sets the title to a string resource id */
@@ -495,6 +514,11 @@ public class MenuItem {
                     .setUxRestrictions(CarUxRestrictions.UX_RESTRICTIONS_NO_SETUP)
                     .build();
         }
+    }
+
+    /** Get a new {@link Builder}. */
+    public static Builder builder(Context context) {
+        return new Builder(context);
     }
 
     /**

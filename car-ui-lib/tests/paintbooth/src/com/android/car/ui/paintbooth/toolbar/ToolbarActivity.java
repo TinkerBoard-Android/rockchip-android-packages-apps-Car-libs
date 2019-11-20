@@ -83,7 +83,7 @@ public class ToolbarActivity extends Activity {
         }));
 
         mButtons.add(Pair.create(getString(R.string.toolbar_add_untined_icon), v -> {
-            mMenuItems.add(new MenuItem.Builder(this)
+            mMenuItems.add(MenuItem.builder(this)
                     .setIcon(R.drawable.ic_tracklist)
                     .setTinted(false)
                     .setOnClickListener(
@@ -95,7 +95,7 @@ public class ToolbarActivity extends Activity {
 
         Mutable<Integer> overflowCounter = new Mutable<>(1);
         mButtons.add(Pair.create(getString(R.string.toolbar_add_overflow), v -> {
-            mMenuItems.add(new MenuItem.Builder(this)
+            mMenuItems.add(MenuItem.builder(this)
                     .setTitle("Foo " + overflowCounter.value)
                     .setOnClickListener(
                             i -> Toast.makeText(this, "Clicked",
@@ -107,7 +107,7 @@ public class ToolbarActivity extends Activity {
         }));
 
         mButtons.add(Pair.create(getString(R.string.toolbar_add_switch), v -> {
-            mMenuItems.add(new MenuItem.Builder(this)
+            mMenuItems.add(MenuItem.builder(this)
                     .setCheckable()
                     .setOnClickListener(
                             i ->
@@ -120,7 +120,7 @@ public class ToolbarActivity extends Activity {
         }));
 
         mButtons.add(Pair.create(getString(R.string.toolbar_add_text), v -> {
-            mMenuItems.add(new MenuItem.Builder(this)
+            mMenuItems.add(MenuItem.builder(this)
                     .setTitle("Baz")
                     .setOnClickListener(
                             i -> Toast.makeText(this, "Clicked",
@@ -130,7 +130,7 @@ public class ToolbarActivity extends Activity {
         }));
 
         mButtons.add(Pair.create(getString(R.string.toolbar_add_icon_text), v -> {
-            mMenuItems.add(new MenuItem.Builder(this)
+            mMenuItems.add(MenuItem.builder(this)
                     .setIcon(R.drawable.ic_tracklist)
                     .setTitle("Bar")
                     .setShowIconAndTitle(true)
@@ -142,7 +142,7 @@ public class ToolbarActivity extends Activity {
         }));
 
         mButtons.add(Pair.create(getString(R.string.toolbar_add_untinted_icon_and_text), v -> {
-            mMenuItems.add(new MenuItem.Builder(this)
+            mMenuItems.add(MenuItem.builder(this)
                     .setIcon(R.drawable.ic_tracklist)
                     .setTitle("Bar")
                     .setShowIconAndTitle(true)
@@ -155,7 +155,7 @@ public class ToolbarActivity extends Activity {
         }));
 
         mButtons.add(Pair.create(getString(R.string.toolbar_add_activatable), v -> {
-            mMenuItems.add(new MenuItem.Builder(this)
+            mMenuItems.add(MenuItem.builder(this)
                     .setIcon(R.drawable.ic_tracklist)
                     .setActivatable()
                     .setOnClickListener(
@@ -166,7 +166,7 @@ public class ToolbarActivity extends Activity {
         }));
 
         mButtons.add(Pair.create(getString(R.string.toolbar_add_morphing), v -> {
-            mMenuItems.add(new MenuItem.Builder(this)
+            mMenuItems.add(MenuItem.builder(this)
                     .setTitle("Become icon")
                     .setOnClickListener(i ->
                             i.setIcon(i.getIcon() == null ? R.drawable.ic_tracklist : 0))
@@ -268,7 +268,8 @@ public class ToolbarActivity extends Activity {
     }
 
     public void xmlMenuItemClicked(MenuItem item) {
-        Toast.makeText(this, "Xml item clicked! " + item.getTitle(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Xml item clicked! " + item.getTitle() + ", id: " + item.getId(),
+                Toast.LENGTH_SHORT).show();
     }
 
     private void getMenuItem(MenuItem.OnClickListener listener) {
