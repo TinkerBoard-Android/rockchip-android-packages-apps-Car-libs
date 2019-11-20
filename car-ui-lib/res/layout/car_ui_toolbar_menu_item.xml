@@ -17,7 +17,8 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="@dimen/car_ui_touch_target_height"
+    android:layout_height="wrap_content"
+    android:minHeight="@dimen/car_ui_touch_target_height"
     android:minWidth="@dimen/car_ui_touch_target_width"
     android:layout_gravity="center_vertical">
     <FrameLayout
