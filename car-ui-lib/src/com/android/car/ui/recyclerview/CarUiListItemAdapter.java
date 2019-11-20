@@ -110,7 +110,7 @@ public class CarUiListItemAdapter extends
                                     + "CarUiContentListItem.");
                 }
 
-                onBindListItemViewHolder((ListItemViewHolder) holder, (CarUiContentListItem) item);
+                ((ListItemViewHolder) holder).bind((CarUiContentListItem) item);
                 break;
             case VIEW_TYPE_LIST_HEADER:
                 if (!(holder instanceof HeaderViewHolder)) {
@@ -124,110 +124,10 @@ public class CarUiListItemAdapter extends
                                     + "CarUiHeaderListItem.");
                 }
 
-                onBindHeaderViewHolder((HeaderViewHolder) holder, (CarUiHeaderListItem) header);
+                ((HeaderViewHolder) holder).bind((CarUiHeaderListItem) header);
                 break;
             default:
                 throw new IllegalStateException("Unknown item view type.");
-        }
-    }
-
-    private void onBindListItemViewHolder(@NonNull ListItemViewHolder holder,
-            @NonNull CarUiContentListItem item) {
-        CharSequence title = item.getTitle();
-        CharSequence body = item.getBody();
-        Drawable icon = item.getIcon();
-
-        if (!TextUtils.isEmpty(title)) {
-            holder.getTitle().setText(title);
-            holder.getTitle().setVisibility(View.VISIBLE);
-        } else {
-            holder.getTitle().setVisibility(View.GONE);
-        }
-
-        if (!TextUtils.isEmpty(body)) {
-            holder.getBody().setText(body);
-        } else {
-            holder.getBody().setVisibility(View.GONE);
-        }
-
-        if (icon != null) {
-            holder.getIcon().setImageDrawable(icon);
-            holder.getIconContainer().setVisibility(View.VISIBLE);
-        } else {
-            holder.getIconContainer().setVisibility(View.GONE);
-        }
-
-        holder.getActionDivider().setVisibility(
-                item.isActionDividerVisible() ? View.VISIBLE : View.GONE);
-
-        Switch switchWidget = holder.getSwitch();
-        CheckBox checkBox = holder.getCheckBox();
-        ImageView supplementalIcon = holder.getSupplementalIcon();
-        ViewGroup actionContainer = holder.getActionContainer();
-
-        switch (item.getAction()) {
-            case NONE:
-                holder.getActionContainer().setVisibility(View.GONE);
-                break;
-            case SWITCH:
-                switchWidget.setVisibility(View.VISIBLE);
-                switchWidget.setChecked(item.isChecked());
-                switchWidget.setOnCheckedChangeListener(
-                        (buttonView, isChecked) -> {
-                            item.setChecked(isChecked);
-                            CarUiContentListItem.OnCheckedChangedListener itemListener =
-                                    item.getOnCheckedChangedListener();
-                            if (itemListener != null) {
-                                itemListener.onCheckedChanged(isChecked);
-                            }
-                        });
-                checkBox.setVisibility(View.GONE);
-                supplementalIcon.setVisibility(View.GONE);
-                actionContainer.setVisibility(View.VISIBLE);
-                break;
-            case CHECK_BOX:
-                checkBox.setVisibility(View.VISIBLE);
-                checkBox.setChecked(item.isChecked());
-                checkBox.setOnCheckedChangeListener(
-                        (buttonView, isChecked) -> {
-                            item.setChecked(isChecked);
-                            CarUiContentListItem.OnCheckedChangedListener itemListener =
-                                    item.getOnCheckedChangedListener();
-                            if (itemListener != null) {
-                                itemListener.onCheckedChanged(isChecked);
-                            }
-                        });
-                switchWidget.setVisibility(View.GONE);
-                supplementalIcon.setVisibility(View.GONE);
-                actionContainer.setVisibility(View.VISIBLE);
-                break;
-            case ICON:
-                supplementalIcon.setVisibility(View.VISIBLE);
-                supplementalIcon.setImageDrawable(item.getSupplementalIcon());
-                supplementalIcon.setOnClickListener(
-                        (iconView) -> {
-                            if (item.getSupplementalIconOnClickListener() != null) {
-                                item.getSupplementalIconOnClickListener().onClick(iconView);
-                            }
-                        });
-                switchWidget.setVisibility(View.GONE);
-                checkBox.setVisibility(View.GONE);
-                actionContainer.setVisibility(View.VISIBLE);
-                break;
-            default:
-                throw new IllegalStateException("Unknown secondary action type.");
-        }
-    }
-
-    private void onBindHeaderViewHolder(@NonNull HeaderViewHolder holder,
-            @NonNull CarUiHeaderListItem item) {
-        holder.getTitle().setText(item.getTitle());
-
-        CharSequence body = item.getBody();
-        if (!TextUtils.isEmpty(body)) {
-            holder.getBody().setText(body);
-        } else {
-            holder.getBody().setVisibility(View.GONE);
         }
     }
 
@@ -248,15 +148,15 @@ public class CarUiListItemAdapter extends
      */
     static class ListItemViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView mTitle;
-        private TextView mBody;
-        private ImageView mIcon;
-        private ViewGroup mIconContainer;
-        private ViewGroup mActionContainer;
-        private View mActionDivider;
-        private Switch mSwitch;
-        private CheckBox mCheckBox;
-        private ImageView mSupplementalIcon;
+        private final TextView mTitle;
+        private final TextView mBody;
+        private final ImageView mIcon;
+        private final ViewGroup mIconContainer;
+        private final ViewGroup mActionContainer;
+        private final View mActionDivider;
+        private final Switch mSwitch;
+        private final CheckBox mCheckBox;
+        private final ImageView mSupplementalIcon;
 
         ListItemViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -271,51 +171,87 @@ public class CarUiListItemAdapter extends
             mSupplementalIcon = itemView.requireViewById(R.id.supplemental_icon);
         }
 
-        @NonNull
-        TextView getTitle() {
-            return mTitle;
-        }
+        private void bind(@NonNull CarUiContentListItem item) {
+            CharSequence title = item.getTitle();
+            CharSequence body = item.getBody();
+            Drawable icon = item.getIcon();
 
-        @NonNull
-        TextView getBody() {
-            return mBody;
-        }
+            if (!TextUtils.isEmpty(title)) {
+                mTitle.setText(title);
+                mTitle.setVisibility(View.VISIBLE);
+            } else {
+                mTitle.setVisibility(View.GONE);
+            }
 
-        @NonNull
-        ImageView getIcon() {
-            return mIcon;
-        }
+            if (!TextUtils.isEmpty(body)) {
+                mBody.setText(body);
+            } else {
+                mBody.setVisibility(View.GONE);
+            }
 
-        @NonNull
-        ViewGroup getIconContainer() {
-            return mIconContainer;
-        }
+            if (icon != null) {
+                mIcon.setImageDrawable(icon);
+                mIconContainer.setVisibility(View.VISIBLE);
+            } else {
+                mIconContainer.setVisibility(View.GONE);
+            }
 
-        @NonNull
-        ViewGroup getActionContainer() {
-            return mActionContainer;
-        }
+            mActionDivider.setVisibility(
+                    item.isActionDividerVisible() ? View.VISIBLE : View.GONE);
 
-        @NonNull
-        View getActionDivider() {
-            return mActionDivider;
+            switch (item.getAction()) {
+                case NONE:
+                    mActionContainer.setVisibility(View.GONE);
+                    break;
+                case SWITCH:
+                    mSwitch.setVisibility(View.VISIBLE);
+                    mSwitch.setChecked(item.isChecked());
+                    mSwitch.setOnCheckedChangeListener(
+                            (buttonView, isChecked) -> {
+                                item.setChecked(isChecked);
+                                CarUiContentListItem.OnCheckedChangedListener itemListener =
+                                        item.getOnCheckedChangedListener();
+                                if (itemListener != null) {
+                                    itemListener.onCheckedChanged(isChecked);
+                                }
+                            });
+                    mCheckBox.setVisibility(View.GONE);
+                    mSupplementalIcon.setVisibility(View.GONE);
+                    mActionContainer.setVisibility(View.VISIBLE);
+                    break;
+                case CHECK_BOX:
+                    mCheckBox.setVisibility(View.VISIBLE);
+                    mCheckBox.setChecked(item.isChecked());
+                    mCheckBox.setOnCheckedChangeListener(
+                            (buttonView, isChecked) -> {
+                                item.setChecked(isChecked);
+                                CarUiContentListItem.OnCheckedChangedListener itemListener =
+                                        item.getOnCheckedChangedListener();
+                                if (itemListener != null) {
+                                    itemListener.onCheckedChanged(isChecked);
+                                }
+                            });
+                    mSwitch.setVisibility(View.GONE);
+                    mSupplementalIcon.setVisibility(View.GONE);
+                    mActionContainer.setVisibility(View.VISIBLE);
+                    break;
+                case ICON:
+                    mSupplementalIcon.setVisibility(View.VISIBLE);
+                    mSupplementalIcon.setImageDrawable(item.getSupplementalIcon());
+                    mSupplementalIcon.setOnClickListener(
+                            (iconView) -> {
+                                if (item.getSupplementalIconOnClickListener() != null) {
+                                    item.getSupplementalIconOnClickListener().onClick(iconView);
+                                }
+                            });
+                    mSwitch.setVisibility(View.GONE);
+                    mCheckBox.setVisibility(View.GONE);
+                    mActionContainer.setVisibility(View.VISIBLE);
+                    break;
+                default:
+                    throw new IllegalStateException("Unknown secondary action type.");
+            }
         }
-
-        @NonNull
-        Switch getSwitch() {
-            return mSwitch;
-        }
-
-        @NonNull
-        CheckBox getCheckBox() {
-            return mCheckBox;
-        }
-
-        @NonNull
-        ImageView getSupplementalIcon() {
-            return mSupplementalIcon;
-        }
-
     }
 
     /**
@@ -323,8 +259,8 @@ public class CarUiListItemAdapter extends
      */
     static class HeaderViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView mTitle;
-        private TextView mBody;
+        private final TextView mTitle;
+        private final TextView mBody;
 
         HeaderViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -332,14 +268,15 @@ public class CarUiListItemAdapter extends
             mBody = itemView.requireViewById(R.id.body);
         }
 
-        @NonNull
-        TextView getTitle() {
-            return mTitle;
-        }
+        private void bind(@NonNull CarUiHeaderListItem item) {
+            mTitle.setText(item.getTitle());
 
-        @NonNull
-        TextView getBody() {
-            return mBody;
+            CharSequence body = item.getBody();
+            if (!TextUtils.isEmpty(body)) {
+                mBody.setText(body);
+            } else {
+                mBody.setVisibility(View.GONE);
+            }
         }
     }
 }
