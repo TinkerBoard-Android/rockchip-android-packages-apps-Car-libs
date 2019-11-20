@@ -25,6 +25,7 @@ import android.content.Context;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import com.android.car.ui.CarUiRobolectricTestRunner;
 import com.android.car.ui.R;
@@ -63,9 +64,47 @@ public class CarUiListItemTest {
                 position);
     }
 
+    private View getListItemTitleAtPosition(int position) {
+        return getListItemViewHolderAtPosition(position).itemView.findViewById(R.id.title);
+    }
+
+    private View getListItemBodyAtPosition(int position) {
+        return getListItemViewHolderAtPosition(position).itemView.findViewById(R.id.body);
+    }
+
+    private View getListItemIconContainerAtPosition(int position) {
+        return getListItemViewHolderAtPosition(position).itemView.findViewById(R.id.icon_container);
+    }
+
+    private View getListItemActionContainerAtPosition(int position) {
+        return getListItemViewHolderAtPosition(position)
+                .itemView.findViewById(R.id.action_container);
+    }
+
+    private Switch getListItemSwitchAtPosition(int position) {
+        return getListItemViewHolderAtPosition(position).itemView.findViewById(R.id.switch_widget);
+    }
+
+    private CheckBox getListItemCheckBoxAtPosition(int position) {
+        return getListItemViewHolderAtPosition(position)
+                .itemView.findViewById(R.id.checkbox_widget);
+    }
+
+    private View getListItemIconAtPosition(int position) {
+        return getListItemViewHolderAtPosition(position).itemView.findViewById(R.id.icon);
+    }
+
     private CarUiListItemAdapter.HeaderViewHolder getHeaderViewHolderAtPosition(int position) {
         return (CarUiListItemAdapter.HeaderViewHolder) mListView.findViewHolderForAdapterPosition(
                 position);
+    }
+
+    private TextView getHeaderViewHolderTitleAtPosition(int position) {
+        return getHeaderViewHolderAtPosition(position).itemView.findViewById(R.id.title);
+    }
+
+    private TextView getHeaderViewHolderBodyAtPosition(int position) {
+        return getHeaderViewHolderAtPosition(position).itemView.findViewById(R.id.body);
     }
 
     private void updateRecyclerViewAdapter(CarUiListItemAdapter adapter) {
@@ -94,16 +133,12 @@ public class CarUiListItemTest {
 
         updateRecyclerViewAdapter(new CarUiListItemAdapter(items));
 
-        assertThat(getListItemViewHolderAtPosition(0).getTitle().getVisibility()).isEqualTo(
-                View.VISIBLE);
-        assertThat(getListItemViewHolderAtPosition(0).getBody().getVisibility()).isNotEqualTo(
-                View.VISIBLE);
-        assertThat(getListItemViewHolderAtPosition(
-                0).getIconContainer().getVisibility()).isNotEqualTo(
-                View.VISIBLE);
-        assertThat(getListItemViewHolderAtPosition(
-                0).getActionContainer().getVisibility()).isNotEqualTo(
-                View.VISIBLE);
+        assertThat(getListItemTitleAtPosition(0).getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(getListItemBodyAtPosition(0).getVisibility()).isNotEqualTo(View.VISIBLE);
+        assertThat(getListItemIconContainerAtPosition(0).getVisibility())
+                .isNotEqualTo(View.VISIBLE);
+        assertThat(getListItemActionContainerAtPosition(0).getVisibility())
+                .isNotEqualTo(View.VISIBLE);
     }
 
     @Test
@@ -117,16 +152,12 @@ public class CarUiListItemTest {
 
         updateRecyclerViewAdapter(new CarUiListItemAdapter(items));
 
-        assertThat(getListItemViewHolderAtPosition(0).getTitle().getVisibility()).isEqualTo(
-                View.VISIBLE);
-        assertThat(getListItemViewHolderAtPosition(0).getBody().getVisibility()).isEqualTo(
-                View.VISIBLE);
-        assertThat(getListItemViewHolderAtPosition(
-                0).getIconContainer().getVisibility()).isNotEqualTo(
-                View.VISIBLE);
-        assertThat(getListItemViewHolderAtPosition(
-                0).getActionContainer().getVisibility()).isNotEqualTo(
-                View.VISIBLE);
+        assertThat(getListItemTitleAtPosition(0).getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(getListItemBodyAtPosition(0).getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(getListItemIconContainerAtPosition(0).getVisibility())
+                .isNotEqualTo(View.VISIBLE);
+        assertThat(getListItemActionContainerAtPosition(0).getVisibility())
+                .isNotEqualTo(View.VISIBLE);
     }
 
     @Test
@@ -140,17 +171,12 @@ public class CarUiListItemTest {
 
         updateRecyclerViewAdapter(new CarUiListItemAdapter(items));
 
-        assertThat(getListItemViewHolderAtPosition(0).getTitle().getVisibility()).isEqualTo(
-                View.VISIBLE);
-        assertThat(getListItemViewHolderAtPosition(0).getBody().getVisibility()).isNotEqualTo(
-                View.VISIBLE);
-        assertThat(getListItemViewHolderAtPosition(0).getIconContainer().getVisibility()).isEqualTo(
-                View.VISIBLE);
-        assertThat(getListItemViewHolderAtPosition(0).getIcon().getVisibility()).isEqualTo(
-                View.VISIBLE);
-        assertThat(getListItemViewHolderAtPosition(
-                0).getActionContainer().getVisibility()).isNotEqualTo(
-                View.VISIBLE);
+        assertThat(getListItemTitleAtPosition(0).getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(getListItemBodyAtPosition(0).getVisibility()).isNotEqualTo(View.VISIBLE);
+        assertThat(getListItemIconContainerAtPosition(0).getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(getListItemIconAtPosition(0).getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(getListItemActionContainerAtPosition(0).getVisibility())
+                .isNotEqualTo(View.VISIBLE);
     }
 
     @Test
@@ -164,21 +190,14 @@ public class CarUiListItemTest {
 
         updateRecyclerViewAdapter(new CarUiListItemAdapter(items));
 
-        assertThat(getListItemViewHolderAtPosition(0).getTitle().getVisibility()).isEqualTo(
-                View.VISIBLE);
-        assertThat(getListItemViewHolderAtPosition(0).getBody().getVisibility()).isNotEqualTo(
-                View.VISIBLE);
-        assertThat(getListItemViewHolderAtPosition(
-                0).getIconContainer().getVisibility()).isNotEqualTo(
-                View.VISIBLE);
-        assertThat(getListItemViewHolderAtPosition(
-                0).getActionContainer().getVisibility()).isEqualTo(
-                View.VISIBLE);
-        assertThat(getListItemViewHolderAtPosition(0).getSwitch().getVisibility()).isNotEqualTo(
-                View.VISIBLE);
-        assertThat(getListItemViewHolderAtPosition(0).getCheckBox().getVisibility()).isEqualTo(
-                View.VISIBLE);
-        assertThat(getListItemViewHolderAtPosition(0).getCheckBox().isChecked()).isEqualTo(false);
+        assertThat(getListItemTitleAtPosition(0).getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(getListItemBodyAtPosition(0).getVisibility()).isNotEqualTo(View.VISIBLE);
+        assertThat(getListItemIconContainerAtPosition(0).getVisibility())
+                .isNotEqualTo(View.VISIBLE);
+        assertThat(getListItemActionContainerAtPosition(0).getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(getListItemSwitchAtPosition(0).getVisibility()).isNotEqualTo(View.VISIBLE);
+        assertThat(getListItemCheckBoxAtPosition(0).getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(getListItemCheckBoxAtPosition(0).isChecked()).isEqualTo(false);
     }
 
     @Test
@@ -193,21 +212,14 @@ public class CarUiListItemTest {
 
         updateRecyclerViewAdapter(new CarUiListItemAdapter(items));
 
-        assertThat(getListItemViewHolderAtPosition(0).getTitle().getVisibility()).isEqualTo(
-                View.VISIBLE);
-        assertThat(getListItemViewHolderAtPosition(0).getBody().getVisibility()).isEqualTo(
-                View.VISIBLE);
-        assertThat(getListItemViewHolderAtPosition(
-                0).getIconContainer().getVisibility()).isNotEqualTo(
-                View.VISIBLE);
-        assertThat(getListItemViewHolderAtPosition(
-                0).getActionContainer().getVisibility()).isEqualTo(
-                View.VISIBLE);
-        assertThat(getListItemViewHolderAtPosition(0).getSwitch().getVisibility()).isEqualTo(
-                View.VISIBLE);
-        assertThat(getListItemViewHolderAtPosition(0).getSwitch().isChecked()).isEqualTo(false);
-        assertThat(getListItemViewHolderAtPosition(0).getCheckBox().getVisibility()).isNotEqualTo(
-                View.VISIBLE);
+        assertThat(getListItemTitleAtPosition(0).getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(getListItemBodyAtPosition(0).getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(getListItemIconContainerAtPosition(0).getVisibility())
+                .isNotEqualTo(View.VISIBLE);
+        assertThat(getListItemActionContainerAtPosition(0).getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(getListItemSwitchAtPosition(0).getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(getListItemSwitchAtPosition(0).isChecked()).isEqualTo(false);
+        assertThat(getListItemCheckBoxAtPosition(0).getVisibility()).isNotEqualTo(View.VISIBLE);
     }
 
     @Test
@@ -223,12 +235,13 @@ public class CarUiListItemTest {
 
         updateRecyclerViewAdapter(new CarUiListItemAdapter(items));
 
-        Switch switchWidget = getListItemViewHolderAtPosition(0).getSwitch();
+        Switch switchWidget = getListItemSwitchAtPosition(0);
 
         assertThat(switchWidget.isChecked()).isEqualTo(true);
         switchWidget.performClick();
         assertThat(switchWidget.isChecked()).isEqualTo(false);
-        verify(mOnCheckedChangedListener, times(1)).onCheckedChanged(false);
+        verify(mOnCheckedChangedListener, times(1))
+                .onCheckedChanged(false);
     }
 
     @Test
@@ -243,12 +256,13 @@ public class CarUiListItemTest {
 
         updateRecyclerViewAdapter(new CarUiListItemAdapter(items));
 
-        CheckBox checkBox = getListItemViewHolderAtPosition(0).getCheckBox();
+        CheckBox checkBox = getListItemCheckBoxAtPosition(0);
 
         assertThat(checkBox.isChecked()).isEqualTo(false);
         checkBox.performClick();
         assertThat(checkBox.isChecked()).isEqualTo(true);
-        verify(mOnCheckedChangedListener, times(1)).onCheckedChanged(true);
+        verify(mOnCheckedChangedListener, times(1))
+                .onCheckedChanged(true);
     }
 
     @Test
@@ -263,9 +277,9 @@ public class CarUiListItemTest {
 
         CarUiListItemAdapter.HeaderViewHolder viewHolder = getHeaderViewHolderAtPosition(0);
 
-        assertThat(viewHolder.getTitle().getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(viewHolder.getTitle().getText()).isEqualTo(title);
-        assertThat(viewHolder.getBody().getVisibility()).isNotEqualTo(View.VISIBLE);
+        assertThat(getHeaderViewHolderTitleAtPosition(0).getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(getHeaderViewHolderTitleAtPosition(0).getText()).isEqualTo(title);
+        assertThat(getHeaderViewHolderBodyAtPosition(0).getVisibility()).isNotEqualTo(View.VISIBLE);
     }
 
     @Test
@@ -280,11 +294,12 @@ public class CarUiListItemTest {
 
         updateRecyclerViewAdapter(new CarUiListItemAdapter(items));
 
-        CarUiListItemAdapter.HeaderViewHolder viewHolder = getHeaderViewHolderAtPosition(0);
+        TextView titleView = getHeaderViewHolderTitleAtPosition(0);
+        TextView bodyView = getHeaderViewHolderBodyAtPosition(0);
 
-        assertThat(viewHolder.getTitle().getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(viewHolder.getTitle().getText()).isEqualTo(title);
-        assertThat(viewHolder.getBody().getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(viewHolder.getBody().getText()).isEqualTo(body);
+        assertThat(titleView.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(titleView.getText()).isEqualTo(title);
+        assertThat(bodyView.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(bodyView.getText()).isEqualTo(body);
     }
 }
