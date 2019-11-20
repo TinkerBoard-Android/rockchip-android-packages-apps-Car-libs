@@ -27,6 +27,7 @@ import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -45,8 +46,6 @@ import com.android.car.apps.common.util.ViewUtils;
 import com.android.car.media.common.playback.PlaybackViewModel;
 import com.android.car.media.common.source.MediaSource;
 import com.android.car.media.common.source.MediaSourceViewModel;
-import com.android.internal.util.Preconditions;
-
 
 /**
  * {@link Fragment} that can be used to display and control the currently playing media item. Its
@@ -54,7 +53,7 @@ import com.android.internal.util.Preconditions;
  * application.
  */
 public class PlaybackFragment extends Fragment {
-
+    private Intent mAppSelectorIntent;
     private MediaSourceViewModel mMediaSourceViewModel;
     private ImageBinder<MediaItemMetadata.ArtworkRef> mAlbumArtBinder;
 
@@ -65,6 +64,7 @@ public class PlaybackFragment extends Fragment {
         FragmentActivity activity = requireActivity();
         PlaybackViewModel playbackViewModel = PlaybackViewModel.get(activity.getApplication());
         mMediaSourceViewModel = MediaSourceViewModel.get(activity.getApplication());
+        mAppSelectorIntent = MediaSource.getSourceSelectorIntent(getContext(), true);
 
         ViewModel innerViewModel = ViewModelProviders.of(activity).get(ViewModel.class);
         innerViewModel.init(mMediaSourceViewModel, playbackViewModel);
@@ -86,6 +86,9 @@ public class PlaybackFragment extends Fragment {
         TextView subtitle = view.findViewById(R.id.subtitle);
         innerViewModel.getSubtitle().observe(getViewLifecycleOwner(), subtitle::setText);
 
+        ImageView appIcon = view.findViewById(R.id.app_icon);
+        innerViewModel.getAppIcon().observe(getViewLifecycleOwner(), appIcon::setImageBitmap);
+
         CrossfadeImageView albumBackground = view.findViewById(R.id.album_background);
         albumBackground.setOnClickListener(
                 // Let the Media center trampoline figure out what to open.
@@ -103,10 +106,9 @@ public class PlaybackFragment extends Fragment {
         playbackViewModel.getMetadata().observe(getViewLifecycleOwner(),
                 item -> mAlbumArtBinder.setImage(PlaybackFragment.this.getContext(),
                         item != null ? item.getArtworkKey() : null));
-
-        MediaAppSelectorWidget appSelector = view.findViewById(R.id.app_switch_container);
-        Preconditions.checkNotNull(appSelector);
-        appSelector.setFragmentActivity(getActivity());
+        View appSelector = view.findViewById(R.id.app_selector_container);
+        appSelector.setVisibility(mAppSelectorIntent != null ? View.VISIBLE : View.GONE);
+        appSelector.setOnClickListener(e -> getContext().startActivity(mAppSelectorIntent));
 
         return view;
     }
