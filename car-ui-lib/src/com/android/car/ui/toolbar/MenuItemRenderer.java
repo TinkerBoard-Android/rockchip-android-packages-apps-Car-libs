@@ -208,6 +208,7 @@ class MenuItemRenderer implements MenuItem.Listener {
 
         TypedArray a = c.obtainStyledAttributes(attrs, R.styleable.CarUiToolbarMenuItem);
         try {
+            int id = a.getInt(R.styleable.CarUiToolbarMenuItem_id, 0);
             String title = a.getString(R.styleable.CarUiToolbarMenuItem_title);
             Drawable icon = a.getDrawable(R.styleable.CarUiToolbarMenuItem_icon);
             boolean tinted = a.getBoolean(R.styleable.CarUiToolbarMenuItem_tinted, true);
@@ -253,7 +254,8 @@ class MenuItemRenderer implements MenuItem.Listener {
             parser.next();
             parser.require(XmlPullParser.END_TAG, null, "MenuItem");
 
-            MenuItem.Builder builder = new MenuItem.Builder(c)
+            MenuItem.Builder builder = MenuItem.builder(c)
+                    .setId(id)
                     .setTitle(title)
                     .setIcon(icon)
                     .setOnClickListener(onClickListener)
