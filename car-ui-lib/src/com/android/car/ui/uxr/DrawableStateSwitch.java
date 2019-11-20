@@ -21,11 +21,13 @@ import android.widget.Switch;
 
 import androidx.annotation.Nullable;
 
+import com.android.car.ui.preference.PreferenceSwitchWidget;
+
 /**
  * A {@link Switch} that implements {@link DrawableStateView}, for allowing additional states
  * such as ux restriction.
  */
-public class DrawableStateSwitch extends Switch implements DrawableStateView {
+public class DrawableStateSwitch extends PreferenceSwitchWidget implements DrawableStateView {
     private int[] mState;
 
     public DrawableStateSwitch(Context context) {

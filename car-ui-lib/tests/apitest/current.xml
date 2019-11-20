@@ -17,6 +17,7 @@
   <public type="bool" name="car_ui_toolbar_tabs_on_second_row"/>
   <public type="color" name="car_ui_activity_background_color"/>
   <public type="color" name="car_ui_color_accent"/>
+  <public type="color" name="car_ui_list_item_divider"/>
   <public type="color" name="car_ui_preference_category_title_text_color"/>
   <public type="color" name="car_ui_preference_edit_text_dialog_message_text_color"/>
   <public type="color" name="car_ui_preference_icon_color"/>
@@ -45,13 +46,18 @@
   <public type="dimen" name="car_ui_dialog_edittext_margin_end"/>
   <public type="dimen" name="car_ui_dialog_edittext_margin_start"/>
   <public type="dimen" name="car_ui_dialog_edittext_margin_top"/>
+  <public type="dimen" name="car_ui_header_list_item_height"/>
   <public type="dimen" name="car_ui_letter_spacing_body1"/>
   <public type="dimen" name="car_ui_letter_spacing_body3"/>
+  <public type="dimen" name="car_ui_list_item_action_divider_height"/>
+  <public type="dimen" name="car_ui_list_item_action_divider_width"/>
   <public type="dimen" name="car_ui_list_item_end_inset"/>
+  <public type="dimen" name="car_ui_list_item_header_start_inset"/>
   <public type="dimen" name="car_ui_list_item_height"/>
   <public type="dimen" name="car_ui_list_item_icon_container_width"/>
   <public type="dimen" name="car_ui_list_item_icon_size"/>
   <public type="dimen" name="car_ui_list_item_start_inset"/>
+  <public type="dimen" name="car_ui_list_item_supplemental_icon_size"/>
   <public type="dimen" name="car_ui_list_item_text_no_icon_start_margin"/>
   <public type="dimen" name="car_ui_list_item_text_start_margin"/>
   <public type="dimen" name="car_ui_margin"/>
@@ -140,6 +146,7 @@
   <public type="drawable" name="car_ui_icon_overflow_menu"/>
   <public type="drawable" name="car_ui_icon_search"/>
   <public type="drawable" name="car_ui_icon_settings"/>
+  <public type="drawable" name="car_ui_list_item_divider"/>
   <public type="drawable" name="car_ui_preference_icon_chevron"/>
   <public type="drawable" name="car_ui_preference_switch_text_track"/>
   <public type="drawable" name="car_ui_recyclerview_button_ripple_background"/>
