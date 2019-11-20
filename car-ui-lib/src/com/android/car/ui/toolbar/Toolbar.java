@@ -429,6 +429,12 @@ public class Toolbar extends FrameLayout {
         setState(getState());
     }
 
+    /** Removes all the tabs. */
+    public void clearAllTabs() {
+        mTabLayout.clearAllTabs();
+        setState(getState());
+    }
+
     /**
      * Gets a tab added to this toolbar. See
      * {@link #addTab(TabLayout.Tab)}.
