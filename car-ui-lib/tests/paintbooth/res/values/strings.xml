@@ -238,7 +238,9 @@
 
   <!--This section is for widget attributes -->
   <eat-comment/>
-  <!-- Text for show Toast button [CHAR_LIMIT=16]-->
-  <string name="widget_checkbox_text">i am a check box</string>
+  <!-- Text for checkbox [CHAR_LIMIT=16]-->
+  <string name="widget_checkbox_text">I\'m a check box</string>
+  <!-- Text for switch [CHAR_LIMIT=25]-->
+  <string name="widget_switch_text">I\'m a switch</string>
   
 </resources>
