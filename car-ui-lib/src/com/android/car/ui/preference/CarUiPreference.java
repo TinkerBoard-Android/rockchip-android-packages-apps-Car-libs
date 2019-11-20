@@ -59,7 +59,7 @@ public class CarUiPreference extends Preference {
         boolean showChevron = mContext.getResources().getBoolean(
                 R.bool.car_ui_preference_show_chevron);
 
-        if (!showChevron) {
+        if (!showChevron || getWidgetLayoutResource() != 0) {
             return;
         }
 
