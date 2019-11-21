@@ -14,17 +14,15 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<MenuItems xmlns:app="http://schemas.android.com/apk/res-auto">
-    <MenuItem
-        app:title="@string/preferences_screen_title"/>
-    <MenuItem
-        app:id="5"
-        app:title="Bar"
-        app:icon="@drawable/ic_tracklist"
-        app:onClick="xmlMenuItemClicked"/>
-    <MenuItem
-        app:title="Bar"
-        app:checkable="true"
-        app:uxRestrictions="UX_RESTRICTIONS_FULLY_RESTRICTED"
-        app:onClick="xmlMenuItemClicked"/>
-</MenuItems>
+
+<resources>
+    <!-- Intent used to launch the app selector as popup -->
+    <string name="launcher_popup_intent" translatable="false">
+        intent:#Intent;component=com.android.car.carlauncher/.AppGridActivity;launchFlags=0x24000000;S.com.android.car.carlauncher.mode=MEDIA_POPUP;end
+    </string>
+
+    <!-- Intent used to launch the app selector -->
+    <string name="launcher_intent" translatable="false">
+        intent:#Intent;component=com.android.car.carlauncher/.AppGridActivity;launchFlags=0x24000000;S.com.android.car.carlauncher.mode=MEDIA_ONLY;end
+    </string>
+</resources>
