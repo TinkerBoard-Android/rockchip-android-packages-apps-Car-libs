@@ -15,7 +15,7 @@
     limitations under the License.
 -->
 
-<com.android.car.ui.preference.PreferenceSwitchWidget
+<Switch
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/switch_widget"
     android:layout_width="wrap_content"

@@ -7,8 +7,6 @@
   <public type="bool" name="car_ui_list_item_single_line_title"/>
   <public type="bool" name="car_ui_preference_list_show_full_screen"/>
   <public type="bool" name="car_ui_preference_show_chevron"/>
-  <public type="bool" name="car_ui_preference_switch_toggle_show_animation"/>
-  <public type="bool" name="car_ui_preference_switch_toggle_use_text_track"/>
   <public type="bool" name="car_ui_scrollbar_above_recycler_view"/>
   <public type="bool" name="car_ui_scrollbar_enable"/>
   <public type="bool" name="car_ui_toolbar_logo_fills_nav_icon_space"/>
@@ -148,7 +146,6 @@
   <public type="drawable" name="car_ui_icon_settings"/>
   <public type="drawable" name="car_ui_list_item_divider"/>
   <public type="drawable" name="car_ui_preference_icon_chevron"/>
-  <public type="drawable" name="car_ui_preference_switch_text_track"/>
   <public type="drawable" name="car_ui_recyclerview_button_ripple_background"/>
   <public type="drawable" name="car_ui_recyclerview_divider"/>
   <public type="drawable" name="car_ui_recyclerview_ic_down"/>

@@ -33,7 +33,7 @@
         android:layout_height="wrap_content"
         android:text="@string/widget_checkbox_text"/>
 
-    <com.android.car.ui.preference.PreferenceSwitchWidget
+    <Switch
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/widget_switch_text"/>
