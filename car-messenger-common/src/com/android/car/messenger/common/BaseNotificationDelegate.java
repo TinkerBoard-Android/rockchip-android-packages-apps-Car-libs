@@ -23,6 +23,7 @@ import android.app.RemoteInput;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.Bundle;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationCompat.Action;
@@ -73,6 +74,7 @@ public class BaseNotificationDelegate {
 
     protected final Context mContext;
     protected final String mNotificationChannelId;
+    protected final String mClassName;
     protected final NotificationManager mNotificationManager;
 
     /**
@@ -109,9 +111,11 @@ public class BaseNotificationDelegate {
      **/
     protected final Map<SenderKey, Bitmap> mSenderLargeIcons = new HashMap<>();
 
-    public BaseNotificationDelegate(Context context, String notificationChannelId) {
+    public BaseNotificationDelegate(Context context, String notificationChannelId,
+            String className) {
         mContext = context;
         mNotificationChannelId = notificationChannelId;
+        mClassName = className;
         mNotificationManager =
                 (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
     }
@@ -210,7 +214,13 @@ public class BaseNotificationDelegate {
             builder.setSmallIcon(notificationInfo.getAppSmallIconResId());
             builder.setShowWhen(true);
             messagingStyle.setGroupConversation(notificationInfo.isGroupConvo());
-            // TODO (ritwikam): retrieve the 3P app name if non null and put it in the Extras.
+
+            if (notificationInfo.getAppDisplayName() != null) {
+                Bundle displayName = new Bundle();
+                displayName.putCharSequence(Notification.EXTRA_INFO_TEXT,
+                        notificationInfo.getAppDisplayName());
+                builder.addExtras(displayName);
+            }
 
             PendingIntent deleteIntent = createServiceIntent(conversationKey,
                     notificationInfo.getNotificationId(),
@@ -276,6 +286,7 @@ public class BaseNotificationDelegate {
             String action) {
         Intent intent = new Intent(mContext, mContext.getClass())
                 .setAction(action)
+                .setClassName(mContext, mClassName)
                 .putExtra(EXTRA_CONVERSATION_KEY, conversationKey);
 
         return PendingIntent.getForegroundService(mContext, notificationId, intent,

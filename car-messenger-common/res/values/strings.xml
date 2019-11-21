@@ -33,7 +33,7 @@
 
     <string name="tts_sender_says">%s says</string>
 
-    <string name="tts_failed_toast">Text playout failed!</string>
+    <string name="tts_failed_toast">Can\'t read out message.</string>
     <string name="reply_message_display_template">\"%s\"</string>
     <string name="message_sent_notice">Reply sent to %s</string>
 
