@@ -24,6 +24,8 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.location.Country;
+import android.location.CountryDetector;
 import android.net.Uri;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
@@ -52,7 +54,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
-/** Helper methods. */
+/**
+ * Helper methods.
+ */
 public class TelecomUtils {
     private static final String TAG = "CD.TelecomUtils";
 
@@ -101,7 +105,7 @@ public class TelecomUtils {
             return "";
         }
 
-        String countryIso = getIsoDefaultCountryNumber(context);
+        String countryIso = getCurrentCountryIso(context);
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "PhoneNumberUtils.formatNumberToE16, number: "
                     + number + ", country: " + countryIso);
@@ -115,34 +119,53 @@ public class TelecomUtils {
         return formattedNumber;
     }
 
-    private static String getIsoDefaultCountryNumber(Context context) {
-        String countryIso = getTelephonyManager(context).getSimCountryIso().toUpperCase(Locale.US);
-        if (countryIso.length() != 2) {
-            countryIso = Locale.getDefault().getCountry();
-            if (countryIso == null || countryIso.length() != 2) {
-                countryIso = "US";
+    /**
+     * @return The ISO 3166-1 two letters country code of the country the user is in.
+     */
+    private static String getCurrentCountryIso(Context context, Locale locale) {
+        String countryIso = null;
+        CountryDetector detector = (CountryDetector) context.getSystemService(
+                Context.COUNTRY_DETECTOR);
+        if (detector != null) {
+            Country country = detector.detectCountry();
+            if (country != null) {
+                countryIso = country.getCountryIso();
+            } else {
+                Log.e(TAG, "CountryDetector.detectCountry() returned null.");
             }
         }
-
+        if (countryIso == null) {
+            countryIso = locale.getCountry();
+            Log.w(TAG, "No CountryDetector; falling back to countryIso based on locale: "
+                    + countryIso);
+        }
+        if (countryIso == null || countryIso.length() != 2) {
+            Log.w(TAG, "Invalid locale, falling back to US");
+            countryIso = "US";
+        }
         return countryIso;
     }
 
+    private static String getCurrentCountryIso(Context context) {
+        return getCurrentCountryIso(context, Locale.getDefault());
+    }
+
     /**
-     * Creates a new instance of {@link Phonenumber#Phonenumber} base on the given number and sim
+     * Creates a new instance of {@link Phonenumber.PhoneNumber} base on the given number and sim
      * card country code. Returns {@code null} if the number in an invalid number.
      */
     @Nullable
     public static Phonenumber.PhoneNumber createI18nPhoneNumber(Context context, String number) {
         try {
-            return PhoneNumberUtil.getInstance().parse(number, getIsoDefaultCountryNumber(context));
+            return PhoneNumberUtil.getInstance().parse(number, getCurrentCountryIso(context));
         } catch (NumberParseException e) {
             return null;
         }
     }
 
     /**
-     * Contains all the info used to display a phone number on the screen.
-     * Returned by {@link #getPhoneNumberInfo(Context, String)}
+     * Contains all the info used to display a phone number on the screen. Returned by {@link
+     * #getPhoneNumberInfo(Context, String)}
      */
     public static final class PhoneNumberInfo {
         private final String mPhoneNumber;
@@ -411,7 +434,9 @@ public class TelecomUtils {
         return letterTileDrawable;
     }
 
-    /** Set the given phone number as the primary phone number for its associated contact. */
+    /**
+     * Set the given phone number as the primary phone number for its associated contact.
+     */
     public static void setAsPrimaryPhoneNumber(Context context, PhoneNumber phoneNumber) {
         // Update the primary values in the data record.
         ContentValues values = new ContentValues(1);
@@ -423,7 +448,9 @@ public class TelecomUtils {
                 values, null, null);
     }
 
-    /** Add a contact to favorite or remove it from favorite. */
+    /**
+     * Add a contact to favorite or remove it from favorite.
+     */
     public static int setAsFavoriteContact(Context context, Contact contact, boolean isFavorite) {
         if (contact.isStarred() == isFavorite) {
             return 0;
