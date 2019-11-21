@@ -26,6 +26,7 @@ import com.android.car.ui.recyclerview.CarUiContentListItem;
 import com.android.car.ui.recyclerview.CarUiHeaderListItem;
 import com.android.car.ui.recyclerview.CarUiListItem;
 import com.android.car.ui.recyclerview.CarUiListItemAdapter;
+import com.android.car.ui.recyclerview.CarUiListItemLayoutManager;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ public class CarUiListItemActivity extends Activity {
 
         CarUiListItemAdapter adapter = new CarUiListItemAdapter(generateDummyData());
         recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new CarUiListItemLayoutManager(this));
     }
 
     private ArrayList<CarUiListItem> generateDummyData() {
