@@ -93,6 +93,10 @@ public class ConnectedDeviceManager {
     private final Map<String, InternalConnectedDevice> mConnectedDevices =
             new ConcurrentHashMap<>();
 
+    // recipientId -> (deviceId -> message bytes)
+    private final Map<UUID, Map<String, byte[]>> mRecipientMissedMessages =
+            new ConcurrentHashMap<>();
+
     // Recipient ids that received multiple callback registrations indicate that the recipient id
     // has been compromised. Another party now has access the messages intended for that recipient.
     // As a safeguard, that recipient id will be added to this list and blocked from further
@@ -313,6 +317,12 @@ public class ConnectedDeviceManager {
         ThreadSafeCallbacks<DeviceCallback> newCallbacks = new ThreadSafeCallbacks<>();
         newCallbacks.add(callback, executor);
         recipientCallbacks.put(recipientId, newCallbacks);
+
+        byte[] message = popMissedMessage(recipientId, device.getDeviceId());
+        if (message != null) {
+            newCallbacks.invoke(deviceCallback ->
+                    deviceCallback.onMessageReceived(device, message));
+        }
     }
 
     private void notifyOfBlacklisting(@NonNull ConnectedDevice device, @NonNull UUID recipientId,
@@ -321,6 +331,32 @@ public class ConnectedDeviceManager {
                 + "recipient id is no longer secure and has been blocked from future use.");
         executor.execute(() ->
                 callback.onDeviceError(device, DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED));
+    }
+
+    private void saveMissedMessage(@NonNull String deviceId, @NonNull UUID recipientId,
+            @NonNull byte[] message) {
+        // Store last message in case recipient registers callbacks in the future.
+        mRecipientMissedMessages.putIfAbsent(recipientId, new HashMap<>());
+        mRecipientMissedMessages.get(recipientId).putIfAbsent(deviceId, message);
+    }
+
+    /**
+     * Remove the last message sent for this device prior to a {@link DeviceCallback} being
+     * registered.
+     *
+     * @param recipientId Recipient's id
+     * @param deviceId Device id
+     * @return The last missed {@code byte[]} of the message, or {@code null} if no messages were
+     *         missed.
+     */
+    @Nullable
+    private byte[] popMissedMessage(@NonNull UUID recipientId, @NonNull String deviceId) {
+        Map<String, byte[]> missedMessages = mRecipientMissedMessages.get(recipientId);
+        if (missedMessages == null) {
+            return null;
+        }
+
+        return missedMessages.remove(deviceId);
     }
 
     /**
@@ -509,14 +545,17 @@ public class ConnectedDeviceManager {
                     + "recipient " + message.getRecipient() + ".");
             return;
         }
+        UUID recipientId = message.getRecipient();
         Map<UUID, ThreadSafeCallbacks<DeviceCallback>> deviceCallbacks =
                 mDeviceCallbacks.get(deviceId);
         if (deviceCallbacks == null) {
+            saveMissedMessage(deviceId, recipientId, message.getMessage());
             return;
         }
         ThreadSafeCallbacks<DeviceCallback> recipientCallbacks =
-                deviceCallbacks.get(message.getRecipient());
+                deviceCallbacks.get(recipientId);
         if (recipientCallbacks == null) {
+            saveMissedMessage(deviceId, recipientId, message.getMessage());
             return;
         }
 

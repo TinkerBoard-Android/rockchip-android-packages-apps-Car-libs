@@ -423,6 +423,58 @@ public class ConnectedDeviceManagerTest {
         assertThat(tryAcquire(semaphore)).isFalse();
     }
 
+    @Test
+    public void registerDeviceCallback_sendsMissedMessageAfterRegistration()
+            throws InterruptedException {
+        Semaphore semaphore = new Semaphore(0);
+        connectNewDevice(mMockCentralManager);
+        ConnectedDevice connectedDevice =
+                mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
+        byte[] payload = ByteUtils.randomBytes(10);
+        DeviceMessage message = new DeviceMessage(mRecipientId, false, payload);
+        mConnectedDeviceManager.onMessageReceived(connectedDevice.getDeviceId(), message);
+        DeviceCallback deviceCallback = createDeviceCallback(semaphore);
+        mConnectedDeviceManager.registerDeviceCallback(connectedDevice, mRecipientId,
+                deviceCallback, mCallbackExecutor);
+        assertThat(tryAcquire(semaphore)).isTrue();
+        verify(deviceCallback).onMessageReceived(connectedDevice, payload);
+    }
+
+    @Test
+    public void registerDeviceCallback_doesNotSendMissedMessageForDifferentRecipient()
+            throws InterruptedException {
+        Semaphore semaphore = new Semaphore(0);
+        connectNewDevice(mMockCentralManager);
+        ConnectedDevice connectedDevice =
+                mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
+        byte[] payload = ByteUtils.randomBytes(10);
+        DeviceMessage message = new DeviceMessage(UUID.randomUUID(), false, payload);
+        mConnectedDeviceManager.onMessageReceived(connectedDevice.getDeviceId(), message);
+        DeviceCallback deviceCallback = createDeviceCallback(semaphore);
+        mConnectedDeviceManager.registerDeviceCallback(connectedDevice, mRecipientId,
+                deviceCallback, mCallbackExecutor);
+        assertThat(tryAcquire(semaphore)).isFalse();
+    }
+
+    @Test
+    public void registerDeviceCallback_doesNotSendMissedMessageForDifferentDevice()
+            throws InterruptedException {
+        Semaphore semaphore = new Semaphore(0);
+        connectNewDevice(mMockCentralManager);
+        connectNewDevice(mMockCentralManager);
+        List<ConnectedDevice> connectedDevices =
+                mConnectedDeviceManager.getActiveUserConnectedDevices();
+        ConnectedDevice connectedDevice = connectedDevices.get(0);
+        ConnectedDevice otherDevice = connectedDevices.get(1);
+        byte[] payload = ByteUtils.randomBytes(10);
+        DeviceMessage message = new DeviceMessage(mRecipientId, false, payload);
+        mConnectedDeviceManager.onMessageReceived(otherDevice.getDeviceId(), message);
+        DeviceCallback deviceCallback = createDeviceCallback(semaphore);
+        mConnectedDeviceManager.registerDeviceCallback(connectedDevice, mRecipientId,
+                deviceCallback, mCallbackExecutor);
+        assertThat(tryAcquire(semaphore)).isFalse();
+    }
+
     private boolean tryAcquire(Semaphore semaphore) throws InterruptedException {
         return semaphore.tryAcquire(100, TimeUnit.MILLISECONDS);
     }
