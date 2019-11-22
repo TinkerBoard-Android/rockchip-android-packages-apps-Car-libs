@@ -253,12 +253,6 @@ public class Toolbar extends FrameLayout {
                 mOverflowDialog.show();
             }
         });
-
-        getViewTreeObserver().addOnGlobalLayoutListener(() -> {
-            for (OnHeightChangedListener listener : mOnHeightChangedListeners) {
-                listener.onHeightChanged(getHeight());
-            }
-        });
     }
 
     /**
@@ -272,6 +266,14 @@ public class Toolbar extends FrameLayout {
         }
 
         return R.layout.car_ui_toolbar;
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        for (OnHeightChangedListener listener : mOnHeightChangedListeners) {
+            listener.onHeightChanged(getHeight());
+        }
     }
 
     /**
