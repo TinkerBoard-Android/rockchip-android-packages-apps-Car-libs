@@ -30,6 +30,8 @@
 
     <!-- Drawable appbar_view_icon_background.xml -->
     <dimen name="appbar_view_icon_background_corner_radius">@*android:dimen/car_radius_2</dimen>
+    <dimen name="appbar_view_icon_touch_target_size">76dp</dimen>
+    <dimen name="appbar_view_icon_background_radius">38dp</dimen>
 
     <!-- Minimized Progress Bar -->
     <dimen name="minimized_progress_bar_track_thickness">4dp</dimen>
