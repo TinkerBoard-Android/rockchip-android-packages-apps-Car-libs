@@ -54,9 +54,17 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat {
         }
 
         recyclerView.setPadding(0, toolbar.getHeight(), 0, 0);
-        toolbar.registerToolbarHeightChangeListener(height -> {
-            recyclerView.setPadding(0, height, 0, 0);
+        toolbar.registerToolbarHeightChangeListener(newHeight -> {
+            if (recyclerView.getPaddingTop() == newHeight) {
+                return;
+            }
+
+            int oldHeight = recyclerView.getPaddingTop();
+            recyclerView.setPadding(0, newHeight, 0, 0);
+            recyclerView.scrollBy(0, oldHeight - newHeight);
         });
+
+        recyclerView.setClipToPadding(false);
         toolbar.setTitle(getPreferenceScreen().getTitle());
     }
 
