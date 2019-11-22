@@ -24,11 +24,11 @@ import java.util.Objects;
  * checking equality and hashing.
  */
 public abstract class CompositeKey {
-    private final String mDeviceAddress;
+    private final String mDeviceId;
     private final String mSubKey;
 
-    protected CompositeKey(String deviceAddress, String subKey) {
-        mDeviceAddress = deviceAddress;
+    protected CompositeKey(String deviceId, String subKey) {
+        mDeviceId = deviceId;
         mSubKey = subKey;
     }
 
@@ -43,34 +43,34 @@ public abstract class CompositeKey {
         }
 
         CompositeKey that = (CompositeKey) o;
-        return Objects.equals(mDeviceAddress, that.mDeviceAddress)
+        return Objects.equals(mDeviceId, that.mDeviceId)
                 && Objects.equals(mSubKey, that.mSubKey);
     }
 
     /**
-     * Returns true if the device address of this composite key equals {@code deviceAddress}.
+     * Returns true if the device address of this composite key equals {@code deviceId}.
      *
-     * @param deviceAddress the device address which is compared to this key's device address
+     * @param deviceId the device address which is compared to this key's device address
      * @return true if the device addresses match
      */
-    public boolean matches(String deviceAddress) {
-        return mDeviceAddress.equals(deviceAddress);
+    public boolean matches(String deviceId) {
+        return mDeviceId.equals(deviceId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mDeviceAddress, mSubKey);
+        return Objects.hash(mDeviceId, mSubKey);
     }
 
     @Override
     public String toString() {
-        return String.format("%s, deviceAddress: %s, subKey: %s",
-                getClass().getSimpleName(), mDeviceAddress, mSubKey);
+        return String.format("%s, deviceId: %s, subKey: %s",
+                getClass().getSimpleName(), mDeviceId, mSubKey);
     }
 
     /** Returns this composite key's device address. */
-    public String getDeviceAddress() {
-        return mDeviceAddress;
+    public String getDeviceId() {
+        return mDeviceId;
     }
 
     /** Returns this composite key's sub key. */

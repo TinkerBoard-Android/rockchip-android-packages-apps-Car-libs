@@ -15,7 +15,7 @@
 //
 
 android_library {
-    name: "car-messenger-common",
+    name: "car-messenger-common-bp",
 
     srcs: ["src/**/*.java"],
 
@@ -28,9 +28,12 @@ android_library {
     resource_dirs: ["res"],
 
     static_libs: [
-        "androidx.annotation_annotation",
         "android.car.userlib",
+        "androidx.legacy_legacy-support-v4",
+        "car-apps-common-bp",
         "car-messenger-protos",
+        "CompanionDeviceSupport-aidl",
+        "connected-device-lib",
         "connected-device-protos",
     ],
 }

@@ -16,47 +16,19 @@
 
 package com.android.car.messenger.common;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import com.android.car.messenger.NotificationMsgProto.NotificationMsg;
 
 /**
- * {@link CompositeKey} subclass used to identify Notification info for a sender;
- * it uses a combination of senderContactUri and senderContactName as the secondary key.
+ * {@link CompositeKey} subclass used to give each contact on all the connected devices a
+ * unique Key.
  */
-public class SenderKey extends CompositeKey implements Parcelable {
-
-    private SenderKey(String deviceAddress, String key) {
-        super(deviceAddress, key);
+public class SenderKey extends CompositeKey {
+    /** Creates a senderkey for SMS, MMS, and {@link NotificationMsg}. **/
+    protected SenderKey(String deviceId, String senderName, String contactUri) {
+        // Use a combination of senderName and senderContactUri for key. Ideally we would use
+        // only senderContactUri (which is encoded phone no.). However since some phones don't
+        // provide these, we fall back to senderName. Since senderName may not be unique, we
+        // include senderContactUri also to provide uniqueness in cases it is available.
+        super(deviceId, senderName + "/" + contactUri);
     }
-
-    @Override
-    public String toString() {
-        return String.format("SenderKey: %s -- %s", getDeviceAddress(), getSubKey());
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(getDeviceAddress());
-        dest.writeString(getSubKey());
-    }
-
-    /** Creates {@link SenderKey} instances from {@link Parcel} sources. */
-    public static final Parcelable.Creator<SenderKey> CREATOR =
-            new Parcelable.Creator<SenderKey>() {
-                @Override
-                public SenderKey createFromParcel(Parcel source) {
-                    return new SenderKey(source.readString(), source.readString());
-                }
-
-                @Override
-                public SenderKey[] newArray(int size) {
-                    return new SenderKey[size];
-                }
-            };
-
 }

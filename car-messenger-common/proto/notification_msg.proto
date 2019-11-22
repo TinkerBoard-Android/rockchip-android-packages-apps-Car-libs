@@ -18,20 +18,18 @@ syntax = "proto3";
 
 package com.android.car.messenger.proto;
 
-option java_package = "com.android.car.messenger.SnapbackProtos";
+option java_package = "com.android.car.messenger.NotificationMsgProto";
 
-message SnapbackPhoneToCarMessage {
-  // The unique ID of the message notification, same in phone and car.
+message PhoneToCarMessage {
+  // The unique key of the message notification, same in phone and car.
   // This will be the StatusBarNotification id of the original message notification posted on the
-  // phone. In the car logic, to differentiate between notifications from multiple phones, the
-  // phone's Batmobile device id might be appended to the end of this ID. However, this should be
-  // removed before sending it back to the phone.
-  string notification_id = 1;
+  // phone.
+  string notification_key = 1;
 
   // Categorizing what type of message this is, so the receiver understands what type of
   // message_data is being sent, and the purpose of the message. The expected message_type(s) with
   // their message_data type (for now) are:
-  //    "NEW_CONVERSATION" - SnapbackConversationNotification expected,
+  //    "NEW_CONVERSATION" - ConversationNotification expected,
   //    "NEW_MESSAGE" - MessagingStyleMessageProto expected,
   //    "ACTION_STATUS_UPDATE" - ActionStatusUpdate expected,
   //    "OTHER" - metadata expected.
@@ -41,27 +39,25 @@ message SnapbackPhoneToCarMessage {
   // introduced in later releases will be put in the metadata field.
   //
   // NOTE: while a message type like "NEW_CONVERSATION" is required to have a
-  // SnapbackConversationNotification message, it may also have a metadata message as well.
+  // ConversationNotification message, it may also have a metadata message as well.
   string message_type = 2;
 
   oneof message_data {
-    SnapbackConversationNotification conversation = 3;
-    MessagingStyleMessageProto message = 4;
+    ConversationNotification conversation = 3;
+    MessagingStyleMessage message = 4;
     ActionStatusUpdate status_update = 5;
   }
 
   // A byte array containing an undefined message. This field may contain supplemental information
-  //  for a message_data, or contain all of the data for the SnapbackPhoneToCarMessage.
+  //  for a message_data, or contain all of the data for the PhoneToCarMessage.
   bytes metadata = 6;
 }
 
-message SnapbackCarToPhoneMessage {
-  // The unique ID of the message notification, same in phone and car.
+message CarToPhoneMessage {
+  // The unique key of the message notification, same in phone and car.
   // This will be the StatusBarNotification id of the original message notification posted on the
-  // phone. In the car logic, to differentiate between notifications from multiple phones, the
-  // phone's Batmobile device id might be appended to the end of this ID. However, this should be
-  // removed before sending it back to the phone.
-  string notification_id = 1;
+  // phone.
+  string notification_key = 1;
 
   Action action_request = 2;
 
@@ -82,31 +78,25 @@ message ActionStatusUpdate {
   string error_explanation = 3;
 }
 
-// A message notification originating from the user's phone, sent across the Batmobile channel.
-message SnapbackConversationNotification {
+// A message notification originating from the user's phone.
+message ConversationNotification {
 
   // Display name of the application that posted this notification.
-  string messaging_app_display_name = 2;
+  string messaging_app_display_name = 1;
 
   // Package name of the application that posted this notification.
-  string messaging_app_package_name = 3;
+  string messaging_app_package_name = 2;
 
-  MessagingStyleProto messaging_style = 4;
+  MessagingStyle messaging_style = 3;
 
   // The time, in milliseconds, this message notification was last updated.
-  int64 time_ms = 5;
+  int64 time_ms = 4;
 
-  // Id of the phone where the message came from
-  string phone_device_id = 6;
-
-
-  repeated Action action = 7;
-
-  bytes app_icon = 8;
+  bytes app_icon = 5;
 }
 
-message MessagingStyleProto {
-  repeated MessagingStyleMessageProto messaging_style_msg = 1;
+message MessagingStyle {
+  repeated MessagingStyleMessage messaging_style_msg = 1;
 
   string convo_title = 2;
 
@@ -116,13 +106,14 @@ message MessagingStyleProto {
   bool is_group_convo = 4;
 }
 
-message MessagingStyleMessageProto {
+message MessagingStyleMessage {
   string text_message = 1;
 
   int64 timestamp = 2;
 
   Person sender = 3;
 
+  // If the message is read on the phone.
   bool is_read = 4;
 }
 
@@ -139,13 +130,11 @@ message Action {
     DISMISS = 2;
   }
 
-  // Same as the SnapbackPhoneToCar and SnapbackCarToPhone messages's notification_id.
+  // Same as the PhoneToCar and CarToPhone messages's notification_key.
   // As mentioned above, this notification id should be the same on the phone and the car.
   // This will be the StatusBarNotification id of the original message notification posted on the
-  // phone. In the car logic, to differentiate between notifications from multiple phones, the
-  // phone's Batmobile device id might be appended to the end of this ID. However, this should be
-  // removed before sending it back to the phone.
-  string notification_id = 1;
+  // phone.
+  string notification_key = 1;
 
   //Optional, used to capture data like the reply string.
   map<string, string> action_data = 2;
