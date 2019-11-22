@@ -26,6 +26,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -144,6 +145,8 @@ public class Toolbar extends FrameLayout {
     private AlertDialog mOverflowDialog;
     private boolean mNavIconSpaceReserved;
     private boolean mLogoFillsNavIconSpace;
+    private boolean mEatingTouch = false;
+    private boolean mEatingHover = false;
 
     public Toolbar(Context context) {
         this(context, null);
@@ -773,6 +776,60 @@ public class Toolbar extends FrameLayout {
     /** Gets the current {@link State} of the toolbar. */
     public State getState() {
         return mState;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        // Copied from androidx.appcompat.widget.Toolbar
+
+        // Toolbars always eat touch events, but should still respect the touch event dispatch
+        // contract. If the normal View implementation doesn't want the events, we'll just silently
+        // eat the rest of the gesture without reporting the events to the default implementation
+        // since that's what it expects.
+
+        final int action = ev.getActionMasked();
+        if (action == MotionEvent.ACTION_DOWN) {
+            mEatingTouch = false;
+        }
+
+        if (!mEatingTouch) {
+            final boolean handled = super.onTouchEvent(ev);
+            if (action == MotionEvent.ACTION_DOWN && !handled) {
+                mEatingTouch = true;
+            }
+        }
+
+        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+            mEatingTouch = false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean onHoverEvent(MotionEvent ev) {
+        // Copied from androidx.appcompat.widget.Toolbar
+
+        // Same deal as onTouchEvent() above. Eat all hover events, but still
+        // respect the touch event dispatch contract.
+
+        final int action = ev.getActionMasked();
+        if (action == MotionEvent.ACTION_HOVER_ENTER) {
+            mEatingHover = false;
+        }
+
+        if (!mEatingHover) {
+            final boolean handled = super.onHoverEvent(ev);
+            if (action == MotionEvent.ACTION_HOVER_ENTER && !handled) {
+                mEatingHover = true;
+            }
+        }
+
+        if (action == MotionEvent.ACTION_HOVER_EXIT || action == MotionEvent.ACTION_CANCEL) {
+            mEatingHover = false;
+        }
+
+        return true;
     }
 
     /**
