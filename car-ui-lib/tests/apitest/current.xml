@@ -176,6 +176,7 @@
   <public type="string" name="car_ui_scrollbar_page_down_button"/>
   <public type="string" name="car_ui_scrollbar_page_up_button"/>
   <public type="string" name="car_ui_toolbar_default_search_hint"/>
+  <public type="string" name="car_ui_toolbar_menu_item_overflow_title"/>
   <public type="string" name="car_ui_toolbar_menu_item_search_title"/>
   <public type="string" name="car_ui_toolbar_menu_item_settings_title"/>
   <public type="style" name="CarUiPreferenceTheme"/>
@@ -212,6 +213,7 @@
   <public type="style" name="Widget.CarUi.CarUiRecyclerView.NestedRecyclerView"/>
   <public type="style" name="Widget.CarUi.Toolbar"/>
   <public type="style" name="Widget.CarUi.Toolbar.BottomView"/>
+  <public type="style" name="Widget.CarUi.Toolbar.Container"/>
   <public type="style" name="Widget.CarUi.Toolbar.Logo"/>
   <public type="style" name="Widget.CarUi.Toolbar.LogoContainer"/>
   <public type="style" name="Widget.CarUi.Toolbar.MenuItem.Container"/>
