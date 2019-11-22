@@ -354,7 +354,7 @@ public class CarCompanionDeviceStorage {
     public void addAssociatedDeviceForActiveUser(@NonNull AssociatedDevice device) {
         int userId = ActivityManager.getCurrentUser();
         SharedPreferences sharedPrefs = getSharedPrefs();
-        if (sharedPrefs.contains(device.getDeviceId())) {
+        if (getActiveUserAssociatedDeviceIds().contains(device.getDeviceId())) {
             clearAssociatedDevice(userId, device.getDeviceId());
         }
         Set<String> devices = sharedPrefs.getStringSet(String.valueOf(userId), new HashSet<>());
@@ -425,10 +425,11 @@ public class CarCompanionDeviceStorage {
     public void clearAssociatedDevice(int userId, @NonNull String deviceId) {
         SharedPreferences sharedPrefs = getSharedPrefs();
         clearEncryptionKey(deviceId);
-        Set<String> deviceIds = sharedPrefs.getStringSet(String.valueOf(userId), new HashSet<>());
-        deviceIds.remove(deviceId);
+        Set<String> devices = sharedPrefs.getStringSet(String.valueOf(userId), new HashSet<>());
+        devices.removeIf(device ->
+                AssociatedDevice.deserialize(device).getDeviceId().equals(deviceId));
         sharedPrefs.edit()
-            .putStringSet(String.valueOf(userId), deviceIds)
+            .putStringSet(String.valueOf(userId), devices)
             .apply();
     }
 
