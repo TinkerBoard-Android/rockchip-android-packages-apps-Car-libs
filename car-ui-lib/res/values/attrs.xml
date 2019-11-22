@@ -43,7 +43,7 @@
 
     <declare-styleable name="CarUiToolbarMenuItem">
         <!-- Id of MenuItem, used to differentiate them -->
-        <attr name="id" format="integer"/>
+        <attr name="id" format="reference"/>
         <!-- Show/hide the MenuItem -->
         <attr name="visible" format="boolean"/>
         <!-- Title -->
