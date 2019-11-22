@@ -18,14 +18,13 @@ package com.android.car.ui.paintbooth.preferences;
 
 import android.os.Bundle;
 
-import androidx.preference.PreferenceFragmentCompat;
-
 import com.android.car.ui.paintbooth.R;
+import com.android.car.ui.preference.PreferenceFragment;
 
 /**
  * Fragment to load preferences
  */
-public class PreferenceDemoFragment extends PreferenceFragmentCompat {
+public class PreferenceDemoFragment extends PreferenceFragment {
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
