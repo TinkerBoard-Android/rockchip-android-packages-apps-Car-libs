@@ -417,8 +417,7 @@ public class ToolbarTest {
     @Test
     public void menuItems_searchScreen_shouldHideMenuItems() {
         mToolbar.setMenuItems(Arrays.asList(
-                MenuItem.Builder.createSearch(mContext, i -> {
-                }),
+                MenuItem.builder(mContext).setToSearch().build(),
                 createMenuItem(i -> {
                 })));
 
@@ -432,8 +431,7 @@ public class ToolbarTest {
     @Test
     public void menuItems_showMenuItemsWhileSearching() {
         mToolbar.setMenuItems(Arrays.asList(
-                MenuItem.Builder.createSearch(mContext, i -> {
-                }),
+                MenuItem.builder(mContext).setToSearch().build(),
                 createMenuItem(i -> {
                 })));
 
@@ -445,7 +443,7 @@ public class ToolbarTest {
     }
 
     private MenuItem createMenuItem(MenuItem.OnClickListener listener) {
-        return new MenuItem.Builder(mContext)
+        return MenuItem.builder(mContext)
                 .setTitle("Button!")
                 .setOnClickListener(listener)
                 .build();
