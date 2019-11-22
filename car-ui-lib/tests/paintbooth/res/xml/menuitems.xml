@@ -18,7 +18,7 @@
     <MenuItem
         app:title="@string/preferences_screen_title"/>
     <MenuItem
-        app:id="5"
+        app:id="@+id/menu_bar"
         app:title="Bar"
         app:icon="@drawable/ic_tracklist"
         app:onClick="xmlMenuItemClicked"/>
