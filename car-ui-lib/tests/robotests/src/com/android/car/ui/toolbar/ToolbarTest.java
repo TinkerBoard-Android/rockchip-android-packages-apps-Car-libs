@@ -331,7 +331,7 @@ public class ToolbarTest {
 
     @Test
     public void menuItems_whenClicked_shouldCallListener() {
-        assertThat(getMenuItemViewCount()).isEqualTo(0);
+        assertThat(getMenuItemCount()).isEqualTo(0);
 
         Mutable<Boolean> button1Clicked = new Mutable<>(false);
         Mutable<Boolean> button2Clicked = new Mutable<>(false);
@@ -339,7 +339,7 @@ public class ToolbarTest {
                 createMenuItem(i -> button1Clicked.value = true),
                 createMenuItem(i -> button2Clicked.value = true)));
 
-        assertThat(getMenuItemViewCount()).isEqualTo(2);
+        assertThat(getMenuItemCount()).isEqualTo(2);
 
         getMenuItemView(0).performClick();
 
@@ -358,11 +358,11 @@ public class ToolbarTest {
                 createMenuItem(i -> {
                 })));
 
-        assertThat(getMenuItemViewCount()).isEqualTo(2);
+        assertThat(getMenuItemCount()).isEqualTo(2);
 
         mToolbar.setMenuItems(null);
 
-        assertThat(getMenuItemViewCount()).isEqualTo(0);
+        assertThat(getMenuItemCount()).isEqualTo(0);
     }
 
     @Test
@@ -404,7 +404,7 @@ public class ToolbarTest {
                 }));
         mToolbar.setMenuItems(menuItems);
 
-        assertThat(getMenuItemViewCount()).isEqualTo(2);
+        assertThat(getMenuItemCount()).isEqualTo(2);
 
         View firstMenuItemView = getMenuItemView(0);
 
@@ -456,10 +456,8 @@ public class ToolbarTest {
         when(mContext.getResources()).thenReturn(mResources);
     }
 
-    private int getMenuItemViewCount() {
-        return ((ViewGroup) mToolbar
-                .findViewById(R.id.car_ui_toolbar_menu_items_container))
-                .getChildCount();
+    private int getMenuItemCount() {
+        return mToolbar.getMenuItems().size();
     }
 
     private View getMenuItemView(int index) {
