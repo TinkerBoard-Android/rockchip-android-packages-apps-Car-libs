@@ -18,7 +18,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    style="@style/Widget.CarUi.Toolbar.Container">
 
     <androidx.constraintlayout.widget.Guideline
         android:layout_width="wrap_content"
@@ -121,7 +122,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:singleLine="true"
-        android:textAppearance="@style/TextAppearance.CarUi.Widget.Toolbar.Title"
         style="@style/Widget.CarUi.Toolbar.Title"
         app:layout_constraintTop_toTopOf="@id/car_ui_toolbar_top_guideline"
         app:layout_constraintBottom_toTopOf="@id/car_ui_toolbar_row_separator"
@@ -146,27 +146,7 @@
         style="@style/Widget.CarUi.Toolbar.MenuItem.Container"
         app:layout_constraintTop_toTopOf="@id/car_ui_toolbar_top_guideline"
         app:layout_constraintBottom_toTopOf="@id/car_ui_toolbar_row_separator"
-        app:layout_constraintEnd_toStartOf="@id/car_ui_toolbar_overflow_button"/>
-
-    <FrameLayout
-        android:id="@+id/car_ui_toolbar_overflow_button"
-        android:layout_width="@dimen/car_ui_touch_target_width"
-        android:layout_height="@dimen/car_ui_touch_target_height"
-        android:layout_marginLeft="@dimen/car_ui_toolbar_menu_item_margin"
-        android:layout_marginRight="@dimen/car_ui_toolbar_menu_item_margin"
-        android:visibility="gone"
-        app:layout_constraintTop_toTopOf="@id/car_ui_toolbar_top_guideline"
-        app:layout_constraintBottom_toTopOf="@id/car_ui_toolbar_row_separator"
-        app:layout_constraintEnd_toEndOf="@id/car_ui_toolbar_end_guideline">
-        <ImageView
-            android:src="@drawable/car_ui_icon_overflow_menu"
-            android:layout_width="@dimen/car_ui_primary_icon_size"
-            android:layout_height="@dimen/car_ui_primary_icon_size"
-            android:layout_gravity="center"
-            android:background="@drawable/car_ui_toolbar_menu_item_icon_ripple"
-            android:tint="@color/car_ui_toolbar_menu_item_icon_color"
-            android:tintMode="src_in"/>
-    </FrameLayout>
+        app:layout_constraintEnd_toStartOf="@id/car_ui_toolbar_end_guideline"/>
 
     <com.android.car.ui.toolbar.TabLayout
         android:id="@+id/car_ui_toolbar_tabs"
