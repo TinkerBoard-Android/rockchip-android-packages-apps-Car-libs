@@ -34,25 +34,30 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 
 /**
- * A singleton statically accessible helper class which pre-loads contacts list into memory so
- * that they can be accessed more easily and quickly.
+ * A singleton statically accessible helper class which pre-loads contacts list into memory so that
+ * they can be accessed more easily and quickly.
  */
 public class InMemoryPhoneBook implements Observer<List<Contact>> {
     private static final String TAG = "CD.InMemoryPhoneBook";
+    private static final String KEY_FORMAT = "%s %s";
     private static InMemoryPhoneBook sInMemoryPhoneBook;
 
     private final Context mContext;
     private final AsyncQueryLiveData<List<Contact>> mContactListAsyncQueryLiveData;
-    /** A map to speed up phone number searching. */
+    /**
+     * A map to speed up phone number searching.
+     */
     private final Map<I18nPhoneNumberWrapper, Contact> mPhoneNumberContactMap = new HashMap<>();
-    /** A map to look up contact by lookup key. */
+    /**
+     * A map to look up contact by lookup key.
+     */
     private final Map<String, Contact> mLookupKeyContactMap = new HashMap<>();
     private boolean mIsLoaded = false;
 
     /**
-     * Initialize the globally accessible {@link InMemoryPhoneBook}.
-     * Returns the existing {@link InMemoryPhoneBook} if already initialized.
-     * {@link #tearDown()} must be called before init to reinitialize.
+     * Initialize the globally accessible {@link InMemoryPhoneBook}. Returns the existing {@link
+     * InMemoryPhoneBook} if already initialized. {@link #tearDown()} must be called before init to
+     * reinitialize.
      */
     public static InMemoryPhoneBook init(Context context) {
         if (sInMemoryPhoneBook == null) {
@@ -63,17 +68,18 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
     }
 
     /**
-     * Returns if the InMemoryPhoneBook is initialized.
-     * get() won't return null or throw if this is true, but it doesn't
-     * indicate whether or not contacts are loaded yet.
-     *
+     * Returns if the InMemoryPhoneBook is initialized. get() won't return null or throw if this is
+     * true, but it doesn't indicate whether or not contacts are loaded yet.
+     * <p>
      * See also: {@link #isLoaded()}
      */
     public static boolean isInitialized() {
         return sInMemoryPhoneBook != null;
     }
 
-    /** Get the global {@link InMemoryPhoneBook} instance. */
+    /**
+     * Get the global {@link InMemoryPhoneBook} instance.
+     */
     public static InMemoryPhoneBook get() {
         if (sInMemoryPhoneBook != null) {
             return sInMemoryPhoneBook;
@@ -82,7 +88,9 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
         }
     }
 
-    /** Tears down the globally accessible {@link InMemoryPhoneBook}. */
+    /**
+     * Tears down the globally accessible {@link InMemoryPhoneBook}.
+     */
     public static void tearDown() {
         sInMemoryPhoneBook.onTearDown();
         sInMemoryPhoneBook = null;
@@ -94,9 +102,11 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
         QueryParam contactListQueryParam = new QueryParam(
                 ContactsContract.Data.CONTENT_URI,
                 null,
-                ContactsContract.Data.MIMETYPE + " = ?",
+                ContactsContract.Data.MIMETYPE + " = ? OR "
+                        + ContactsContract.Data.MIMETYPE + " = ?",
                 new String[]{
-                        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE},
+                        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE,
+                        ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE},
                 ContactsContract.Contacts.DISPLAY_NAME + " ASC ");
         mContactListAsyncQueryLiveData = new AsyncQueryLiveData<List<Contact>>(mContext,
                 QueryParam.of(contactListQueryParam), Executors.newSingleThreadExecutor()) {
@@ -148,11 +158,11 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
     }
 
     /**
-     * Looks up a {@link Contact} by the given lookup key. Returns null if can't find the contact
-     * entry.
+     * Looks up a {@link Contact} by the given lookup key and account name. Returns null if can't
+     * find the contact entry.
      */
     @Nullable
-    public Contact lookupContactByKey(String lookupKey) {
+    public Contact lookupContactByKey(String lookupKey, String accountName) {
         if (!isLoaded()) {
             Log.w(TAG, "looking up a contact while loading.");
         }
@@ -160,42 +170,54 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
             Log.w(TAG, "looking up an empty lookup key.");
             return null;
         }
+        if (TextUtils.isEmpty(accountName)) {
+            Log.w(TAG, "looking up an empty lookup account");
+            return null;
+        }
 
-        return mLookupKeyContactMap.get(lookupKey);
+        return mLookupKeyContactMap.get(getContactKey(lookupKey, accountName));
     }
 
     private List<Contact> onCursorLoaded(Cursor cursor) {
-        Map<String, Contact> result = new LinkedHashMap<>();
-        List<Contact> contacts = new ArrayList<>();
+        Map<String, Contact> contactMap = new LinkedHashMap<>();
+        List<Contact> contactList = new ArrayList<>();
 
         while (cursor.moveToNext()) {
-            Contact contact = Contact.fromCursor(mContext, cursor);
-            String lookupKey = contact.getLookupKey();
-            if (result.containsKey(lookupKey)) {
-                Contact existingContact = result.get(lookupKey);
-                existingContact.merge(contact);
-            } else {
-                result.put(lookupKey, contact);
-            }
+            int accountNameColumn = cursor.getColumnIndex(
+                    ContactsContract.RawContacts.ACCOUNT_NAME);
+            int lookupKeyColumn = cursor.getColumnIndex(ContactsContract.Data.LOOKUP_KEY);
+            String accountName = cursor.getString(accountNameColumn);
+            String lookupKey = cursor.getString(lookupKeyColumn);
+            String key = getContactKey(lookupKey, accountName);
+
+            contactMap.put(key, Contact.fromCursor(mContext, cursor, contactMap.get(key)));
         }
 
-        contacts.addAll(result.values());
+        contactList.addAll(contactMap.values());
 
         mLookupKeyContactMap.clear();
-        mLookupKeyContactMap.putAll(result);
+        mLookupKeyContactMap.putAll(contactMap);
 
-        mPhoneNumberContactMap.clear();
-        for (Contact contact : contacts) {
+        for (Contact contact : contactList) {
             for (PhoneNumber phoneNumber : contact.getNumbers()) {
                 mPhoneNumberContactMap.put(phoneNumber.getI18nPhoneNumberWrapper(), contact);
             }
         }
-        return contacts;
+        return contactList;
     }
 
     @Override
     public void onChanged(List<Contact> contacts) {
         Log.d(TAG, "Contacts loaded:" + (contacts == null ? 0 : contacts.size()));
         mIsLoaded = true;
+    }
+
+    /**
+     * Formats a key to identify a contact based the lookup key and the account name.
+     */
+    private String getContactKey(String lookupKey, String accountName) {
+        String key = String.format(KEY_FORMAT, lookupKey, accountName);
+        Log.d(TAG, "Contact key is: " + key);
+        return key;
     }
 }
