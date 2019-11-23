@@ -39,10 +39,6 @@
 
     <!-- Preferences -->
 
-    <!-- Whether toggle transition should be animated or not -->
-    <bool name="car_ui_preference_switch_toggle_show_animation">true</bool>
-    <!-- Whether a text track should be used instead of the standard device default track -->
-    <bool name="car_ui_preference_switch_toggle_use_text_track">false</bool>
     <!-- Whether list, edit, dropdown and intent preferences should show a chevron or not -->
     <bool name="car_ui_preference_show_chevron">false</bool>
     <!-- whether list preference should be shown in full screen or as a dialog -->
