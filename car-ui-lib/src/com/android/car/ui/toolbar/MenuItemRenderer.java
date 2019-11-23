@@ -122,6 +122,7 @@ class MenuItemRenderer implements MenuItem.Listener {
             return;
         }
         mView.setVisibility(View.VISIBLE);
+        mView.setContentDescription(mMenuItem.getTitle());
 
         mIconContainer.setVisibility(View.GONE);
         mTextView.setVisibility(View.GONE);
