@@ -24,6 +24,8 @@
 
     <style name="Widget.CarUi.Toolbar"/>
 
+    <style name="Widget.CarUi.Toolbar.Container"/>
+
     <style name="Widget.CarUi.Toolbar.NavIconContainer"/>
 
     <style name="Widget.CarUi.Toolbar.Logo"/>
@@ -39,6 +41,7 @@
 
     <style name="Widget.CarUi.Toolbar.Title">
         <item name="android:layout_marginStart">@dimen/car_ui_toolbar_title_margin_start</item>
+        <item name="android:textAppearance">@style/TextAppearance.CarUi.Widget.Toolbar.Title</item>
     </style>
 
     <style name="Widget.CarUi.Toolbar.TextButton" parent="Widget.CarUi.Button.Borderless.Colored">
@@ -64,7 +67,7 @@
 
     <style name="Widget.CarUi.Toolbar.MenuItem.Container" parent="@style/Widget.CarUi.Toolbar">
         <item name="android:divider">@drawable/car_ui_toolbar_menu_item_divider</item>
-        <item name="android:showDividers">beginning|middle</item>
+        <item name="android:showDividers">beginning|middle|end</item>
     </style>
 
     <!-- Style applied to the edit box inside the toolbar search area -->
