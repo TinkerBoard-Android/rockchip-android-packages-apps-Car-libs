@@ -128,7 +128,7 @@ public class Toolbar extends FrameLayout {
     private ViewGroup mTitleLogoContainer;
     private TabLayout mTabLayout;
     private LinearLayout mMenuItemsContainer;
-    private View mOverflowButton;
+    private final MenuItem mOverflowButton;
     private final Set<OnBackListener> mOnBackListeners = new HashSet<>();
     private final Set<OnTabSelectedListener> mOnTabSelectedListeners = new HashSet<>();
     private final Set<OnHeightChangedListener> mOnHeightChangedListeners = new HashSet<>();
@@ -160,6 +160,20 @@ public class Toolbar extends FrameLayout {
     public Toolbar(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
+        mOverflowButton = MenuItem.builder(getContext())
+                .setIcon(R.drawable.car_ui_icon_overflow_menu)
+                .setTitle(R.string.car_ui_toolbar_menu_item_overflow_title)
+                .setOnClickListener(v -> {
+                    if (mOverflowDialog == null) {
+                        if (Log.isLoggable(TAG, Log.ERROR)) {
+                            Log.e(TAG, "Overflow dialog was null when trying to show it!");
+                        }
+                    } else {
+                        mOverflowDialog.show();
+                    }
+                })
+                .build();
+
         TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.CarUiToolbar, defStyleAttr, defStyleRes);
 
@@ -185,7 +199,6 @@ public class Toolbar extends FrameLayout {
             mTitleLogoContainer = requireViewById(R.id.car_ui_toolbar_title_logo_container);
             mTitleLogo = requireViewById(R.id.car_ui_toolbar_title_logo);
             mSearchView = requireViewById(R.id.car_ui_toolbar_search_view);
-            mOverflowButton = requireViewById(R.id.car_ui_toolbar_overflow_button);
 
             mTitle.setText(a.getString(R.styleable.CarUiToolbar_title));
             setLogo(a.getResourceId(R.styleable.CarUiToolbar_logo, 0));
@@ -253,12 +266,6 @@ public class Toolbar extends FrameLayout {
                 mOverflowDialog.show();
             }
         });
-
-        getViewTreeObserver().addOnGlobalLayoutListener(() -> {
-            for (OnHeightChangedListener listener : mOnHeightChangedListeners) {
-                listener.onHeightChanged(getHeight());
-            }
-        });
     }
 
     /**
@@ -272,6 +279,14 @@ public class Toolbar extends FrameLayout {
         }
 
         return R.layout.car_ui_toolbar;
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        for (OnHeightChangedListener listener : mOnHeightChangedListeners) {
+            listener.onHeightChanged(getHeight());
+        }
     }
 
     /**
@@ -579,7 +594,7 @@ public class Toolbar extends FrameLayout {
         mMenuItemRenderers.clear();
         mMenuItemsContainer.removeAllViews();
 
-        for (MenuItem item : items) {
+        for (MenuItem item : mMenuItems) {
             if (item.getDisplayBehavior() == MenuItem.DisplayBehavior.NEVER) {
                 mOverflowItems.add(item);
                 item.setListener(() -> {
@@ -589,10 +604,13 @@ public class Toolbar extends FrameLayout {
             } else {
                 MenuItemRenderer renderer = new MenuItemRenderer(item, mMenuItemsContainer);
                 mMenuItemRenderers.add(renderer);
-
                 mMenuItemsContainer.addView(renderer.createView());
             }
         }
+
+        MenuItemRenderer renderer = new MenuItemRenderer(mOverflowButton, mMenuItemsContainer);
+        mMenuItemRenderers.add(renderer);
+        mMenuItemsContainer.addView(renderer.createView());
 
         createOverflowDialog();
 
@@ -634,7 +652,30 @@ public class Toolbar extends FrameLayout {
     /** Gets the {@link MenuItem MenuItems} currently displayed */
     @NonNull
     public List<MenuItem> getMenuItems() {
-        return mMenuItems;
+        return Collections.unmodifiableList(mMenuItems);
+    }
+
+    /** Gets a {@link MenuItem} by id. */
+    @Nullable
+    public MenuItem findMenuItemById(int id) {
+        for (MenuItem item : mMenuItems) {
+            if (item.getId() == id) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    /** Gets a {@link MenuItem} by id. Will throw an exception if not found. */
+    @NonNull
+    public MenuItem requireMenuItemById(int id) {
+        MenuItem result = findMenuItemById(id);
+
+        if (result == null) {
+            throw new IllegalArgumentException("ID does not reference a MenuItem on this Toolbar");
+        }
+
+        return result;
     }
 
     private int countVisibleOverflowItems() {
@@ -766,8 +807,7 @@ public class Toolbar extends FrameLayout {
 
         boolean showButtons = state != State.SEARCH || mShowMenuItemsWhileSearching;
         mMenuItemsContainer.setVisibility(showButtons ? VISIBLE : GONE);
-        mOverflowButton.setVisibility(showButtons && countVisibleOverflowItems() > 0
-                ? VISIBLE : GONE);
+        mOverflowButton.setVisible(showButtons && countVisibleOverflowItems() > 0);
     }
 
     /** Gets the current {@link State} of the toolbar. */

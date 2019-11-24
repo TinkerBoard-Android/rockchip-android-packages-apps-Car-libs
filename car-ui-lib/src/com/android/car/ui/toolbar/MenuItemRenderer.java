@@ -122,6 +122,7 @@ class MenuItemRenderer implements MenuItem.Listener {
             return;
         }
         mView.setVisibility(View.VISIBLE);
+        mView.setContentDescription(mMenuItem.getTitle());
 
         mIconContainer.setVisibility(View.GONE);
         mTextView.setVisibility(View.GONE);
@@ -207,7 +208,7 @@ class MenuItemRenderer implements MenuItem.Listener {
 
         TypedArray a = c.obtainStyledAttributes(attrs, R.styleable.CarUiToolbarMenuItem);
         try {
-            int id = a.getInt(R.styleable.CarUiToolbarMenuItem_id, 0);
+            int id = a.getResourceId(R.styleable.CarUiToolbarMenuItem_id, 0);
             String title = a.getString(R.styleable.CarUiToolbarMenuItem_title);
             Drawable icon = a.getDrawable(R.styleable.CarUiToolbarMenuItem_icon);
             boolean tinted = a.getBoolean(R.styleable.CarUiToolbarMenuItem_tinted, true);

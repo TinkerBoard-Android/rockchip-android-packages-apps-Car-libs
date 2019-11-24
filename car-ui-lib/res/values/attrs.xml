@@ -43,7 +43,7 @@
 
     <declare-styleable name="CarUiToolbarMenuItem">
         <!-- Id of MenuItem, used to differentiate them -->
-        <attr name="id" format="integer"/>
+        <attr name="id" format="reference"/>
         <!-- Show/hide the MenuItem -->
         <attr name="visible" format="boolean"/>
         <!-- Title -->
@@ -111,18 +111,6 @@
 
     <!-- Theme attribute to specify a default style for all CarUiRecyclerViews -->
     <attr name="carUiRecyclerViewStyle" format="reference" />
-
-    <!-- TODO: Replace this with the Android default text styleable -->
-    <declare-styleable name="CarUiTextDrawable">
-        <!-- Text to be rendered by the drawable -->
-        <attr name="renderedText" format="string" />
-        <!-- Font size -->
-        <attr name="textSize" format="dimension" />
-        <!-- Text color -->
-        <attr name="textColor" format="color" />
-        <!-- Type face to use -->
-        <attr name="typeface" format="string" />
-    </declare-styleable>
 
     <attr name="state_ux_restricted" format="boolean" />
 </resources>
