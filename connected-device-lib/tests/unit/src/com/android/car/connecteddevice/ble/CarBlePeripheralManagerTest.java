@@ -30,6 +30,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
+import android.bluetooth.le.AdvertiseSettings;
 import android.car.encryptionrunner.EncryptionRunnerFactory;
 import android.car.encryptionrunner.Key;
 import android.os.ParcelUuid;
@@ -135,6 +136,23 @@ public class CarBlePeripheralManagerTest {
     }
 
     @Test
+    public void testNotifyAssociationSuccess() throws InterruptedException {
+        Semaphore semaphore = new Semaphore(0);
+        AssociationCallback callback = createAssociationCallback(semaphore);
+        String testDeviceName = getNameForAssociation();
+        startAssociation(callback, testDeviceName);
+        ArgumentCaptor<AdvertiseCallback> callbackCaptor =
+                ArgumentCaptor.forClass(AdvertiseCallback.class);
+        verify(mMockPeripheralManager, timeout(3000))
+                .startAdvertising(any(), any(), callbackCaptor.capture());
+        AdvertiseCallback advertiseCallback = callbackCaptor.getValue();
+        AdvertiseSettings settings = new AdvertiseSettings.Builder().build();
+        advertiseCallback.onStartSuccess(settings);
+        assertThat(tryAcquire(semaphore)).isTrue();
+        verify(callback).onAssociationStartSuccess(eq(testDeviceName));
+    }
+
+    @Test
     public void testShowVerificationCode() throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
         AssociationCallback callback = createAssociationCallback(semaphore);
@@ -207,6 +225,10 @@ public class CarBlePeripheralManagerTest {
     @NonNull
     private AssociationCallback createAssociationCallback(@NonNull final Semaphore semaphore) {
         return spy(new AssociationCallback() {
+            @Override
+            public void onAssociationStartSuccess(String deviceName) {
+                semaphore.release();
+            }
             @Override
             public void onAssociationStartFailure() {
                 semaphore.release();

@@ -19,7 +19,14 @@ package com.android.car.connecteddevice;
 /** Callbacks that will be invoked during associating a new client. */
 public interface AssociationCallback {
 
-    /** Invoked when IHU failed to start advertising for association*/
+    /**
+     * Invoked when IHU starts advertising with its device name for association successfully.
+     *
+     * @param deviceName The device name to identify the car.
+     */
+    void onAssociationStartSuccess(String deviceName);
+
+    /** Invoked when IHU failed to start advertising for association. */
     void onAssociationStartFailure();
 
     /**

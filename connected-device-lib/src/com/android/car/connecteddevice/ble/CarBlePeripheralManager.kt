@@ -313,6 +313,7 @@ internal class CarBlePeripheralManager(
         advertiseCallback = object : AdvertiseCallback() {
             override fun onStartSuccess(settingsInEffect: AdvertiseSettings?) {
                 super.onStartSuccess(settingsInEffect)
+                associationCallback?.onAssociationStartSuccess(deviceName)
                 logd(TAG, "Successfully started advertising for association.")
             }
             override fun onStartFailure(errorCode: Int) {
