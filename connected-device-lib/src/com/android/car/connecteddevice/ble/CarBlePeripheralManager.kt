@@ -284,6 +284,18 @@ internal class CarBlePeripheralManager(
 
     /** Connect to device with id of [deviceId]. */
     fun connectToDevice(deviceId: UUID) {
+        val isAlreadyConnected = connectedDevices.any {
+            try {
+                UUID.fromString(it.deviceId) == deviceId
+            } catch (e: Exception) {
+                false
+            }
+        }
+        if (isAlreadyConnected) {
+            // Already connected to this device. Ignore requests to connect again.
+            return
+        }
+
         // Clear any previous session before starting a new one.
         reset()
         advertiseCallback = object : AdvertiseCallback() {

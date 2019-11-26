@@ -107,6 +107,13 @@ public class ConnectedDeviceManager {
     @GuardedBy("mLock")
     private volatile boolean mIsConnectingToUserDevice = false;
 
+    @GuardedBy("mLock")
+    private volatile boolean mIsStarted = false;
+
+    // True if a request to connect came in before manager has started.
+    @GuardedBy("mLock")
+    private volatile boolean mHasDelayedConnectionRequest = false;
+
     private String mNameForAssociation;
 
     @Retention(SOURCE)
@@ -183,11 +190,32 @@ public class ConnectedDeviceManager {
         logd(TAG, "Starting ConnectedDeviceManager.");
         //mCentralManager.start();
         mPeripheralManager.start();
+        boolean hasDelayedRequest = false;
+        mLock.lock();
+        try {
+            mIsStarted = true;
+            hasDelayedRequest = mHasDelayedConnectionRequest;
+            mHasDelayedConnectionRequest = false;
+        } finally {
+            mLock.unlock();
+        }
+
+        if (hasDelayedRequest) {
+            connectToActiveUserDevice();
+        }
     }
 
     /** Clean up internal processes and disconnect any active connections. */
     public void cleanup() {
         logd(TAG, "Cleaning up ConnectedDeviceManager.");
+        mLock.lock();
+        try {
+            mIsStarted = false;
+            mHasDelayedConnectionRequest = false;
+            mIsConnectingToUserDevice = false;
+        } finally {
+            mLock.unlock();
+        }
         mCentralManager.stop();
         mPeripheralManager.stop();
         mDeviceCallbacks.clear();
@@ -233,6 +261,10 @@ public class ConnectedDeviceManager {
     public void connectToActiveUserDevice() {
         mLock.lock();
         try {
+            if (!mIsStarted) {
+                mHasDelayedConnectionRequest = true;
+                return;
+            }
             if (mIsConnectingToUserDevice) {
                 // Already connecting, no further action needed.
                 return;
