@@ -107,7 +107,7 @@ public class ListPreferenceDialogFragment extends PreferenceDialogFragment imple
 
         setStyle(DialogFragment.STYLE_NORMAL, R.style.Preference_CarUi_ListPreference);
         LayoutInflater inflater = LayoutInflater.from(getContext());
-        mDialogView = inflater.inflate(R.layout.car_ui_list_preference_dialog, null);
+        mDialogView = inflater.inflate(R.layout.car_ui_list_preference, null);
 
         Toolbar toolbar = mDialogView.findViewById(R.id.toolbar);
         toolbar.registerOnBackListener(this);
