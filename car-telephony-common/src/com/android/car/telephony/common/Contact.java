@@ -316,15 +316,26 @@ public class Contact implements Parcelable, Comparable<Contact> {
      * {@link ContactsContract.CommonDataKinds.Phone#CONTENT_ITEM_TYPE}.
      */
     private void addPhoneNumber(Context context, Cursor cursor) {
-        PhoneNumber number = PhoneNumber.fromCursor(context, cursor);
-        mPhoneNumbers.add(number);
+        PhoneNumber newNumber = PhoneNumber.fromCursor(context, cursor);
 
-        if (number.isPrimary()) {
-            mPrimaryPhoneNumber = number;
+        boolean hasSameNumber = false;
+        for (PhoneNumber number : mPhoneNumbers) {
+            if (newNumber.equals(number)) {
+                hasSameNumber = true;
+                number.merge(newNumber);
+            }
+        }
+
+        if (!hasSameNumber) {
+            mPhoneNumbers.add(newNumber);
+        }
+
+        if (newNumber.isPrimary()) {
+            mPrimaryPhoneNumber = mPrimaryPhoneNumber.merge(newNumber);
         }
 
         // TODO: update voice mail number part when start to support voice mail.
-        if (TelecomUtils.isVoicemailNumber(context, number.getNumber())) {
+        if (TelecomUtils.isVoicemailNumber(context, newNumber.getNumber())) {
             mIsVoiceMail = true;
         }
     }
