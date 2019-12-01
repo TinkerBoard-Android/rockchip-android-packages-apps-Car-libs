@@ -226,7 +226,8 @@ public class Contact implements Parcelable, Comparable<Contact> {
             contact.loadBasicInfo(cursor);
         }
 
-        if (!accountName.equals(contact.mAccountName) || !lookupKey.equals(contact.mLookupKey)) {
+        if (!TextUtils.equals(accountName, contact.mAccountName)
+                || !TextUtils.equals(lookupKey, contact.mLookupKey)) {
             Log.w(TAG, "A wrong contact is passed in. A new contact will be created.");
             contact = new Contact();
             contact.loadBasicInfo(cursor);
