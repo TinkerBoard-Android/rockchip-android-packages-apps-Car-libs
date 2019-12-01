@@ -158,20 +158,16 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
     }
 
     /**
-     * Looks up a {@link Contact} by the given lookup key and account name. Returns null if can't
-     * find the contact entry.
+     * Looks up a {@link Contact} by the given lookup key and account name. Account name could be
+     * null for locally added contacts. Returns null if can't find the contact entry.
      */
     @Nullable
-    public Contact lookupContactByKey(String lookupKey, String accountName) {
+    public Contact lookupContactByKey(String lookupKey, @Nullable String accountName) {
         if (!isLoaded()) {
             Log.w(TAG, "looking up a contact while loading.");
         }
         if (TextUtils.isEmpty(lookupKey)) {
             Log.w(TAG, "looking up an empty lookup key.");
-            return null;
-        }
-        if (TextUtils.isEmpty(accountName)) {
-            Log.w(TAG, "looking up an empty lookup account");
             return null;
         }
 
@@ -213,9 +209,10 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
     }
 
     /**
-     * Formats a key to identify a contact based the lookup key and the account name.
+     * Formats a key to identify a contact based the lookup key and the account name. Account Name
+     * could be null and it will be handled by String.format().
      */
-    private String getContactKey(String lookupKey, String accountName) {
+    private String getContactKey(String lookupKey, @Nullable String accountName) {
         String key = String.format(KEY_FORMAT, lookupKey, accountName);
         Log.d(TAG, "Contact key is: " + key);
         return key;
