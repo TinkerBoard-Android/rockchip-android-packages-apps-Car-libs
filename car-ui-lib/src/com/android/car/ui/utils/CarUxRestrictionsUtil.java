@@ -66,7 +66,7 @@ public class CarUxRestrictionsUtil {
                     }
                 };
 
-        mCarApi = Car.createCar(context);
+        mCarApi = Car.createCar(context.getApplicationContext());
         mObservers = Collections.newSetFromMap(new WeakHashMap<>());
 
         try {
