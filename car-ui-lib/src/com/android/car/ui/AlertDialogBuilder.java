@@ -27,7 +27,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
+import android.widget.TextView;
 
 import androidx.annotation.ArrayRes;
 import androidx.annotation.AttrRes;
@@ -44,7 +46,9 @@ public class AlertDialogBuilder {
     private boolean mPositiveButtonSet;
     private boolean mNeutralButtonSet;
     private boolean mNegativeButtonSet;
-    private String mDefaultButtonText;
+    private CharSequence mTitle;
+    private CharSequence mSubtitle;
+    private Drawable mIcon;
 
     public AlertDialogBuilder(Context context) {
         // Resource id specified as 0 uses the parent contexts resolved value for alertDialogTheme.
@@ -54,7 +58,6 @@ public class AlertDialogBuilder {
     public AlertDialogBuilder(Context context, int themeResId) {
         mBuilder = new AlertDialog.Builder(context, themeResId);
         mContext = context;
-        mDefaultButtonText = context.getString(R.string.car_ui_alert_dialog_default_button);
     }
 
     public Context getContext() {
@@ -67,8 +70,7 @@ public class AlertDialogBuilder {
      * @return This Builder object to allow for chaining of calls to set methods
      */
     public AlertDialogBuilder setTitle(@StringRes int titleId) {
-        mBuilder.setTitle(titleId);
-        return this;
+        return setTitle(mContext.getText(titleId));
     }
 
     /**
@@ -77,7 +79,27 @@ public class AlertDialogBuilder {
      * @return This Builder object to allow for chaining of calls to set methods
      */
     public AlertDialogBuilder setTitle(CharSequence title) {
+        mTitle = title;
         mBuilder.setTitle(title);
+        return this;
+    }
+
+    /**
+     * Sets a subtitle to be displayed in the {@link Dialog}.
+     *
+     * @return This Builder object to allow for chaining of calls to set methods
+     */
+    public AlertDialogBuilder setSubtitle(@StringRes int subtitle) {
+        return setSubtitle(mContext.getString(subtitle));
+    }
+
+    /**
+     * Sets a subtitle to be displayed in the {@link Dialog}.
+     *
+     * @return This Builder object to allow for chaining of calls to set methods
+     */
+    public AlertDialogBuilder setSubtitle(CharSequence subtitle) {
+        mSubtitle = subtitle;
         return this;
     }
 
@@ -109,8 +131,7 @@ public class AlertDialogBuilder {
      * @return This Builder object to allow for chaining of calls to set methods
      */
     public AlertDialogBuilder setIcon(@DrawableRes int iconId) {
-        mBuilder.setIcon(iconId);
-        return this;
+        return setIcon(mContext.getDrawable(iconId));
     }
 
     /**
@@ -124,6 +145,7 @@ public class AlertDialogBuilder {
      * methods
      */
     public AlertDialogBuilder setIcon(Drawable icon) {
+        mIcon = icon;
         mBuilder.setIcon(icon);
         return this;
     }
@@ -510,10 +532,8 @@ public class AlertDialogBuilder {
      */
     public AlertDialogBuilder setEditBox(String prompt, TextWatcher textChangedListener,
             InputFilter[] inputFilters, int inputType) {
-        LayoutInflater layoutInflater =
-                (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View contentView = layoutInflater.inflate(R.layout.car_ui_alert_dialog_edit_text,
-                null);
+        View contentView = LayoutInflater.from(mContext).inflate(
+                R.layout.car_ui_alert_dialog_edit_text, null);
 
         EditText editText = contentView.requireViewById(R.id.textbox);
         editText.setText(prompt);
@@ -548,6 +568,33 @@ public class AlertDialogBuilder {
         return setEditBox(prompt, textChangedListener, inputFilters, 0);
     }
 
+
+    /** Final steps common to both {@link #create()} and {@link #show()} */
+    private void prepareDialog() {
+        if (mSubtitle != null) {
+
+            View customTitle = LayoutInflater.from(mContext).inflate(
+                    R.layout.car_ui_alert_dialog_title_with_subtitle, null);
+
+            TextView mTitleView = customTitle.requireViewById(R.id.alertTitle);
+            TextView mSubtitleView = customTitle.requireViewById(R.id.alertSubtitle);
+            ImageView mIconView = customTitle.requireViewById(R.id.icon);
+
+            mTitleView.setText(mTitle);
+            mSubtitleView.setText(mSubtitle);
+            mIconView.setImageDrawable(mIcon);
+            mIconView.setVisibility(mIcon != null ? View.VISIBLE : View.GONE);
+            mBuilder.setCustomTitle(customTitle);
+        }
+
+        if (!mNeutralButtonSet && !mNegativeButtonSet && !mPositiveButtonSet) {
+            String mDefaultButtonText = mContext.getString(
+                    R.string.car_ui_alert_dialog_default_button);
+            mBuilder.setNegativeButton(mDefaultButtonText, (dialog, which) -> {
+            });
+        }
+    }
+
     /**
      * Creates an {@link AlertDialog} with the arguments supplied to this
      * builder.
@@ -557,6 +604,7 @@ public class AlertDialogBuilder {
      * create and display the dialog.
      */
     public AlertDialog create() {
+        prepareDialog();
         return mBuilder.create();
     }
 
@@ -571,12 +619,7 @@ public class AlertDialogBuilder {
      * </pre>
      */
     public AlertDialog show() {
-        if (mNeutralButtonSet || mNegativeButtonSet || mPositiveButtonSet) {
-            return mBuilder.show();
-        }
-
-        mBuilder.setNegativeButton(mDefaultButtonText, (dialog, which) -> {
-        });
+        prepareDialog();
         return mBuilder.show();
     }
 }
