@@ -63,7 +63,7 @@
         android:title="@string/title_switch_preference"
         android:summary="@string/summary_switch_preference"/>
 
-    <com.android.car.ui.preference.CarUiDropDownPreference
+    <DropDownPreference
         android:key="dropdown"
         android:title="@string/title_dropdown_preference"
         android:entries="@array/entries"
@@ -80,13 +80,13 @@
   <PreferenceCategory
       android:title="@string/dialogs">
 
-    <com.android.car.ui.preference.CarUiEditTextPreference
+    <EditTextPreference
         android:key="edittext"
         android:title="@string/title_edittext_preference"
         app:useSimpleSummaryProvider="true"
         android:dialogTitle="@string/dialog_title_edittext_preference"/>
 
-    <com.android.car.ui.preference.CarUiListPreference
+    <ListPreference
         android:key="list"
         android:title="@string/title_list_preference"
         app:useSimpleSummaryProvider="true"
@@ -94,7 +94,7 @@
         android:entryValues="@array/entry_values"
         android:dialogTitle="@string/dialog_title_list_preference"/>
 
-    <com.android.car.ui.preference.CarUiMultiSelectListPreference
+    <MultiSelectListPreference
         android:key="multi_select_list"
         android:title="@string/title_multi_list_preference"
         android:summary="@string/summary_multi_list_preference"
@@ -108,19 +108,19 @@
       android:title="@string/advanced_attributes"
       app:initialExpandedChildrenCount="1">
 
-    <com.android.car.ui.preference.CarUiPreference
+    <Preference
         android:key="expandable"
         android:title="@string/title_expandable_preference"
         android:summary="@string/summary_expandable_preference"/>
 
-    <com.android.car.ui.preference.CarUiPreference
+    <Preference
         android:title="@string/title_intent_preference"
         android:summary="@string/summary_intent_preference">
 
       <intent android:action="android.intent.action.VIEW"
           android:data="http://www.android.com"/>
 
-    </com.android.car.ui.preference.CarUiPreference>
+    </Preference>
 
     <SwitchPreference
         android:key="parent"
