@@ -16,21 +16,35 @@
 
 package com.android.car.ui.preference;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+import androidx.preference.DialogPreference;
+import androidx.preference.DropDownPreference;
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.MultiSelectListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceGroup;
+import androidx.preference.PreferenceScreen;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.R;
 import com.android.car.ui.toolbar.Toolbar;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
 /**
  * A PreferenceFragmentCompat is the entry point to using the Preference library.
@@ -38,9 +52,15 @@ import com.android.car.ui.toolbar.Toolbar;
  * <p>Note: this is borrowed as-is from androidx.preference.PreferenceFragmentCompat with updates to
  * launch Car UI library {@link DialogFragment}. Automotive applications should use children of
  * this fragment in order to launch the system themed {@link DialogFragment}.
+ *
+ * <p>Using this fragment will replace regular Preferences with CarUi equivalents. Because of this,
+ * certain properties that cannot be read out of Preferences will be lost upon calling
+ * {@link #setPreferenceScreen(PreferenceScreen)}. These include the preference viewId,
+ * defaultValue, and enabled state.
  */
 public abstract class PreferenceFragment extends PreferenceFragmentCompat {
 
+    private static final String TAG = "CarUiPreferenceFragment";
     private static final String DIALOG_FRAGMENT_TAG =
             "com.android.car.ui.PreferenceFragment.DIALOG";
 
@@ -108,5 +128,176 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat {
         }
         f.setTargetFragment(this, 0);
         f.show(getFragmentManager(), DIALOG_FRAGMENT_TAG);
+    }
+
+    /**
+     * This override of setPreferenceScreen replaces preferences with their CarUi versions first.
+     */
+    @Override
+    public void setPreferenceScreen(PreferenceScreen preferenceScreen) {
+        // We do a search of the tree and every time we see a PreferenceGroup we remove
+        // all it's children, replace them with CarUi versions, and then re-add them
+
+        Map<Preference, String> dependencies = new HashMap<>();
+        List<Preference> children = new ArrayList<>();
+
+        // Stack of preferences to process
+        Stack<Preference> stack = new Stack<>();
+        stack.push(preferenceScreen);
+
+        while (!stack.empty()) {
+            Preference preference = stack.pop();
+
+            if (preference instanceof PreferenceGroup) {
+                PreferenceGroup pg = (PreferenceGroup) preference;
+
+                children.clear();
+                for (int i = 0; i < pg.getPreferenceCount(); i++) {
+                    children.add(pg.getPreference(i));
+                }
+
+                pg.removeAll();
+
+                for (Preference child : children) {
+                    Preference replacement = getReplacementFor(child);
+
+                    dependencies.put(replacement, child.getDependency());
+                    pg.addPreference(replacement);
+                    stack.push(replacement);
+                }
+            }
+        }
+
+        super.setPreferenceScreen(preferenceScreen);
+
+        // Set the dependencies after all the swapping has been done and they've been
+        // associated with this fragment, or we could potentially fail to find preferences
+        // or use the wrong preferenceManager
+        for (Map.Entry<Preference, String> entry : dependencies.entrySet()) {
+            entry.getKey().setDependency(entry.getValue());
+        }
+    }
+
+    // Mapping from regular preferences to CarUi preferences.
+    // Order is important, subclasses must come before their base classes
+    private static final List<Pair<Class<? extends Preference>, Class<? extends Preference>>>
+            sPreferenceMapping = Arrays.asList(
+            new Pair<>(DropDownPreference.class, CarUiDropDownPreference.class),
+            new Pair<>(ListPreference.class, CarUiListPreference.class),
+            new Pair<>(MultiSelectListPreference.class, CarUiMultiSelectListPreference.class),
+            new Pair<>(EditTextPreference.class, CarUiEditTextPreference.class),
+            new Pair<>(Preference.class, CarUiPreference.class)
+    );
+
+    /**
+     * Gets the CarUi version of the passed in preference. If there is no suitable replacement, this
+     * method will return it's input.
+     *
+     * <p>When given a Preference that extends a replaceable preference, we log a warning instead
+     * of replacing it so that we don't remove any functionality.
+     */
+    private static Preference getReplacementFor(Preference preference) {
+        Class<? extends Preference> clazz = preference.getClass();
+
+        for (Pair<Class<? extends Preference>, Class<? extends Preference>> replacement
+                : sPreferenceMapping) {
+            Class<? extends Preference> source = replacement.first;
+            Class<? extends Preference> target = replacement.second;
+            if (source.isAssignableFrom(clazz)) {
+                if (clazz == source) {
+                    try {
+                        return copyPreference(preference, (Preference) target
+                                .getDeclaredConstructor(Context.class)
+                                .newInstance(preference.getContext()));
+                    } catch (ReflectiveOperationException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else if (clazz == target || source == Preference.class) {
+                    // Don't warn about subclasses of Preference because there are many legitimate
+                    // uses for non-carui Preference subclasses, like Preference groups.
+                    return preference;
+                } else {
+                    Log.w(TAG, "Subclass of " + source.getSimpleName() + " was used, "
+                            + "preventing us from substituting it with " + target.getSimpleName());
+                    return preference;
+                }
+            }
+        }
+
+        return preference;
+    }
+
+    /**
+     * Copies all the properties of one preference to another.
+     *
+     * @return the {@code to} parameter
+     */
+    private static Preference copyPreference(Preference from, Preference to) {
+        // viewId and defaultValue don't have getters
+        // isEnabled() is not completely symmetrical with setEnabled(), so we can't use it.
+        to.setTitle(from.getTitle());
+        to.setOnPreferenceClickListener(from.getOnPreferenceClickListener());
+        to.setOnPreferenceChangeListener(from.getOnPreferenceChangeListener());
+        to.setIcon(from.getIcon());
+        to.setFragment(from.getFragment());
+        to.setIntent(from.getIntent());
+        to.setKey(from.getKey());
+        to.setOrder(from.getOrder());
+        to.setSelectable(from.isSelectable());
+        to.setPersistent(from.isPersistent());
+        to.setIconSpaceReserved(from.isIconSpaceReserved());
+        to.setWidgetLayoutResource(from.getWidgetLayoutResource());
+        to.setPreferenceDataStore(from.getPreferenceDataStore());
+        to.setShouldDisableView(from.getShouldDisableView());
+        to.setSingleLineTitle(from.isSingleLineTitle());
+        to.setVisible(from.isVisible());
+        to.setLayoutResource(from.getLayoutResource());
+        to.setCopyingEnabled(from.isCopyingEnabled());
+
+        if (from.getSummaryProvider() != null) {
+            to.setSummaryProvider(from.getSummaryProvider());
+        } else {
+            to.setSummary(from.getSummary());
+        }
+
+        if (from.peekExtras() != null) {
+            to.getExtras().putAll(from.peekExtras());
+        }
+
+        if (from instanceof DialogPreference) {
+            DialogPreference fromDialog = (DialogPreference) from;
+            DialogPreference toDialog = (DialogPreference) to;
+            toDialog.setDialogTitle(fromDialog.getDialogTitle());
+            toDialog.setDialogIcon(fromDialog.getDialogIcon());
+            toDialog.setDialogMessage(fromDialog.getDialogMessage());
+            toDialog.setDialogLayoutResource(fromDialog.getDialogLayoutResource());
+            toDialog.setNegativeButtonText(fromDialog.getNegativeButtonText());
+            toDialog.setPositiveButtonText(fromDialog.getPositiveButtonText());
+        }
+
+        // DropDownPreference extends ListPreference and doesn't add any extra api surface,
+        // so we don't need a case for it
+        if (from instanceof ListPreference) {
+            ListPreference fromList = (ListPreference) from;
+            ListPreference toList = (ListPreference) to;
+            toList.setEntries(fromList.getEntries());
+            toList.setEntryValues(fromList.getEntryValues());
+            toList.setValue(fromList.getValue());
+        } else if (from instanceof EditTextPreference) {
+            EditTextPreference fromText = (EditTextPreference) from;
+            EditTextPreference toText = (EditTextPreference) to;
+            toText.setText(fromText.getText());
+        } else if (from instanceof MultiSelectListPreference) {
+            MultiSelectListPreference fromMulti = (MultiSelectListPreference) from;
+            MultiSelectListPreference toMulti = (MultiSelectListPreference) to;
+            toMulti.setEntries(fromMulti.getEntries());
+            toMulti.setEntryValues(fromMulti.getEntryValues());
+            toMulti.setValues(fromMulti.getValues());
+        }
+
+        // We don't need to add checks for things that we will never replace,
+        // like PreferenceGroup or CheckBoxPreference
+
+        return to;
     }
 }
