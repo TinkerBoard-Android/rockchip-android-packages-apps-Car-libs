@@ -97,6 +97,7 @@ public class MenuItem {
     /** Sets the id, which is purely for the client to distinguish MenuItems with.  */
     public void setId(int id) {
         mId = id;
+        update();
     }
 
     /** Gets the id, which is purely for the client to distinguish MenuItems with. */
@@ -300,7 +301,7 @@ public class MenuItem {
     public static final class Builder {
         private Context mContext;
 
-        private int mId;
+        private int mId = View.NO_ID;
         private CharSequence mTitle;
         private Drawable mIcon;
         private OnClickListener mOnClickListener;
