@@ -147,11 +147,15 @@ public class MediaItemMetadata implements Parcelable {
 
             Bitmap myBitmap = getBitmapToFlag(context);
             Bitmap otherBitmap = other.getBitmapToFlag(context);
-            if ((myBitmap != null) && (myBitmap.equals(otherBitmap))) return true;
+            if ((myBitmap != null) || (otherBitmap != null)) {
+                return Objects.equals(myBitmap, otherBitmap);
+            }
 
             Uri myUri = getImageURI();
             Uri otherUri = other.getImageURI();
-            if ((myUri != null) && (myUri.equals(otherUri))) return true;
+            if ((myUri != null) || (otherUri != null)) {
+                return Objects.equals(myUri, otherUri);
+            }
 
             return getPlaceholderHash() == other.getPlaceholderHash();
         }
@@ -229,6 +233,13 @@ public class MediaItemMetadata implements Parcelable {
     private @Nullable Uri getNonEmptyArtworkUri() {
         Uri uri = mMediaDescription.getIconUri();
         return (uri != null && !TextUtils.isEmpty(uri.toString())) ? uri : null;
+    }
+
+    /**
+     * @return optional extras that can include extra information about the media item to be played.
+     */
+    public Bundle getExtras() {
+        return mMediaDescription.getExtras();
     }
 
     /**

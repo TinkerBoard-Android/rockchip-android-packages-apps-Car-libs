@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2019 The Android Open Source Project
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<resources>
+    <declare-styleable name="CarUiToolbar">
+        <!-- Title of the toolbar, only displayed in certain conditions -->
+        <attr name="title" format="string"/>
+        <!-- Logo drawable for the toolbar. Appears when there's no back/close button shown -->
+        <attr name="logo" format="reference"/>
+        <!-- Hint for the search bar in the toolbar -->
+        <attr name="searchHint" format="string"/>
+        <!-- Whether or not to show the MenuItems while searching. Default false. -->
+        <attr name="showMenuItemsWhileSearching" format="boolean"/>
+        <!-- Initial state of the toolbar. See the Toolbar.State enum for more information -->
+        <attr name="state" format="enum">
+            <enum name="home" value="0"/>
+            <enum name="subpage" value="1"/>
+            <enum name="subpage_custom" value="2"/>
+            <enum name="search" value="3"/>
+        </attr>
+        <!-- Whether or not the toolbar should have a background. Default true. -->
+        <attr name="showBackground" format="boolean"/>
+        <!-- Mode of the navigation button See the Toolbar.NavButtonMode enum for more information -->
+        <attr name="navButtonMode" format="enum">
+            <enum name="back" value="0"/>
+            <enum name="close" value="1"/>
+        </attr>
+    </declare-styleable>
+
+    <!-- Theme attribute to specifying a default style for all CarUiToolbars -->
+    <attr name="CarUiToolbarStyle" format="reference"/>
+
+    <declare-styleable name="PagedRecyclerView">
+        <!-- Whether to enable the car_ui_pagedrecyclerview_divider for linear layout or not. -->
+        <attr name="enableDivider" format="boolean" />
+        <!-- Top offset for paged recycler view. -->
+        <attr name="startOffset" format="integer" />
+        <!-- Bottom offset for paged recycler view for linear layout. -->
+        <attr name="endOffset" format="integer" />
+
+        <!-- Number of columns in a grid layout. -->
+        <attr name="numOfColumns" format="integer" />
+
+        <!-- Paged recycler view layout. -->
+        <attr name="layoutStyle" format="enum">
+            <!-- linear layout -->
+            <enum name="linear" value="0" />
+            <!-- grid layout -->
+            <enum name="grid" value="1" />
+        </attr>
+    </declare-styleable>
+
+    <declare-styleable name="PagedRecyclerViewTheme">
+        <attr name="pagedRecyclerViewStyle" format="reference" />
+    </declare-styleable>
+</resources>

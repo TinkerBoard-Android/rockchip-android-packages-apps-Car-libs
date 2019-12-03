@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2019 The Android Open Source Project
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<resources>
+
+    <!-- Whether to display the Scroll Bar or not. Defaults to true. If this is set to false,
+         the PagedRecyclerView will behave exactly like the RecyclerView. -->
+    <bool name="car_ui_scrollbar_enable">true</bool>
+
+    <!-- Whether to place the scrollbar z-index above the recycler view. Defaults to
+         true. -->
+    <bool name="car_ui_scrollbar_above_recycler_view">true</bool>
+
+    <bool name="car_ui_preference_allow_divider_above">false</bool>
+    <bool name="car_ui_preference_allow_divider_below">false</bool>
+    <bool name="car_ui_preference_category_allow_divider_above">false</bool>
+    <bool name="car_ui_preference_category_allow_divider_below">false</bool>
+</resources>

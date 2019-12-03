@@ -59,7 +59,9 @@ import java.util.Set;
  * <p>Touch feedback is using @android:attr/selectableItemBackground.
  *
  * @param <T> Presents a CarTab entity
+ * @deprecated Use {@link com.android.car.ui.TabLayout} instead
  */
+@Deprecated
 public class CarTabLayout<T extends CarTabLayout.CarTab> extends LinearLayout {
 
     /**

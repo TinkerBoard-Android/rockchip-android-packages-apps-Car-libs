@@ -19,7 +19,4 @@ limitations under the License.
     <string name="control_bar_expand_collapse_button" msgid="3420351169078117938">"Tlačítko rozbalení/sbalení"</string>
     <string name="car_drawer_open" msgid="2676372472514742324">"Otevřít vysouvací panel"</string>
     <string name="car_drawer_close" msgid="5329374630462464855">"Zavřít vysouvací panel"</string>
-    <string name="restricted_while_driving" msgid="2278031053760704437">"Funkce při řízení není dostupná."</string>
-    <string name="scroll_bar_page_down_button" msgid="8633547153186948066">"Posunout dolů"</string>
-    <string name="scroll_bar_page_up_button" msgid="8306413844913744345">"Posunout nahoru"</string>
 </resources>
