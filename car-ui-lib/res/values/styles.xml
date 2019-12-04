@@ -110,6 +110,26 @@
         <item name="android:scrollbars">none</item>
     </style>
 
+    <style name="Widget.CarUi.AlertDialog"/>
+
+    <style name="Widget.CarUi.AlertDialog.HeaderContainer">
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical|start</item>
+        <item name="android:paddingTop">18dp</item>
+        <item name="android:paddingBottom">18dp</item>
+    </style>
+
+    <style name="Widget.CarUi.AlertDialog.TitleContainer">
+        <item name="android:layout_marginStart">@dimen/car_ui_dialog_title_margin</item>
+        <item name="android:layout_marginEnd">@dimen/car_ui_dialog_title_margin</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="Widget.CarUi.AlertDialog.Icon">
+        <item name="android:layout_marginStart">@dimen/car_ui_dialog_title_margin</item>
+        <item name="android:scaleType">fitCenter</item>
+    </style>
+
     <style name="Preference.CarUi.ListPreference" parent="android:Theme.DeviceDefault.Dialog">
         <item name="android:windowNoTitle">true</item>
         <!-- Set this to true if you want Full Screen without status bar -->
@@ -213,6 +233,8 @@
         <item name="android:textSize">@dimen/car_ui_preference_edit_text_dialog_message_text_size
         </item>
     </style>
+
+    <style name="TextAppearance.CarUi.AlertDialog.Subtitle" parent="android:TextAppearance.DeviceDefault"/>
 
     <style name="TextAppearance.CarUi.Widget" parent="android:TextAppearance.DeviceDefault.Widget"/>
 
