@@ -44,7 +44,13 @@
   <public type="dimen" name="car_ui_dialog_edittext_margin_end"/>
   <public type="dimen" name="car_ui_dialog_edittext_margin_start"/>
   <public type="dimen" name="car_ui_dialog_edittext_margin_top"/>
+  <public type="dimen" name="car_ui_dialog_icon_size"/>
+  <public type="dimen" name="car_ui_dialog_title_margin"/>
   <public type="dimen" name="car_ui_header_list_item_height"/>
+  <public type="dimen" name="car_ui_keyline_1"/>
+  <public type="dimen" name="car_ui_keyline_2"/>
+  <public type="dimen" name="car_ui_keyline_3"/>
+  <public type="dimen" name="car_ui_keyline_4"/>
   <public type="dimen" name="car_ui_letter_spacing_body1"/>
   <public type="dimen" name="car_ui_letter_spacing_body3"/>
   <public type="dimen" name="car_ui_list_item_action_divider_height"/>
@@ -192,6 +198,7 @@
   <public type="style" name="PreferenceFragmentList.CarUi"/>
   <public type="style" name="RadioButton.CarUi"/>
   <public type="style" name="TextAppearance.CarUi"/>
+  <public type="style" name="TextAppearance.CarUi.AlertDialog.Subtitle"/>
   <public type="style" name="TextAppearance.CarUi.ListItem"/>
   <public type="style" name="TextAppearance.CarUi.ListItem.Body"/>
   <public type="style" name="TextAppearance.CarUi.PreferenceCategoryTitle"/>
@@ -205,6 +212,10 @@
   <public type="style" name="TextAppearance.CarUi.Widget.Toolbar.Title"/>
   <public type="style" name="Theme.CarUi"/>
   <public type="style" name="Widget.CarUi"/>
+  <public type="style" name="Widget.CarUi.AlertDialog"/>
+  <public type="style" name="Widget.CarUi.AlertDialog.HeaderContainer"/>
+  <public type="style" name="Widget.CarUi.AlertDialog.Icon"/>
+  <public type="style" name="Widget.CarUi.AlertDialog.TitleContainer"/>
   <public type="style" name="Widget.CarUi.Button.Borderless.Colored"/>
   <public type="style" name="Widget.CarUi.CarUiRecyclerView"/>
   <public type="style" name="Widget.CarUi.CarUiRecyclerView.NestedRecyclerView"/>
