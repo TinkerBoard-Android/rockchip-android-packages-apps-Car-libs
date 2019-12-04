@@ -22,7 +22,7 @@
       <item quantity="other">%d नए मैसेज</item>
     </plurals>
     <string name="action_play" msgid="1884580550634079470">"चलाएं"</string>
-    <string name="action_mark_as_read" msgid="5185216939940407938">"\'पढ़ा गया है\' का सही का निशान लगाएं"</string>
+    <string name="action_mark_as_read" msgid="5185216939940407938">"\'पढ़ा गया\' का निशान लगाएं"</string>
     <string name="action_repeat" msgid="8184323082093728957">"दोहराएं"</string>
     <string name="action_reply" msgid="564106590567600685">"जवाब दें"</string>
     <string name="action_stop" msgid="6950369080845695405">"रोकें"</string>
