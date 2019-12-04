@@ -18,7 +18,11 @@ package com.android.car.ui.recyclerview;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
 import android.content.Context;
+import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -34,6 +38,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
 
 @RunWith(CarUiRobolectricTestRunner.class)
@@ -103,5 +108,25 @@ public class CarUiRecyclerViewTest {
         mCarUiRecyclerView = mView.findViewById(R.id.test_prv);
 
         assertThat(mCarUiRecyclerView.mNestedRecyclerView).isNotNull();
+    }
+
+    @Test
+    public void init_shouldNotContainNestedRecyclerView() {
+        Context context = spy(mContext);
+        Resources resources = spy(mContext.getResources());
+        when(resources.getBoolean(R.bool.car_ui_scrollbar_enable)).thenReturn(false);
+        when(context.getResources()).thenReturn(resources);
+
+        mCarUiRecyclerView = new CarUiRecyclerView(context);
+
+        assertThat(mCarUiRecyclerView.mNestedRecyclerView).isNull();
+    }
+
+    @Test
+    public void init_shouldHaveGridLayout() {
+        mCarUiRecyclerView = new CarUiRecyclerView(mContext,
+                Robolectric.buildAttributeSet().addAttribute(R.attr.layoutStyle, "grid").build());
+        assertThat(mCarUiRecyclerView.getEffectiveLayoutManager()).isInstanceOf(
+                GridLayoutManager.class);
     }
 }
