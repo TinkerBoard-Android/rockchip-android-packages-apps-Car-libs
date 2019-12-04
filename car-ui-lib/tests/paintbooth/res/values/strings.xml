@@ -218,6 +218,9 @@
   <!-- Text for show dialog button [CHAR_LIMIT=18]-->
   <string name="dialog_show_dialog">Show Dialog</string>
 
+  <!-- Text for show dialog button [CHAR_LIMIT=30]-->
+  <string name="dialog_show_dialog_icon">Show Dialog with icon</string>
+
   <!-- Text for Dialog with edit text box button [CHAR_LIMIT=50]-->
   <string name="dialog_show_dialog_edit">Show Dialog with edit text box</string>
 
@@ -235,6 +238,12 @@
 
   <!-- Text for show Toast button [CHAR_LIMIT=16]-->
   <string name="dialog_show_toast">Show Toast</string>
+
+  <!-- Button that shows a dialog with a subtitle [CHAR_LIMIT=50]-->
+  <string name="dialog_show_subtitle">Show Dialog with title and subtitle</string>
+
+  <!-- Button that shows a dialog with a subtitle and icon [CHAR_LIMIT=50]-->
+  <string name="dialog_show_subtitle_and_icon">Show Dialog with title, subtitle, and icon</string>
 
   <!--This section is for widget attributes -->
   <eat-comment/>
