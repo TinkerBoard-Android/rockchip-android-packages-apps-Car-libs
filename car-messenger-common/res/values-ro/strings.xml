@@ -28,8 +28,8 @@
     <string name="action_reply" msgid="564106590567600685">"Răspundeți"</string>
     <string name="action_stop" msgid="6950369080845695405">"Opriți"</string>
     <string name="action_close_messages" msgid="7949295965012770696">"Închideți"</string>
-    <string name="auto_reply_failed_message" msgid="6445984971657465627">"Nu puteți trimite răspunsul. Încercați din nou."</string>
-    <string name="auto_reply_device_disconnected" msgid="5861772755278229950">"Nu puteți trimite răspunsul. Dispozitivul nu este conectat."</string>
+    <string name="auto_reply_failed_message" msgid="6445984971657465627">"Nu se poate trimite răspunsul. Încercați din nou."</string>
+    <string name="auto_reply_device_disconnected" msgid="5861772755278229950">"Nu se poate trimite răspunsul. Dispozitivul nu este conectat."</string>
     <string name="tts_sender_says" msgid="5352698006545359668">"%s spune"</string>
     <string name="tts_failed_toast" msgid="4077460119220565965">"Redarea textului nu a reușit!"</string>
     <string name="reply_message_display_template" msgid="6348622926232346974">"„%s”"</string>
