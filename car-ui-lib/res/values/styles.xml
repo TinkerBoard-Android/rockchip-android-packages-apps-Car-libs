@@ -34,6 +34,10 @@
         <item name="android:paddingEnd">@dimen/car_ui_toolbar_title_logo_padding</item>
     </style>
 
+    <style name="Widget.CarUi.Toolbar.ProgressBar"
+           parent="@android:style/Widget.DeviceDefault.ProgressBar.Horizontal">
+    </style>
+
     <style name="Widget.CarUi.Toolbar.NavIcon">
         <item name="android:tint">@color/car_ui_toolbar_nav_icon_color</item>
         <item name="android:src">@drawable/car_ui_icon_arrow_back</item>
@@ -167,10 +171,14 @@
         <item name="android:layout">@layout/car_ui_preference_dropdown</item>
     </style>
 
+    <style name="Preference.CarUi.Icon"/>
+
     <style name="Preference.CarUi.Information">
         <item name="android:enabled">false</item>
         <item name="android:shouldDisableView">false</item>
     </style>
+
+    <style name="Preference.CarUi.Preference"/>
 
     <style name="Preference.CarUi.PreferenceScreen"/>
 
@@ -227,11 +235,8 @@
     </style>
 
     <style name="TextAppearance.CarUi.PreferenceEditTextDialogMessage">
-        <item name="android:textColor">
-            @color/car_ui_preference_edit_text_dialog_message_text_color
-        </item>
-        <item name="android:textSize">@dimen/car_ui_preference_edit_text_dialog_message_text_size
-        </item>
+        <item name="android:textColor">@color/car_ui_preference_edit_text_dialog_message_text_color</item>
+        <item name="android:textSize">@dimen/car_ui_preference_edit_text_dialog_message_text_size</item>
     </style>
 
     <style name="TextAppearance.CarUi.AlertDialog.Subtitle" parent="android:TextAppearance.DeviceDefault"/>
