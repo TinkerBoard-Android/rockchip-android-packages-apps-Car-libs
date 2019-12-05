@@ -39,7 +39,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.car.connecteddevice.AssociationCallback;
 import com.android.car.connecteddevice.model.AssociatedDevice;
-import com.android.car.connecteddevice.storage.CarCompanionDeviceStorage;
+import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
 import com.android.car.connecteddevice.util.ByteUtils;
 
 import org.junit.After;
@@ -70,7 +70,7 @@ public class CarBlePeripheralManagerTest {
     private static String sAdapterName;
 
     @Mock private BlePeripheralManager mMockPeripheralManager;
-    @Mock private CarCompanionDeviceStorage mMockStorage;
+    @Mock private ConnectedDeviceStorage mMockStorage;
 
     private CarBlePeripheralManager mCarBlePeripheralManager;
 
@@ -174,7 +174,7 @@ public class CarBlePeripheralManagerTest {
         channelCallback.onSecureChannelEstablished(key);
         ArgumentCaptor<AssociatedDevice> deviceCaptor =
                 ArgumentCaptor.forClass(AssociatedDevice.class);
-        verify(mMockStorage).addAssociatedDeviceForActiveUser(deviceCaptor.capture());
+        verify(mMockStorage).addAssociatedDeviceForActiveUser(deviceCaptor.capture(), any());
         AssociatedDevice device = deviceCaptor.getValue();
         assertThat(device.getDeviceId()).isEqualTo(TEST_REMOTE_DEVICE_ID.toString());
         assertThat(tryAcquire(semaphore)).isTrue();

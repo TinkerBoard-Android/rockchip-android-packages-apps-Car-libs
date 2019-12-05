@@ -23,16 +23,13 @@ import android.car.encryptionrunner.HandshakeException
 import android.car.encryptionrunner.HandshakeMessage.HandshakeState
 import android.car.encryptionrunner.Key
 import com.android.car.connecteddevice.BleStreamProtos.BleOperationProto.OperationType
-import com.android.car.connecteddevice.storage.CarCompanionDeviceStorage
+import com.android.car.connecteddevice.storage.ConnectedDeviceStorage
 import com.android.car.connecteddevice.util.ByteUtils
 import com.android.car.connecteddevice.util.logd
 import com.android.car.connecteddevice.util.loge
-import com.android.internal.R.attr.key
 import com.android.internal.annotations.GuardedBy
-import java.lang.Exception
 import java.security.SignatureException
 import java.util.concurrent.locks.ReentrantLock
-import kotlin.annotation.Retention
 import kotlin.concurrent.thread
 import kotlin.concurrent.withLock
 
@@ -47,18 +44,18 @@ val CONFIRMATION_SIGNAL = "True".toByteArray()
  */
 internal class SecureBleChannel(
     internal val stream: BleDeviceMessageStream,
-    private val storage: CarCompanionDeviceStorage,
+    private val storage: ConnectedDeviceStorage,
     private val isReconnect: Boolean = true,
     private val runner: EncryptionRunner = EncryptionRunnerFactory.newRunner()
 ) {
     @IntDef(
-            CHANNEL_ERROR_INVALID_HANDSHAKE,
-            CHANNEL_ERROR_INVALID_MSG,
-            CHANNEL_ERROR_INVALID_DEVICE_ID,
-            CHANNEL_ERROR_INVALID_VERIFICATION,
-            CHANNEL_ERROR_INVALID_STATE,
-            CHANNEL_ERROR_INVALID_ENCRYPTION_KEY,
-            CHANNEL_ERROR_STORAGE_ERROR
+        CHANNEL_ERROR_INVALID_HANDSHAKE,
+        CHANNEL_ERROR_INVALID_MSG,
+        CHANNEL_ERROR_INVALID_DEVICE_ID,
+        CHANNEL_ERROR_INVALID_VERIFICATION,
+        CHANNEL_ERROR_INVALID_STATE,
+        CHANNEL_ERROR_INVALID_ENCRYPTION_KEY,
+        CHANNEL_ERROR_STORAGE_ERROR
     )
     @Retention(AnnotationRetention.SOURCE)
     annotation class ChannelError
@@ -145,6 +142,7 @@ internal class SecureBleChannel(
                     notifyCallback {
                         it.onEstablishSecureChannelFailure(CHANNEL_ERROR_INVALID_DEVICE_ID)
                     }
+                    return
                 }
                 notifyCallback { it.onDeviceIdReceived(id) }
                 sendUniqueIdToClient()
@@ -154,9 +152,9 @@ internal class SecureBleChannel(
                 val handshakeMessage = runner.continueHandshake(message)
                 state = handshakeMessage.handshakeState
                 val isValidStateForAssociation = !isReconnect &&
-                        (state == HandshakeState.VERIFICATION_NEEDED)
+                    (state == HandshakeState.VERIFICATION_NEEDED)
                 val isValidStateForReconnect = isReconnect &&
-                        (state == HandshakeState.RESUMING_SESSION)
+                    (state == HandshakeState.RESUMING_SESSION)
                 if (!isValidStateForAssociation && !isValidStateForReconnect) {
                     loge(TAG, "Encounter unexpected handshake state: $state.")
                     notifyCallback {
@@ -227,7 +225,7 @@ internal class SecureBleChannel(
             }
             else -> {
                 loge(TAG, "Encountered unrecognized handshake state: $state." +
-                        " Received message: $message.")
+                    " Received message: $message.")
                 notifyCallback { it.onEstablishSecureChannelFailure(CHANNEL_ERROR_INVALID_STATE) }
             }
         }
@@ -235,7 +233,6 @@ internal class SecureBleChannel(
 
     private fun sendUniqueIdToClient() {
         val uniqueId = storage.uniqueId
-        logd(TAG, "Send car id: $uniqueId")
         val deviceMessage = DeviceMessage(
             recipient = null,
             isMessageEncrypted = false,
@@ -321,7 +318,7 @@ internal class SecureBleChannel(
         }
         if (message.handshakeState != HandshakeState.FINISHED) {
             loge(TAG, "Handshake not finished after calling verify PIN." +
-                    " Instead got state: $message.")
+                " Instead got state: $message.")
             notifyCallback { it.onEstablishSecureChannelFailure(CHANNEL_ERROR_INVALID_STATE) }
             return
         }
@@ -344,11 +341,6 @@ internal class SecureBleChannel(
             return
         }
 
-        if (!storage.saveEncryptionKey(localDeviceId, localKey.asBytes())) {
-            loge(TAG, "Failed to save encryption key.")
-            notifyCallback { it.onEstablishSecureChannelFailure(CHANNEL_ERROR_STORAGE_ERROR) }
-            return
-        }
         logd(TAG, "Pairing code successfully verified and encryption key saved. " +
             "Sending confirmation to device.")
         notifyCallback { it.onSecureChannelEstablished(localKey) }
@@ -387,7 +379,7 @@ internal class SecureBleChannel(
          *
          * @param error The failure indication.
          */
-        fun onEstablishSecureChannelFailure(@ChannelError error: Int)
+        fun onEstablishSecureChannelFailure(@SecureBleChannel.ChannelError error: Int)
 
         /**
          * Invoked when a complete message is received securely from the client and decrypted.

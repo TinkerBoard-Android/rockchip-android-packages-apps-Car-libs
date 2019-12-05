@@ -31,7 +31,12 @@ android_library {
 
     static_libs: [
         "EncryptionRunner",
+        "androidx.room_room-runtime",
         "connected-device-protos",
+    ],
+
+    plugins: [
+        "androidx.room_room-compiler-plugin",
     ],
 
     platform_apis: true,
