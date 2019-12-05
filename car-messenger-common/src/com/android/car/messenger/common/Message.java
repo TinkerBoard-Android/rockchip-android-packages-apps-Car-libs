@@ -16,10 +16,14 @@
 
 package com.android.car.messenger.common;
 
+import static com.android.car.connecteddevice.util.SafeLog.logw;
+
 import android.annotation.Nullable;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothMapClient;
 import android.content.Intent;
+import android.os.Build;
+import android.util.Log;
 
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.MessagingStyleMessage;
@@ -30,6 +34,8 @@ import com.android.car.messenger.NotificationMsgProto.NotificationMsg.MessagingS
  * on {@link NotificationMsg} and intents sent from {@link BluetoothMapClient}.
  */
 public class Message {
+    private static final String TAG = "CMC.Message";
+
     private final String mSenderName;
     private final String mDeviceId;
     private final String mMessageText;
@@ -78,9 +84,24 @@ public class Message {
         );
     }
 
-    /** Creates a Message based on {@link MessagingStyleMessage}. **/
+    /**
+     * Creates a Message based on {@link MessagingStyleMessage}. Returns {@code null} if the {@link
+     * MessagingStyleMessage} is missing required fields.
+     **/
+    @Nullable
     public static Message parseFromMessage(String deviceId,
             MessagingStyleMessage updatedMessage) {
+
+        if (!Utils.isValidMessagingStyleMessage(updatedMessage)) {
+            if (Log.isLoggable(TAG, Log.DEBUG) || Build.IS_DEBUGGABLE) {
+                throw new IllegalArgumentException(
+                        "MessagingStyleMessage is missing required fields");
+            } else {
+                logw(TAG, "MessagingStyleMessage is missing required fields");
+                return null;
+            }
+        }
+
         return new Message(updatedMessage.getSender().getName(),
                 deviceId,
                 updatedMessage.getTextMessage(),
