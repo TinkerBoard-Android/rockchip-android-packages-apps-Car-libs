@@ -150,6 +150,7 @@
   <public type="drawable" name="car_ui_icon_overflow_menu"/>
   <public type="drawable" name="car_ui_icon_search"/>
   <public type="drawable" name="car_ui_icon_settings"/>
+  <public type="drawable" name="car_ui_icon_sound_settings"/>
   <public type="drawable" name="car_ui_list_item_divider"/>
   <public type="drawable" name="car_ui_preference_icon_chevron"/>
   <public type="drawable" name="car_ui_recyclerview_button_ripple_background"/>
@@ -182,6 +183,7 @@
   <public type="string" name="car_ui_toolbar_menu_item_overflow_title"/>
   <public type="string" name="car_ui_toolbar_menu_item_search_title"/>
   <public type="string" name="car_ui_toolbar_menu_item_settings_title"/>
+  <public type="string" name="car_ui_toolbar_menu_item_sound_settings_title"/>
   <public type="style" name="CarUiPreferenceTheme"/>
   <public type="style" name="Preference.CarUi"/>
   <public type="style" name="Preference.CarUi.Category"/>
