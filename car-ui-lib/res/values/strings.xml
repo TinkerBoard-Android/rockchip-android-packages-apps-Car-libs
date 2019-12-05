@@ -33,6 +33,8 @@ limitations under the License.
     <string name="car_ui_toolbar_menu_item_search_title">Search</string>
     <!-- Title of the settings menu item. Will be displayed if the button is in the overflow menu. [CHAR_LIMIT=50] -->
     <string name="car_ui_toolbar_menu_item_settings_title">Settings</string>
+    <!-- Title of the sound settings menu item. Will be displayed if the button is in the overflow menu. [CHAR_LIMIT=50] -->
+    <string name="car_ui_toolbar_menu_item_sound_settings_title">Sound Settings</string>
     <!-- Title of the overflow menu item. Only used for content descriptions. [CHAR_LIMIT=50] -->
     <string name="car_ui_toolbar_menu_item_overflow_title">Overflow</string>
 
