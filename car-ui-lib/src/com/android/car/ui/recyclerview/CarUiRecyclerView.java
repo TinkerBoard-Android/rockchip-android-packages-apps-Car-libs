@@ -132,7 +132,7 @@ public final class CarUiRecyclerView extends RecyclerView implements
         int START = 0;
 
         /** Position scrollbar to the right of the screen. */
-        int END = 2;
+        int END = 1;
     }
 
     /**
