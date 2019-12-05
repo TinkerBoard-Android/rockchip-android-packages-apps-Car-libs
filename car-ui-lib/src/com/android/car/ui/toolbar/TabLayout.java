@@ -328,7 +328,7 @@ public class TabLayout extends LinearLayout {
             textView.setText(mText);
         }
 
-        /** Set icon drawable. */
+        /** Set icon drawable. TODO(b/139444064): revise this api.*/
         protected void bindIcon(ImageView imageView) {
             imageView.setImageDrawable(mIcon);
         }
