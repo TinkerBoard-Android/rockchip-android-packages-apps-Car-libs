@@ -26,6 +26,12 @@
   <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL"/>
   <uses-permission android:name="android.permission.CHANGE_OVERLAY_PACKAGES"/>
   <uses-permission android:name="android.permission.MANAGE_USERS"/>
+  <!-- Required to use the TYPE_DISPLAY_OVERLAY layout param for the current activity overlay -->
+  <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
+  <!-- Required for listening to android task stack changes -->
+  <uses-permission android:name="android.permission.MANAGE_ACTIVITY_STACKS" />
+  <uses-permission android:name="android.permission.REAL_GET_TASKS" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
   <application
       android:icon="@drawable/ic_launcher"
@@ -76,5 +82,14 @@
         android:name=".caruirecyclerview.CarUiListItemActivity"
         android:exported="false"
         android:parentActivityName=".MainActivity"/>
+
+    <service
+        android:label="Current Activity Service"
+        android:name=".CurrentActivityService">
+      <intent-filter>
+        <action android:name="com.android.car.ui.paintbooth.StopService" />
+      </intent-filter>
+    </service>
+
   </application>
 </manifest>

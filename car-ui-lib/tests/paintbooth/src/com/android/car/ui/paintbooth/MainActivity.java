@@ -17,6 +17,8 @@
 package com.android.car.ui.paintbooth;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -63,6 +66,16 @@ public class MainActivity extends Activity {
             Pair.create("ListItem sample", CarUiListItemActivity.class)
     );
 
+    private final List<Pair<String, View.OnClickListener>> mSwitches = Arrays.asList(
+            Pair.create("Show foreground activities", v -> {
+                Intent intent = new Intent(this, CurrentActivityService.class);
+                if (isCurrentActivityServiceRunning()) {
+                    intent.setAction(CurrentActivityService.STOP_SERVICE);
+                }
+                startForegroundService(intent);
+            })
+    );
+
     private class ViewHolder extends RecyclerView.ViewHolder {
         private Button mButton;
 
@@ -71,36 +84,60 @@ public class MainActivity extends Activity {
             mButton = itemView.findViewById(R.id.button);
         }
 
-        void update(String title, Class<? extends Activity> activityClass) {
-            mButton.setText(title);
-            mButton.setOnClickListener(e -> {
-                Intent intent = new Intent(mButton.getContext(), activityClass);
-                startActivity(intent);
-            });
+        void bind(String text, View.OnClickListener listener) {
+            mButton.setText(text);
+            mButton.setOnClickListener(listener);
+
+            if (mButton instanceof Switch) {
+                ((Switch) mButton).setChecked(isCurrentActivityServiceRunning());
+            }
         }
     }
 
     private final RecyclerView.Adapter<ViewHolder> mAdapter =
             new RecyclerView.Adapter<ViewHolder>() {
-        @NonNull
-        @Override
-        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View item = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item, parent,
-                    false);
-            return new ViewHolder(item);
-        }
 
-        @Override
-        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            Pair<String, Class<? extends Activity>> item = mActivities.get(position);
-            holder.update(item.first, item.second);
-        }
+                private static final int TYPE_SWITCH = 0;
+                private static final int TYPE_ACTIVITY = 1;
 
-        @Override
-        public int getItemCount() {
-            return mActivities.size();
-        }
-    };
+                @NonNull
+                @Override
+                public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                    View item = LayoutInflater.from(parent.getContext()).inflate(
+                            viewType == TYPE_SWITCH ? R.layout.list_item_switch
+                                    : R.layout.list_item,
+                            parent, false);
+                    return new ViewHolder(item);
+                }
+
+                @Override
+                public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+                    if (getItemViewType(position) == TYPE_SWITCH) {
+                        Pair<String, View.OnClickListener> item = mSwitches.get(position);
+                        holder.bind(item.first, item.second);
+                    } else {
+                        Pair<String, Class<? extends Activity>> item =
+                                mActivities.get(position - mSwitches.size());
+                        holder.bind(item.first, v -> {
+                            Intent intent = new Intent(holder.itemView.getContext(), item.second);
+                            startActivity(intent);
+                        });
+                    }
+                }
+
+                @Override
+                public int getItemCount() {
+                    return mSwitches.size() + mActivities.size();
+                }
+
+                @Override
+                public int getItemViewType(int position) {
+                    if (position < mSwitches.size()) {
+                        return TYPE_SWITCH;
+                    }
+                    return TYPE_ACTIVITY;
+                }
+            };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -188,5 +225,16 @@ public class MainActivity extends Activity {
         } catch (ClassNotFoundException e) {
             // LeakCanary is not used in this build, do nothing.
         }
+    }
+
+    private boolean isCurrentActivityServiceRunning() {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(
+                Integer.MAX_VALUE)) {
+            if (CurrentActivityService.class.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

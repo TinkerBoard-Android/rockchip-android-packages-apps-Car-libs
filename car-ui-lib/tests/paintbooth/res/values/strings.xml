@@ -18,6 +18,9 @@
   <!-- Application name [CHAR LIMIT=30] -->
   <string name="app_name" translatable="false">Paint Booth (Gerrit)</string>
 
+  <!-- Description of the CurrentActivityService. -->
+  <string name="current_activity_service_description">Shows the current activity</string>
+
   <!-- Strings for Preference Samples -->
   <eat-comment/>
 
@@ -251,5 +254,5 @@
   <string name="widget_checkbox_text">I\'m a check box</string>
   <!-- Text for switch [CHAR_LIMIT=25]-->
   <string name="widget_switch_text">I\'m a switch</string>
-  
+
 </resources>
