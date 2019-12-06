@@ -22,11 +22,13 @@ import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -39,7 +41,6 @@ import java.util.concurrent.Executors;
  */
 public class InMemoryPhoneBook implements Observer<List<Contact>> {
     private static final String TAG = "CD.InMemoryPhoneBook";
-    private static final String KEY_FORMAT = "%s %s";
     private static InMemoryPhoneBook sInMemoryPhoneBook;
 
     private final Context mContext;
@@ -49,9 +50,10 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
      */
     private final Map<I18nPhoneNumberWrapper, Contact> mPhoneNumberContactMap = new HashMap<>();
     /**
-     * A map to look up contact by lookup key.
+     * A map to look up contact by account name and lookup key. Each entry presents a map of lookup
+     * key to contacts for one account.
      */
-    private final Map<String, Contact> mLookupKeyContactMap = new HashMap<>();
+    private final Map<String, Map<String, Contact>> mLookupKeyContactMap = new HashMap<>();
     private boolean mIsLoaded = false;
 
     /**
@@ -170,12 +172,41 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
             Log.w(TAG, "looking up an empty lookup key.");
             return null;
         }
+        if (mLookupKeyContactMap.containsKey(accountName)) {
+            return mLookupKeyContactMap.get(accountName).get(lookupKey);
+        }
 
-        return mLookupKeyContactMap.get(getContactKey(lookupKey, accountName));
+        return null;
+    }
+
+    /**
+     * Iterates all the accounts and returns a list of contacts that match the lookup key. This API
+     * is discouraged to use whenever the account name is available where {@link
+     * #lookupContactByKey(String, String)} should be used instead.
+     */
+    @NonNull
+    public List<Contact> lookupContactByKey(String lookupKey) {
+        if (!isLoaded()) {
+            Log.w(TAG, "looking up a contact while loading.");
+        }
+
+        if (TextUtils.isEmpty(lookupKey)) {
+            Log.w(TAG, "looking up an empty lookup key.");
+            return Collections.emptyList();
+        }
+        List<Contact> results = new ArrayList<>();
+        // Iterate all the accounts to get all the match contacts with given lookup key.
+        for (Map<String, Contact> subMap : mLookupKeyContactMap.values()) {
+            if (subMap.containsKey(lookupKey)) {
+                results.add(subMap.get(lookupKey));
+            }
+        }
+
+        return results;
     }
 
     private List<Contact> onCursorLoaded(Cursor cursor) {
-        Map<String, Contact> contactMap = new LinkedHashMap<>();
+        Map<String, Map<String, Contact>> contactMap = new LinkedHashMap<>();
         List<Contact> contactList = new ArrayList<>();
 
         while (cursor.moveToNext()) {
@@ -184,12 +215,18 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
             int lookupKeyColumn = cursor.getColumnIndex(ContactsContract.Data.LOOKUP_KEY);
             String accountName = cursor.getString(accountNameColumn);
             String lookupKey = cursor.getString(lookupKeyColumn);
-            String key = getContactKey(lookupKey, accountName);
 
-            contactMap.put(key, Contact.fromCursor(mContext, cursor, contactMap.get(key)));
+            if (!contactMap.containsKey(accountName)) {
+                contactMap.put(accountName, new HashMap<>());
+            }
+
+            Map<String, Contact> subMap = contactMap.get(accountName);
+            subMap.put(lookupKey, Contact.fromCursor(mContext, cursor, subMap.get(lookupKey)));
         }
 
-        contactList.addAll(contactMap.values());
+        for (Map<String, Contact> subMap : contactMap.values()) {
+            contactList.addAll(subMap.values());
+        }
 
         mLookupKeyContactMap.clear();
         mLookupKeyContactMap.putAll(contactMap);
@@ -206,15 +243,5 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
     public void onChanged(List<Contact> contacts) {
         Log.d(TAG, "Contacts loaded:" + (contacts == null ? 0 : contacts.size()));
         mIsLoaded = true;
-    }
-
-    /**
-     * Formats a key to identify a contact based the lookup key and the account name. Account Name
-     * could be null and it will be handled by String.format().
-     */
-    private String getContactKey(String lookupKey, @Nullable String accountName) {
-        String key = String.format(KEY_FORMAT, lookupKey, accountName);
-        Log.d(TAG, "Contact key is: " + key);
-        return key;
     }
 }
