@@ -149,6 +149,10 @@ public class Toolbar extends FrameLayout {
     private boolean mEatingTouch = false;
     private boolean mEatingHover = false;
     private ProgressBar mProgressBar;
+    private MenuItem.Listener mOverflowItemListener = () -> {
+        createOverflowDialog();
+        setState(getState());
+    };
 
     public Toolbar(Context context) {
         this(context, null);
@@ -603,10 +607,7 @@ public class Toolbar extends FrameLayout {
         for (MenuItem item : mMenuItems) {
             if (item.getDisplayBehavior() == MenuItem.DisplayBehavior.NEVER) {
                 mOverflowItems.add(item);
-                item.setListener(() -> {
-                    createOverflowDialog();
-                    setState(getState());
-                });
+                item.setListener(mOverflowItemListener);
             } else {
                 MenuItemRenderer renderer = new MenuItemRenderer(item, mMenuItemsContainer);
                 mMenuItemRenderers.add(renderer);
