@@ -109,6 +109,14 @@
         </attr>
     </declare-styleable>
 
+    <declare-styleable name="CarUiPreference">
+        <!-- Toggle for showing chevron -->
+        <attr name="showChevron" format="boolean" />
+    </declare-styleable>
+
+    <!-- Theme attribute to specify a default style for all CarUiPreferences -->
+    <attr name="carUiPreferenceStyle" format="reference" />
+
     <!-- Theme attribute to specify a default style for all CarUiRecyclerViews -->
     <attr name="carUiRecyclerViewStyle" format="reference" />
 

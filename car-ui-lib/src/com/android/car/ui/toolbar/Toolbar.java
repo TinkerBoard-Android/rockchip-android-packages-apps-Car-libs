@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.DrawableRes;
@@ -147,6 +148,7 @@ public class Toolbar extends FrameLayout {
     private boolean mLogoFillsNavIconSpace;
     private boolean mEatingTouch = false;
     private boolean mEatingHover = false;
+    private ProgressBar mProgressBar;
 
     public Toolbar(Context context) {
         this(context, null);
@@ -202,6 +204,7 @@ public class Toolbar extends FrameLayout {
             mTitleLogoContainer = requireViewById(R.id.car_ui_toolbar_title_logo_container);
             mTitleLogo = requireViewById(R.id.car_ui_toolbar_title_logo);
             mSearchView = requireViewById(R.id.car_ui_toolbar_search_view);
+            mProgressBar = requireViewById(R.id.car_ui_toolbar_progress_bar);
 
             mTitle.setText(a.getString(R.styleable.CarUiToolbar_title));
             setLogo(a.getResourceId(R.styleable.CarUiToolbar_logo, 0));
@@ -918,5 +921,20 @@ public class Toolbar extends FrameLayout {
     /** Unregisters a new {@link OnTabSelectedListener} from the list of listeners. */
     public boolean unregisterOnBackListener(OnBackListener listener) {
         return mOnBackListeners.remove(listener);
+    }
+
+    /** Shows the progress bar */
+    public void showProgressBar() {
+        mProgressBar.setVisibility(View.VISIBLE);
+    }
+
+    /** Hides the progress bar */
+    public void hideProgressBar() {
+        mProgressBar.setVisibility(View.GONE);
+    }
+
+    /** Returns the progress bar */
+    public ProgressBar getProgressBar() {
+        return mProgressBar;
     }
 }

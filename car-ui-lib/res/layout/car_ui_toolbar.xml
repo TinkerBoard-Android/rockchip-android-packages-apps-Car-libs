@@ -150,16 +150,28 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/car_ui_toolbar_separator_height"
         style="@style/Widget.CarUi.Toolbar.SeparatorView"
-        app:layout_constraintTop_toBottomOf="@id/car_ui_toolbar_bottom_guideline"
+        app:layout_constraintBottom_toTopOf="@id/car_ui_toolbar_bottom_guideline"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
+
+    <ProgressBar
+        android:id="@+id/car_ui_toolbar_progress_bar"
+        style="@style/Widget.CarUi.Toolbar.ProgressBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/car_ui_toolbar_row_separator"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:indeterminate="true"
+        android:visibility="gone"/>
 
     <View
         android:id="@+id/car_ui_toolbar_bottom_styleable"
         android:layout_width="match_parent"
         android:layout_height="@dimen/car_ui_toolbar_bottom_view_height"
         style="@style/Widget.CarUi.Toolbar.BottomView"
-        app:layout_constraintTop_toBottomOf="@+id/car_ui_toolbar_row_separator"
+        app:layout_constraintBottom_toTopOf="@+id/car_ui_toolbar_progress_bar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
