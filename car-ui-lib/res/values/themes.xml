@@ -205,13 +205,10 @@
     </style>
 
     <style name="CarUiPreferenceTheme">
-        <item name="checkBoxPreferenceStyle">@style/Preference.CarUi.CheckBoxPreference
-        </item>
+        <item name="checkBoxPreferenceStyle">@style/Preference.CarUi.CheckBoxPreference</item>
         <item name="dialogPreferenceStyle">@style/Preference.CarUi.DialogPreference</item>
         <item name="dropdownPreferenceStyle">@style/Preference.CarUi.DropDown</item>
-        <item name="editTextPreferenceStyle">
-            @style/Preference.CarUi.DialogPreference.EditTextPreference
-        </item>
+        <item name="editTextPreferenceStyle">@style/Preference.CarUi.DialogPreference.EditTextPreference</item>
         <item name="preferenceCategoryStyle">@style/Preference.CarUi.Category</item>
         <item name="preferenceFragmentCompatStyle">@style/PreferenceFragment.CarUi</item>
         <item name="preferenceFragmentListStyle">@style/PreferenceFragmentList.CarUi</item>
