@@ -30,6 +30,7 @@ import com.android.car.ui.R;
 public class CarUiEditTextPreference extends EditTextPreference {
 
     private final Context mContext;
+    private boolean mShowChevron = true;
 
     public CarUiEditTextPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
@@ -56,13 +57,17 @@ public class CarUiEditTextPreference extends EditTextPreference {
     public void onAttached() {
         super.onAttached();
 
-        boolean showChevron = mContext.getResources().getBoolean(
+        boolean allowChevron = mContext.getResources().getBoolean(
                 R.bool.car_ui_preference_show_chevron);
 
-        if (!showChevron) {
+        if (!allowChevron || !mShowChevron) {
             return;
         }
 
         setWidgetLayoutResource(R.layout.car_ui_preference_chevron);
+    }
+
+    public void setShowChevron(boolean showChevron) {
+        mShowChevron = showChevron;
     }
 }
