@@ -159,11 +159,6 @@ public class Contact implements Parcelable, Comparable<Contact> {
     private String mLookupKey;
 
     /**
-     * All phone numbers of this contact mapping to the unique primary key for the raw data entry.
-     */
-    private List<PhoneNumber> mPhoneNumbers = new ArrayList<>();
-
-    /**
      * A URI that can be used to retrieve a thumbnail of the contact's photo.
      */
     @Nullable
@@ -196,6 +191,17 @@ public class Contact implements Parcelable, Comparable<Contact> {
      * Whether this contact represents a voice mail.
      */
     private boolean mIsVoiceMail;
+
+    /**
+     * All phone numbers of this contact mapping to the unique primary key for the raw data entry.
+     */
+    private final List<PhoneNumber> mPhoneNumbers = new ArrayList<>();
+
+    /**
+     * All postal addresses of this contact mapping to the unique primary key for the raw data
+     * entry
+     */
+    private final List<PostalAddress> mPostalAddresses = new ArrayList<>();
 
     /**
      * Parses a contact entry for a Cursor loaded from the Contact Database. A new contact will be
@@ -243,6 +249,9 @@ public class Contact implements Parcelable, Comparable<Contact> {
                 break;
             case ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE:
                 contact.addPhoneNumber(context, cursor);
+                break;
+            case ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE:
+                contact.addPostalAddress(cursor);
                 break;
             default:
                 Log.d(TAG,
@@ -328,6 +337,15 @@ public class Contact implements Parcelable, Comparable<Contact> {
         if (TelecomUtils.isVoicemailNumber(context, number.getNumber())) {
             mIsVoiceMail = true;
         }
+    }
+
+    /**
+     * Loads the data whose mimetype is
+     * {@link ContactsContract.CommonDataKinds.StructuredPostal#CONTENT_ITEM_TYPE}.
+     */
+    private void addPostalAddress(Cursor cursor) {
+        PostalAddress postalAddress = PostalAddress.fromCursor(cursor);
+        mPostalAddresses.add(postalAddress);
     }
 
     @Override
@@ -455,6 +473,13 @@ public class Contact implements Parcelable, Comparable<Contact> {
     }
 
     /**
+     * Return all postal addresses associated with this contact.
+     */
+    public List<PostalAddress> getPostalAddresses() {
+        return mPostalAddresses;
+    }
+
+    /**
      * Returns if this Contact represents a voice mail number.
      */
     public boolean isVoicemail() {
@@ -534,6 +559,11 @@ public class Contact implements Parcelable, Comparable<Contact> {
         for (PhoneNumber phoneNumber : mPhoneNumbers) {
             dest.writeParcelable(phoneNumber, flags);
         }
+
+        dest.writeInt(mPostalAddresses.size());
+        for (PostalAddress postalAddress : mPostalAddresses) {
+            dest.writeParcelable(postalAddress, flags);
+        }
     }
 
     public static final Creator<Contact> CREATOR = new Creator<Contact>() {
@@ -571,13 +601,18 @@ public class Contact implements Parcelable, Comparable<Contact> {
         contact.mIsVoiceMail = source.readBoolean();
         contact.mPrimaryPhoneNumber = source.readParcelable(PhoneNumber.class.getClassLoader());
         int phoneNumberListLength = source.readInt();
-        contact.mPhoneNumbers = new ArrayList<>();
         for (int i = 0; i < phoneNumberListLength; i++) {
             PhoneNumber phoneNumber = source.readParcelable(PhoneNumber.class.getClassLoader());
             contact.mPhoneNumbers.add(phoneNumber);
             if (phoneNumber.isPrimary()) {
                 contact.mPrimaryPhoneNumber = phoneNumber;
             }
+        }
+
+        int postalAddressListLength = source.readInt();
+        for (int i = 0; i < postalAddressListLength; i++) {
+            PostalAddress address = source.readParcelable(PostalAddress.class.getClassLoader());
+            contact.mPostalAddresses.add(address);
         }
 
         return contact;
