@@ -18,8 +18,12 @@ package com.android.car.ui.preference;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.text.InputType;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.preference.EditTextPreference;
@@ -32,13 +36,14 @@ import androidx.preference.EditTextPreference;
  * implementations in order to launch the system themed platform {@link AlertDialog} instead of the
  * one in the support library.
  */
-public class EditTextPreferenceDialogFragment extends PreferenceDialogFragment {
+public class EditTextPreferenceDialogFragment extends PreferenceDialogFragment implements
+        TextView.OnEditorActionListener {
 
     private static final String SAVE_STATE_TEXT = "EditTextPreferenceDialogFragment.text";
 
     private EditText mEditText;
-
     private CharSequence mText;
+    private boolean mAllowEnterToSubmit = true;
 
     /**
      * Returns a new instance of {@link EditTextPreferenceDialogFragment} for the {@link
@@ -82,6 +87,10 @@ public class EditTextPreferenceDialogFragment extends PreferenceDialogFragment {
 
         mEditText.requestFocus();
         mEditText.setText(mText);
+        mEditText.setInputType(InputType.TYPE_CLASS_TEXT);
+        mEditText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        mEditText.setOnEditorActionListener(this);
+
         // Place cursor at the end
         mEditText.setSelection(mEditText.getText().length());
     }
@@ -105,4 +114,26 @@ public class EditTextPreferenceDialogFragment extends PreferenceDialogFragment {
         }
     }
 
+    /** Allows enabling and disabling the ability to press enter to dismiss the dialog. */
+    public void setAllowEnterToSubmit(boolean isAllowed) {
+        mAllowEnterToSubmit = isAllowed;
+    }
+
+    /** Allows verifying if enter to submit is currently enabled. */
+    public boolean getAllowEnterToSubmit() {
+        return mAllowEnterToSubmit;
+    }
+
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        if (actionId == EditorInfo.IME_ACTION_DONE && mAllowEnterToSubmit) {
+            CharSequence newValue = v.getText();
+
+            getEditTextPreference().callChangeListener(newValue);
+            dismiss();
+
+            return true;
+        }
+        return false;
+    }
 }
