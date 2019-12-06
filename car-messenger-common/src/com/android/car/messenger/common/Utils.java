@@ -16,6 +16,7 @@
 
 package com.android.car.messenger.common;
 
+import static com.android.car.connecteddevice.util.SafeLog.logd;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
@@ -27,6 +28,7 @@ import com.android.car.messenger.NotificationMsgProto.NotificationMsg.MessagingS
 
 /** Utils methods for the car-messenger-common lib. **/
 public class Utils {
+    private static final String TAG = "CMC.Utils";
     /**
      * Represents the maximum length of a message substring to be used when constructing the
      * message's unique handle/key.
@@ -67,5 +69,75 @@ public class Utils {
     public static String getBluetoothDeviceAddress(Intent intent) {
         BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
         return device.getAddress();
+    }
+
+    /**
+     * Ensure the {@link ConversationNotification} object has all the required fields.
+     *
+     * @param isShallowCheck should be {@code true} if the caller only wants to verify the
+     *                       notification and its {@link MessagingStyle} is valid, without checking
+     *                       all of the notification's {@link MessagingStyleMessage}s.
+     **/
+    public static boolean isValidConversationNotification(ConversationNotification notification,
+            boolean isShallowCheck) {
+        if (notification == null) {
+            logd(TAG, "ConversationNotification is null");
+            return false;
+        } else if (!notification.hasMessagingStyle()) {
+            logd(TAG, "ConversationNotification is missing required field: messagingStyle");
+            return false;
+        } else if (notification.getMessagingAppDisplayName() == null) {
+            logd(TAG, "ConversationNotification is missing required field: appDisplayName");
+            return false;
+        } else if (notification.getMessagingAppPackageName() == null) {
+            logd(TAG, "ConversationNotification is missing required field: appPackageName");
+            return false;
+        }
+        return isValidMessagingStyle(notification.getMessagingStyle(), isShallowCheck);
+    }
+
+    /**
+     * Ensure the {@link MessagingStyle} object has all the required fields.
+     **/
+    private static boolean isValidMessagingStyle(MessagingStyle messagingStyle,
+            boolean isShallowCheck) {
+        if (messagingStyle == null) {
+            logd(TAG, "MessagingStyle is null");
+            return false;
+        } else if (messagingStyle.getConvoTitle() == null) {
+            logd(TAG, "MessagingStyle is missing required field: convoTitle");
+            return false;
+        } else if (messagingStyle.getUserDisplayName() == null) {
+            logd(TAG, "MessagingStyle is missing required field: userDisplayName");
+            return false;
+        } else if (messagingStyle.getMessagingStyleMsgCount() == 0) {
+            logd(TAG, "MessagingStyle is missing required field: messagingStyleMsg");
+            return false;
+        }
+        if (!isShallowCheck) {
+            for (MessagingStyleMessage message : messagingStyle.getMessagingStyleMsgList()) {
+                if (!isValidMessagingStyleMessage(message)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Ensure the {@link MessagingStyleMessage} object has all the required fields.
+     **/
+    public static boolean isValidMessagingStyleMessage(MessagingStyleMessage message) {
+        if (message == null) {
+            logd(TAG, "MessagingStyleMessage is null");
+            return false;
+        } else if (message.getTextMessage() == null) {
+            logd(TAG, "MessagingStyleMessage is missing required field: textMessage");
+            return false;
+        } else if (!message.hasSender()) {
+            logd(TAG, "MessagingStyleMessage is missing required field: sender");
+            return false;
+        }
+        return true;
     }
 }

@@ -16,10 +16,14 @@
 
 package com.android.car.messenger.common;
 
+import static com.android.car.connecteddevice.util.SafeLog.logw;
+
 import android.annotation.Nullable;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothMapClient;
 import android.content.Intent;
+import android.os.Build;
+import android.util.Log;
 
 import com.android.car.companiondevicesupport.api.external.CompanionDevice;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg;
@@ -35,6 +39,7 @@ import java.util.LinkedList;
  * ConversationNotificationInfo object.
  **/
 public class ConversationNotificationInfo {
+    private static final String TAG = "CMC.ConversationNotificationInfo";
     private static int sNextNotificationId = 0;
     final int mNotificationId = sNextNotificationId++;
 
@@ -70,11 +75,25 @@ public class ConversationNotificationInfo {
 
     }
 
-    /** Creates a ConversationNotificationInfo for a {@link NotificationMsg} **/
+    /**
+     * Creates a ConversationNotificationInfo for a {@link NotificationMsg}. Returns {@code null} if
+     * the {@link ConversationNotification} is missing required fields.
+     **/
+    @Nullable
     public static ConversationNotificationInfo createConversationNotificationInfo(
             CompanionDevice device,
             ConversationNotification conversation, String notificationKey) {
         MessagingStyle messagingStyle = conversation.getMessagingStyle();
+
+        if (!Utils.isValidConversationNotification(conversation, /* isShallowCheck= */ true)) {
+            if (Log.isLoggable(TAG, Log.DEBUG) || Build.IS_DEBUGGABLE) {
+                throw new IllegalArgumentException(
+                        "ConversationNotificationInfo is missing required fields");
+            } else {
+                logw(TAG, "ConversationNotificationInfo is missing required fields");
+                return null;
+            }
+        }
 
         return new ConversationNotificationInfo(device.getDeviceName(), device.getDeviceId(),
                 messagingStyle.getConvoTitle(),
