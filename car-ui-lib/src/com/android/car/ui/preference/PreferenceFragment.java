@@ -21,10 +21,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
 import androidx.preference.DialogPreference;
 import androidx.preference.DropDownPreference;
 import androidx.preference.EditTextPreference;
@@ -48,10 +50,6 @@ import java.util.Stack;
 
 /**
  * A PreferenceFragmentCompat is the entry point to using the Preference library.
- *
- * <p>Note: this is borrowed as-is from androidx.preference.PreferenceFragmentCompat with updates to
- * launch Car UI library {@link DialogFragment}. Automotive applications should use children of
- * this fragment in order to launch the system themed {@link DialogFragment}.
  *
  * <p>Using this fragment will replace regular Preferences with CarUi equivalents. Because of this,
  * certain properties that cannot be read out of Preferences will be lost upon calling
@@ -112,11 +110,11 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat {
             return;
         }
 
-        final DialogFragment f;
+        final Fragment f;
         if (preference instanceof EditTextPreference) {
             f = EditTextPreferenceDialogFragment.newInstance(preference.getKey());
         } else if (preference instanceof ListPreference) {
-            f = ListPreferenceDialogFragment.newInstance(preference.getKey());
+            f = ListPreferenceFragment.newInstance(preference.getKey());
         } else if (preference instanceof MultiSelectListPreference) {
             f = MultiSelectListPreferenceDialogFragment.newInstance(preference.getKey());
         } else {
@@ -126,8 +124,27 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat {
                             + ". Make sure to implement onPreferenceDisplayDialog() to handle "
                             + "displaying a custom dialog for this Preference.");
         }
+
         f.setTargetFragment(this, 0);
-        f.show(getFragmentManager(), DIALOG_FRAGMENT_TAG);
+
+        if (f instanceof DialogFragment) {
+            ((DialogFragment) f).show(getFragmentManager(), DIALOG_FRAGMENT_TAG);
+        } else {
+            if (getActivity() == null) {
+                throw new IllegalStateException(
+                        "Preference fragment is not attached to an Activity.");
+            }
+
+            if (getView() == null) {
+                throw new IllegalStateException(
+                        "Preference fragment must have a layout.");
+            }
+
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(((ViewGroup) getView().getParent()).getId(), f)
+                    .addToBackStack(null)
+                    .commit();
+        }
     }
 
     /**
