@@ -20,7 +20,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RadioButton;
+import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.R;
@@ -55,6 +57,7 @@ public class CarUiRecyclerViewRadioButtonAdapter extends
         mSelectedPosition = position;
     }
 
+    @NonNull
     @Override
     public CarUiRecyclerViewRadioButtonAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
             int viewType) {
@@ -70,7 +73,7 @@ public class CarUiRecyclerViewRadioButtonAdapter extends
         //since only one radio button is allowed to be selected,
         // this condition un-checks previous selections
         holder.mRadioButton.setChecked(mSelectedPosition == position);
-        holder.mRadioButton.setText(entry);
+        holder.mTextView.setText(entry);
     }
 
     @Override
@@ -89,15 +92,17 @@ public class CarUiRecyclerViewRadioButtonAdapter extends
     }
 
     /** The viewholder class for recyclerview containing radio buttons. */
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
 
-        public RadioButton mRadioButton;
+        RadioButton mRadioButton;
+        TextView mTextView;
 
-        public ViewHolder(View view) {
+        ViewHolder(View view) {
             super(view);
-            mRadioButton = (RadioButton) view.findViewById(R.id.radio_button);
+            mRadioButton = view.findViewById(R.id.radio_button);
+            mTextView = view.findViewById(R.id.text);
 
-            mRadioButton.setOnClickListener(v -> {
+            view.setOnClickListener(v -> {
                 mSelectedPosition = getAdapterPosition();
                 notifyDataSetChanged();
                 if (mOnRadioButtonClickedListener != null) {

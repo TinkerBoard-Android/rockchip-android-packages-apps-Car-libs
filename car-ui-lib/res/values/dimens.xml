@@ -195,4 +195,9 @@
     <dimen name="car_ui_list_item_icon_container_width">112dp</dimen>
     <dimen name="car_ui_list_item_action_divider_width">1dp</dimen>
     <dimen name="car_ui_list_item_action_divider_height">60dp</dimen>
+
+    <dimen name="car_ui_list_item_radio_button_height">@dimen/car_ui_list_item_height</dimen>
+    <dimen name="car_ui_list_item_radio_button_start_inset">@dimen/car_ui_list_item_start_inset</dimen>
+    <dimen name="car_ui_list_item_radio_button_end_inset">@dimen/car_ui_list_item_end_inset</dimen>
+    <dimen name="car_ui_list_item_radio_button_icon_container_width">@dimen/car_ui_list_item_icon_container_width</dimen>
 </resources>
