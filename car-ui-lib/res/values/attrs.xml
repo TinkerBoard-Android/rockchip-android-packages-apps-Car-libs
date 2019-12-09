@@ -46,6 +46,10 @@
         <attr name="id" format="reference"/>
         <!-- Show/hide the MenuItem -->
         <attr name="visible" format="boolean"/>
+        <!-- Set this to true to make a search MenuItem. This will override every other property except id, visible, and onclick. -->
+        <attr name="search" format="boolean"/>
+        <!-- Set this to true to make a settings MenuItem. This will override every other property except id, visible, and onclick. -->
+        <attr name="settings" format="boolean"/>
         <!-- Title -->
         <attr name="title"/>
         <!-- Icon -->
