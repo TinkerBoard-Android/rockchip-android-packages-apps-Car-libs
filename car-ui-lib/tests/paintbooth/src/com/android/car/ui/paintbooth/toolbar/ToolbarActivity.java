@@ -62,8 +62,10 @@ public class ToolbarActivity extends Activity {
                     return false;
                 });
 
-        mMenuItems.add(
-                MenuItem.Builder.createSearch(this, i -> toolbar.setState(Toolbar.State.SEARCH)));
+        mMenuItems.add(MenuItem.builder(this)
+                .setToSearch()
+                .setOnClickListener(i -> toolbar.setState(Toolbar.State.SEARCH))
+                .build());
 
         toolbar.setMenuItems(mMenuItems);
 
@@ -86,9 +88,11 @@ public class ToolbarActivity extends Activity {
         }));
 
         mButtons.add(Pair.create(getString(R.string.toolbar_add_icon), v -> {
-            mMenuItems.add(MenuItem.Builder.createSettings(
-                    this, i -> Toast.makeText(this, "Clicked",
-                            Toast.LENGTH_SHORT).show()));
+            mMenuItems.add(MenuItem.builder(this)
+                    .setToSettings()
+                    .setOnClickListener(i -> Toast.makeText(this, "Clicked",
+                            Toast.LENGTH_SHORT).show())
+                    .build());
             toolbar.setMenuItems(mMenuItems);
         }));
 
