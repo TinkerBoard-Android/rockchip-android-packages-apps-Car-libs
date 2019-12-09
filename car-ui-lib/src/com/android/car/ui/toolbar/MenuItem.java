@@ -509,20 +509,6 @@ public class MenuItem {
         }
 
         /**
-         * Creates an equalizer MenuItem.
-         *
-         * <p>The advantage of using this over creating your own is getting an OEM-styled
-         * sound settings icon.
-         */
-        public static MenuItem createSoundSettings(Context c, OnClickListener listener) {
-            return new Builder(c)
-                .setTitle(R.string.car_ui_toolbar_menu_item_sound_settings_title)
-                .setIcon(R.drawable.car_ui_icon_sound_settings)
-                .setOnClickListener(listener)
-                .build();
-        }
-
-        /**
          * Creates a settings MenuItem.
          *
          * <p>The advantage of this over creating your own is getting an OEM-styled settings icon,
