@@ -43,8 +43,8 @@
     <string name="call_state_call_ending">Disconnecting&#8230;</string>
 
     <!-- String format used to format a address Uri. -->
-    <string name="address_uri_format">geo:0,0?q=%s</string>
+    <string name="address_uri_format" translatable="false">geo:0,0?q=%s</string>
     <!-- String format used to format a navigation Uri. -->
-    <string name="navigation_uri_format">https://maps.google.com/maps?daddr=%s&amp;nav=1</string>
+    <string name="navigation_uri_format" translatable="false">https://maps.google.com/maps?daddr=%s&amp;nav=1</string>
 
 </resources>
