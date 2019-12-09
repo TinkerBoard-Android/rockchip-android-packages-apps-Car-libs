@@ -26,6 +26,8 @@ import androidx.annotation.VisibleForTesting;
 import com.android.car.ui.R;
 import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
+import java.lang.ref.WeakReference;
+
 /**
  * Represents a button to display in the {@link Toolbar}.
  *
@@ -57,7 +59,10 @@ public class MenuItem {
 
     private int mId;
     private CarUxRestrictions mCurrentRestrictions;
-    private Listener mListener;
+    // This is a WeakReference to allow the Toolbar (and by extension, the whole screen
+    // the toolbar is on) to be garbage-collected if the MenuItem is held past the
+    // lifecycle of the toolbar.
+    private WeakReference<Listener> mListener = new WeakReference<>(null);
     private CharSequence mTitle;
     private Drawable mIcon;
     private OnClickListener mOnClickListener;
@@ -89,8 +94,9 @@ public class MenuItem {
     }
 
     private void update() {
-        if (mListener != null) {
-            mListener.onMenuItemChanged();
+        Listener listener = mListener.get();
+        if (listener != null) {
+            listener.onMenuItemChanged();
         }
     }
 
@@ -319,7 +325,9 @@ public class MenuItem {
         private int mUxRestrictions = CarUxRestrictions.UX_RESTRICTIONS_BASELINE;
 
         public Builder(Context c) {
-            mContext = c;
+            // Must use getApplicationContext to avoid leaking activities when the MenuItem
+            // is held onto for longer than the Activity's lifecycle
+            mContext = c.getApplicationContext();
         }
 
         /** Builds a {@link MenuItem} from the current state of the Builder */
@@ -560,7 +568,12 @@ public class MenuItem {
         void onMenuItemChanged();
     }
 
+    /**
+     * Sets a listener for changes to this MenuItem. Note that the MenuItem will only hold
+     * weak references to the Listener, so that the listener is not held if the MenuItem
+     * outlives the toolbar.
+     */
     void setListener(Listener listener) {
-        mListener = listener;
+        mListener = new WeakReference<>(listener);
     }
 }
