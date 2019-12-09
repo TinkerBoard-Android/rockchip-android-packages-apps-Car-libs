@@ -210,20 +210,13 @@ public class MediaSourceViewModel extends AndroidViewModel {
             return;
         }
 
-        // Reset dependent values to avoid propagating inconsistencies.
-        mMediaController.setValue(null);
-        mConnectedMediaBrowser.setValue(null);
-        mBrowserConnector.connectTo(null);
-
         // Broadcast the new source
         mPrimaryMediaSource.setValue(newMediaSource);
 
         // Recompute dependent values
-        if (newMediaSource == null) {
-            return;
+        if (newMediaSource != null) {
+            ComponentName browseService = newMediaSource.getBrowseServiceComponentName();
+            mBrowserConnector.connectTo(browseService);
         }
-
-        ComponentName browseService = newMediaSource.getBrowseServiceComponentName();
-        mBrowserConnector.connectTo(browseService);
     }
 }
