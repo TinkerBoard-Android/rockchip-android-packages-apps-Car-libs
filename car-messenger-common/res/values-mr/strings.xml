@@ -30,7 +30,7 @@
     <string name="auto_reply_failed_message" msgid="6445984971657465627">"उत्तर पाठवता आले नाही. कृपया पुन्हा प्रयत्न करा."</string>
     <string name="auto_reply_device_disconnected" msgid="5861772755278229950">"उत्तर पाठवता आले नाही. डिव्हाइस कनेक्ट केलेले नाही."</string>
     <string name="tts_sender_says" msgid="5352698006545359668">"%s म्हणतात"</string>
-    <string name="tts_failed_toast" msgid="4077460119220565965">"मजकूर वाचता आला नाही!"</string>
+    <string name="tts_failed_toast" msgid="1483313550894086353">"मेसेज वाचू शकत नाही."</string>
     <string name="reply_message_display_template" msgid="6348622926232346974">"\"%s\""</string>
     <string name="message_sent_notice" msgid="7172592196465284673">"उत्तर %s ला पाठवले"</string>
     <string name="name_not_available" msgid="3800013092212550915">"नाव उपलब्ध नाही"</string>

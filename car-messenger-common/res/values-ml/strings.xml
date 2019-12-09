@@ -30,7 +30,7 @@
     <string name="auto_reply_failed_message" msgid="6445984971657465627">"മറുപടി അയയ്ക്കാനാവുന്നില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="auto_reply_device_disconnected" msgid="5861772755278229950">"മറുപടി അയയ്ക്കാനാവുന്നില്ല. ഉപകരണം കണക്റ്റ് ചെയ്തിട്ടില്ല."</string>
     <string name="tts_sender_says" msgid="5352698006545359668">"%s പറയുന്നു"</string>
-    <string name="tts_failed_toast" msgid="4077460119220565965">"ടെക്സ്റ്റ് പ്ലേ ഔട്ട് ചെയ്യാനായില്ല!"</string>
+    <string name="tts_failed_toast" msgid="1483313550894086353">"സന്ദേശം ഉറക്കെ വായിക്കാനാവില്ല."</string>
     <string name="reply_message_display_template" msgid="6348622926232346974">"\"%s\""</string>
     <string name="message_sent_notice" msgid="7172592196465284673">"%s എന്നതിലേക്ക് മറുപടി അയച്ചു"</string>
     <string name="name_not_available" msgid="3800013092212550915">"പേര് ലഭ്യമല്ല"</string>

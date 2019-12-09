@@ -32,7 +32,7 @@
     <!-- String.format failed for translation -->
     <!-- no translation found for tts_sender_says (5352698006545359668) -->
     <skip />
-    <string name="tts_failed_toast" msgid="4077460119220565965">"SMSను చదివి వినిపించడం సాధ్యం కాలేదు!"</string>
+    <string name="tts_failed_toast" msgid="1483313550894086353">"సందేశాన్ని చదవడం సాధ్యం కాలేదు."</string>
     <string name="reply_message_display_template" msgid="6348622926232346974">"\"%s\""</string>
     <string name="message_sent_notice" msgid="7172592196465284673">"%s కు ప్రత్యుత్తరం పంపబడింది"</string>
     <string name="name_not_available" msgid="3800013092212550915">"పేరు అందుబాటులో లేదు"</string>
