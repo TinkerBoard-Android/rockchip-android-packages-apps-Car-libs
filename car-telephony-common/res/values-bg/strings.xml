@@ -26,4 +26,6 @@
     <string name="call_state_call_active" msgid="2769644783657864202">"Установена е връзка"</string>
     <string name="call_state_call_ringing" msgid="4618803402954375017">"Звъни се…"</string>
     <string name="call_state_call_ending" msgid="5037498349965472247">"Връзката се прекр…"</string>
+    <string name="address_uri_format" msgid="7726586715461112145">"geo:0,0?q=%s"</string>
+    <string name="navigation_uri_format" msgid="3197532294608326294">"https://maps.google.com/maps?daddr=%s&amp;nav=1"</string>
 </resources>
