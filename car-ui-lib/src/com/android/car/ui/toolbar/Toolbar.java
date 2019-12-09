@@ -721,8 +721,7 @@ public class Toolbar extends FrameLayout {
     /**
      * Set whether or not to show the {@link MenuItem MenuItems} while searching. Default false.
      * Even if this is set to true, the {@link MenuItem} created by
-     * {@link MenuItem.Builder#createSearch(Context, MenuItem.OnClickListener)} will still be
-     * hidden.
+     * {@link MenuItem.Builder#setToSearch()} will still be hidden.
      */
     public void setShowMenuItemsWhileSearching(boolean showMenuItems) {
         mShowMenuItemsWhileSearching = showMenuItems;
