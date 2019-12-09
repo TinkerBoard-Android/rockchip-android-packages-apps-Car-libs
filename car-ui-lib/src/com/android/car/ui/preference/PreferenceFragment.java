@@ -41,12 +41,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.car.ui.R;
 import com.android.car.ui.toolbar.Toolbar;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
 /**
  * A PreferenceFragmentCompat is the entry point to using the Preference library.
@@ -159,11 +160,11 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat {
         List<Preference> children = new ArrayList<>();
 
         // Stack of preferences to process
-        Stack<Preference> stack = new Stack<>();
-        stack.push(preferenceScreen);
+        Deque<Preference> stack = new ArrayDeque<>();
+        stack.addFirst(preferenceScreen);
 
-        while (!stack.empty()) {
-            Preference preference = stack.pop();
+        while (!stack.isEmpty()) {
+            Preference preference = stack.removeFirst();
 
             if (preference instanceof PreferenceGroup) {
                 PreferenceGroup pg = (PreferenceGroup) preference;
@@ -180,7 +181,7 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat {
 
                     dependencies.put(replacement, child.getDependency());
                     pg.addPreference(replacement);
-                    stack.push(replacement);
+                    stack.addFirst(replacement);
                 }
             }
         }

@@ -18,8 +18,6 @@ package com.android.car.ui.preference;
 
 import static com.android.car.ui.preference.PreferenceDialogFragment.ARG_KEY;
 
-import static java.util.stream.Collectors.toList;
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,7 +34,7 @@ import com.android.car.ui.R;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.Toolbar;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -115,8 +113,10 @@ public class ListPreferenceFragment extends Fragment implements
         }
 
         mClickedDialogEntryIndex = preference.findIndexOfValue(preference.getValue());
-        List<String> entryStrings = Arrays.stream(entries).map(CharSequence::toString).collect(
-                toList());
+        List<String> entryStrings = new ArrayList<>(entries.length);
+        for (CharSequence entry : entries) {
+            entryStrings.add(entry.toString());
+        }
 
         CarUiRecyclerViewRadioButtonAdapter adapter = new CarUiRecyclerViewRadioButtonAdapter(
                 entryStrings, mClickedDialogEntryIndex);
