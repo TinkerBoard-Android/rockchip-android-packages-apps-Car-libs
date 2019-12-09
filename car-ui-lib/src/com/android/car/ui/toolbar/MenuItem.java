@@ -40,8 +40,8 @@ import java.lang.ref.WeakReference;
  * itself, or it's overflow menu.
  *
  * <p>If you require a search or settings button, you should use
- * {@link Builder#createSearch(Context, OnClickListener)} or
- * {@link Builder#createSettings(Context, OnClickListener)}.
+ * {@link Builder#setToSearch()} or
+ * {@link Builder#setToSettings()}.
  *
  * <p>Some properties can be changed after the creating a MenuItem, but others require being set
  * with a {@link Builder}.
@@ -297,15 +297,13 @@ public class MenuItem {
         return mIsSearch;
     }
 
-    /**
-     * Builder class.
-     *
-     * <p>Use the static {@link #createSearch(Context, OnClickListener)} or
-     * {@link #createSettings(Context, OnClickListener)} if you want one of those specialized
-     * buttons.
-     */
+    /** Builder class */
     public static final class Builder {
-        private Context mContext;
+        private final Context mContext;
+        private final CharSequence mSearchTitle;
+        private final CharSequence mSettingsTitle;
+        private final Drawable mSearchIcon;
+        private final Drawable mSettingsIcon;
 
         private int mId = View.NO_ID;
         private CharSequence mTitle;
@@ -321,6 +319,7 @@ public class MenuItem {
         private boolean mIsActivatable = false;
         private boolean mIsActivated = false;
         private boolean mIsSearch = false;
+        private boolean mIsSettings = false;
         @CarUxRestrictions.CarUxRestrictionsInfo
         private int mUxRestrictions = CarUxRestrictions.UX_RESTRICTIONS_BASELINE;
 
@@ -328,6 +327,10 @@ public class MenuItem {
             // Must use getApplicationContext to avoid leaking activities when the MenuItem
             // is held onto for longer than the Activity's lifecycle
             mContext = c.getApplicationContext();
+            mSearchTitle = mContext.getString(R.string.car_ui_toolbar_menu_item_search_title);
+            mSettingsTitle = mContext.getString(R.string.car_ui_toolbar_menu_item_settings_title);
+            mSearchIcon = mContext.getDrawable(R.drawable.car_ui_icon_search);
+            mSettingsIcon = mContext.getDrawable(R.drawable.car_ui_icon_settings);
         }
 
         /** Builds a {@link MenuItem} from the current state of the Builder */
@@ -340,6 +343,30 @@ public class MenuItem {
                     || mShowIconAndTitle
                     || mIsActivatable)) {
                 throw new IllegalStateException("Unsupported options for a checkable MenuItem");
+            }
+            if (mIsSearch && mIsSettings) {
+                throw new IllegalStateException("Can't have both a search and settings MenuItem");
+            }
+
+            if (mIsSearch && (!mSearchTitle.equals(mTitle)
+                    || !mSearchIcon.equals(mIcon)
+                    || mIsCheckable
+                    || mIsActivatable
+                    || !mIsTinted
+                    || mShowIconAndTitle
+                    || mDisplayBehavior != DisplayBehavior.ALWAYS)) {
+                throw new IllegalStateException("Invalid search MenuItem");
+            }
+
+            if (mIsSettings && (!mSettingsTitle.equals(mTitle)
+                    || !mSettingsIcon.equals(mIcon)
+                    || mIsCheckable
+                    || mIsActivatable
+                    || !mIsTinted
+                    || mShowIconAndTitle
+                    || mDisplayBehavior != DisplayBehavior.ALWAYS
+                    || mUxRestrictions != CarUxRestrictions.UX_RESTRICTIONS_NO_SETUP)) {
+                throw new IllegalStateException("Invalid settings MenuItem");
             }
 
             return new MenuItem(this);
@@ -486,26 +513,20 @@ public class MenuItem {
             return this;
         }
 
-        /** Sets that this is the search MenuItem, which has special behavior while searching */
-        private Builder setSearch() {
-            mIsSearch = true;
-            return this;
-        }
-
         /**
          * Creates a search MenuItem.
          *
          * <p>The advantage of using this over creating your own is getting an OEM-styled search
          * icon, and this button will always disappear while searching, even when the
          * {@link Toolbar Toolbar's} showMenuItemsWhileSearching is true.
+         *
+         * <p>If using this, you should only change the id, visibility, or onClickListener.
          */
-        public static MenuItem createSearch(Context c, OnClickListener listener) {
-            return new Builder(c)
-                    .setTitle(R.string.car_ui_toolbar_menu_item_search_title)
-                    .setIcon(R.drawable.car_ui_icon_search)
-                    .setOnClickListener(listener)
-                    .setSearch()
-                    .build();
+        public Builder setToSearch() {
+            mIsSearch = true;
+            setTitle(mSearchTitle);
+            setIcon(mSearchIcon);
+            return this;
         }
 
         /**
@@ -514,13 +535,32 @@ public class MenuItem {
          * <p>The advantage of this over creating your own is getting an OEM-styled settings icon,
          * and that the MenuItem will be restricted based on
          * {@link CarUxRestrictions#UX_RESTRICTIONS_NO_SETUP}
+         *
+         * <p>If using this, you should only change the id, visibility, or onClickListener.
          */
-        public static MenuItem createSettings(Context c, OnClickListener listener) {
-            return new Builder(c)
-                    .setTitle(R.string.car_ui_toolbar_menu_item_settings_title)
-                    .setIcon(R.drawable.car_ui_icon_settings)
+        public Builder setToSettings() {
+            mIsSettings = true;
+            setTitle(mSettingsTitle);
+            setIcon(mSettingsIcon);
+            setUxRestrictions(CarUxRestrictions.UX_RESTRICTIONS_NO_SETUP);
+            return this;
+        }
+
+        /** @deprecated Use {@link #setToSearch()} instead. */
+        @Deprecated
+        public static MenuItem createSearch(Context c, OnClickListener listener) {
+            return MenuItem.builder(c)
+                    .setToSearch()
                     .setOnClickListener(listener)
-                    .setUxRestrictions(CarUxRestrictions.UX_RESTRICTIONS_NO_SETUP)
+                    .build();
+        }
+
+        /** @deprecated Use {@link #setToSettings()} instead. */
+        @Deprecated
+        public static MenuItem createSettings(Context c, OnClickListener listener) {
+            return MenuItem.builder(c)
+                    .setToSettings()
+                    .setOnClickListener(listener)
                     .build();
         }
     }
