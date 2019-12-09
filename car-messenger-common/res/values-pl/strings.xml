@@ -32,7 +32,7 @@
     <string name="auto_reply_failed_message" msgid="6445984971657465627">"Nie udało się wysłać odpowiedzi. Spróbuj ponownie."</string>
     <string name="auto_reply_device_disconnected" msgid="5861772755278229950">"Nie udało się wysłać odpowiedzi. Urządzenie nie ma połączenia."</string>
     <string name="tts_sender_says" msgid="5352698006545359668">"%s mówi"</string>
-    <string name="tts_failed_toast" msgid="4077460119220565965">"Nie udało się odczytać tekstu."</string>
+    <string name="tts_failed_toast" msgid="1483313550894086353">"Nie mogę odczytać wiadomości."</string>
     <string name="reply_message_display_template" msgid="6348622926232346974">"„%s”"</string>
     <string name="message_sent_notice" msgid="7172592196465284673">"Wysłano odpowiedź do: %s"</string>
     <string name="name_not_available" msgid="3800013092212550915">"Nazwa niedostępna"</string>

@@ -30,7 +30,7 @@
     <string name="auto_reply_failed_message" msgid="6445984971657465627">"Cavab göndərmək alınmadı. Yenidən cəhd edin."</string>
     <string name="auto_reply_device_disconnected" msgid="5861772755278229950">"Cavab göndərmək alınmadı. Cihaz qoşulmayıb."</string>
     <string name="tts_sender_says" msgid="5352698006545359668">"%s söyləyir:"</string>
-    <string name="tts_failed_toast" msgid="4077460119220565965">"Mətn oxudulması alınmadı!"</string>
+    <string name="tts_failed_toast" msgid="1483313550894086353">"Mesajı oxumaq mümkün deyil."</string>
     <string name="reply_message_display_template" msgid="6348622926232346974">"\"%s\""</string>
     <string name="message_sent_notice" msgid="7172592196465284673">"Cavab bu ünvana göndərildi: %s"</string>
     <string name="name_not_available" msgid="3800013092212550915">"Ad əlçatan deyil"</string>

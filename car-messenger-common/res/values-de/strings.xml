@@ -30,7 +30,7 @@
     <string name="auto_reply_failed_message" msgid="6445984971657465627">"Antwort kann nicht gesendet werden. Bitte versuch es noch einmal."</string>
     <string name="auto_reply_device_disconnected" msgid="5861772755278229950">"Antwort kann nicht gesendet werden. Gerät ist nicht verbunden."</string>
     <string name="tts_sender_says" msgid="5352698006545359668">"%s sagt"</string>
-    <string name="tts_failed_toast" msgid="4077460119220565965">"Fehler bei der Textwiedergabe!"</string>
+    <string name="tts_failed_toast" msgid="1483313550894086353">"Die Nachricht kann nicht vorgelesen werden."</string>
     <string name="reply_message_display_template" msgid="6348622926232346974">"\"%s\""</string>
     <string name="message_sent_notice" msgid="7172592196465284673">"Antwort wurde an %s gesendet"</string>
     <string name="name_not_available" msgid="3800013092212550915">"Name nicht verfügbar"</string>

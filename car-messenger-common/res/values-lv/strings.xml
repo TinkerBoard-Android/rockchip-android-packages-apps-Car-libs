@@ -31,7 +31,7 @@
     <string name="auto_reply_failed_message" msgid="6445984971657465627">"Nevar nosūtīt atbildi. Mēģiniet vēlreiz."</string>
     <string name="auto_reply_device_disconnected" msgid="5861772755278229950">"Nevar nosūtīt atbildi. Ierīce nav pievienota."</string>
     <string name="tts_sender_says" msgid="5352698006545359668">"%s saka"</string>
-    <string name="tts_failed_toast" msgid="4077460119220565965">"Neizdevās atskaņot tekstu."</string>
+    <string name="tts_failed_toast" msgid="1483313550894086353">"Nevar nolasīt ziņojumu."</string>
     <string name="reply_message_display_template" msgid="6348622926232346974">"“%s”"</string>
     <string name="message_sent_notice" msgid="7172592196465284673">"Atbilde nosūtīta lietotājam %s"</string>
     <string name="name_not_available" msgid="3800013092212550915">"Vārds nav pieejams."</string>

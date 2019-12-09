@@ -30,7 +30,7 @@
     <string name="auto_reply_failed_message" msgid="6445984971657465627">"Δεν είναι δυνατή η αποστολή απάντησης. Δοκιμάστε ξανά."</string>
     <string name="auto_reply_device_disconnected" msgid="5861772755278229950">"Δεν είναι δυνατή η αποστολή απάντησης. Η συσκευή δεν είναι συνδεδεμένη."</string>
     <string name="tts_sender_says" msgid="5352698006545359668">"Ο χρήστης %s λέει"</string>
-    <string name="tts_failed_toast" msgid="4077460119220565965">"Η εκφώνηση κειμένου απέτυχε!"</string>
+    <string name="tts_failed_toast" msgid="1483313550894086353">"Δεν είναι δυνατή η ανάγνωση του μηνύματος."</string>
     <string name="reply_message_display_template" msgid="6348622926232346974">"%s"</string>
     <string name="message_sent_notice" msgid="7172592196465284673">"Η απάντηση στάλθηκε στον χρήστη %s."</string>
     <string name="name_not_available" msgid="3800013092212550915">"Το όνομα δεν είναι διαθέσιμο."</string>

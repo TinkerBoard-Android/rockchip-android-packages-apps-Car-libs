@@ -30,7 +30,7 @@
     <string name="auto_reply_failed_message" msgid="6445984971657465627">"جواب بھیجنے سے قاصر۔ براہ کرم دوبارہ کوشش کریں۔"</string>
     <string name="auto_reply_device_disconnected" msgid="5861772755278229950">"جواب بھیجنے سے قاصر۔ آلہ منسلک نہیں ہے۔"</string>
     <string name="tts_sender_says" msgid="5352698006545359668">"%s کا کہنا ہے"</string>
-    <string name="tts_failed_toast" msgid="4077460119220565965">"متن کا پلے آؤٹ ناکام ہو گیا!"</string>
+    <string name="tts_failed_toast" msgid="1483313550894086353">"پیغام نہیں پڑھا جا سکتا۔"</string>
     <string name="reply_message_display_template" msgid="6348622926232346974">"\"%s\""</string>
     <string name="message_sent_notice" msgid="7172592196465284673">"جواب %s پر بھیجا گیا"</string>
     <string name="name_not_available" msgid="3800013092212550915">"نام دستیاب نہیں ہے"</string>

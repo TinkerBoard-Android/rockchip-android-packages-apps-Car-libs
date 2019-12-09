@@ -30,7 +30,7 @@
     <string name="auto_reply_failed_message" msgid="6445984971657465627">"پاسخ ارسال نشد. لطفاً دوباره امتحان کنید."</string>
     <string name="auto_reply_device_disconnected" msgid="5861772755278229950">"پاسخ ارسال نشد. دستگاه متصل نشده است."</string>
     <string name="tts_sender_says" msgid="5352698006545359668">"%s می‌گوید"</string>
-    <string name="tts_failed_toast" msgid="4077460119220565965">"نوشتار ایجاد نشد!"</string>
+    <string name="tts_failed_toast" msgid="1483313550894086353">"خواندن پیام ممکن نیست."</string>
     <string name="reply_message_display_template" msgid="6348622926232346974">"«%s»"</string>
     <string name="message_sent_notice" msgid="7172592196465284673">"پاسخ برای %s ارسال شد"</string>
     <string name="name_not_available" msgid="3800013092212550915">"نام در دسترس نیست"</string>

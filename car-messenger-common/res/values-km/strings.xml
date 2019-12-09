@@ -30,7 +30,7 @@
     <string name="auto_reply_failed_message" msgid="6445984971657465627">"មិនអាច​ផ្ញើ​ការឆ្លើយតប​បានទេ​។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="auto_reply_device_disconnected" msgid="5861772755278229950">"មិនអាច​ផ្ញើ​ការឆ្លើយតប​បានទេ​។ មិន​បាន​ភ្ជាប់​ឧបករណ៍​ទេ​។"</string>
     <string name="tts_sender_says" msgid="5352698006545359668">"%s និយាយ​ថា"</string>
-    <string name="tts_failed_toast" msgid="4077460119220565965">"មិនអាច​អាន​ការជូនដំណឹង​អំពី​សារ​ឱ្យឮ​បានទេ​!"</string>
+    <string name="tts_failed_toast" msgid="1483313550894086353">"មិនអាច​អានសារឱ្យឮៗ​បានទេ។"</string>
     <string name="reply_message_display_template" msgid="6348622926232346974">"\"%s\""</string>
     <string name="message_sent_notice" msgid="7172592196465284673">"ការ​ឆ្លើយតប​ដែលបាន​ផ្ញើ​ទៅ %s"</string>
     <string name="name_not_available" msgid="3800013092212550915">"មិន​មាន​ឈ្មោះ​ទេ"</string>

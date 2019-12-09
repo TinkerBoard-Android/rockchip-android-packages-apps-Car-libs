@@ -32,7 +32,7 @@
     <string name="auto_reply_failed_message" msgid="6445984971657465627">"Не удалось отправить ответ. Повторите попытку."</string>
     <string name="auto_reply_device_disconnected" msgid="5861772755278229950">"Не удалось отправить ответ. Устройство не подключено."</string>
     <string name="tts_sender_says" msgid="5352698006545359668">"%s говорит"</string>
-    <string name="tts_failed_toast" msgid="4077460119220565965">"Не удалось воспроизвести сообщение."</string>
+    <string name="tts_failed_toast" msgid="1483313550894086353">"Не удалось прочитать сообщение."</string>
     <string name="reply_message_display_template" msgid="6348622926232346974">"\"%s\""</string>
     <string name="message_sent_notice" msgid="7172592196465284673">"Ответ отправлен пользователю %s."</string>
     <string name="name_not_available" msgid="3800013092212550915">"Имя недоступно"</string>
