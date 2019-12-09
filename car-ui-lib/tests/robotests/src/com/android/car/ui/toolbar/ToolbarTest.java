@@ -322,7 +322,7 @@ public class ToolbarTest {
     public void menuItems_setId_shouldWork() {
         MenuItem item = MenuItem.builder(mContext).build();
 
-        assertThat(item.getId()).isEqualTo(0);
+        assertThat(item.getId()).isEqualTo(View.NO_ID);
 
         item.setId(7);
 
