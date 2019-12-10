@@ -362,8 +362,8 @@ public class TelecomUtils {
     }
 
     /**
-     * Sets a Contact avatar onto the provided {@code icon}. The first letter or both letters
-     * of the contact's initials.
+     * Sets a Contact avatar onto the provided {@code icon}. The first letter or both letters of the
+     * contact's initials.
      */
     public static void setContactBitmapAsync(
             Context context,
@@ -373,9 +373,9 @@ public class TelecomUtils {
     }
 
     /**
-     * Sets a Contact avatar onto the provided {@code icon}. The first letter or both letters
-     * of the contact's initials or {@code fallbackDisplayName} will be used as a fallback resource
-     * if avatar loading fails.
+     * Sets a Contact avatar onto the provided {@code icon}. The first letter or both letters of the
+     * contact's initials or {@code fallbackDisplayName} will be used as a fallback resource if
+     * avatar loading fails.
      */
     public static void setContactBitmapAsync(
             Context context,
@@ -383,9 +383,9 @@ public class TelecomUtils {
             @Nullable final Contact contact,
             @Nullable final String fallbackDisplayName) {
         Uri avatarUri = contact != null ? contact.getAvatarUri() : null;
-        String initials = contact != null
-                ? contact.getInitials() : fallbackDisplayName.substring(0, 1);
-        String identifier = TextUtils.isEmpty(initials) ? fallbackDisplayName : initials;
+        String initials = contact != null ? contact.getInitials()
+                : (fallbackDisplayName == null ? null : getInitials(fallbackDisplayName, null));
+        String identifier = contact == null ? fallbackDisplayName : contact.getDisplayName();
 
         setContactBitmapAsync(context, icon, avatarUri, initials, identifier);
     }
@@ -416,10 +416,10 @@ public class TelecomUtils {
     /**
      * Create a {@link LetterTileDrawable} for the given initials.
      *
-     * @param initials   is the letters that will be drawn on the canvas. If it is null, then
-     *                   an avatar anonymous icon will be drawn
-     * @param identifier will decide the color for the drawable. If null, a default color will
-     *                   be used.
+     * @param initials   is the letters that will be drawn on the canvas. If it is null, then an
+     *                   avatar anonymous icon will be drawn
+     * @param identifier will decide the color for the drawable. If null, a default color will be
+     *                   used.
      */
     public static LetterTileDrawable createLetterTile(
             Context context,
@@ -506,7 +506,13 @@ public class TelecomUtils {
         }
     }
 
-    static String getInitials(String name, String nameAlt) {
+    /**
+     * Returns the initials based on the name and nameAlt.
+     *
+     * @param name    should be the display name of a contact.
+     * @param nameAlt should be alternative display name of a contact.
+     */
+    public static String getInitials(String name, String nameAlt) {
         StringBuilder initials = new StringBuilder();
         if (!TextUtils.isEmpty(name) && Character.isLetter(name.charAt(0))) {
             initials.append(Character.toUpperCase(name.charAt(0)));
