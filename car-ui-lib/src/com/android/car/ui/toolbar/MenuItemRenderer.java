@@ -80,8 +80,8 @@ class MenuItemRenderer implements MenuItem.Listener {
         }
     }
 
-    void setUxRestrictions(CarUxRestrictions restrictions) {
-        mMenuItem.setUxRestrictions(restrictions);
+    void setCarUxRestrictions(CarUxRestrictions restrictions) {
+        mMenuItem.setCarUxRestrictions(restrictions);
     }
 
     @Override
