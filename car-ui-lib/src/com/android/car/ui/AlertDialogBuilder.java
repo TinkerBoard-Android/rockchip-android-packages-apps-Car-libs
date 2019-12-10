@@ -243,7 +243,7 @@ public class AlertDialogBuilder {
      */
     public AlertDialogBuilder setNeutralButton(CharSequence text,
             final DialogInterface.OnClickListener listener) {
-        mBuilder.setPositiveButton(text, listener);
+        mBuilder.setNeutralButton(text, listener);
         mNeutralButtonSet = true;
         return this;
     }
