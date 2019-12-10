@@ -322,7 +322,7 @@ public class ToolbarTest {
     public void menuItems_setId_shouldWork() {
         MenuItem item = MenuItem.builder(mContext).build();
 
-        assertThat(item.getId()).isEqualTo(0);
+        assertThat(item.getId()).isEqualTo(View.NO_ID);
 
         item.setId(7);
 
@@ -416,8 +416,7 @@ public class ToolbarTest {
     @Test
     public void menuItems_searchScreen_shouldHideMenuItems() {
         mToolbar.setMenuItems(Arrays.asList(
-                MenuItem.Builder.createSearch(mContext, i -> {
-                }),
+                MenuItem.builder(mContext).setToSearch().build(),
                 createMenuItem(i -> {
                 })));
 
@@ -431,8 +430,7 @@ public class ToolbarTest {
     @Test
     public void menuItems_showMenuItemsWhileSearching() {
         mToolbar.setMenuItems(Arrays.asList(
-                MenuItem.Builder.createSearch(mContext, i -> {
-                }),
+                MenuItem.builder(mContext).setToSearch().build(),
                 createMenuItem(i -> {
                 })));
 
@@ -444,7 +442,7 @@ public class ToolbarTest {
     }
 
     private MenuItem createMenuItem(MenuItem.OnClickListener listener) {
-        return new MenuItem.Builder(mContext)
+        return MenuItem.builder(mContext)
                 .setTitle("Button!")
                 .setOnClickListener(listener)
                 .build();

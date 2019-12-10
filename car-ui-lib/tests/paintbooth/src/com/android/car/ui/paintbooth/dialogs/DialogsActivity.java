@@ -39,7 +39,7 @@ import java.util.List;
  */
 public class DialogsActivity extends Activity {
 
-    private List<Pair<Integer, View.OnClickListener>> mButtons = new ArrayList<>();
+    private final List<Pair<Integer, View.OnClickListener>> mButtons = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -174,7 +174,7 @@ public class DialogsActivity extends Activity {
         }
     }
 
-    private CarUiRecyclerView.Adapter<ViewHolder> mAdapter =
+    private final CarUiRecyclerView.Adapter<ViewHolder> mAdapter =
             new CarUiRecyclerView.Adapter<ViewHolder>() {
                 @Override
                 public int getItemCount() {

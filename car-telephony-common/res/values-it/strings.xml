@@ -26,4 +26,8 @@
     <string name="call_state_call_active" msgid="2769644783657864202">"Connesso"</string>
     <string name="call_state_call_ringing" msgid="4618803402954375017">"Sta squillando…"</string>
     <string name="call_state_call_ending" msgid="5037498349965472247">"Disconnessione…"</string>
+    <!-- no translation found for address_uri_format (7726586715461112145) -->
+    <skip />
+    <!-- no translation found for navigation_uri_format (3197532294608326294) -->
+    <skip />
 </resources>

@@ -19,11 +19,13 @@ package com.android.car.ui.paintbooth;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -38,6 +40,7 @@ import com.android.car.ui.paintbooth.toolbar.ToolbarActivity;
 import com.android.car.ui.paintbooth.widgets.WidgetActivity;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
@@ -106,5 +109,84 @@ public class MainActivity extends Activity {
 
         CarUiRecyclerView prv = findViewById(R.id.activities);
         prv.setAdapter(mAdapter);
+
+        initLeakCanary();
+    }
+
+    private void initLeakCanary() {
+        // This sets LeakCanary to report errors after a single leak instead of 5, and to ask for
+        // permission to use storage, which it needs to work.
+        //
+        // Equivalent to this non-reflection code:
+        //
+        // Config config = LeakCanary.INSTANCE.getConfig();
+        // LeakCanary.INSTANCE.setConfig(config.copy(config.getDumpHeap(),
+        //     config.getDumpHeapWhenDebugging(),
+        //     1,
+        //     config.getReferenceMatchers(),
+        //     config.getObjectInspectors(),
+        //     config.getOnHeapAnalyzedListener(),
+        //     config.getMetatadaExtractor(),
+        //     config.getComputeRetainedHeapSize(),
+        //     config.getMaxStoredHeapDumps(),
+        //     true,
+        //     config.getUseExperimentalLeakFinders()));
+        try {
+            Class<?> canaryClass = Class.forName("leakcanary.LeakCanary");
+            try {
+                Class<?> onHeapAnalyzedListenerClass =
+                        Class.forName("leakcanary.OnHeapAnalyzedListener");
+                Class<?> metadataExtractorClass = Class.forName("shark.MetadataExtractor");
+                Method getConfig = canaryClass.getMethod("getConfig");
+                Class<?> configClass = getConfig.getReturnType();
+                Method setConfig = canaryClass.getMethod("setConfig", configClass);
+                Method copy = configClass.getMethod("copy", boolean.class, boolean.class,
+                        int.class, List.class, List.class, onHeapAnalyzedListenerClass,
+                        metadataExtractorClass, boolean.class, int.class, boolean.class,
+                        boolean.class);
+
+                Object canary = canaryClass.getField("INSTANCE").get(null);
+                Object currentConfig = getConfig.invoke(canary);
+
+                Boolean dumpHeap = (Boolean) configClass
+                        .getMethod("getDumpHeap").invoke(currentConfig);
+                Boolean dumpHeapWhenDebugging = (Boolean) configClass
+                        .getMethod("getDumpHeapWhenDebugging").invoke(currentConfig);
+                List<?> referenceMatchers = (List<?>) configClass
+                        .getMethod("getReferenceMatchers").invoke(currentConfig);
+                List<?> objectInspectors = (List<?>) configClass
+                        .getMethod("getObjectInspectors").invoke(currentConfig);
+                Object onHeapAnalyzedListener = configClass
+                        .getMethod("getOnHeapAnalyzedListener").invoke(currentConfig);
+                // Yes, LeakCanary misspelled metadata
+                Object metadataExtractor = configClass
+                        .getMethod("getMetatadaExtractor").invoke(currentConfig);
+                Boolean computeRetainedHeapSize = (Boolean) configClass
+                        .getMethod("getComputeRetainedHeapSize").invoke(currentConfig);
+                Integer maxStoredHeapDumps = (Integer) configClass
+                        .getMethod("getMaxStoredHeapDumps").invoke(currentConfig);
+                Boolean useExperimentalLeakFinders = (Boolean) configClass
+                        .getMethod("getUseExperimentalLeakFinders").invoke(currentConfig);
+
+                setConfig.invoke(canary, copy.invoke(currentConfig,
+                        dumpHeap,
+                        dumpHeapWhenDebugging,
+                        1,
+                        referenceMatchers,
+                        objectInspectors,
+                        onHeapAnalyzedListener,
+                        metadataExtractor,
+                        computeRetainedHeapSize,
+                        maxStoredHeapDumps,
+                        true,
+                        useExperimentalLeakFinders));
+
+            } catch (ReflectiveOperationException e) {
+                Log.e("paintbooth", "Error initializing LeakCanary", e);
+                Toast.makeText(this, "Error initializing LeakCanary", Toast.LENGTH_LONG).show();
+            }
+        } catch (ClassNotFoundException e) {
+            // LeakCanary is not used in this build, do nothing.
+        }
     }
 }

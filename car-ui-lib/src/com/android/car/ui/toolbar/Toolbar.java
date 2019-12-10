@@ -149,6 +149,10 @@ public class Toolbar extends FrameLayout {
     private boolean mEatingTouch = false;
     private boolean mEatingHover = false;
     private ProgressBar mProgressBar;
+    private MenuItem.Listener mOverflowItemListener = () -> {
+        createOverflowDialog();
+        setState(getState());
+    };
 
     public Toolbar(Context context) {
         this(context, null);
@@ -603,10 +607,7 @@ public class Toolbar extends FrameLayout {
         for (MenuItem item : mMenuItems) {
             if (item.getDisplayBehavior() == MenuItem.DisplayBehavior.NEVER) {
                 mOverflowItems.add(item);
-                item.setListener(() -> {
-                    createOverflowDialog();
-                    setState(getState());
-                });
+                item.setListener(mOverflowItemListener);
             } else {
                 MenuItemRenderer renderer = new MenuItemRenderer(item, mMenuItemsContainer);
                 mMenuItemRenderers.add(renderer);
@@ -720,8 +721,7 @@ public class Toolbar extends FrameLayout {
     /**
      * Set whether or not to show the {@link MenuItem MenuItems} while searching. Default false.
      * Even if this is set to true, the {@link MenuItem} created by
-     * {@link MenuItem.Builder#createSearch(Context, MenuItem.OnClickListener)} will still be
-     * hidden.
+     * {@link MenuItem.Builder#setToSearch()} will still be hidden.
      */
     public void setShowMenuItemsWhileSearching(boolean showMenuItems) {
         mShowMenuItemsWhileSearching = showMenuItems;
