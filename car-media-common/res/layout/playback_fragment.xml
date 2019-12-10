@@ -64,7 +64,7 @@
             android:singleLine="true"
             android:includeFontPadding="false"
             app:layout_constraintLeft_toRightOf="@+id/app_icon"
-            app:layout_constraintRight_toLeftOf="@+id/app_selector"
+            app:layout_constraintRight_toLeftOf="@+id/app_selector_container"
             app:layout_constraintTop_toTopOf="parent"/>
 
         <TextView
