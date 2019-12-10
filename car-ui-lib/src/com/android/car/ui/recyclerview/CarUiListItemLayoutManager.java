@@ -133,7 +133,7 @@ public class CarUiListItemLayoutManager extends LinearLayoutManager {
             }
         }
 
-        return (mListItemHeights.get(firstPos)) + heightOfScreen;
+        return mListItemHeights.get(firstPos) + heightOfScreen;
     }
 
     /**
