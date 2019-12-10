@@ -55,7 +55,6 @@ public class MenuItem {
     private final boolean mShowIconAndTitle;
     private final boolean mIsTinted;
     @CarUxRestrictions.CarUxRestrictionsInfo
-    private final int mUxRestrictions;
 
     private int mId;
     private CarUxRestrictions mCurrentRestrictions;
@@ -67,6 +66,7 @@ public class MenuItem {
     private Drawable mIcon;
     private OnClickListener mOnClickListener;
     private DisplayBehavior mDisplayBehavior;
+    private int mUxRestrictions;
     private boolean mIsEnabled;
     private boolean mIsChecked;
     private boolean mIsVisible;
@@ -208,6 +208,14 @@ public class MenuItem {
         setTitle(mContext.getString(resId));
     }
 
+    /** Sets the UxRestrictions of this MenuItem. */
+    public void setUxRestrictions(@CarUxRestrictions.CarUxRestrictionsInfo int uxRestrictions) {
+        if (mUxRestrictions != uxRestrictions) {
+            mUxRestrictions = uxRestrictions;
+            update();
+        }
+    }
+
     @CarUxRestrictions.CarUxRestrictionsInfo
     public int getUxRestrictions() {
         return mUxRestrictions;
@@ -229,7 +237,7 @@ public class MenuItem {
         update();
     }
 
-    /* package */ void setUxRestrictions(CarUxRestrictions restrictions) {
+    /* package */ void setCarUxRestrictions(CarUxRestrictions restrictions) {
         boolean wasRestricted = isRestricted();
         mCurrentRestrictions = restrictions;
 
