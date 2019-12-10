@@ -75,6 +75,8 @@ public class DialogsActivity extends Activity {
         new AlertDialogBuilder(this)
                 .setTitle("Standard Alert Dialog")
                 .setMessage("With a message to show.")
+                .setNeutralButton("NEUTRAL", (dialogInterface, which) -> {
+                })
                 .setPositiveButton("OK", (dialogInterface, which) -> {
                 })
                 .setNegativeButton("CANCEL", (dialogInterface, which) -> {
