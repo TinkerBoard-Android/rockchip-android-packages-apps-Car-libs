@@ -152,9 +152,9 @@ public class MainActivity extends Activity {
                         .getMethod("getDumpHeap").invoke(currentConfig);
                 Boolean dumpHeapWhenDebugging = (Boolean) configClass
                         .getMethod("getDumpHeapWhenDebugging").invoke(currentConfig);
-                List referenceMatchers = (List) configClass
+                List<?> referenceMatchers = (List<?>) configClass
                         .getMethod("getReferenceMatchers").invoke(currentConfig);
-                List objectInspectors = (List) configClass
+                List<?> objectInspectors = (List<?>) configClass
                         .getMethod("getObjectInspectors").invoke(currentConfig);
                 Object onHeapAnalyzedListener = configClass
                         .getMethod("getOnHeapAnalyzedListener").invoke(currentConfig);
