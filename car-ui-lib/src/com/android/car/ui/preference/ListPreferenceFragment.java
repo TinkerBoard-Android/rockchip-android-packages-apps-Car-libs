@@ -44,16 +44,14 @@ import java.util.List;
 public class ListPreferenceFragment extends Fragment implements
         CarUiRecyclerViewRadioButtonAdapter.OnRadioButtonClickedListener {
 
-    private CarUiRecyclerView mCarUiRecyclerView;
     private ListPreference mPreference;
     private int mClickedDialogEntryIndex;
-    private CharSequence[] mEntryValues;
 
     /**
      * Returns a new instance of {@link ListPreferenceFragment} for the {@link ListPreference} with
      * the given {@code key}.
      */
-    public static ListPreferenceFragment newInstance(String key) {
+    static ListPreferenceFragment newInstance(String key) {
         ListPreferenceFragment fragment = new ListPreferenceFragment();
         Bundle b = new Bundle(/* capacity= */ 1);
         b.putString(ARG_KEY, key);
@@ -72,17 +70,8 @@ public class ListPreferenceFragment extends Fragment implements
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mCarUiRecyclerView = view.findViewById(R.id.radio_list);
-        final Toolbar toolbar = view.findViewById(R.id.toolbar);
-        if (mCarUiRecyclerView == null) {
-            throw new IllegalStateException(
-                    "ListPreference layout did not contain recycler view with expected id.");
-        }
-
-        if (toolbar == null) {
-            throw new IllegalStateException(
-                    "ListPreference layout did not contain toolbar with expected id.");
-        }
+        final CarUiRecyclerView mCarUiRecyclerView = view.requireViewById(R.id.radio_list);
+        final Toolbar toolbar = view.requireViewById(R.id.toolbar);
 
         mCarUiRecyclerView.setPadding(0, toolbar.getHeight(), 0, 0);
         toolbar.registerToolbarHeightChangeListener(newHeight -> {
@@ -96,23 +85,23 @@ public class ListPreferenceFragment extends Fragment implements
         });
 
         mCarUiRecyclerView.setClipToPadding(false);
-        ListPreference preference = getListPreference();
+        mPreference = getListPreference();
         toolbar.setTitle(mPreference.getTitle());
 
-        CharSequence[] entries = preference.getEntries();
-        mEntryValues = preference.getEntryValues();
+        CharSequence[] entries = mPreference.getEntries();
+        CharSequence[] entryValues = mPreference.getEntryValues();
 
-        if (entries == null || mEntryValues == null) {
+        if (entries == null || entryValues == null) {
             throw new IllegalStateException(
                     "ListPreference requires an entries array and an entryValues array.");
         }
 
-        if (entries.length != mEntryValues.length) {
+        if (entries.length != entryValues.length) {
             throw new IllegalStateException(
                     "ListPreference entries array length does not match entryValues array length.");
         }
 
-        mClickedDialogEntryIndex = preference.findIndexOfValue(preference.getValue());
+        mClickedDialogEntryIndex = mPreference.findIndexOfValue(mPreference.getValue());
         List<String> entryStrings = new ArrayList<>(entries.length);
         for (CharSequence entry : entries) {
             entryStrings.add(entry.toString());
@@ -125,47 +114,49 @@ public class ListPreferenceFragment extends Fragment implements
     }
 
     private ListPreference getListPreference() {
-        if (mPreference == null && getArguments() != null) {
-            String key = getArguments().getString(ARG_KEY);
-            DialogPreference.TargetFragment fragment =
-                    (DialogPreference.TargetFragment) getTargetFragment();
-
-            if (key == null) {
-                throw new IllegalStateException(
-                        "ListPreference key not found in Fragment arguments");
-            }
-
-            if (fragment == null) {
-                throw new IllegalStateException(
-                        "Target fragment must be registered before displaying ListPreference "
-                                + "screen.");
-            }
-
-            Preference preference = fragment.findPreference(key);
-
-            if (!(preference instanceof ListPreference)) {
-                throw new IllegalStateException(
-                        "Cannot use ListPreferenceFragment with a preference that is not of type "
-                                + "ListPreference");
-            }
-
-            mPreference = (ListPreference) preference;
+        if (getArguments() == null) {
+            throw new IllegalStateException("Preference arguments cannot be null");
         }
-        return mPreference;
+
+        String key = getArguments().getString(ARG_KEY);
+        DialogPreference.TargetFragment fragment =
+                (DialogPreference.TargetFragment) getTargetFragment();
+
+        if (key == null) {
+            throw new IllegalStateException(
+                    "ListPreference key not found in Fragment arguments");
+        }
+
+        if (fragment == null) {
+            throw new IllegalStateException(
+                    "Target fragment must be registered before displaying ListPreference "
+                            + "screen.");
+        }
+
+        Preference preference = fragment.findPreference(key);
+
+        if (!(preference instanceof ListPreference)) {
+            throw new IllegalStateException(
+                    "Cannot use ListPreferenceFragment with a preference that is not of type "
+                            + "ListPreference");
+        }
+
+        return (ListPreference) preference;
     }
 
     @Override
     public void onClick(int position) {
-        if (position < 0 || position > mEntryValues.length - 1) {
+        CharSequence[] entryValues = mPreference.getEntryValues();
+
+        if (position < 0 || position > entryValues.length - 1) {
             throw new IllegalStateException(
                     "Clicked preference has invalid index.");
         }
 
         mClickedDialogEntryIndex = position;
-        String value = mEntryValues[mClickedDialogEntryIndex].toString();
-        ListPreference preference = getListPreference();
-        if (preference.callChangeListener(value)) {
-            preference.setValue(value);
+        String value = entryValues[mClickedDialogEntryIndex].toString();
+        if (mPreference.callChangeListener(value)) {
+            mPreference.setValue(value);
         }
 
         if (getActivity() == null) {

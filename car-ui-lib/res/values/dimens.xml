@@ -200,4 +200,10 @@
     <dimen name="car_ui_list_item_radio_button_start_inset">@dimen/car_ui_list_item_start_inset</dimen>
     <dimen name="car_ui_list_item_radio_button_end_inset">@dimen/car_ui_list_item_end_inset</dimen>
     <dimen name="car_ui_list_item_radio_button_icon_container_width">@dimen/car_ui_list_item_icon_container_width</dimen>
+
+    <dimen name="car_ui_list_item_check_box_height">@dimen/car_ui_list_item_height</dimen>
+    <dimen name="car_ui_list_item_check_box_start_inset">@dimen/car_ui_list_item_start_inset</dimen>
+    <dimen name="car_ui_list_item_check_box_end_inset">@dimen/car_ui_list_item_end_inset</dimen>
+    <dimen name="car_ui_list_item_check_box_icon_container_width">@dimen/car_ui_list_item_icon_container_width</dimen>
+
 </resources>
