@@ -22,6 +22,8 @@
     <style name="Widget.CarUi.Button.Borderless.Colored"
            parent="android:Widget.DeviceDefault.Button.Borderless.Colored"/>
 
+    <style name="Widget.CarUi.Button" parent="android:Widget.DeviceDefault.Button"/>
+
     <style name="Widget.CarUi.Toolbar"/>
 
     <style name="Widget.CarUi.Toolbar.Container"/>
