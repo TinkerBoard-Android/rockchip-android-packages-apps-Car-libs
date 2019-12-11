@@ -332,6 +332,20 @@ public class ConnectedDeviceManager {
     }
 
     /**
+     * Remove the associated device with the given device identifier for the current user.
+     *
+     * @param deviceId Device identifier.
+     */
+    public void removeActiveUserAssociatedDevice(@NonNull String deviceId) {
+        if (mConnectedDevices.containsKey(deviceId)) {
+            removeConnectedDevice(deviceId, mPeripheralManager);
+            mPeripheralManager.stop();
+        }
+        mStorage.removeAssociatedDeviceForActiveUser(deviceId);
+        //TODO(b/146504818): Notify features that an associated device has been removed.
+    }
+
+    /**
      * Register a callback for a specific device and recipient.
      *
      * @param device {@link ConnectedDevice} to register triggers on.
