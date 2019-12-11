@@ -52,6 +52,15 @@ public class CarUiDropDownPreference extends DropDownPreference {
         mContext = context;
     }
 
+    /**
+     * Instead of displaying a drop-down that is not car optimized, have drop-down preferences
+     * mirror the behavior of list preferences.
+     */
+    @Override
+    protected void onClick() {
+        getPreferenceManager().showDialog(this);
+    }
+
     @Override
     public void onAttached() {
         super.onAttached();
