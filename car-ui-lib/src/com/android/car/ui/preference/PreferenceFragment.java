@@ -40,6 +40,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.R;
 import com.android.car.ui.toolbar.Toolbar;
+import com.android.car.ui.utils.CarUiUtils;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -141,7 +142,17 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat {
                         "Preference fragment must have a layout.");
             }
 
+            Context context = getContext();
             getActivity().getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(
+                            CarUiUtils.getAttrResourceId(context,
+                                    android.R.attr.fragmentOpenEnterAnimation),
+                            CarUiUtils.getAttrResourceId(context,
+                                    android.R.attr.fragmentOpenExitAnimation),
+                            CarUiUtils.getAttrResourceId(context,
+                                    android.R.attr.fragmentCloseEnterAnimation),
+                            CarUiUtils.getAttrResourceId(context,
+                                    android.R.attr.fragmentCloseExitAnimation))
                     .replace(((ViewGroup) getView().getParent()).getId(), f)
                     .addToBackStack(null)
                     .commit();
