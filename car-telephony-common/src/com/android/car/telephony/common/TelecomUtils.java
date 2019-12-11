@@ -24,6 +24,9 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Icon;
 import android.location.Country;
 import android.location.CountryDetector;
 import android.net.Uri;
@@ -40,6 +43,9 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.RoundedBitmapDrawable;
+import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
 import com.android.car.apps.common.LetterTileDrawable;
 
@@ -79,7 +85,16 @@ public class TelecomUtils {
      * @see TelephonyManager#getVoiceMailNumber()
      */
     public static boolean isVoicemailNumber(Context context, String number) {
-        return !TextUtils.isEmpty(number) && number.equals(getVoicemailNumber(context));
+        if (TextUtils.isEmpty(number)) {
+            return false;
+        }
+
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE)
+                != PackageManager.PERMISSION_GRANTED) {
+            return false;
+        }
+
+        return number.equals(getVoicemailNumber(context));
     }
 
     /**
@@ -523,6 +538,34 @@ public class TelecomUtils {
             initials.append(Character.toUpperCase(nameAlt.charAt(0)));
         }
         return initials.toString();
+    }
+
+    /**
+     * Creates a Letter Tile Icon that will display the given initials. If the initials are null,
+     * then an avatar anonymous icon will be drawn.
+     **/
+    public static Icon createLetterTile(Context context, @Nullable String initials,
+            String identifier, int avatarSize, float cornerRadiusPercent) {
+        LetterTileDrawable letterTileDrawable = TelecomUtils.createLetterTile(context, initials,
+                identifier);
+        RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(
+                context.getResources(), letterTileDrawable.toBitmap(avatarSize));
+        return createFromRoundedBitmapDrawable(roundedBitmapDrawable, avatarSize,
+            cornerRadiusPercent);
+    }
+
+    /** Creates an Icon based on the given roundedBitmapDrawable. **/
+    public static Icon createFromRoundedBitmapDrawable(RoundedBitmapDrawable roundedBitmapDrawable,
+            int avatarSize, float cornerRadiusPercent) {
+        float radius = avatarSize * cornerRadiusPercent;
+        roundedBitmapDrawable.setCornerRadius(radius);
+
+        final Bitmap result = Bitmap.createBitmap(avatarSize, avatarSize,
+                Bitmap.Config.ARGB_8888);
+        final Canvas canvas = new Canvas(result);
+        roundedBitmapDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        roundedBitmapDrawable.draw(canvas);
+        return Icon.createWithBitmap(result);
     }
 
     private static Uri makeResourceUri(Context context, int resourceId) {
