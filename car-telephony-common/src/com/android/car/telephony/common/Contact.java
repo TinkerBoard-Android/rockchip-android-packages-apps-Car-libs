@@ -341,7 +341,7 @@ public class Contact implements Parcelable, Comparable<Contact> {
         }
 
         if (newNumber.isPrimary()) {
-            mPrimaryPhoneNumber = mPrimaryPhoneNumber.merge(newNumber);
+            mPrimaryPhoneNumber = newNumber.merge(mPrimaryPhoneNumber);
         }
 
         // TODO: update voice mail number part when start to support voice mail.
