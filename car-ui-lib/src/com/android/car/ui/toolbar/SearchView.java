@@ -135,6 +135,7 @@ public class SearchView extends ConstraintLayout {
 
     /**
      * Sets the search hint.
+     *
      * @param resId A string resource id of the search hint.
      */
     public void setHint(int resId) {
@@ -143,6 +144,7 @@ public class SearchView extends ConstraintLayout {
 
     /**
      * Sets the search hint
+     *
      * @param hint A CharSequence of the search hint.
      */
     public void setHint(CharSequence hint) {
@@ -174,6 +176,15 @@ public class SearchView extends ConstraintLayout {
         } else {
             mIcon.setImageResource(resId);
         }
+    }
+
+    /**
+     * Sets the visibility state for the icon.
+     *
+     * @param visibility One of VISIBLE, INVISIBLE, GONE
+     */
+    public void setIconVisibility(int visibility) {
+        mIcon.setVisibility(visibility);
     }
 
     private void onSearch(String query) {
