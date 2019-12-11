@@ -525,6 +525,15 @@ public class Toolbar extends FrameLayout {
     }
 
     /**
+     * Sets the visibility state for the search icon.
+     *
+     * @param visibility One of VISIBLE, INVISIBLE, GONE
+     */
+    public void setSearchIconVisibility(int visibility) {
+        mSearchView.setIconVisibility(visibility);
+    }
+
+    /**
      * Sets the icon to display in the search box.
      *
      * <p>The icon will be lost on configuration change, make sure to set it in onCreate() or
