@@ -19,10 +19,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.util.TypedValue;
 
 import androidx.annotation.DimenRes;
 import androidx.annotation.Nullable;
+import androidx.annotation.StyleRes;
 
 /**
  * Collection of utility methods
@@ -42,6 +44,22 @@ public final class CarUiUtils {
         TypedValue outValue = new TypedValue();
         res.getValue(resId, outValue, true);
         return outValue.getFloat();
+    }
+
+    /** Returns the identifier of the resolved resource assigned to the given attribute. */
+    public static int getAttrResourceId(Context context, int attr) {
+        return getAttrResourceId(context, /*styleResId=*/ 0, attr);
+    }
+
+    /**
+     * Returns the identifier of the resolved resource assigned to the given attribute defined in
+     * the given style.
+     */
+    public static int getAttrResourceId(Context context, @StyleRes int styleResId, int attr) {
+        TypedArray ta = context.obtainStyledAttributes(styleResId, new int[]{attr});
+        int resId = ta.getResourceId(0, 0);
+        ta.recycle();
+        return resId;
     }
 
     /**
