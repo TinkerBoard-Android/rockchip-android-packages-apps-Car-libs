@@ -396,7 +396,7 @@ public class Toolbar extends FrameLayout {
     private final CarUxRestrictionsUtil.OnUxRestrictionsChangedListener
             mOnUxRestrictionsChangedListener = restrictions -> {
                 for (MenuItemRenderer renderer : mMenuItemRenderers) {
-                    renderer.setUxRestrictions(restrictions);
+                    renderer.setCarUxRestrictions(restrictions);
                 }
             };
 
