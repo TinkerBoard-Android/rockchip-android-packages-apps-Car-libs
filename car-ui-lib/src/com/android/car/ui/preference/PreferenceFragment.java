@@ -118,7 +118,7 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat {
         } else if (preference instanceof ListPreference) {
             f = ListPreferenceFragment.newInstance(preference.getKey());
         } else if (preference instanceof MultiSelectListPreference) {
-            f = MultiSelectListPreferenceDialogFragment.newInstance(preference.getKey());
+            f = MultiSelectListPreferenceFragment.newInstance(preference.getKey());
         } else {
             throw new IllegalArgumentException(
                     "Cannot display dialog for an unknown Preference type: "
