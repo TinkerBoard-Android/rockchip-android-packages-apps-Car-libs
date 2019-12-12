@@ -23,8 +23,6 @@
         android:id="@+id/car_ui_toolbar_search_bar"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:paddingStart="@dimen/car_ui_toolbar_search_search_icon_container_width"
-        android:paddingEnd="@dimen/car_ui_toolbar_search_close_icon_container_width"
         android:hint="@string/car_ui_toolbar_default_search_hint"
         android:textColorHint="@color/car_ui_toolbar_search_hint_text_color"
         android:inputType="text"

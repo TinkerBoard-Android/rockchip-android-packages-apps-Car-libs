@@ -55,7 +55,8 @@ public class ToolbarActivity extends Activity {
         Toolbar toolbar = requireViewById(R.id.toolbar);
         toolbar.registerOnBackListener(
                 () -> {
-                    if (toolbar.getState() == Toolbar.State.SEARCH) {
+                    if (toolbar.getState() == Toolbar.State.SEARCH
+                            || toolbar.getState() == Toolbar.State.EDIT) {
                         toolbar.setState(Toolbar.State.SUBPAGE);
                         return true;
                     }
@@ -231,9 +232,11 @@ public class ToolbarActivity extends Activity {
             hasLogo.value = !hasLogo.value;
         }));
 
-        mButtons.add(Pair.create(getString(R.string.toolbar_toggle_state), v -> {
+        mButtons.add(Pair.create(getString(R.string.toolbar_cycle_state), v -> {
             if (toolbar.getState() == Toolbar.State.SUBPAGE) {
                 toolbar.setState(Toolbar.State.HOME);
+            } else if (toolbar.getState() == Toolbar.State.HOME) {
+                toolbar.setState(Toolbar.State.EDIT);
             } else {
                 toolbar.setState(Toolbar.State.SUBPAGE);
             }
