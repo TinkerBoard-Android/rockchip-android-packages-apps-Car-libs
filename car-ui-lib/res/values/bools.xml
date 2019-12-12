@@ -24,6 +24,8 @@
     <!-- Whether the logo (if provided) should be used in place of the nav icon when nav icon is
          not visible -->
     <bool name="car_ui_toolbar_logo_fills_nav_icon_space">true</bool>
+    <!-- Whether logo should be displayed. If set to false, logo won't be shown even if provided -->
+    <bool name="car_ui_toolbar_show_logo">true</bool>
     <!-- Whether tabs should be displayed on a second row, or they should be placed in the first
          row, replacing the title -->
     <bool name="car_ui_toolbar_tabs_on_second_row">false</bool>

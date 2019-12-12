@@ -146,6 +146,7 @@ public class Toolbar extends FrameLayout {
     private AlertDialog mOverflowDialog;
     private boolean mNavIconSpaceReserved;
     private boolean mLogoFillsNavIconSpace;
+    private boolean mShowLogo;
     private boolean mEatingTouch = false;
     private boolean mEatingHover = false;
     private ProgressBar mProgressBar;
@@ -194,6 +195,8 @@ public class Toolbar extends FrameLayout {
                     R.bool.car_ui_toolbar_nav_icon_reserve_space);
             mLogoFillsNavIconSpace = context.getResources().getBoolean(
                     R.bool.car_ui_toolbar_logo_fills_nav_icon_space);
+            mShowLogo = context.getResources().getBoolean(
+                    R.bool.car_ui_toolbar_show_logo);
 
             LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -489,6 +492,10 @@ public class Toolbar extends FrameLayout {
      * will be displayed next to the title.
      */
     public void setLogo(Drawable drawable) {
+        if (!mShowLogo) {
+            // If no logo should be shown then we act as if we never received one.
+            return;
+        }
         if (drawable != null) {
             mLogoInNavIconSpace.setImageDrawable(drawable);
             mTitleLogo.setImageDrawable(drawable);
