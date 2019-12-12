@@ -52,6 +52,10 @@ public class CarUiMultiSelectListPreference extends MultiSelectListPreference {
         mContext = context;
     }
 
+    protected boolean[] getSelectedItems() {
+        return super.getSelectedItems();
+    }
+
     @Override
     public void onAttached() {
         super.onAttached();
