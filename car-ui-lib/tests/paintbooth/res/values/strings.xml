@@ -194,8 +194,8 @@
   <!-- Text for toggle logo button [CHAR_LIMIT=19]-->
   <string name="toolbar_toggle_logo">Toggle logo</string>
 
-  <!-- Text for toggle state button [CHAR_LIMIT=20]-->
-  <string name="toolbar_toggle_state">Toggle state</string>
+  <!-- Text for cycle state button [CHAR_LIMIT=20]-->
+  <string name="toolbar_cycle_state">Cycle state</string>
 
   <!-- Text for toggle search hint button [CHAR_LIMIT=30]-->
   <string name="toolbar_toggle_search_hint">Toggle search hint</string>
