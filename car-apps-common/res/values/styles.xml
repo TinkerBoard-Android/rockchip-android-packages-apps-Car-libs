@@ -144,6 +144,5 @@
         <item name="android:textColor">@color/hero_button_text_color</item>
         <item name="android:gravity">center</item>
         <item name="android:paddingHorizontal">@dimen/hero_button_corner_radius</item>
-        <item name="app:carUxRestrictions">UX_RESTRICTIONS_NO_SETUP</item>
     </style>
 </resources>
