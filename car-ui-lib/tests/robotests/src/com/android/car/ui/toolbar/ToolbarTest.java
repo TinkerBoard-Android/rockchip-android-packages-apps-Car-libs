@@ -111,6 +111,19 @@ public class ToolbarTest {
     }
 
     @Test
+    public void hideLogo_andTitleLogo_whenSet_andStateIsHome_andLogoIsDisabled() {
+        mockResources();
+        when(mResources.getBoolean(R.bool.car_ui_toolbar_show_logo)).thenReturn(false);
+
+        Toolbar toolbar = new Toolbar(mContext);
+        toolbar.setState(Toolbar.State.HOME);
+        toolbar.setLogo(R.drawable.test_ic_launcher);
+
+        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_logo).isShown()).isFalse();
+        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_title_logo).isShown()).isFalse();
+    }
+
+    @Test
     public void showTitleLogo_whenSet_andStateIsNotHome() {
         mToolbar.setState(Toolbar.State.SUBPAGE);
         mToolbar.setLogo(R.drawable.test_ic_launcher);
