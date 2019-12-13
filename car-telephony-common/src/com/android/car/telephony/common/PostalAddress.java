@@ -68,6 +68,12 @@ public class PostalAddress implements Parcelable {
         return postalAddress;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof PostalAddress
+                && mFormattedAddress.equals(((PostalAddress) obj).mFormattedAddress);
+    }
+
     /**
      * Returns {@link #mFormattedAddress}
      */
