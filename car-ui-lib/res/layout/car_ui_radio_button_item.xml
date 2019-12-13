@@ -16,6 +16,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="?android:attr/selectableItemBackground"
     android:layout_width="match_parent"
     android:layout_height="@dimen/car_ui_list_item_radio_button_height">
 
@@ -37,13 +38,14 @@
         android:id="@+id/radio_button_container"
         android:layout_width="@dimen/car_ui_list_item_radio_button_icon_container_width"
         android:layout_height="0dp"
-        android:background="?android:attr/selectableItemBackground"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="@+id/car_ui_radio_button_start_guideline"
         app:layout_constraintTop_toTopOf="parent">
 
         <RadioButton
             android:id="@+id/radio_button"
+            android:clickable="false"
+            android:focusable="false"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center" />

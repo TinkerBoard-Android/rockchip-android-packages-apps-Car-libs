@@ -91,12 +91,21 @@ public class Toolbar extends FrameLayout {
     /** Search listener */
     public interface OnSearchListener {
         /**
-         * Invoked when the user submits a search query.
+         * Invoked when the user edits a search query.
          *
          * <p>This is called for every letter the user types, and also empty strings if the user
          * erases everything.
          */
         void onSearch(String query);
+    }
+
+    /** Search completed listener */
+    public interface OnSearchCompletedListener {
+        /**
+         * Invoked when the user submits a search query by clicking the keyboard's search / done
+         * button.
+         */
+        void onSearchCompleted();
     }
 
     private static final String TAG = "CarUiToolbar";
@@ -118,6 +127,11 @@ public class Toolbar extends FrameLayout {
          * In the SEARCH state, only the back button and the search bar will be visible.
          */
         SEARCH,
+        /**
+         * In the EDIT state, the search bar will look like a regular text box, but will be
+         * functionally identical to the SEARCH state.
+         */
+        EDIT,
     }
 
     private final boolean mIsTabsInSecondRow;
@@ -146,6 +160,7 @@ public class Toolbar extends FrameLayout {
     private AlertDialog mOverflowDialog;
     private boolean mNavIconSpaceReserved;
     private boolean mLogoFillsNavIconSpace;
+    private boolean mShowLogo;
     private boolean mEatingTouch = false;
     private boolean mEatingHover = false;
     private ProgressBar mProgressBar;
@@ -194,6 +209,8 @@ public class Toolbar extends FrameLayout {
                     R.bool.car_ui_toolbar_nav_icon_reserve_space);
             mLogoFillsNavIconSpace = context.getResources().getBoolean(
                     R.bool.car_ui_toolbar_logo_fills_nav_icon_space);
+            mShowLogo = context.getResources().getBoolean(
+                    R.bool.car_ui_toolbar_show_logo);
 
             LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -264,16 +281,6 @@ public class Toolbar extends FrameLayout {
                 for (OnTabSelectedListener listener : mOnTabSelectedListeners) {
                     listener.onTabSelected(tab);
                 }
-            }
-        });
-
-        mOverflowButton.setOnClickListener(v -> {
-            if (mOverflowDialog == null) {
-                if (Log.isLoggable(TAG, Log.ERROR)) {
-                    Log.e(TAG, "Overflow dialog was null when trying to show it!");
-                }
-            } else {
-                mOverflowDialog.show();
             }
         });
     }
@@ -489,6 +496,10 @@ public class Toolbar extends FrameLayout {
      * will be displayed next to the title.
      */
     public void setLogo(Drawable drawable) {
+        if (!mShowLogo) {
+            // If no logo should be shown then we act as if we never received one.
+            return;
+        }
         if (drawable != null) {
             mLogoInNavIconSpace.setImageDrawable(drawable);
             mTitleLogo.setImageDrawable(drawable);
@@ -522,15 +533,6 @@ public class Toolbar extends FrameLayout {
      */
     public void setSearchIcon(int resId) {
         mSearchView.setIcon(resId);
-    }
-
-    /**
-     * Sets the visibility state for the search icon.
-     *
-     * @param visibility One of VISIBLE, INVISIBLE, GONE
-     */
-    public void setSearchIconVisibility(int visibility) {
-        mSearchView.setIconVisibility(visibility);
     }
 
     /**
@@ -818,9 +820,11 @@ public class Toolbar extends FrameLayout {
                 ? VISIBLE : GONE);
         mTabLayout.setVisibility(state == State.HOME && hasTabs ? VISIBLE : GONE);
 
-        mSearchView.setVisibility(state == State.SEARCH ? VISIBLE : GONE);
+        mSearchView.setVisibility(state == State.SEARCH || state == State.EDIT ? VISIBLE : GONE);
+        mSearchView.setPlainText(state == State.EDIT);
 
-        boolean showButtons = state != State.SEARCH || mShowMenuItemsWhileSearching;
+        boolean showButtons = (state != State.SEARCH && state != State.EDIT)
+                || mShowMenuItemsWhileSearching;
         mMenuItemsContainer.setVisibility(showButtons ? VISIBLE : GONE);
         mOverflowButton.setVisible(showButtons && countVisibleOverflowItems() > 0);
     }
@@ -896,7 +900,7 @@ public class Toolbar extends FrameLayout {
         mOnHeightChangedListeners.add(listener);
     }
 
-    /** Unregisters a {@link OnHeightChangedListener} from the list of listeners. */
+    /** Unregisters an existing {@link OnHeightChangedListener} from the list of listeners. */
     public boolean unregisterToolbarHeightChangeListener(
             OnHeightChangedListener listener) {
         return mOnHeightChangedListeners.remove(listener);
@@ -907,7 +911,7 @@ public class Toolbar extends FrameLayout {
         mOnTabSelectedListeners.add(listener);
     }
 
-    /** Unregisters a new {@link OnTabSelectedListener} from the list of listeners. */
+    /** Unregisters an existing {@link OnTabSelectedListener} from the list of listeners. */
     public boolean unregisterOnTabSelectedListener(OnTabSelectedListener listener) {
         return mOnTabSelectedListeners.remove(listener);
     }
@@ -917,9 +921,19 @@ public class Toolbar extends FrameLayout {
         mSearchView.registerOnSearchListener(listener);
     }
 
-    /** Unregisters a new {@link OnSearchListener} from the list of listeners. */
+    /** Unregisters an existing {@link OnSearchListener} from the list of listeners. */
     public boolean unregisterOnSearchListener(OnSearchListener listener) {
         return mSearchView.unregisterOnSearchListener(listener);
+    }
+
+    /** Registers a new {@link OnSearchCompletedListener} to the list of listeners. */
+    public void registerOnSearchCompletedListener(OnSearchCompletedListener listener) {
+        mSearchView.registerOnSearchCompletedListener(listener);
+    }
+
+    /** Unregisters an existing {@link OnSearchCompletedListener} from the list of listeners. */
+    public boolean unregisterOnSearchCompletedListener(OnSearchCompletedListener listener) {
+        return mSearchView.unregisterOnSearchCompletedListener(listener);
     }
 
     /** Registers a new {@link OnBackListener} to the list of listeners. */
@@ -927,7 +941,7 @@ public class Toolbar extends FrameLayout {
         mOnBackListeners.add(listener);
     }
 
-    /** Unregisters a new {@link OnTabSelectedListener} from the list of listeners. */
+    /** Unregisters an existing {@link OnTabSelectedListener} from the list of listeners. */
     public boolean unregisterOnBackListener(OnBackListener listener) {
         return mOnBackListeners.remove(listener);
     }
