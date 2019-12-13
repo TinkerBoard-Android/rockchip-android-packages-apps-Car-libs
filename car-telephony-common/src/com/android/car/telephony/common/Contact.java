@@ -355,8 +355,11 @@ public class Contact implements Parcelable, Comparable<Contact> {
      * {@link ContactsContract.CommonDataKinds.StructuredPostal#CONTENT_ITEM_TYPE}.
      */
     private void addPostalAddress(Cursor cursor) {
-        PostalAddress postalAddress = PostalAddress.fromCursor(cursor);
-        mPostalAddresses.add(postalAddress);
+        PostalAddress newAddress = PostalAddress.fromCursor(cursor);
+
+        if (!mPostalAddresses.contains(newAddress)) {
+            mPostalAddresses.add(newAddress);
+        }
     }
 
     @Override
