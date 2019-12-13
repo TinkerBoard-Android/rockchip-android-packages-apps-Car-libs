@@ -169,6 +169,10 @@
         <item name="android:dialogLayout">@layout/car_ui_preference_dialog_edittext</item>
     </style>
 
+    <style name="Preference.CarUi.Divider">
+        <item name="android:background">@color/car_ui_preference_two_action_divider_color</item>
+    </style>
+
     <style name="Preference.CarUi.DropDown">
         <item name="android:layout">@layout/car_ui_preference_dropdown</item>
     </style>
