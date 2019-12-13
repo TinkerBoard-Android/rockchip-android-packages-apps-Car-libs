@@ -20,7 +20,10 @@ import android.car.Car;
 import android.car.CarNotConnectedException;
 import android.car.content.pm.CarPackageManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -70,5 +73,15 @@ public class CarPackageManagerUtils {
             }
         }
         return false;
+    }
+
+    /**
+     * Attempts to resolve the provided intent into an activity, and returns true if the
+     * resolved activity is distraction optimized
+     */
+    public boolean isDistractionOptimized(PackageManager packageManager, Intent intent) {
+        ResolveInfo info = packageManager.resolveActivity(
+                intent, PackageManager.MATCH_DEFAULT_ONLY);
+        return (info != null) ? isDistractionOptimized(info.activityInfo) : false;
     }
 }
