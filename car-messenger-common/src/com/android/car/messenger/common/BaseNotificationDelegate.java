@@ -73,7 +73,6 @@ public class BaseNotificationDelegate {
             "com.android.car.messenger.common.REMOTE_INPUT_KEY";
 
     protected final Context mContext;
-    protected final String mNotificationChannelId;
     protected final String mClassName;
     protected final NotificationManager mNotificationManager;
 
@@ -111,13 +110,19 @@ public class BaseNotificationDelegate {
      **/
     protected final Map<SenderKey, Bitmap> mSenderLargeIcons = new HashMap<>();
 
-    public BaseNotificationDelegate(Context context, String notificationChannelId,
-            String className) {
+    private final int mBitmapSize;
+    private final float mCornerRadiusPercent;
+
+    public BaseNotificationDelegate(Context context, String className) {
         mContext = context;
-        mNotificationChannelId = notificationChannelId;
         mClassName = className;
         mNotificationManager =
                 (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        mBitmapSize =
+                mContext.getResources()
+                        .getDimensionPixelSize(R.dimen.notification_contact_photo_size);
+        mCornerRadiusPercent = mContext.getResources()
+                .getFloat(R.dimen.contact_avatar_corner_radius_percent);
     }
 
     /**
@@ -164,11 +169,11 @@ public class BaseNotificationDelegate {
      * and all of its {@link Message} objects have been linked to it.
      **/
     protected void postNotification(ConversationKey conversationKey,
-            ConversationNotificationInfo notificationInfo) {
+            ConversationNotificationInfo notificationInfo, String channelId) {
         boolean newNotification = !mNotificationBuilders.containsKey(conversationKey);
 
         NotificationCompat.Builder builder = newNotification ? new NotificationCompat.Builder(
-                mContext, mNotificationChannelId) : mNotificationBuilders.get(
+                mContext, channelId) : mNotificationBuilders.get(
                 conversationKey);
         Message lastMessage = mMessages.get(notificationInfo.mMessageKeys.getLast());
 
@@ -181,8 +186,9 @@ public class BaseNotificationDelegate {
             builder.setLargeIcon(
                     mSenderLargeIcons.get(getSenderKeyFromConversation(conversationKey)));
         } else {
-            builder.setLargeIcon(
-                    createLetterTileBitmap(lastMessage.getSenderName()));
+            builder.setLargeIcon(Utils.createLetterTile(mContext,
+                    Utils.getInitials(lastMessage.getSenderName(), ""),
+                    lastMessage.getSenderName(), mBitmapSize, mCornerRadiusPercent).getBitmap());
         }
 
         builder.setWhen(lastMessage.getReceiveTime());
@@ -211,13 +217,18 @@ public class BaseNotificationDelegate {
         // We are creating this notification for the first time.
         if (newNotification) {
             builder.setCategory(Notification.CATEGORY_MESSAGE);
-            builder.setSmallIcon(notificationInfo.getAppSmallIconResId());
+            if (notificationInfo.getAppSmallIconResId() == 0) {
+                builder.setSmallIcon(R.drawable.ic_message);
+            } else {
+                builder.setSmallIcon(notificationInfo.getAppSmallIconResId());
+            }
+
             builder.setShowWhen(true);
             messagingStyle.setGroupConversation(notificationInfo.isGroupConvo());
 
             if (notificationInfo.getAppDisplayName() != null) {
                 Bundle displayName = new Bundle();
-                displayName.putCharSequence(Notification.EXTRA_INFO_TEXT,
+                displayName.putCharSequence(Notification.EXTRA_SUBSTITUTE_APP_NAME,
                         notificationInfo.getAppDisplayName());
                 builder.addExtras(displayName);
             }
@@ -291,19 +302,6 @@ public class BaseNotificationDelegate {
 
         return PendingIntent.getForegroundService(mContext, notificationId, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
-    }
-
-
-    // TODO(ritwikam): Use TelecomUtils once all the libs use .bp files.
-    private Bitmap createLetterTileBitmap(String senderName) {
-        LetterTileDrawable letterTileDrawable = new LetterTileDrawable(mContext.getResources());
-        letterTileDrawable.setContactDetails(senderName, senderName);
-        letterTileDrawable.setIsCircular(true);
-
-        int bitmapSize = mContext.getResources()
-                .getDimensionPixelSize(R.dimen.notification_contact_photo_size);
-
-        return letterTileDrawable.toBitmap(bitmapSize);
     }
 
     protected SenderKey getSenderKeyFromConversation(ConversationKey conversationKey) {
