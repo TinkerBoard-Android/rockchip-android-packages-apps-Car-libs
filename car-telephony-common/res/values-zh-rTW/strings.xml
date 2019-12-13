@@ -26,8 +26,4 @@
     <string name="call_state_call_active" msgid="2769644783657864202">"已連線"</string>
     <string name="call_state_call_ringing" msgid="4618803402954375017">"鈴響中…"</string>
     <string name="call_state_call_ending" msgid="5037498349965472247">"正在中斷連線…"</string>
-    <!-- no translation found for address_uri_format (7726586715461112145) -->
-    <skip />
-    <!-- no translation found for navigation_uri_format (3197532294608326294) -->
-    <skip />
 </resources>
