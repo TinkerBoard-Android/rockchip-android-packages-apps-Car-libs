@@ -414,13 +414,12 @@ public class TelecomUtils {
             @Nullable final ImageView icon,
             @Nullable final Uri avatarUri,
             @Nullable final String initials,
-            final String identifier) {
+            @Nullable final String identifier) {
         if (icon == null) {
             return;
         }
 
-        LetterTileDrawable letterTileDrawable = createLetterTile(context, initials,
-                TextUtils.isEmpty(initials) ? identifier : initials);
+        LetterTileDrawable letterTileDrawable = createLetterTile(context, initials, identifier);
 
         Glide.with(context)
                 .load(avatarUri)
