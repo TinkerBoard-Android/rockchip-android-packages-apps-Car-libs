@@ -265,15 +265,20 @@
         <item name="android:textFontWeight">500</item>
     </style>
 
+    <style name="TextAppearance.CarUi.ListItem.Header">
+        <item name="android:fontFamily">@string/car_ui_list_item_header_font_family</item>
+        <item name="android:textColor">@color/car_ui_list_item_header_text_color</item>
+        <item name="android:textSize">@dimen/car_ui_list_item_header_text_size</item>
+    </style>
+
     <style name="TextAppearance.CarUi.ListItem">
-        <item name="android:textStyle">normal</item>
-        <item name="android:textSize">@dimen/car_ui_body1_size</item>
-        <item name="android:textColor">@color/car_ui_text_color_primary</item>
+        <item name="android:textColor">@color/car_ui_list_item_title_text_color</item>
+        <item name="android:textSize">@dimen/car_ui_list_item_title_text_size</item>
     </style>
 
     <style name="TextAppearance.CarUi.ListItem.Body">
-        <item name="android:textSize">@dimen/car_ui_body3_size</item>
-        <item name="android:textColor">@color/car_ui_text_color_secondary</item>
+        <item name="android:textSize">@dimen/car_ui_list_item_body_text_size</item>
+        <item name="android:textColor">@color/car_ui_list_item_body_text_color</item>
     </style>
 
 </resources>
