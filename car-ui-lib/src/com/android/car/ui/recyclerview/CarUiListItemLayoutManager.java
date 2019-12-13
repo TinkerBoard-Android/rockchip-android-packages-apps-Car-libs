@@ -46,7 +46,7 @@ public class CarUiListItemLayoutManager extends LinearLayoutManager {
         mContentItemSize = (int) context.getResources().getDimension(
                 R.dimen.car_ui_list_item_height);
         mHeaderItemSize = (int) context.getResources().getDimension(
-                R.dimen.car_ui_header_list_item_height);
+                R.dimen.car_ui_list_item_header_height);
 
         setSmoothScrollbarEnabled(false);
     }
