@@ -29,6 +29,10 @@ define generate-rro
   LOCAL_SDK_VERSION := current
   LOCAL_USE_AAPT2 := true
 
+  # Add --no-resource-deduping to prevent overlays to "values-port" with the same
+  # value as in "values" from being removed
+  LOCAL_AAPT_FLAGS := --no-resource-deduping
+
   gen := $$(call intermediates-dir-for,ETC,$$(rro_package_name))/AndroidManifest.xml
   $$(gen): $(LOCAL_PATH)/AndroidManifest.xml
 	@echo Generate $$@
