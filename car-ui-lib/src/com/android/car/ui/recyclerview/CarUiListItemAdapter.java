@@ -157,6 +157,9 @@ public class CarUiListItemAdapter extends
         private final Switch mSwitch;
         private final CheckBox mCheckBox;
         private final ImageView mSupplementalIcon;
+        private final View mTouchInterceptor;
+        private final View mReducedTouchInterceptor;
+
 
         ListItemViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -169,6 +172,8 @@ public class CarUiListItemAdapter extends
             mSwitch = itemView.requireViewById(R.id.switch_widget);
             mCheckBox = itemView.requireViewById(R.id.checkbox_widget);
             mSupplementalIcon = itemView.requireViewById(R.id.supplemental_icon);
+            mReducedTouchInterceptor = itemView.requireViewById(R.id.reduced_touch_interceptor);
+            mTouchInterceptor = itemView.requireViewById(R.id.touch_interceptor);
         }
 
         private void bind(@NonNull CarUiContentListItem item) {
@@ -202,6 +207,11 @@ public class CarUiListItemAdapter extends
             switch (item.getAction()) {
                 case NONE:
                     mActionContainer.setVisibility(View.GONE);
+
+                    // Display ripple effects across entire item when clicked by using full-sized
+                    // touch interceptor.
+                    mTouchInterceptor.setVisibility(View.VISIBLE);
+                    mReducedTouchInterceptor.setVisibility(View.GONE);
                     break;
                 case SWITCH:
                     mSwitch.setVisibility(View.VISIBLE);
@@ -215,9 +225,20 @@ public class CarUiListItemAdapter extends
                                     itemListener.onCheckedChanged(isChecked);
                                 }
                             });
+
+                    // Clicks anywhere on the item should toggle the switch state. Use full touch
+                    // interceptor.
+                    mTouchInterceptor.setVisibility(View.VISIBLE);
+                    mTouchInterceptor.setOnClickListener(
+                            v -> mSwitch.setChecked(!item.isChecked()));
+                    mReducedTouchInterceptor.setVisibility(View.GONE);
+
+                    // Only the switch should be displayed in the action container.
                     mCheckBox.setVisibility(View.GONE);
                     mSupplementalIcon.setVisibility(View.GONE);
+
                     mActionContainer.setVisibility(View.VISIBLE);
+                    mActionContainer.setClickable(false);
                     break;
                 case CHECK_BOX:
                     mCheckBox.setVisibility(View.VISIBLE);
@@ -231,22 +252,50 @@ public class CarUiListItemAdapter extends
                                     itemListener.onCheckedChanged(isChecked);
                                 }
                             });
+
+                    // Clicks anywhere on the item should toggle the checkbox state. Use full touch
+                    // interceptor.
+                    mTouchInterceptor.setVisibility(View.VISIBLE);
+                    mTouchInterceptor.setOnClickListener(
+                            v -> mCheckBox.setChecked(!item.isChecked()));
+                    mReducedTouchInterceptor.setVisibility(View.GONE);
+
+                    // Only the checkbox should be displayed in the action container.
                     mSwitch.setVisibility(View.GONE);
                     mSupplementalIcon.setVisibility(View.GONE);
+
                     mActionContainer.setVisibility(View.VISIBLE);
+                    mActionContainer.setClickable(false);
                     break;
                 case ICON:
                     mSupplementalIcon.setVisibility(View.VISIBLE);
                     mSupplementalIcon.setImageDrawable(item.getSupplementalIcon());
-                    mSupplementalIcon.setOnClickListener(
-                            (iconView) -> {
+                    mActionContainer.setVisibility(View.VISIBLE);
+                    mActionContainer.setOnClickListener(
+                            (container) -> {
                                 if (item.getSupplementalIconOnClickListener() != null) {
-                                    item.getSupplementalIconOnClickListener().onClick(iconView);
+                                    item.getSupplementalIconOnClickListener().onClick(mIcon);
                                 }
                             });
+
+                    // Only the supplemental icon should be displayed in the action container.
                     mSwitch.setVisibility(View.GONE);
                     mCheckBox.setVisibility(View.GONE);
-                    mActionContainer.setVisibility(View.VISIBLE);
+
+                    // If the icon has a click listener, use a reduced touch interceptor to create
+                    // two distinct touch area; the action container and the remainder of the list
+                    // item. Each touch area will have its own ripple effect. If the icon has no
+                    // click listener, it shouldn't be clickable.
+                    if (item.getSupplementalIconOnClickListener() == null) {
+                        mTouchInterceptor.setVisibility(View.VISIBLE);
+                        mTouchInterceptor.setOnClickListener(null);
+                        mReducedTouchInterceptor.setVisibility(View.GONE);
+                        mActionContainer.setClickable(false);
+                    } else {
+                        mReducedTouchInterceptor.setVisibility(View.VISIBLE);
+                        mReducedTouchInterceptor.setOnClickListener(null);
+                        mTouchInterceptor.setVisibility(View.GONE);
+                    }
                     break;
                 default:
                     throw new IllegalStateException("Unknown secondary action type.");
