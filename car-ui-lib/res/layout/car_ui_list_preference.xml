@@ -15,22 +15,22 @@
   ~ limitations under the License.
   -->
 
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/dialog_container">
+    android:background="@drawable/car_ui_activity_background">
 
     <com.android.car.ui.recyclerview.CarUiRecyclerView
-        android:id="@+id/radio_list"
+        android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
     <com.android.car.ui.toolbar.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:state="subpage"/>
+        app:state="subpage" />
 
 </FrameLayout>
