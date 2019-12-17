@@ -50,6 +50,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * A toolbar for Android Automotive OS apps.
@@ -157,6 +158,8 @@ public class Toolbar extends FrameLayout {
     private List<MenuItem> mMenuItems = Collections.emptyList();
     private List<MenuItem> mOverflowItems = new ArrayList<>();
     private final List<MenuItemRenderer> mMenuItemRenderers = new ArrayList<>();
+    private CompletableFuture<Void> mMenuItemViewsFuture;
+    private int mMenuItemsXmlId = 0;
     private AlertDialog mOverflowDialog;
     private boolean mNavIconSpaceReserved;
     private boolean mLogoFillsNavIconSpace;
@@ -595,10 +598,7 @@ public class Toolbar extends FrameLayout {
         return super.getBackground() != null;
     }
 
-    /**
-     * Sets the {@link MenuItem Menuitems} to display.
-     */
-    public void setMenuItems(@Nullable List<MenuItem> items) {
+    private void setMenuItemsInternal(@Nullable List<MenuItem> items) {
         if (items == null) {
             items = Collections.emptyList();
         }
@@ -615,6 +615,7 @@ public class Toolbar extends FrameLayout {
         mMenuItemRenderers.clear();
         mMenuItemsContainer.removeAllViews();
 
+        List<CompletableFuture<View>> viewFutures = new ArrayList<>();
         for (MenuItem item : mMenuItems) {
             if (item.getDisplayBehavior() == MenuItem.DisplayBehavior.NEVER) {
                 mOverflowItems.add(item);
@@ -622,23 +623,48 @@ public class Toolbar extends FrameLayout {
             } else {
                 MenuItemRenderer renderer = new MenuItemRenderer(item, mMenuItemsContainer);
                 mMenuItemRenderers.add(renderer);
-                mMenuItemsContainer.addView(renderer.createView());
+                viewFutures.add(renderer.createView());
             }
         }
 
-        MenuItemRenderer renderer = new MenuItemRenderer(mOverflowButton, mMenuItemsContainer);
-        mMenuItemRenderers.add(renderer);
-        mMenuItemsContainer.addView(renderer.createView());
+        if (!mOverflowItems.isEmpty()) {
+            MenuItemRenderer renderer = new MenuItemRenderer(mOverflowButton, mMenuItemsContainer);
+            mMenuItemRenderers.add(renderer);
+            viewFutures.add(renderer.createView());
+            createOverflowDialog();
+        }
 
-        createOverflowDialog();
+        if (mMenuItemViewsFuture != null) {
+            mMenuItemViewsFuture.cancel(false);
+        }
+
+        mMenuItemViewsFuture = CompletableFuture.allOf(
+            viewFutures.toArray(new CompletableFuture[0]));
+        mMenuItemViewsFuture.thenRunAsync(() -> {
+            for (CompletableFuture<View> future : viewFutures) {
+                mMenuItemsContainer.addView(future.join());
+            }
+            mMenuItemViewsFuture = null;
+        }, getContext().getMainExecutor());
 
         setState(mState);
     }
 
     /**
+     * Sets the {@link MenuItem Menuitems} to display.
+     */
+    public void setMenuItems(@Nullable List<MenuItem> items) {
+        mMenuItemsXmlId = 0;
+        setMenuItemsInternal(items);
+    }
+
+    /**
      * Sets the {@link MenuItem Menuitems} to display to a list defined in XML.
      *
-     * The XML file must have one <MenuItems> tag, with a variable number of <MenuItem>
+     * <p>If this method is called twice with the same argument (and {@link #setMenuItems(List)}
+     * wasn't called), nothing will happen the second time, even if the MenuItems were changed.
+     *
+     * <p>The XML file must have one <MenuItems> tag, with a variable number of <MenuItem>
      * child tags. See CarUiToolbarMenuItem in CarUi's attrs.xml for a list of available attributes.
      *
      * Example:
@@ -662,8 +688,13 @@ public class Toolbar extends FrameLayout {
      * @return The MenuItems that were loaded from XML.
      */
     public List<MenuItem> setMenuItems(@XmlRes int resId) {
+        if (mMenuItemsXmlId != 0 && mMenuItemsXmlId == resId) {
+            return mMenuItems;
+        }
+
+        mMenuItemsXmlId = resId;
         List<MenuItem> menuItems = MenuItemRenderer.readMenuItemList(getContext(), resId);
-        setMenuItems(menuItems);
+        setMenuItemsInternal(menuItems);
         return menuItems;
     }
 
