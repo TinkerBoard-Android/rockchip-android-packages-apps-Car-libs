@@ -126,6 +126,14 @@
             android:clickable="false"
             android:focusable="false" />
 
+        <RadioButton
+            android:id="@+id/radio_button_widget"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:clickable="false"
+            android:focusable="false" />
+
         <ImageView
             android:id="@+id/supplemental_icon"
             android:layout_width="@dimen/car_ui_list_item_supplemental_icon_size"
