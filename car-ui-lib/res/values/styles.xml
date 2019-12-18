@@ -201,10 +201,6 @@
         <item name="android:layout">@layout/car_ui_preference_fragment</item>
     </style>
 
-    <style name="RadioButton.CarUi" parent="android:Widget.DeviceDefault.Light.CompoundButton.RadioButton">
-        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
-    </style>
-
     <style name="PreferenceFragmentList.CarUi">
         <item name="android:paddingTop">0dp</item>
         <item name="android:paddingBottom">0dp</item>
