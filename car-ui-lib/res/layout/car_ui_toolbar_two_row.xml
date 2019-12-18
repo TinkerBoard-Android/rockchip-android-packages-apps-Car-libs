@@ -128,15 +128,14 @@
         app:layout_constraintStart_toEndOf="@id/car_ui_toolbar_title_logo_container"
         app:layout_constraintEnd_toStartOf="@id/car_ui_toolbar_menu_items_container"/>
 
-    <com.android.car.ui.toolbar.SearchView
-        android:id="@+id/car_ui_toolbar_search_view"
+    <FrameLayout
+        android:id="@+id/car_ui_toolbar_search_view_container"
         android:layout_width="0dp"
         android:layout_height="@dimen/car_ui_toolbar_search_height"
-        android:visibility="gone"
         app:layout_constraintTop_toTopOf="@id/car_ui_toolbar_top_guideline"
         app:layout_constraintBottom_toTopOf="@id/car_ui_toolbar_row_separator"
-        app:layout_constraintStart_toEndOf="@id/car_ui_toolbar_nav_icon_container"
-        app:layout_constraintEnd_toStartOf="@id/car_ui_toolbar_menu_items_container"/>
+        app:layout_constraintStart_toEndOf="@+id/car_ui_toolbar_nav_icon_container"
+        app:layout_constraintEnd_toStartOf="@+id/car_ui_toolbar_menu_items_container"/>
 
     <LinearLayout
         android:id="@+id/car_ui_toolbar_menu_items_container"
