@@ -200,8 +200,6 @@
 
         <!-- Used by CarUiRecyclerView -->
         <item name="carUiRecyclerViewStyle">@style/Widget.CarUi.CarUiRecyclerView</item>
-
-        <item name="radioButtonStyle">@style/RadioButton.CarUi</item>
     </style>
 
     <style name="CarUiPreferenceTheme">
