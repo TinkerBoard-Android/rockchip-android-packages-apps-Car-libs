@@ -24,7 +24,6 @@ import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Xml;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -32,6 +31,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.XmlRes;
+import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 
 import com.android.car.ui.R;
 import com.android.car.ui.utils.CarUiUtils;
@@ -45,6 +45,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 class MenuItemRenderer implements MenuItem.Listener {
 
@@ -89,20 +90,22 @@ class MenuItemRenderer implements MenuItem.Listener {
         updateView();
     }
 
-    View createView() {
-        LayoutInflater inflater = (LayoutInflater) mParentView.getContext().getSystemService(
-                Context.LAYOUT_INFLATER_SERVICE);
+    CompletableFuture<View> createView() {
+        CompletableFuture<View> future = new CompletableFuture<>();
+        AsyncLayoutInflater inflater = new AsyncLayoutInflater(mParentView.getContext());
+        inflater.inflate(R.layout.car_ui_toolbar_menu_item, mParentView, (View view, int resid,
+                ViewGroup parent) -> {
+            mView = view;
+            mIconContainer = mView.requireViewById(R.id.car_ui_toolbar_menu_item_icon_container);
+            mIconView = mView.requireViewById(R.id.car_ui_toolbar_menu_item_icon);
+            mSwitch = mView.requireViewById(R.id.car_ui_toolbar_menu_item_switch);
+            mTextView = mView.requireViewById(R.id.car_ui_toolbar_menu_item_text);
+            mTextWithIconView = mView.requireViewById(R.id.car_ui_toolbar_menu_item_text_with_icon);
+            updateView();
+            future.complete(view);
+        });
 
-        mView = inflater.inflate(R.layout.car_ui_toolbar_menu_item, mParentView, false);
-
-        mIconContainer = mView.requireViewById(R.id.car_ui_toolbar_menu_item_icon_container);
-        mIconView = mView.requireViewById(R.id.car_ui_toolbar_menu_item_icon);
-        mSwitch = mView.requireViewById(R.id.car_ui_toolbar_menu_item_switch);
-        mTextView = mView.requireViewById(R.id.car_ui_toolbar_menu_item_text);
-        mTextWithIconView = mView.requireViewById(R.id.car_ui_toolbar_menu_item_text_with_icon);
-
-        updateView();
-        return mView;
+        return future;
     }
 
     private void updateView() {
