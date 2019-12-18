@@ -79,7 +79,6 @@
         android:id="@+id/car_ui_toolbar_nav_icon_container"
         android:layout_width="@dimen/car_ui_toolbar_margin"
         android:layout_height="0dp"
-        android:background="?android:attr/selectableItemBackground"
         style="@style/Widget.CarUi.Toolbar.NavIconContainer"
         app:layout_constraintTop_toTopOf="@id/car_ui_toolbar_top_guideline"
         app:layout_constraintBottom_toTopOf="@id/car_ui_toolbar_row_separator"
