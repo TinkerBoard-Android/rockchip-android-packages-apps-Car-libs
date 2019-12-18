@@ -26,7 +26,7 @@ import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.os.ParcelUuid
-import com.android.car.connecteddevice.storage.CarCompanionDeviceStorage
+import com.android.car.connecteddevice.storage.ConnectedDeviceStorage
 import com.android.car.connecteddevice.util.containsUuidsInOverflow
 import com.android.car.connecteddevice.util.logd
 import com.android.car.connecteddevice.util.loge
@@ -48,7 +48,7 @@ private val CHARACTERISTIC_CONFIG = UUID.fromString("00002902-0000-1000-8000-008
  *
  * @param context The caller's [Context].
  * @param bleCentralManager [BleCentralManager] for establishing connections.
- * @param carCompanionDeviceStorage Shared [CarCompanionDeviceStorage] for companion features.
+ * @param connectedDeviceStorage Shared [ConnectedDeviceStorage] for companion features.
  * @param serviceUuid [UUID] of peripheral's service.
  * @param bgServiceMask iOS overflow bit mask for service UUID.
  * @param writeCharacteristicUuid [UUID] of characteristic the car will write to.
@@ -57,12 +57,12 @@ private val CHARACTERISTIC_CONFIG = UUID.fromString("00002902-0000-1000-8000-008
 internal class CarBleCentralManager(
     private val context: Context,
     private val bleCentralManager: BleCentralManager,
-    carCompanionDeviceStorage: CarCompanionDeviceStorage,
+    connectedDeviceStorage: ConnectedDeviceStorage,
     private val serviceUuid: UUID,
     bgServiceMask: String,
     writeCharacteristicUuid: UUID,
     readCharacteristicUuid: UUID
-) : CarBleManager(carCompanionDeviceStorage) {
+) : CarBleManager(connectedDeviceStorage) {
 
     private val ignoredDevices = CopyOnWriteArraySet<BleDevice>()
 

@@ -18,7 +18,7 @@ package com.android.car.connecteddevice.ble
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
-import com.android.car.connecteddevice.storage.CarCompanionDeviceStorage
+import com.android.car.connecteddevice.storage.ConnectedDeviceStorage
 import com.android.car.connecteddevice.util.ThreadSafeCallbacksKt
 import com.android.car.connecteddevice.util.logd
 import com.android.car.connecteddevice.util.logw
@@ -31,10 +31,10 @@ private const val TAG = "CarBleManager"
  * Generic BLE manager for a car that keeps track of connected devices and their associated
  * callbacks.
  *
- * @param carCompanionDeviceStorage Shared [CarCompanionDeviceStorage] for companion features.
+ * @param connectedDeviceStorage Shared [ConnectedDeviceStorage] for companion features.
  */
 internal abstract class CarBleManager(
-    private val carCompanionDeviceStorage: CarCompanionDeviceStorage
+    private val connectedDeviceStorage: ConnectedDeviceStorage
 ) {
 
     protected val connectedDevices = CopyOnWriteArraySet<BleDevice>()

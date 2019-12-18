@@ -40,7 +40,7 @@ import com.android.car.connecteddevice.ble.CarBleManager;
 import com.android.car.connecteddevice.ble.CarBlePeripheralManager;
 import com.android.car.connecteddevice.ble.DeviceMessage;
 import com.android.car.connecteddevice.model.ConnectedDevice;
-import com.android.car.connecteddevice.storage.CarCompanionDeviceStorage;
+import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
 import com.android.car.connecteddevice.util.ByteUtils;
 
 import org.junit.After;
@@ -68,7 +68,7 @@ public class ConnectedDeviceManagerTest {
     private final UUID mRecipientId = UUID.randomUUID();
 
     @Mock
-    private CarCompanionDeviceStorage mMockStorage;
+    private ConnectedDeviceStorage mMockStorage;
 
     @Mock
     private CarBlePeripheralManager mMockPeripheralManager;
@@ -88,6 +88,7 @@ public class ConnectedDeviceManagerTest {
                 .startMocking();
         mConnectedDeviceManager = new ConnectedDeviceManager(mMockStorage, mMockCentralManager,
             mMockPeripheralManager);
+        mConnectedDeviceManager.start();
     }
 
     @After

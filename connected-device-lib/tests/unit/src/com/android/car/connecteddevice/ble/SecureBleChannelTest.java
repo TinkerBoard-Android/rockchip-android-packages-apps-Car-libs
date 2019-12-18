@@ -34,7 +34,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.car.connecteddevice.BleStreamProtos.BleOperationProto.OperationType;
 import com.android.car.connecteddevice.ble.BleDeviceMessageStream.MessageReceivedListener;
-import com.android.car.connecteddevice.storage.CarCompanionDeviceStorage;
+import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
 import com.android.car.connecteddevice.util.ByteUtils;
 
 import org.junit.Before;
@@ -59,14 +59,13 @@ public final class SecureBleChannelTest {
     private MessageReceivedListener mMessageReceivedListener;
 
     @Mock private BleDeviceMessageStream mStreamMock;
-    @Mock private CarCompanionDeviceStorage mStorageMock;
+    @Mock private ConnectedDeviceStorage mStorageMock;
     @Mock private SecureBleChannel.ShowVerificationCodeListener mShowVerificationCodeListenerMock;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(mStorageMock.getUniqueId()).thenReturn(SERVER_DEVICE_ID);
-        when(mStorageMock.saveEncryptionKey(anyString(), any(byte[].class))).thenReturn(true);
     }
 
     @Test

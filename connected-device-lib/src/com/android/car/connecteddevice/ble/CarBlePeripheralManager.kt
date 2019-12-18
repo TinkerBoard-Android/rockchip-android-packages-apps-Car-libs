@@ -28,7 +28,7 @@ import android.car.encryptionrunner.Key
 import android.os.ParcelUuid
 import com.android.car.connecteddevice.AssociationCallback
 import com.android.car.connecteddevice.model.AssociatedDevice
-import com.android.car.connecteddevice.storage.CarCompanionDeviceStorage
+import com.android.car.connecteddevice.storage.ConnectedDeviceStorage
 import com.android.car.connecteddevice.util.logd
 import com.android.car.connecteddevice.util.loge
 import com.android.internal.annotations.VisibleForTesting
@@ -49,18 +49,18 @@ private val CLIENT_CHARACTERISTIC_CONFIG = UUID.fromString("00002902-0000-1000-8
  * Communication manager that allows for targeted connections to a specific device in the car.
  *
  * @param blePeripheralManager [BlePeripheralManager] for establishing connection.
- * @param carCompanionDeviceStorage Shared [CarCompanionDeviceStorage] for companion features.
+ * @param connectedDeviceStorage Shared [ConnectedDeviceStorage] for companion features.
  * @param associationServiceUuid [UUID] of association service
  * @param writeCharacteristicUuid [UUID] of characteristic the car will write to.
  * @param readCharacteristicUuid [UUID] of characteristic the device will write to.
  */
 internal class CarBlePeripheralManager(
     private val blePeripheralManager: BlePeripheralManager,
-    carCompanionDeviceStorage: CarCompanionDeviceStorage,
+    private val connectedDeviceStorage: ConnectedDeviceStorage,
     private val associationServiceUuid: UUID,
     writeCharacteristicUuid: UUID,
     readCharacteristicUuid: UUID
-) : CarBleManager(carCompanionDeviceStorage) {
+) : CarBleManager(connectedDeviceStorage) {
 
     private val connectedDevice get() = connectedDevices.firstOrNull()
 
@@ -103,23 +103,7 @@ internal class CarBlePeripheralManager(
             }
 
             override fun onRemoteDeviceConnected(device: BluetoothDevice) {
-                blePeripheralManager.stopAdvertising(advertiseCallback)
-                val secureStream = BleDeviceMessageStream(
-                    blePeripheralManager, device,
-                    writeCharacteristic, readCharacteristic
-                ).apply {
-                    maxWriteSize = writeSize
-                }
-                val secureChannel = SecureBleChannel(
-                    secureStream,
-                    carCompanionDeviceStorage
-                ).apply {
-                    channelCallback = secureChannelCallback
-                }
-                val bleDevice = BleDevice(device, gatt = null).apply {
-                    this.secureChannel = secureChannel
-                }
-                addConnectedDevice(bleDevice)
+                addConnectedDevice(device, isReconnect = true)
             }
 
             override fun onRemoteDeviceDisconnected(device: BluetoothDevice) {
@@ -144,27 +128,8 @@ internal class CarBlePeripheralManager(
 
             override fun onRemoteDeviceConnected(device: BluetoothDevice) {
                 resetBluetoothAdapterName()
-                blePeripheralManager.stopAdvertising(advertiseCallback)
-                clientDeviceAddress = device.address
-                clientDeviceName = device.name
-                if (clientDeviceName == null) {
-                    logd(TAG, "Device connected, but name is null; issuing request to " +
-                        "retrieve device name.")
-                    blePeripheralManager.retrieveDeviceName(device)
-                }
-                val secureStream = BleDeviceMessageStream(
-                    blePeripheralManager, device,
-                    writeCharacteristic, readCharacteristic
-                ).apply {
-                    maxWriteSize = writeSize
-                }
-                val secureChannel = SecureBleChannel(
-                    secureStream,
-                    carCompanionDeviceStorage,
-                    isReconnect = false
-                )
-                secureChannel.channelCallback = secureChannelCallback
-                secureChannel.showVerificationCodeListener =
+                addConnectedDevice(device, isReconnect = false)
+                connectedDevice?.secureChannel?.showVerificationCodeListener =
                     object : SecureBleChannel.ShowVerificationCodeListener {
                         override fun showVerificationCode(code: String) {
                             if (associationCallback == null) {
@@ -173,10 +138,6 @@ internal class CarBlePeripheralManager(
                             associationCallback?.onVerificationCodeAvailable(code)
                         }
                     }
-                val bleDevice = BleDevice(device, gatt = null).apply {
-                    this.secureChannel = secureChannel
-                }
-                addConnectedDevice(bleDevice)
             }
 
             override fun onRemoteDeviceDisconnected(device: BluetoothDevice) {
@@ -203,16 +164,20 @@ internal class CarBlePeripheralManager(
                         "Null device address found when secure channel established.")
                     return
                 }
-                callbacks.invoke { it.onSecureChannelEstablished(deviceId) }
-                if (!isAssociating) {
-                    return
+                if (isAssociating) {
+                    logd(TAG, "Secure channel established for un-associated device. " +
+                        "Saving association of that device for current user.")
+                    connectedDeviceStorage.addAssociatedDeviceForActiveUser(
+                        AssociatedDevice(deviceId, address, clientDeviceName),
+                        encryptionKey.asBytes()
+                    )
+                    associationCallback?.onAssociationCompleted()
+
+                    // Need to reissue because this device is now associated with a user.
+                    callbacks.invoke { it.onDeviceConnected(deviceId) }
                 }
-                logd(TAG, "Secure channel established for un-associated device. " +
-                    "Saving association of that device for current user.")
-                carCompanionDeviceStorage.addAssociatedDeviceForActiveUser(
-                    AssociatedDevice(deviceId, address, clientDeviceName)
-                )
-                associationCallback?.onAssociationCompleted()
+
+                callbacks.invoke { it.onSecureChannelEstablished(deviceId) }
             }
 
             override fun onMessageReceived(deviceMessage: DeviceMessage) {
@@ -328,6 +293,7 @@ internal class CarBlePeripheralManager(
                 associationCallback?.onAssociationStartSuccess(deviceName)
                 logd(TAG, "Successfully started advertising for association.")
             }
+
             override fun onStartFailure(errorCode: Int) {
                 super.onStartFailure(errorCode)
                 callback.onAssociationStartFailure()
@@ -425,5 +391,33 @@ internal class CarBlePeripheralManager(
     private fun setMtuSize(size: Int) {
         writeSize = size - ATT_PROTOCOL_BYTES
         connectedDevice?.secureChannel?.stream?.maxWriteSize = writeSize
+    }
+
+    private fun addConnectedDevice(device: BluetoothDevice, isReconnect: Boolean) {
+        blePeripheralManager.stopAdvertising(advertiseCallback)
+        clientDeviceAddress = device.address
+        clientDeviceName = device.name
+        if (clientDeviceName == null) {
+            logd(TAG, "Device connected, but name is null; issuing request to " +
+                "retrieve device name.")
+            blePeripheralManager.retrieveDeviceName(device)
+        }
+        val secureStream = BleDeviceMessageStream(
+            blePeripheralManager, device,
+            writeCharacteristic, readCharacteristic
+        ).apply {
+            maxWriteSize = writeSize
+        }
+        val secureChannel = SecureBleChannel(
+            secureStream,
+            connectedDeviceStorage,
+            isReconnect = isReconnect
+        ).apply {
+            channelCallback = secureChannelCallback
+        }
+        val bleDevice = BleDevice(device, gatt = null).apply {
+            this.secureChannel = secureChannel
+        }
+        addConnectedDevice(bleDevice)
     }
 }

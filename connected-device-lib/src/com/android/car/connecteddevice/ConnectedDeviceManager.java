@@ -37,7 +37,7 @@ import com.android.car.connecteddevice.ble.CarBlePeripheralManager;
 import com.android.car.connecteddevice.ble.DeviceMessage;
 import com.android.car.connecteddevice.model.AssociatedDevice;
 import com.android.car.connecteddevice.model.ConnectedDevice;
-import com.android.car.connecteddevice.storage.CarCompanionDeviceStorage;
+import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
 import com.android.car.connecteddevice.util.ByteUtils;
 import com.android.car.connecteddevice.util.ThreadSafeCallbacks;
 import com.android.internal.annotations.GuardedBy;
@@ -73,7 +73,7 @@ public class ConnectedDeviceManager {
     // Subtracting 2 bytes used by header, we have 8 bytes for device name.
     private static final int DEVICE_NAME_LENGTH_LIMIT = 8;
 
-    private final CarCompanionDeviceStorage mStorage;
+    private final ConnectedDeviceStorage mStorage;
 
     private final CarBleCentralManager mCentralManager;
 
@@ -142,7 +142,7 @@ public class ConnectedDeviceManager {
     public static final int DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED = 8;
 
     public ConnectedDeviceManager(@NonNull Context context) {
-        this(context, new CarCompanionDeviceStorage(context), new BleCentralManager(context),
+        this(context, new ConnectedDeviceStorage(context), new BleCentralManager(context),
                 new BlePeripheralManager(context),
                 UUID.fromString(context.getString(R.string.car_service_uuid)),
                 UUID.fromString(context.getString(R.string.car_association_service_uuid)),
@@ -153,7 +153,7 @@ public class ConnectedDeviceManager {
 
     private ConnectedDeviceManager(
             @NonNull Context context,
-            @NonNull CarCompanionDeviceStorage storage,
+            @NonNull ConnectedDeviceStorage storage,
             @NonNull BleCentralManager bleCentralManager,
             @NonNull BlePeripheralManager blePeripheralManager,
             @NonNull UUID serviceUuid,
@@ -170,7 +170,7 @@ public class ConnectedDeviceManager {
 
     @VisibleForTesting
     ConnectedDeviceManager(
-            @NonNull CarCompanionDeviceStorage storage,
+            @NonNull ConnectedDeviceStorage storage,
             @NonNull CarBleCentralManager centralManager,
             @NonNull CarBlePeripheralManager peripheralManager) {
         Executor callbackExecutor = Executors.newSingleThreadExecutor();
@@ -232,6 +232,7 @@ public class ConnectedDeviceManager {
                 activeUserConnectedDevices.add(device.mConnectedDevice);
             }
         }
+        logd(TAG, "Returned " + activeUserConnectedDevices.size() + " active user devices.");
         return activeUserConnectedDevices;
     }
 
@@ -259,33 +260,46 @@ public class ConnectedDeviceManager {
 
     /** Connect to a device for the active user if available. */
     public void connectToActiveUserDevice() {
-        mLock.lock();
-        try {
-            if (!mIsStarted) {
-                mHasDelayedConnectionRequest = true;
-                return;
+        Executors.defaultThreadFactory().newThread(() -> {
+            logd(TAG, "Received request to connect to active user's device.");
+            mLock.lock();
+            try {
+                if (!mIsStarted) {
+                    mHasDelayedConnectionRequest = true;
+                    logd(TAG,
+                            "Manager has not been started yet. Deferring connection request until "
+                                    + "after start.");
+                    return;
+                }
+                if (mIsConnectingToUserDevice) {
+                    logd(TAG, "A request has already been made to connect to this user's device. "
+                            + "Ignoring redundant request.");
+                    return;
+                }
+                List<String> userDeviceIds = mStorage.getActiveUserAssociatedDeviceIds();
+                if (userDeviceIds.isEmpty()) {
+                    logw(TAG, "No devices associated with active user. Ignoring.");
+                    return;
+                }
+
+                // Only currently support one device per user for fast association, so take the
+                // first one.
+                String userDeviceId = userDeviceIds.get(0);
+                byte[] key = mStorage.getEncryptionKey(userDeviceId);
+                logd(TAG, "Found encryption key of value " + key);
+                if (mConnectedDevices.containsKey(userDeviceId)) {
+                    logd(TAG, "Device has already been connected. No need to attempt connection "
+                            + "again.");
+                    return;
+                }
+                mIsConnectingToUserDevice = true;
+                mPeripheralManager.connectToDevice(UUID.fromString(userDeviceId));
+            } catch (Exception e) {
+                loge(TAG, "Exception while attempting connection with active user's device.", e);
+            } finally {
+                mLock.unlock();
             }
-            if (mIsConnectingToUserDevice) {
-                // Already connecting, no further action needed.
-                return;
-            }
-            List<String> userDeviceIds = mStorage.getActiveUserAssociatedDeviceIds();
-            if (userDeviceIds.isEmpty()) {
-                logw(TAG, "No devices associated with active user. Ignoring.");
-                return;
-            }
-            // Only currently support one device per user for fast association, so take the first
-            // one.
-            String userDeviceId  = userDeviceIds.get(0);
-            if (mConnectedDevices.containsKey(userDeviceId)) {
-                // Device has already connected, no further action needed.
-                return;
-            }
-            mIsConnectingToUserDevice = true;
-            mPeripheralManager.connectToDevice(UUID.fromString(userDeviceId));
-        } finally {
-            mLock.unlock();
-        }
+        }).start();
     }
 
     /**
@@ -368,6 +382,8 @@ public class ConnectedDeviceManager {
     private void saveMissedMessage(@NonNull String deviceId, @NonNull UUID recipientId,
             @NonNull byte[] message) {
         // Store last message in case recipient registers callbacks in the future.
+        logd(TAG, "No recipient registered for device " + deviceId + " and recipient "
+                + recipientId + " combination. Saving message.");
         mRecipientMissedMessages.putIfAbsent(recipientId, new HashMap<>());
         mRecipientMissedMessages.get(recipientId).putIfAbsent(deviceId, message);
     }
@@ -569,7 +585,8 @@ public class ConnectedDeviceManager {
     @VisibleForTesting
     void onMessageReceived(@NonNull String deviceId, @NonNull DeviceMessage message) {
         logd(TAG, "New message received from device " + deviceId + " intended for "
-                + message.getRecipient() + "containing " + message.getMessage().length + " bytes.");
+                + message.getRecipient() + " containing " + message.getMessage().length
+                + " bytes.");
 
         InternalConnectedDevice connectedDevice = mConnectedDevices.get(deviceId);
         if (connectedDevice == null) {
