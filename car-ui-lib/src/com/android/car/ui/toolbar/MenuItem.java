@@ -308,10 +308,11 @@ public class MenuItem {
     /** Builder class */
     public static final class Builder {
         private final Context mContext;
-        private final CharSequence mSearchTitle;
-        private final CharSequence mSettingsTitle;
-        private final Drawable mSearchIcon;
-        private final Drawable mSettingsIcon;
+
+        private CharSequence mSearchTitle;
+        private CharSequence mSettingsTitle;
+        private Drawable mSearchIcon;
+        private Drawable mSettingsIcon;
 
         private int mId = View.NO_ID;
         private CharSequence mTitle;
@@ -335,10 +336,6 @@ public class MenuItem {
             // Must use getApplicationContext to avoid leaking activities when the MenuItem
             // is held onto for longer than the Activity's lifecycle
             mContext = c.getApplicationContext();
-            mSearchTitle = mContext.getString(R.string.car_ui_toolbar_menu_item_search_title);
-            mSettingsTitle = mContext.getString(R.string.car_ui_toolbar_menu_item_settings_title);
-            mSearchIcon = mContext.getDrawable(R.drawable.car_ui_icon_search);
-            mSettingsIcon = mContext.getDrawable(R.drawable.car_ui_icon_settings);
         }
 
         /** Builds a {@link MenuItem} from the current state of the Builder */
@@ -531,6 +528,8 @@ public class MenuItem {
          * <p>If using this, you should only change the id, visibility, or onClickListener.
          */
         public Builder setToSearch() {
+            mSearchTitle = mContext.getString(R.string.car_ui_toolbar_menu_item_search_title);
+            mSearchIcon = mContext.getDrawable(R.drawable.car_ui_icon_search);
             mIsSearch = true;
             setTitle(mSearchTitle);
             setIcon(mSearchIcon);
@@ -547,6 +546,8 @@ public class MenuItem {
          * <p>If using this, you should only change the id, visibility, or onClickListener.
          */
         public Builder setToSettings() {
+            mSettingsTitle = mContext.getString(R.string.car_ui_toolbar_menu_item_settings_title);
+            mSettingsIcon = mContext.getDrawable(R.drawable.car_ui_icon_settings);
             mIsSettings = true;
             setTitle(mSettingsTitle);
             setIcon(mSettingsIcon);
