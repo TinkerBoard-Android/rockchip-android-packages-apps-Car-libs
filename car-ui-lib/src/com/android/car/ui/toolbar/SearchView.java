@@ -32,22 +32,23 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.android.car.ui.R;
 
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
 
 /**
  * A search view used by {@link Toolbar}.
  */
 public class SearchView extends ConstraintLayout {
+    private final InputMethodManager mInputMethodManager;
     private final ImageView mIcon;
     private final EditText mSearchText;
     private final View mCloseIcon;
     private final int mStartPaddingWithoutIcon;
     private final int mStartPadding;
     private final int mEndPadding;
-    private final Set<Toolbar.OnSearchListener> mSearchListeners = new HashSet<>();
-    private final Set<Toolbar.OnSearchCompletedListener> mSearchCompletedListeners =
-            new HashSet<>();
+    private Set<Toolbar.OnSearchListener> mSearchListeners = Collections.emptySet();
+    private Set<Toolbar.OnSearchCompletedListener> mSearchCompletedListeners =
+            Collections.emptySet();
     private final TextWatcher mTextWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -76,6 +77,9 @@ public class SearchView extends ConstraintLayout {
     public SearchView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
+        mInputMethodManager = (InputMethodManager)
+            getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+
         LayoutInflater inflater = LayoutInflater.from(context);
         inflater.inflate(R.layout.car_ui_toolbar_search_view, this, true);
 
@@ -83,6 +87,7 @@ public class SearchView extends ConstraintLayout {
         mIcon = requireViewById(R.id.car_ui_toolbar_search_icon);
         mCloseIcon = requireViewById(R.id.car_ui_toolbar_search_close);
         mCloseIcon.setOnClickListener(view -> mSearchText.getText().clear());
+        mCloseIcon.setVisibility(View.GONE);
 
         mStartPaddingWithoutIcon = mSearchText.getPaddingStart();
         mStartPadding = context.getResources().getDimensionPixelSize(
@@ -94,13 +99,10 @@ public class SearchView extends ConstraintLayout {
 
         mSearchText.setOnFocusChangeListener(
                 (view, hasFocus) -> {
-                    InputMethodManager manager = ((InputMethodManager)
-                            context.getSystemService(Context.INPUT_METHOD_SERVICE));
                     if (hasFocus) {
-                        manager.restartInput(view); // needed to detect changes to imeOptions
-                        manager.showSoftInput(view, 0);
+                        mInputMethodManager.showSoftInput(view, 0);
                     } else {
-                        manager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                        mInputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
                     }
                 });
 
@@ -138,32 +140,16 @@ public class SearchView extends ConstraintLayout {
      * Adds a listener for the search text changing.
      * See also {@link #unregisterOnSearchListener(Toolbar.OnSearchListener)}
      */
-    public void registerOnSearchListener(Toolbar.OnSearchListener listener) {
-        mSearchListeners.add(listener);
+    public void setSearchListeners(Set<Toolbar.OnSearchListener> listeners) {
+        mSearchListeners = listeners;
     }
 
     /**
      * Removes a search listener.
      * See also {@link #registerOnSearchListener(Toolbar.OnSearchListener)}
      */
-    public boolean unregisterOnSearchListener(Toolbar.OnSearchListener listener) {
-        return mSearchListeners.remove(listener);
-    }
-
-    /**
-     * Adds a search completed listener
-     * See also {@link #registerOnSearchCompletedListener(Toolbar.OnSearchCompletedListener)}
-     */
-    public void registerOnSearchCompletedListener(Toolbar.OnSearchCompletedListener listener) {
-        mSearchCompletedListeners.add(listener);
-    }
-
-    /**
-     * Removes a search completed listener.
-     * See also {@link #unregisterOnSearchCompletedListener(Toolbar.OnSearchCompletedListener)}
-     */
-    public boolean unregisterOnSearchCompletedListener(Toolbar.OnSearchCompletedListener listener) {
-        return mSearchCompletedListeners.remove(listener);
+    public void setSearchCompletedListeners(Set<Toolbar.OnSearchCompletedListener> listeners) {
+        mSearchCompletedListeners = listeners;
     }
 
     /**
@@ -227,6 +213,9 @@ public class SearchView extends ConstraintLayout {
                 mIcon.setVisibility(View.VISIBLE);
             }
             mIsPlainText = plainText;
+
+            // Needed to detect changes to imeOptions
+            mInputMethodManager.restartInput(mSearchText);
         }
     }
 
