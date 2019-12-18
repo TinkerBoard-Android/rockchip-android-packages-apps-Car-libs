@@ -62,10 +62,11 @@ LOCAL_STATIC_ANDROID_LIBRARIES += \
     androidx.appcompat_appcompat \
     androidx-constraintlayout_constraintlayout \
     androidx.preference_preference \
-    androidx.recyclerview_recyclerview
+    androidx.recyclerview_recyclerview \
+    androidx.asynclayoutinflater_asynclayoutinflater \
 
 LOCAL_STATIC_JAVA_LIBRARIES += \
-    androidx-constraintlayout_constraintlayout-solver
+    androidx-constraintlayout_constraintlayout-solver \
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
