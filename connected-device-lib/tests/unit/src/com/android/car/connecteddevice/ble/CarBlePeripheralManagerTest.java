@@ -178,7 +178,7 @@ public class CarBlePeripheralManagerTest {
         AssociatedDevice device = deviceCaptor.getValue();
         assertThat(device.getDeviceId()).isEqualTo(TEST_REMOTE_DEVICE_ID.toString());
         assertThat(tryAcquire(semaphore)).isTrue();
-        verify(callback).onAssociationCompleted();
+        verify(callback).onAssociationCompleted(eq(TEST_REMOTE_DEVICE_ID.toString()));
     }
 
     @Test
@@ -245,7 +245,7 @@ public class CarBlePeripheralManagerTest {
             }
 
             @Override
-            public void onAssociationCompleted() {
+            public void onAssociationCompleted(String deviceId) {
                 semaphore.release();
             }
         });

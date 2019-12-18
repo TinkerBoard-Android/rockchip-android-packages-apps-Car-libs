@@ -116,6 +116,8 @@ public class ConnectedDeviceManager {
 
     private String mNameForAssociation;
 
+    private AssociationCallback mAssociationCallback;
+
     @Retention(SOURCE)
     @IntDef(prefix = { "DEVICE_ERROR_" },
             value = {
@@ -308,12 +310,18 @@ public class ConnectedDeviceManager {
      * @param callback Callback for association events.
      */
     public void startAssociation(@NonNull AssociationCallback callback) {
-        mPeripheralManager.startAssociation(getNameForAssociation(), callback);
+        mAssociationCallback = callback;
+        mPeripheralManager.startAssociation(getNameForAssociation(), mInternalAssociationCallback);
     }
 
     /** Stop the association with any device. */
     public void stopAssociation(@NonNull AssociationCallback callback) {
-        mPeripheralManager.stopAssociation(callback);
+        if (mAssociationCallback != callback) {
+            logd(TAG, "Stop association called with unrecognized callback. Ignoring.");
+            return;
+        }
+        mAssociationCallback = null;
+        mPeripheralManager.stopAssociation(mInternalAssociationCallback);
     }
 
     /**
@@ -626,6 +634,20 @@ public class ConnectedDeviceManager {
                         DEVICE_ERROR_INVALID_SECURITY_KEY));
     }
 
+    @VisibleForTesting
+    void onAssociationCompleted(@NonNull String deviceId) {
+        InternalConnectedDevice connectedDevice =
+                getConnectedDeviceForManager(deviceId, mPeripheralManager);
+        if (connectedDevice == null) {
+            return;
+        }
+
+        // The previous device is now obsolete and should be replaced with a new one properly
+        // reflecting the state of belonging to the active user and notify features.
+        removeConnectedDevice(deviceId, mPeripheralManager);
+        addConnectedDevice(deviceId, mPeripheralManager);
+    }
+
     @NonNull
     private List<String> getActiveUserDeviceIds() {
         return mStorage.getAssociatedDeviceIdsForUser(ActivityManager.getCurrentUser());
@@ -708,6 +730,44 @@ public class ConnectedDeviceManager {
             }
         };
     }
+
+    private final AssociationCallback mInternalAssociationCallback = new AssociationCallback() {
+        @Override
+        public void onAssociationStartSuccess(String deviceName) {
+            if (mAssociationCallback != null) {
+                mAssociationCallback.onAssociationStartSuccess(deviceName);
+            }
+        }
+
+        @Override
+        public void onAssociationStartFailure() {
+            if (mAssociationCallback != null) {
+                mAssociationCallback.onAssociationStartFailure();
+            }
+        }
+
+        @Override
+        public void onAssociationError(int error) {
+            if (mAssociationCallback != null) {
+                mAssociationCallback.onAssociationError(error);
+            }
+        }
+
+        @Override
+        public void onVerificationCodeAvailable(String code) {
+            if (mAssociationCallback != null) {
+                mAssociationCallback.onVerificationCodeAvailable(code);
+            }
+        }
+
+        @Override
+        public void onAssociationCompleted(String deviceId) {
+            if (mAssociationCallback != null) {
+                mAssociationCallback.onAssociationCompleted(deviceId);
+            }
+            onAssociationCompleted(deviceId);
+        }
+    };
 
     /** Callback for triggered connection events from {@link ConnectedDeviceManager}. */
     public interface ConnectionCallback {

@@ -365,6 +365,23 @@ public class ConnectedDeviceStorage {
     }
 
     /**
+     * Update the name for an associated device.
+     *
+     * @param deviceId The id of the associated device.
+     * @param name The name to replace with.
+     */
+    public void updateAssociatedDeviceName(@NonNull String deviceId, @NonNull String name) {
+        AssociatedDeviceEntity entity = mAssociatedDeviceDatabase.getAssociatedDevice(deviceId);
+        if (entity == null) {
+            logw(TAG, "Attempt to update name on an unrecognized device " + deviceId
+                    + ". Ignoring.");
+            return;
+        }
+        entity.name = name;
+        mAssociatedDeviceDatabase.addOrUpdateAssociatedDevice(entity);
+    }
+
+    /**
      * Remove the associated device of the given deviceId for the given user.
      *
      * @param userId The identifier of the user.

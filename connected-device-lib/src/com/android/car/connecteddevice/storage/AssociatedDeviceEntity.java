@@ -40,7 +40,7 @@ public class AssociatedDeviceEntity {
     public String address;
 
     /** Bluetooth device name. */
-    @NonNull
+    @Nullable
     public String name;
 
     /** Encrypted key for secure session. */
