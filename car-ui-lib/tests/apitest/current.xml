@@ -215,7 +215,6 @@
   <public type="style" name="Preference.CarUi.SwitchPreference"/>
   <public type="style" name="PreferenceFragment.CarUi"/>
   <public type="style" name="PreferenceFragmentList.CarUi"/>
-  <public type="style" name="RadioButton.CarUi"/>
   <public type="style" name="TextAppearance.CarUi"/>
   <public type="style" name="TextAppearance.CarUi.AlertDialog.Subtitle"/>
   <public type="style" name="TextAppearance.CarUi.ListItem"/>
