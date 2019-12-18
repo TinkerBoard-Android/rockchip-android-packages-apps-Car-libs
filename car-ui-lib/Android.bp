@@ -35,5 +35,6 @@ android_library {
         "androidx.preference_preference",
         "androidx.recyclerview_recyclerview",
         "androidx-constraintlayout_constraintlayout-solver",
+        "androidx.asynclayoutinflater_asynclayoutinflater",
     ],
 }
