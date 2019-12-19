@@ -142,6 +142,8 @@
 
     <!-- Preferences -->
 
+    <dimen name="car_ui_divider_width">1dp</dimen>
+
     <dimen name="car_ui_preference_category_text_size">24sp</dimen>
     <dimen name="car_ui_preference_summary_text_size">24sp</dimen>
     <dimen name="car_ui_preference_title_text_size">32sp</dimen>

@@ -53,6 +53,12 @@
   <PreferenceCategory
       android:title="@string/widgets">
 
+    <com.android.car.ui.preference.CarUiTwoActionPreference
+      android:key="twoaction"
+      android:title="@string/title_twoaction_preference"
+      android:summary="@string/summary_twoaction_preference"
+      android:widgetLayout="@layout/details_preference_widget"/>
+
     <CheckBoxPreference
         android:key="checkbox"
         android:title="@string/title_checkbox_preference"

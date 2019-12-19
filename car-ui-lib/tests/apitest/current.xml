@@ -27,6 +27,7 @@
   <public type="color" name="car_ui_preference_summary_text_color"/>
   <public type="color" name="car_ui_preference_switch_track_text_color"/>
   <public type="color" name="car_ui_preference_title_text_color"/>
+  <public type="color" name="car_ui_preference_two_action_divider_color"/>
   <public type="color" name="car_ui_recyclerview_divider_color"/>
   <public type="color" name="car_ui_ripple_color"/>
   <public type="color" name="car_ui_scrollbar_thumb"/>
@@ -51,6 +52,7 @@
   <public type="dimen" name="car_ui_dialog_edittext_margin_top"/>
   <public type="dimen" name="car_ui_dialog_icon_size"/>
   <public type="dimen" name="car_ui_dialog_title_margin"/>
+  <public type="dimen" name="car_ui_divider_width"/>
   <public type="dimen" name="car_ui_keyline_1"/>
   <public type="dimen" name="car_ui_keyline_2"/>
   <public type="dimen" name="car_ui_keyline_3"/>
@@ -205,6 +207,7 @@
   <public type="style" name="Preference.CarUi.CheckBoxPreference"/>
   <public type="style" name="Preference.CarUi.DialogPreference"/>
   <public type="style" name="Preference.CarUi.DialogPreference.EditTextPreference"/>
+  <public type="style" name="Preference.CarUi.Divider"/>
   <public type="style" name="Preference.CarUi.DropDown"/>
   <public type="style" name="Preference.CarUi.Icon"/>
   <public type="style" name="Preference.CarUi.Information"/>

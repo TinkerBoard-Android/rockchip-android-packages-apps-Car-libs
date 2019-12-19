@@ -118,6 +118,11 @@
         <attr name="showChevron" format="boolean" />
     </declare-styleable>
 
+    <declare-styleable name="CarUiTwoActionPreference">
+        <!-- Determines if the secondary action is initially shown -->
+        <attr name="actionShown" format="boolean"/>
+    </declare-styleable>
+
     <!-- Theme attribute to specify a default style for all CarUiPreferences -->
     <attr name="carUiPreferenceStyle" format="reference" />
 
