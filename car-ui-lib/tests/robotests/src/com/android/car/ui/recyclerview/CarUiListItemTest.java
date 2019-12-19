@@ -241,7 +241,7 @@ public class CarUiListItemTest {
         switchWidget.performClick();
         assertThat(switchWidget.isChecked()).isEqualTo(false);
         verify(mOnCheckedChangedListener, times(1))
-                .onCheckedChanged(false);
+                .onCheckedChanged(item, false);
     }
 
     @Test
@@ -262,7 +262,7 @@ public class CarUiListItemTest {
         checkBox.performClick();
         assertThat(checkBox.isChecked()).isEqualTo(true);
         verify(mOnCheckedChangedListener, times(1))
-                .onCheckedChanged(true);
+                .onCheckedChanged(item, true);
     }
 
     @Test
