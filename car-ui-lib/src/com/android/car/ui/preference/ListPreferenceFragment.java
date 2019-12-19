@@ -70,7 +70,7 @@ public class ListPreferenceFragment extends Fragment implements
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        final CarUiRecyclerView mCarUiRecyclerView = view.requireViewById(R.id.radio_list);
+        final CarUiRecyclerView mCarUiRecyclerView = view.requireViewById(R.id.list);
         final Toolbar toolbar = view.requireViewById(R.id.toolbar);
 
         mCarUiRecyclerView.setPadding(0, toolbar.getHeight(), 0, 0);

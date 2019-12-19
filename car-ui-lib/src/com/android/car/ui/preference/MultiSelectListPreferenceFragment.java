@@ -18,13 +18,10 @@ package com.android.car.ui.preference;
 
 import static com.android.car.ui.preference.PreferenceDialogFragment.ARG_KEY;
 
-import static java.util.stream.Collectors.toList;
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,10 +30,13 @@ import androidx.preference.DialogPreference;
 import androidx.preference.Preference;
 
 import com.android.car.ui.R;
+import com.android.car.ui.recyclerview.CarUiContentListItem;
+import com.android.car.ui.recyclerview.CarUiListItem;
+import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.Toolbar;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,8 +45,7 @@ import java.util.Set;
  * A fragment that provides a layout with a list of options associated with a {@link
  * CarUiMultiSelectListPreference}.
  */
-public class MultiSelectListPreferenceFragment extends Fragment implements
-        CarUiMultiSelectListItemAdapter.OnCheckedChangeListener {
+public class MultiSelectListPreferenceFragment extends Fragment {
 
     private CarUiMultiSelectListPreference mPreference;
     private Set<String> mNewValues;
@@ -68,7 +67,7 @@ public class MultiSelectListPreferenceFragment extends Fragment implements
     public View onCreateView(
             @NonNull LayoutInflater inflater, @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.car_ui_multi_select_list_preference, container, false);
+        return inflater.inflate(R.layout.car_ui_list_preference, container, false);
     }
 
     @Override
@@ -109,27 +108,36 @@ public class MultiSelectListPreferenceFragment extends Fragment implements
                             + "array length.");
         }
 
-        List<String> entryStrings = Arrays.stream(entries).map(CharSequence::toString).collect(
-                toList());
+        List<CarUiListItem> listItems = new ArrayList<>();
+        boolean[] selectedItems = mPreference.getSelectedItems();
 
-        CarUiMultiSelectListItemAdapter adapter = new CarUiMultiSelectListItemAdapter(
-                entryStrings, mPreference.getSelectedItems());
+        for (int i = 0; i < entries.length; i++) {
+            String entry = entries[i].toString();
+            String entryValue = entryValues[i].toString();
+            CarUiContentListItem item = new CarUiContentListItem();
+            item.setAction(CarUiContentListItem.Action.CHECK_BOX);
+            item.setTitle(entry);
+            item.setChecked(selectedItems[i]);
+            item.setOnCheckedChangedListener(isChecked -> {
+                if (isChecked) {
+                    mNewValues.add(entryValue);
+                } else {
+                    mNewValues.remove(entryValue);
+                }
+            });
+
+            listItems.add(item);
+        }
+
+        CarUiListItemAdapter adapter = new CarUiListItemAdapter(listItems);
         recyclerView.setAdapter(adapter);
-        adapter.setOnCheckedChangedListener(this);
 
-        Button positiveButton = view.requireViewById(R.id.positive_button);
-        Button negativeButton = view.requireViewById(R.id.negative_button);
-
-        positiveButton.setOnClickListener(v -> {
+        toolbar.registerOnBackListener(() -> {
             if (mPreference.callChangeListener(mNewValues)) {
                 mPreference.setValues(mNewValues);
             }
 
-            dismissFragment();
-        });
-
-        negativeButton.setOnClickListener(v -> {
-            dismissFragment();
+            return false;
         });
     }
 
@@ -162,32 +170,5 @@ public class MultiSelectListPreferenceFragment extends Fragment implements
         }
 
         return (CarUiMultiSelectListPreference) preference;
-    }
-
-    private void dismissFragment() {
-        if (getActivity() == null) {
-            throw new IllegalStateException(
-                    "MultiSelectListPreference fragment is not attached to an Activity.");
-        }
-
-        getActivity().getSupportFragmentManager().popBackStack();
-    }
-
-    @Override
-    public void onCheckChanged(int position, boolean isChecked) {
-        CharSequence[] entryValues = mPreference.getEntryValues();
-
-        if (position < 0 || position > entryValues.length - 1) {
-            throw new IllegalStateException(
-                    "Clicked preference has invalid index.");
-        }
-
-        String value = entryValues[position].toString();
-
-        if (isChecked) {
-            mNewValues.add(value);
-        } else {
-            mNewValues.remove(value);
-        }
     }
 }
