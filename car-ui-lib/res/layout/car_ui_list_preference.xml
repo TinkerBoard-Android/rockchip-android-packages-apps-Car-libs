@@ -25,7 +25,8 @@
     <com.android.car.ui.recyclerview.CarUiRecyclerView
         android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        app:enableDivider="true" />
 
     <com.android.car.ui.toolbar.Toolbar
         android:id="@+id/toolbar"
