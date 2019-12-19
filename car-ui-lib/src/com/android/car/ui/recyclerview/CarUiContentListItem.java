@@ -34,9 +34,10 @@ public class CarUiContentListItem extends CarUiListItem {
         /**
          * Called when the checked state of a list item has changed.
          *
+         * @param item The item whose checked state changed.
          * @param isChecked new checked state of list item.
          */
-        void onCheckedChanged(boolean isChecked);
+        void onCheckedChanged(CarUiContentListItem item, boolean isChecked);
     }
 
     /**

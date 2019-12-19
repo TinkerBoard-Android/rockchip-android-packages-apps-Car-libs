@@ -118,7 +118,7 @@ public class MultiSelectListPreferenceFragment extends Fragment {
             item.setAction(CarUiContentListItem.Action.CHECK_BOX);
             item.setTitle(entry);
             item.setChecked(selectedItems[i]);
-            item.setOnCheckedChangedListener(isChecked -> {
+            item.setOnCheckedChangedListener((listItem, isChecked) -> {
                 if (isChecked) {
                     mNewValues.add(entryValue);
                 } else {

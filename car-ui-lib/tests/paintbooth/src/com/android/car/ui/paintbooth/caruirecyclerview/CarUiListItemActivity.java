@@ -88,7 +88,7 @@ public class CarUiListItemActivity extends Activity {
         item.setTitle("Title -- Item with checkbox");
         item.setBody("Will present toast on change of selection state.");
         item.setOnCheckedChangedListener(
-                (isChecked) -> Toast.makeText(context,
+                (listItem, isChecked) -> Toast.makeText(context,
                         "Item checked state is: " + isChecked, Toast.LENGTH_SHORT).show());
         item.setAction(CarUiContentListItem.Action.CHECK_BOX);
         mData.add(item);
@@ -114,7 +114,7 @@ public class CarUiListItemActivity extends Activity {
         radioItem1.setBody("Item is initially unchecked checked");
         radioItem1.setAction(CarUiContentListItem.Action.RADIO_BUTTON);
         radioItem1.setChecked(false);
-        radioItem1.setOnCheckedChangedListener(isChecked -> {
+        radioItem1.setOnCheckedChangedListener((listItem, isChecked) -> {
             if (isChecked) {
                 radioItem2.setChecked(false);
                 mAdapter.notifyItemChanged(mData.indexOf(radioItem2));
@@ -126,7 +126,7 @@ public class CarUiListItemActivity extends Activity {
         radioItem2.setTitle("Item is mutually exclusive with item above");
         radioItem2.setAction(CarUiContentListItem.Action.RADIO_BUTTON);
         radioItem2.setChecked(true);
-        radioItem2.setOnCheckedChangedListener(isChecked -> {
+        radioItem2.setOnCheckedChangedListener((listItem, isChecked) -> {
             if (isChecked) {
                 radioItem1.setChecked(false);
                 mAdapter.notifyItemChanged(mData.indexOf(radioItem1));
