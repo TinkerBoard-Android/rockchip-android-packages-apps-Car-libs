@@ -57,6 +57,11 @@ public class CarUiContentListItem extends CarUiListItem {
          */
         CHECK_BOX,
         /**
+         * For an action value of CHECK_BOX, a radio button is shown for the action element of the
+         * list item.
+         */
+        RADIO_BUTTON,
+        /**
          * For an action value of ICON, an icon is shown for the action element of the list item.
          */
         ICON
@@ -142,8 +147,9 @@ public class CarUiContentListItem extends CarUiListItem {
      * @param checked the checked state for the item.
      */
     public void setChecked(boolean checked) {
-        // Checked state can only be set when action type is checkbox or switch.
-        if (mAction == Action.CHECK_BOX || mAction == Action.SWITCH) {
+        // Checked state can only be set when action type is checkbox, radio button or switch.
+        if (mAction == Action.CHECK_BOX || mAction == Action.SWITCH
+                || mAction == Action.RADIO_BUTTON) {
             mIsChecked = checked;
         }
     }
@@ -179,8 +185,10 @@ public class CarUiContentListItem extends CarUiListItem {
     public void setAction(Action action) {
         mAction = action;
 
-        // Cannot have checked state be true when there action type is not checkbox or switch.
-        if (mAction != Action.CHECK_BOX && mAction != Action.SWITCH) {
+        // Cannot have checked state be true when there action type is not checkbox, radio button or
+        // switch.
+        if (mAction != Action.CHECK_BOX && mAction != Action.SWITCH
+                && mAction != Action.RADIO_BUTTON) {
             mIsChecked = false;
         }
     }
