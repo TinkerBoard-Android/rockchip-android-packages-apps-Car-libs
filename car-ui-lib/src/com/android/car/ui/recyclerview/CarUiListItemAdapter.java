@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.RadioButton;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -156,6 +157,7 @@ public class CarUiListItemAdapter extends
         private final View mActionDivider;
         private final Switch mSwitch;
         private final CheckBox mCheckBox;
+        private final RadioButton mRadioButton;
         private final ImageView mSupplementalIcon;
         private final View mTouchInterceptor;
         private final View mReducedTouchInterceptor;
@@ -171,6 +173,7 @@ public class CarUiListItemAdapter extends
             mActionDivider = itemView.requireViewById(R.id.action_divider);
             mSwitch = itemView.requireViewById(R.id.switch_widget);
             mCheckBox = itemView.requireViewById(R.id.checkbox_widget);
+            mRadioButton = itemView.requireViewById(R.id.radio_button_widget);
             mSupplementalIcon = itemView.requireViewById(R.id.supplemental_icon);
             mReducedTouchInterceptor = itemView.requireViewById(R.id.reduced_touch_interceptor);
             mTouchInterceptor = itemView.requireViewById(R.id.touch_interceptor);
@@ -204,6 +207,11 @@ public class CarUiListItemAdapter extends
             mActionDivider.setVisibility(
                     item.isActionDividerVisible() ? View.VISIBLE : View.GONE);
 
+            mSwitch.setVisibility(View.GONE);
+            mCheckBox.setVisibility(View.GONE);
+            mRadioButton.setVisibility(View.GONE);
+            mSupplementalIcon.setVisibility(View.GONE);
+
             switch (item.getAction()) {
                 case NONE:
                     mActionContainer.setVisibility(View.GONE);
@@ -229,13 +237,8 @@ public class CarUiListItemAdapter extends
                     // Clicks anywhere on the item should toggle the switch state. Use full touch
                     // interceptor.
                     mTouchInterceptor.setVisibility(View.VISIBLE);
-                    mTouchInterceptor.setOnClickListener(
-                            v -> mSwitch.setChecked(!item.isChecked()));
+                    mTouchInterceptor.setOnClickListener(v -> mSwitch.toggle());
                     mReducedTouchInterceptor.setVisibility(View.GONE);
-
-                    // Only the switch should be displayed in the action container.
-                    mCheckBox.setVisibility(View.GONE);
-                    mSupplementalIcon.setVisibility(View.GONE);
 
                     mActionContainer.setVisibility(View.VISIBLE);
                     mActionContainer.setClickable(false);
@@ -256,13 +259,30 @@ public class CarUiListItemAdapter extends
                     // Clicks anywhere on the item should toggle the checkbox state. Use full touch
                     // interceptor.
                     mTouchInterceptor.setVisibility(View.VISIBLE);
-                    mTouchInterceptor.setOnClickListener(
-                            v -> mCheckBox.setChecked(!item.isChecked()));
+                    mTouchInterceptor.setOnClickListener(v -> mCheckBox.toggle());
                     mReducedTouchInterceptor.setVisibility(View.GONE);
 
-                    // Only the checkbox should be displayed in the action container.
-                    mSwitch.setVisibility(View.GONE);
-                    mSupplementalIcon.setVisibility(View.GONE);
+                    mActionContainer.setVisibility(View.VISIBLE);
+                    mActionContainer.setClickable(false);
+                    break;
+                case RADIO_BUTTON:
+                    mRadioButton.setVisibility(View.VISIBLE);
+                    mRadioButton.setChecked(item.isChecked());
+                    mRadioButton.setOnCheckedChangeListener(
+                            (buttonView, isChecked) -> {
+                                item.setChecked(isChecked);
+                                CarUiContentListItem.OnCheckedChangedListener itemListener =
+                                        item.getOnCheckedChangedListener();
+                                if (itemListener != null) {
+                                    itemListener.onCheckedChanged(isChecked);
+                                }
+                            });
+
+                    // Clicks anywhere on the item should toggle the switch state. Use full touch
+                    // interceptor.
+                    mTouchInterceptor.setVisibility(View.VISIBLE);
+                    mTouchInterceptor.setOnClickListener(v -> mRadioButton.toggle());
+                    mReducedTouchInterceptor.setVisibility(View.GONE);
 
                     mActionContainer.setVisibility(View.VISIBLE);
                     mActionContainer.setClickable(false);
@@ -277,10 +297,6 @@ public class CarUiListItemAdapter extends
                                     item.getSupplementalIconOnClickListener().onClick(mIcon);
                                 }
                             });
-
-                    // Only the supplemental icon should be displayed in the action container.
-                    mSwitch.setVisibility(View.GONE);
-                    mCheckBox.setVisibility(View.GONE);
 
                     // If the icon has a click listener, use a reduced touch interceptor to create
                     // two distinct touch area; the action container and the remainder of the list
