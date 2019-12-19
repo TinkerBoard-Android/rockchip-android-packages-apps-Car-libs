@@ -31,6 +31,9 @@ import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 
 import com.android.car.ui.R;
+import com.android.car.ui.recyclerview.CarUiContentListItem;
+import com.android.car.ui.recyclerview.CarUiListItem;
+import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.Toolbar;
 
@@ -41,11 +44,10 @@ import java.util.List;
  * A fragment that provides a layout with a list of options associated with a {@link
  * ListPreference}.
  */
-public class ListPreferenceFragment extends Fragment implements
-        CarUiRecyclerViewRadioButtonAdapter.OnRadioButtonClickedListener {
+public class ListPreferenceFragment extends Fragment {
 
     private ListPreference mPreference;
-    private int mClickedDialogEntryIndex;
+    private CarUiContentListItem mSelectedItem;
 
     /**
      * Returns a new instance of {@link ListPreferenceFragment} for the {@link ListPreference} with
@@ -70,21 +72,21 @@ public class ListPreferenceFragment extends Fragment implements
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        final CarUiRecyclerView mCarUiRecyclerView = view.requireViewById(R.id.list);
+        final CarUiRecyclerView carUiRecyclerView = view.requireViewById(R.id.list);
         final Toolbar toolbar = view.requireViewById(R.id.toolbar);
 
-        mCarUiRecyclerView.setPadding(0, toolbar.getHeight(), 0, 0);
+        carUiRecyclerView.setPadding(0, toolbar.getHeight(), 0, 0);
         toolbar.registerToolbarHeightChangeListener(newHeight -> {
-            if (mCarUiRecyclerView.getPaddingTop() == newHeight) {
+            if (carUiRecyclerView.getPaddingTop() == newHeight) {
                 return;
             }
 
-            int oldHeight = mCarUiRecyclerView.getPaddingTop();
-            mCarUiRecyclerView.setPadding(0, newHeight, 0, 0);
-            mCarUiRecyclerView.scrollBy(0, oldHeight - newHeight);
+            int oldHeight = carUiRecyclerView.getPaddingTop();
+            carUiRecyclerView.setPadding(0, newHeight, 0, 0);
+            carUiRecyclerView.scrollBy(0, oldHeight - newHeight);
         });
 
-        mCarUiRecyclerView.setClipToPadding(false);
+        carUiRecyclerView.setClipToPadding(false);
         mPreference = getListPreference();
         toolbar.setTitle(mPreference.getTitle());
 
@@ -101,16 +103,42 @@ public class ListPreferenceFragment extends Fragment implements
                     "ListPreference entries array length does not match entryValues array length.");
         }
 
-        mClickedDialogEntryIndex = mPreference.findIndexOfValue(mPreference.getValue());
-        List<String> entryStrings = new ArrayList<>(entries.length);
-        for (CharSequence entry : entries) {
-            entryStrings.add(entry.toString());
+        int selectedEntryIndex = mPreference.findIndexOfValue(mPreference.getValue());
+        List<CarUiListItem> listItems = new ArrayList<>();
+        CarUiListItemAdapter adapter = new CarUiListItemAdapter(listItems);
+
+        for (int i = 0; i < entries.length; i++) {
+            String entry = entries[i].toString();
+            CarUiContentListItem item = new CarUiContentListItem();
+            item.setAction(CarUiContentListItem.Action.RADIO_BUTTON);
+            item.setTitle(entry);
+
+            if (i == selectedEntryIndex) {
+                item.setChecked(true);
+                mSelectedItem = item;
+            }
+
+            item.setOnCheckedChangedListener((listItem, isChecked) -> {
+                mSelectedItem.setChecked(false);
+                adapter.notifyItemChanged(listItems.indexOf(mSelectedItem));
+                mSelectedItem = listItem;
+            });
+
+            listItems.add(item);
         }
 
-        CarUiRecyclerViewRadioButtonAdapter adapter = new CarUiRecyclerViewRadioButtonAdapter(
-                entryStrings, mClickedDialogEntryIndex);
-        mCarUiRecyclerView.setAdapter(adapter);
-        adapter.registerListener(this);
+        toolbar.registerOnBackListener(() -> {
+            int selectedIndex = listItems.indexOf(mSelectedItem);
+            String entryValue = entryValues[selectedIndex].toString();
+
+            if (mPreference.callChangeListener(entryValue)) {
+                mPreference.setValue(entryValue);
+            }
+
+            return false;
+        });
+
+        carUiRecyclerView.setAdapter(adapter);
     }
 
     private ListPreference getListPreference() {
@@ -142,28 +170,5 @@ public class ListPreferenceFragment extends Fragment implements
         }
 
         return (ListPreference) preference;
-    }
-
-    @Override
-    public void onClick(int position) {
-        CharSequence[] entryValues = mPreference.getEntryValues();
-
-        if (position < 0 || position > entryValues.length - 1) {
-            throw new IllegalStateException(
-                    "Clicked preference has invalid index.");
-        }
-
-        mClickedDialogEntryIndex = position;
-        String value = entryValues[mClickedDialogEntryIndex].toString();
-        if (mPreference.callChangeListener(value)) {
-            mPreference.setValue(value);
-        }
-
-        if (getActivity() == null) {
-            throw new IllegalStateException(
-                    "ListPreference fragment is not attached to an Activity.");
-        }
-
-        getActivity().getSupportFragmentManager().popBackStack();
     }
 }
