@@ -223,6 +223,7 @@ public class CarUiListItemAdapter extends
                     break;
                 case SWITCH:
                     mSwitch.setVisibility(View.VISIBLE);
+                    mSwitch.setOnCheckedChangeListener(null);
                     mSwitch.setChecked(item.isChecked());
                     mSwitch.setOnCheckedChangeListener(
                             (buttonView, isChecked) -> {
@@ -230,7 +231,7 @@ public class CarUiListItemAdapter extends
                                 CarUiContentListItem.OnCheckedChangedListener itemListener =
                                         item.getOnCheckedChangedListener();
                                 if (itemListener != null) {
-                                    itemListener.onCheckedChanged(isChecked);
+                                    itemListener.onCheckedChanged(item, isChecked);
                                 }
                             });
 
@@ -245,6 +246,7 @@ public class CarUiListItemAdapter extends
                     break;
                 case CHECK_BOX:
                     mCheckBox.setVisibility(View.VISIBLE);
+                    mCheckBox.setOnCheckedChangeListener(null);
                     mCheckBox.setChecked(item.isChecked());
                     mCheckBox.setOnCheckedChangeListener(
                             (buttonView, isChecked) -> {
@@ -252,7 +254,7 @@ public class CarUiListItemAdapter extends
                                 CarUiContentListItem.OnCheckedChangedListener itemListener =
                                         item.getOnCheckedChangedListener();
                                 if (itemListener != null) {
-                                    itemListener.onCheckedChanged(isChecked);
+                                    itemListener.onCheckedChanged(item, isChecked);
                                 }
                             });
 
@@ -267,6 +269,7 @@ public class CarUiListItemAdapter extends
                     break;
                 case RADIO_BUTTON:
                     mRadioButton.setVisibility(View.VISIBLE);
+                    mRadioButton.setOnCheckedChangeListener(null);
                     mRadioButton.setChecked(item.isChecked());
                     mRadioButton.setOnCheckedChangeListener(
                             (buttonView, isChecked) -> {
@@ -274,7 +277,7 @@ public class CarUiListItemAdapter extends
                                 CarUiContentListItem.OnCheckedChangedListener itemListener =
                                         item.getOnCheckedChangedListener();
                                 if (itemListener != null) {
-                                    itemListener.onCheckedChanged(isChecked);
+                                    itemListener.onCheckedChanged(item, isChecked);
                                 }
                             });
 

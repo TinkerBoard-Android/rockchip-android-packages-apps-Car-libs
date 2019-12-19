@@ -208,7 +208,6 @@
   <public type="style" name="Preference.CarUi.DropDown"/>
   <public type="style" name="Preference.CarUi.Icon"/>
   <public type="style" name="Preference.CarUi.Information"/>
-  <public type="style" name="Preference.CarUi.ListPreference"/>
   <public type="style" name="Preference.CarUi.Preference"/>
   <public type="style" name="Preference.CarUi.PreferenceScreen"/>
   <public type="style" name="Preference.CarUi.SeekBarPreference"/>
