@@ -49,7 +49,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * A toolbar for Android Automotive OS apps.
@@ -144,11 +146,21 @@ public class Toolbar extends FrameLayout {
     private ViewGroup mTitleLogoContainer;
     private TabLayout mTabLayout;
     private LinearLayout mMenuItemsContainer;
-    private final MenuItem mOverflowButton;
+    private FrameLayout mSearchViewContainer;
+    private SearchView mSearchView;
+
+    // Cached values that we will send to views when they are inflated
+    private CharSequence mSearchHint;
+    private Drawable mSearchIcon;
+    private String mSearchQuery;
+    private final Set<OnSearchListener> mOnSearchListeners = new HashSet<>();
+    private final Set<OnSearchCompletedListener> mOnSearchCompletedListeners = new HashSet<>();
+
     private final Set<OnBackListener> mOnBackListeners = new HashSet<>();
     private final Set<OnTabSelectedListener> mOnTabSelectedListeners = new HashSet<>();
     private final Set<OnHeightChangedListener> mOnHeightChangedListeners = new HashSet<>();
-    private SearchView mSearchView;
+
+    private final MenuItem mOverflowButton;
     private boolean mHasLogo = false;
     private boolean mShowMenuItemsWhileSearching;
     private State mState = State.HOME;
@@ -157,6 +169,8 @@ public class Toolbar extends FrameLayout {
     private List<MenuItem> mMenuItems = Collections.emptyList();
     private List<MenuItem> mOverflowItems = new ArrayList<>();
     private final List<MenuItemRenderer> mMenuItemRenderers = new ArrayList<>();
+    private CompletableFuture<Void> mMenuItemViewsFuture;
+    private int mMenuItemsXmlId = 0;
     private AlertDialog mOverflowDialog;
     private boolean mNavIconSpaceReserved;
     private boolean mLogoFillsNavIconSpace;
@@ -224,7 +238,7 @@ public class Toolbar extends FrameLayout {
             mTitle = requireViewById(R.id.car_ui_toolbar_title);
             mTitleLogoContainer = requireViewById(R.id.car_ui_toolbar_title_logo_container);
             mTitleLogo = requireViewById(R.id.car_ui_toolbar_title_logo);
-            mSearchView = requireViewById(R.id.car_ui_toolbar_search_view);
+            mSearchViewContainer = requireViewById(R.id.car_ui_toolbar_search_view_container);
             mProgressBar = requireViewById(R.id.car_ui_toolbar_progress_bar);
 
             mTitle.setText(a.getString(R.styleable.CarUiToolbar_title));
@@ -511,18 +525,23 @@ public class Toolbar extends FrameLayout {
     }
 
     /** Sets the hint for the search bar. */
-    public void setSearchHint(int resId) {
-        mSearchView.setHint(resId);
+    public void setSearchHint(@StringRes int resId) {
+        setSearchHint(getContext().getString(resId));
     }
 
     /** Sets the hint for the search bar. */
     public void setSearchHint(CharSequence hint) {
-        mSearchView.setHint(hint);
+        if (!Objects.equals(hint, mSearchHint)) {
+            mSearchHint = hint;
+            if (mSearchView != null) {
+                mSearchView.setHint(mSearchHint);
+            }
+        }
     }
 
     /** Gets the search hint */
     public CharSequence getSearchHint() {
-        return mSearchView.getHint();
+        return mSearchHint;
     }
 
     /**
@@ -531,8 +550,8 @@ public class Toolbar extends FrameLayout {
      * <p>The icon will be lost on configuration change, make sure to set it in onCreate() or
      * a similar place.
      */
-    public void setSearchIcon(int resId) {
-        mSearchView.setIcon(resId);
+    public void setSearchIcon(@DrawableRes int resId) {
+        setSearchIcon(getContext().getDrawable(resId));
     }
 
     /**
@@ -542,7 +561,12 @@ public class Toolbar extends FrameLayout {
      * a similar place.
      */
     public void setSearchIcon(Drawable d) {
-        mSearchView.setIcon(d);
+        if (!Objects.equals(d, mSearchIcon)) {
+            mSearchIcon = d;
+            if (mSearchView != null) {
+                mSearchView.setIcon(mSearchIcon);
+            }
+        }
     }
 
     /**
@@ -595,10 +619,7 @@ public class Toolbar extends FrameLayout {
         return super.getBackground() != null;
     }
 
-    /**
-     * Sets the {@link MenuItem Menuitems} to display.
-     */
-    public void setMenuItems(@Nullable List<MenuItem> items) {
+    private void setMenuItemsInternal(@Nullable List<MenuItem> items) {
         if (items == null) {
             items = Collections.emptyList();
         }
@@ -615,6 +636,7 @@ public class Toolbar extends FrameLayout {
         mMenuItemRenderers.clear();
         mMenuItemsContainer.removeAllViews();
 
+        List<CompletableFuture<View>> viewFutures = new ArrayList<>();
         for (MenuItem item : mMenuItems) {
             if (item.getDisplayBehavior() == MenuItem.DisplayBehavior.NEVER) {
                 mOverflowItems.add(item);
@@ -622,23 +644,48 @@ public class Toolbar extends FrameLayout {
             } else {
                 MenuItemRenderer renderer = new MenuItemRenderer(item, mMenuItemsContainer);
                 mMenuItemRenderers.add(renderer);
-                mMenuItemsContainer.addView(renderer.createView());
+                viewFutures.add(renderer.createView());
             }
         }
 
-        MenuItemRenderer renderer = new MenuItemRenderer(mOverflowButton, mMenuItemsContainer);
-        mMenuItemRenderers.add(renderer);
-        mMenuItemsContainer.addView(renderer.createView());
+        if (!mOverflowItems.isEmpty()) {
+            MenuItemRenderer renderer = new MenuItemRenderer(mOverflowButton, mMenuItemsContainer);
+            mMenuItemRenderers.add(renderer);
+            viewFutures.add(renderer.createView());
+            createOverflowDialog();
+        }
 
-        createOverflowDialog();
+        if (mMenuItemViewsFuture != null) {
+            mMenuItemViewsFuture.cancel(false);
+        }
+
+        mMenuItemViewsFuture = CompletableFuture.allOf(
+            viewFutures.toArray(new CompletableFuture[0]));
+        mMenuItemViewsFuture.thenRunAsync(() -> {
+            for (CompletableFuture<View> future : viewFutures) {
+                mMenuItemsContainer.addView(future.join());
+            }
+            mMenuItemViewsFuture = null;
+        }, getContext().getMainExecutor());
 
         setState(mState);
     }
 
     /**
+     * Sets the {@link MenuItem Menuitems} to display.
+     */
+    public void setMenuItems(@Nullable List<MenuItem> items) {
+        mMenuItemsXmlId = 0;
+        setMenuItemsInternal(items);
+    }
+
+    /**
      * Sets the {@link MenuItem Menuitems} to display to a list defined in XML.
      *
-     * The XML file must have one <MenuItems> tag, with a variable number of <MenuItem>
+     * <p>If this method is called twice with the same argument (and {@link #setMenuItems(List)}
+     * wasn't called), nothing will happen the second time, even if the MenuItems were changed.
+     *
+     * <p>The XML file must have one <MenuItems> tag, with a variable number of <MenuItem>
      * child tags. See CarUiToolbarMenuItem in CarUi's attrs.xml for a list of available attributes.
      *
      * Example:
@@ -662,8 +709,13 @@ public class Toolbar extends FrameLayout {
      * @return The MenuItems that were loaded from XML.
      */
     public List<MenuItem> setMenuItems(@XmlRes int resId) {
+        if (mMenuItemsXmlId != 0 && mMenuItemsXmlId == resId) {
+            return mMenuItems;
+        }
+
+        mMenuItemsXmlId = resId;
         List<MenuItem> menuItems = MenuItemRenderer.readMenuItemList(getContext(), resId);
-        setMenuItems(menuItems);
+        setMenuItemsInternal(menuItems);
         return menuItems;
     }
 
@@ -748,7 +800,16 @@ public class Toolbar extends FrameLayout {
      * Sets the search query.
      */
     public void setSearchQuery(String query) {
-        mSearchView.setSearchQuery(query);
+        if (!Objects.equals(mSearchQuery, query)) {
+            mSearchQuery = query;
+            if (mSearchView != null) {
+                mSearchView.setSearchQuery(query);
+            } else {
+                for (OnSearchListener listener : mOnSearchListeners) {
+                    listener.onSearch(query);
+                }
+            }
+        }
     }
 
     /**
@@ -757,6 +818,23 @@ public class Toolbar extends FrameLayout {
      */
     public void setState(State state) {
         mState = state;
+
+        if (mSearchView == null && (state == State.SEARCH || state == State.EDIT)) {
+            SearchView searchView = new SearchView(getContext());
+            searchView.setHint(mSearchHint);
+            searchView.setIcon(mSearchIcon);
+            searchView.setSearchListeners(mOnSearchListeners);
+            searchView.setSearchCompletedListeners(mOnSearchCompletedListeners);
+            searchView.setSearchQuery(mSearchQuery);
+            searchView.setVisibility(View.GONE);
+
+            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
+            mSearchViewContainer.addView(searchView, layoutParams);
+
+            mSearchView = searchView;
+        }
 
         for (MenuItemRenderer renderer : mMenuItemRenderers) {
             renderer.setToolbarState(mState);
@@ -820,8 +898,14 @@ public class Toolbar extends FrameLayout {
                 ? VISIBLE : GONE);
         mTabLayout.setVisibility(state == State.HOME && hasTabs ? VISIBLE : GONE);
 
-        mSearchView.setVisibility(state == State.SEARCH || state == State.EDIT ? VISIBLE : GONE);
-        mSearchView.setPlainText(state == State.EDIT);
+        if (mSearchView != null) {
+            if (state == State.SEARCH || state == State.EDIT) {
+                mSearchView.setPlainText(state == State.EDIT);
+                mSearchView.setVisibility(VISIBLE);
+            } else {
+                mSearchView.setVisibility(GONE);
+            }
+        }
 
         boolean showButtons = (state != State.SEARCH && state != State.EDIT)
                 || mShowMenuItemsWhileSearching;
@@ -918,22 +1002,22 @@ public class Toolbar extends FrameLayout {
 
     /** Registers a new {@link OnSearchListener} to the list of listeners. */
     public void registerOnSearchListener(OnSearchListener listener) {
-        mSearchView.registerOnSearchListener(listener);
+        mOnSearchListeners.add(listener);
     }
 
     /** Unregisters an existing {@link OnSearchListener} from the list of listeners. */
     public boolean unregisterOnSearchListener(OnSearchListener listener) {
-        return mSearchView.unregisterOnSearchListener(listener);
+        return mOnSearchListeners.remove(listener);
     }
 
     /** Registers a new {@link OnSearchCompletedListener} to the list of listeners. */
     public void registerOnSearchCompletedListener(OnSearchCompletedListener listener) {
-        mSearchView.registerOnSearchCompletedListener(listener);
+        mOnSearchCompletedListeners.add(listener);
     }
 
     /** Unregisters an existing {@link OnSearchCompletedListener} from the list of listeners. */
     public boolean unregisterOnSearchCompletedListener(OnSearchCompletedListener listener) {
-        return mSearchView.unregisterOnSearchCompletedListener(listener);
+        return mOnSearchCompletedListeners.remove(listener);
     }
 
     /** Registers a new {@link OnBackListener} to the list of listeners. */
