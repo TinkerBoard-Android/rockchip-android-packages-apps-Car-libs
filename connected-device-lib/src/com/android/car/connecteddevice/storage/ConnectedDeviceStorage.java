@@ -377,4 +377,13 @@ public class ConnectedDeviceStorage {
         }
         mAssociatedDeviceDatabase.removeAssociatedDevice(entity);
     }
+
+    /**
+     * Clear the associated device of the given deviceId for the current user.
+     *
+     * @param deviceId The identifier of the device to be cleared.
+     */
+    public void removeAssociatedDeviceForActiveUser(@NonNull String deviceId) {
+        removeAssociatedDevice(ActivityManager.getCurrentUser(), deviceId);
+    }
 }
