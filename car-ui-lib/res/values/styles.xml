@@ -43,6 +43,7 @@
     <style name="Widget.CarUi.Toolbar.NavIcon">
         <item name="android:tint">@color/car_ui_toolbar_nav_icon_color</item>
         <item name="android:src">@drawable/car_ui_icon_arrow_back</item>
+        <item name="android:background">@drawable/car_ui_toolbar_menu_item_icon_ripple</item>
     </style>
 
     <style name="Widget.CarUi.Toolbar.Title">
