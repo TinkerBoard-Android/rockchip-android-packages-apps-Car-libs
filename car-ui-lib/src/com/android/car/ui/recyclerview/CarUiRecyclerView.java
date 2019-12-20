@@ -264,7 +264,7 @@ public final class CarUiRecyclerView extends RecyclerView implements
                 a.getInt(R.styleable.CarUiRecyclerView_layoutStyle, CarUiRecyclerViewLayout.LINEAR);
         mNumOfColumns = a.getInt(R.styleable.CarUiRecyclerView_numOfColumns, /* defValue= */ 2);
         boolean enableDivider =
-                a.getBoolean(R.styleable.CarUiRecyclerView_enableDivider, /* defValue= */ true);
+                a.getBoolean(R.styleable.CarUiRecyclerView_enableDivider, /* defValue= */ false);
 
         if (mCarUiRecyclerViewLayout == CarUiRecyclerViewLayout.LINEAR) {
 
