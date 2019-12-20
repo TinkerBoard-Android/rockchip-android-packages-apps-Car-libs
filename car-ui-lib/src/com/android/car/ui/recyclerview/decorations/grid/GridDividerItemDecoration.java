@@ -89,8 +89,9 @@ public class GridDividerItemDecoration extends RecyclerView.ItemDecoration {
         int childCount = parent.getChildCount();
         int rowCount = childCount / mNumColumns;
         int lastRowChildCount = childCount % mNumColumns;
+        int lastColumn = Math.min(childCount, mNumColumns);
 
-        for (int i = 1; i < mNumColumns; i++) {
+        for (int i = 1; i < lastColumn; i++) {
             int lastRowChildIndex;
             if (i < lastRowChildCount) {
                 lastRowChildIndex = i + (rowCount * mNumColumns);
