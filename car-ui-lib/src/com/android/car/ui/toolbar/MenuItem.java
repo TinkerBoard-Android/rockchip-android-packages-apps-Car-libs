@@ -369,8 +369,7 @@ public class MenuItem {
                     || mIsActivatable
                     || !mIsTinted
                     || mShowIconAndTitle
-                    || mDisplayBehavior != DisplayBehavior.ALWAYS
-                    || mUxRestrictions != CarUxRestrictions.UX_RESTRICTIONS_NO_SETUP)) {
+                    || mDisplayBehavior != DisplayBehavior.ALWAYS)) {
                 throw new IllegalStateException("Invalid settings MenuItem");
             }
 
