@@ -37,29 +37,9 @@ import java.util.List;
 public interface MediaBrowserViewModel {
 
     /**
-     * Possible states of the application UI
-     */
-    enum BrowseState {
-        /** There is no content to show */
-        EMPTY,
-        /** We are still in the process of obtaining data */
-        LOADING,
-        /** Data has been loaded */
-        LOADED,
-        /** The content can't be shown due an error */
-        ERROR
-    }
-
-    /**
      * Returns a LiveData that emits the current package name of the browser's service component.
      */
     LiveData<String> getPackageName();
-
-    /**
-     * Returns a LiveData that emits the current {@link BrowseState}
-     */
-    LiveData<BrowseState> getBrowseState();
-
 
     /**
      * Fetches the MediaItemMetadatas for the current browsed id, and the loading status of the
