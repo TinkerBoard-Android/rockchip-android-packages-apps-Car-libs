@@ -85,7 +85,10 @@ public class ConnectedDeviceStorage {
     public ConnectedDeviceStorage(@NonNull Context context) {
         mContext = context;
         mAssociatedDeviceDatabase = Room.databaseBuilder(context, ConnectedDeviceDatabase.class,
-                DATABASE_NAME).build().associatedDeviceDao();
+                DATABASE_NAME)
+                .fallbackToDestructiveMigration()
+                .build()
+                .associatedDeviceDao();
     }
 
     /**
