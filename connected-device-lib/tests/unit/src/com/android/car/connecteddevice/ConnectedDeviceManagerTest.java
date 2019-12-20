@@ -147,11 +147,13 @@ public class ConnectedDeviceManagerTest {
     }
 
     @Test
-    public void connectToActiveUserDevice_startsAdvertisingWithDeviceId() {
+    public void connectToActiveUserDevice_startsAdvertisingWithDeviceId()
+            throws InterruptedException {
         UUID deviceId = UUID.randomUUID();
         when(mMockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(
                 Collections.singletonList(deviceId.toString()));
         mConnectedDeviceManager.connectToActiveUserDevice();
+        Thread.sleep(100); // Below verify call is made on a background thread.
         verify(mMockPeripheralManager).connectToDevice(deviceId);
     }
 
@@ -474,6 +476,21 @@ public class ConnectedDeviceManagerTest {
         mConnectedDeviceManager.registerDeviceCallback(connectedDevice, mRecipientId,
                 deviceCallback, mCallbackExecutor);
         assertThat(tryAcquire(semaphore)).isFalse();
+    }
+
+    @Test
+    public void onAssociationCompleted_disconnectsOriginalDeviceAndReconnectsAsActiveUser()
+            throws InterruptedException {
+        String deviceId = UUID.randomUUID().toString();
+        mConnectedDeviceManager.addConnectedDevice(deviceId, mMockPeripheralManager);
+        Semaphore semaphore = new Semaphore(0);
+        ConnectionCallback connectionCallback = createConnectionCallback(semaphore);
+        mConnectedDeviceManager.registerActiveUserConnectionCallback(connectionCallback,
+                mCallbackExecutor);
+        when(mMockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(
+                Collections.singletonList(deviceId));
+        mConnectedDeviceManager.onAssociationCompleted(deviceId);
+        assertThat(tryAcquire(semaphore)).isTrue();
     }
 
     private boolean tryAcquire(Semaphore semaphore) throws InterruptedException {

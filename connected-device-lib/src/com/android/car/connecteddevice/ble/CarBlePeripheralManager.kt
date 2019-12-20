@@ -119,7 +119,9 @@ internal class CarBlePeripheralManager(
     private val associatePeripheralCallback by lazy(mode = LazyThreadSafetyMode.NONE) {
         object : BlePeripheralManager.Callback {
             override fun onDeviceNameRetrieved(deviceName: String?) {
-                clientDeviceName = deviceName
+                clientDeviceName = deviceName ?: return
+                val deviceId = connectedDevice?.deviceId ?: return
+                connectedDeviceStorage.updateAssociatedDeviceName(deviceId, deviceName)
             }
 
             override fun onMtuSizeChanged(size: Int) {
@@ -171,10 +173,7 @@ internal class CarBlePeripheralManager(
                         AssociatedDevice(deviceId, address, clientDeviceName),
                         encryptionKey.asBytes()
                     )
-                    associationCallback?.onAssociationCompleted()
-
-                    // Need to reissue because this device is now associated with a user.
-                    callbacks.invoke { it.onDeviceConnected(deviceId) }
+                    associationCallback?.onAssociationCompleted(deviceId)
                 }
 
                 callbacks.invoke { it.onSecureChannelEstablished(deviceId) }
