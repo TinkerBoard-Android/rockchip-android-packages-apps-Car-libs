@@ -350,6 +350,7 @@ public class ConnectedDeviceManager {
             mPeripheralManager.stop();
         }
         mStorage.removeAssociatedDeviceForActiveUser(deviceId);
+        logd(TAG, "Successfully removed associated device " + deviceId + ".");
         //TODO(b/146504818): Notify features that an associated device has been removed.
     }
 
@@ -779,7 +780,7 @@ public class ConnectedDeviceManager {
             if (mAssociationCallback != null) {
                 mAssociationCallback.onAssociationCompleted(deviceId);
             }
-            onAssociationCompleted(deviceId);
+            ConnectedDeviceManager.this.onAssociationCompleted(deviceId);
         }
     };
 
