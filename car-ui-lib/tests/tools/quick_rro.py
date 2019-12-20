@@ -222,10 +222,10 @@ def build(args, package_name):
             link_command.extend(['-R', os.path.join(root_folder, filename)])
     run_command(link_command)
 
-    # For some reason signapk.jar requires a relative path to out/host/linux-x86/lib64
+    # For some reason signapk.jar requires a relative path to out/soong/host/linux-x86/lib64
     os.chdir(os.environ['ANDROID_BUILD_TOP'])
-    run_command(['java', '-Djava.library.path=out/host/linux-x86/lib64',
-                 '-jar', 'out/host/linux-x86/framework/signapk.jar',
+    run_command(['java', '-Djava.library.path=out/soong/host/linux-x86/lib64',
+                 '-jar', 'out/soong/host/linux-x86/framework/signapk.jar',
                  'build/target/product/security/platform.x509.pem',
                  'build/target/product/security/platform.pk8',
                  unsigned_apk, signed_apk])
@@ -290,8 +290,8 @@ def main():
         sys.exit(1)
 
     if not os.path.isfile(os.path.join(
-            os.environ['ANDROID_BUILD_TOP'], 'out/host/linux-x86/framework/signapk.jar')):
-        print('out/host/linux-x86/framework/signapk.jar missing, please do an android build first')
+            os.environ['ANDROID_BUILD_TOP'], 'out/soong/host/linux-x86/framework/signapk.jar')):
+        print('out/soong/host/linux-x86/framework/signapk.jar missing, please do an android build first')
         sys.exit(1)
 
     package_name = get_package_name(args)
@@ -308,7 +308,7 @@ def main():
     print('Enabling...')
     # Enabling RROs sometimes fails shortly after installing them
     time.sleep(1)
-    run_command(['adb', 'shell', 'cmd', 'overlay', 'enable', '--user', '10', package_name])
+    run_command(['adb', 'shell', 'cmd', 'overlay', 'enable', '--user', 'current', package_name])
 
     print('Done!')
 
