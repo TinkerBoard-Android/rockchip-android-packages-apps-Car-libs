@@ -214,26 +214,26 @@
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
-    <style name="TextAppearance.CarUi.PreferenceCategoryTitle">
-        <item name="android:fontFamily">@string/car_ui_preference_category_title_font_family</item>
-        <item name="android:textColor">@color/car_ui_preference_category_title_text_color</item>
-        <item name="android:textSize">@dimen/car_ui_preference_category_text_size</item>
+    <style name="TextAppearance.CarUi.Body1">
+        <item name="android:textSize">32sp</item>
     </style>
 
-    <style name="TextAppearance.CarUi.PreferenceSummary">
-        <item name="android:textColor">@color/car_ui_preference_summary_text_color</item>
-        <item name="android:textSize">@dimen/car_ui_preference_summary_text_size</item>
+    <style name="TextAppearance.CarUi.Body3">
+        <item name="android:textSize">24sp</item>
     </style>
 
-    <style name="TextAppearance.CarUi.PreferenceTitle">
-        <item name="android:textColor">@color/car_ui_preference_title_text_color</item>
-        <item name="android:textSize">@dimen/car_ui_preference_title_text_size</item>
+    <style name="TextAppearance.CarUi.PreferenceCategoryTitle" parent="TextAppearance.CarUi.Body3">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/car_ui_color_accent</item>
     </style>
 
-    <style name="TextAppearance.CarUi.PreferenceEditTextDialogMessage">
-        <item name="android:textColor">@color/car_ui_preference_edit_text_dialog_message_text_color</item>
-        <item name="android:textSize">@dimen/car_ui_preference_edit_text_dialog_message_text_size</item>
+    <style name="TextAppearance.CarUi.PreferenceSummary" parent="TextAppearance.CarUi.Body3">
+        <item name="android:textColor">@color/car_ui_text_color_secondary</item>
     </style>
+
+    <style name="TextAppearance.CarUi.PreferenceTitle" parent="TextAppearance.CarUi.Body1"/>
+
+    <style name="TextAppearance.CarUi.PreferenceEditTextDialogMessage" parent="TextAppearance.CarUi.Body3"/>
 
     <style name="TextAppearance.CarUi.AlertDialog.Subtitle" parent="android:TextAppearance.DeviceDefault"/>
 
@@ -241,15 +241,11 @@
 
     <style name="TextAppearance.CarUi.Widget.Toolbar"/>
 
-    <style name="TextAppearance.CarUi.Widget.Toolbar.Title">
+    <style name="TextAppearance.CarUi.Widget.Toolbar.Title" parent="TextAppearance.CarUi.Body1">
         <item name="android:singleLine">true</item>
-        <item name="android:textSize">32sp</item>
-        <item name="android:letterSpacing">@dimen/car_ui_letter_spacing_body1</item>
     </style>
 
-    <style name="TextAppearance.CarUi.Widget.Toolbar.Tab">
-        <item name="android:textSize">24sp</item>
-        <item name="android:letterSpacing">@dimen/car_ui_letter_spacing_body3</item>
+    <style name="TextAppearance.CarUi.Widget.Toolbar.Tab" parent="TextAppearance.CarUi.Body3">
         <item name="android:textColor">@color/car_ui_toolbar_tab_item_selector</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textFontWeight">400</item>
@@ -259,20 +255,15 @@
         <item name="android:textFontWeight">500</item>
     </style>
 
-    <style name="TextAppearance.CarUi.ListItem.Header">
-        <item name="android:fontFamily">@string/car_ui_list_item_header_font_family</item>
-        <item name="android:textColor">@color/car_ui_list_item_header_text_color</item>
-        <item name="android:textSize">@dimen/car_ui_list_item_header_text_size</item>
+    <style name="TextAppearance.CarUi.ListItem.Header" parent="TextAppearance.CarUi.Body3">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/car_ui_color_accent</item>
     </style>
 
-    <style name="TextAppearance.CarUi.ListItem">
-        <item name="android:textColor">@color/car_ui_list_item_title_text_color</item>
-        <item name="android:textSize">@dimen/car_ui_list_item_title_text_size</item>
-    </style>
+    <style name="TextAppearance.CarUi.ListItem" parent="TextAppearance.CarUi.Body1"/>
 
-    <style name="TextAppearance.CarUi.ListItem.Body">
-        <item name="android:textSize">@dimen/car_ui_list_item_body_text_size</item>
-        <item name="android:textColor">@color/car_ui_list_item_body_text_color</item>
+    <style name="TextAppearance.CarUi.ListItem.Body" parent="TextAppearance.CarUi.Body3">
+        <item name="android:textColor">@color/car_ui_text_color_secondary</item>
     </style>
 
 </resources>
