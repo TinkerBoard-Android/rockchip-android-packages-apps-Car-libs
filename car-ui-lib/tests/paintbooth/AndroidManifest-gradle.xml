@@ -71,7 +71,7 @@
 
     <service
         android:label="Current Activity Service"
-        android:name=".CurrentActivityService"
+        android:name=".currentactivity.CurrentActivityService"
         android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
       <intent-filter>
         <action android:name="android.accessibilityservice.AccessibilityService"/>

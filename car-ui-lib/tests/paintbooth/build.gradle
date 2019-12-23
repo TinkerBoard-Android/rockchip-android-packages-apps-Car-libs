@@ -36,7 +36,10 @@ android {
             manifest.srcFile 'AndroidManifest-gradle.xml'
             java {
                 srcDirs = ['src']
-                filter.excludes = ["com/android/car/ui/paintbooth/overlays/OverlayManagerImpl.java"]
+                filter.excludes = [
+                        "com/android/car/ui/paintbooth/overlays/OverlayManagerImpl.java",
+                        "com/android/car/ui/paintbooth/currentactivity/ActivityTaskManagerImpl.java",
+                ]
             }
             res.srcDirs = ['res']
         }

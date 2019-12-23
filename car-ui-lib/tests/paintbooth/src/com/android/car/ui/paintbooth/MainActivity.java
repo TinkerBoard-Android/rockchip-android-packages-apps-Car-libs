@@ -36,6 +36,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.car.ui.paintbooth.caruirecyclerview.CarUiListItemActivity;
 import com.android.car.ui.paintbooth.caruirecyclerview.CarUiRecyclerViewActivity;
 import com.android.car.ui.paintbooth.caruirecyclerview.GridCarUiRecyclerViewActivity;
+import com.android.car.ui.paintbooth.currentactivity.CurrentActivityService;
 import com.android.car.ui.paintbooth.dialogs.DialogsActivity;
 import com.android.car.ui.paintbooth.overlays.OverlayActivity;
 import com.android.car.ui.paintbooth.preferences.PreferenceActivity;

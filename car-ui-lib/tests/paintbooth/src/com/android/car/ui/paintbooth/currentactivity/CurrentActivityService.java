@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.car.ui.paintbooth;
+package com.android.car.ui.paintbooth.currentactivity;
 
-import android.Manifest;
 import android.app.ActivityManager;
-import android.app.ActivityTaskManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.app.TaskStackListener;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -44,6 +41,9 @@ import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+
+import com.android.car.ui.paintbooth.R;
+import com.android.car.ui.paintbooth.currentactivity.ActivityTaskManager.TaskStackListener;
 
 import java.util.List;
 
@@ -68,7 +68,7 @@ public class CurrentActivityService extends Service {
     public void onCreate() {
         mHandler = new Handler(Looper.getMainLooper());
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.REAL_GET_TASKS)
+        if (ContextCompat.checkSelfPermission(this, "android.permission.REAL_GET_TASKS")
                 != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(this, "android.permission.REAL_GET_TASKS is not granted!",
                     Toast.LENGTH_LONG).show();
@@ -152,7 +152,12 @@ public class CurrentActivityService extends Service {
             }
         });
 
-        mWindowManager.addView(mTextView, layoutParams);
+        try {
+            mWindowManager.addView(mTextView, layoutParams);
+        } catch (RuntimeException e) {
+            Toast.makeText(this, "Couldn't display overlay", Toast.LENGTH_SHORT)
+                .show();
+        }
 
         showCurrentTask();
     }
