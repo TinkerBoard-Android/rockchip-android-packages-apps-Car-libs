@@ -269,7 +269,7 @@ internal class SecureBleChannel(
         if (message != null) {
             stream.writeMessage(
                 DeviceMessage(recipient = null, isMessageEncrypted = false, message = message),
-                operationType = OperationType.CLIENT_MESSAGE
+                operationType = OperationType.ENCRYPTION_HANDSHAKE
             )
         } else {
             loge(TAG, "Unable to send server authentication message to client, message is null.")
