@@ -119,8 +119,10 @@ public class ListPreferenceFragment extends Fragment {
             }
 
             item.setOnCheckedChangedListener((listItem, isChecked) -> {
-                mSelectedItem.setChecked(false);
-                adapter.notifyItemChanged(listItems.indexOf(mSelectedItem));
+                if (mSelectedItem != null) {
+                    mSelectedItem.setChecked(false);
+                    adapter.notifyItemChanged(listItems.indexOf(mSelectedItem));
+                }
                 mSelectedItem = listItem;
             });
 
@@ -128,11 +130,13 @@ public class ListPreferenceFragment extends Fragment {
         }
 
         toolbar.registerOnBackListener(() -> {
-            int selectedIndex = listItems.indexOf(mSelectedItem);
-            String entryValue = entryValues[selectedIndex].toString();
+            if (mSelectedItem != null) {
+                int selectedIndex = listItems.indexOf(mSelectedItem);
+                String entryValue = entryValues[selectedIndex].toString();
 
-            if (mPreference.callChangeListener(entryValue)) {
-                mPreference.setValue(entryValue);
+                if (mPreference.callChangeListener(entryValue)) {
+                    mPreference.setValue(entryValue);
+                }
             }
 
             return false;
