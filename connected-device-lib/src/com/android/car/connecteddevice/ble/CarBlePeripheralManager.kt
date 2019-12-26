@@ -174,6 +174,7 @@ internal class CarBlePeripheralManager(
                         encryptionKey.asBytes()
                     )
                     associationCallback?.onAssociationCompleted(deviceId)
+                    associationCallback = null
                 }
 
                 callbacks.invoke { it.onSecureChannelEstablished(deviceId) }
