@@ -659,6 +659,10 @@ public class ConnectedDeviceManager {
 
         // The previous device is now obsolete and should be replaced with a new one properly
         // reflecting the state of belonging to the active user and notify features.
+        if (connectedDevice.mConnectedDevice.getBelongsToActiveUser()) {
+            // Device was already marked as belonging to active user. No need to reissue callbacks.
+            return;
+        }
         removeConnectedDevice(deviceId, mPeripheralManager);
         addConnectedDevice(deviceId, mPeripheralManager);
     }

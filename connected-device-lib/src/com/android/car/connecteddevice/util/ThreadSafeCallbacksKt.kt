@@ -25,7 +25,9 @@ internal class ThreadSafeCallbacksKt<T> {
     private val callbacks = ConcurrentHashMap<T, Executor>()
 
     /** Number of callbacks in collection. */
-    val size = callbacks.size
+    fun size(): Int {
+        return callbacks.size
+    }
 
     /** Add a [callback] to be notified on its [executor]. */
     fun add(callback: T, executor: Executor) {

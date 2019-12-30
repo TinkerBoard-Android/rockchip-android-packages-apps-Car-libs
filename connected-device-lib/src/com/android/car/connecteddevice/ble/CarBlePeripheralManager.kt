@@ -182,6 +182,8 @@ internal class CarBlePeripheralManager(
             override fun onMessageReceived(deviceMessage: DeviceMessage) {
                 val deviceId = connectedDevice?.deviceId
                 if (deviceId != null) {
+                    logd(TAG, "Received new message from $deviceId. Notifying ${callbacks.size()}" +
+                        " callbacks.")
                     callbacks.invoke { it.onMessageReceived(deviceId, deviceMessage) }
                 } else {
                     disconnectWithError("Null device id found when message received.")
