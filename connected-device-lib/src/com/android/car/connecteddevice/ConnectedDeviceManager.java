@@ -38,6 +38,7 @@ import com.android.car.connecteddevice.ble.DeviceMessage;
 import com.android.car.connecteddevice.model.AssociatedDevice;
 import com.android.car.connecteddevice.model.ConnectedDevice;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
+import com.android.car.connecteddevice.storage.ConnectedDeviceStorage.AssociatedDeviceCallback;
 import com.android.car.connecteddevice.util.ByteUtils;
 import com.android.car.connecteddevice.util.ThreadSafeCallbacks;
 import com.android.internal.annotations.GuardedBy;
@@ -78,6 +79,9 @@ public class ConnectedDeviceManager {
     private final CarBleCentralManager mCentralManager;
 
     private final CarBlePeripheralManager mPeripheralManager;
+
+    private final ThreadSafeCallbacks<DeviceAssociationCallback> mDeviceAssociationCallbacks =
+            new ThreadSafeCallbacks<>();
 
     private final ThreadSafeCallbacks<ConnectionCallback> mActiveUserConnectionCallbacks =
             new ThreadSafeCallbacks<>();
@@ -182,6 +186,7 @@ public class ConnectedDeviceManager {
         mCentralManager.registerCallback(generateCarBleCallback(centralManager), callbackExecutor);
         mPeripheralManager.registerCallback(generateCarBleCallback(peripheralManager),
                 callbackExecutor);
+        storage.setAssociatedDeviceCallback(mAssociatedDeviceCallback);
     }
 
     /**
@@ -221,8 +226,10 @@ public class ConnectedDeviceManager {
         mCentralManager.stop();
         mPeripheralManager.stop();
         mDeviceCallbacks.clear();
+        mDeviceAssociationCallbacks.clear();
         mActiveUserConnectionCallbacks.clear();
         mAllUserConnectionCallbacks.clear();
+        mStorage.clearAssociationDeviceCallback();
     }
 
     /** Returns {@link List<ConnectedDevice>} of devices currently connected. */
@@ -236,6 +243,26 @@ public class ConnectedDeviceManager {
         }
         logd(TAG, "Returned " + activeUserConnectedDevices.size() + " active user devices.");
         return activeUserConnectedDevices;
+    }
+
+    /**
+     * Register a callback for triggered associated device related events.
+     *
+     * @param callback {@link DeviceAssociationCallback} to register.
+     * @param executor {@link Executor} to execute triggers on.
+     */
+    public void registerDeviceAssociationCallback(@NonNull DeviceAssociationCallback callback,
+            @NonNull @CallbackExecutor Executor executor) {
+        mDeviceAssociationCallbacks.add(callback, executor);
+    }
+
+    /**
+     * Unregister a device association callback.
+     *
+     * @param callback {@link DeviceAssociationCallback} to unregister.
+     */
+    public void unregisterDeviceAssociationCallback(@NonNull DeviceAssociationCallback callback) {
+        mDeviceAssociationCallbacks.remove(callback);
     }
 
     /**
@@ -351,7 +378,6 @@ public class ConnectedDeviceManager {
         }
         mStorage.removeAssociatedDeviceForActiveUser(deviceId);
         logd(TAG, "Successfully removed associated device " + deviceId + ".");
-        //TODO(b/146504818): Notify features that an associated device has been removed.
     }
 
     /**
@@ -788,6 +814,25 @@ public class ConnectedDeviceManager {
         }
     };
 
+    private final AssociatedDeviceCallback mAssociatedDeviceCallback =
+            new AssociatedDeviceCallback() {
+        @Override
+        public void onAssociatedDeviceAdded(String deviceId) {
+            mDeviceAssociationCallbacks.invoke(callback ->
+                    callback.onAssociatedDeviceAdded(deviceId));
+        }
+
+        @Override
+        public void onAssociatedDeviceRemoved(String deviceId) {
+            mDeviceAssociationCallbacks.invoke(callback -> onAssociatedDeviceRemoved(deviceId));
+        }
+
+        @Override
+        public void onAssociatedDeviceUpdated(AssociatedDevice device) {
+            mDeviceAssociationCallbacks.invoke(callback -> onAssociatedDeviceUpdated(device));
+        }
+    };
+
     /** Callback for triggered connection events from {@link ConnectedDeviceManager}. */
     public interface ConnectionCallback {
         /** Triggered when a new device has connected. */
@@ -810,6 +855,19 @@ public class ConnectedDeviceManager {
 
         /** Triggered when an error has occurred for a device. */
         void onDeviceError(@NonNull ConnectedDevice device, @DeviceError int error);
+    }
+
+    /** Callback for association device related events. */
+    public interface DeviceAssociationCallback {
+
+        /** Triggered when an associated device has been added */
+        void onAssociatedDeviceAdded(@NonNull String deviceId);
+
+        /** Triggered when an associated device has been removed.  */
+        void onAssociatedDeviceRemoved(@NonNull String deviceId);
+
+        /** Triggered when the name of an associated device has been updated. */
+        void onAssociatedDeviceUpdated(@NonNull AssociatedDevice device);
     }
 
     private static class InternalConnectedDevice {
