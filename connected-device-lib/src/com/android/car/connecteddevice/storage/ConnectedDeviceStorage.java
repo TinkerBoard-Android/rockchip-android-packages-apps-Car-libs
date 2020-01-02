@@ -82,6 +82,8 @@ public class ConnectedDeviceStorage {
 
     private AssociatedDeviceDao mAssociatedDeviceDatabase;
 
+    private AssociatedDeviceCallback mAssociatedDeviceCallback;
+
     public ConnectedDeviceStorage(@NonNull Context context) {
         mContext = context;
         mAssociatedDeviceDatabase = Room.databaseBuilder(context, ConnectedDeviceDatabase.class,
@@ -89,6 +91,21 @@ public class ConnectedDeviceStorage {
                 .fallbackToDestructiveMigration()
                 .build()
                 .associatedDeviceDao();
+    }
+
+    /**
+     * Set a callback for associated device updates.
+     *
+     * @param callback {@link AssociatedDeviceCallback} to set.
+     */
+    public void setAssociatedDeviceCallback(
+            @NonNull AssociatedDeviceCallback callback) {
+        mAssociatedDeviceCallback = callback;
+    }
+
+    /** Clear the callback for association device callback updates. */
+    public void clearAssociationDeviceCallback() {
+        mAssociatedDeviceCallback = null;
     }
 
     /**
@@ -350,6 +367,9 @@ public class ConnectedDeviceStorage {
     public void addAssociatedDeviceForActiveUser(@NonNull AssociatedDevice device,
             @NonNull byte[] encryptionKey) {
         addAssociatedDeviceForUser(ActivityManager.getCurrentUser(), device, encryptionKey);
+        if (mAssociatedDeviceCallback != null) {
+            mAssociatedDeviceCallback.onAssociatedDeviceAdded(device.getDeviceId());
+        }
     }
 
 
@@ -382,6 +402,11 @@ public class ConnectedDeviceStorage {
         }
         entity.name = name;
         mAssociatedDeviceDatabase.addOrUpdateAssociatedDevice(entity);
+        if (mAssociatedDeviceCallback != null) {
+            mAssociatedDeviceCallback.onAssociatedDeviceUpdated(
+                    new AssociatedDevice(deviceId, entity.address, name));
+        }
+
     }
 
     /**
@@ -405,5 +430,20 @@ public class ConnectedDeviceStorage {
      */
     public void removeAssociatedDeviceForActiveUser(@NonNull String deviceId) {
         removeAssociatedDevice(ActivityManager.getCurrentUser(), deviceId);
+        if (mAssociatedDeviceCallback != null) {
+            mAssociatedDeviceCallback.onAssociatedDeviceRemoved(deviceId);
+        }
+    }
+
+    /** Callback for association device related events. */
+    public interface AssociatedDeviceCallback {
+        /** Triggered when an associated device has been added */
+        void onAssociatedDeviceAdded(@NonNull String deviceId);
+
+        /** Triggered when an associated device has been removed.  */
+        void onAssociatedDeviceRemoved(@NonNull String deviceId);
+
+        /** Triggered when an associated device has been updated. */
+        void onAssociatedDeviceUpdated(@NonNull AssociatedDevice device);
     }
 }
