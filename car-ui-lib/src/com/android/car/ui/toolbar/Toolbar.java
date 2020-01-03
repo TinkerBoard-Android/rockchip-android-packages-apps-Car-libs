@@ -20,9 +20,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -325,93 +322,6 @@ public class Toolbar extends FrameLayout {
      */
     public boolean isTabsInSecondRow() {
         return mIsTabsInSecondRow;
-    }
-
-    @Override
-    public Parcelable onSaveInstanceState() {
-        Parcelable superState = super.onSaveInstanceState();
-        SavedState ss = new SavedState(superState);
-        ss.mTitle = getTitle();
-        ss.mNavButtonMode = getNavButtonMode();
-        ss.mSearchHint = getSearchHint();
-        ss.mBackgroundShown = getBackgroundShown();
-        ss.mShowMenuItemsWhileSearching = getShowMenuItemsWhileSearching();
-        ss.mState = getState();
-        return ss;
-    }
-
-    @Override
-    public void onRestoreInstanceState(Parcelable state) {
-        if (!(state instanceof SavedState)) {
-            Log.w(TAG, "onRestoreInstanceState called with an unsupported state");
-            super.onRestoreInstanceState(state);
-        } else {
-            SavedState ss = (SavedState) state;
-            super.onRestoreInstanceState(ss.getSuperState());
-            setTitle(ss.mTitle);
-            setNavButtonMode(ss.mNavButtonMode);
-            setSearchHint(ss.mSearchHint);
-            setBackgroundShown(ss.mBackgroundShown);
-            setShowMenuItemsWhileSearching(ss.mShowMenuItemsWhileSearching);
-            setState(ss.mState);
-        }
-    }
-
-    private static class SavedState extends BaseSavedState {
-        private CharSequence mTitle;
-        private State mState;
-        private NavButtonMode mNavButtonMode;
-        private CharSequence mSearchHint;
-        private boolean mBackgroundShown;
-        private boolean mShowMenuItemsWhileSearching;
-
-        SavedState(Parcelable in) {
-            super(in);
-        }
-
-        SavedState(Parcel in) {
-            super(in);
-            mTitle = readCharSequence(in);
-            mNavButtonMode = NavButtonMode.valueOf(in.readString());
-            mSearchHint = readCharSequence(in);
-            mBackgroundShown = in.readInt() != 0;
-            mShowMenuItemsWhileSearching = in.readInt() != 0;
-            mState = State.valueOf(in.readString());
-        }
-
-        @Override
-        public void writeToParcel(Parcel out, int flags) {
-            super.writeToParcel(out, flags);
-            writeCharSequence(out, mTitle);
-            out.writeString(mNavButtonMode.name());
-            writeCharSequence(out, mSearchHint);
-            out.writeInt(mBackgroundShown ? 1 : 0);
-            out.writeInt(mShowMenuItemsWhileSearching ? 1 : 0);
-            out.writeString(mState.name());
-        }
-
-        public static final Parcelable.Creator<SavedState> CREATOR =
-                new Parcelable.Creator<SavedState>() {
-                    @Override
-                    public SavedState createFromParcel(Parcel in) {
-                        return new SavedState(in);
-                    }
-
-                    @Override
-                    public SavedState[] newArray(int size) {
-                        return new SavedState[size];
-                    }
-                };
-
-        /** Replacement of hidden Parcel#readCharSequence(Parcel) */
-        private static CharSequence readCharSequence(Parcel in) {
-            return TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
-        }
-
-        /** Replacement of hidden Parcel#writeCharSequence(Parcel, CharSequence) */
-        private static void writeCharSequence(Parcel dest, CharSequence val) {
-            TextUtils.writeToParcel(val, dest, 0);
-        }
     }
 
     private final CarUxRestrictionsUtil.OnUxRestrictionsChangedListener
