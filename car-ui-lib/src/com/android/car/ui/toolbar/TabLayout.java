@@ -77,9 +77,6 @@ public class TabLayout extends LinearLayout {
         }
     }
 
-    // View attributes
-    private final boolean mTabFlexibleLayout;
-
     private final Set<Listener> mListeners = new ArraySet<>();
 
     private final TabAdapter mTabAdapter;
@@ -96,9 +93,11 @@ public class TabLayout extends LinearLayout {
         super(context, attrs, defStyle);
         Resources resources = context.getResources();
 
-        mTabFlexibleLayout = resources.getBoolean(R.bool.car_ui_toolbar_tab_flexible_layout);
-
-        mTabAdapter = new TabAdapter(context, R.layout.car_ui_toolbar_tab_item_layout, this);
+        boolean tabFlexibleLayout = resources.getBoolean(R.bool.car_ui_toolbar_tab_flexible_layout);
+        @LayoutRes int tabLayoutRes = tabFlexibleLayout
+                ? R.layout.car_ui_toolbar_tab_item_layout_flexible
+                : R.layout.car_ui_toolbar_tab_item_layout;
+        mTabAdapter = new TabAdapter(context, tabLayoutRes, this);
     }
 
     /**
@@ -172,15 +171,7 @@ public class TabLayout extends LinearLayout {
     }
 
     private void addTabView(View tabView, int position) {
-        LayoutParams layoutParams;
-        if (mTabFlexibleLayout) {
-            layoutParams = new LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT);
-            layoutParams.weight = 1;
-        } else {
-            layoutParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT);
-        }
-        addView(tabView, position, layoutParams);
+        addView(tabView, position);
     }
 
     private static class TabAdapter extends BaseAdapter {
