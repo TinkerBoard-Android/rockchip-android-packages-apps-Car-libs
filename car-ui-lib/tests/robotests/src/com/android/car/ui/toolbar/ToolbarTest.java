@@ -78,19 +78,13 @@ public class ToolbarTest {
     }
 
     @Test
-    public void configurationChange_shouldNotLoseProperties() {
+    public void setters_and_getters_test() {
         mToolbar.setTitle("Foo");
         mToolbar.setSearchHint("Foo2");
         mToolbar.setBackgroundShown(false);
         mToolbar.setShowMenuItemsWhileSearching(true);
         mToolbar.setState(Toolbar.State.SUBPAGE);
         mToolbar.setNavButtonMode(Toolbar.NavButtonMode.CLOSE);
-
-        // TODO this is supposed to change the configuration, but doesn't
-        RuntimeEnvironment.setQualifiers("+port");
-        mActivityController.configurationChange();
-        mActivity = mActivityController.get();
-        mToolbar = mActivity.findViewById(R.id.toolbar);
 
         assertThat(mToolbar.getTitle().toString()).isEqualTo("Foo");
         assertThat(mToolbar.getSearchHint().toString()).isEqualTo("Foo2");
