@@ -34,13 +34,16 @@ import android.annotation.NonNull;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.car.connecteddevice.ConnectedDeviceManager.ConnectionCallback;
+import com.android.car.connecteddevice.ConnectedDeviceManager.DeviceAssociationCallback;
 import com.android.car.connecteddevice.ConnectedDeviceManager.DeviceCallback;
 import com.android.car.connecteddevice.ble.CarBleCentralManager;
 import com.android.car.connecteddevice.ble.CarBleManager;
 import com.android.car.connecteddevice.ble.CarBlePeripheralManager;
 import com.android.car.connecteddevice.ble.DeviceMessage;
+import com.android.car.connecteddevice.model.AssociatedDevice;
 import com.android.car.connecteddevice.model.ConnectedDevice;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
+import com.android.car.connecteddevice.storage.ConnectedDeviceStorage.AssociatedDeviceCallback;
 import com.android.car.connecteddevice.util.ByteUtils;
 
 import org.junit.After;
@@ -80,14 +83,20 @@ public class ConnectedDeviceManagerTest {
 
     private MockitoSession mMockingSession;
 
+    private AssociatedDeviceCallback mAssociatedDeviceCallback;
+
     @Before
     public void setUp() {
         mMockingSession = mockitoSession()
                 .initMocks(this)
                 .strictness(Strictness.LENIENT)
                 .startMocking();
+        ArgumentCaptor<AssociatedDeviceCallback> callbackCaptor = ArgumentCaptor
+                .forClass(AssociatedDeviceCallback.class);
         mConnectedDeviceManager = new ConnectedDeviceManager(mMockStorage, mMockCentralManager,
             mMockPeripheralManager);
+        verify(mMockStorage).setAssociatedDeviceCallback(callbackCaptor.capture());
+        mAssociatedDeviceCallback = callbackCaptor.getValue();
         mConnectedDeviceManager.start();
     }
 
@@ -497,6 +506,42 @@ public class ConnectedDeviceManagerTest {
         return semaphore.tryAcquire(100, TimeUnit.MILLISECONDS);
     }
 
+    @Test
+    public void deviceAssociationCallback_onAssociatedDeviceAdded() throws InterruptedException {
+        Semaphore semaphore = new Semaphore(0);
+        DeviceAssociationCallback callback = createDeviceAssociationCallback(semaphore);
+        mConnectedDeviceManager.registerDeviceAssociationCallback(callback, mCallbackExecutor);
+        String deviceId = UUID.randomUUID().toString();
+        mAssociatedDeviceCallback.onAssociatedDeviceAdded(deviceId);
+        assertThat(tryAcquire(semaphore)).isTrue();
+        verify(callback).onAssociatedDeviceAdded(eq(deviceId));
+    }
+
+    @Test
+    public void deviceAssociationCallback_onAssociationDeviceRemoved() throws InterruptedException {
+        Semaphore semaphore = new Semaphore(0);
+        DeviceAssociationCallback callback = createDeviceAssociationCallback(semaphore);
+        mConnectedDeviceManager.registerDeviceAssociationCallback(callback, mCallbackExecutor);
+        String deviceId = UUID.randomUUID().toString();
+        mAssociatedDeviceCallback.onAssociatedDeviceRemoved(deviceId);
+        assertThat(tryAcquire(semaphore)).isTrue();
+        verify(callback).onAssociatedDeviceRemoved(eq(deviceId));
+    }
+
+    @Test
+    public void deviceAssociationCallback_onAssociatedDeviceUpdated() throws InterruptedException {
+        Semaphore semaphore = new Semaphore(0);
+        DeviceAssociationCallback callback = createDeviceAssociationCallback(semaphore);
+        mConnectedDeviceManager.registerDeviceAssociationCallback(callback, mCallbackExecutor);
+        String deviceId = UUID.randomUUID().toString();
+        String deviceAddress = "00:11:22:33:44:55";
+        String deviceName = "TEST_NAME";
+        AssociatedDevice testDevice = new AssociatedDevice(deviceId, deviceAddress, deviceName);
+        mAssociatedDeviceCallback.onAssociatedDeviceUpdated(testDevice);
+        assertThat(tryAcquire(semaphore)).isTrue();
+        verify(callback).onAssociatedDeviceUpdated(eq(testDevice));
+    }
+
     @NonNull
     private String connectNewDevice(@NonNull CarBleManager carBleManager) {
         String deviceId = UUID.randomUUID().toString();
@@ -536,6 +581,27 @@ public class ConnectedDeviceManagerTest {
 
             @Override
             public void onDeviceError(ConnectedDevice device, int error) {
+                semaphore.release();
+            }
+        });
+    }
+
+    @NonNull
+    private DeviceAssociationCallback createDeviceAssociationCallback(
+            @NonNull final Semaphore semaphore) {
+        return spy(new DeviceAssociationCallback() {
+            @Override
+            public void onAssociatedDeviceAdded(String deviceId) {
+                semaphore.release();
+            }
+
+            @Override
+            public void onAssociatedDeviceRemoved(String deviceId) {
+                semaphore.release();
+            }
+
+            @Override
+            public void onAssociatedDeviceUpdated(AssociatedDevice device) {
                 semaphore.release();
             }
         });
