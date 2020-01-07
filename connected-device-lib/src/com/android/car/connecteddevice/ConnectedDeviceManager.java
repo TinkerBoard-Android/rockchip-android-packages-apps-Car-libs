@@ -186,7 +186,7 @@ public class ConnectedDeviceManager {
         mCentralManager.registerCallback(generateCarBleCallback(centralManager), callbackExecutor);
         mPeripheralManager.registerCallback(generateCarBleCallback(peripheralManager),
                 callbackExecutor);
-        storage.setAssociatedDeviceCallback(mAssociatedDeviceCallback);
+        mStorage.setAssociatedDeviceCallback(mAssociatedDeviceCallback);
     }
 
     /**
@@ -824,12 +824,14 @@ public class ConnectedDeviceManager {
 
         @Override
         public void onAssociatedDeviceRemoved(String deviceId) {
-            mDeviceAssociationCallbacks.invoke(callback -> onAssociatedDeviceRemoved(deviceId));
+            mDeviceAssociationCallbacks.invoke(callback ->
+                    callback.onAssociatedDeviceRemoved(deviceId));
         }
 
         @Override
         public void onAssociatedDeviceUpdated(AssociatedDevice device) {
-            mDeviceAssociationCallbacks.invoke(callback -> onAssociatedDeviceUpdated(device));
+            mDeviceAssociationCallbacks.invoke(callback ->
+                    callback.onAssociatedDeviceUpdated(device));
         }
     };
 
