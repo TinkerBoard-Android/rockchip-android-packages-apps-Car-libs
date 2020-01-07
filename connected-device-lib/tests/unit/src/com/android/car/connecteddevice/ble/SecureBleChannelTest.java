@@ -96,7 +96,7 @@ public final class SecureBleChannelTest {
         mChannel.notifyOutOfBandAccepted();
         verify(mStreamMock, times(3)).writeMessage(messageCaptor.capture(), any());
         byte[] confirmMessage = messageCaptor.getValue().getMessage();
-        assertThat(confirmMessage).isEqualTo(SecureBleChannelKt.getCONFIRMATION_SIGNAL());
+        assertThat(confirmMessage).isEqualTo(SecureBleChannel.CONFIRMATION_SIGNAL);
         assertThat(semaphore.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
         verify(callbackSpy).onSecureChannelEstablished(any());
     }
@@ -146,7 +146,7 @@ public final class SecureBleChannelTest {
                 /* isReconnect = */ false,
                 EncryptionRunnerFactory.newDummyRunner()
         );
-        mChannel.setChannelCallback(callback);
+        mChannel.registerCallback(callback);
         mChannel.setShowVerificationCodeListener(mShowVerificationCodeListenerMock);
         ArgumentCaptor<MessageReceivedListener> listenerCaptor =
                 ArgumentCaptor.forClass(MessageReceivedListener.class);
