@@ -172,9 +172,7 @@ public class BleCentralManager {
         @Override
         public void onScanFailed(int errorCode) {
             if (mScannerStartCount >= RETRY_LIMIT) {
-                loge(TAG, "Cannot start BLE Scanner. BT Adapter: "
-                        + BluetoothAdapter.getDefaultAdapter()
-                        + " Scanning Retry count: "
+                loge(TAG, "Cannot start BLE Scanner. Scanning Retry count: "
                         + mScannerStartCount);
                 if (mScanCallback != null) {
                     mScanCallback.onScanFailed(errorCode);
