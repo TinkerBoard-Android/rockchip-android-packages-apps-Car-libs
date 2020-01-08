@@ -129,7 +129,7 @@ public class ConnectedDeviceManagerTest {
         mConnectedDeviceManager.onSecureChannelEstablished(deviceId, mMockCentralManager);
         ConnectedDevice connectedDevice =
                 mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
-        assertThat(connectedDevice.getHasSecureChannel()).isTrue();
+        assertThat(connectedDevice.hasSecureChannel()).isTrue();
     }
 
     @Test
@@ -216,7 +216,7 @@ public class ConnectedDeviceManagerTest {
         verify(connectionCallback).onDeviceConnected(deviceCaptor.capture());
         ConnectedDevice connectedDevice = deviceCaptor.getValue();
         assertThat(connectedDevice.getDeviceId()).isEqualTo(deviceId);
-        assertThat(connectedDevice.getHasSecureChannel()).isFalse();
+        assertThat(connectedDevice.hasSecureChannel()).isFalse();
     }
 
     @Test

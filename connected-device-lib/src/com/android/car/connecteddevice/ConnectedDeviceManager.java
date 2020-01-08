@@ -46,6 +46,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -237,7 +238,7 @@ public class ConnectedDeviceManager {
     public List<ConnectedDevice> getActiveUserConnectedDevices() {
         List<ConnectedDevice> activeUserConnectedDevices = new ArrayList<>();
         for (InternalConnectedDevice device : mConnectedDevices.values()) {
-            if (device.mConnectedDevice.getBelongsToActiveUser()) {
+            if (device.mConnectedDevice.isAssociatedWithActiveUser()) {
                 activeUserConnectedDevices.add(device.mConnectedDevice);
             }
         }
@@ -315,7 +316,7 @@ public class ConnectedDeviceManager {
                 // first one.
                 String userDeviceId = userDeviceIds.get(0);
                 byte[] key = mStorage.getEncryptionKey(userDeviceId);
-                logd(TAG, "Found encryption key of value " + key);
+                logd(TAG, "Found encryption key of value " + Arrays.toString(key));
                 if (mConnectedDevices.containsKey(userDeviceId)) {
                     logd(TAG, "Device has already been connected. No need to attempt connection "
                             + "again.");
@@ -522,7 +523,7 @@ public class ConnectedDeviceManager {
             return;
         }
 
-        if (isEncrypted && !connectedDevice.mConnectedDevice.getHasSecureChannel()) {
+        if (isEncrypted && !connectedDevice.mConnectedDevice.hasSecureChannel()) {
             throw new IllegalStateException("Cannot send a message securely to device that has not "
                     + "established a secure channel.");
         }
@@ -577,7 +578,7 @@ public class ConnectedDeviceManager {
         );
 
         mConnectedDevices.put(deviceId, new InternalConnectedDevice(connectedDevice, bleManager));
-        invokeConnectionCallbacks(connectedDevice.getBelongsToActiveUser(),
+        invokeConnectionCallbacks(connectedDevice.isAssociatedWithActiveUser(),
                 callback -> callback.onDeviceConnected(connectedDevice));
     }
 
@@ -588,7 +589,7 @@ public class ConnectedDeviceManager {
                 bleManager);
         if (connectedDevice != null) {
             mConnectedDevices.remove(deviceId);
-            invokeConnectionCallbacks(connectedDevice.mConnectedDevice.getBelongsToActiveUser(),
+            invokeConnectionCallbacks(connectedDevice.mConnectedDevice.isAssociatedWithActiveUser(),
                     callback -> callback.onDeviceDisconnected(connectedDevice.mConnectedDevice));
         }
 
@@ -612,7 +613,7 @@ public class ConnectedDeviceManager {
         }
         ConnectedDevice connectedDevice = mConnectedDevices.get(deviceId).mConnectedDevice;
         ConnectedDevice updatedConnectedDevice = new ConnectedDevice(connectedDevice.getDeviceId(),
-                connectedDevice.getDeviceName(), connectedDevice.getBelongsToActiveUser(),
+                connectedDevice.getDeviceName(), connectedDevice.isAssociatedWithActiveUser(),
                 /* hasSecureChannel = */ true);
 
         boolean notifyCallbacks = getConnectedDeviceForManager(deviceId, bleManager) != null;
@@ -685,7 +686,7 @@ public class ConnectedDeviceManager {
 
         // The previous device is now obsolete and should be replaced with a new one properly
         // reflecting the state of belonging to the active user and notify features.
-        if (connectedDevice.mConnectedDevice.getBelongsToActiveUser()) {
+        if (connectedDevice.mConnectedDevice.isAssociatedWithActiveUser()) {
             // Device was already marked as belonging to active user. No need to reissue callbacks.
             return;
         }
