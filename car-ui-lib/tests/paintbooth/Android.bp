@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2018 The Android Open Source Project
+// Copyright (C) 2019 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,16 +14,33 @@
 // limitations under the License.
 //
 
-android_library {
-    name: "car-theme-lib",
+android_app {
+    name: "PaintBooth",
 
     srcs: ["src/**/*.java"],
 
     resource_dirs: ["res"],
 
-    static_libs: ["androidx.car_car"],
+    platform_apis: true,
+
+    certificate: "platform",
+
+
+    static_libs: [
+        "car-ui-lib",
+    ],
 
     optimize: {
         enabled: false,
+    },
+
+    dex_preopt: {
+        enabled: false,
+    },
+
+    product_variables: {
+        pdk: {
+            enabled: false,
+        },
     },
 }

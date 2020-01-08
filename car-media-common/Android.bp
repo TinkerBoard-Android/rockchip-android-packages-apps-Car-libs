@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2018 The Android Open Source Project
+// Copyright (C) 2016 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,15 +15,26 @@
 //
 
 android_library {
-    name: "car-theme-lib",
+    name: "car-media-common",
 
     srcs: ["src/**/*.java"],
 
     resource_dirs: ["res"],
 
-    static_libs: ["androidx.car_car"],
-
     optimize: {
         enabled: false,
     },
+
+    static_libs: [
+        "androidx.cardview_cardview",
+        "androidx.legacy_legacy-support-v4",
+        "androidx.recyclerview_recyclerview",
+        "androidx.mediarouter_mediarouter",
+        "androidx-constraintlayout_constraintlayout",
+        "car-apps-common",
+        "car-arch-common",
+        "androidx-constraintlayout_constraintlayout-solver",
+    ],
+
+    libs: ["android.car"],
 }
