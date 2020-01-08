@@ -17,16 +17,8 @@
   <public type="bool" name="car_ui_toolbar_tabs_on_second_row"/>
   <public type="color" name="car_ui_activity_background_color"/>
   <public type="color" name="car_ui_color_accent"/>
-  <public type="color" name="car_ui_list_item_body_text_color"/>
   <public type="color" name="car_ui_list_item_divider"/>
-  <public type="color" name="car_ui_list_item_header_text_color"/>
-  <public type="color" name="car_ui_list_item_title_text_color"/>
-  <public type="color" name="car_ui_preference_category_title_text_color"/>
-  <public type="color" name="car_ui_preference_edit_text_dialog_message_text_color"/>
   <public type="color" name="car_ui_preference_icon_color"/>
-  <public type="color" name="car_ui_preference_summary_text_color"/>
-  <public type="color" name="car_ui_preference_switch_track_text_color"/>
-  <public type="color" name="car_ui_preference_title_text_color"/>
   <public type="color" name="car_ui_preference_two_action_divider_color"/>
   <public type="color" name="car_ui_recyclerview_divider_color"/>
   <public type="color" name="car_ui_ripple_color"/>
@@ -57,11 +49,8 @@
   <public type="dimen" name="car_ui_keyline_2"/>
   <public type="dimen" name="car_ui_keyline_3"/>
   <public type="dimen" name="car_ui_keyline_4"/>
-  <public type="dimen" name="car_ui_letter_spacing_body1"/>
-  <public type="dimen" name="car_ui_letter_spacing_body3"/>
   <public type="dimen" name="car_ui_list_item_action_divider_height"/>
   <public type="dimen" name="car_ui_list_item_action_divider_width"/>
-  <public type="dimen" name="car_ui_list_item_body_text_size"/>
   <public type="dimen" name="car_ui_list_item_check_box_end_inset"/>
   <public type="dimen" name="car_ui_list_item_check_box_height"/>
   <public type="dimen" name="car_ui_list_item_check_box_icon_container_width"/>
@@ -69,7 +58,6 @@
   <public type="dimen" name="car_ui_list_item_end_inset"/>
   <public type="dimen" name="car_ui_list_item_header_height"/>
   <public type="dimen" name="car_ui_list_item_header_start_inset"/>
-  <public type="dimen" name="car_ui_list_item_header_text_size"/>
   <public type="dimen" name="car_ui_list_item_height"/>
   <public type="dimen" name="car_ui_list_item_icon_container_width"/>
   <public type="dimen" name="car_ui_list_item_icon_size"/>
@@ -81,7 +69,6 @@
   <public type="dimen" name="car_ui_list_item_supplemental_icon_size"/>
   <public type="dimen" name="car_ui_list_item_text_no_icon_start_margin"/>
   <public type="dimen" name="car_ui_list_item_text_start_margin"/>
-  <public type="dimen" name="car_ui_list_item_title_text_size"/>
   <public type="dimen" name="car_ui_margin"/>
   <public type="dimen" name="car_ui_padding_0"/>
   <public type="dimen" name="car_ui_padding_1"/>
@@ -93,7 +80,6 @@
   <public type="dimen" name="car_ui_preference_category_icon_margin_end"/>
   <public type="dimen" name="car_ui_preference_category_icon_size"/>
   <public type="dimen" name="car_ui_preference_category_min_height"/>
-  <public type="dimen" name="car_ui_preference_category_text_size"/>
   <public type="dimen" name="car_ui_preference_content_margin_bottom"/>
   <public type="dimen" name="car_ui_preference_content_margin_top"/>
   <public type="dimen" name="car_ui_preference_dropdown_padding_start"/>
@@ -102,17 +88,10 @@
   <public type="dimen" name="car_ui_preference_edit_text_dialog_message_margin_bottom"/>
   <public type="dimen" name="car_ui_preference_edit_text_dialog_message_margin_end"/>
   <public type="dimen" name="car_ui_preference_edit_text_dialog_message_margin_start"/>
-  <public type="dimen" name="car_ui_preference_edit_text_dialog_message_text_size"/>
   <public type="dimen" name="car_ui_preference_edit_text_dialog_text_margin_end"/>
   <public type="dimen" name="car_ui_preference_edit_text_dialog_text_margin_start"/>
   <public type="dimen" name="car_ui_preference_icon_margin_end"/>
   <public type="dimen" name="car_ui_preference_icon_size"/>
-  <public type="dimen" name="car_ui_preference_summary_text_size"/>
-  <public type="dimen" name="car_ui_preference_switch_height"/>
-  <public type="dimen" name="car_ui_preference_switch_text_size"/>
-  <public type="dimen" name="car_ui_preference_switch_width"/>
-  <public type="dimen" name="car_ui_preference_switch_width_half"/>
-  <public type="dimen" name="car_ui_preference_title_text_size"/>
   <public type="dimen" name="car_ui_primary_icon_size"/>
   <public type="dimen" name="car_ui_recyclerview_divider_bottom_margin"/>
   <public type="dimen" name="car_ui_recyclerview_divider_end_margin"/>
@@ -189,8 +168,6 @@
   <public type="string" name="car_ui_dialog_preference_negative"/>
   <public type="string" name="car_ui_dialog_preference_positive"/>
   <public type="string" name="car_ui_ellipsis"/>
-  <public type="string" name="car_ui_list_item_header_font_family"/>
-  <public type="string" name="car_ui_preference_category_title_font_family"/>
   <public type="string" name="car_ui_preference_switch_off"/>
   <public type="string" name="car_ui_preference_switch_on"/>
   <public type="string" name="car_ui_restricted_while_driving"/>
@@ -219,6 +196,8 @@
   <public type="style" name="PreferenceFragmentList.CarUi"/>
   <public type="style" name="TextAppearance.CarUi"/>
   <public type="style" name="TextAppearance.CarUi.AlertDialog.Subtitle"/>
+  <public type="style" name="TextAppearance.CarUi.Body1"/>
+  <public type="style" name="TextAppearance.CarUi.Body3"/>
   <public type="style" name="TextAppearance.CarUi.ListItem"/>
   <public type="style" name="TextAppearance.CarUi.ListItem.Body"/>
   <public type="style" name="TextAppearance.CarUi.ListItem.Header"/>

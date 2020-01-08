@@ -44,11 +44,6 @@ limitations under the License.
     <string name="car_ui_preference_switch_on">On</string>
     <!-- Text to show when a preference switch is off. [CHAR_LIMIT=30] -->
     <string name="car_ui_preference_switch_off">Off</string>
-    <!-- Font family to use for preference category titles. [CHAR_LIMIT=NONE] -->
-    <string name="car_ui_preference_category_title_font_family" translatable="false">sans-serif-medium</string>
-
-    <!-- Font family to use for list item headers. [CHAR_LIMIT=NONE] -->
-    <string name="car_ui_list_item_header_font_family" translatable="false">sans-serif-medium</string>
 
     <!-- Text to show when no button is provided and a default button is used. -->
     <string name="car_ui_alert_dialog_default_button" translatable="false">Close</string>
