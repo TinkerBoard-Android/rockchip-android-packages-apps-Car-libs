@@ -33,43 +33,6 @@
 
 CAR_UI_GENERATE_RRO_SET := $(call my-dir)/generate_rros.mk
 
-# Build car-ui library
-
-LOCAL_PATH:= $(call my-dir)
-
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES := $(call all-java-files-under, src)
-
-LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
-
-LOCAL_MODULE := car-ui-lib
-
-LOCAL_MODULE_TAGS := optional
-
-LOCAL_PRIVILEGED_MODULE := true
-
-LOCAL_PROGUARD_ENABLED := disabled
-
-LOCAL_USE_AAPT2 := true
-
-LOCAL_JAVA_LIBRARIES += android.car
-
-LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
-
-LOCAL_STATIC_ANDROID_LIBRARIES += \
-    androidx.annotation_annotation \
-    androidx.appcompat_appcompat \
-    androidx-constraintlayout_constraintlayout \
-    androidx.preference_preference \
-    androidx.recyclerview_recyclerview \
-    androidx.asynclayoutinflater_asynclayoutinflater \
-
-LOCAL_STATIC_JAVA_LIBRARIES += \
-    androidx-constraintlayout_constraintlayout-solver \
-
-include $(BUILD_STATIC_JAVA_LIBRARY)
-
 ifeq (,$(ONE_SHOT_MAKEFILE))
     include $(call all-makefiles-under,$(LOCAL_PATH))
 endif

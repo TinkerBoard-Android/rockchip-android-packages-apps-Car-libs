@@ -15,15 +15,18 @@
 //
 
 android_library {
-    name: "car-theme-lib",
+    name: "car-arch-common",
 
     srcs: ["src/**/*.java"],
-
-    resource_dirs: ["res"],
-
-    static_libs: ["androidx.car_car"],
 
     optimize: {
         enabled: false,
     },
+
+    static_libs: [
+        "androidx.lifecycle_lifecycle-extensions",
+        "androidx.lifecycle_lifecycle-common-java8",
+        "androidx.annotation_annotation",
+        "junit",
+    ],
 }

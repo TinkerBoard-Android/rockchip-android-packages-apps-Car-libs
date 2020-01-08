@@ -15,8 +15,7 @@
 // limitations under the License.
 
 android_library {
-
-    name: "car-ui-lib-bp",
+    name: "car-ui-lib",
 
     srcs: ["src/**/*.java"],
 
@@ -34,6 +33,7 @@ android_library {
         "androidx-constraintlayout_constraintlayout",
         "androidx.preference_preference",
         "androidx.recyclerview_recyclerview",
+        "androidx.asynclayoutinflater_asynclayoutinflater",
         "androidx-constraintlayout_constraintlayout-solver",
     ],
 }
