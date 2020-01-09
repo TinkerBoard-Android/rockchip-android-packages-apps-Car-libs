@@ -48,7 +48,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A toolbar for Android Automotive OS apps.
@@ -166,7 +166,7 @@ public class Toolbar extends FrameLayout {
     private List<MenuItem> mMenuItems = Collections.emptyList();
     private List<MenuItem> mOverflowItems = new ArrayList<>();
     private final List<MenuItemRenderer> mMenuItemRenderers = new ArrayList<>();
-    private CompletableFuture<Void> mMenuItemViewsFuture;
+    private View[] mMenuItemViews;
     private int mMenuItemsXmlId = 0;
     private AlertDialog mOverflowDialog;
     private boolean mNavIconSpaceReserved;
@@ -534,49 +534,60 @@ public class Toolbar extends FrameLayout {
             items = Collections.emptyList();
         }
 
-        if (items.equals(mMenuItems)) {
-            return;
-        }
+        List<MenuItem> visibleMenuItems = new ArrayList<>();
+        List<MenuItem> overflowItems = new ArrayList<>();
+        AtomicInteger loadedMenuItems = new AtomicInteger(0);
 
-        // Copy the list so that if the list is modified and setMenuItems is called again,
-        // the equals() check will fail. Note that the MenuItems are not copied here.
-        mMenuItems = new ArrayList<>(items);
+        synchronized (this) {
+            if (items.equals(mMenuItems)) {
+                return;
+            }
 
-        mOverflowItems.clear();
-        mMenuItemRenderers.clear();
-        mMenuItemsContainer.removeAllViews();
+            for (MenuItem item : items) {
+                if (item.getDisplayBehavior() == MenuItem.DisplayBehavior.NEVER) {
+                    overflowItems.add(item);
+                    item.setListener(mOverflowItemListener);
+                } else {
+                    visibleMenuItems.add(item);
+                }
+            }
 
-        List<CompletableFuture<View>> viewFutures = new ArrayList<>();
-        for (MenuItem item : mMenuItems) {
-            if (item.getDisplayBehavior() == MenuItem.DisplayBehavior.NEVER) {
-                mOverflowItems.add(item);
-                item.setListener(mOverflowItemListener);
-            } else {
+            // Copy the list so that if the list is modified and setMenuItems is called again,
+            // the equals() check will fail. Note that the MenuItems are not copied here.
+            mMenuItems = new ArrayList<>(items);
+            mOverflowItems = overflowItems;
+            mMenuItemRenderers.clear();
+            mMenuItemsContainer.removeAllViews();
+
+            if (!overflowItems.isEmpty()) {
+                visibleMenuItems.add(mOverflowButton);
+                createOverflowDialog();
+            }
+
+            View[] menuItemViews = new View[visibleMenuItems.size()];
+            mMenuItemViews = menuItemViews;
+
+            for (int i = 0; i < visibleMenuItems.size(); ++i) {
+                int index = i;
+                MenuItem item = visibleMenuItems.get(i);
                 MenuItemRenderer renderer = new MenuItemRenderer(item, mMenuItemsContainer);
                 mMenuItemRenderers.add(renderer);
-                viewFutures.add(renderer.createView());
+                renderer.createView(view -> {
+                    synchronized (Toolbar.this) {
+                        if (menuItemViews != mMenuItemViews) {
+                            return;
+                        }
+
+                        menuItemViews[index] = view;
+                        if (loadedMenuItems.addAndGet(1) == menuItemViews.length) {
+                            for (View v : menuItemViews) {
+                                mMenuItemsContainer.addView(v);
+                            }
+                        }
+                    }
+                });
             }
         }
-
-        if (!mOverflowItems.isEmpty()) {
-            MenuItemRenderer renderer = new MenuItemRenderer(mOverflowButton, mMenuItemsContainer);
-            mMenuItemRenderers.add(renderer);
-            viewFutures.add(renderer.createView());
-            createOverflowDialog();
-        }
-
-        if (mMenuItemViewsFuture != null) {
-            mMenuItemViewsFuture.cancel(false);
-        }
-
-        mMenuItemViewsFuture = CompletableFuture.allOf(
-            viewFutures.toArray(new CompletableFuture[0]));
-        mMenuItemViewsFuture.thenRunAsync(() -> {
-            for (CompletableFuture<View> future : viewFutures) {
-                mMenuItemsContainer.addView(future.join());
-            }
-            mMenuItemViewsFuture = null;
-        }, getContext().getMainExecutor());
 
         setState(mState);
     }

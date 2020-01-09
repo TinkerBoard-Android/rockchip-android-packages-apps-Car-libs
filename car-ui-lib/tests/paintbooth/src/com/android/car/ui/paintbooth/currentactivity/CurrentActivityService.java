@@ -133,12 +133,6 @@ public class CurrentActivityService extends Service {
                         mInitialTouchX = event.getRawX();
                         mInitialTouchY = event.getRawY();
                         break;
-                    case MotionEvent.ACTION_UP:
-                        break;
-                    case MotionEvent.ACTION_POINTER_DOWN:
-                        break;
-                    case MotionEvent.ACTION_POINTER_UP:
-                        break;
                     case MotionEvent.ACTION_MOVE:
                         WindowManager.LayoutParams layoutParams =
                                 (WindowManager.LayoutParams) view.getLayoutParams();
@@ -146,6 +140,8 @@ public class CurrentActivityService extends Service {
                         layoutParams.y = mInitialY + (int) (event.getRawY() - mInitialTouchY);
                         mWindowManager.updateViewLayout(view, layoutParams);
                         return true;
+                    default:
+                        break;
                 }
 
                 return false;
