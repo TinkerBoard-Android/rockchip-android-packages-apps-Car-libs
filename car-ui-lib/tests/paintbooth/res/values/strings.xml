@@ -18,7 +18,7 @@
   <!-- Application name [CHAR LIMIT=30] -->
   <string name="app_name" translatable="false">Paint Booth (Gerrit)</string>
 
-  <!-- Description of the CurrentActivityService. -->
+  <!-- Description of the CurrentActivityService. [CHAR_LIMIT=200] -->
   <string name="current_activity_service_description">Shows the current activity</string>
 
   <!-- Strings for Preference Samples -->

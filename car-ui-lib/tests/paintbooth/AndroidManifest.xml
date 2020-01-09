@@ -85,6 +85,7 @@
 
     <service
         android:label="Current Activity Service"
+        android:exported="false"
         android:name=".currentactivity.CurrentActivityService">
       <intent-filter>
         <action android:name="com.android.car.ui.paintbooth.StopService" />
