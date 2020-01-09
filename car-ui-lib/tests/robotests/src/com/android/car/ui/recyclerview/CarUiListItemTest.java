@@ -29,7 +29,6 @@ import android.widget.TextView;
 
 import com.android.car.ui.CarUiRobolectricTestRunner;
 import com.android.car.ui.R;
-import com.android.car.ui.TestConfig;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,13 +36,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(CarUiRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class CarUiListItemTest {
 
     private CarUiRecyclerView mListView;
