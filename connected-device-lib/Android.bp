@@ -17,7 +17,7 @@
 android_library {
     name: "connected-device-lib",
 
-    srcs: ["src/**/*.java", "src/**/*.kt"],
+    srcs: ["src/**/*.java"],
 
     manifest: "AndroidManifest.xml",
 

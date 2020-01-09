@@ -32,15 +32,13 @@ import android.car.encryptionrunner.Key;
 import com.android.car.connecteddevice.BleStreamProtos.BleOperationProto.OperationType;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
 import com.android.car.connecteddevice.util.ByteUtils;
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.security.SignatureException;
 import java.util.UUID;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
@@ -50,10 +48,17 @@ import java.util.function.Consumer;
 class SecureBleChannel {
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({CHANNEL_ERROR_INVALID_HANDSHAKE, CHANNEL_ERROR_INVALID_MSG,
-            CHANNEL_ERROR_INVALID_DEVICE_ID, CHANNEL_ERROR_INVALID_VERIFICATION,
-            CHANNEL_ERROR_INVALID_STATE, CHANNEL_ERROR_INVALID_ENCRYPTION_KEY,
-            CHANNEL_ERROR_STORAGE_ERROR})
+    @IntDef(prefix = { "CHANNEL_ERROR" },
+            value = {
+                    CHANNEL_ERROR_INVALID_HANDSHAKE,
+                    CHANNEL_ERROR_INVALID_MSG,
+                    CHANNEL_ERROR_INVALID_DEVICE_ID,
+                    CHANNEL_ERROR_INVALID_VERIFICATION,
+                    CHANNEL_ERROR_INVALID_STATE,
+                    CHANNEL_ERROR_INVALID_ENCRYPTION_KEY,
+                    CHANNEL_ERROR_STORAGE_ERROR
+            }
+    )
     @interface ChannelError { }
 
     /** Indicates an error during a Handshake of EncryptionRunner. */
@@ -76,8 +81,6 @@ class SecureBleChannel {
 
     private static final String TAG = "SecureBleChannel";
 
-    private final Lock mLock = new ReentrantLock();
-
     private final BleDeviceMessageStream mStream;
 
     private final ConnectedDeviceStorage mStorage;
@@ -86,6 +89,8 @@ class SecureBleChannel {
 
     private final EncryptionRunner mEncryptionRunner;
 
+    private final AtomicReference<Key> mEncryptionKey = new AtomicReference<>();
+
     private @HandshakeState int mState = HandshakeState.UNKNOWN;
 
     private String mDeviceId;
@@ -93,9 +98,6 @@ class SecureBleChannel {
     private Callback mCallback;
 
     private ShowVerificationCodeListener mShowVerificationCodeListener;
-
-    @GuardedBy("mLock")
-    private Key mEncryptionKey;
 
     SecureBleChannel(@NonNull BleDeviceMessageStream stream,
             @NonNull ConnectedDeviceStorage storage) {
@@ -222,12 +224,7 @@ class SecureBleChannel {
 
         logd(TAG, "Saved new key for reconnection.");
         mStorage.saveEncryptionKey(mDeviceId, newKey.asBytes());
-        mLock.lock();
-        try {
-            mEncryptionKey = newKey;
-        } finally {
-            mLock.unlock();
-        }
+        mEncryptionKey.set(newKey);
         sendServerAuthToClient(handshakeMessage.getNextMessage());
         notifyCallback(callback -> callback.onSecureChannelEstablished(newKey));
     }
@@ -279,14 +276,7 @@ class SecureBleChannel {
             loge(TAG, "Encryption not required for this message " + deviceMessage + ".");
             return;
         }
-
-        Key key = null;
-        mLock.lock();
-        try {
-            key = mEncryptionKey;
-        } finally {
-            mLock.unlock();
-        }
+        Key key = mEncryptionKey.get();
         if (key == null) {
             throw new IllegalStateException("Secure channel has not been established.");
         }
@@ -324,12 +314,7 @@ class SecureBleChannel {
         }
 
         mState = message.getHandshakeState();
-        mLock.lock();
-        try {
-            mEncryptionKey = localKey;
-        } finally {
-            mLock.unlock();
-        }
+        mEncryptionKey.set(localKey);
         if (mDeviceId == null) {
             loge(TAG, "Unable to finish association, device id is null.");
             notifySecureChannelFailure(CHANNEL_ERROR_INVALID_DEVICE_ID);
@@ -413,13 +398,7 @@ class SecureBleChannel {
                                         deviceMessage));
                                 return;
                             }
-                            Key key;
-                            mLock.lock();
-                            try {
-                                key = mEncryptionKey;
-                            } finally {
-                                mLock.unlock();
-                            }
+                            Key key = mEncryptionKey.get();
                             if (key == null) {
                                 loge(TAG, "Received encrypted message before secure channel has "
                                         + "been established.");
