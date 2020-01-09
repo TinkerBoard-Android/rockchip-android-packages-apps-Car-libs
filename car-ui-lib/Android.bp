@@ -15,8 +15,7 @@
 // limitations under the License.
 
 android_library {
-
-    name: "car-ui-lib-bp",
+    name: "car-ui-lib",
 
     srcs: ["src/**/*.java"],
 

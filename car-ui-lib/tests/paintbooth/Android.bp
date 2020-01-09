@@ -15,7 +15,7 @@
 //
 
 android_app {
-    name: "PaintBooth-bp",
+    name: "PaintBooth",
 
     srcs: ["src/**/*.java"],
 
@@ -28,7 +28,7 @@ android_app {
     privileged: true,
 
     static_libs: [
-        "car-ui-lib-bp",
+        "car-ui-lib",
         "android.car.userlib",
     ],
 
