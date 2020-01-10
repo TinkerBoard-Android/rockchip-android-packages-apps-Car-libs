@@ -27,6 +27,8 @@
     <drawable name="car_ui_toolbar_search_search_icon">@drawable/car_ui_icon_search</drawable>
     <!-- Icon used for clearing the search box in toolbar -->
     <drawable name="car_ui_toolbar_search_close_icon">@drawable/car_ui_icon_close</drawable>
+    <!-- Icon used for nav when the toolbar is in search state   -->
+    <drawable name="car_ui_icon_search_nav_icon">@drawable/car_ui_icon_arrow_back</drawable>
 
     <!-- Preferences -->
 
