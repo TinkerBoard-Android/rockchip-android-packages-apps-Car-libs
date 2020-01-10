@@ -721,14 +721,12 @@ public class Toolbar extends FrameLayout {
      * Sets the search query.
      */
     public void setSearchQuery(String query) {
-        if (!Objects.equals(mSearchQuery, query)) {
+        if (mSearchView != null) {
+            mSearchView.setSearchQuery(query);
+        } else {
             mSearchQuery = query;
-            if (mSearchView != null) {
-                mSearchView.setSearchQuery(query);
-            } else {
-                for (OnSearchListener listener : mOnSearchListeners) {
-                    listener.onSearch(query);
-                }
+            for (OnSearchListener listener : mOnSearchListeners) {
+                listener.onSearch(query);
             }
         }
     }
@@ -744,9 +742,9 @@ public class Toolbar extends FrameLayout {
             SearchView searchView = new SearchView(getContext());
             searchView.setHint(mSearchHint);
             searchView.setIcon(mSearchIcon);
+            searchView.setSearchQuery(mSearchQuery);
             searchView.setSearchListeners(mOnSearchListeners);
             searchView.setSearchCompletedListeners(mOnSearchCompletedListeners);
-            searchView.setSearchQuery(mSearchQuery);
             searchView.setVisibility(View.GONE);
 
             FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
