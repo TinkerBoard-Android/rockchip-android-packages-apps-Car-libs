@@ -33,6 +33,7 @@
   <public type="color" name="car_ui_toolbar_tab_item_selector"/>
   <public type="color" name="car_ui_toolbar_tab_selected_color"/>
   <public type="color" name="car_ui_toolbar_tab_unselected_color"/>
+  <public type="color" name="car_ui_window_background"/>
   <public type="dimen" name="car_ui_body1_size"/>
   <public type="dimen" name="car_ui_body2_size"/>
   <public type="dimen" name="car_ui_body3_size"/>
