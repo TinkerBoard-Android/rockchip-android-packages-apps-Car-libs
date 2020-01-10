@@ -15,8 +15,11 @@
   ~ limitations under the License.
   -->
 
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-       android:shape="rectangle">
-    <size android:height="@dimen/car_ui_recyclerview_divider_height" />
-    <solid android:color="@color/car_ui_recyclerview_divider_color" />
-</shape>
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:insetLeft="@dimen/car_ui_recyclerview_divider_start_margin"
+    android:insetRight="@dimen/car_ui_recyclerview_divider_end_margin">
+    <shape android:shape="rectangle">
+        <size android:height="@dimen/car_ui_recyclerview_divider_height" />
+        <solid android:color="@color/car_ui_recyclerview_divider_color" />
+    </shape>
+</inset>
