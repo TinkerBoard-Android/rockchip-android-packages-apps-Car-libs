@@ -52,6 +52,11 @@ public class CarUiMultiSelectListPreference extends MultiSelectListPreference {
         mContext = context;
     }
 
+    /**
+     * This is to make getSelectedItems() visible from other classes in
+     * com.android.car.ui.preference.
+     */
+    @Override
     protected boolean[] getSelectedItems() {
         return super.getSelectedItems();
     }

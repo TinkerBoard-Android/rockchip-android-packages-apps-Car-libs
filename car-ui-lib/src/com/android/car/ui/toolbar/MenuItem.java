@@ -309,8 +309,8 @@ public class MenuItem {
     public static final class Builder {
         private final Context mContext;
 
-        private CharSequence mSearchTitle;
-        private CharSequence mSettingsTitle;
+        private String mSearchTitle;
+        private String mSettingsTitle;
         private Drawable mSearchIcon;
         private Drawable mSettingsIcon;
 

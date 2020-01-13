@@ -441,11 +441,9 @@ public class Toolbar extends FrameLayout {
 
     /** Sets the hint for the search bar. */
     public void setSearchHint(CharSequence hint) {
-        if (!Objects.equals(hint, mSearchHint)) {
-            mSearchHint = hint;
-            if (mSearchView != null) {
-                mSearchView.setHint(mSearchHint);
-            }
+        mSearchHint = hint;
+        if (mSearchView != null) {
+            mSearchView.setHint(mSearchHint);
         }
     }
 
