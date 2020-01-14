@@ -167,7 +167,7 @@ public class CarBlePeripheralManagerTest {
         Semaphore semaphore = new Semaphore(0);
         AssociationCallback callback = createAssociationCallback(semaphore);
         SecureBleChannel channel = getChannelForAssociation(callback);
-        SecureBleChannel.Callback channelCallback = channel.getChannelCallback();
+        SecureBleChannel.Callback channelCallback = channel.getCallback();
         assertThat(channelCallback).isNotNull();
         channelCallback.onDeviceIdReceived(TEST_REMOTE_DEVICE_ID.toString());
         Key key = EncryptionRunnerFactory.newDummyRunner().keyOf(TEST_KEY);
@@ -186,7 +186,7 @@ public class CarBlePeripheralManagerTest {
         Semaphore semaphore = new Semaphore(0);
         AssociationCallback callback = createAssociationCallback(semaphore);
         SecureBleChannel channel = getChannelForAssociation(callback);
-        SecureBleChannel.Callback channelCallback = channel.getChannelCallback();
+        SecureBleChannel.Callback channelCallback = channel.getCallback();
         int testErrorCode = 1;
         assertThat(channelCallback).isNotNull();
         channelCallback.onDeviceIdReceived(TEST_REMOTE_DEVICE_ID.toString());

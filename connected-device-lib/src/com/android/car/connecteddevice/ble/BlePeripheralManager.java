@@ -322,9 +322,7 @@ public class BlePeripheralManager {
         } else {
             loge(
                     TAG,
-                    "Cannot start BLE Advertisement.  BT Adapter: "
-                            + BluetoothAdapter.getDefaultAdapter()
-                            + " Advertise Retry count: "
+                    "Cannot start BLE Advertisement. Advertise Retry count: "
                             + mAdvertiserStartCount,
                     null);
         }
