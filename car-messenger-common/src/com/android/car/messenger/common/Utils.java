@@ -16,15 +16,26 @@
 
 package com.android.car.messenger.common;
 
-import static com.android.car.connecteddevice.util.SafeLog.logd;
+import static com.android.car.connecteddevice.util.SafeLog.logw;
 
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Icon;
+import android.text.TextUtils;
 
+import androidx.annotation.Nullable;
+import androidx.core.graphics.drawable.RoundedBitmapDrawable;
+import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
+
+import com.android.car.apps.common.LetterTileDrawable;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.ConversationNotification;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.MessagingStyle;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.MessagingStyleMessage;
+import com.android.car.messenger.NotificationMsgProto.NotificationMsg.Person;
 
 /** Utils methods for the car-messenger-common lib. **/
 public class Utils {
@@ -81,16 +92,16 @@ public class Utils {
     public static boolean isValidConversationNotification(ConversationNotification notification,
             boolean isShallowCheck) {
         if (notification == null) {
-            logd(TAG, "ConversationNotification is null");
+            logw(TAG, "ConversationNotification is null");
             return false;
         } else if (!notification.hasMessagingStyle()) {
-            logd(TAG, "ConversationNotification is missing required field: messagingStyle");
+            logw(TAG, "ConversationNotification is missing required field: messagingStyle");
             return false;
         } else if (notification.getMessagingAppDisplayName() == null) {
-            logd(TAG, "ConversationNotification is missing required field: appDisplayName");
+            logw(TAG, "ConversationNotification is missing required field: appDisplayName");
             return false;
         } else if (notification.getMessagingAppPackageName() == null) {
-            logd(TAG, "ConversationNotification is missing required field: appPackageName");
+            logw(TAG, "ConversationNotification is missing required field: appPackageName");
             return false;
         }
         return isValidMessagingStyle(notification.getMessagingStyle(), isShallowCheck);
@@ -102,16 +113,16 @@ public class Utils {
     private static boolean isValidMessagingStyle(MessagingStyle messagingStyle,
             boolean isShallowCheck) {
         if (messagingStyle == null) {
-            logd(TAG, "MessagingStyle is null");
+            logw(TAG, "MessagingStyle is null");
             return false;
         } else if (messagingStyle.getConvoTitle() == null) {
-            logd(TAG, "MessagingStyle is missing required field: convoTitle");
+            logw(TAG, "MessagingStyle is missing required field: convoTitle");
             return false;
         } else if (messagingStyle.getUserDisplayName() == null) {
-            logd(TAG, "MessagingStyle is missing required field: userDisplayName");
+            logw(TAG, "MessagingStyle is missing required field: userDisplayName");
             return false;
         } else if (messagingStyle.getMessagingStyleMsgCount() == 0) {
-            logd(TAG, "MessagingStyle is missing required field: messagingStyleMsg");
+            logw(TAG, "MessagingStyle is missing required field: messagingStyleMsg");
             return false;
         }
         if (!isShallowCheck) {
@@ -129,15 +140,101 @@ public class Utils {
      **/
     public static boolean isValidMessagingStyleMessage(MessagingStyleMessage message) {
         if (message == null) {
-            logd(TAG, "MessagingStyleMessage is null");
+            logw(TAG, "MessagingStyleMessage is null");
             return false;
         } else if (message.getTextMessage() == null) {
-            logd(TAG, "MessagingStyleMessage is missing required field: textMessage");
+            logw(TAG, "MessagingStyleMessage is missing required field: textMessage");
             return false;
         } else if (!message.hasSender()) {
-            logd(TAG, "MessagingStyleMessage is missing required field: sender");
+            logw(TAG, "MessagingStyleMessage is missing required field: sender");
+            return false;
+        }
+        return isValidSender(message.getSender());
+    }
+
+    /**
+     * Ensure the {@link Person} object has all the required fields.
+     **/
+    public static boolean isValidSender(Person person) {
+        if (person.getName() == null) {
+            logw(TAG, "Person is missing required field: name");
             return false;
         }
         return true;
     }
+
+    /**
+     * Creates a Letter Tile Icon that will display the given initials. If the initials are null,
+     * then an avatar anonymous icon will be drawn.
+     **/
+    public static Icon createLetterTile(Context context, @Nullable String initials,
+            String identifier, int avatarSize, float cornerRadiusPercent) {
+        // TODO(b/135446418): use TelecomUtils once car-telephony-common supports bp.
+        LetterTileDrawable letterTileDrawable = createLetterTileDrawable(context, initials,
+                identifier);
+        RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(
+                context.getResources(), letterTileDrawable.toBitmap(avatarSize));
+        return createFromRoundedBitmapDrawable(roundedBitmapDrawable, avatarSize,
+                cornerRadiusPercent);
+    }
+
+    /** Creates an Icon based on the given roundedBitmapDrawable. **/
+    private static Icon createFromRoundedBitmapDrawable(RoundedBitmapDrawable roundedBitmapDrawable,
+            int avatarSize, float cornerRadiusPercent) {
+        // TODO(b/135446418): use TelecomUtils once car-telephony-common supports bp.
+        float radius = avatarSize * cornerRadiusPercent;
+        roundedBitmapDrawable.setCornerRadius(radius);
+
+        final Bitmap result = Bitmap.createBitmap(avatarSize, avatarSize,
+                Bitmap.Config.ARGB_8888);
+        final Canvas canvas = new Canvas(result);
+        roundedBitmapDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        roundedBitmapDrawable.draw(canvas);
+        return Icon.createWithBitmap(result);
+    }
+
+
+    /**
+     * Create a {@link LetterTileDrawable} for the given initials.
+     *
+     * @param initials   is the letters that will be drawn on the canvas. If it is null, then an
+     *                   avatar anonymous icon will be drawn
+     * @param identifier will decide the color for the drawable. If null, a default color will be
+     *                   used.
+     */
+    private static LetterTileDrawable createLetterTileDrawable(
+            Context context,
+            @Nullable String initials,
+            @Nullable String identifier) {
+        // TODO(b/135446418): use TelecomUtils once car-telephony-common supports bp.
+        int numberOfLetter = context.getResources().getInteger(
+                R.integer.config_number_of_letters_shown_for_avatar);
+        String letters = initials != null
+                ? initials.substring(0, Math.min(initials.length(), numberOfLetter)) : null;
+        LetterTileDrawable letterTileDrawable = new LetterTileDrawable(context.getResources(),
+                letters, identifier);
+        return letterTileDrawable;
+    }
+
+
+    /**
+     * Returns the initials based on the name and nameAlt.
+     *
+     * @param name    should be the display name of a contact.
+     * @param nameAlt should be alternative display name of a contact.
+     */
+    public static String getInitials(String name, String nameAlt) {
+        // TODO(b/135446418): use TelecomUtils once car-telephony-common supports bp.
+        StringBuilder initials = new StringBuilder();
+        if (!TextUtils.isEmpty(name) && Character.isLetter(name.charAt(0))) {
+            initials.append(Character.toUpperCase(name.charAt(0)));
+        }
+        if (!TextUtils.isEmpty(nameAlt)
+                && !TextUtils.equals(name, nameAlt)
+                && Character.isLetter(nameAlt.charAt(0))) {
+            initials.append(Character.toUpperCase(nameAlt.charAt(0)));
+        }
+        return initials.toString();
+    }
+
 }

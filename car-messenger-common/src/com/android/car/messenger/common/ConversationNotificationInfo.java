@@ -103,17 +103,14 @@ public class ConversationNotificationInfo {
 
     }
 
-    private ConversationNotificationInfo(String deviceName, String deviceId, String convoTitle,
-            boolean isGroupConvo, @Nullable String notificationKey, @Nullable String appDisplayName,
-            @Nullable String userDisplayName, int appSmallIconResId) {
-        boolean missingDeviceName = (deviceName == null);
+    private ConversationNotificationInfo(@Nullable String deviceName, String deviceId,
+            String convoTitle, boolean isGroupConvo, @Nullable String notificationKey,
+            @Nullable String appDisplayName, @Nullable String userDisplayName,
+            int appSmallIconResId) {
         boolean missingDeviceId = (deviceId == null);
         boolean missingTitle = (convoTitle == null);
-        if (missingDeviceName || missingDeviceId || missingTitle) {
+        if (missingDeviceId || missingTitle) {
             StringBuilder builder = new StringBuilder("Missing required fields:");
-            if (missingDeviceName) {
-                builder.append(" deviceName");
-            }
             if (missingDeviceId) {
                 builder.append(" deviceId");
             }
