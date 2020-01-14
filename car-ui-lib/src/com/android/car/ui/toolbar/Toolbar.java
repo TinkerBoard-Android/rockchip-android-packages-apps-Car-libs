@@ -765,16 +765,20 @@ public class Toolbar extends FrameLayout {
             }
         };
 
-        switch (mNavButtonMode) {
-            case CLOSE:
-                mNavIcon.setImageResource(R.drawable.car_ui_icon_close);
-                break;
-            case DOWN:
-                mNavIcon.setImageResource(R.drawable.car_ui_icon_down);
-                break;
-            default:
-                mNavIcon.setImageResource(R.drawable.car_ui_icon_arrow_back);
-                break;
+        if (state == State.SEARCH) {
+            mNavIcon.setImageResource(R.drawable.car_ui_icon_search_nav_icon);
+        } else {
+            switch (mNavButtonMode) {
+                case CLOSE:
+                    mNavIcon.setImageResource(R.drawable.car_ui_icon_close);
+                    break;
+                case DOWN:
+                    mNavIcon.setImageResource(R.drawable.car_ui_icon_down);
+                    break;
+                default:
+                    mNavIcon.setImageResource(R.drawable.car_ui_icon_arrow_back);
+                    break;
+            }
         }
 
         mNavIcon.setVisibility(state != State.HOME ? VISIBLE : GONE);
