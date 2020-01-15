@@ -20,7 +20,7 @@
     android:id="@+id/home"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/dialog_activity_background_color">
+    android:background="@drawable/car_ui_activity_background">
 
   <com.android.car.ui.toolbar.Toolbar
       android:id="@+id/toolbar"
@@ -30,7 +30,7 @@
       app:title="@string/app_name"
       app:logo="@drawable/ic_launcher"/>
 
-  <com.android.car.ui.pagedrecyclerview.PagedRecyclerView
+  <com.android.car.ui.recyclerview.CarUiRecyclerView
       android:id="@+id/activities"
       android:layout_width="0dp"
       android:layout_height="0dp"

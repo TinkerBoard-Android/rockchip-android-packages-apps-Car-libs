@@ -27,8 +27,7 @@
         <attr name="state" format="enum">
             <enum name="home" value="0"/>
             <enum name="subpage" value="1"/>
-            <enum name="subpage_custom" value="2"/>
-            <enum name="search" value="3"/>
+            <enum name="search" value="2"/>
         </attr>
         <!-- Whether or not the toolbar should have a background. Default true. -->
         <attr name="showBackground" format="boolean"/>
@@ -36,24 +35,76 @@
         <attr name="navButtonMode" format="enum">
             <enum name="back" value="0"/>
             <enum name="close" value="1"/>
+            <enum name="down" value="2"/>
         </attr>
+        <!-- XML resource of MenuItems. See Toolbar.setMenuItems(int) for more information. -->
+        <attr name="menuItems" format="reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="CarUiToolbarMenuItem">
+        <!-- Id of MenuItem, used to differentiate them -->
+        <attr name="id" format="reference"/>
+        <!-- Show/hide the MenuItem -->
+        <attr name="visible" format="boolean"/>
+        <!-- Set this to true to make a search MenuItem. This will override every other property except id, visible, and onclick. -->
+        <attr name="search" format="boolean"/>
+        <!-- Set this to true to make a settings MenuItem. This will override every other property except id, visible, and onclick. -->
+        <attr name="settings" format="boolean"/>
+        <!-- Title -->
+        <attr name="title"/>
+        <!-- Icon -->
+        <attr name="icon" format="reference"/>
+        <!-- True to tint the icon to a consistent color. Default true, all the other booleans default to false -->
+        <attr name="tinted" format="boolean"/>
+        <!-- Show both the icon and title at the same time -->
+        <attr name="showIconAndTitle" format="boolean"/>
+        <!-- True if this MenuItem should be a switch -->
+        <attr name="checkable" format="boolean"/>
+        <!-- Whether the switch should be checked or not. Setting this implies checkable=true -->
+        <attr name="checked" format="boolean"/>
+        <!-- True if this MenuItem should be activatable, in which case it will visually toggle states when clicked -->
+        <attr name="activatable" format="boolean"/>
+        <!-- Whether the MenuItem starts activated. Setting this implies activatable=true -->
+        <attr name="activated" format="boolean"/>
+        <!-- How to display the MenuItem. "always" means always show it on the toolbar, "never" means never show it on the toolbar and instead show it in the overflow menu -->
+        <attr name="displayBehavior" format="enum">
+            <enum name="always" value="0"/>
+            <enum name="never" value="1"/>
+        </attr>
+        <!-- Ux restrictions required to interact with this MenuItem -->
+        <attr name="uxRestrictions">
+            <!-- Values are copied from android.car.drivingstate.CarUxRestrictions. Note:
+            UX_RESTRICTIONS_BASELINE is not allowed here because it's useless and confusing. -->
+            <flag name="UX_RESTRICTIONS_NO_DIALPAD" value="1"/>
+            <flag name="UX_RESTRICTIONS_NO_FILTERING" value="2"/>
+            <flag name="UX_RESTRICTIONS_LIMIT_STRING_LENGTH" value="4"/>
+            <flag name="UX_RESTRICTIONS_NO_KEYBOARD" value="8"/>
+            <flag name="UX_RESTRICTIONS_NO_VIDEO" value="16"/>
+            <flag name="UX_RESTRICTIONS_LIMIT_CONTENT" value="32"/>
+            <flag name="UX_RESTRICTIONS_NO_SETUP" value="64"/>
+            <flag name="UX_RESTRICTIONS_NO_TEXT_MESSAGE" value="128"/>
+            <flag name="UX_RESTRICTIONS_NO_VOICE_TRANSCRIPTION" value="256"/>
+            <flag name="UX_RESTRICTIONS_FULLY_RESTRICTED" value="511"/>
+        </attr>
+        <!-- The name of a method that takes a MenuItem as an argument in you'r toolbar's Activity. Will be called when the MenuItem is clicked -->
+        <attr name="onClick" format="string"/>
     </declare-styleable>
 
     <!-- Theme attribute to specifying a default style for all CarUiToolbars -->
     <attr name="CarUiToolbarStyle" format="reference"/>
 
-    <declare-styleable name="PagedRecyclerView">
-        <!-- Whether to enable the car_ui_pagedrecyclerview_divider for linear layout or not. -->
+    <declare-styleable name="CarUiRecyclerView">
+        <!-- Whether to enable the car_ui_recyclerview_divider for linear layout or not. -->
         <attr name="enableDivider" format="boolean" />
-        <!-- Top offset for paged recycler view. -->
+        <!-- Top offset for car ui recycler view. -->
         <attr name="startOffset" format="integer" />
-        <!-- Bottom offset for paged recycler view for linear layout. -->
+        <!-- Bottom offset for car ui recycler view for linear layout. -->
         <attr name="endOffset" format="integer" />
 
         <!-- Number of columns in a grid layout. -->
         <attr name="numOfColumns" format="integer" />
 
-        <!-- Paged recycler view layout. -->
+        <!-- car ui recycler view layout. -->
         <attr name="layoutStyle" format="enum">
             <!-- linear layout -->
             <enum name="linear" value="0" />
@@ -62,7 +113,16 @@
         </attr>
     </declare-styleable>
 
-    <declare-styleable name="PagedRecyclerViewTheme">
-        <attr name="pagedRecyclerViewStyle" format="reference" />
+    <declare-styleable name="CarUiPreference">
+        <!-- Toggle for showing chevron -->
+        <attr name="showChevron" format="boolean" />
     </declare-styleable>
+
+    <!-- Theme attribute to specify a default style for all CarUiPreferences -->
+    <attr name="carUiPreferenceStyle" format="reference" />
+
+    <!-- Theme attribute to specify a default style for all CarUiRecyclerViews -->
+    <attr name="carUiRecyclerViewStyle" format="reference" />
+
+    <attr name="state_ux_restricted" format="boolean" />
 </resources>

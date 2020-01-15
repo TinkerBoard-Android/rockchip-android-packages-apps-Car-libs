@@ -16,37 +16,40 @@
 <resources>
     <!-- General -->
 
-    <!-- Main text color (titles, text body, etc.) -->
-    <color name="car_ui_primary_text_color">#FFFFFFFF</color>
-    <!-- Text color used in subtitles or other secondary text blocks -->
-    <color name="car_ui_secondary_text_color">#90FFFFFF</color>
+    <!-- Background color to use on full screen activities -->
+    <color name="car_ui_activity_background_color">#000000</color>
     <!-- The ripple color. -->
     <color name="car_ui_ripple_color">#27ffffff</color>
 
-    <!-- Tabs -->
-
-    <!-- Selected colors -->
-    <color name="car_ui_tab_selected_color">@color/car_ui_primary_text_color</color>
-    <!-- Normal colors -->
-    <color name="car_ui_tab_unselected_color">@color/car_ui_secondary_text_color</color>
-
     <!-- Toolbar -->
 
+    <!-- Color used on the navigation icon -->
+    <color name="car_ui_toolbar_nav_icon_color">@color/car_ui_text_color_primary</color>
     <!-- Text color applied to the hint displayed inside the search box -->
-    <color name="car_ui_toolbar_search_hint_text_color">#33FFFFFF</color>
-    <!-- Toolbar background color -->
-    <color name="car_ui_toolbar_background_color">#E0000000</color>
+    <color name="car_ui_toolbar_search_hint_text_color">@color/car_ui_text_color_hint</color>
+    <!-- Tab selected color -->
+    <color name="car_ui_toolbar_tab_selected_color">@color/car_ui_text_color_primary</color>
+    <!-- Tab normal color -->
+    <color name="car_ui_toolbar_tab_unselected_color">@color/car_ui_text_color_secondary</color>
 
-    <!--  Paged Recycler View  -->
-    <!-- The color of the scroll bar indicator in the PagedListView. -->
+    <!-- Recycler View  -->
+
+    <!-- Color of the scroll bar indicator in the CarUiRecyclerView. -->
     <color name="car_ui_scrollbar_thumb">#99ffffff</color>
+    <!-- Color of the divider views between CarUiRecyclerView items -->
+    <color name="car_ui_recyclerview_divider_color">@android:color/transparent</color>
 
     <!-- Preferences -->
 
-    <color name="car_ui_preference_category_title_text_color">#ff60a8f0</color>
-    <color name="car_ui_preference_summary_text_color">#ffdadce0</color>
-    <color name="car_ui_preference_title_text_color">@android:color/white</color>
-    <color name="car_ui_preference_edit_text_dialog_message_text_color">#ffdadce0</color>
+    <color name="car_ui_preference_category_title_text_color">@color/car_ui_color_accent</color>
+    <color name="car_ui_preference_summary_text_color">@color/car_ui_text_color_secondary</color>
+    <color name="car_ui_preference_title_text_color">@color/car_ui_text_color_primary</color>
+    <color name="car_ui_preference_edit_text_dialog_message_text_color">@color/car_ui_text_color_primary</color>
+    <color name="car_ui_preference_icon_color">@color/car_ui_text_color_primary</color>
+    <color name="car_ui_preference_switch_track_text_color">@color/car_ui_text_color_primary</color>
 
-    <color name="car_ui_preference_icon_color">@android:color/white</color>
+    <!-- List item -->
+    <color name="car_ui_list_item_header_text_color">@color/car_ui_color_accent</color>
+    <color name="car_ui_list_item_title_text_color">@color/car_ui_text_color_primary</color>
+    <color name="car_ui_list_item_body_text_color">@color/car_ui_text_color_secondary</color>
 </resources>

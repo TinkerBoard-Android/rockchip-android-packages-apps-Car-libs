@@ -16,6 +16,8 @@
   -->
 
 <resources>
-    <bool name="car_ui_tab_flexible_layout">false</bool>
-    <item name="car_ui_tab_item_layout" type="layout">@layout/car_ui_tab_item</item>
+    <!-- Toolbar -->
+
+    <!-- Layout to be used for toolbar tabs -->
+    <item name="car_ui_toolbar_tab_item_layout" type="layout">@layout/car_ui_toolbar_tab_item</item>
 </resources>

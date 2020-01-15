@@ -16,9 +16,9 @@
 package com.android.car.ui.toolbar;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -32,16 +32,39 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.android.car.ui.R;
 
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
 
 /**
  * A search view used by {@link Toolbar}.
  */
 public class SearchView extends ConstraintLayout {
+    private final InputMethodManager mInputMethodManager;
     private final ImageView mIcon;
     private final EditText mSearchText;
-    private final Set<Toolbar.OnSearchListener> mListeners = new HashSet<>();
+    private final View mCloseIcon;
+    private final int mStartPaddingWithoutIcon;
+    private final int mStartPadding;
+    private final int mEndPadding;
+    private Set<Toolbar.OnSearchListener> mSearchListeners = Collections.emptySet();
+    private Set<Toolbar.OnSearchCompletedListener> mSearchCompletedListeners =
+            Collections.emptySet();
+    private final TextWatcher mTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            onSearch(editable.toString());
+        }
+    };
+
+    private boolean mIsPlainText = false;
 
     public SearchView(Context context) {
         this(context, null);
@@ -54,68 +77,84 @@ public class SearchView extends ConstraintLayout {
     public SearchView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        LayoutInflater inflater = LayoutInflater.from(context);
-        inflater.inflate(R.layout.car_ui_search_view, this, true);
+        mInputMethodManager = (InputMethodManager)
+            getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
-        mSearchText = requireViewById(R.id.search_bar);
-        View closeIcon = requireViewById(R.id.search_close);
-        closeIcon.setOnClickListener(view -> mSearchText.getText().clear());
-        mIcon = requireViewById(R.id.icon);
+        LayoutInflater inflater = LayoutInflater.from(context);
+        inflater.inflate(R.layout.car_ui_toolbar_search_view, this, true);
+
+        mSearchText = requireViewById(R.id.car_ui_toolbar_search_bar);
+        mIcon = requireViewById(R.id.car_ui_toolbar_search_icon);
+        mCloseIcon = requireViewById(R.id.car_ui_toolbar_search_close);
+        mCloseIcon.setOnClickListener(view -> mSearchText.getText().clear());
+        mCloseIcon.setVisibility(View.GONE);
+
+        mStartPaddingWithoutIcon = mSearchText.getPaddingStart();
+        mStartPadding = context.getResources().getDimensionPixelSize(
+                R.dimen.car_ui_toolbar_search_search_icon_container_width);
+        mEndPadding = context.getResources().getDimensionPixelSize(
+                R.dimen.car_ui_toolbar_search_close_icon_container_width);
+
+        mSearchText.setPaddingRelative(mStartPadding, 0, mEndPadding, 0);
 
         mSearchText.setOnFocusChangeListener(
                 (view, hasFocus) -> {
                     if (hasFocus) {
-                        ((InputMethodManager)
-                                context.getSystemService(Context.INPUT_METHOD_SERVICE))
-                                .showSoftInput(view, 0);
+                        mInputMethodManager.showSoftInput(view, 0);
                     } else {
-                        ((InputMethodManager)
-                                context.getSystemService(Context.INPUT_METHOD_SERVICE))
-                                .hideSoftInputFromWindow(view.getWindowToken(), 0);
+                        mInputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
                     }
                 });
-        mSearchText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
 
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                onSearch(editable.toString());
-            }
-        });
+        mSearchText.addTextChangedListener(mTextWatcher);
 
         mSearchText.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE
                     || actionId == EditorInfo.IME_ACTION_SEARCH) {
                 mSearchText.clearFocus();
+                for (Toolbar.OnSearchCompletedListener listener : mSearchCompletedListeners) {
+                    listener.onSearchCompleted();
+                }
             }
             return false;
         });
+    }
+
+    @Override
+    public void setVisibility(int visibility) {
+        boolean showing = visibility == View.VISIBLE && getVisibility() != View.VISIBLE;
+
+        super.setVisibility(visibility);
+
+        if (showing) {
+            mSearchText.removeTextChangedListener(mTextWatcher);
+            mSearchText.getText().clear();
+            mSearchText.addTextChangedListener(mTextWatcher);
+            mCloseIcon.setVisibility(View.GONE);
+
+            mSearchText.requestFocus();
+        }
     }
 
     /**
      * Adds a listener for the search text changing.
      * See also {@link #unregisterOnSearchListener(Toolbar.OnSearchListener)}
      */
-    public void registerOnSearchListener(Toolbar.OnSearchListener listener) {
-        mListeners.add(listener);
+    public void setSearchListeners(Set<Toolbar.OnSearchListener> listeners) {
+        mSearchListeners = listeners;
     }
 
     /**
-     * Removes a listener.
+     * Removes a search listener.
      * See also {@link #registerOnSearchListener(Toolbar.OnSearchListener)}
      */
-    public boolean unregisterOnSearchListener(Toolbar.OnSearchListener listener) {
-        return mListeners.remove(listener);
+    public void setSearchCompletedListeners(Set<Toolbar.OnSearchCompletedListener> listeners) {
+        mSearchCompletedListeners = listeners;
     }
 
     /**
      * Sets the search hint.
+     *
      * @param resId A string resource id of the search hint.
      */
     public void setHint(int resId) {
@@ -124,6 +163,7 @@ public class SearchView extends ConstraintLayout {
 
     /**
      * Sets the search hint
+     *
      * @param hint A CharSequence of the search hint.
      */
     public void setHint(CharSequence hint) {
@@ -138,26 +178,51 @@ public class SearchView extends ConstraintLayout {
     /**
      * Sets a custom icon to display in the search box.
      */
-    public void setIcon(Bitmap b) {
-        mIcon.setImageBitmap(b);
-    }
-
-    /**
-     * Sets a custom icon to display in the search box.
-     */
     public void setIcon(Drawable d) {
-        mIcon.setImageDrawable(d);
+        if (d == null) {
+            mIcon.setImageResource(R.drawable.car_ui_icon_search);
+        } else {
+            mIcon.setImageDrawable(d);
+        }
     }
 
     /**
      * Sets a custom icon to display in the search box.
      */
     public void setIcon(int resId) {
-        mIcon.setImageResource(resId);
+        if (resId == 0) {
+            mIcon.setImageResource(R.drawable.car_ui_icon_search);
+        } else {
+            mIcon.setImageResource(resId);
+        }
+    }
+
+    /**
+     * Sets whether or not the search bar should look like a regular text box
+     * instead of a search box.
+     */
+    public void setPlainText(boolean plainText) {
+        if (plainText != mIsPlainText) {
+            if (plainText) {
+                mSearchText.setPaddingRelative(mStartPaddingWithoutIcon, 0, mEndPadding, 0);
+                mSearchText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+                mIcon.setVisibility(View.GONE);
+            } else {
+                mSearchText.setPaddingRelative(mStartPadding, 0, mEndPadding, 0);
+                mSearchText.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
+                mIcon.setVisibility(View.VISIBLE);
+            }
+            mIsPlainText = plainText;
+
+            // Needed to detect changes to imeOptions
+            mInputMethodManager.restartInput(mSearchText);
+        }
     }
 
     private void onSearch(String query) {
-        for (Toolbar.OnSearchListener listener : mListeners) {
+        mCloseIcon.setVisibility(TextUtils.isEmpty(query) ? View.GONE : View.VISIBLE);
+
+        for (Toolbar.OnSearchListener listener : mSearchListeners) {
             listener.onSearch(query);
         }
     }

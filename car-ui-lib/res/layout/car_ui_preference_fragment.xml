@@ -15,28 +15,27 @@
     limitations under the License.
 -->
 
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:background="@drawable/car_ui_activity_background">
+
+    <FrameLayout
+        android:id="@android:id/list_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <com.android.car.ui.recyclerview.CarUiRecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:enableDivider="true"/>
+    </FrameLayout>
 
     <com.android.car.ui.toolbar.Toolbar
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/toolbar"
         app:state="subpage"/>
-
-    <FrameLayout
-        android:id="@android:id/list_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <com.android.car.ui.pagedrecyclerview.PagedRecyclerView
-            android:id="@+id/recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scrollbars="none"/>
-    </FrameLayout>
-
-</LinearLayout>
+</FrameLayout>
