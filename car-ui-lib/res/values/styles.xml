@@ -72,9 +72,17 @@
         <item name="android:background">@android:color/transparent</item>
     </style>
 
-    <style name="Widget.CarUi.Toolbar.MenuItem.Container" parent="@style/Widget.CarUi.Toolbar">
+    <style name="Widget.CarUi.Toolbar.MenuItem"/>
+
+    <style name="Widget.CarUi.Toolbar.MenuItem.Container">
         <item name="android:divider">@drawable/car_ui_toolbar_menu_item_divider</item>
         <item name="android:showDividers">beginning|middle|end</item>
+    </style>
+
+    <style name="Widget.CarUi.Toolbar.MenuItem.IndividualContainer">
+        <item name="android:minHeight">@dimen/car_ui_touch_target_height</item>
+        <item name="android:minWidth">@dimen/car_ui_touch_target_width</item>
+        <item name="android:layout_gravity">center_vertical</item>
     </style>
 
     <!-- Style applied to the edit box inside the toolbar search area -->
