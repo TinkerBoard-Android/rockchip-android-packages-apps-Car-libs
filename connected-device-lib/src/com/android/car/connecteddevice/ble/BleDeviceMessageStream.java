@@ -34,6 +34,7 @@ import com.android.car.connecteddevice.BleStreamProtos.BleDeviceMessageProto.Ble
 import com.android.car.connecteddevice.util.ByteUtils;
 import com.android.car.protobuf.ByteString;
 import com.android.car.protobuf.InvalidProtocolBufferException;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -265,7 +266,8 @@ class BleDeviceMessageStream {
         logd(TAG, "Sent supported version to the phone.");
     }
 
-    private void processPacket(@NonNull BlePacket packet) {
+    @VisibleForTesting
+    void processPacket(@NonNull BlePacket packet) {
         // Messages are coming in. Need to throttle outgoing messages to allow outgoing
         // notifications to make it to the device.
         mThrottleDelay.set(THROTTLE_WAIT_MS);
@@ -273,6 +275,8 @@ class BleDeviceMessageStream {
         int messageId = packet.getMessageId();
         ByteArrayOutputStream currentPayloadStream =
                 mPendingData.getOrDefault(messageId, new ByteArrayOutputStream());
+        mPendingData.putIfAbsent(messageId, currentPayloadStream);
+
         byte[] payload = packet.getPayload().toByteArray();
         try {
             currentPayloadStream.write(payload);
