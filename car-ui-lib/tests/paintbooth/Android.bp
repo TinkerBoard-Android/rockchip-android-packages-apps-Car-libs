@@ -19,6 +19,8 @@ android_app {
 
     srcs: ["src/**/*.java"],
 
+    required: ["privapp_whitelist_com.android.car.ui.paintbooth"],
+
     resource_dirs: ["res"],
 
     platform_apis: true,
