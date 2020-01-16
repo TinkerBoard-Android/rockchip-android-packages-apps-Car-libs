@@ -58,6 +58,7 @@ public class LocalImageFetcher {
 
     private static final String TAG = "LocalImageFetcher";
     private static final boolean L_WARN = Log.isLoggable(TAG, Log.WARN);
+    private static final boolean L_DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final int KB = 1024;
     private static final int MB = KB * KB;
@@ -146,6 +147,9 @@ public class LocalImageFetcher {
                 task = new ImageLoadingTask(context, key, mFlagRemoteImages);
                 mTasks.put(key, task);
                 task.executeOnExecutor(getThreadPool(packageName));
+                if (L_DEBUG) {
+                    Log.d(TAG, "Added task " + key.mImageUri);
+                }
             } else {
                 Log.e(TAG, "No package for " + key.mImageUri);
             }
@@ -164,8 +168,10 @@ public class LocalImageFetcher {
                 ImageLoadingTask task = mTasks.remove(key);
                 if (task != null) {
                     task.cancel(true);
-                }
-                if (L_WARN) {
+                    if (L_DEBUG) {
+                        Log.d(TAG, "Canceled task " + key.mImageUri);
+                    }
+                } else if (L_WARN) {
                     Log.w(TAG, "cancelRequest missing task for: " + key);
                 }
             }
@@ -283,6 +289,10 @@ public class LocalImageFetcher {
         @UiThread
         @Override
         protected void onPostExecute(Drawable drawable) {
+            if (L_DEBUG) {
+                Log.d(TAG, "onPostExecute canceled:  " + isCancelled() + " drawable: " + drawable
+                        + " " + mImageKey.mImageUri);
+            }
             if (!isCancelled()) {
                 if (sInstance != null) {
                     sInstance.fulfilRequests(this, drawable);
