@@ -26,6 +26,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.AlertDialogBuilder;
 import com.android.car.ui.paintbooth.R;
@@ -161,7 +162,7 @@ public class DialogsActivity extends Activity {
                 .show();
     }
 
-    private static class ViewHolder extends CarUiRecyclerView.ViewHolder {
+    private static class ViewHolder extends RecyclerView.ViewHolder {
 
         private final Button mButton;
 
@@ -176,8 +177,8 @@ public class DialogsActivity extends Activity {
         }
     }
 
-    private final CarUiRecyclerView.Adapter<ViewHolder> mAdapter =
-            new CarUiRecyclerView.Adapter<ViewHolder>() {
+    private final RecyclerView.Adapter<ViewHolder> mAdapter =
+            new RecyclerView.Adapter<ViewHolder>() {
                 @Override
                 public int getItemCount() {
                     return mButtons.size();

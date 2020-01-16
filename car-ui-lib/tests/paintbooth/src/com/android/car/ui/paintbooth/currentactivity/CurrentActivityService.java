@@ -207,7 +207,7 @@ public class CurrentActivityService extends Service {
         });
     }
 
-    private TaskStackListener mTaskStackListener = new TaskStackListener() {
+    private final TaskStackListener mTaskStackListener = new TaskStackListener() {
         @Override
         public void onTaskCreated(int taskId, ComponentName componentName) {
             updateComponentName(componentName);

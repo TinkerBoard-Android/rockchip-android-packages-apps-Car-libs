@@ -353,7 +353,7 @@ public class MenuItem {
                 throw new IllegalStateException("Can't have both a search and settings MenuItem");
             }
 
-            if (mIsSearch && (!mSearchTitle.equals(mTitle)
+            if (mIsSearch && (!mSearchTitle.contentEquals(mTitle)
                     || !mSearchIcon.equals(mIcon)
                     || mIsCheckable
                     || mIsActivatable
@@ -363,7 +363,7 @@ public class MenuItem {
                 throw new IllegalStateException("Invalid search MenuItem");
             }
 
-            if (mIsSettings && (!mSettingsTitle.equals(mTitle)
+            if (mIsSettings && (!mSettingsTitle.contentEquals(mTitle)
                     || !mSettingsIcon.equals(mIcon)
                     || mIsCheckable
                     || mIsActivatable

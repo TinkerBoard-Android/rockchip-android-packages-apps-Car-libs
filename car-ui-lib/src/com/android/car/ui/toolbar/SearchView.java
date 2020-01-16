@@ -15,7 +15,6 @@
  */
 package com.android.car.ui.toolbar;
 
-import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
@@ -29,6 +28,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.android.car.ui.R;
@@ -125,7 +125,7 @@ public class SearchView extends ConstraintLayout {
     private boolean mWasShown = false;
 
     @Override
-    public void onVisibilityChanged(@NonNull View changedView, @View.Visibility int visibility) {
+    public void onVisibilityChanged(@NonNull View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
 
         boolean isShown = isShown();
