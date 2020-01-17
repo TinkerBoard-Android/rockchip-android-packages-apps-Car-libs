@@ -14,7 +14,7 @@
 //
 
 android_library {
-    name: "car-apps-common-bp",
+    name: "car-apps-common",
 
     srcs: ["src/**/*.java"],
 
@@ -36,5 +36,4 @@ android_library {
         "androidx.recyclerview_recyclerview",
         "androidx-constraintlayout_constraintlayout-solver",
     ],
-
 }
