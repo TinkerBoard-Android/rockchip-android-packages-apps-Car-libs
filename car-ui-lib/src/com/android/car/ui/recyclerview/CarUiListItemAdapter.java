@@ -161,6 +161,7 @@ public final class CarUiListItemAdapter extends
         private final ImageView mSupplementalIcon;
         private final View mTouchInterceptor;
         private final View mReducedTouchInterceptor;
+        private final View mActionContainerTouchInterceptor;
 
 
         ListItemViewHolder(@NonNull View itemView) {
@@ -177,6 +178,8 @@ public final class CarUiListItemAdapter extends
             mSupplementalIcon = itemView.requireViewById(R.id.supplemental_icon);
             mReducedTouchInterceptor = itemView.requireViewById(R.id.reduced_touch_interceptor);
             mTouchInterceptor = itemView.requireViewById(R.id.touch_interceptor);
+            mActionContainerTouchInterceptor = itemView.requireViewById(
+                    R.id.action_container_touch_interceptor);
         }
 
         private void bind(@NonNull CarUiContentListItem item) {
@@ -193,6 +196,7 @@ public final class CarUiListItemAdapter extends
 
             if (!TextUtils.isEmpty(body)) {
                 mBody.setText(body);
+                mBody.setVisibility(View.VISIBLE);
             } else {
                 mBody.setVisibility(View.GONE);
             }
@@ -220,6 +224,7 @@ public final class CarUiListItemAdapter extends
                     // touch interceptor.
                     mTouchInterceptor.setVisibility(View.VISIBLE);
                     mReducedTouchInterceptor.setVisibility(View.GONE);
+                    mActionContainerTouchInterceptor.setVisibility(View.GONE);
                     break;
                 case SWITCH:
                     mSwitch.setVisibility(View.VISIBLE);
@@ -240,6 +245,7 @@ public final class CarUiListItemAdapter extends
                     mTouchInterceptor.setVisibility(View.VISIBLE);
                     mTouchInterceptor.setOnClickListener(v -> mSwitch.toggle());
                     mReducedTouchInterceptor.setVisibility(View.GONE);
+                    mActionContainerTouchInterceptor.setVisibility(View.GONE);
 
                     mActionContainer.setVisibility(View.VISIBLE);
                     mActionContainer.setClickable(false);
@@ -263,6 +269,7 @@ public final class CarUiListItemAdapter extends
                     mTouchInterceptor.setVisibility(View.VISIBLE);
                     mTouchInterceptor.setOnClickListener(v -> mCheckBox.toggle());
                     mReducedTouchInterceptor.setVisibility(View.GONE);
+                    mActionContainerTouchInterceptor.setVisibility(View.GONE);
 
                     mActionContainer.setVisibility(View.VISIBLE);
                     mActionContainer.setClickable(false);
@@ -286,6 +293,7 @@ public final class CarUiListItemAdapter extends
                     mTouchInterceptor.setVisibility(View.VISIBLE);
                     mTouchInterceptor.setOnClickListener(v -> mRadioButton.toggle());
                     mReducedTouchInterceptor.setVisibility(View.GONE);
+                    mActionContainerTouchInterceptor.setVisibility(View.GONE);
 
                     mActionContainer.setVisibility(View.VISIBLE);
                     mActionContainer.setClickable(false);
@@ -294,7 +302,7 @@ public final class CarUiListItemAdapter extends
                     mSupplementalIcon.setVisibility(View.VISIBLE);
                     mSupplementalIcon.setImageDrawable(item.getSupplementalIcon());
                     mActionContainer.setVisibility(View.VISIBLE);
-                    mActionContainer.setOnClickListener(
+                    mActionContainerTouchInterceptor.setOnClickListener(
                             (container) -> {
                                 if (item.getSupplementalIconOnClickListener() != null) {
                                     item.getSupplementalIconOnClickListener().onClick(mIcon);
@@ -309,10 +317,10 @@ public final class CarUiListItemAdapter extends
                         mTouchInterceptor.setVisibility(View.VISIBLE);
                         mTouchInterceptor.setOnClickListener(null);
                         mReducedTouchInterceptor.setVisibility(View.GONE);
-                        mActionContainer.setClickable(false);
+                        mActionContainerTouchInterceptor.setVisibility(View.GONE);
                     } else {
                         mReducedTouchInterceptor.setVisibility(View.VISIBLE);
-                        mReducedTouchInterceptor.setOnClickListener(null);
+                        mActionContainerTouchInterceptor.setVisibility(View.VISIBLE);
                         mTouchInterceptor.setVisibility(View.GONE);
                     }
                     break;
