@@ -22,6 +22,7 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.text.InputFilter;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,6 +50,7 @@ public class AlertDialogBuilder {
     private CharSequence mTitle;
     private CharSequence mSubtitle;
     private Drawable mIcon;
+    private boolean mIconTinted;
 
     public AlertDialogBuilder(Context context) {
         // Resource id specified as 0 uses the parent contexts resolved value for alertDialogTheme.
@@ -146,7 +148,18 @@ public class AlertDialogBuilder {
      */
     public AlertDialogBuilder setIcon(Drawable icon) {
         mIcon = icon;
-        mBuilder.setIcon(icon);
+        return this;
+    }
+
+    /**
+     * Whether the icon provided by {@link #setIcon(Drawable)} should be
+     * tinted with the default system color.
+     *
+     * @return this Builder object to allow for chaining of calls to set
+     * methods.
+     */
+    public AlertDialogBuilder setIconTinted(boolean tinted) {
+        mIconTinted = tinted;
         return this;
     }
 
@@ -154,8 +167,7 @@ public class AlertDialogBuilder {
      * Set an icon as supplied by a theme attribute. e.g.
      * {@link android.R.attr#alertDialogIcon}.
      * <p>
-     * Takes precedence over values set using {@link #setIcon(int)} or
-     * {@link #setIcon(Drawable)}.
+     * Takes precedence over values set using {@link #setIcon(Drawable)}.
      *
      * @param attrId ID of a theme attribute that points to a drawable resource.
      */
@@ -571,21 +583,24 @@ public class AlertDialogBuilder {
 
     /** Final steps common to both {@link #create()} and {@link #show()} */
     private void prepareDialog() {
-        if (mSubtitle != null) {
+        View customTitle = LayoutInflater.from(mContext).inflate(
+                R.layout.car_ui_alert_dialog_title_with_subtitle, null);
 
-            View customTitle = LayoutInflater.from(mContext).inflate(
-                    R.layout.car_ui_alert_dialog_title_with_subtitle, null);
+        TextView mTitleView = customTitle.requireViewById(R.id.alertTitle);
+        TextView mSubtitleView = customTitle.requireViewById(R.id.alertSubtitle);
+        ImageView mIconView = customTitle.requireViewById(R.id.icon);
 
-            TextView mTitleView = customTitle.requireViewById(R.id.alertTitle);
-            TextView mSubtitleView = customTitle.requireViewById(R.id.alertSubtitle);
-            ImageView mIconView = customTitle.requireViewById(R.id.icon);
-
-            mTitleView.setText(mTitle);
-            mSubtitleView.setText(mSubtitle);
-            mIconView.setImageDrawable(mIcon);
-            mIconView.setVisibility(mIcon != null ? View.VISIBLE : View.GONE);
-            mBuilder.setCustomTitle(customTitle);
+        mTitleView.setText(mTitle);
+        mTitleView.setVisibility(TextUtils.isEmpty(mTitle) ? View.GONE : View.VISIBLE);
+        mSubtitleView.setText(mSubtitle);
+        mSubtitleView.setVisibility(TextUtils.isEmpty(mSubtitle) ? View.GONE : View.VISIBLE);
+        mIconView.setImageDrawable(mIcon);
+        mIconView.setVisibility(mIcon != null ? View.VISIBLE : View.GONE);
+        if (mIconTinted) {
+            mIconView.setImageTintList(
+                    mContext.getColorStateList(R.color.car_ui_dialog_icon_color));
         }
+        mBuilder.setCustomTitle(customTitle);
 
         if (!mNeutralButtonSet && !mNegativeButtonSet && !mPositiveButtonSet) {
             String mDefaultButtonText = mContext.getString(
