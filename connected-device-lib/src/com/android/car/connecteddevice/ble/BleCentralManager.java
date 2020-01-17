@@ -20,6 +20,7 @@ import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
 import static com.android.car.connecteddevice.util.SafeLog.logw;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.bluetooth.BluetoothAdapter;
@@ -32,11 +33,10 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 
-import com.android.internal.annotations.GuardedBy;
-
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class that manages BLE scanning operations.
@@ -63,15 +63,17 @@ public class BleCentralManager {
 
     private int mScannerStartCount = 0;
 
-    private Lock mLock = new ReentrantLock();
-    @GuardedBy("mLock")
-    private volatile ScannerState mScannerState = ScannerState.STOPPED;
-
-    private enum ScannerState {
-        STOPPED,
-        STARTED,
-        SCANNING
-    }
+    private AtomicInteger mScannerState = new AtomicInteger(STOPPED);
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            STOPPED,
+            STARTED,
+            SCANNING
+    })
+    private @interface ScannerState {}
+    private static final int STOPPED = 0;
+    private static final int STARTED = 1;
+    private static final int SCANNING = 2;
 
     public BleCentralManager(@NonNull Context context) {
         mContext = context;
@@ -96,7 +98,7 @@ public class BleCentralManager {
         mScanFilters = filters;
         mScanSettings = settings;
         mScanCallback = callback;
-        updateScannerState(ScannerState.STARTED);
+        updateScannerState(STARTED);
         startScanningInternally();
     }
 
@@ -107,17 +109,12 @@ public class BleCentralManager {
             mScanner.stopScan(mInternalScanCallback);
         }
         mScanCallback = null;
-        updateScannerState(ScannerState.STOPPED);
+        updateScannerState(STOPPED);
     }
 
-    /** Returns `true` if currently scanning, `false` otherwise. */
+    /** Returns {@code true} if currently scanning, {@code false} otherwise. */
     public boolean isScanning() {
-        mLock.lock();
-        try {
-            return mScannerState == ScannerState.SCANNING;
-        } finally {
-            mLock.unlock();
-        }
+        return mScannerState.get() == SCANNING;
     }
 
     /** Clean up the scanning process. */
@@ -134,7 +131,7 @@ public class BleCentralManager {
         }
         if (mScanner != null) {
             mScanner.startScan(mScanFilters, mScanSettings, mInternalScanCallback);
-            updateScannerState(ScannerState.SCANNING);
+            updateScannerState(SCANNING);
         } else {
             mHandler.postDelayed(() -> {
                 // Keep trying
@@ -144,13 +141,8 @@ public class BleCentralManager {
         }
     }
 
-    private void updateScannerState(ScannerState newState) {
-        mLock.lock();
-        try {
-            mScannerState = newState;
-        } finally {
-            mLock.unlock();
-        }
+    private void updateScannerState(@ScannerState int newState) {
+        mScannerState.set(newState);
     }
 
     private final ScanCallback mInternalScanCallback = new ScanCallback() {

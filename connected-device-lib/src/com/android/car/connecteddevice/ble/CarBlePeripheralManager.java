@@ -471,8 +471,9 @@ public class CarBlePeripheralManager extends CarBleManager {
                         return;
                     }
 
-                    logd(TAG, "Received new message from $deviceId. Notifying " + mCallbacks.size()
-                            + " callbacks.");
+                    logd(TAG, "Received new message from " + connectedDevice.mDeviceId
+                            + " with " + deviceMessage.getMessage().length + " in its payload. "
+                            + "Notifying " + mCallbacks.size() + " callbacks.");
                     mCallbacks.invoke(
                             callback ->callback.onMessageReceived(connectedDevice.mDeviceId,
                                     deviceMessage));

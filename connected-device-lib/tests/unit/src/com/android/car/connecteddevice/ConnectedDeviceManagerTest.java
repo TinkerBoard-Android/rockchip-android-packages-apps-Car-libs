@@ -155,17 +155,6 @@ public class ConnectedDeviceManagerTest {
         assertThat(mConnectedDeviceManager.getActiveUserConnectedDevices()).hasSize(1);
     }
 
-    @Test
-    public void connectToActiveUserDevice_startsAdvertisingWithDeviceId()
-            throws InterruptedException {
-        UUID deviceId = UUID.randomUUID();
-        when(mMockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(
-                Collections.singletonList(deviceId.toString()));
-        mConnectedDeviceManager.connectToActiveUserDevice();
-        Thread.sleep(100); // Below verify call is made on a background thread.
-        verify(mMockPeripheralManager).connectToDevice(deviceId);
-    }
-
     @Test(expected = IllegalStateException.class)
     public void sendMessageSecurely_throwsIllegalStateExceptionIfNoSecureChannel() {
         connectNewDevice(mMockCentralManager);

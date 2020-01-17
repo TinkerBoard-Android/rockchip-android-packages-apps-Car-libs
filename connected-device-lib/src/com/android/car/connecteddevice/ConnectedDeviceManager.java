@@ -26,7 +26,6 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.content.Context;
 
 import com.android.car.connecteddevice.ble.BleCentralManager;
@@ -41,12 +40,10 @@ import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage.AssociatedDeviceCallback;
 import com.android.car.connecteddevice.util.ByteUtils;
 import com.android.car.connecteddevice.util.ThreadSafeCallbacks;
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,8 +53,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 /** Manager of devices connected to the car. */
@@ -108,16 +104,7 @@ public class ConnectedDeviceManager {
     // callback notifications.
     private final Set<UUID> mBlacklistedRecipients = new CopyOnWriteArraySet<>();
 
-    private final Lock mLock = new ReentrantLock();
-    @GuardedBy("mLock")
-    private volatile boolean mIsConnectingToUserDevice = false;
-
-    @GuardedBy("mLock")
-    private volatile boolean mIsStarted = false;
-
-    // True if a request to connect came in before manager has started.
-    @GuardedBy("mLock")
-    private volatile boolean mHasDelayedConnectionRequest = false;
+    private final AtomicBoolean mIsConnectingToUserDevice = new AtomicBoolean(false);
 
     private String mNameForAssociation;
 
@@ -198,32 +185,13 @@ public class ConnectedDeviceManager {
         logd(TAG, "Starting ConnectedDeviceManager.");
         //mCentralManager.start();
         mPeripheralManager.start();
-        boolean hasDelayedRequest = false;
-        mLock.lock();
-        try {
-            mIsStarted = true;
-            hasDelayedRequest = mHasDelayedConnectionRequest;
-            mHasDelayedConnectionRequest = false;
-        } finally {
-            mLock.unlock();
-        }
-
-        if (hasDelayedRequest) {
-            connectToActiveUserDevice();
-        }
+        connectToActiveUserDevice();
     }
 
     /** Clean up internal processes and disconnect any active connections. */
     public void cleanup() {
         logd(TAG, "Cleaning up ConnectedDeviceManager.");
-        mLock.lock();
-        try {
-            mIsStarted = false;
-            mHasDelayedConnectionRequest = false;
-            mIsConnectingToUserDevice = false;
-        } finally {
-            mLock.unlock();
-        }
+        mIsConnectingToUserDevice.set(false);
         mCentralManager.stop();
         mPeripheralManager.stop();
         mDeviceCallbacks.clear();
@@ -289,47 +257,41 @@ public class ConnectedDeviceManager {
     }
 
     /** Connect to a device for the active user if available. */
-    public void connectToActiveUserDevice() {
+    @VisibleForTesting
+    void connectToActiveUserDevice() {
         Executors.defaultThreadFactory().newThread(() -> {
             logd(TAG, "Received request to connect to active user's device.");
-            mLock.lock();
-            try {
-                if (!mIsStarted) {
-                    mHasDelayedConnectionRequest = true;
-                    logd(TAG,
-                            "Manager has not been started yet. Deferring connection request until "
-                                    + "after start.");
-                    return;
-                }
-                if (mIsConnectingToUserDevice) {
-                    logd(TAG, "A request has already been made to connect to this user's device. "
-                            + "Ignoring redundant request.");
-                    return;
-                }
-                List<String> userDeviceIds = mStorage.getActiveUserAssociatedDeviceIds();
-                if (userDeviceIds.isEmpty()) {
-                    logw(TAG, "No devices associated with active user. Ignoring.");
-                    return;
-                }
-
-                // Only currently support one device per user for fast association, so take the
-                // first one.
-                String userDeviceId = userDeviceIds.get(0);
-                byte[] key = mStorage.getEncryptionKey(userDeviceId);
-                logd(TAG, "Found encryption key of value " + Arrays.toString(key));
-                if (mConnectedDevices.containsKey(userDeviceId)) {
-                    logd(TAG, "Device has already been connected. No need to attempt connection "
-                            + "again.");
-                    return;
-                }
-                mIsConnectingToUserDevice = true;
-                mPeripheralManager.connectToDevice(UUID.fromString(userDeviceId));
-            } catch (Exception e) {
-                loge(TAG, "Exception while attempting connection with active user's device.", e);
-            } finally {
-                mLock.unlock();
-            }
+            connectToActiveUserDeviceInternal();
         }).start();
+    }
+
+    private void connectToActiveUserDeviceInternal() {
+        try {
+            if (mIsConnectingToUserDevice.get()) {
+                logd(TAG, "A request has already been made to connect to this user's device. "
+                        + "Ignoring redundant request.");
+                return;
+            }
+            List<String> userDeviceIds = mStorage.getActiveUserAssociatedDeviceIds();
+            if (userDeviceIds.isEmpty()) {
+                logw(TAG, "No devices associated with active user. Ignoring.");
+                return;
+            }
+
+            // Only currently support one device per user for fast association, so take the
+            // first one.
+            String userDeviceId = userDeviceIds.get(0);
+            byte[] key = mStorage.getEncryptionKey(userDeviceId);
+            if (mConnectedDevices.containsKey(userDeviceId)) {
+                logd(TAG, "Device has already been connected. No need to attempt connection "
+                        + "again.");
+                return;
+            }
+            mIsConnectingToUserDevice.set(true);
+            mPeripheralManager.connectToDevice(UUID.fromString(userDeviceId));
+        } catch (Exception e) {
+            loge(TAG, "Exception while attempting connection with active user's device.", e);
+        }
     }
 
     /**
@@ -595,12 +557,7 @@ public class ConnectedDeviceManager {
 
         // If disconnect happened on peripheral, open for future requests to connect.
         if (bleManager == mPeripheralManager) {
-            mLock.lock();
-            try {
-                mIsConnectingToUserDevice = false;
-            } finally {
-                mLock.unlock();
-            }
+            mIsConnectingToUserDevice.set(false);
         }
     }
 
@@ -696,7 +653,7 @@ public class ConnectedDeviceManager {
 
     @NonNull
     private List<String> getActiveUserDeviceIds() {
-        return mStorage.getAssociatedDeviceIdsForUser(ActivityManager.getCurrentUser());
+        return mStorage.getActiveUserAssociatedDeviceIds();
     }
 
     @Nullable
