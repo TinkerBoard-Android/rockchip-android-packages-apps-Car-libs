@@ -171,10 +171,10 @@ public class CarBlePeripheralManagerTest {
         assertThat(channelCallback).isNotNull();
         channelCallback.onDeviceIdReceived(TEST_REMOTE_DEVICE_ID.toString());
         Key key = EncryptionRunnerFactory.newDummyRunner().keyOf(TEST_KEY);
-        channelCallback.onSecureChannelEstablished(key);
+        channelCallback.onSecureChannelEstablished();
         ArgumentCaptor<AssociatedDevice> deviceCaptor =
                 ArgumentCaptor.forClass(AssociatedDevice.class);
-        verify(mMockStorage).addAssociatedDeviceForActiveUser(deviceCaptor.capture(), any());
+        verify(mMockStorage).addAssociatedDeviceForActiveUser(deviceCaptor.capture());
         AssociatedDevice device = deviceCaptor.getValue();
         assertThat(device.getDeviceId()).isEqualTo(TEST_REMOTE_DEVICE_ID.toString());
         assertThat(tryAcquire(semaphore)).isTrue();

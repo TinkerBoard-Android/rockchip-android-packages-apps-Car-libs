@@ -28,7 +28,6 @@ import static org.mockito.Mockito.when;
 
 import android.car.encryptionrunner.DummyEncryptionRunner;
 import android.car.encryptionrunner.EncryptionRunnerFactory;
-import android.car.encryptionrunner.Key;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
@@ -98,7 +97,7 @@ public final class SecureBleChannelTest {
         byte[] confirmMessage = messageCaptor.getValue().getMessage();
         assertThat(confirmMessage).isEqualTo(SecureBleChannel.CONFIRMATION_SIGNAL);
         assertThat(semaphore.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
-        verify(callbackSpy).onSecureChannelEstablished(any());
+        verify(callbackSpy).onSecureChannelEstablished();
     }
 
     @Test
@@ -195,7 +194,7 @@ public final class SecureBleChannelTest {
             mSemaphore = semaphore;
         }
         @Override
-        public void onSecureChannelEstablished(Key encryptionKey) {
+        public void onSecureChannelEstablished() {
             mSemaphore.release();
         }
 

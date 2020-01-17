@@ -116,8 +116,9 @@ public class ConnectedDeviceStorage {
      */
     @Nullable
     public byte[] getEncryptionKey(@NonNull String deviceId) {
-        AssociatedDeviceEntity entity = mAssociatedDeviceDatabase.getAssociatedDevice(deviceId);
-        if (entity == null || entity.encryptedKey == null) {
+        AssociatedDeviceKeyEntity entity =
+                mAssociatedDeviceDatabase.getAssociatedDeviceKey(deviceId);
+        if (entity == null) {
             logd(TAG, "Encryption key not found!");
             return null;
         }
@@ -141,13 +142,8 @@ public class ConnectedDeviceStorage {
      */
     public void saveEncryptionKey(@NonNull String deviceId, @NonNull byte[] encryptionKey) {
         String encryptedKey = encryptWithKeyStore(KEY_ALIAS, encryptionKey);
-        AssociatedDeviceEntity entity = mAssociatedDeviceDatabase.getAssociatedDevice(deviceId);
-        if (entity == null) {
-            entity = new AssociatedDeviceEntity();
-            entity.id = deviceId;
-        }
-        entity.encryptedKey = encryptedKey;
-        mAssociatedDeviceDatabase.addOrUpdateAssociatedDevice(entity);
+        AssociatedDeviceKeyEntity entity = new AssociatedDeviceKeyEntity(deviceId, encryptedKey);
+        mAssociatedDeviceDatabase.addOrReplaceAssociatedDeviceKey(entity);
         logd(TAG, "Successfully wrote encryption key.");
     }
 
@@ -362,11 +358,9 @@ public class ConnectedDeviceStorage {
      * Add the associated device of the given deviceId for the currently active user.
      *
      * @param device New associated device to be added.
-     * @param encryptionKey They encryption key used for association.
      */
-    public void addAssociatedDeviceForActiveUser(@NonNull AssociatedDevice device,
-            @NonNull byte[] encryptionKey) {
-        addAssociatedDeviceForUser(ActivityManager.getCurrentUser(), device, encryptionKey);
+    public void addAssociatedDeviceForActiveUser(@NonNull AssociatedDevice device) {
+        addAssociatedDeviceForUser(ActivityManager.getCurrentUser(), device);
         if (mAssociatedDeviceCallback != null) {
             mAssociatedDeviceCallback.onAssociatedDeviceAdded(device.getDeviceId());
         }
@@ -378,13 +372,10 @@ public class ConnectedDeviceStorage {
      *
      * @param userId The identifier of the user.
      * @param device New associated device to be added.
-     * @param encryptionKey They encryption key used for association.
      */
-    public void addAssociatedDeviceForUser(int userId, @NonNull AssociatedDevice device,
-            @NonNull byte[] encryptionKey) {
+    public void addAssociatedDeviceForUser(int userId, @NonNull AssociatedDevice device) {
         AssociatedDeviceEntity entity = new AssociatedDeviceEntity(userId, device);
-        entity.encryptedKey = encryptWithKeyStore(KEY_ALIAS, encryptionKey);
-        mAssociatedDeviceDatabase.addOrUpdateAssociatedDevice(entity);
+        mAssociatedDeviceDatabase.addOrReplaceAssociatedDevice(entity);
     }
 
     /**
@@ -401,7 +392,7 @@ public class ConnectedDeviceStorage {
             return;
         }
         entity.name = name;
-        mAssociatedDeviceDatabase.addOrUpdateAssociatedDevice(entity);
+        mAssociatedDeviceDatabase.addOrReplaceAssociatedDevice(entity);
         if (mAssociatedDeviceCallback != null) {
             mAssociatedDeviceCallback.onAssociatedDeviceUpdated(
                     new AssociatedDevice(deviceId, entity.address, name));

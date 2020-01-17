@@ -43,10 +43,6 @@ public class AssociatedDeviceEntity {
     @Nullable
     public String name;
 
-    /** Encrypted key for secure session. */
-    @NonNull
-    public String encryptedKey;
-
     public AssociatedDeviceEntity() { }
 
     public AssociatedDeviceEntity(int userId, AssociatedDevice associatedDevice) {
