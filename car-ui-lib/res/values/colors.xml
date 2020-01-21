@@ -17,7 +17,7 @@
     <!-- General -->
 
     <!-- Background color to use on full screen activities -->
-    <color name="car_ui_activity_background_color">@color/car_ui_window_background</color>
+    <color name="car_ui_activity_background_color">#000000</color>
     <!-- The ripple color. -->
     <color name="car_ui_ripple_color">#27ffffff</color>
 
