@@ -231,6 +231,7 @@
   <public type="style" name="TextAppearance.CarUi.Widget.Toolbar.Tab.Selected"/>
   <public type="style" name="TextAppearance.CarUi.Widget.Toolbar.Title"/>
   <public type="style" name="Theme.CarUi"/>
+  <public type="style" name="Theme.CarUi.WithActionBar"/>
   <public type="style" name="Widget.CarUi"/>
   <public type="style" name="Widget.CarUi.AlertDialog"/>
   <public type="style" name="Widget.CarUi.AlertDialog.HeaderContainer"/>

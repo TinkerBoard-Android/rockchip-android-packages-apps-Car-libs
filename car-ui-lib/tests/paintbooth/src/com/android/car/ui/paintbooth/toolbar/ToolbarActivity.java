@@ -15,7 +15,6 @@
  */
 package com.android.car.ui.paintbooth.toolbar;
 
-import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
@@ -32,18 +31,20 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.AlertDialogBuilder;
+import com.android.car.ui.CarUiAppCompatActivity;
 import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.MenuItem;
 import com.android.car.ui.toolbar.TabLayout;
 import com.android.car.ui.toolbar.Toolbar;
+import com.android.car.ui.toolbar.ToolbarController;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ToolbarActivity extends Activity {
+public class ToolbarActivity extends CarUiAppCompatActivity {
 
     private List<MenuItem> mMenuItems = new ArrayList<>();
     private List<Pair<CharSequence, View.OnClickListener>> mButtons = new ArrayList<>();
@@ -51,9 +52,11 @@ public class ToolbarActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.car_ui_recycler_view_activity);
+        setContentView(R.layout.car_ui_recycler_view_activity_without_toolbar);
 
-        Toolbar toolbar = requireViewById(R.id.toolbar);
+        ToolbarController toolbar = getCarUiToolbar();
+        toolbar.setLogo(R.drawable.ic_launcher);
+        toolbar.setState(Toolbar.State.SUBPAGE);
         toolbar.registerOnBackListener(
                 () -> {
                     if (toolbar.getState() == Toolbar.State.SEARCH
