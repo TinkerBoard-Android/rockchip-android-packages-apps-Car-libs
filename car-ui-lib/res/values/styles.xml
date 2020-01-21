@@ -190,6 +190,14 @@
         <item name="showSeekBarValue">false</item>
     </style>
 
+    <style name="Preference.CarUi.DialogSeekBarPreference"/>
+
+    <style name="Preference.CarUi.DialogSeekBarPreference.Seekbar"/>
+
+    <style name="Preference.CarUi.DialogSeekBarPreference.TopText"/>
+    <style name="Preference.CarUi.DialogSeekBarPreference.RightText"/>
+    <style name="Preference.CarUi.DialogSeekBarPreference.LeftText"/>
+
     <style name="Preference.CarUi.SwitchPreference">
         <item name="android:widgetLayout">@layout/car_ui_preference_widget_switch</item>
         <item name="android:switchTextOn">@string/car_ui_preference_switch_on</item>

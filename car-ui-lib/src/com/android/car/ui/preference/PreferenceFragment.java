@@ -119,6 +119,8 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat {
             f = ListPreferenceFragment.newInstance(preference.getKey());
         } else if (preference instanceof MultiSelectListPreference) {
             f = MultiSelectListPreferenceFragment.newInstance(preference.getKey());
+        } else if (preference instanceof CarUiSeekBarDialogPreference) {
+            f = SeekbarPreferenceDialogFragment.newInstance(preference.getKey());
         } else {
             throw new IllegalArgumentException(
                     "Cannot display dialog for an unknown Preference type: "

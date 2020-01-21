@@ -188,6 +188,11 @@
   <public type="style" name="Preference.CarUi.CheckBoxPreference"/>
   <public type="style" name="Preference.CarUi.DialogPreference"/>
   <public type="style" name="Preference.CarUi.DialogPreference.EditTextPreference"/>
+  <public type="style" name="Preference.CarUi.DialogSeekBarPreference"/>
+  <public type="style" name="Preference.CarUi.DialogSeekBarPreference.LeftText"/>
+  <public type="style" name="Preference.CarUi.DialogSeekBarPreference.RightText"/>
+  <public type="style" name="Preference.CarUi.DialogSeekBarPreference.Seekbar"/>
+  <public type="style" name="Preference.CarUi.DialogSeekBarPreference.TopText"/>
   <public type="style" name="Preference.CarUi.Divider"/>
   <public type="style" name="Preference.CarUi.DropDown"/>
   <public type="style" name="Preference.CarUi.Icon"/>
