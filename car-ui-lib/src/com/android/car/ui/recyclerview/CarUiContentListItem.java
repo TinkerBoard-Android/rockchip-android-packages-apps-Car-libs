@@ -34,10 +34,26 @@ public class CarUiContentListItem extends CarUiListItem {
         /**
          * Called when the checked state of a list item has changed.
          *
-         * @param item The item whose checked state changed.
+         * @param item      The item whose checked state changed.
          * @param isChecked new checked state of list item.
          */
         void onCheckedChanged(CarUiContentListItem item, boolean isChecked);
+    }
+
+    public enum IconType {
+        /**
+         * For an icon type of CONTENT, the primary icon is a larger than {@code STANDARD}.
+         */
+        CONTENT,
+        /**
+         * For an icon type of STANDARD, the primary icon is the standard size.
+         */
+        STANDARD,
+        /**
+         * For an icon type of AVATAR, the primary icon is masked to provide an icon with a modified
+         * shape.
+         */
+        AVATAR
     }
 
     /**
@@ -74,6 +90,7 @@ public class CarUiContentListItem extends CarUiListItem {
     private CharSequence mTitle;
     private CharSequence mBody;
     private Action mAction;
+    private IconType mPrimaryIconType;
     private boolean mIsActionDividerVisible;
     private boolean mIsChecked;
     private OnCheckedChangedListener mOnCheckedChangedListener;
@@ -81,6 +98,7 @@ public class CarUiContentListItem extends CarUiListItem {
 
     public CarUiContentListItem() {
         mAction = Action.NONE;
+        mPrimaryIconType = IconType.STANDARD;
     }
 
     /**
@@ -132,6 +150,22 @@ public class CarUiContentListItem extends CarUiListItem {
      */
     public void setIcon(@Nullable Drawable icon) {
         mIcon = icon;
+    }
+
+    /**
+     * Returns the primary icon type for the item.
+     */
+    public IconType getPrimaryIconType() {
+        return mPrimaryIconType;
+    }
+
+    /**
+     * Sets the primary icon type for the item.
+     *
+     * @param icon the icon type for the item.
+     */
+    public void setPrimaryIconType(IconType icon) {
+        mPrimaryIconType = icon;
     }
 
     /**
