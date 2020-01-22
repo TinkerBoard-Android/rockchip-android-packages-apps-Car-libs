@@ -17,6 +17,7 @@
   <public type="bool" name="car_ui_toolbar_tabs_on_second_row"/>
   <public type="color" name="car_ui_activity_background_color"/>
   <public type="color" name="car_ui_color_accent"/>
+  <public type="color" name="car_ui_dialog_icon_color"/>
   <public type="color" name="car_ui_list_item_divider"/>
   <public type="color" name="car_ui_preference_icon_color"/>
   <public type="color" name="car_ui_preference_two_action_divider_color"/>
