@@ -19,9 +19,6 @@ package com.android.car.messenger.common;
 import static com.android.car.connecteddevice.util.SafeLog.logw;
 
 import android.annotation.Nullable;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothMapClient;
-import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
 
@@ -31,7 +28,7 @@ import com.android.car.messenger.NotificationMsgProto.NotificationMsg.MessagingS
 
 /**
  * Represents a SMS, MMS, and {@link NotificationMsg}. This object is based
- * on {@link NotificationMsg} and intents sent from {@link BluetoothMapClient}.
+ * on {@link NotificationMsg}.
  */
 public class Message {
     private static final String TAG = "CMC.Message";
@@ -59,29 +56,6 @@ public class Message {
      */
     public enum MessageType {
         BLUETOOTH_MAP_MESSAGE, NOTIFICATION_MESSAGE
-    }
-
-    /** Creates a Message for messages received through Bluetooth MAP profile. **/
-    public static Message parseFromIntent(Intent intent) {
-        BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-        String senderName = intent.getStringExtra(BluetoothMapClient.EXTRA_SENDER_CONTACT_NAME);
-        String messageText = intent.getStringExtra(android.content.Intent.EXTRA_TEXT);
-        long receiveTime = intent.getLongExtra(BluetoothMapClient.EXTRA_MESSAGE_TIMESTAMP,
-                System.currentTimeMillis());
-        boolean isRead = intent.getBooleanExtra(BluetoothMapClient.EXTRA_MESSAGE_READ_STATUS,
-                false);
-        String handle = intent.getStringExtra(BluetoothMapClient.EXTRA_MESSAGE_HANDLE);
-        String senderUri = intent.getStringExtra(BluetoothMapClient.EXTRA_SENDER_CONTACT_URI);
-
-        return new Message(senderName,
-                device.getAddress(),
-                messageText,
-                receiveTime,
-                isRead,
-                handle,
-                MessageType.BLUETOOTH_MAP_MESSAGE,
-                senderUri
-        );
     }
 
     /**

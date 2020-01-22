@@ -16,8 +16,6 @@
 
 package com.android.car.messenger.common;
 
-import android.bluetooth.BluetoothMapClient;
-import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -29,19 +27,6 @@ public class ConversationKey extends CompositeKey implements Parcelable {
 
     public ConversationKey(String deviceId, String key) {
         super(deviceId, key);
-    }
-
-    /**
-     * Creates a ConversationKey for a MMS/SMS message from a {@link BluetoothMapClient} intent.
-     **/
-    public static ConversationKey createMmsSmsConversationKey(Intent intent) {
-        // Use a combination of senderName and senderContactUri for key. Ideally we would use
-        // only senderContactUri (which is encoded phone no.). However since some phones don't
-        // provide these, we fall back to senderName. Since senderName may not be unique, we
-        // include senderContactUri also to provide uniqueness in cases it is available.
-        return new ConversationKey(Utils.getBluetoothDeviceAddress(intent),
-                intent.getStringExtra(BluetoothMapClient.EXTRA_SENDER_CONTACT_NAME)
-                        + "/" + intent.getStringExtra(BluetoothMapClient.EXTRA_SENDER_CONTACT_URI));
     }
 
     @Override

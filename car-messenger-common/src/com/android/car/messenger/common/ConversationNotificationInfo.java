@@ -19,9 +19,6 @@ package com.android.car.messenger.common;
 import static com.android.car.connecteddevice.util.SafeLog.logw;
 
 import android.annotation.Nullable;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothMapClient;
-import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
 
@@ -59,21 +56,6 @@ public class ConversationNotificationInfo {
     private final int mAppSmallIconResId;
 
     public final LinkedList<MessageKey> mMessageKeys = new LinkedList<>();
-
-    /**
-     * Creates a ConversationNotificationInfo for a message received through Bluetooth MAP
-     * profile.
-     **/
-    public static ConversationNotificationInfo createConversationNotificationInfo(Intent intent,
-            int appSmallIconResId) {
-        BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-
-        return new ConversationNotificationInfo(device.getName(), device.getAddress(),
-                intent.getStringExtra(BluetoothMapClient.EXTRA_SENDER_CONTACT_NAME),
-                /* isGroupConvo= */ false, /* notificationKey= */ null, /* appDisplayName= */ null,
-                /* userDisplayName= */ null, appSmallIconResId);
-
-    }
 
     /**
      * Creates a ConversationNotificationInfo for a {@link NotificationMsg}. Returns {@code null} if

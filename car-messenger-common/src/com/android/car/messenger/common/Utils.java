@@ -18,9 +18,7 @@ package com.android.car.messenger.common;
 
 import static com.android.car.connecteddevice.util.SafeLog.logw;
 
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Icon;
@@ -71,15 +69,6 @@ public class Utils {
         String subMessage = textMessage.substring(
                 Math.min(MAX_SUB_MESSAGE_LENGTH, textMessage.length()));
         return message.getTimestamp() + "/" + message.getSender().getName() + "/" + subMessage;
-    }
-
-    /**
-     * Extracts the {@link BluetoothDevice}'s address from an intent sent from
-     * {@link android.bluetooth.BluetoothMapClient}.
-     */
-    public static String getBluetoothDeviceAddress(Intent intent) {
-        BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-        return device.getAddress();
     }
 
     /**
