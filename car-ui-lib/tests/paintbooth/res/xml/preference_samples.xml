@@ -92,6 +92,12 @@
         app:useSimpleSummaryProvider="true"
         android:dialogTitle="@string/dialog_title_edittext_preference"/>
 
+    <com.android.car.ui.preference.CarUiSeekBarDialogPreference
+        android:key="seekbarDialog"
+        android:title="@string/title_seekbar_preference"
+        android:summary="@string/summary_seekbar_preference"
+        android:dialogTitle="Seekbar Dialog"/>
+
     <ListPreference
         android:key="list"
         android:title="@string/title_list_preference"

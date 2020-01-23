@@ -79,6 +79,8 @@
 
   <!-- Title of a seekbar preference [CHAR_LIMIT=30]-->
   <string name="title_seekbar_preference">Seekbar preference</string>
+  <!-- Summary of an seekbar preference [CHAR_LIMIT=32]-->
+  <string name="summary_seekbar_preference">Seekbar summary</string>
 
   <!--This section is for preferences that launch a dialog to edit the preference -->
   <eat-comment/>
