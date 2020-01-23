@@ -137,10 +137,15 @@ message Action {
   string notification_key = 1;
 
   //Optional, used to capture data like the reply string.
-  map<string, string> action_data = 2;
+  repeated ActionDataFieldEntry action_data_field = 2;
 
   ActionName action_name = 3;
 
   // Unique id of this action.
   int64 request_id = 4;
+}
+
+message ActionDataFieldEntry {
+  string key = 1;
+  string value = 2;
 }
