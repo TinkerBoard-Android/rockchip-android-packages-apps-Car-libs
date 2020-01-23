@@ -80,7 +80,7 @@ public class BaseNotificationDelegate {
      * Maps a conversation's Notification Metadata to the conversation's unique key.
      * The extending class should always keep this map updated with the latest new/updated
      * notification information before calling {@link BaseNotificationDelegate#postNotification(
-     * ConversationKey, ConversationNotificationInfo)}.
+     * ConversationKey, ConversationNotificationInfo, String)}.
      **/
     protected final Map<ConversationKey, ConversationNotificationInfo> mNotificationInfos =
             new HashMap<>();
@@ -96,7 +96,7 @@ public class BaseNotificationDelegate {
      * Maps a message's metadata with the message's unique key.
      * The extending class should always keep this map updated with the latest message information
      * before calling {@link BaseNotificationDelegate#postNotification(
-     * ConversationKey, ConversationNotificationInfo)}.
+     * ConversationKey, ConversationNotificationInfo, String)}.
      **/
     protected final Map<MessageKey, Message> mMessages = new HashMap<>();
 
@@ -104,8 +104,8 @@ public class BaseNotificationDelegate {
      * Maps a Bitmap of a sender's Large Icon to the sender's unique key.
      * The extending class should always keep this map updated with the loaded Sender large icons
      * before calling {@link BaseNotificationDelegate#postNotification(
-     * ConversationKey, ConversationNotificationInfo)}. If the large icon is not found for the
-     * {@link SenderKey} when constructing the notification, a {@link LetterTileDrawable} will
+     * ConversationKey, ConversationNotificationInfo, String)}. If the large icon is not found for
+     * the {@link SenderKey} when constructing the notification, a {@link LetterTileDrawable} will
      * be created for the sender.
      **/
     protected final Map<SenderKey, Bitmap> mSenderLargeIcons = new HashMap<>();
@@ -194,7 +194,8 @@ public class BaseNotificationDelegate {
         builder.setWhen(lastMessage.getReceiveTime());
 
         // Create MessagingStyle
-        String userName = (notificationInfo.getUserDisplayName() == null) ? mContext.getString(
+        String userName = (notificationInfo.getUserDisplayName() == null
+                || notificationInfo.getUserDisplayName().isEmpty()) ? mContext.getString(
                 R.string.name_not_available) : notificationInfo.getUserDisplayName();
         Person user = new Person.Builder()
                 .setName(userName)
@@ -213,6 +214,11 @@ public class BaseNotificationDelegate {
                         sender);
             }
         });
+        if (notificationInfo.isGroupConvo()) {
+            messagingStyle.setConversationTitle(
+                    mContext.getString(R.string.group_conversation_title_separator,
+                            lastMessage.getSenderName(), notificationInfo.getConvoTitle()));
+        }
 
         // We are creating this notification for the first time.
         if (newNotification) {
