@@ -47,4 +47,5 @@ android_app {
             enabled: false,
         },
     },
+    export_package_resources: true,
 }
