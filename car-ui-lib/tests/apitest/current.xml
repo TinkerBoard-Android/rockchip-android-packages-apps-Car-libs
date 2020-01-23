@@ -234,6 +234,8 @@
   <public type="style" name="Widget.CarUi.Button.Borderless.Colored"/>
   <public type="style" name="Widget.CarUi.CarUiRecyclerView"/>
   <public type="style" name="Widget.CarUi.CarUiRecyclerView.NestedRecyclerView"/>
+  <public type="style" name="Widget.CarUi.SeekbarPreference"/>
+  <public type="style" name="Widget.CarUi.SeekbarPreference.Seekbar"/>
   <public type="style" name="Widget.CarUi.Toolbar"/>
   <public type="style" name="Widget.CarUi.Toolbar.BottomView"/>
   <public type="style" name="Widget.CarUi.Toolbar.Container"/>
