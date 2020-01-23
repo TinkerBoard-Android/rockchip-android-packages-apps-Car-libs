@@ -52,10 +52,14 @@
   <public type="dimen" name="car_ui_keyline_4"/>
   <public type="dimen" name="car_ui_list_item_action_divider_height"/>
   <public type="dimen" name="car_ui_list_item_action_divider_width"/>
+  <public type="dimen" name="car_ui_list_item_avatar_icon_height"/>
+  <public type="dimen" name="car_ui_list_item_avatar_icon_width"/>
   <public type="dimen" name="car_ui_list_item_check_box_end_inset"/>
   <public type="dimen" name="car_ui_list_item_check_box_height"/>
   <public type="dimen" name="car_ui_list_item_check_box_icon_container_width"/>
   <public type="dimen" name="car_ui_list_item_check_box_start_inset"/>
+  <public type="dimen" name="car_ui_list_item_content_icon_height"/>
+  <public type="dimen" name="car_ui_list_item_content_icon_width"/>
   <public type="dimen" name="car_ui_list_item_end_inset"/>
   <public type="dimen" name="car_ui_list_item_header_height"/>
   <public type="dimen" name="car_ui_list_item_header_start_inset"/>
@@ -151,6 +155,7 @@
   <public type="drawable" name="car_ui_icon_settings"/>
   <public type="drawable" name="car_ui_list_header_background"/>
   <public type="drawable" name="car_ui_list_item_background"/>
+  <public type="drawable" name="car_ui_list_item_avatar_icon_outline"/>
   <public type="drawable" name="car_ui_list_item_divider"/>
   <public type="drawable" name="car_ui_preference_icon_chevron"/>
   <public type="drawable" name="car_ui_recyclerview_button_ripple_background"/>

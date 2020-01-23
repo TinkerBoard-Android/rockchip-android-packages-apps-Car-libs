@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="utf-8"?>
+<!--
   ~ Copyright 2019 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +15,8 @@
   ~ limitations under the License.
   -->
 
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="@dimen/car_ui_list_item_height">
@@ -65,6 +67,24 @@
             android:layout_width="@dimen/car_ui_list_item_icon_size"
             android:layout_height="@dimen/car_ui_list_item_icon_size"
             android:layout_gravity="center"
+            android:visibility="gone"
+            android:scaleType="fitXY" />
+
+        <ImageView
+            android:id="@+id/content_icon"
+            android:layout_width="@dimen/car_ui_list_item_content_icon_width"
+            android:layout_height="@dimen/car_ui_list_item_content_icon_height"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:scaleType="fitXY" />
+
+        <ImageView
+            android:id="@+id/avatar_icon"
+            android:background="@drawable/car_ui_list_item_avatar_icon_outline"
+            android:layout_width="@dimen/car_ui_list_item_avatar_icon_width"
+            android:layout_height="@dimen/car_ui_list_item_avatar_icon_height"
+            android:layout_gravity="center"
+            android:visibility="gone"
             android:scaleType="fitXY" />
     </FrameLayout>
 
