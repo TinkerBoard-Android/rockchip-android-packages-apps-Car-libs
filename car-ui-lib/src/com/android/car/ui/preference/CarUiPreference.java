@@ -19,8 +19,13 @@ package com.android.car.ui.preference;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Toast;
 
+import androidx.core.view.ViewCompat;
 import androidx.preference.Preference;
+import androidx.preference.PreferenceViewHolder;
 
 import com.android.car.ui.R;
 
@@ -32,6 +37,10 @@ public class CarUiPreference extends Preference {
 
     private Context mContext;
     private boolean mShowChevron;
+    private String mMessageToShowWhenDisabledPreferenceClicked;
+
+    private boolean mShouldShowRippleOnDisabledPreference;
+    private boolean mEnabledAppearance = true;
 
     public CarUiPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
@@ -61,6 +70,42 @@ public class CarUiPreference extends Preference {
                 defStyleRes);
 
         mShowChevron = a.getBoolean(R.styleable.CarUiPreference_showChevron, true);
+        mShouldShowRippleOnDisabledPreference = a.getBoolean(
+                R.styleable.CarUiPreference_showRippleOnDisabledPreference, false);
+    }
+
+
+    @Override
+    public void onBindViewHolder(PreferenceViewHolder holder) {
+        super.onBindViewHolder(holder);
+        boolean viewEnabled = mEnabledAppearance;
+        if (!viewEnabled) {
+            enableView(holder.itemView, false, true);
+        }
+    }
+
+    private void enableView(View view, boolean enabled, boolean isRootView) {
+        if (!isRootView) {
+            view.setEnabled(enabled);
+        } else if (!mShouldShowRippleOnDisabledPreference) {
+            ViewCompat.setBackground(view, null);
+        }
+        if (view instanceof ViewGroup) {
+            ViewGroup grp = (ViewGroup) view;
+            for (int index = 0; index < grp.getChildCount(); index++) {
+                enableView(grp.getChildAt(index), enabled, false);
+            }
+        }
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        mEnabledAppearance = enabled;
+        if (!enabled) {
+            // Enabled state can change dependent preferences' states, so notify
+            notifyDependencyChange(true);
+            notifyChanged();
+        }
     }
 
     @Override
@@ -80,7 +125,26 @@ public class CarUiPreference extends Preference {
         }
     }
 
+    @Override
+    protected void onClick() {
+        if (mEnabledAppearance) {
+            super.onClick();
+        } else if (!mMessageToShowWhenDisabledPreferenceClicked.isEmpty()) {
+            Toast toast = Toast.makeText(mContext, mMessageToShowWhenDisabledPreferenceClicked,
+                    Toast.LENGTH_LONG);
+            toast.show();
+        }
+    }
+
     public void setShowChevron(boolean showChevron) {
         mShowChevron = showChevron;
+    }
+
+    public void setShouldShowRippleOnDisabledPreference(boolean showRipple) {
+        mShouldShowRippleOnDisabledPreference = showRipple;
+    }
+
+    public void setMessageToShowWhenDisabledPreferenceClicked(String message) {
+        mMessageToShowWhenDisabledPreferenceClicked = message;
     }
 }
