@@ -134,7 +134,8 @@ public final class ConnectedDeviceStorageTest {
     }
 
     private void addAssociatedDevice(int userId, AssociatedDevice device, byte[] encryptionKey) {
-        mConnectedDeviceStorage.addAssociatedDeviceForUser(userId, device, encryptionKey);
+        mConnectedDeviceStorage.addAssociatedDeviceForUser(userId, device);
+        mConnectedDeviceStorage.saveEncryptionKey(device.getDeviceId(), encryptionKey);
         mAddedAssociatedDevices.add(new Pair<>(userId, device));
     }
 }

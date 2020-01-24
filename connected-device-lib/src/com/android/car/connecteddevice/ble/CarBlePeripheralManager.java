@@ -30,7 +30,6 @@ import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.car.encryptionrunner.EncryptionRunnerFactory;
-import android.car.encryptionrunner.Key;
 import android.os.ParcelUuid;
 
 import com.android.car.connecteddevice.AssociationCallback;
@@ -418,7 +417,7 @@ public class CarBlePeripheralManager extends CarBleManager {
     private final SecureBleChannel.Callback mSecureChannelCallback =
             new SecureBleChannel.Callback() {
                 @Override
-                public void onSecureChannelEstablished(Key encryptionKey) {
+                public void onSecureChannelEstablished() {
                     BleDevice connectedDevice = getConnectedDevice();
                     if (connectedDevice == null || connectedDevice.mDeviceId == null) {
                         disconnectWithError("Null device id found when secure channel "
@@ -436,8 +435,7 @@ public class CarBlePeripheralManager extends CarBleManager {
                                 + "association of that device for current user.");
                         mStorage.addAssociatedDeviceForActiveUser(
                                 new AssociatedDevice(deviceId, mClientDeviceAddress,
-                                        mClientDeviceName),
-                                encryptionKey.asBytes());
+                                        mClientDeviceName));
                         if (mAssociationCallback != null) {
                             mAssociationCallback.onAssociationCompleted(deviceId);
                             mAssociationCallback = null;

@@ -226,7 +226,7 @@ class SecureBleChannel {
         mStorage.saveEncryptionKey(mDeviceId, newKey.asBytes());
         mEncryptionKey.set(newKey);
         sendServerAuthToClient(handshakeMessage.getNextMessage());
-        notifyCallback(callback -> callback.onSecureChannelEstablished(newKey));
+        notifyCallback(callback -> callback.onSecureChannelEstablished());
     }
 
     private void sendUniqueIdToClient() {
@@ -314,6 +314,7 @@ class SecureBleChannel {
         }
 
         mState = message.getHandshakeState();
+        mStorage.saveEncryptionKey(mDeviceId, localKey.asBytes());
         mEncryptionKey.set(localKey);
         if (mDeviceId == null) {
             loge(TAG, "Unable to finish association, device id is null.");
@@ -322,7 +323,7 @@ class SecureBleChannel {
         }
         logd(TAG, "Pairing code successfully verified and encryption key saved. Sending "
                 + "confirmation to device.");
-        notifyCallback(callback -> callback.onSecureChannelEstablished(localKey));
+        notifyCallback(Callback::onSecureChannelEstablished);
         DeviceMessage deviceMessage = new DeviceMessage(/* recipient = */ null,
                 /* isMessageEncrypted = */ false, CONFIRMATION_SIGNAL);
         mStream.writeMessage(deviceMessage, OperationType.ENCRYPTION_HANDSHAKE);
@@ -429,10 +430,8 @@ class SecureBleChannel {
     interface Callback {
         /**
          * Invoked when secure channel has been established successfully.
-         *
-         * @param encryptionKey The new key generated in handshake.
          */
-        void onSecureChannelEstablished(Key encryptionKey);
+        void onSecureChannelEstablished();
 
         /**
          * Invoked when a {@link ChannelError} has been encountered in attempting to establish

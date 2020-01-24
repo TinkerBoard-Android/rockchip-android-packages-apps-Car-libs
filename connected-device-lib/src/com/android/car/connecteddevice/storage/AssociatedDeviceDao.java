@@ -43,9 +43,24 @@ public interface AssociatedDeviceDao {
      * device id.
      */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void addOrUpdateAssociatedDevice(AssociatedDeviceEntity associatedDevice);
+    void addOrReplaceAssociatedDevice(AssociatedDeviceEntity associatedDevice);
 
     /** Remove a {@link AssociatedDeviceEntity}. */
     @Delete
     void removeAssociatedDevice(AssociatedDeviceEntity connectedDevice);
+
+    /** Get the key associated with a device id. */
+    @Query("SELECT * FROM associated_device_keys WHERE id LIKE :deviceId LIMIT 1")
+    AssociatedDeviceKeyEntity getAssociatedDeviceKey(String deviceId);
+
+    /**
+     * Add a {@link AssociatedDeviceKeyEntity}. Replace if a device key already exists with the
+     * same device id.
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void addOrReplaceAssociatedDeviceKey(AssociatedDeviceKeyEntity keyEntity);
+
+    /** Remove a {@link AssociatedDeviceKeyEntity}. */
+    @Delete
+    void removeAssociatedDeviceKey(AssociatedDeviceKeyEntity keyEntity);
 }

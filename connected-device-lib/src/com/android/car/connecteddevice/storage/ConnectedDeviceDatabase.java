@@ -20,7 +20,8 @@ import androidx.room.Database;
 import androidx.room.RoomDatabase;
 
 /** Database for connected devices. */
-@Database(entities = { AssociatedDeviceEntity.class }, version = 1, exportSchema = false)
+@Database(entities = { AssociatedDeviceEntity.class, AssociatedDeviceKeyEntity.class }, version = 1,
+        exportSchema = false)
 public abstract class ConnectedDeviceDatabase extends RoomDatabase {
     /** Return the DAO for the associated device table. */
     public abstract AssociatedDeviceDao associatedDeviceDao();
