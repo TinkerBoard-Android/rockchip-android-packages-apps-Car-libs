@@ -94,6 +94,14 @@ public class CarUiListItemActivity extends Activity {
         item.setBody("With avatar icon.");
         item.setIcon(getDrawable(R.drawable.ic_sample_logo));
         item.setPrimaryIconType(CarUiContentListItem.IconType.AVATAR);
+
+        item = new CarUiContentListItem();
+        item.setTitle("Test Title");
+        item.setBody("Displays toast on click");
+        item.setIcon(getDrawable(R.drawable.ic_launcher));
+        item.setOnItemClickedListener(item1 -> {
+            Toast.makeText(context, "Item clicked" , Toast.LENGTH_SHORT).show();
+        });
         mData.add(item);
 
         item = new CarUiContentListItem();
@@ -108,8 +116,11 @@ public class CarUiListItemActivity extends Activity {
 
         item = new CarUiContentListItem();
         item.setIcon(getDrawable(R.drawable.ic_launcher));
-        item.setBody("Body -- Item with switch");
+        item.setBody("Body -- Item with switch  -- with click listener");
         item.setAction(CarUiContentListItem.Action.SWITCH);
+        item.setOnItemClickedListener(item1 -> {
+            Toast.makeText(context, "Click on item with switch" , Toast.LENGTH_SHORT).show();
+        });
         mData.add(item);
 
         item = new CarUiContentListItem();
