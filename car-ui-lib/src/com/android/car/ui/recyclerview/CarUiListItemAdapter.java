@@ -42,7 +42,7 @@ import java.util.List;
  * <li> Implements {@link CarUiRecyclerView.ItemCap} - defaults to unlimited item count.
  * </ul>
  */
-public class CarUiListItemAdapter extends
+public final class CarUiListItemAdapter extends
         RecyclerView.Adapter<RecyclerView.ViewHolder> implements
         CarUiRecyclerView.ItemCap {
 
