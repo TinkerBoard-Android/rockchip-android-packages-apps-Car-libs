@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2018 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+    <overlayable name="CarUiOverlayableResources">
+        <policy type="public">
+            <item type="string" name="car_ui_dialog_preference_positive" />
+            <item type="attr" name="title" />
+            <item type="attr" name="logo" />
+            <item type="attr" name="numOfColumns" />
+            <item type="attr" name="layoutStyle" />
+
+            <item type="attr" name="layout_constraintTop_toTopOf" />
+            <item type="attr" name="layout_constraintTop_toBottomOf" />
+            <item type="attr" name="layout_constraintLeft_toLeftOf" />
+            <item type="attr" name="layout_constraintLeft_toRightOf" />
+            <item type="attr" name="layout_constraintBottom_toTopOf" />
+            <item type="attr" name="layout_constraintBottom_toBottomOf" />
+            <item type="attr" name="layout_constraintRight_toRightOf" />
+            <item type="attr" name="layout_constraintRight_toLeftOf" />
+            <item type="attr" name="layout_constraintGuide_begin" />
+            <item type="attr" name="layout_constraintVertical_chainStyle" />
+        </policy>
+    </overlayable>
+</resources>

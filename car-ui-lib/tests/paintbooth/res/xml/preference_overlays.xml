@@ -16,5 +16,6 @@
   -->
 <PreferenceScreen
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:title="Overlays">
+    xmlns:lib="http://schemas.android.com/apk/res/com.android.car.ui.sharedlibrary"
+    lib:title="Overlays">
 </PreferenceScreen>
