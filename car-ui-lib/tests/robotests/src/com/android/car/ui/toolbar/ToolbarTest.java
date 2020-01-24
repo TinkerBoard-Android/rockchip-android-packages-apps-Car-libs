@@ -26,13 +26,13 @@ import android.content.res.Resources;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.android.car.ui.CarUiRobolectricTestRunner;
 import com.android.car.ui.R;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
@@ -41,7 +41,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-@RunWith(CarUiRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(qualifiers = "land")
 public class ToolbarTest {
 
