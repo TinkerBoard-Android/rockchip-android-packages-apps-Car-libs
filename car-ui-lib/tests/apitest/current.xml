@@ -241,7 +241,9 @@
   <public type="style" name="Widget.CarUi.Toolbar.Container"/>
   <public type="style" name="Widget.CarUi.Toolbar.Logo"/>
   <public type="style" name="Widget.CarUi.Toolbar.LogoContainer"/>
+  <public type="style" name="Widget.CarUi.Toolbar.MenuItem"/>
   <public type="style" name="Widget.CarUi.Toolbar.MenuItem.Container"/>
+  <public type="style" name="Widget.CarUi.Toolbar.MenuItem.IndividualContainer"/>
   <public type="style" name="Widget.CarUi.Toolbar.NavIcon"/>
   <public type="style" name="Widget.CarUi.Toolbar.NavIconContainer"/>
   <public type="style" name="Widget.CarUi.Toolbar.ProgressBar"/>
