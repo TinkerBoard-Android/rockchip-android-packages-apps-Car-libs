@@ -128,6 +128,8 @@
     <declare-styleable name="CarUiPreference">
         <!-- Toggle for showing chevron -->
         <attr name="showChevron" format="boolean" />
+        <!-- Show ripple when disabled preference is clicked -->
+        <attr name="showRippleOnDisabledPreference" format="boolean" />
     </declare-styleable>
 
     <!-- Theme attribute to specify a default style for all CarUiPreferences -->
