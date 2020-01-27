@@ -281,7 +281,6 @@ public class ConnectedDeviceManager {
             // Only currently support one device per user for fast association, so take the
             // first one.
             String userDeviceId = userDeviceIds.get(0);
-            byte[] key = mStorage.getEncryptionKey(userDeviceId);
             if (mConnectedDevices.containsKey(userDeviceId)) {
                 logd(TAG, "Device has already been connected. No need to attempt connection "
                         + "again.");
@@ -549,15 +548,24 @@ public class ConnectedDeviceManager {
         logd(TAG, "Device " + deviceId + " disconnected from manager " + bleManager);
         InternalConnectedDevice connectedDevice = getConnectedDeviceForManager(deviceId,
                 bleManager);
-        if (connectedDevice != null) {
-            mConnectedDevices.remove(deviceId);
-            invokeConnectionCallbacks(connectedDevice.mConnectedDevice.isAssociatedWithActiveUser(),
-                    callback -> callback.onDeviceDisconnected(connectedDevice.mConnectedDevice));
-        }
 
         // If disconnect happened on peripheral, open for future requests to connect.
         if (bleManager == mPeripheralManager) {
             mIsConnectingToUserDevice.set(false);
+        }
+
+        if (connectedDevice == null) {
+            return;
+        }
+
+        mConnectedDevices.remove(deviceId);
+        boolean isAssociated = connectedDevice.mConnectedDevice.isAssociatedWithActiveUser();
+        invokeConnectionCallbacks(isAssociated,
+                callback -> callback.onDeviceDisconnected(connectedDevice.mConnectedDevice));
+
+        if (isAssociated) {
+            // Try to regain connection to active user's device.
+            connectToActiveUserDevice();
         }
     }
 
