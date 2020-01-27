@@ -27,7 +27,6 @@ import android.widget.CheckBox;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.android.car.ui.CarUiRobolectricTestRunner;
 import com.android.car.ui.R;
 
 import org.junit.Before;
@@ -35,12 +34,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@RunWith(CarUiRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class CarUiListItemTest {
 
     private CarUiRecyclerView mListView;
