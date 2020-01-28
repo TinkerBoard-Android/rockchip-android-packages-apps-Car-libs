@@ -142,11 +142,11 @@ def uninstall_all():
     if len(packages) == 0:
         print('No quick RROs to uninstall')
 
-def delete_arsc_flat_files(path):
-    """Deletes all .arsc.flat files under `path`"""
+def delete_flat_files(path):
+    """Deletes all .flat files under `path`"""
     for filename in os.listdir(path):
-        if filename.endswith('.arsc.flat'):
-            run_command(['rm', os.path.join(path, filename)])
+        if filename.endswith('.flat'):
+            os.remove(os.path.join(path, filename))
 
 def build(args, package_name):
     """Builds the RRO apk"""
@@ -200,7 +200,7 @@ def build(args, package_name):
     run_command(['aapt2', 'compile', '-o', os.path.join(root_folder, 'compiled.zip'),
                  '--dir', resource_folder])
 
-    delete_arsc_flat_files(root_folder)
+    delete_flat_files(root_folder)
 
     run_command(['unzip', os.path.join(root_folder, 'compiled.zip'),
                  '-d', root_folder])
@@ -209,7 +209,7 @@ def build(args, package_name):
                     '-o', unsigned_apk, '--manifest', manifest_file,
                     '-I', android_jar_path]
     for filename in os.listdir(root_folder):
-        if filename.endswith('.arsc.flat'):
+        if filename.endswith('.flat'):
             link_command.extend(['-R', os.path.join(root_folder, filename)])
     run_command(link_command)
 
