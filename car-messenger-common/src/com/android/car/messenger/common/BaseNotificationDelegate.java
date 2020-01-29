@@ -188,7 +188,7 @@ public class BaseNotificationDelegate {
         } else {
             builder.setLargeIcon(Utils.createLetterTile(mContext,
                     Utils.getInitials(lastMessage.getSenderName(), ""),
-                    lastMessage.getSenderName(), mBitmapSize, mCornerRadiusPercent).getBitmap());
+                    lastMessage.getSenderName(), mBitmapSize, mCornerRadiusPercent));
         }
 
         builder.setWhen(lastMessage.getReceiveTime());
