@@ -42,7 +42,8 @@ import java.util.Collections;
 import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = {ExtendedShadowTypeface.class}, qualifiers = "land")
+@Config(shadows = {ExtendedShadowTypeface.class, ShadowAsyncLayoutInflater.class},
+        qualifiers = "land")
 public class ToolbarTest {
 
     private Context mContext;
