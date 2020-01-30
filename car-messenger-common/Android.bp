@@ -30,7 +30,7 @@ android_library {
     static_libs: [
         "android.car.userlib",
         "androidx.legacy_legacy-support-v4",
-        "car-apps-common",
+        "car-apps-common-bp",
         "car-messenger-protos",
         "connected-device-lib",
         "connected-device-protos",
