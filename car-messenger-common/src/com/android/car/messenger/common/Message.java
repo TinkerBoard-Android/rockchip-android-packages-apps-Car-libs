@@ -38,7 +38,7 @@ public class Message {
     private final String mMessageText;
     private final long mReceiveTime;
     private final boolean mIsReadOnPhone;
-    private boolean mIsReadOnCar;
+    private boolean mShouldExclude;
     private final String mHandle;
     private final MessageType mMessageType;
     private final SenderKey mSenderKey;
@@ -118,7 +118,7 @@ public class Message {
         this.mMessageText = messageText;
         this.mReceiveTime = receiveTime;
         this.mIsReadOnPhone = isReadOnPhone;
-        this.mIsReadOnCar = false;
+        this.mShouldExclude = false;
         this.mHandle = handle;
         this.mMessageType = messageType;
         this.mSenderContactUri = senderContactUri;
@@ -157,10 +157,12 @@ public class Message {
     }
 
     /**
-     * Marks the message as read on the car. Note: this will not be propagated back to the phone.
+     * Whether message should be included in the notification. Messages that have been read aloud on
+     * the car, or that have been dismissed by the user should be excluded from the notification if/
+     * when the notification gets updated. Note: this state will not be propagated to the phone.
      */
-    public void markMessageAsRead() {
-        mIsReadOnCar = true;
+    public void excludeFromNotification() {
+        mShouldExclude = true;
     }
 
     /**
@@ -171,10 +173,12 @@ public class Message {
     }
 
     /**
-     * Returns {@code true} if message was read on the car.
+     * Returns {@code true} if message should not be included in the notification. Messages that
+     * have been read aloud on the car, or that have been dismissed by the user should be excluded
+     * from the notification if/when the notification gets updated.
      */
-    public boolean isReadOnCar() {
-        return mIsReadOnCar;
+    public boolean shouldExcludeFromNotification() {
+        return mShouldExclude;
     }
 
     /**
@@ -216,7 +220,7 @@ public class Message {
                 + ", mSenderContactUri='" + mSenderContactUri + '\''
                 + ", mReceiveTime=" + mReceiveTime + '\''
                 + ", mIsReadOnPhone= " + mIsReadOnPhone + '\''
-                + ", mIsReadOnCar= " + mIsReadOnCar + '\''
+                + ", mShouldExclude= " + mShouldExclude + '\''
                 + ", mHandle='" + mHandle
                 + "}";
     }

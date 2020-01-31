@@ -206,7 +206,7 @@ public class BaseNotificationDelegate {
                 .setUri(lastMessage.getSenderContactUri())
                 .build();
         notificationInfo.mMessageKeys.stream().map(mMessages::get).forEachOrdered(message -> {
-            if (!message.isReadOnCar()) {
+            if (!message.shouldExcludeFromNotification()) {
                 messagingStyle.addMessage(
                         message.getMessageText(),
                         message.getReceiveTime(),
