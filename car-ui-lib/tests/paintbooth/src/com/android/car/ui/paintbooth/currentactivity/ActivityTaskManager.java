@@ -24,6 +24,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
@@ -69,14 +70,14 @@ interface ActivityTaskManager {
     @NonNull
     static ActivityTaskManager getService() {
         try {
-            return (ActivityTaskManager) Class
-                    .forName(
-                            "com.android.car.ui.paintbooth.currentactivity.ActivityTaskManagerImpl")
-                    .getConstructor()
-                    .newInstance();
+            Class clazz = Class.forName(
+                    "com.android.car.ui.paintbooth.currentactivity.ActivityTaskManagerImpl");
+            Constructor constructor = clazz.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            return (ActivityTaskManager) constructor.newInstance();
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException
                 | NoSuchMethodException | InvocationTargetException e) {
-            Log.i("paintbooth", "ActivityTaskManager is not available");
+            Log.e("paintbooth", "ActivityTaskManager is not available", e);
             return new ActivityTaskManagerStub();
         }
     }
