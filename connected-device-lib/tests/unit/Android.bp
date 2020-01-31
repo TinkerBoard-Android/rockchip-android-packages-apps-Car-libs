@@ -31,7 +31,6 @@ android_test {
         "androidx.test.ext.junit",
         "androidx.test.rules",
         "connected-device-lib",
-        "kotlin-reflect",
         "mockito-target-extended-minus-junit4",
         "testables",
         "truth-prebuilt",

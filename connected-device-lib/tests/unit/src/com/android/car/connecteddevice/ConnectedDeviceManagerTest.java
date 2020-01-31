@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mockitoSession;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -529,6 +530,34 @@ public class ConnectedDeviceManagerTest {
         mAssociatedDeviceCallback.onAssociatedDeviceUpdated(testDevice);
         assertThat(tryAcquire(semaphore)).isTrue();
         verify(callback).onAssociatedDeviceUpdated(eq(testDevice));
+    }
+
+    @Test
+    public void removeConnectedDevice_startsAdvertisingForActiveUserDevice()
+            throws InterruptedException {
+        String deviceId = UUID.randomUUID().toString();
+        when(mMockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(
+                Collections.singletonList(deviceId));
+        mConnectedDeviceManager.addConnectedDevice(deviceId, mMockPeripheralManager);
+        mConnectedDeviceManager.removeConnectedDevice(deviceId, mMockPeripheralManager);
+        Thread.sleep(100);  // Async process so need to allow it time to complete.
+        // ConnectedDeviceManager.start() also invokes connectToDevice(), so expect # of calls = 2.
+        verify(mMockPeripheralManager, timeout(1000).times(2))
+                .connectToDevice(eq(UUID.fromString(deviceId)));
+    }
+
+    @Test
+    public void removeConnectedDevice__doesNotAdvertiseForNonActiveUserDevice()
+            throws InterruptedException {
+        String deviceId = UUID.randomUUID().toString();
+        String userDeviceId = UUID.randomUUID().toString();
+        when(mMockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(
+                Collections.singletonList(userDeviceId));
+        mConnectedDeviceManager.addConnectedDevice(deviceId, mMockPeripheralManager);
+        mConnectedDeviceManager.removeConnectedDevice(deviceId, mMockPeripheralManager);
+        // ConnectedDeviceManager.start() invokes connectToDevice(), so expect # of calls = 1.
+        verify(mMockPeripheralManager, timeout(1000))
+                .connectToDevice(eq(UUID.fromString(userDeviceId)));
     }
 
     @NonNull
