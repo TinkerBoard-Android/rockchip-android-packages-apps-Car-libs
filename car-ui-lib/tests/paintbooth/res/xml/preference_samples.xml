@@ -19,144 +19,154 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     app:title="@string/preferences_screen_title">
 
-  <PreferenceCategory
-      android:title="@string/basic_preferences">
+    <PreferenceCategory
+        android:title="@string/basic_preferences">
 
-    <Preference
-        android:key="preference"
-        android:title="@string/title_basic_preference"
-        android:summary="@string/summary_basic_preference"/>
+        <Preference
+            android:key="preference"
+            android:summary="@string/summary_basic_preference"
+            android:title="@string/title_basic_preference"/>
 
-    <Preference
-        android:key="stylized"
-        android:title="@string/title_stylish_preference"
-        android:summary="@string/summary_stylish_preference"/>
+        <Preference
+            android:key="preference_disabled_without_ripple"
+            android:summary="Without ripple"
+            android:title="@string/title_basic_preference"/>
 
-    <Preference
-        android:key="icon"
-        android:title="@string/title_icon_preference"
-        android:summary="@string/summary_icon_preference"
-        android:icon="@drawable/ic_settings_wifi"/>
+        <Preference
+            android:key="preference_disabled_with_ripple"
+            android:summary="With ripple"
+            android:title="@string/title_basic_preference"/>
 
-    <Preference
-        android:key="single_line_title"
-        android:title="@string/title_single_line_title_preference"
-        android:summary="@string/summary_single_line_title_preference"
-        app:singleLineTitle="true"/>
+        <Preference
+            android:key="stylized"
+            android:summary="@string/summary_stylish_preference"
+            android:title="@string/title_stylish_preference"/>
 
-    <Preference
-        android:key="single_line_no_summary"
-        android:title="@string/title_single_line_no_summary"
-        app:singleLineTitle="true"/>
-  </PreferenceCategory>
+        <Preference
+            android:icon="@drawable/ic_settings_wifi"
+            android:key="icon"
+            android:summary="@string/summary_icon_preference"
+            android:title="@string/title_icon_preference"/>
 
-  <PreferenceCategory
-      android:title="@string/widgets">
+        <Preference
+            android:key="single_line_title"
+            android:summary="@string/summary_single_line_title_preference"
+            android:title="@string/title_single_line_title_preference"
+            app:singleLineTitle="true"/>
 
-    <com.android.car.ui.preference.CarUiTwoActionPreference
-      android:key="twoaction"
-      android:title="@string/title_twoaction_preference"
-      android:summary="@string/summary_twoaction_preference"
-      android:widgetLayout="@layout/details_preference_widget"/>
+        <Preference
+            android:key="single_line_no_summary"
+            android:title="@string/title_single_line_no_summary"
+            app:singleLineTitle="true"/>
+    </PreferenceCategory>
 
-    <CheckBoxPreference
-        android:key="checkbox"
-        android:title="@string/title_checkbox_preference"
-        android:summary="@string/summary_checkbox_preference"/>
+    <PreferenceCategory
+        android:title="@string/widgets">
 
-    <SwitchPreference
-        android:key="switch"
-        android:title="@string/title_switch_preference"
-        android:summary="@string/summary_switch_preference"/>
+        <CheckBoxPreference
+            android:key="checkbox"
+            android:summary="@string/summary_checkbox_preference"
+            android:title="@string/title_checkbox_preference"/>
 
-    <DropDownPreference
-        android:key="dropdown"
-        android:title="@string/title_dropdown_preference"
-        android:entries="@array/entries"
-        app:useSimpleSummaryProvider="true"
-        android:entryValues="@array/entry_values"/>
+        <DropDownPreference
+            android:entries="@array/entries"
+            android:entryValues="@array/entry_values"
+            android:key="dropdown"
+            android:title="@string/title_dropdown_preference"
+            app:useSimpleSummaryProvider="true"/>
 
-    <SeekBarPreference
-        android:key="seekbar"
-        android:title="@string/title_seekbar_preference"
-        android:max="10"
-        android:defaultValue="5"/>
-  </PreferenceCategory>
+        <SeekBarPreference
+            android:defaultValue="5"
+            android:key="seekbar"
+            android:max="10"
+            android:title="@string/title_seekbar_preference"/>
 
-  <PreferenceCategory
-      android:title="@string/dialogs">
+        <SwitchPreference
+            android:key="switch"
+            android:summary="@string/summary_switch_preference"
+            android:title="@string/title_switch_preference"/>
 
-    <EditTextPreference
-        android:key="edittext"
-        android:title="@string/title_edittext_preference"
-        app:useSimpleSummaryProvider="true"
-        android:dialogTitle="@string/dialog_title_edittext_preference"/>
+        <com.android.car.ui.preference.CarUiTwoActionPreference
+            android:key="twoaction"
+            android:summary="@string/summary_twoaction_preference"
+            android:title="@string/title_twoaction_preference"
+            android:widgetLayout="@layout/details_preference_widget"/>
+    </PreferenceCategory>
 
-    <com.android.car.ui.preference.CarUiSeekBarDialogPreference
-        android:key="seekbarDialog"
-        android:title="@string/title_seekbar_preference"
-        android:summary="@string/summary_seekbar_preference"
-        android:dialogTitle="Seekbar Dialog"/>
+    <PreferenceCategory
+        android:title="@string/dialogs">
 
-    <ListPreference
-        android:key="list"
-        android:title="@string/title_list_preference"
-        app:useSimpleSummaryProvider="true"
-        android:entries="@array/entries"
-        android:entryValues="@array/entry_values"
-        android:dialogTitle="@string/dialog_title_list_preference"/>
+        <EditTextPreference
+            android:dialogTitle="@string/dialog_title_edittext_preference"
+            android:key="edittext"
+            android:title="@string/title_edittext_preference"
+            app:useSimpleSummaryProvider="true"/>
 
-    <MultiSelectListPreference
-        android:key="multi_select_list"
-        android:title="@string/title_multi_list_preference"
-        android:summary="@string/summary_multi_list_preference"
-        android:entries="@array/entries"
-        android:entryValues="@array/entry_values"
-        android:dialogTitle="@string/dialog_title_multi_list_preference"/>
-  </PreferenceCategory>
+        <ListPreference
+            android:dialogTitle="@string/dialog_title_list_preference"
+            android:entries="@array/entries"
+            android:entryValues="@array/entry_values"
+            android:key="list"
+            android:title="@string/title_list_preference"
+            app:useSimpleSummaryProvider="true"/>
 
-  <PreferenceCategory
-      android:key="@string/advanced_preference"
-      android:title="@string/advanced_attributes"
-      app:initialExpandedChildrenCount="1">
+        <MultiSelectListPreference
+            android:dialogTitle="@string/dialog_title_multi_list_preference"
+            android:entries="@array/entries"
+            android:entryValues="@array/entry_values"
+            android:key="multi_select_list"
+            android:summary="@string/summary_multi_list_preference"
+            android:title="@string/title_multi_list_preference"/>
 
-    <Preference
-        android:key="expandable"
-        android:title="@string/title_expandable_preference"
-        android:summary="@string/summary_expandable_preference"/>
+        <com.android.car.ui.preference.CarUiSeekBarDialogPreference
+            android:dialogTitle="Seekbar Dialog"
+            android:key="seekbarDialog"
+            android:summary="@string/summary_seekbar_preference"
+            android:title="@string/title_seekbar_preference"/>
+    </PreferenceCategory>
 
-    <Preference
-        android:title="@string/title_intent_preference"
-        android:summary="@string/summary_intent_preference">
+    <PreferenceCategory
+        android:key="@string/advanced_preference"
+        android:title="@string/advanced_attributes"
+        app:initialExpandedChildrenCount="1">
 
-      <intent android:action="android.intent.action.VIEW"
-          android:data="http://www.android.com"/>
+        <Preference
+            android:key="expandable"
+            android:summary="@string/summary_expandable_preference"
+            android:title="@string/title_expandable_preference"/>
 
-    </Preference>
+        <Preference
+            android:summary="@string/summary_intent_preference"
+            android:title="@string/title_intent_preference">
 
-    <SwitchPreference
-        android:key="parent"
-        android:title="@string/title_parent_preference"
-        android:summary="@string/summary_parent_preference"/>
+            <intent android:action="android.intent.action.VIEW"
+                    android:data="http://www.android.com"/>
 
-    <SwitchPreference
-        android:key="child"
-        android:dependency="parent"
-        android:title="@string/title_child_preference"
-        android:summary="@string/summary_child_preference"/>
+        </Preference>
 
-    <SwitchPreference
-        android:key="toggle_summary"
-        android:title="@string/title_toggle_summary_preference"
-        android:summaryOn="@string/summary_on_toggle_summary_preference"
-        android:summaryOff="@string/summary_off_toggle_summary_preference"/>
+        <Preference
+            android:key="copyable"
+            android:selectable="false"
+            android:summary="@string/summary_copyable_preference"
+            android:title="@string/title_copyable_preference"
+            app:enableCopying="true"/>
 
-    <Preference
-        android:key="copyable"
-        android:title="@string/title_copyable_preference"
-        android:summary="@string/summary_copyable_preference"
-        android:selectable="false"
-        app:enableCopying="true"/>
-  </PreferenceCategory>
+        <SwitchPreference
+            android:dependency="parent"
+            android:key="child"
+            android:summary="@string/summary_child_preference"
+            android:title="@string/title_child_preference"/>
+
+        <SwitchPreference
+            android:key="toggle_summary"
+            android:summaryOff="@string/summary_off_toggle_summary_preference"
+            android:summaryOn="@string/summary_on_toggle_summary_preference"
+            android:title="@string/title_toggle_summary_preference"/>
+
+        <SwitchPreference
+            android:key="parent"
+            android:summary="@string/summary_parent_preference"
+            android:title="@string/title_parent_preference"/>
+    </PreferenceCategory>
 
 </PreferenceScreen>
