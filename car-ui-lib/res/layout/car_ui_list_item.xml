@@ -25,7 +25,7 @@
         android:id="@+id/touch_interceptor"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="?android:attr/selectableItemBackground"
+        android:background="@drawable/car_ui_list_item_background"
         android:clickable="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -37,7 +37,7 @@
         android:id="@+id/reduced_touch_interceptor"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="?android:attr/selectableItemBackground"
+        android:background="@drawable/car_ui_list_item_background"
         android:clickable="true"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -94,12 +94,24 @@
         app:layout_constraintTop_toBottomOf="@+id/title"
         app:layout_goneMarginStart="@dimen/car_ui_list_item_text_no_icon_start_margin" />
 
+    <!-- This touch interceptor is sized and positioned to encompass the action container   -->
+    <View
+        android:id="@+id/action_container_touch_interceptor"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/car_ui_list_item_background"
+        android:clickable="true"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/action_container"
+        app:layout_constraintEnd_toEndOf="@id/action_container"
+        app:layout_constraintStart_toStartOf="@id/action_container"
+        app:layout_constraintTop_toTopOf="@id/action_container" />
+
     <FrameLayout
         android:id="@+id/action_container"
         android:layout_width="wrap_content"
         android:minWidth="@dimen/car_ui_list_item_icon_container_width"
         android:layout_height="0dp"
-        android:background="?android:attr/selectableItemBackground"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/car_ui_list_item_end_guideline"
         app:layout_constraintTop_toTopOf="parent">
