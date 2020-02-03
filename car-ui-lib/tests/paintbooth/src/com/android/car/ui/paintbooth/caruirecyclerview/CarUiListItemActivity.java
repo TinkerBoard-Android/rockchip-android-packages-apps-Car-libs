@@ -84,6 +84,19 @@ public class CarUiListItemActivity extends Activity {
         mData.add(item);
 
         item = new CarUiContentListItem();
+        item.setTitle("Test Title -- with content icon");
+        item.setPrimaryIconType(CarUiContentListItem.IconType.CONTENT);
+        item.setIcon(getDrawable(R.drawable.ic_sample_logo));
+        mData.add(item);
+
+        item = new CarUiContentListItem();
+        item.setTitle("Test Title");
+        item.setBody("With avatar icon.");
+        item.setIcon(getDrawable(R.drawable.ic_sample_logo));
+        item.setPrimaryIconType(CarUiContentListItem.IconType.AVATAR);
+        mData.add(item);
+
+        item = new CarUiContentListItem();
         item.setIcon(getDrawable(R.drawable.ic_launcher));
         item.setTitle("Title -- Item with checkbox");
         item.setBody("Will present toast on change of selection state.");
