@@ -201,7 +201,7 @@ public class CurrentActivityService extends Service {
 
     private void updateComponentName(ComponentName componentName) {
         mHandler.post(() -> {
-            if (mTextView != null) {
+            if (mTextView != null && componentName != null) {
                 mTextView.setText(componentName.flattenToShortString().replace('/', '\n'));
             }
         });
