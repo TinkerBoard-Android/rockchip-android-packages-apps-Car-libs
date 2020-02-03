@@ -299,7 +299,7 @@ public class PlaybackViewModel extends AndroidViewModel {
                             .collect(Collectors.toList());
 
             mSanitizedQueue.setValue(filtered);
-            mHasQueue.setValue(!filtered.isEmpty());
+            mHasQueue.setValue(filtered.size() > 1);
         }
 
         @Override
