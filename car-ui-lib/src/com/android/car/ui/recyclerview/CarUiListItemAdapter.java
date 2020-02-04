@@ -152,6 +152,8 @@ public final class CarUiListItemAdapter extends
         private final TextView mTitle;
         private final TextView mBody;
         private final ImageView mIcon;
+        private final ImageView mContentIcon;
+        private final ImageView mAvatarIcon;
         private final ViewGroup mIconContainer;
         private final ViewGroup mActionContainer;
         private final View mActionDivider;
@@ -169,6 +171,8 @@ public final class CarUiListItemAdapter extends
             mTitle = itemView.requireViewById(R.id.title);
             mBody = itemView.requireViewById(R.id.body);
             mIcon = itemView.requireViewById(R.id.icon);
+            mContentIcon = itemView.requireViewById(R.id.content_icon);
+            mAvatarIcon = itemView.requireViewById(R.id.avatar_icon);
             mIconContainer = itemView.requireViewById(R.id.icon_container);
             mActionContainer = itemView.requireViewById(R.id.action_container);
             mActionDivider = itemView.requireViewById(R.id.action_divider);
@@ -201,16 +205,34 @@ public final class CarUiListItemAdapter extends
                 mBody.setVisibility(View.GONE);
             }
 
+            mIcon.setVisibility(View.GONE);
+            mContentIcon.setVisibility(View.GONE);
+            mAvatarIcon.setVisibility(View.GONE);
+
             if (icon != null) {
-                mIcon.setImageDrawable(icon);
                 mIconContainer.setVisibility(View.VISIBLE);
+
+                switch (item.getPrimaryIconType()) {
+                    case CONTENT:
+                        mContentIcon.setVisibility(View.VISIBLE);
+                        mContentIcon.setImageDrawable(icon);
+                        break;
+                    case STANDARD:
+                        mIcon.setVisibility(View.VISIBLE);
+                        mIcon.setImageDrawable(icon);
+                        break;
+                    case AVATAR:
+                        mAvatarIcon.setVisibility(View.VISIBLE);
+                        mAvatarIcon.setImageDrawable(icon);
+                        mAvatarIcon.setClipToOutline(true);
+                        break;
+                }
             } else {
                 mIconContainer.setVisibility(View.GONE);
             }
 
             mActionDivider.setVisibility(
                     item.isActionDividerVisible() ? View.VISIBLE : View.GONE);
-
             mSwitch.setVisibility(View.GONE);
             mCheckBox.setVisibility(View.GONE);
             mRadioButton.setVisibility(View.GONE);
