@@ -41,7 +41,7 @@ android {
                         "com/android/car/ui/paintbooth/currentactivity/ActivityTaskManagerImpl.java",
                 ]
             }
-            res.srcDirs = ['res']
+            res.srcDirs = ['res', 'res-public']
         }
     }
 }
