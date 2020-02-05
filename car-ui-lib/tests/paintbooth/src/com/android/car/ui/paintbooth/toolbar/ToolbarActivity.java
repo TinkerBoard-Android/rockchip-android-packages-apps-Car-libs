@@ -270,6 +270,9 @@ public class ToolbarActivity extends Activity {
                     .show();
         }));
 
+        mButtons.add(Pair.create(getString(R.string.toolbar_show_tabs_in_subpage), v ->
+                toolbar.setShowTabsInSubpage(!toolbar.getShowTabsInSubpage())));
+
         Mutable<Boolean> showingLauncherIcon = new Mutable<>(false);
         mButtons.add(Pair.create(getString(R.string.toolbar_toggle_search_icon), v -> {
             if (showingLauncherIcon.value) {
