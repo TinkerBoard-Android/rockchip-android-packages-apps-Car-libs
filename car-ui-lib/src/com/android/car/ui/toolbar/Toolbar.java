@@ -162,6 +162,7 @@ public class Toolbar extends FrameLayout {
     private boolean mShowMenuItemsWhileSearching;
     private State mState = State.HOME;
     private NavButtonMode mNavButtonMode = NavButtonMode.BACK;
+    private boolean mShowTabsInSubpage = false;
     @NonNull
     private List<MenuItem> mMenuItems = Collections.emptyList();
     private List<MenuItem> mOverflowItems = new ArrayList<>();
@@ -238,6 +239,7 @@ public class Toolbar extends FrameLayout {
             mSearchViewContainer = requireViewById(R.id.car_ui_toolbar_search_view_container);
             mProgressBar = requireViewById(R.id.car_ui_toolbar_progress_bar);
 
+            setShowTabsInSubpage(a.getBoolean(R.styleable.CarUiToolbar_showTabsInSubpage, false));
             mTitle.setText(a.getString(R.styleable.CarUiToolbar_title));
             setLogo(a.getResourceId(R.styleable.CarUiToolbar_logo, 0));
             setBackgroundShown(a.getBoolean(R.styleable.CarUiToolbar_showBackground, true));
@@ -405,6 +407,23 @@ public class Toolbar extends FrameLayout {
      */
     public void selectTab(int position) {
         mTabLayout.selectTab(position);
+    }
+
+    /**
+     * Sets whether or not tabs should also be shown in the SUBPAGE {@link State}.
+     */
+    public void setShowTabsInSubpage(boolean showTabs) {
+        if (mShowTabsInSubpage != showTabs) {
+            mShowTabsInSubpage = showTabs;
+            setState(getState());
+        }
+    }
+
+    /**
+     * Gets whether or not tabs should also be shown in the SUBPAGE {@link State}.
+     */
+    public boolean getShowTabsInSubpage() {
+        return mShowTabsInSubpage;
     }
 
     /**
@@ -811,13 +830,14 @@ public class Toolbar extends FrameLayout {
         mNavIconContainer.setOnClickListener(state != State.HOME ? backClickListener : null);
         mNavIconContainer.setClickable(state != State.HOME);
 
-        boolean hasTabs = mTabLayout.getTabCount() > 0;
+        boolean hasTabs = mTabLayout.getTabCount() > 0
+                && (state == State.HOME || (state == State.SUBPAGE && mShowTabsInSubpage));
         // Show the title if we're in the subpage state, or in the home state with no tabs or tabs
         // on the second row
-        mTitle.setVisibility(state == State.SUBPAGE
-                || (state == State.HOME && (!hasTabs || mIsTabsInSecondRow))
+        mTitle.setVisibility((state == State.SUBPAGE || state == State.HOME)
+                && (!hasTabs || mIsTabsInSecondRow)
                 ? VISIBLE : GONE);
-        mTabLayout.setVisibility(state == State.HOME && hasTabs ? VISIBLE : GONE);
+        mTabLayout.setVisibility(hasTabs ? VISIBLE : GONE);
 
         if (mSearchView != null) {
             if (state == State.SEARCH || state == State.EDIT) {
