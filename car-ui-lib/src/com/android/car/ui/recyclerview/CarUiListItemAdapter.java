@@ -238,6 +238,8 @@ public final class CarUiListItemAdapter extends
             mRadioButton.setVisibility(View.GONE);
             mSupplementalIcon.setVisibility(View.GONE);
 
+            CarUiContentListItem.OnClickListener itemOnClickListener = item.getOnClickListener();
+
             switch (item.getAction()) {
                 case NONE:
                     mActionContainer.setVisibility(View.GONE);
@@ -245,6 +247,11 @@ public final class CarUiListItemAdapter extends
                     // Display ripple effects across entire item when clicked by using full-sized
                     // touch interceptor.
                     mTouchInterceptor.setVisibility(View.VISIBLE);
+                    mTouchInterceptor.setOnClickListener(v -> {
+                        if (itemOnClickListener != null) {
+                            itemOnClickListener.onClick(item);
+                        }
+                    });
                     mReducedTouchInterceptor.setVisibility(View.GONE);
                     mActionContainerTouchInterceptor.setVisibility(View.GONE);
                     break;
@@ -265,7 +272,12 @@ public final class CarUiListItemAdapter extends
                     // Clicks anywhere on the item should toggle the switch state. Use full touch
                     // interceptor.
                     mTouchInterceptor.setVisibility(View.VISIBLE);
-                    mTouchInterceptor.setOnClickListener(v -> mSwitch.toggle());
+                    mTouchInterceptor.setOnClickListener(v -> {
+                        mSwitch.toggle();
+                        if (itemOnClickListener != null) {
+                            itemOnClickListener.onClick(item);
+                        }
+                    });
                     mReducedTouchInterceptor.setVisibility(View.GONE);
                     mActionContainerTouchInterceptor.setVisibility(View.GONE);
 
@@ -289,7 +301,12 @@ public final class CarUiListItemAdapter extends
                     // Clicks anywhere on the item should toggle the checkbox state. Use full touch
                     // interceptor.
                     mTouchInterceptor.setVisibility(View.VISIBLE);
-                    mTouchInterceptor.setOnClickListener(v -> mCheckBox.toggle());
+                    mTouchInterceptor.setOnClickListener(v -> {
+                        mCheckBox.toggle();
+                        if (itemOnClickListener != null) {
+                            itemOnClickListener.onClick(item);
+                        }
+                    });
                     mReducedTouchInterceptor.setVisibility(View.GONE);
                     mActionContainerTouchInterceptor.setVisibility(View.GONE);
 
@@ -313,7 +330,12 @@ public final class CarUiListItemAdapter extends
                     // Clicks anywhere on the item should toggle the switch state. Use full touch
                     // interceptor.
                     mTouchInterceptor.setVisibility(View.VISIBLE);
-                    mTouchInterceptor.setOnClickListener(v -> mRadioButton.toggle());
+                    mTouchInterceptor.setOnClickListener(v -> {
+                        mRadioButton.toggle();
+                        if (itemOnClickListener != null) {
+                            itemOnClickListener.onClick(item);
+                        }
+                    });
                     mReducedTouchInterceptor.setVisibility(View.GONE);
                     mActionContainerTouchInterceptor.setVisibility(View.GONE);
 
@@ -329,6 +351,9 @@ public final class CarUiListItemAdapter extends
                                 if (item.getSupplementalIconOnClickListener() != null) {
                                     item.getSupplementalIconOnClickListener().onClick(mIcon);
                                 }
+                                if (itemOnClickListener != null) {
+                                    itemOnClickListener.onClick(item);
+                                }
                             });
 
                     // If the icon has a click listener, use a reduced touch interceptor to create
@@ -337,11 +362,20 @@ public final class CarUiListItemAdapter extends
                     // click listener, it shouldn't be clickable.
                     if (item.getSupplementalIconOnClickListener() == null) {
                         mTouchInterceptor.setVisibility(View.VISIBLE);
-                        mTouchInterceptor.setOnClickListener(null);
+                        mTouchInterceptor.setOnClickListener(v -> {
+                            if (itemOnClickListener != null) {
+                                itemOnClickListener.onClick(item);
+                            }
+                        });
                         mReducedTouchInterceptor.setVisibility(View.GONE);
                         mActionContainerTouchInterceptor.setVisibility(View.GONE);
                     } else {
                         mReducedTouchInterceptor.setVisibility(View.VISIBLE);
+                        mReducedTouchInterceptor.setOnClickListener(v -> {
+                            if (itemOnClickListener != null) {
+                                itemOnClickListener.onClick(item);
+                            }
+                        });
                         mActionContainerTouchInterceptor.setVisibility(View.VISIBLE);
                         mTouchInterceptor.setVisibility(View.GONE);
                     }

@@ -34,10 +34,22 @@ public class CarUiContentListItem extends CarUiListItem {
         /**
          * Called when the checked state of a list item has changed.
          *
-         * @param item      The item whose checked state changed.
+         * @param item      whose checked state changed.
          * @param isChecked new checked state of list item.
          */
-        void onCheckedChanged(CarUiContentListItem item, boolean isChecked);
+        void onCheckedChanged(@NonNull CarUiContentListItem item, boolean isChecked);
+    }
+
+    /**
+     * Callback to be invoked when an item is clicked.
+     */
+    public interface OnClickListener {
+        /**
+         * Called when the item has been clicked.
+         *
+         * @param item whose checked state changed.
+         */
+        void onClick(@NonNull CarUiContentListItem item);
     }
 
     public enum IconType {
@@ -93,6 +105,7 @@ public class CarUiContentListItem extends CarUiListItem {
     private IconType mPrimaryIconType;
     private boolean mIsActionDividerVisible;
     private boolean mIsChecked;
+    private OnClickListener mOnClickListener;
     private OnCheckedChangedListener mOnCheckedChangedListener;
     private View.OnClickListener mSupplementalIconOnClickListener;
 
@@ -271,6 +284,20 @@ public class CarUiContentListItem extends CarUiListItem {
     }
 
     /**
+     * Registers a callback to be invoked when the item is clicked.
+     *
+     * @param listener callback to be invoked when item is clicked.
+     */
+    public void setOnItemClickedListener(@Nullable OnClickListener listener) {
+        mOnClickListener = listener;
+    }
+
+    @Nullable
+    OnClickListener getOnClickListener() {
+        return mOnClickListener;
+    }
+
+    /**
      * Registers a callback to be invoked when the checked state of list item changes.
      *
      * <p>Checked state changes can take place when the action type is {@code Action.SWITCH} or
@@ -279,7 +306,7 @@ public class CarUiContentListItem extends CarUiListItem {
      * @param listener callback to be invoked when the checked state shown in the UI changes.
      */
     public void setOnCheckedChangedListener(
-            @NonNull OnCheckedChangedListener listener) {
+            @Nullable OnCheckedChangedListener listener) {
         mOnCheckedChangedListener = listener;
     }
 
