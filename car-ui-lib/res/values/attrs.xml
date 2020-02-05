@@ -39,6 +39,8 @@
         </attr>
         <!-- XML resource of MenuItems. See Toolbar.setMenuItems(int) for more information. -->
         <attr name="menuItems" format="reference"/>
+        <!-- Whether or not to show tabs in the SUBPAGE state. Default false -->
+        <attr name="showTabsInSubpage" format="boolean"/>
     </declare-styleable>
 
     <declare-styleable name="CarUiToolbarMenuItem">
