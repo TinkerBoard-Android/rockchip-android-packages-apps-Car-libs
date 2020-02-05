@@ -18,9 +18,15 @@ package com.android.car.ui.preference;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Toast;
 
+import androidx.core.view.ViewCompat;
 import androidx.preference.Preference;
+import androidx.preference.PreferenceViewHolder;
 
 import com.android.car.ui.R;
 
@@ -32,6 +38,12 @@ public class CarUiPreference extends Preference {
 
     private Context mContext;
     private boolean mShowChevron;
+    private String mMessageToShowWhenDisabledPreferenceClicked;
+
+    private boolean mShouldShowRippleOnDisabledPreference;
+    private boolean mEnabledAppearance = true;
+    private Drawable mBackground;
+    private View mPreference;
 
     public CarUiPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
@@ -61,6 +73,46 @@ public class CarUiPreference extends Preference {
                 defStyleRes);
 
         mShowChevron = a.getBoolean(R.styleable.CarUiPreference_showChevron, true);
+        mShouldShowRippleOnDisabledPreference = a.getBoolean(
+                R.styleable.CarUiPreference_showRippleOnDisabledPreference, false);
+    }
+
+
+    @Override
+    public void onBindViewHolder(PreferenceViewHolder holder) {
+        super.onBindViewHolder(holder);
+        boolean viewEnabled = isEnabled();
+        if (viewEnabled) {
+            if (mBackground != null) {
+                ViewCompat.setBackground(holder.itemView, mBackground);
+            }
+            enableView(holder.itemView, true, false);
+        } else {
+            holder.itemView.setEnabled(true);
+            mPreference = holder.itemView;
+            if (mBackground == null) {
+                // store the original background.
+                mBackground = mPreference.getBackground();
+            }
+            if (!mShouldShowRippleOnDisabledPreference) {
+                ViewCompat.setBackground(mPreference, null);
+            } else if (mBackground != null) {
+                ViewCompat.setBackground(mPreference, mBackground);
+            }
+            enableView(holder.itemView, false, true);
+        }
+    }
+
+    private void enableView(View view, boolean enabled, boolean isRootView) {
+        if (!isRootView) {
+            view.setEnabled(enabled);
+        }
+        if (view instanceof ViewGroup) {
+            ViewGroup grp = (ViewGroup) view;
+            for (int index = 0; index < grp.getChildCount(); index++) {
+                enableView(grp.getChildAt(index), enabled, false);
+            }
+        }
     }
 
     @Override
@@ -80,7 +132,46 @@ public class CarUiPreference extends Preference {
         }
     }
 
+    /**
+     * This is similar to {@link Preference#performClick()} with the only difference that we do not
+     * return when view is not enabled.
+     */
+    @Override
+    public void performClick() {
+        if (isEnabled()) {
+            super.performClick();
+        } else if (mMessageToShowWhenDisabledPreferenceClicked != null
+                && !mMessageToShowWhenDisabledPreferenceClicked.isEmpty()) {
+            Toast toast = Toast.makeText(mContext, mMessageToShowWhenDisabledPreferenceClicked,
+                    Toast.LENGTH_LONG);
+            toast.show();
+        }
+    }
+
     public void setShowChevron(boolean showChevron) {
         mShowChevron = showChevron;
+    }
+
+    /**
+     * Sets the ripple on the disabled preference.
+     */
+    public void setShouldShowRippleOnDisabledPreference(boolean showRipple) {
+        mShouldShowRippleOnDisabledPreference = showRipple;
+        updateRippleStateOnDisabledPreference();
+    }
+
+    private void updateRippleStateOnDisabledPreference() {
+        if (isEnabled()) {
+            return;
+        }
+        if (mShouldShowRippleOnDisabledPreference && mPreference != null) {
+            ViewCompat.setBackground(mPreference, mBackground);
+        } else if (mPreference != null) {
+            ViewCompat.setBackground(mPreference, null);
+        }
+    }
+
+    public void setMessageToShowWhenDisabledPreferenceClicked(String message) {
+        mMessageToShowWhenDisabledPreferenceClicked = message;
     }
 }
