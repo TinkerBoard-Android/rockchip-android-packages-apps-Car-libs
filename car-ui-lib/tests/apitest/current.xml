@@ -146,16 +146,18 @@
   <public type="dimen" name="wrap_content"/>
   <public type="drawable" name="car_ui_activity_background"/>
   <public type="drawable" name="car_ui_divider"/>
+  <public type="drawable" name="car_ui_icon_add"/>
   <public type="drawable" name="car_ui_icon_arrow_back"/>
   <public type="drawable" name="car_ui_icon_close"/>
   <public type="drawable" name="car_ui_icon_down"/>
   <public type="drawable" name="car_ui_icon_overflow_menu"/>
+  <public type="drawable" name="car_ui_icon_save"/>
   <public type="drawable" name="car_ui_icon_search"/>
   <public type="drawable" name="car_ui_icon_search_nav_icon"/>
   <public type="drawable" name="car_ui_icon_settings"/>
   <public type="drawable" name="car_ui_list_header_background"/>
-  <public type="drawable" name="car_ui_list_item_background"/>
   <public type="drawable" name="car_ui_list_item_avatar_icon_outline"/>
+  <public type="drawable" name="car_ui_list_item_background"/>
   <public type="drawable" name="car_ui_list_item_divider"/>
   <public type="drawable" name="car_ui_preference_icon_chevron"/>
   <public type="drawable" name="car_ui_recyclerview_button_ripple_background"/>
