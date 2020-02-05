@@ -22,12 +22,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.R;
@@ -42,17 +44,16 @@ import java.util.List;
  * <li> Implements {@link CarUiRecyclerView.ItemCap} - defaults to unlimited item count.
  * </ul>
  */
-public final class CarUiListItemAdapter extends
-        RecyclerView.Adapter<RecyclerView.ViewHolder> implements
+public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements
         CarUiRecyclerView.ItemCap {
 
-    private static final int VIEW_TYPE_LIST_ITEM = 1;
-    private static final int VIEW_TYPE_LIST_HEADER = 2;
+    static final int VIEW_TYPE_LIST_ITEM = 1;
+    static final int VIEW_TYPE_LIST_HEADER = 2;
 
-    private List<CarUiListItem> mItems;
+    private List<? extends CarUiListItem> mItems;
     private int mMaxItems = CarUiRecyclerView.ItemCap.UNLIMITED;
 
-    public CarUiListItemAdapter(List<CarUiListItem> items) {
+    public CarUiListItemAdapter(List<? extends CarUiListItem> items) {
         this.mItems = items;
     }
 
@@ -81,7 +82,7 @@ public final class CarUiListItemAdapter extends
      * appropriate notify method for the adapter.
      */
     @NonNull
-    public List<CarUiListItem> getItems() {
+    public List<? extends CarUiListItem> getItems() {
         return mItems;
     }
 
@@ -149,22 +150,21 @@ public final class CarUiListItemAdapter extends
      */
     static class ListItemViewHolder extends RecyclerView.ViewHolder {
 
-        private final TextView mTitle;
-        private final TextView mBody;
-        private final ImageView mIcon;
-        private final ImageView mContentIcon;
-        private final ImageView mAvatarIcon;
-        private final ViewGroup mIconContainer;
-        private final ViewGroup mActionContainer;
-        private final View mActionDivider;
-        private final Switch mSwitch;
-        private final CheckBox mCheckBox;
-        private final RadioButton mRadioButton;
-        private final ImageView mSupplementalIcon;
-        private final View mTouchInterceptor;
-        private final View mReducedTouchInterceptor;
-        private final View mActionContainerTouchInterceptor;
-
+        final TextView mTitle;
+        final TextView mBody;
+        final ImageView mIcon;
+        final ImageView mContentIcon;
+        final ImageView mAvatarIcon;
+        final ViewGroup mIconContainer;
+        final ViewGroup mActionContainer;
+        final View mActionDivider;
+        final Switch mSwitch;
+        final CheckBox mCheckBox;
+        final RadioButton mRadioButton;
+        final ImageView mSupplementalIcon;
+        final View mTouchInterceptor;
+        final View mReducedTouchInterceptor;
+        final View mActionContainerTouchInterceptor;
 
         ListItemViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -186,7 +186,7 @@ public final class CarUiListItemAdapter extends
                     R.id.action_container_touch_interceptor);
         }
 
-        private void bind(@NonNull CarUiContentListItem item) {
+        void bind(@NonNull CarUiContentListItem item) {
             CharSequence title = item.getTitle();
             CharSequence body = item.getBody();
             Drawable icon = item.getIcon();
@@ -256,91 +256,13 @@ public final class CarUiListItemAdapter extends
                     mActionContainerTouchInterceptor.setVisibility(View.GONE);
                     break;
                 case SWITCH:
-                    mSwitch.setVisibility(View.VISIBLE);
-                    mSwitch.setOnCheckedChangeListener(null);
-                    mSwitch.setChecked(item.isChecked());
-                    mSwitch.setOnCheckedChangeListener(
-                            (buttonView, isChecked) -> {
-                                item.setChecked(isChecked);
-                                CarUiContentListItem.OnCheckedChangedListener itemListener =
-                                        item.getOnCheckedChangedListener();
-                                if (itemListener != null) {
-                                    itemListener.onCheckedChanged(item, isChecked);
-                                }
-                            });
-
-                    // Clicks anywhere on the item should toggle the switch state. Use full touch
-                    // interceptor.
-                    mTouchInterceptor.setVisibility(View.VISIBLE);
-                    mTouchInterceptor.setOnClickListener(v -> {
-                        mSwitch.toggle();
-                        if (itemOnClickListener != null) {
-                            itemOnClickListener.onClick(item);
-                        }
-                    });
-                    mReducedTouchInterceptor.setVisibility(View.GONE);
-                    mActionContainerTouchInterceptor.setVisibility(View.GONE);
-
-                    mActionContainer.setVisibility(View.VISIBLE);
-                    mActionContainer.setClickable(false);
+                    bindCompoundButton(item, mSwitch, itemOnClickListener);
                     break;
                 case CHECK_BOX:
-                    mCheckBox.setVisibility(View.VISIBLE);
-                    mCheckBox.setOnCheckedChangeListener(null);
-                    mCheckBox.setChecked(item.isChecked());
-                    mCheckBox.setOnCheckedChangeListener(
-                            (buttonView, isChecked) -> {
-                                item.setChecked(isChecked);
-                                CarUiContentListItem.OnCheckedChangedListener itemListener =
-                                        item.getOnCheckedChangedListener();
-                                if (itemListener != null) {
-                                    itemListener.onCheckedChanged(item, isChecked);
-                                }
-                            });
-
-                    // Clicks anywhere on the item should toggle the checkbox state. Use full touch
-                    // interceptor.
-                    mTouchInterceptor.setVisibility(View.VISIBLE);
-                    mTouchInterceptor.setOnClickListener(v -> {
-                        mCheckBox.toggle();
-                        if (itemOnClickListener != null) {
-                            itemOnClickListener.onClick(item);
-                        }
-                    });
-                    mReducedTouchInterceptor.setVisibility(View.GONE);
-                    mActionContainerTouchInterceptor.setVisibility(View.GONE);
-
-                    mActionContainer.setVisibility(View.VISIBLE);
-                    mActionContainer.setClickable(false);
+                    bindCompoundButton(item, mCheckBox, itemOnClickListener);
                     break;
                 case RADIO_BUTTON:
-                    mRadioButton.setVisibility(View.VISIBLE);
-                    mRadioButton.setOnCheckedChangeListener(null);
-                    mRadioButton.setChecked(item.isChecked());
-                    mRadioButton.setOnCheckedChangeListener(
-                            (buttonView, isChecked) -> {
-                                item.setChecked(isChecked);
-                                CarUiContentListItem.OnCheckedChangedListener itemListener =
-                                        item.getOnCheckedChangedListener();
-                                if (itemListener != null) {
-                                    itemListener.onCheckedChanged(item, isChecked);
-                                }
-                            });
-
-                    // Clicks anywhere on the item should toggle the switch state. Use full touch
-                    // interceptor.
-                    mTouchInterceptor.setVisibility(View.VISIBLE);
-                    mTouchInterceptor.setOnClickListener(v -> {
-                        mRadioButton.toggle();
-                        if (itemOnClickListener != null) {
-                            itemOnClickListener.onClick(item);
-                        }
-                    });
-                    mReducedTouchInterceptor.setVisibility(View.GONE);
-                    mActionContainerTouchInterceptor.setVisibility(View.GONE);
-
-                    mActionContainer.setVisibility(View.VISIBLE);
-                    mActionContainer.setClickable(false);
+                    bindCompoundButton(item, mRadioButton, itemOnClickListener);
                     break;
                 case ICON:
                     mSupplementalIcon.setVisibility(View.VISIBLE);
@@ -383,6 +305,31 @@ public final class CarUiListItemAdapter extends
                 default:
                     throw new IllegalStateException("Unknown secondary action type.");
             }
+        }
+
+        void bindCompoundButton(@NonNull CarUiContentListItem item,
+                @NonNull CompoundButton compoundButton,
+                @Nullable CarUiContentListItem.OnClickListener itemOnClickListener) {
+            compoundButton.setVisibility(View.VISIBLE);
+            compoundButton.setOnCheckedChangeListener(null);
+            compoundButton.setChecked(item.isChecked());
+            compoundButton.setOnCheckedChangeListener(
+                    (buttonView, isChecked) -> item.setChecked(isChecked));
+
+            // Clicks anywhere on the item should toggle the checkbox state. Use full touch
+            // interceptor.
+            mTouchInterceptor.setVisibility(View.VISIBLE);
+            mTouchInterceptor.setOnClickListener(v -> {
+                compoundButton.toggle();
+                if (itemOnClickListener != null) {
+                    itemOnClickListener.onClick(item);
+                }
+            });
+            mReducedTouchInterceptor.setVisibility(View.GONE);
+            mActionContainerTouchInterceptor.setVisibility(View.GONE);
+
+            mActionContainer.setVisibility(View.VISIBLE);
+            mActionContainer.setClickable(false);
         }
     }
 
