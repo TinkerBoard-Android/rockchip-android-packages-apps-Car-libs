@@ -137,6 +137,7 @@ public class CarUiPreference extends Preference {
      * return when view is not enabled.
      */
     @Override
+    @SuppressWarnings("RestrictTo")
     public void performClick() {
         if (isEnabled()) {
             super.performClick();
