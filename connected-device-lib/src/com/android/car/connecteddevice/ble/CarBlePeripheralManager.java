@@ -136,6 +136,7 @@ public class CarBlePeripheralManager extends CarBleManager {
     public void connectToDevice(@NonNull UUID deviceId) {
         for (BleDevice device : mConnectedDevices) {
             if (UUID.fromString(device.mDeviceId).equals(deviceId)) {
+                logd(TAG, "Already connected to device " + deviceId + ".");
                 // Already connected to this device. Ignore requests to connect again.
                 return;
             }
@@ -354,14 +355,17 @@ public class CarBlePeripheralManager extends CarBleManager {
                 public void onRemoteDeviceDisconnected(BluetoothDevice device) {
                     String deviceId = null;
                     BleDevice connectedDevice = getConnectedDevice(device);
+                    // Reset before invoking callbacks to avoid a race condition with reconnect
+                    // logic.
+                    reset();
                     if (connectedDevice != null) {
                         deviceId = connectedDevice.mDeviceId;
                     }
                     final String finalDeviceId = deviceId;
                     if (finalDeviceId != null) {
+                        logd(TAG, "Connected device " + finalDeviceId + " disconnected.");
                         mCallbacks.invoke(callback -> callback.onDeviceDisconnected(finalDeviceId));
                     }
-                    reset();
                 }
             };
 
@@ -406,11 +410,13 @@ public class CarBlePeripheralManager extends CarBleManager {
                 @Override
                 public void onRemoteDeviceDisconnected(BluetoothDevice device) {
                     BleDevice connectedDevice = getConnectedDevice(device);
+                    // Reset before invoking callbacks to avoid a race condition with reconnect
+                    // logic.
+                    reset();
                     if (connectedDevice != null && connectedDevice.mDeviceId != null) {
                         mCallbacks.invoke(callback -> callback.onDeviceDisconnected(
                                 connectedDevice.mDeviceId));
                     }
-                    reset();
                 }
             };
 
