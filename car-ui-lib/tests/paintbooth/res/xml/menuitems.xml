@@ -14,20 +14,19 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<MenuItems xmlns:app="http://schemas.android.com/apk/res-auto"
-           xmlns:lib="http://schemas.android.com/apk/res/com.android.car.ui.sharedlibrary">
-    <MenuItem lib:search="true"/>
-    <MenuItem lib:settings="true"/>
+<MenuItems xmlns:app="http://schemas.android.com/apk/res-auto">
+    <MenuItem app:search="true"/>
+    <MenuItem app:settings="true"/>
     <MenuItem
-        lib:title="@string/preferences_screen_title"/>
+        app:title="@string/preferences_screen_title"/>
     <MenuItem
-        lib:id="@+id/menu_bar"
-        lib:title="Bar"
-        lib:icon="@drawable/ic_tracklist"
-        lib:onClick="xmlMenuItemClicked"/>
+        app:id="@+id/menu_bar"
+        app:title="Bar"
+        app:icon="@drawable/ic_tracklist"
+        app:onClick="xmlMenuItemClicked"/>
     <MenuItem
-        lib:title="Bar"
-        lib:checkable="true"
-        lib:uxRestrictions="UX_RESTRICTIONS_FULLY_RESTRICTED"
-        lib:onClick="xmlMenuItemClicked"/>
+        app:title="Bar"
+        app:checkable="true"
+        app:uxRestrictions="UX_RESTRICTIONS_FULLY_RESTRICTED"
+        app:onClick="xmlMenuItemClicked"/>
 </MenuItems>

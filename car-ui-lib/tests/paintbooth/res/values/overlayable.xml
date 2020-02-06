@@ -20,9 +20,19 @@
             <item type="drawable" name="ic_launcher" />
             <item type="string" name="app_name" />
             <item type="layout" name="main_activity" />
-            <item type="id" name="activities" />
             <item type="id" name="home" />
             <item type="id" name="toolbar" />
+            <item type="id" name="activities" />
+            <item type="attr" name="title" />
+            <item type="attr" name="logo" />
+            <item type="attr" name="layout_constraintTop_toTopOf" />
+            <item type="attr" name="layout_constraintTop_toBottomOf" />
+            <item type="attr" name="layout_constraintLeft_toLeftOf" />
+            <item type="attr" name="layout_constraintBottom_toTopOf" />
+            <item type="attr" name="layout_constraintBottom_toBottomOf" />
+            <item type="attr" name="layout_constraintRight_toRightOf" />
+            <item type="attr" name="numOfColumns" />
+            <item type="attr" name="layoutStyle" />
         </policy>
     </overlayable>
 </resources>

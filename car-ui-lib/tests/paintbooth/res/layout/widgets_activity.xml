@@ -16,7 +16,6 @@
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:app="http://schemas.android.com/apk/res-auto"
-              xmlns:lib="http://schemas.android.com/apk/res/com.android.car.ui.sharedlibrary"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical">
@@ -25,8 +24,8 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        lib:title="@string/app_name"
-        lib:state="subpage"/>
+        app:title="@string/app_name"
+        app:state="subpage"/>
 
     <CheckBox
         android:id="@+id/check"
