@@ -209,6 +209,9 @@
   <!-- Text for add tab with custom text button [CHAR_LIMIT=40]-->
   <string name="toolbar_add_tab_with_custom_text">Add tab with custom text</string>
 
+  <!-- Text for showing tabs in subpages [CHAR_LIMIT=50]-->
+  <string name="toolbar_show_tabs_in_subpage">Toggle showing tabs in subpages</string>
+
   <!-- Text for toggle search icon button [CHAR_LIMIT=30]-->
   <string name="toolbar_toggle_search_icon">Toggle search icon</string>
 
