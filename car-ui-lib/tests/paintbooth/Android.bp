@@ -29,11 +29,8 @@ android_app {
 
     privileged: true,
 
-    libs: [
-        "car-ui-lib-sharedlibrary"
-    ],
-
     static_libs: [
+        "car-ui-lib",
         "android.car.userlib",
     ],
 

@@ -17,27 +17,26 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:lib="http://schemas.android.com/apk/res/com.android.car.ui.sharedlibrary"
     android:id="@+id/home"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@lib:drawable/car_ui_activity_background">
+    android:background="@drawable/car_ui_activity_background">
 
   <com.android.car.ui.toolbar.Toolbar
       android:id="@+id/toolbar"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      lib:layout_constraintTop_toTopOf="parent"
-      lib:title="@string/app_name"
-      lib:logo="@drawable/ic_launcher"/>
+      app:layout_constraintTop_toTopOf="parent"
+      app:title="@string/app_name"
+      app:logo="@drawable/ic_launcher"/>
 
   <com.android.car.ui.recyclerview.CarUiRecyclerView
       android:id="@+id/activities"
       android:layout_width="0dp"
       android:layout_height="0dp"
-      lib:layout_constraintLeft_toLeftOf="parent"
-      lib:layout_constraintRight_toRightOf="parent"
-      lib:layout_constraintTop_toBottomOf="@id/toolbar"
-      lib:layout_constraintBottom_toBottomOf="parent"/>
+      app:layout_constraintLeft_toLeftOf="parent"
+      app:layout_constraintRight_toRightOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/toolbar"
+      app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
