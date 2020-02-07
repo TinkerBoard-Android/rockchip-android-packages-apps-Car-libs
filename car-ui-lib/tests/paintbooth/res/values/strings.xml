@@ -248,6 +248,9 @@
   <!-- Button that shows a dialog with a subtitle and icon [CHAR_LIMIT=50]-->
   <string name="dialog_show_subtitle_and_icon">Show Dialog with title, subtitle, and icon</string>
 
+  <!-- Text to show Dialog with single choice items-->
+  <string name="dialog_show_single_choice">Show with single choice items</string>
+
   <!--This section is for widget attributes -->
   <eat-comment/>
   <!-- Text for checkbox [CHAR_LIMIT=16]-->
