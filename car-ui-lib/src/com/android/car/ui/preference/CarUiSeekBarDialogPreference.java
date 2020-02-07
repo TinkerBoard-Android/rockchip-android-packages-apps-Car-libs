@@ -46,30 +46,30 @@ public class CarUiSeekBarDialogPreference extends DialogPreference
     private String mSeekBarRightText;
 
     private SeekBar.OnSeekBarChangeListener mOnSeekBarChangeListener;
-    int mMaxProgress = 100;
+    private int mMaxProgress = 100;
 
     public CarUiSeekBarDialogPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init(context);
+        init();
     }
 
     public CarUiSeekBarDialogPreference(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(context);
+        init();
     }
 
     public CarUiSeekBarDialogPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context);
+        init();
     }
 
     public CarUiSeekBarDialogPreference(Context context) {
         super(context);
-        init(context);
+        init();
     }
 
-    private void init(Context context) {
+    private void init() {
         setDialogLayoutResource(R.layout.car_ui_seekbar_dialog);
         setPositiveButtonText(R.string.car_ui_dialog_preference_positive);
         setNegativeButtonText(R.string.car_ui_dialog_preference_negative);
@@ -104,11 +104,24 @@ public class CarUiSeekBarDialogPreference extends DialogPreference
     }
 
     /**
-     * Get the progress bar's current level of progress. Return 0 when the
-     * progress bar is in indeterminate mode.
+     * Get the progress bar's current level of progress. Return 0 when the progress bar is in
+     * indeterminate mode.
      */
     public int getProgress() {
+        if (mSeekBar != null) {
+            return mSeekBar.getProgress();
+        }
         return mSeekBarProgress;
+    }
+
+    /**
+     * Sets the current progress to the specified value.
+     */
+    public void setProgress(int progress) {
+        if (mSeekBar != null) {
+            mSeekBar.setProgress(progress);
+        }
+        mSeekBarProgress = progress;
     }
 
     @Override
@@ -126,16 +139,6 @@ public class CarUiSeekBarDialogPreference extends DialogPreference
     }
 
     /**
-     * Sets the current progress to the specified value.
-     */
-    public void setProgress(int progress) {
-        if (mSeekBar != null) {
-            mSeekBar.setProgress(progress);
-        }
-        mSeekBarProgress = progress;
-    }
-
-    /**
      * Sets the text view visibility on top of the seekbar.
      */
     public void setSeekBarTopTextViewVisibility(int visibility) {
@@ -143,6 +146,16 @@ public class CarUiSeekBarDialogPreference extends DialogPreference
             mSeekBarTopTextView.setVisibility(visibility);
         }
         mSeekBarTopTextViewVisibility = visibility;
+    }
+
+    /**
+     * Gets the text on top of the seekbar.
+     */
+    public String getSeekBarTopTextViewText() {
+        if (mSeekBarTopTextView != null) {
+            return mSeekBarTopTextView.getText().toString();
+        }
+        return mSeekBarTopText;
     }
 
     /**
@@ -163,6 +176,16 @@ public class CarUiSeekBarDialogPreference extends DialogPreference
             mSeekBarLeftTextView.setVisibility(visibility);
         }
         mSeekBarLeftTextViewVisibility = visibility;
+    }
+
+    /**
+     * Gets the text on left of the seekbar.
+     */
+    public String getSeekBarLeftTextViewText() {
+        if (mSeekBarLeftTextView != null) {
+            return mSeekBarLeftTextView.getText().toString();
+        }
+        return mSeekBarLeftText;
     }
 
     /**
@@ -187,6 +210,17 @@ public class CarUiSeekBarDialogPreference extends DialogPreference
     }
 
     /**
+     * Gets the text on right of the seekbar.
+     */
+    public String getSeekBarRightTextViewText() {
+        if (mSeekBarRightTextView != null) {
+            return mSeekBarRightTextView.getText().toString();
+        }
+        return mSeekBarRightText;
+    }
+
+
+    /**
      * Sets the text on right of the seekbar.
      */
     public void setSeekBarRightTextViewText(String text) {
@@ -208,6 +242,14 @@ public class CarUiSeekBarDialogPreference extends DialogPreference
             mSeekBar.setOnSeekBarChangeListener(listener);
         }
         mOnSeekBarChangeListener = listener;
+    }
+
+    /** Get the upper range of the progress bar */
+    public int getMaxProgress() {
+        if (mSeekBar != null) {
+            return mSeekBar.getMax();
+        }
+        return mMaxProgress;
     }
 
     /** Set the upper range of the progress bar */
