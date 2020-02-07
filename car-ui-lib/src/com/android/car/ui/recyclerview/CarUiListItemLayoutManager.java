@@ -150,7 +150,7 @@ public class CarUiListItemLayoutManager extends LinearLayoutManager {
         }
 
         mAdapter = (CarUiListItemAdapter) adapter;
-        List<? extends CarUiListItem> itemList = mAdapter.getItems();
+        List<CarUiListItem> itemList = mAdapter.getItems();
         mListItemHeights = new ArrayList<>();
 
         int cumulativeHeight = 0;

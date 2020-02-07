@@ -30,7 +30,7 @@ public class CarUiContentListItem extends CarUiListItem {
     /**
      * Callback to be invoked when the checked state of a list item changed.
      */
-    public interface OnCheckedChangeListener {
+    public interface OnCheckedChangedListener {
         /**
          * Called when the checked state of a list item has changed.
          *
@@ -86,8 +86,8 @@ public class CarUiContentListItem extends CarUiListItem {
          */
         CHECK_BOX,
         /**
-         * For an action value of RADIO_BUTTON, a radio button is shown for the action element of
-         * the list item.
+         * For an action value of CHECK_BOX, a radio button is shown for the action element of the
+         * list item.
          */
         RADIO_BUTTON,
         /**
@@ -108,12 +108,11 @@ public class CarUiContentListItem extends CarUiListItem {
     private boolean mIsEnabled = true;
     private boolean mIsActivated;
     private OnClickListener mOnClickListener;
-    private OnCheckedChangeListener mOnCheckedChangeListener;
+    private OnCheckedChangedListener mOnCheckedChangedListener;
     private View.OnClickListener mSupplementalIconOnClickListener;
 
-
-    public CarUiContentListItem(Action action) {
-        mAction = action;
+    public CarUiContentListItem() {
+        mAction = Action.NONE;
         mPrimaryIconType = IconType.STANDARD;
     }
 
@@ -230,18 +229,10 @@ public class CarUiContentListItem extends CarUiListItem {
      * @param checked the checked state for the item.
      */
     public void setChecked(boolean checked) {
-        if (checked == mIsChecked) {
-            return;
-        }
-
         // Checked state can only be set when action type is checkbox, radio button or switch.
         if (mAction == Action.CHECK_BOX || mAction == Action.SWITCH
                 || mAction == Action.RADIO_BUTTON) {
             mIsChecked = checked;
-
-            if (mOnCheckedChangeListener != null) {
-                mOnCheckedChangeListener.onCheckedChanged(this, mIsChecked);
-            }
         }
     }
 
@@ -266,6 +257,22 @@ public class CarUiContentListItem extends CarUiListItem {
      */
     public Action getAction() {
         return mAction;
+    }
+
+    /**
+     * Sets the action type for the item.
+     *
+     * @param action the action type for the item.
+     */
+    public void setAction(Action action) {
+        mAction = action;
+
+        // Cannot have checked state be true when there action type is not checkbox, radio button or
+        // switch.
+        if (mAction != Action.CHECK_BOX && mAction != Action.SWITCH
+                && mAction != Action.RADIO_BUTTON) {
+            mIsChecked = false;
+        }
     }
 
     /**
@@ -297,18 +304,16 @@ public class CarUiContentListItem extends CarUiListItem {
      */
     public void setSupplementalIcon(@Nullable Drawable icon,
             @Nullable View.OnClickListener listener) {
-        if (mAction != Action.ICON) {
-            throw new IllegalStateException(
-                    "Cannot set supplemental icon on list item that does not have an action of "
-                            + "type ICON");
-        }
+        mAction = Action.ICON;
+
+        // Cannot have checked state when action type is {@code Action.ICON}.
+        mIsChecked = false;
 
         mSupplementalIcon = icon;
         mSupplementalIconOnClickListener = listener;
     }
 
-    @Nullable
-    public View.OnClickListener getSupplementalIconOnClickListener() {
+    View.OnClickListener getSupplementalIconOnClickListener() {
         return mSupplementalIconOnClickListener;
     }
 
@@ -321,11 +326,8 @@ public class CarUiContentListItem extends CarUiListItem {
         mOnClickListener = listener;
     }
 
-    /**
-     * Returns the {@link OnClickListener} registered for this item.
-     */
     @Nullable
-    public OnClickListener getOnClickListener() {
+    OnClickListener getOnClickListener() {
         return mOnClickListener;
     }
 
@@ -337,16 +339,13 @@ public class CarUiContentListItem extends CarUiListItem {
      *
      * @param listener callback to be invoked when the checked state shown in the UI changes.
      */
-    public void setOnCheckedChangeListener(
-            @Nullable OnCheckedChangeListener listener) {
-        mOnCheckedChangeListener = listener;
+    public void setOnCheckedChangedListener(
+            @Nullable OnCheckedChangedListener listener) {
+        mOnCheckedChangedListener = listener;
     }
 
-    /**
-     * Returns the {@link OnCheckedChangeListener} registered for this item.
-     */
     @Nullable
-    public OnCheckedChangeListener getOnCheckedChangeListener() {
-        return mOnCheckedChangeListener;
+    OnCheckedChangedListener getOnCheckedChangedListener() {
+        return mOnCheckedChangedListener;
     }
 }
