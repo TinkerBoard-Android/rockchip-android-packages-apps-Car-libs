@@ -124,6 +124,7 @@ class DefaultScrollBar implements ScrollBar {
         getRecyclerView().setOnFlingListener(null);
         mSnapHelper.attachToRecyclerView(getRecyclerView());
 
+        mScrollView.setVisibility(View.INVISIBLE);
         mScrollView.addOnLayoutChangeListener(
                 (View v,
                         int left,
@@ -558,13 +559,14 @@ class DefaultScrollBar implements ScrollBar {
         boolean isAtEnd = isAtEnd();
         RecyclerView.LayoutManager layoutManager = getRecyclerView().getLayoutManager();
 
+        // enable/disable the button before the view is shown. So there is no flicker.
+        setUpEnabled(!isAtStart);
+        setDownEnabled(!isAtEnd);
         if ((isAtStart && isAtEnd) || layoutManager == null || layoutManager.getItemCount() == 0) {
             mScrollView.setVisibility(View.INVISIBLE);
         } else {
             mScrollView.setVisibility(View.VISIBLE);
         }
-        setUpEnabled(!isAtStart);
-        setDownEnabled(!isAtEnd);
 
         if (layoutManager == null) {
             return;
