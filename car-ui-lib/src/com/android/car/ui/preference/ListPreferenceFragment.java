@@ -109,8 +109,8 @@ public class ListPreferenceFragment extends Fragment {
 
         for (int i = 0; i < entries.length; i++) {
             String entry = entries[i].toString();
-            CarUiContentListItem item = new CarUiContentListItem();
-            item.setAction(CarUiContentListItem.Action.RADIO_BUTTON);
+            CarUiContentListItem item = new CarUiContentListItem(
+                    CarUiContentListItem.Action.RADIO_BUTTON);
             item.setTitle(entry);
 
             if (i == selectedEntryIndex) {
@@ -118,7 +118,7 @@ public class ListPreferenceFragment extends Fragment {
                 mSelectedItem = item;
             }
 
-            item.setOnCheckedChangedListener((listItem, isChecked) -> {
+            item.setOnCheckedChangeListener((listItem, isChecked) -> {
                 if (mSelectedItem != null) {
                     mSelectedItem.setChecked(false);
                     adapter.notifyItemChanged(listItems.indexOf(mSelectedItem));

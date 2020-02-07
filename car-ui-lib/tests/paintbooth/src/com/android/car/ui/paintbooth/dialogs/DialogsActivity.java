@@ -29,6 +29,8 @@ import androidx.annotation.NonNull;
 
 import com.android.car.ui.AlertDialogBuilder;
 import com.android.car.ui.paintbooth.R;
+import com.android.car.ui.recyclerview.CarUiRadioButtonListItem;
+import com.android.car.ui.recyclerview.CarUiRadioButtonListItemAdapter;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 
 import java.util.ArrayList;
@@ -66,6 +68,9 @@ public class DialogsActivity extends Activity {
                 v -> showDialogWithSubtitle()));
         mButtons.add(Pair.create(R.string.dialog_show_subtitle_and_icon,
                 v -> showDialogWithSubtitleAndIcon()));
+        mButtons.add(Pair.create(R.string.dialog_show_single_choice,
+                v -> showDialogWithSingleChoiceItems()));
+
 
         CarUiRecyclerView recyclerView = requireViewById(R.id.list);
         recyclerView.setAdapter(mAdapter);
@@ -149,6 +154,28 @@ public class DialogsActivity extends Activity {
                 .setTitle("My Title!")
                 .setSubtitle("My Subtitle!")
                 .setMessage("My Message!")
+                .show();
+    }
+
+    private void showDialogWithSingleChoiceItems() {
+        ArrayList<CarUiRadioButtonListItem> data = new ArrayList<>();
+
+        CarUiRadioButtonListItem item = new CarUiRadioButtonListItem();
+        item.setTitle("First item");
+        data.add(item);
+
+        item = new CarUiRadioButtonListItem();
+        item.setTitle("Second item");
+        data.add(item);
+
+        item = new CarUiRadioButtonListItem();
+        item.setTitle("Third item");
+        data.add(item);
+
+        new AlertDialogBuilder(this)
+                .setTitle("Select one option.")
+                .setSubtitle("Ony one option may be selected at a time")
+                .setSingleChoiceItems(new CarUiRadioButtonListItemAdapter(data), null)
                 .show();
     }
 
