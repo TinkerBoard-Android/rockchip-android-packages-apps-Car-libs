@@ -116,6 +116,17 @@ public class CarUiListItemActivity extends Activity {
 
         item = new CarUiContentListItem();
         item.setIcon(getDrawable(R.drawable.ic_launcher));
+        item.setEnabled(false);
+        item.setTitle("Title -- Checkbox that is disabled");
+        item.setBody("Clicks should not have any affect");
+        item.setOnCheckedChangedListener(
+                (listItem, isChecked) -> Toast.makeText(context,
+                        "Item checked state is: " + isChecked, Toast.LENGTH_SHORT).show());
+        item.setAction(CarUiContentListItem.Action.CHECK_BOX);
+        mData.add(item);
+
+        item = new CarUiContentListItem();
+        item.setIcon(getDrawable(R.drawable.ic_launcher));
         item.setBody("Body -- Item with switch  -- with click listener");
         item.setAction(CarUiContentListItem.Action.SWITCH);
         item.setOnItemClickedListener(item1 -> {
