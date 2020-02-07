@@ -485,6 +485,24 @@ public final class CarUiRecyclerView extends RecyclerView implements
         }
     }
 
+    @Override
+    public void scrollToPosition(int position) {
+        if (mScrollBarEnabled) {
+            mNestedRecyclerView.scrollToPosition(position);
+        } else {
+            super.scrollToPosition(position);
+        }
+    }
+
+    @Override
+    public void smoothScrollToPosition(int position) {
+        if (mScrollBarEnabled) {
+            mNestedRecyclerView.smoothScrollToPosition(position);
+        } else {
+            super.smoothScrollToPosition(position);
+        }
+    }
+
     @SuppressWarnings("rawtypes")
     @Override
     public void setAdapter(@Nullable Adapter adapter) {
