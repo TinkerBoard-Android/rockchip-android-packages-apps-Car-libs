@@ -105,6 +105,8 @@ public class CarUiContentListItem extends CarUiListItem {
     private IconType mPrimaryIconType;
     private boolean mIsActionDividerVisible;
     private boolean mIsChecked;
+    private boolean mIsEnabled = true;
+    private boolean mIsActivated;
     private OnClickListener mOnClickListener;
     private OnCheckedChangedListener mOnCheckedChangedListener;
     private View.OnClickListener mSupplementalIconOnClickListener;
@@ -179,6 +181,38 @@ public class CarUiContentListItem extends CarUiListItem {
      */
     public void setPrimaryIconType(IconType icon) {
         mPrimaryIconType = icon;
+    }
+
+    /**
+     * Returns {@code true} if the item is activated.
+     */
+    public boolean isActivated() {
+        return mIsActivated;
+    }
+
+    /**
+     * Sets the activated state of the item.
+     *
+     * @param activated the activated state for the item.
+     */
+    public void setActivated(boolean activated) {
+        mIsActivated = activated;
+    }
+
+    /**
+     * Returns {@code true} if the item is enabled.
+     */
+    public boolean isEnabled() {
+        return mIsEnabled;
+    }
+
+    /**
+     * Sets the enabled state of the item.
+     *
+     * @param enabled the enabled state for the item.
+     */
+    public void setEnabled(boolean enabled) {
+        mIsEnabled = enabled;
     }
 
     /**

@@ -383,6 +383,20 @@ public final class CarUiListItemAdapter extends
                 default:
                     throw new IllegalStateException("Unknown secondary action type.");
             }
+
+            itemView.setActivated(item.isActivated());
+            setEnabled(itemView, item.isEnabled());
+        }
+
+        void setEnabled(View view, boolean enabled) {
+            view.setEnabled(enabled);
+            if (view instanceof ViewGroup) {
+                ViewGroup group = (ViewGroup) view;
+
+                for (int i = 0; i < group.getChildCount(); i++) {
+                    setEnabled(group.getChildAt(i), enabled);
+                }
+            }
         }
     }
 
