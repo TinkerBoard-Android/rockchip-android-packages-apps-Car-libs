@@ -17,6 +17,7 @@
 package com.android.car.ui.preference;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 
@@ -30,8 +31,7 @@ public class SeekbarPreferenceDialogFragment extends PreferenceDialogFragment {
      * CarUiSeekBarDialogPreference} with the given {@code key}.
      */
     public static SeekbarPreferenceDialogFragment newInstance(String key) {
-        SeekbarPreferenceDialogFragment fragment =
-                new SeekbarPreferenceDialogFragment();
+        SeekbarPreferenceDialogFragment fragment = new SeekbarPreferenceDialogFragment();
         Bundle b = new Bundle(/* capacity= */ 1);
         b.putString(ARG_KEY, key);
         fragment.setArguments(b);
@@ -44,6 +44,14 @@ public class SeekbarPreferenceDialogFragment extends PreferenceDialogFragment {
 
         IDialogFragmentCallbacks dialogPreference = (IDialogFragmentCallbacks) getPreference();
         dialogPreference.onBindDialogView(view);
+    }
+
+    @Override
+    public void onClick(DialogInterface dialog, int which) {
+        super.onClick(dialog, which);
+
+        IDialogFragmentCallbacks dialogPreference = (IDialogFragmentCallbacks) getPreference();
+        dialogPreference.onClick(dialog, which);
     }
 
     @Override

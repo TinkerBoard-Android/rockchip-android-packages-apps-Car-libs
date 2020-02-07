@@ -16,6 +16,7 @@
 package com.android.car.ui.preference;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.view.View;
 
 import androidx.preference.DialogPreference;
@@ -26,23 +27,17 @@ import androidx.preference.DialogPreference;
  * A {@link androidx.preference.Preference} should implement this, and its {@link DialogPreference}
  * will call these methods on the Preference.
  */
-public interface IDialogFragmentCallbacks {
+public interface IDialogFragmentCallbacks extends DialogInterface.OnClickListener {
 
-    /**
-     * @see CarUiDialogFragment#onPrepareDialogBuilder(AlertDialog.Builder)
-     */
-    default void onPrepareDialogBuilder(AlertDialog.Builder builder) {
-    }
+    /** See {@link CarUiDialogFragment#onPrepareDialogBuilder(AlertDialog.Builder)}. */
+    default void onPrepareDialogBuilder(AlertDialog.Builder builder) {}
 
-    /**
-     * @see CarUiDialogFragment#onDialogClosed(boolean)
-     */
-    default void onDialogClosed(boolean positiveResult) {
-    }
+    @Override
+    default void onClick(DialogInterface dialog, int which) {}
 
-    /**
-     * @see CarUiDialogFragment#onBindDialogView(View)
-     */
-    default void onBindDialogView(View view) {
-    }
+    /** See {@link CarUiDialogFragment#onDialogClosed(boolean)}. */
+    default void onDialogClosed(boolean positiveResult) {}
+
+    /** See {@link CarUiDialogFragment#onBindDialogView(View)}. */
+    default void onBindDialogView(View view) {}
 }
