@@ -37,6 +37,7 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.StringRes;
 
 import com.android.car.ui.recyclerview.CarUiListItemAdapter;
+import com.android.car.ui.recyclerview.CarUiRadioButtonListItemAdapter;
 import com.android.car.ui.recyclerview.RecyclerViewToListAdapter;
 
 /**
@@ -500,12 +501,31 @@ public class AlertDialogBuilder {
     /**
      * This was not supposed to be in the Chassis API because it allows custom views.
      *
-     * @deprecated Use {@link #setAdapter(CarUiListItemAdapter)} instead.
+     * @deprecated Use {@link #setSingleChoiceItems(CarUiRadioButtonListItemAdapter,
+     * DialogInterface.OnClickListener)} instead.
      */
     @Deprecated
     public AlertDialogBuilder setSingleChoiceItems(ListAdapter adapter, int checkedItem,
             final DialogInterface.OnClickListener listener) {
         mBuilder.setSingleChoiceItems(adapter, checkedItem, listener);
+        return this;
+    }
+
+    /**
+     * Set a list of items to be displayed in the dialog as the content, you will be notified of
+     * the selected item via the supplied listener. The list will have a check mark displayed to
+     * the right of the text for the checked item. Clicking on an item in the list will not
+     * dismiss the dialog. Clicking on a button will dismiss the dialog.
+     *
+     * @param adapter The {@link CarUiRadioButtonListItemAdapter} to supply the list of items
+     * @param listener notified when an item on the list is clicked. The dialog will not be
+     * dismissed when an item is clicked. It will only be dismissed if clicked on a
+     * button, if no buttons are supplied it's up to the user to dismiss the dialog.
+     * @return This Builder object to allow for chaining of calls to set methods
+     */
+    public AlertDialogBuilder setSingleChoiceItems(CarUiRadioButtonListItemAdapter adapter,
+            final DialogInterface.OnClickListener listener) {
+        mBuilder.setAdapter(new RecyclerViewToListAdapter<>(adapter), listener);
         return this;
     }
 

@@ -47,7 +47,7 @@ public class CarUiListItemTest {
     private Context mContext;
 
     @Mock
-    CarUiContentListItem.OnCheckedChangedListener mOnCheckedChangedListener;
+    CarUiContentListItem.OnCheckedChangeListener mOnCheckedChangeListener;
 
     @Before
     public void setUp() {
@@ -124,7 +124,7 @@ public class CarUiListItemTest {
     public void testItemVisibility_withTitle() {
         List<CarUiListItem> items = new ArrayList<>();
 
-        CarUiContentListItem item = new CarUiContentListItem();
+        CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
         item.setTitle("Test title");
         items.add(item);
 
@@ -142,7 +142,7 @@ public class CarUiListItemTest {
     public void testItemVisibility_withTitle_withBody() {
         List<CarUiListItem> items = new ArrayList<>();
 
-        CarUiContentListItem item = new CarUiContentListItem();
+        CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
         item.setTitle("Test title");
         item.setBody("Test body");
         items.add(item);
@@ -161,7 +161,7 @@ public class CarUiListItemTest {
     public void testItemVisibility_withTitle_withIcon() {
         List<CarUiListItem> items = new ArrayList<>();
 
-        CarUiContentListItem item = new CarUiContentListItem();
+        CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
         item.setTitle("Test title");
         item.setIcon(mContext.getDrawable(R.drawable.car_ui_icon_close));
         items.add(item);
@@ -180,9 +180,8 @@ public class CarUiListItemTest {
     public void testItemVisibility_withTitle_withCheckbox() {
         List<CarUiListItem> items = new ArrayList<>();
 
-        CarUiContentListItem item = new CarUiContentListItem();
+        CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.CHECK_BOX);
         item.setTitle("Test title");
-        item.setAction(CarUiContentListItem.Action.CHECK_BOX);
         items.add(item);
 
         updateRecyclerViewAdapter(new CarUiListItemAdapter(items));
@@ -201,10 +200,9 @@ public class CarUiListItemTest {
     public void testItemVisibility_withTitle_withBody_withSwitch() {
         List<CarUiListItem> items = new ArrayList<>();
 
-        CarUiContentListItem item = new CarUiContentListItem();
+        CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.SWITCH);
         item.setTitle("Test title");
         item.setBody("Body text");
-        item.setAction(CarUiContentListItem.Action.SWITCH);
         items.add(item);
 
         updateRecyclerViewAdapter(new CarUiListItemAdapter(items));
@@ -223,10 +221,9 @@ public class CarUiListItemTest {
     public void testCheckedState_switch() {
         List<CarUiListItem> items = new ArrayList<>();
 
-        CarUiContentListItem item = new CarUiContentListItem();
+        CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.SWITCH);
         item.setTitle("Test title");
-        item.setOnCheckedChangedListener(mOnCheckedChangedListener);
-        item.setAction(CarUiContentListItem.Action.SWITCH);
+        item.setOnCheckedChangeListener(mOnCheckedChangeListener);
         item.setChecked(true);
         items.add(item);
 
@@ -237,7 +234,7 @@ public class CarUiListItemTest {
         assertThat(switchWidget.isChecked()).isEqualTo(true);
         switchWidget.performClick();
         assertThat(switchWidget.isChecked()).isEqualTo(false);
-        verify(mOnCheckedChangedListener, times(1))
+        verify(mOnCheckedChangeListener, times(1))
                 .onCheckedChanged(item, false);
     }
 
@@ -245,10 +242,9 @@ public class CarUiListItemTest {
     public void testCheckedState_checkbox() {
         List<CarUiListItem> items = new ArrayList<>();
 
-        CarUiContentListItem item = new CarUiContentListItem();
+        CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.CHECK_BOX);
         item.setTitle("Test title");
-        item.setAction(CarUiContentListItem.Action.CHECK_BOX);
-        item.setOnCheckedChangedListener(mOnCheckedChangedListener);
+        item.setOnCheckedChangeListener(mOnCheckedChangeListener);
         items.add(item);
 
         updateRecyclerViewAdapter(new CarUiListItemAdapter(items));
@@ -258,7 +254,7 @@ public class CarUiListItemTest {
         assertThat(checkBox.isChecked()).isEqualTo(false);
         checkBox.performClick();
         assertThat(checkBox.isChecked()).isEqualTo(true);
-        verify(mOnCheckedChangedListener, times(1))
+        verify(mOnCheckedChangeListener, times(1))
                 .onCheckedChanged(item, true);
     }
 
@@ -271,8 +267,6 @@ public class CarUiListItemTest {
         items.add(header);
 
         updateRecyclerViewAdapter(new CarUiListItemAdapter(items));
-
-        CarUiListItemAdapter.HeaderViewHolder viewHolder = getHeaderViewHolderAtPosition(0);
 
         assertThat(getHeaderViewHolderTitleAtPosition(0).getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(getHeaderViewHolderTitleAtPosition(0).getText()).isEqualTo(title);

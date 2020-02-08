@@ -114,11 +114,11 @@ public class MultiSelectListPreferenceFragment extends Fragment {
         for (int i = 0; i < entries.length; i++) {
             String entry = entries[i].toString();
             String entryValue = entryValues[i].toString();
-            CarUiContentListItem item = new CarUiContentListItem();
-            item.setAction(CarUiContentListItem.Action.CHECK_BOX);
+            CarUiContentListItem item = new CarUiContentListItem(
+                    CarUiContentListItem.Action.CHECK_BOX);
             item.setTitle(entry);
             item.setChecked(selectedItems[i]);
-            item.setOnCheckedChangedListener((listItem, isChecked) -> {
+            item.setOnCheckedChangeListener((listItem, isChecked) -> {
                 if (isChecked) {
                     mNewValues.add(entryValue);
                 } else {
