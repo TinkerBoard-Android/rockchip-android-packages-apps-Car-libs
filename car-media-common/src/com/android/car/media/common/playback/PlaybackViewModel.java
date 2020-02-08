@@ -615,8 +615,9 @@ public class PlaybackViewModel extends AndroidViewModel {
          */
         public void playItem(MediaItemMetadata item) {
             if (mMediaController != null) {
-                mMediaController.getTransportControls().playFromMediaId(item.getId(),
-                        item.getExtras());
+                // Do NOT pass the extras back as that's not the official API and isn't supported
+                // in media2, so apps should not rely on this.
+                mMediaController.getTransportControls().playFromMediaId(item.getId(), null);
             }
         }
 
