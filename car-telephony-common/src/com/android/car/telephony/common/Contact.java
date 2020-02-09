@@ -227,7 +227,6 @@ public class Contact implements Parcelable, Comparable<Contact> {
         String lookupKey = cursor.getString(lookupKeyColumn);
 
         if (contact == null) {
-            Log.d(TAG, "A new contact will be created.");
             contact = new Contact();
             contact.loadBasicInfo(cursor);
         }
