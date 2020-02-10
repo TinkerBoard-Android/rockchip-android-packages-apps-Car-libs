@@ -42,7 +42,7 @@ import java.util.Collections;
 import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(qualifiers = "land")
+@Config(shadows = {ExtendedShadowTypeface.class}, qualifiers = "land")
 public class ToolbarTest {
 
     private Context mContext;
