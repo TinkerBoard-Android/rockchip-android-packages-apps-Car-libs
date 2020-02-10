@@ -123,6 +123,15 @@ public class CarBlePeripheralManager extends CarBleManager {
         reset();
     }
 
+    @Override
+    public void disconnectDevice(@NonNull String deviceId) {
+        BleDevice connectedDevice = getConnectedDevice();
+        if (connectedDevice == null || !deviceId.equals(connectedDevice.mDeviceId)) {
+            return;
+        }
+        reset();
+    }
+
     private void reset() {
         resetBluetoothAdapterName();
         mClientDeviceAddress = null;

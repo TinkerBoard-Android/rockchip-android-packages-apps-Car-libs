@@ -560,6 +560,20 @@ public class ConnectedDeviceManagerTest {
                 .connectToDevice(eq(UUID.fromString(userDeviceId)));
     }
 
+    @Test
+    public void removeActiveUserAssociatedDevice_deletesAssociatedDeviceFromStorage() {
+        String deviceId = UUID.randomUUID().toString();
+        mConnectedDeviceManager.removeActiveUserAssociatedDevice(deviceId);
+        verify(mMockStorage).removeAssociatedDeviceForActiveUser(deviceId);
+    }
+
+    @Test
+    public void removeActiveUserAssociatedDevice_disconnectsIfConnected() {
+        String deviceId = connectNewDevice(mMockPeripheralManager);
+        mConnectedDeviceManager.removeActiveUserAssociatedDevice(deviceId);
+        verify(mMockPeripheralManager).disconnectDevice(deviceId);
+    }
+
     @NonNull
     private String connectNewDevice(@NonNull CarBleManager carBleManager) {
         String deviceId = UUID.randomUUID().toString();

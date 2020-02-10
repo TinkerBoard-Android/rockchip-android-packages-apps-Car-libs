@@ -57,6 +57,8 @@ public class CarBleCentralManager extends CarBleManager {
     private static final UUID CHARACTERISTIC_CONFIG =
             UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
+    private static final int STATUS_FORCED_DISCONNECT = -1;
+
     private final ScanSettings mScanSettings = new ScanSettings.Builder()
             .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
             .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
@@ -115,6 +117,16 @@ public class CarBleCentralManager extends CarBleManager {
     public void stop() {
         super.stop();
         mBleCentralManager.stopScanning();
+    }
+
+    @Override
+    public void disconnectDevice(String deviceId) {
+        BleDevice device = getConnectedDevice(deviceId);
+        if (device == null) {
+            return;
+        }
+
+        deviceDisconnected(device, STATUS_FORCED_DISCONNECT);
     }
 
     private void ignoreDevice(@NonNull BleDevice device) {

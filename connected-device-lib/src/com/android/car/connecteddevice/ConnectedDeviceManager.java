@@ -334,11 +334,12 @@ public class ConnectedDeviceManager {
      * @param deviceId Device identifier.
      */
     public void removeActiveUserAssociatedDevice(@NonNull String deviceId) {
-        if (mConnectedDevices.containsKey(deviceId)) {
-            removeConnectedDevice(deviceId, mPeripheralManager);
-            mPeripheralManager.stop();
-        }
         mStorage.removeAssociatedDeviceForActiveUser(deviceId);
+        InternalConnectedDevice device = mConnectedDevices.get(deviceId);
+        if (device != null) {
+            removeConnectedDevice(deviceId, device.mCarBleManager);
+            device.mCarBleManager.disconnectDevice(deviceId);
+        }
         logd(TAG, "Successfully removed associated device " + deviceId + ".");
     }
 
