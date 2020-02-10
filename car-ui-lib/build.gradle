@@ -71,5 +71,5 @@ dependencies {
     api 'androidx.constraintlayout:constraintlayout:1.1.3'
     api 'androidx.preference:preference:1.1.0'
     api 'androidx.recyclerview:recyclerview:1.0.0'
-    implementation files('../../../../../out/target/common/obj/JAVA_LIBRARIES/android.car_intermediates/classes.jar')
+    implementation files('../../../../../out/target/common/obj/JAVA_LIBRARIES/android.car_intermediates/classes-pre-proguard.jar')
 }
