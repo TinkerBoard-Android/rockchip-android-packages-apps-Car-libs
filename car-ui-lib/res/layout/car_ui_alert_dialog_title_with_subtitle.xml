@@ -41,6 +41,12 @@
             android:textAlignment="viewStart"
             style="?android:attr/windowTitleStyle" />
 
+        <View
+            style="@style/Widget.CarUi.AlertDialog.TitleDivider"
+            android:id="@+id/titleDivider"
+            android:layout_width="@dimen/car_ui_title_divider_width"
+            android:layout_height="@dimen/car_ui_title_divider_height" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

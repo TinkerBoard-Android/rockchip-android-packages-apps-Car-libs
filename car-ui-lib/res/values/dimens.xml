@@ -180,6 +180,9 @@
     <dimen name="car_ui_dialog_edittext_margin_end">22dp</dimen>
     <dimen name="car_ui_dialog_icon_size">56dp</dimen>
     <dimen name="car_ui_dialog_title_margin">@dimen/car_ui_keyline_1</dimen>
+    <dimen name="car_ui_title_divider_width">0dp</dimen>
+    <dimen name="car_ui_title_divider_height">0dp</dimen>
+
 
     <!-- List item  -->
 

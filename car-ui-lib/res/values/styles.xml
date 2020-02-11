@@ -149,6 +149,10 @@
         <item name="android:orientation">vertical</item>
     </style>
 
+    <style name="Widget.CarUi.AlertDialog.TitleDivider">
+        <item name="android:visibility">gone</item>
+    </style>
+
     <style name="Widget.CarUi.AlertDialog.Icon">
         <item name="android:layout_marginStart">@dimen/car_ui_dialog_title_margin</item>
         <item name="android:scaleType">fitCenter</item>

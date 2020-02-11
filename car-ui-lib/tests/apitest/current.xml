@@ -132,6 +132,8 @@
   <public type="dimen" name="car_ui_scrollbar_separator_margin"/>
   <public type="dimen" name="car_ui_scrollbar_thumb_radius"/>
   <public type="dimen" name="car_ui_scrollbar_thumb_width"/>
+  <public type="dimen" name="car_ui_title_divider_height"/>
+  <public type="dimen" name="car_ui_title_divider_width"/>
   <public type="dimen" name="car_ui_toolbar_bottom_inset"/>
   <public type="dimen" name="car_ui_toolbar_bottom_view_height"/>
   <public type="dimen" name="car_ui_toolbar_end_inset"/>
@@ -244,6 +246,7 @@
   <public type="style" name="Widget.CarUi.AlertDialog.HeaderContainer"/>
   <public type="style" name="Widget.CarUi.AlertDialog.Icon"/>
   <public type="style" name="Widget.CarUi.AlertDialog.TitleContainer"/>
+  <public type="style" name="Widget.CarUi.AlertDialog.TitleDivider"/>
   <public type="style" name="Widget.CarUi.Button"/>
   <public type="style" name="Widget.CarUi.Button.Borderless.Colored"/>
   <public type="style" name="Widget.CarUi.CarUiRecyclerView"/>
