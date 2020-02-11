@@ -18,11 +18,11 @@ package com.android.car.messenger.common;
 
 import static com.android.car.connecteddevice.util.SafeLog.logw;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Build;
 import android.util.Log;
 
-import com.android.car.companiondevicesupport.api.external.CompanionDevice;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.ConversationNotification;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.MessagingStyle;
@@ -63,8 +63,8 @@ public class ConversationNotificationInfo {
      **/
     @Nullable
     public static ConversationNotificationInfo createConversationNotificationInfo(
-            CompanionDevice device,
-            ConversationNotification conversation, String notificationKey) {
+            @NonNull String deviceName, @NonNull String deviceId,
+            @NonNull ConversationNotification conversation, @NonNull String notificationKey) {
         MessagingStyle messagingStyle = conversation.getMessagingStyle();
 
         if (!Utils.isValidConversationNotification(conversation, /* isShallowCheck= */ true)) {
@@ -77,7 +77,7 @@ public class ConversationNotificationInfo {
             }
         }
 
-        return new ConversationNotificationInfo(device.getDeviceName(), device.getDeviceId(),
+        return new ConversationNotificationInfo(deviceName, deviceId,
                 messagingStyle.getConvoTitle(),
                 messagingStyle.getIsGroupConvo(), notificationKey,
                 conversation.getMessagingAppDisplayName(),
