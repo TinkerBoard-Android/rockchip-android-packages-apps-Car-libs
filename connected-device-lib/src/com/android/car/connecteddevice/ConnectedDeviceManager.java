@@ -337,8 +337,8 @@ public class ConnectedDeviceManager {
         mStorage.removeAssociatedDeviceForActiveUser(deviceId);
         InternalConnectedDevice device = mConnectedDevices.get(deviceId);
         if (device != null) {
-            removeConnectedDevice(deviceId, device.mCarBleManager);
             device.mCarBleManager.disconnectDevice(deviceId);
+            removeConnectedDevice(deviceId, device.mCarBleManager);
         }
         logd(TAG, "Successfully removed associated device " + deviceId + ".");
     }

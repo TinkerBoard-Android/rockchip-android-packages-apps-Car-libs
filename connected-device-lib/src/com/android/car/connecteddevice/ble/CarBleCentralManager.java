@@ -121,6 +121,7 @@ public class CarBleCentralManager extends CarBleManager {
 
     @Override
     public void disconnectDevice(String deviceId) {
+        logd(TAG, "Request to disconnect from device " + deviceId + ".");
         BleDevice device = getConnectedDevice(deviceId);
         if (device == null) {
             return;

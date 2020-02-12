@@ -161,6 +161,7 @@ public class CarBlePeripheralManager extends CarBleManager {
                 logd(TAG, "Successfully started advertising for device " + deviceId + ".");
             }
         };
+        mBlePeripheralManager.unregisterCallback(mAssociationPeripheralCallback);
         mBlePeripheralManager.registerCallback(mReconnectPeripheralCallback);
         startAdvertising(deviceId, mAdvertiseCallback, /* includeDeviceName = */ false);
     }
@@ -190,6 +191,7 @@ public class CarBlePeripheralManager extends CarBleManager {
         adapter.setName(nameForAssociation);
         logd(TAG, "Changing bluetooth adapter name from " + mOriginalBluetoothName + " to "
                 + nameForAssociation + ".");
+        mBlePeripheralManager.unregisterCallback(mReconnectPeripheralCallback);
         mBlePeripheralManager.registerCallback(mAssociationPeripheralCallback);
         mAdvertiseCallback = new AdvertiseCallback() {
             @Override
