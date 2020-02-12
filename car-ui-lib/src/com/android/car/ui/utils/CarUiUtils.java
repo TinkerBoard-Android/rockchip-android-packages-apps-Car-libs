@@ -20,18 +20,23 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.DimenRes;
 import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
+import androidx.core.view.ViewCompat;
 
 /**
  * Collection of utility methods
  */
 public final class CarUiUtils {
     /** This is a utility class */
-    private CarUiUtils() {}
+    private CarUiUtils() {
+    }
 
     /**
      * Reads a float value from a dimens resource. This is necessary as {@link Resources#getFloat}
@@ -77,5 +82,69 @@ public final class CarUiUtils {
             context = ((ContextWrapper) context).getBaseContext();
         }
         return null;
+    }
+
+    /**
+     * Updates the preference view enabled state. If the view is disabled we just disable the child
+     * of preference like TextView, ImageView. The preference itself is always enabled to get the
+     * click events. Ripple effect in background is also removed by default. If the ripple is
+     * needed see
+     * {@link IDisabledPreferenceCallback#setShouldShowRippleOnDisabledPreference(boolean)}
+     */
+    public static Drawable setPreferenceViewEnabled(boolean viewEnabled, View itemView,
+            Drawable background, boolean shouldShowRippleOnDisabledPreference) {
+        if (viewEnabled) {
+            if (background != null) {
+                ViewCompat.setBackground(itemView, background);
+            }
+            setChildViewsEnabled(itemView, true, false);
+        } else {
+            itemView.setEnabled(true);
+            if (background == null) {
+                // store the original background.
+                background = itemView.getBackground();
+            }
+            updateRippleStateOnDisabledPreference(false, shouldShowRippleOnDisabledPreference,
+                    background, itemView);
+            setChildViewsEnabled(itemView, false, true);
+        }
+        return background;
+    }
+
+    /**
+     * Sets the enabled state on the views of the preference. If the view is being disabled we want
+     * only child views of preference to be disabled.
+     */
+    private static void setChildViewsEnabled(View view, boolean enabled, boolean isRootView) {
+        if (!isRootView) {
+            view.setEnabled(enabled);
+        }
+        if (view instanceof ViewGroup) {
+            ViewGroup grp = (ViewGroup) view;
+            for (int index = 0; index < grp.getChildCount(); index++) {
+                setChildViewsEnabled(grp.getChildAt(index), enabled, false);
+            }
+        }
+    }
+
+    /**
+     * Updates the ripple state on the given preference.
+     *
+     * @param isEnabled whether the preference is enabled or not
+     * @param shouldShowRippleOnDisabledPreference should ripple be displayed when the preference is
+     * clicked
+     * @param background drawable that represents the ripple
+     * @param preference preference on which drawable will be applied
+     */
+    public static void updateRippleStateOnDisabledPreference(boolean isEnabled,
+            boolean shouldShowRippleOnDisabledPreference, Drawable background, View preference) {
+        if (isEnabled || preference == null) {
+            return;
+        }
+        if (shouldShowRippleOnDisabledPreference && background != null) {
+            ViewCompat.setBackground(preference, background);
+        } else {
+            ViewCompat.setBackground(preference, null);
+        }
     }
 }
