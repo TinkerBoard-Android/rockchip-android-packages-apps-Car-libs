@@ -32,6 +32,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.AlertDialogBuilder;
 import com.android.car.ui.CarUiAppCompatActivity;
+import com.android.car.ui.Insets;
 import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.MenuItem;
@@ -289,6 +290,14 @@ public class ToolbarActivity extends CarUiAppCompatActivity {
 
         CarUiRecyclerView prv = requireViewById(R.id.list);
         prv.setAdapter(mAdapter);
+    }
+
+    @Override
+    protected void onCarUiInsetsChanged(Insets insets) {
+        requireViewById(R.id.list)
+                .setPadding(0, insets.getTop(), 0, insets.getBottom());
+        requireViewById(android.R.id.content)
+                .setPadding(insets.getLeft(), 0, insets.getRight(), 0);
     }
 
     public void xmlMenuItemClicked(MenuItem item) {

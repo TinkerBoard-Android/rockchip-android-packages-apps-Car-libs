@@ -169,6 +169,8 @@ public class ToolbarControllerImpl implements ToolbarController {
             }
         });
 
+        setBackgroundShown(true);
+
         // This holds weak references so we don't need to unregister later
         CarUxRestrictionsUtil.getInstance(getContext())
                 .register(mOnUxRestrictionsChangedListener);
