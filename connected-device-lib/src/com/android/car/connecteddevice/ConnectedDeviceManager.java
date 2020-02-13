@@ -39,6 +39,7 @@ import com.android.car.connecteddevice.model.ConnectedDevice;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage.AssociatedDeviceCallback;
 import com.android.car.connecteddevice.util.ByteUtils;
+import com.android.car.connecteddevice.util.EventLog;
 import com.android.car.connecteddevice.util.ThreadSafeCallbacks;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -183,6 +184,7 @@ public class ConnectedDeviceManager {
      */
     public void start() {
         logd(TAG, "Starting ConnectedDeviceManager.");
+        EventLog.onConnectedDeviceManagerStarted();
         //mCentralManager.start();
         mPeripheralManager.start();
         connectToActiveUserDevice();
@@ -286,6 +288,7 @@ public class ConnectedDeviceManager {
                         + "again.");
                 return;
             }
+            EventLog.onStartDeviceSearchStarted();
             mIsConnectingToUserDevice.set(true);
             mPeripheralManager.connectToDevice(UUID.fromString(userDeviceId));
         } catch (Exception e) {
@@ -718,6 +721,7 @@ public class ConnectedDeviceManager {
         return new CarBleManager.Callback() {
             @Override
             public void onDeviceConnected(String deviceId) {
+                EventLog.onDeviceIdReceived();
                 addConnectedDevice(deviceId, carBleManager);
             }
 
@@ -728,6 +732,7 @@ public class ConnectedDeviceManager {
 
             @Override
             public void onSecureChannelEstablished(String deviceId) {
+                EventLog.onSecureChannelEstablished();
                 ConnectedDeviceManager.this.onSecureChannelEstablished(deviceId, carBleManager);
             }
 

@@ -35,6 +35,7 @@ import android.os.ParcelUuid;
 import com.android.car.connecteddevice.AssociationCallback;
 import com.android.car.connecteddevice.model.AssociatedDevice;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
+import com.android.car.connecteddevice.util.EventLog;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.UUID;
@@ -310,6 +311,7 @@ public class CarBlePeripheralManager extends CarBleManager {
     }
 
     private void addConnectedDevice(BluetoothDevice device, boolean isReconnect) {
+        EventLog.onDeviceConnected();
         mBlePeripheralManager.stopAdvertising(mAdvertiseCallback);
         mClientDeviceAddress = device.getAddress();
         mClientDeviceName = device.getName();
