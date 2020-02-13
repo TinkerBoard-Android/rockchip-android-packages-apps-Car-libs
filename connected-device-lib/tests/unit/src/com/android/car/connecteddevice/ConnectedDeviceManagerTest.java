@@ -67,6 +67,10 @@ import java.util.concurrent.TimeUnit;
 @RunWith(AndroidJUnit4.class)
 public class ConnectedDeviceManagerTest {
 
+    private static final String TEST_DEVICE_ADDRESS = "00:11:22:33:44:55";
+
+    private static final String TEST_DEVICE_NAME = "TEST_DEVICE_NAME";
+
     private final Executor mCallbackExecutor = Executors.newSingleThreadExecutor();
 
     private final UUID mRecipientId = UUID.randomUUID();
@@ -502,9 +506,11 @@ public class ConnectedDeviceManagerTest {
         DeviceAssociationCallback callback = createDeviceAssociationCallback(semaphore);
         mConnectedDeviceManager.registerDeviceAssociationCallback(callback, mCallbackExecutor);
         String deviceId = UUID.randomUUID().toString();
-        mAssociatedDeviceCallback.onAssociatedDeviceAdded(deviceId);
+        AssociatedDevice testDevice = new AssociatedDevice(deviceId, TEST_DEVICE_ADDRESS,
+                TEST_DEVICE_NAME, /* isConnectionEnabled = */ true);
+        mAssociatedDeviceCallback.onAssociatedDeviceAdded(testDevice);
         assertThat(tryAcquire(semaphore)).isTrue();
-        verify(callback).onAssociatedDeviceAdded(eq(deviceId));
+        verify(callback).onAssociatedDeviceAdded(eq(testDevice));
     }
 
     @Test
@@ -513,9 +519,11 @@ public class ConnectedDeviceManagerTest {
         DeviceAssociationCallback callback = createDeviceAssociationCallback(semaphore);
         mConnectedDeviceManager.registerDeviceAssociationCallback(callback, mCallbackExecutor);
         String deviceId = UUID.randomUUID().toString();
-        mAssociatedDeviceCallback.onAssociatedDeviceRemoved(deviceId);
+        AssociatedDevice testDevice = new AssociatedDevice(deviceId, TEST_DEVICE_ADDRESS,
+                TEST_DEVICE_NAME, /* isConnectionEnabled = */ true);
+        mAssociatedDeviceCallback.onAssociatedDeviceRemoved(testDevice);
         assertThat(tryAcquire(semaphore)).isTrue();
-        verify(callback).onAssociatedDeviceRemoved(eq(deviceId));
+        verify(callback).onAssociatedDeviceRemoved(eq(testDevice));
     }
 
     @Test
@@ -524,9 +532,8 @@ public class ConnectedDeviceManagerTest {
         DeviceAssociationCallback callback = createDeviceAssociationCallback(semaphore);
         mConnectedDeviceManager.registerDeviceAssociationCallback(callback, mCallbackExecutor);
         String deviceId = UUID.randomUUID().toString();
-        String deviceAddress = "00:11:22:33:44:55";
-        String deviceName = "TEST_NAME";
-        AssociatedDevice testDevice = new AssociatedDevice(deviceId, deviceAddress, deviceName);
+        AssociatedDevice testDevice = new AssociatedDevice(deviceId, TEST_DEVICE_ADDRESS,
+                TEST_DEVICE_NAME, /* isConnectionEnabled = */ true);
         mAssociatedDeviceCallback.onAssociatedDeviceUpdated(testDevice);
         assertThat(tryAcquire(semaphore)).isTrue();
         verify(callback).onAssociatedDeviceUpdated(eq(testDevice));
@@ -538,6 +545,10 @@ public class ConnectedDeviceManagerTest {
         String deviceId = UUID.randomUUID().toString();
         when(mMockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(
                 Collections.singletonList(deviceId));
+        AssociatedDevice device = new AssociatedDevice(deviceId, TEST_DEVICE_ADDRESS,
+                TEST_DEVICE_NAME, /* isConnectionEnabled = */ true);
+        when(mMockStorage.getActiveUserAssociatedDevices()).thenReturn(
+                Collections.singletonList(device));
         mConnectedDeviceManager.addConnectedDevice(deviceId, mMockPeripheralManager);
         mConnectedDeviceManager.removeConnectedDevice(deviceId, mMockPeripheralManager);
         Thread.sleep(100);  // Async process so need to allow it time to complete.
@@ -553,6 +564,10 @@ public class ConnectedDeviceManagerTest {
         String userDeviceId = UUID.randomUUID().toString();
         when(mMockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(
                 Collections.singletonList(userDeviceId));
+        AssociatedDevice userDevice = new AssociatedDevice(userDeviceId, TEST_DEVICE_ADDRESS,
+                TEST_DEVICE_NAME, /* isConnectionEnabled = */ true);
+        when(mMockStorage.getActiveUserAssociatedDevices()).thenReturn(
+                Collections.singletonList(userDevice));
         mConnectedDeviceManager.addConnectedDevice(deviceId, mMockPeripheralManager);
         mConnectedDeviceManager.removeConnectedDevice(deviceId, mMockPeripheralManager);
         // ConnectedDeviceManager.start() invokes connectToDevice(), so expect # of calls = 1.
@@ -574,9 +589,34 @@ public class ConnectedDeviceManagerTest {
         verify(mMockPeripheralManager).disconnectDevice(deviceId);
     }
 
+    @Test
+    public void enableAssociatedDeviceConnection_enableDeviceConnectionInStorage() {
+        String deviceId = UUID.randomUUID().toString();
+        mConnectedDeviceManager.enableAssociatedDeviceConnection(deviceId);
+        verify(mMockStorage).updateAssociatedDeviceConnectionEnabled(deviceId, true);
+    }
+
+    @Test
+    public void disableAssociatedDeviceConnection_disableDeviceConnectionInStorage() {
+        String deviceId = UUID.randomUUID().toString();
+        mConnectedDeviceManager.disableAssociatedDeviceConnection(deviceId);
+        verify(mMockStorage).updateAssociatedDeviceConnectionEnabled(deviceId, false);
+    }
+
+    @Test
+    public void disableAssociatedDeviceConnection_disconnectsIfConnected() {
+        String deviceId = connectNewDevice(mMockPeripheralManager);
+        mConnectedDeviceManager.disableAssociatedDeviceConnection(deviceId);
+        verify(mMockPeripheralManager).disconnectDevice(deviceId);
+    }
+
     @NonNull
     private String connectNewDevice(@NonNull CarBleManager carBleManager) {
         String deviceId = UUID.randomUUID().toString();
+        AssociatedDevice device = new AssociatedDevice(deviceId, TEST_DEVICE_ADDRESS,
+                TEST_DEVICE_NAME, /* isConnectionEnabled = */ true);
+        when(mMockStorage.getActiveUserAssociatedDevices()).thenReturn(
+                Collections.singletonList(device));
         when(mMockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(
                 Collections.singletonList(deviceId));
         mConnectedDeviceManager.addConnectedDevice(deviceId, carBleManager);
@@ -623,12 +663,13 @@ public class ConnectedDeviceManagerTest {
             @NonNull final Semaphore semaphore) {
         return spy(new DeviceAssociationCallback() {
             @Override
-            public void onAssociatedDeviceAdded(String deviceId) {
+            public void onAssociatedDeviceAdded(AssociatedDevice device) {
                 semaphore.release();
             }
 
             @Override
-            public void onAssociatedDeviceRemoved(String deviceId) {
+            public void onAssociatedDeviceRemoved(
+                    AssociatedDevice device) {
                 semaphore.release();
             }
 

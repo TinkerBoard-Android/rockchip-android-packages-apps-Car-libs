@@ -32,6 +32,8 @@ public class AssociatedDevice {
 
     private final String mDeviceName;
 
+    private final boolean mIsConnectionEnabled;
+
 
     /**
      * Create a new AssociatedDevice.
@@ -39,12 +41,14 @@ public class AssociatedDevice {
      * @param deviceId Id of the associated device.
      * @param deviceAddress Address of the associated device.
      * @param deviceName Name of the associated device. {@code null} if not known.
+     * @param isConnectionEnabled If connection is enabled for this device.
      */
     public AssociatedDevice(@NonNull String deviceId, @NonNull String deviceAddress,
-            @Nullable String deviceName) {
+            @Nullable String deviceName, boolean isConnectionEnabled) {
         mDeviceId = deviceId;
         mDeviceAddress = deviceAddress;
         mDeviceName = deviceName;
+        mIsConnectionEnabled = isConnectionEnabled;
     }
 
     /** Returns the id for this device. */
@@ -65,6 +69,11 @@ public class AssociatedDevice {
         return mDeviceName;
     }
 
+    /** Return if connection is enabled for this device. */
+    public boolean isConnectionEnabled() {
+        return mIsConnectionEnabled;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
@@ -76,11 +85,12 @@ public class AssociatedDevice {
         AssociatedDevice associatedDevice = (AssociatedDevice) obj;
         return Objects.equals(mDeviceId, associatedDevice.mDeviceId)
                 && Objects.equals(mDeviceAddress, associatedDevice.mDeviceAddress)
-                && Objects.equals(mDeviceName, associatedDevice.mDeviceName);
+                && Objects.equals(mDeviceName, associatedDevice.mDeviceName)
+                && mIsConnectionEnabled == associatedDevice.mIsConnectionEnabled;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mDeviceId, mDeviceAddress, mDeviceName);
+        return Objects.hash(mDeviceId, mDeviceAddress, mDeviceName, mIsConnectionEnabled);
     }
 }

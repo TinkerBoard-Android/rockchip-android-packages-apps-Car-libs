@@ -43,17 +43,22 @@ public class AssociatedDeviceEntity {
     @Nullable
     public String name;
 
+    /** {@code true} if the connection is enabled for this device.*/
+    public boolean isConnectionEnabled;
+
     public AssociatedDeviceEntity() { }
 
-    public AssociatedDeviceEntity(int userId, AssociatedDevice associatedDevice) {
+    public AssociatedDeviceEntity(int userId, AssociatedDevice associatedDevice,
+            boolean isConnectionEnabled) {
         this.userId = userId;
         id = associatedDevice.getDeviceId();
         address = associatedDevice.getDeviceAddress();
         name = associatedDevice.getDeviceName();
+        this.isConnectionEnabled = isConnectionEnabled;
     }
 
     /** Return a new {@link AssociatedDevice} of this entity. */
     public AssociatedDevice toAssociatedDevice() {
-        return new AssociatedDevice(id, address, name);
+        return new AssociatedDevice(id, address, name, isConnectionEnabled);
     }
 }
