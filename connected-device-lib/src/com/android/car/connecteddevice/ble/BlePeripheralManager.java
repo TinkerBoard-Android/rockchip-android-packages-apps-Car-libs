@@ -16,8 +16,6 @@
 
 package com.android.car.connecteddevice.ble;
 
-import static android.bluetooth.BluetoothProfile.GATT_SERVER;
-
 import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
 import static com.android.car.connecteddevice.util.SafeLog.logw;
@@ -49,6 +47,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A generic class that manages BLE peripheral operations like start/stop advertising, notifying
@@ -79,13 +78,13 @@ public class BlePeripheralManager {
     private final Set<Callback> mCallbacks = new CopyOnWriteArraySet<>();
     private final Set<OnCharacteristicWriteListener> mWriteListeners = new HashSet<>();
     private final Set<OnCharacteristicReadListener> mReadListeners = new HashSet<>();
+    private final AtomicReference<BluetoothGattServer> mGattServer = new AtomicReference<>();
+    private final AtomicReference<BluetoothGatt> mBluetoothGatt = new AtomicReference<>();
 
     private int mMtuSize = 20;
 
     private BluetoothManager mBluetoothManager;
     private BluetoothLeAdvertiser mAdvertiser;
-    private BluetoothGattServer mGattServer;
-    private BluetoothGatt mBluetoothGatt;
     private int mAdvertiserStartCount;
     private int mGattServerRetryStartCount;
     private BluetoothGattService mBluetoothGattService;
@@ -185,7 +184,7 @@ public class BlePeripheralManager {
         mAdvertiseData = data;
         mGattServerRetryStartCount = 0;
         mBluetoothManager = (BluetoothManager) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
-        mGattServer = mBluetoothManager.openGattServer(mContext, mGattServerCallback);
+        mGattServer.set(mBluetoothManager.openGattServer(mContext, mGattServerCallback));
         openGattServer();
     }
 
@@ -208,11 +207,12 @@ public class BlePeripheralManager {
             @NonNull BluetoothDevice device,
             @NonNull BluetoothGattCharacteristic characteristic,
             boolean confirm) {
-        if (mGattServer == null) {
+        BluetoothGattServer gattServer = mGattServer.get();
+        if (gattServer == null) {
             return;
         }
 
-        if (!mGattServer.notifyCharacteristicChanged(device, characteristic, confirm)) {
+        if (!gattServer.notifyCharacteristicChanged(device, characteristic, confirm)) {
             loge(TAG, "notifyCharacteristicChanged failed");
         }
     }
@@ -221,17 +221,7 @@ public class BlePeripheralManager {
      * Connect the Gatt server of the remote device to retrieve device name.
      */
     final void retrieveDeviceName(BluetoothDevice device) {
-        mBluetoothGatt = device.connectGatt(mContext, false, mGattCallback);
-    }
-
-    /**
-     * Returns the currently opened GATT server within this manager.
-     *
-     * @return An opened GATT server or {@code null} if none have been opened.
-     */
-    @Nullable
-    BluetoothGattServer getGattServer() {
-        return mGattServer;
+        mBluetoothGatt.compareAndSet(null, device.connectGatt(mContext, false, mGattCallback));
     }
 
     /**
@@ -247,45 +237,28 @@ public class BlePeripheralManager {
         mWriteListeners.clear();
         mAdvertiser = null;
 
-        if (mGattServer == null) {
+        BluetoothGattServer gattServer = mGattServer.getAndSet(null);
+        if (gattServer == null) {
             return;
         }
-        mGattServer.clearServices();
-        try {
-            for (BluetoothDevice d : mBluetoothManager.getConnectedDevices(GATT_SERVER)) {
-                logd(TAG, "Disconnecting from " + d.getAddress());
-                mGattServer.cancelConnection(d);
-            }
-        } catch (UnsupportedOperationException e) {
-            loge(TAG, "Error getting connected devices", e);
-        } finally {
-            stopGattServer();
-        }
-    }
 
-    /**
-     * Close the GATT Server
-     */
-    void stopGattServer() {
-        if (mGattServer == null) {
-            return;
-        }
         logd(TAG, "stopGattServer");
-        if (mBluetoothGatt != null) {
-            mGattServer.cancelConnection(mBluetoothGatt.getDevice());
-            mBluetoothGatt.disconnect();
+        BluetoothGatt bluetoothGatt = mBluetoothGatt.getAndSet(null);
+        if (bluetoothGatt != null) {
+            gattServer.cancelConnection(bluetoothGatt.getDevice());
+            bluetoothGatt.disconnect();
         }
-        mGattServer.clearServices();
-        mGattServer.close();
-        mGattServer = null;
+        gattServer.clearServices();
+        gattServer.close();
     }
 
     private void openGattServer() {
         // Only open one Gatt server.
-        if (mGattServer != null) {
+        BluetoothGattServer gattServer = mGattServer.get();
+        if (gattServer != null) {
             logd(TAG, "Gatt Server created, retry count: " + mGattServerRetryStartCount);
-            mGattServer.clearServices();
-            mGattServer.addService(mBluetoothGattService);
+            gattServer.clearServices();
+            gattServer.addService(mBluetoothGattService);
             AdvertiseSettings settings =
                     new AdvertiseSettings.Builder()
                             .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
@@ -296,7 +269,7 @@ public class BlePeripheralManager {
             startAdvertisingInternally(settings, mAdvertiseData, mAdvertiseCallback);
             mGattServerRetryStartCount = 0;
         } else if (mGattServerRetryStartCount < GATT_SERVER_RETRY_LIMIT) {
-            mGattServer = mBluetoothManager.openGattServer(mContext, mGattServerCallback);
+            mGattServer.set(mBluetoothManager.openGattServer(mContext, mGattServerCallback));
             mGattServerRetryStartCount++;
             mHandler.postDelayed(() -> openGattServer(), GATT_SERVER_RETRY_DELAY_MS);
         } else {
@@ -320,11 +293,8 @@ public class BlePeripheralManager {
                     BLE_RETRY_INTERVAL_MS);
             mAdvertiserStartCount += 1;
         } else {
-            loge(
-                    TAG,
-                    "Cannot start BLE Advertisement. Advertise Retry count: "
-                            + mAdvertiserStartCount,
-                    null);
+            loge(TAG, "Cannot start BLE Advertisement. Advertise Retry count: "
+                            + mAdvertiserStartCount);
         }
     }
 
@@ -365,7 +335,11 @@ public class BlePeripheralManager {
                         boolean responseNeeded,
                         int offset,
                         byte[] value) {
-                    mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset,
+                    BluetoothGattServer gattServer = mGattServer.get();
+                    if (gattServer == null) {
+                        return;
+                    }
+                    gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset,
                             value);
                     for (OnCharacteristicWriteListener listener : mWriteListeners) {
                         listener.onCharacteristicWrite(device, characteristic, value);
@@ -385,8 +359,11 @@ public class BlePeripheralManager {
                             + descriptor.getUuid()
                             + "; value: "
                             + ByteUtils.byteArrayToHexString(value));
-
-                    mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset,
+                    BluetoothGattServer gattServer = mGattServer.get();
+                    if (gattServer == null) {
+                        return;
+                    }
+                    gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset,
                             value);
                 }
 
@@ -425,7 +402,11 @@ public class BlePeripheralManager {
                     switch (newState) {
                         case BluetoothProfile.STATE_CONNECTED:
                             logd(TAG, "Gatt connected");
-                            mBluetoothGatt.discoverServices();
+                            BluetoothGatt bluetoothGatt = mBluetoothGatt.get();
+                            if (bluetoothGatt == null) {
+                                break;
+                            }
+                            bluetoothGatt.discoverServices();
                             break;
                         case BluetoothProfile.STATE_DISCONNECTED:
                             logd(TAG, "Gatt Disconnected");
@@ -439,7 +420,11 @@ public class BlePeripheralManager {
                 @Override
                 public void onServicesDiscovered(BluetoothGatt gatt, int status) {
                     logd(TAG, "Gatt Services Discovered");
-                    BluetoothGattService gapService = mBluetoothGatt.getService(
+                    BluetoothGatt bluetoothGatt = mBluetoothGatt.get();
+                    if (bluetoothGatt == null) {
+                        return;
+                    }
+                    BluetoothGattService gapService = bluetoothGatt.getService(
                             GENERIC_ACCESS_PROFILE_UUID);
                     if (gapService == null) {
                         loge(TAG, "Generic Access Service is null.");
@@ -451,7 +436,7 @@ public class BlePeripheralManager {
                         loge(TAG, "Device Name Characteristic is null.");
                         return;
                     }
-                    mBluetoothGatt.readCharacteristic(deviceNameCharacteristic);
+                    bluetoothGatt.readCharacteristic(deviceNameCharacteristic);
                 }
 
                 @Override
