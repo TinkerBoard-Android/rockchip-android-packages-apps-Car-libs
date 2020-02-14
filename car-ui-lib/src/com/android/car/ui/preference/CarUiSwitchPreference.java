@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The Android Open Source Project
+ * Copyright 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,83 +23,60 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
+import androidx.preference.SwitchPreference;
 
 import com.android.car.ui.R;
 import com.android.car.ui.utils.CarUiUtils;
 
 /**
- * This class extends the base {@link Preference} class. Adds the support to add a drawable icon to
- * the preference if there is one of fragment, intent or onPreferenceClickListener set.
+ * This class extends the base {@link SwitchPreference} class. Adds the functionality to show
+ * message when preference is disabled.
  */
-public class CarUiPreference extends Preference implements IDisabledPreferenceCallback {
+public class CarUiSwitchPreference extends SwitchPreference implements IDisabledPreferenceCallback {
 
-    private Context mContext;
-    private boolean mShowChevron;
     private String mMessageToShowWhenDisabledPreferenceClicked;
 
     private boolean mShouldShowRippleOnDisabledPreference;
     private Drawable mBackground;
     private View mPreference;
+    private Context mContext;
 
-    public CarUiPreference(Context context, AttributeSet attrs,
-            int defStyleAttr, int defStyleRes) {
+    public CarUiSwitchPreference(Context context, AttributeSet attrs, int defStyleAttr,
+            int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init(context, attrs, defStyleAttr, defStyleRes);
+        init(context, attrs);
     }
 
-    public CarUiPreference(Context context, AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, R.style.Preference_CarUi_Preference);
+    public CarUiSwitchPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init(context, attrs);
     }
 
-    public CarUiPreference(Context context, AttributeSet attrs) {
-        this(context, attrs, R.attr.carUiPreferenceStyle);
+    public CarUiSwitchPreference(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init(context, attrs);
     }
 
-    public CarUiPreference(Context context) {
-        this(context, null);
+    public CarUiSwitchPreference(Context context) {
+        super(context);
+        init(context, null);
     }
 
-    public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    private void init(Context context, AttributeSet attrs) {
         mContext = context;
-
-        TypedArray a = getContext().obtainStyledAttributes(
-                attrs,
-                R.styleable.CarUiPreference,
-                defStyleAttr,
-                defStyleRes);
-
-        mShowChevron = a.getBoolean(R.styleable.CarUiPreference_showChevron, true);
-        mShouldShowRippleOnDisabledPreference = a.getBoolean(
+        TypedArray preferenceAttributes = getContext().obtainStyledAttributes(attrs,
+                R.styleable.CarUiPreference);
+        mShouldShowRippleOnDisabledPreference = preferenceAttributes.getBoolean(
                 R.styleable.CarUiPreference_showRippleOnDisabledPreference, false);
     }
-
 
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
-        boolean viewEnabled = isEnabled();
         mPreference = holder.itemView;
-        mBackground = CarUiUtils.setPreferenceViewEnabled(viewEnabled, holder.itemView, mBackground,
+        mBackground = CarUiUtils.setPreferenceViewEnabled(isEnabled(), holder.itemView, mBackground,
                 mShouldShowRippleOnDisabledPreference);
-    }
-
-    @Override
-    public void onAttached() {
-        super.onAttached();
-
-        boolean allowChevron = mContext.getResources().getBoolean(
-                R.bool.car_ui_preference_show_chevron);
-
-        if (!allowChevron || !mShowChevron) {
-            return;
-        }
-
-        if (getOnPreferenceClickListener() != null || getIntent() != null
-                || getFragment() != null) {
-            setWidgetLayoutResource(R.layout.car_ui_preference_chevron);
-        }
     }
 
     /**
@@ -107,7 +84,6 @@ public class CarUiPreference extends Preference implements IDisabledPreferenceCa
      * return when view is not enabled.
      */
     @Override
-    @SuppressWarnings("RestrictTo")
     public void performClick() {
         if (isEnabled()) {
             super.performClick();
@@ -116,10 +92,6 @@ public class CarUiPreference extends Preference implements IDisabledPreferenceCa
             Toast.makeText(mContext, mMessageToShowWhenDisabledPreferenceClicked,
                     Toast.LENGTH_LONG).show();
         }
-    }
-
-    public void setShowChevron(boolean showChevron) {
-        mShowChevron = showChevron;
     }
 
     /**

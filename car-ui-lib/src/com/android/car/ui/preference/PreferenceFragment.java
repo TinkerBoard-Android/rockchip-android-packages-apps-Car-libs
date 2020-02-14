@@ -36,6 +36,7 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceGroup;
 import androidx.preference.PreferenceScreen;
+import androidx.preference.SwitchPreference;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.R;
@@ -217,6 +218,7 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat {
             new Pair<>(ListPreference.class, CarUiListPreference.class),
             new Pair<>(MultiSelectListPreference.class, CarUiMultiSelectListPreference.class),
             new Pair<>(EditTextPreference.class, CarUiEditTextPreference.class),
+            new Pair<>(SwitchPreference.class, CarUiSwitchPreference.class),
             new Pair<>(Preference.class, CarUiPreference.class)
     );
 
