@@ -812,7 +812,8 @@ public class Toolbar extends FrameLayout {
         // Show logo next to the title if we're in the subpage state or we're configured to not show
         // the logo in the nav icon space.
         mTitleLogoContainer.setVisibility(mHasLogo
-                && (state == State.SUBPAGE || !mLogoFillsNavIconSpace)
+                && (state == State.SUBPAGE
+                || (state == Toolbar.State.HOME && !mLogoFillsNavIconSpace))
                 ? VISIBLE : GONE);
 
         // Show the nav icon container if we're not in the home space or the logo fills the nav icon
