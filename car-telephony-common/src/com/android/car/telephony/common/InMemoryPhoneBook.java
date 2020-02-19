@@ -233,6 +233,7 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
         mLookupKeyContactMap.clear();
         mLookupKeyContactMap.putAll(contactMap);
 
+        mPhoneNumberContactMap.clear();
         for (Contact contact : contactList) {
             for (PhoneNumber phoneNumber : contact.getNumbers()) {
                 mPhoneNumberContactMap.put(phoneNumber.getI18nPhoneNumberWrapper(), contact);
