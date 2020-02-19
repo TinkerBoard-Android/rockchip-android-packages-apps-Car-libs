@@ -16,6 +16,7 @@
 
 package com.android.car.apps.common.util;
 
+import android.app.PendingIntent;
 import android.car.Car;
 import android.car.CarNotConnectedException;
 import android.car.content.pm.CarPackageManager;
@@ -57,6 +58,17 @@ public class CarPackageManagerUtils {
             sInstance = new CarPackageManagerUtils(context);
         }
         return sInstance;
+    }
+
+    /**
+     * Returns whether the given {@link PendingIntent} represents an activity that is distraction
+     * optimized.
+     */
+    public boolean isDistractionOptimized(@NonNull PendingIntent pendingIntent) {
+        if (mCarPackageManager != null) {
+            return mCarPackageManager.isPendingIntentDistractionOptimized(pendingIntent);
+        }
+        return false;
     }
 
     /**
