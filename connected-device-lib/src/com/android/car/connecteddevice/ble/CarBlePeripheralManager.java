@@ -16,6 +16,7 @@
 
 package com.android.car.connecteddevice.ble;
 
+import static com.android.car.connecteddevice.ConnectedDeviceManager.DEVICE_ERROR_UNEXPECTED_DISCONNECTION;
 import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
 
@@ -423,6 +424,10 @@ public class CarBlePeripheralManager extends CarBleManager {
                 @Override
                 public void onRemoteDeviceDisconnected(BluetoothDevice device) {
                     BleDevice connectedDevice = getConnectedDevice(device);
+                    if (isAssociating()) {
+                        mAssociationCallback.onAssociationError(
+                                DEVICE_ERROR_UNEXPECTED_DISCONNECTION);
+                    }
                     // Reset before invoking callbacks to avoid a race condition with reconnect
                     // logic.
                     reset();
