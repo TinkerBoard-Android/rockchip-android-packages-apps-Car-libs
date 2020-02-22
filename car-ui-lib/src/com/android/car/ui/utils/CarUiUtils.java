@@ -21,10 +21,14 @@ import android.content.ContextWrapper;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.util.TypedValue;
+import android.view.View;
 
 import androidx.annotation.DimenRes;
+import androidx.annotation.IdRes;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
+import androidx.annotation.UiThread;
 
 /**
  * Collection of utility methods
@@ -77,5 +81,41 @@ public final class CarUiUtils {
             context = ((ContextWrapper) context).getBaseContext();
         }
         return null;
+    }
+
+    /**
+     * It behaves similar to @see View#findViewById, except it resolves the ID reference first.
+     *
+     * @param id the ID to search for
+     * @return a view with given ID if found, or {@code null} otherwise
+     * @see View#requireViewById(int)
+     */
+    @Nullable
+    @UiThread
+    public static <T extends View> T findViewByRefId(@NonNull View root, @IdRes int id) {
+        if (id == View.NO_ID) {
+            return null;
+        }
+
+        TypedValue value = new TypedValue();
+        root.getResources().getValue(id, value, true);
+        return root.findViewById(value.resourceId);
+    }
+
+    /**
+     * It behaves similar to @see View#requireViewById, except it resolves the ID reference first.
+     *
+     * @param id the ID to search for
+     * @return a view with given ID
+     * @see View#findViewById(int)
+     */
+    @NonNull
+    @UiThread
+    public static <T extends View> T requireViewByRefId(@NonNull View root, @IdRes int id) {
+        T view = findViewByRefId(root, id);
+        if (view == null) {
+            throw new IllegalArgumentException("ID does not reference a View inside this View");
+        }
+        return view;
     }
 }
