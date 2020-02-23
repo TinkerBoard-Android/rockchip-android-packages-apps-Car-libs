@@ -15,6 +15,9 @@
  */
 package com.android.car.ui.toolbar;
 
+import static com.android.car.ui.utils.CarUiUtils.getActivity;
+import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -39,7 +42,6 @@ import androidx.annotation.StringRes;
 import androidx.annotation.XmlRes;
 
 import com.android.car.ui.R;
-import com.android.car.ui.utils.CarUiUtils;
 import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
 import java.util.ArrayList;
@@ -228,16 +230,19 @@ public class Toolbar extends FrameLayout {
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             inflater.inflate(getToolbarLayout(), this, true);
 
-            mTabLayout = requireViewById(R.id.car_ui_toolbar_tabs);
-            mNavIcon = requireViewById(R.id.car_ui_toolbar_nav_icon);
-            mLogoInNavIconSpace = requireViewById(R.id.car_ui_toolbar_logo);
-            mNavIconContainer = requireViewById(R.id.car_ui_toolbar_nav_icon_container);
-            mMenuItemsContainer = requireViewById(R.id.car_ui_toolbar_menu_items_container);
-            mTitle = requireViewById(R.id.car_ui_toolbar_title);
-            mTitleLogoContainer = requireViewById(R.id.car_ui_toolbar_title_logo_container);
-            mTitleLogo = requireViewById(R.id.car_ui_toolbar_title_logo);
-            mSearchViewContainer = requireViewById(R.id.car_ui_toolbar_search_view_container);
-            mProgressBar = requireViewById(R.id.car_ui_toolbar_progress_bar);
+            mTabLayout = requireViewByRefId(this, R.id.car_ui_toolbar_tabs);
+            mNavIcon = requireViewByRefId(this, R.id.car_ui_toolbar_nav_icon);
+            mLogoInNavIconSpace = requireViewByRefId(this, R.id.car_ui_toolbar_logo);
+            mNavIconContainer = requireViewByRefId(this, R.id.car_ui_toolbar_nav_icon_container);
+            mMenuItemsContainer =
+                    requireViewByRefId(this, R.id.car_ui_toolbar_menu_items_container);
+            mTitle = requireViewByRefId(this, R.id.car_ui_toolbar_title);
+            mTitleLogoContainer =
+                    requireViewByRefId(this, R.id.car_ui_toolbar_title_logo_container);
+            mTitleLogo = requireViewByRefId(this, R.id.car_ui_toolbar_title_logo);
+            mSearchViewContainer =
+                    requireViewByRefId(this, R.id.car_ui_toolbar_search_view_container);
+            mProgressBar = requireViewByRefId(this, R.id.car_ui_toolbar_progress_bar);
 
             setShowTabsInSubpage(a.getBoolean(R.styleable.CarUiToolbar_showTabsInSubpage, false));
             mTitle.setText(a.getString(R.styleable.CarUiToolbar_title));
@@ -777,7 +782,7 @@ public class Toolbar extends FrameLayout {
             }
 
             if (!absorbed) {
-                Activity activity = CarUiUtils.getActivity(getContext());
+                Activity activity = getActivity(getContext());
                 if (activity != null) {
                     activity.onBackPressed();
                 }
