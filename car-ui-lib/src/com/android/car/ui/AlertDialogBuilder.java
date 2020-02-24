@@ -35,11 +35,13 @@ import android.widget.TextView;
 import androidx.annotation.ArrayRes;
 import androidx.annotation.AttrRes;
 import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.recyclerview.CarUiRadioButtonListItemAdapter;
-import com.android.car.ui.recyclerview.RecyclerViewToListAdapter;
 
 /**
  * Wrapper for AlertDialog.Builder
@@ -357,8 +359,17 @@ public class AlertDialogBuilder {
      * opposed to a callback in this function.
      */
     public AlertDialogBuilder setAdapter(final CarUiListItemAdapter adapter) {
-        mBuilder.setAdapter(new RecyclerViewToListAdapter<>(adapter), null);
+        setCustomList(adapter);
         return this;
+    }
+
+    private void setCustomList(@NonNull CarUiListItemAdapter adapter) {
+        View customList = LayoutInflater.from(mContext).inflate(
+                R.layout.car_ui_alert_dialog_list, null);
+        RecyclerView mList = customList.requireViewById(R.id.list);
+        mList.setLayoutManager(new LinearLayoutManager(mContext));
+        mList.setAdapter(adapter);
+        mBuilder.setView(customList);
     }
 
     /**
@@ -534,10 +545,28 @@ public class AlertDialogBuilder {
      * dismissed when an item is clicked. It will only be dismissed if clicked on a
      * button, if no buttons are supplied it's up to the user to dismiss the dialog.
      * @return This Builder object to allow for chaining of calls to set methods
+     *
+     * @deprecated Use {@link #setSingleChoiceItems(CarUiRadioButtonListItemAdapter)} instead.
      */
+    @Deprecated
     public AlertDialogBuilder setSingleChoiceItems(CarUiRadioButtonListItemAdapter adapter,
             final DialogInterface.OnClickListener listener) {
-        mBuilder.setAdapter(new RecyclerViewToListAdapter<>(adapter), listener);
+        setCustomList(adapter);
+        return this;
+    }
+
+    /**
+     * Set a list of items to be displayed in the dialog as the content,The list will have a check
+     * mark displayed to the right of the text for the checked item. Clicking on an item in the list
+     * will not dismiss the dialog. Clicking on a button will dismiss the dialog.
+     *
+     * @param adapter The {@link CarUiRadioButtonListItemAdapter} to supply the list of items
+     * dismissed when an item is clicked. It will only be dismissed if clicked on a
+     * button, if no buttons are supplied it's up to the user to dismiss the dialog.
+     * @return This Builder object to allow for chaining of calls to set methods
+     */
+    public AlertDialogBuilder setSingleChoiceItems(CarUiRadioButtonListItemAdapter adapter) {
+        setCustomList(adapter);
         return this;
     }
 
