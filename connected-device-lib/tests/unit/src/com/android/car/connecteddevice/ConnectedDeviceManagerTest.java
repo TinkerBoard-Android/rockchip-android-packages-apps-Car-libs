@@ -23,9 +23,9 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.mockitoSession;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -542,7 +542,8 @@ public class ConnectedDeviceManagerTest {
         mConnectedDeviceManager.removeConnectedDevice(deviceId, mMockPeripheralManager);
         Thread.sleep(100);  // Async process so need to allow it time to complete.
         // ConnectedDeviceManager.start() also invokes connectToDevice(), so expect # of calls = 2.
-        verify(mMockPeripheralManager, atMost(2)).connectToDevice(eq(UUID.fromString(deviceId)));
+        verify(mMockPeripheralManager, timeout(1000).times(2))
+                .connectToDevice(eq(UUID.fromString(deviceId)));
     }
 
     @Test
@@ -554,9 +555,23 @@ public class ConnectedDeviceManagerTest {
                 Collections.singletonList(userDeviceId));
         mConnectedDeviceManager.addConnectedDevice(deviceId, mMockPeripheralManager);
         mConnectedDeviceManager.removeConnectedDevice(deviceId, mMockPeripheralManager);
-        Thread.sleep(100);  // Async process so need to allow it time to complete.
         // ConnectedDeviceManager.start() invokes connectToDevice(), so expect # of calls = 1.
-        verify(mMockPeripheralManager).connectToDevice(eq(UUID.fromString(userDeviceId)));
+        verify(mMockPeripheralManager, timeout(1000))
+                .connectToDevice(eq(UUID.fromString(userDeviceId)));
+    }
+
+    @Test
+    public void removeActiveUserAssociatedDevice_deletesAssociatedDeviceFromStorage() {
+        String deviceId = UUID.randomUUID().toString();
+        mConnectedDeviceManager.removeActiveUserAssociatedDevice(deviceId);
+        verify(mMockStorage).removeAssociatedDeviceForActiveUser(deviceId);
+    }
+
+    @Test
+    public void removeActiveUserAssociatedDevice_disconnectsIfConnected() {
+        String deviceId = connectNewDevice(mMockPeripheralManager);
+        mConnectedDeviceManager.removeActiveUserAssociatedDevice(deviceId);
+        verify(mMockPeripheralManager).disconnectDevice(deviceId);
     }
 
     @NonNull

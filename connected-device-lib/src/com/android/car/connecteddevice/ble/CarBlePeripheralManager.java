@@ -35,6 +35,7 @@ import android.os.ParcelUuid;
 import com.android.car.connecteddevice.AssociationCallback;
 import com.android.car.connecteddevice.model.AssociatedDevice;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
+import com.android.car.connecteddevice.util.EventLog;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.UUID;
@@ -123,6 +124,15 @@ public class CarBlePeripheralManager extends CarBleManager {
         reset();
     }
 
+    @Override
+    public void disconnectDevice(@NonNull String deviceId) {
+        BleDevice connectedDevice = getConnectedDevice();
+        if (connectedDevice == null || !deviceId.equals(connectedDevice.mDeviceId)) {
+            return;
+        }
+        reset();
+    }
+
     private void reset() {
         resetBluetoothAdapterName();
         mClientDeviceAddress = null;
@@ -136,6 +146,7 @@ public class CarBlePeripheralManager extends CarBleManager {
     public void connectToDevice(@NonNull UUID deviceId) {
         for (BleDevice device : mConnectedDevices) {
             if (UUID.fromString(device.mDeviceId).equals(deviceId)) {
+                logd(TAG, "Already connected to device " + deviceId + ".");
                 // Already connected to this device. Ignore requests to connect again.
                 return;
             }
@@ -151,6 +162,7 @@ public class CarBlePeripheralManager extends CarBleManager {
                 logd(TAG, "Successfully started advertising for device " + deviceId + ".");
             }
         };
+        mBlePeripheralManager.unregisterCallback(mAssociationPeripheralCallback);
         mBlePeripheralManager.registerCallback(mReconnectPeripheralCallback);
         startAdvertising(deviceId, mAdvertiseCallback, /* includeDeviceName = */ false);
     }
@@ -180,6 +192,7 @@ public class CarBlePeripheralManager extends CarBleManager {
         adapter.setName(nameForAssociation);
         logd(TAG, "Changing bluetooth adapter name from " + mOriginalBluetoothName + " to "
                 + nameForAssociation + ".");
+        mBlePeripheralManager.unregisterCallback(mReconnectPeripheralCallback);
         mBlePeripheralManager.registerCallback(mAssociationPeripheralCallback);
         mAdvertiseCallback = new AdvertiseCallback() {
             @Override
@@ -298,6 +311,7 @@ public class CarBlePeripheralManager extends CarBleManager {
     }
 
     private void addConnectedDevice(BluetoothDevice device, boolean isReconnect) {
+        EventLog.onDeviceConnected();
         mBlePeripheralManager.stopAdvertising(mAdvertiseCallback);
         mClientDeviceAddress = device.getAddress();
         mClientDeviceName = device.getName();
@@ -354,14 +368,17 @@ public class CarBlePeripheralManager extends CarBleManager {
                 public void onRemoteDeviceDisconnected(BluetoothDevice device) {
                     String deviceId = null;
                     BleDevice connectedDevice = getConnectedDevice(device);
+                    // Reset before invoking callbacks to avoid a race condition with reconnect
+                    // logic.
+                    reset();
                     if (connectedDevice != null) {
                         deviceId = connectedDevice.mDeviceId;
                     }
                     final String finalDeviceId = deviceId;
                     if (finalDeviceId != null) {
+                        logd(TAG, "Connected device " + finalDeviceId + " disconnected.");
                         mCallbacks.invoke(callback -> callback.onDeviceDisconnected(finalDeviceId));
                     }
-                    reset();
                 }
             };
 
@@ -406,11 +423,13 @@ public class CarBlePeripheralManager extends CarBleManager {
                 @Override
                 public void onRemoteDeviceDisconnected(BluetoothDevice device) {
                     BleDevice connectedDevice = getConnectedDevice(device);
+                    // Reset before invoking callbacks to avoid a race condition with reconnect
+                    // logic.
+                    reset();
                     if (connectedDevice != null && connectedDevice.mDeviceId != null) {
                         mCallbacks.invoke(callback -> callback.onDeviceDisconnected(
                                 connectedDevice.mDeviceId));
                     }
-                    reset();
                 }
             };
 
