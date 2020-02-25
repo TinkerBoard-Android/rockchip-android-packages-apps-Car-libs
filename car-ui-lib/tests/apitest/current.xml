@@ -194,6 +194,7 @@
   <public type="string" name="car_ui_toolbar_menu_item_search_title"/>
   <public type="string" name="car_ui_toolbar_menu_item_settings_title"/>
   <public type="style" name="CarUiPreferenceTheme"/>
+  <public type="style" name="CarUiPreferenceTheme.WithToolbar"/>
   <public type="style" name="Preference.CarUi"/>
   <public type="style" name="Preference.CarUi.Category"/>
   <public type="style" name="Preference.CarUi.CheckBoxPreference"/>
@@ -213,6 +214,7 @@
   <public type="style" name="Preference.CarUi.SeekBarPreference"/>
   <public type="style" name="Preference.CarUi.SwitchPreference"/>
   <public type="style" name="PreferenceFragment.CarUi"/>
+  <public type="style" name="PreferenceFragment.CarUi.WithToolbar"/>
   <public type="style" name="PreferenceFragmentList.CarUi"/>
   <public type="style" name="TextAppearance.CarUi"/>
   <public type="style" name="TextAppearance.CarUi.AlertDialog.Subtitle"/>
@@ -232,7 +234,8 @@
   <public type="style" name="TextAppearance.CarUi.Widget.Toolbar.Tab.Selected"/>
   <public type="style" name="TextAppearance.CarUi.Widget.Toolbar.Title"/>
   <public type="style" name="Theme.CarUi"/>
-  <public type="style" name="Theme.CarUi.WithActionBar"/>
+  <public type="style" name="Theme.CarUi.NoToolbar"/>
+  <public type="style" name="Theme.CarUi.WithToolbar"/>
   <public type="style" name="Widget.CarUi"/>
   <public type="style" name="Widget.CarUi.AlertDialog"/>
   <public type="style" name="Widget.CarUi.AlertDialog.HeaderContainer"/>

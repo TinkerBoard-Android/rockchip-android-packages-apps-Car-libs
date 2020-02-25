@@ -40,7 +40,11 @@ import androidx.preference.SwitchPreference;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.R;
+import com.android.car.ui.baselayout.Insets;
+import com.android.car.ui.baselayout.InsetsChangedListener;
+import com.android.car.ui.core.CarUi;
 import com.android.car.ui.toolbar.Toolbar;
+import com.android.car.ui.toolbar.ToolbarController;
 import com.android.car.ui.utils.CarUiUtils;
 
 import java.util.ArrayDeque;
@@ -59,7 +63,8 @@ import java.util.Map;
  * {@link #setPreferenceScreen(PreferenceScreen)}. These include the preference viewId,
  * defaultValue, and enabled state.
  */
-public abstract class PreferenceFragment extends PreferenceFragmentCompat {
+public abstract class PreferenceFragment extends PreferenceFragmentCompat implements
+        InsetsChangedListener {
 
     private static final String TAG = "CarUiPreferenceFragment";
     private static final String DIALOG_FRAGMENT_TAG =
@@ -68,6 +73,14 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        ToolbarController baseLayoutToolbar = CarUi.getToolbar(getActivity());
+        if (baseLayoutToolbar != null) {
+            baseLayoutToolbar.setState(Toolbar.State.SUBPAGE);
+            baseLayoutToolbar.setTitle(getPreferenceScreen().getTitle());
+        }
+
+        // TODO(b/150230923) remove the code for the old toolbar height change when apps are ready
         final RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
         final Toolbar toolbar = view.findViewById(R.id.toolbar);
         if (recyclerView == null || toolbar == null) {
@@ -87,6 +100,15 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat {
 
         recyclerView.setClipToPadding(false);
         toolbar.setTitle(getPreferenceScreen().getTitle());
+    }
+
+    @Override
+    public void onCarUiInsetsChanged(Insets insets) {
+        View view = requireView();
+        view.requireViewById(R.id.recycler_view)
+                .setPadding(0, insets.getTop(), 0, insets.getBottom());
+        view.getRootView().requireViewById(android.R.id.content)
+                .setPadding(insets.getLeft(), 0, insets.getRight(), 0);
     }
 
     /**
@@ -109,7 +131,7 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat {
         }
 
         // check if dialog is already showing
-        if (getFragmentManager().findFragmentByTag(DIALOG_FRAGMENT_TAG) != null) {
+        if (requireFragmentManager().findFragmentByTag(DIALOG_FRAGMENT_TAG) != null) {
             return;
         }
 
