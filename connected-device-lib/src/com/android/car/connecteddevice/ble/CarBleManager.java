@@ -181,6 +181,9 @@ public abstract class CarBleManager {
         mConnectedDevices.remove(device);
     }
 
+    /** Disconnect the provided device from this manager. */
+    public abstract void disconnectDevice(@NonNull String deviceId);
+
     /** State for a connected device. */
     enum BleDeviceState {
         CONNECTING,
