@@ -15,7 +15,6 @@
  */
 package com.android.car.ui.paintbooth.toolbar;
 
-import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
@@ -29,20 +28,24 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.AlertDialogBuilder;
+import com.android.car.ui.CarUiAppCompatActivity;
+import com.android.car.ui.Insets;
 import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.MenuItem;
 import com.android.car.ui.toolbar.TabLayout;
 import com.android.car.ui.toolbar.Toolbar;
+import com.android.car.ui.toolbar.ToolbarController;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ToolbarActivity extends Activity {
+public class ToolbarActivity extends CarUiAppCompatActivity {
 
     private List<MenuItem> mMenuItems = new ArrayList<>();
     private List<Pair<CharSequence, View.OnClickListener>> mButtons = new ArrayList<>();
@@ -50,9 +53,11 @@ public class ToolbarActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.car_ui_recycler_view_activity);
+        setContentView(R.layout.car_ui_recycler_view_activity_without_toolbar);
 
-        Toolbar toolbar = requireViewById(R.id.toolbar);
+        ToolbarController toolbar = getCarUiToolbar();
+        toolbar.setLogo(R.drawable.ic_launcher);
+        toolbar.setState(Toolbar.State.SUBPAGE);
         toolbar.registerOnBackListener(
                 () -> {
                     if (toolbar.getState() == Toolbar.State.SEARCH
@@ -287,6 +292,14 @@ public class ToolbarActivity extends Activity {
         prv.setAdapter(mAdapter);
     }
 
+    @Override
+    protected void onCarUiInsetsChanged(Insets insets) {
+        requireViewById(R.id.list)
+                .setPadding(0, insets.getTop(), 0, insets.getBottom());
+        requireViewById(android.R.id.content)
+                .setPadding(insets.getLeft(), 0, insets.getRight(), 0);
+    }
+
     public void xmlMenuItemClicked(MenuItem item) {
         Toast.makeText(this, "Xml item clicked! " + item.getTitle() + ", id: " + item.getId(),
                 Toast.LENGTH_SHORT).show();
@@ -315,7 +328,7 @@ public class ToolbarActivity extends Activity {
                 }).show();
     }
 
-    private static class ViewHolder extends CarUiRecyclerView.ViewHolder {
+    private static class ViewHolder extends RecyclerView.ViewHolder {
 
         private final Button mButton;
 
@@ -330,8 +343,8 @@ public class ToolbarActivity extends Activity {
         }
     }
 
-    private CarUiRecyclerView.Adapter<ViewHolder> mAdapter =
-            new CarUiRecyclerView.Adapter<ViewHolder>() {
+    private final RecyclerView.Adapter<ViewHolder> mAdapter =
+            new RecyclerView.Adapter<ViewHolder>() {
                 @Override
                 public int getItemCount() {
                     return mButtons.size();

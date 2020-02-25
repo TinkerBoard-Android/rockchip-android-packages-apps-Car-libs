@@ -30,6 +30,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.android.car.ui.R;
@@ -98,6 +99,7 @@ public class SearchView extends ConstraintLayout {
         mEndPadding = context.getResources().getDimensionPixelSize(
                 R.dimen.car_ui_toolbar_search_close_icon_container_width);
 
+        mSearchText.setSaveEnabled(false);
         mSearchText.setPaddingRelative(mStartPadding, 0, mEndPadding, 0);
 
         mSearchText.setOnFocusChangeListener(
@@ -123,20 +125,19 @@ public class SearchView extends ConstraintLayout {
         });
     }
 
+    private boolean mWasShown = false;
+
     @Override
-    public void setVisibility(int visibility) {
-        boolean showing = visibility == View.VISIBLE && getVisibility() != View.VISIBLE;
+    public void onVisibilityChanged(@NonNull View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
 
-        super.setVisibility(visibility);
-
-        if (showing) {
-            mSearchText.removeTextChangedListener(mTextWatcher);
-            mSearchText.getText().clear();
-            mSearchText.addTextChangedListener(mTextWatcher);
-            mCloseIcon.setVisibility(View.GONE);
-
+        boolean isShown = isShown();
+        if (isShown && !mWasShown) {
+            boolean hasQuery = mSearchText.getText().length() > 0;
+            mCloseIcon.setVisibility(hasQuery ? View.VISIBLE : View.GONE);
             mSearchText.requestFocus();
         }
+        mWasShown = isShown;
     }
 
     /**
