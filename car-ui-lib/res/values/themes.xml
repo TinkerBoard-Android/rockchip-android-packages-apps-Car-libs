@@ -202,6 +202,10 @@
         <item name="carUiRecyclerViewStyle">@style/Widget.CarUi.CarUiRecyclerView</item>
     </style>
 
+    <style name="Theme.CarUi.WithActionBar">
+        <item name="carUiActionBar">true</item>
+    </style>
+
     <style name="CarUiPreferenceTheme">
         <item name="checkBoxPreferenceStyle">@style/Preference.CarUi.CheckBoxPreference</item>
         <item name="dialogPreferenceStyle">@style/Preference.CarUi.DialogPreference</item>
