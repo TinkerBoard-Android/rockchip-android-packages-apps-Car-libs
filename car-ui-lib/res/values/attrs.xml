@@ -14,6 +14,12 @@
  limitations under the License.
 -->
 <resources>
+    <!-- Global theme options for CarUi -->
+    <declare-styleable name="CarUi">
+        <!-- When set to true, a CarUi Toolbar will be provided in the window decor -->
+        <attr name="carUiActionBar" format="boolean"/>
+    </declare-styleable>
+
     <declare-styleable name="CarUiToolbar">
         <!-- Title of the toolbar, only displayed in certain conditions -->
         <attr name="title" format="string"/>
