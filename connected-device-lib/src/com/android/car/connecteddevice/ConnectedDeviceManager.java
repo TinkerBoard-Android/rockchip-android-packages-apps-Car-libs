@@ -122,7 +122,8 @@ public class ConnectedDeviceManager {
                     DEVICE_ERROR_INVALID_ENCRYPTION_KEY,
                     DEVICE_ERROR_STORAGE_FAILURE,
                     DEVICE_ERROR_INVALID_SECURITY_KEY,
-                    DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED
+                    DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED,
+                    DEVICE_ERROR_UNEXPECTED_DISCONNECTION
             }
     )
     public @interface DeviceError {}
@@ -135,6 +136,7 @@ public class ConnectedDeviceManager {
     public static final int DEVICE_ERROR_STORAGE_FAILURE = 6;
     public static final int DEVICE_ERROR_INVALID_SECURITY_KEY = 7;
     public static final int DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED = 8;
+    public static final int DEVICE_ERROR_UNEXPECTED_DISCONNECTION = 9;
 
     public ConnectedDeviceManager(@NonNull Context context) {
         this(context, new ConnectedDeviceStorage(context), new BleCentralManager(context),
@@ -307,7 +309,11 @@ public class ConnectedDeviceManager {
      */
     public void startAssociation(@NonNull AssociationCallback callback) {
         mAssociationCallback = callback;
-        mPeripheralManager.startAssociation(getNameForAssociation(), mInternalAssociationCallback);
+        Executors.defaultThreadFactory().newThread(() -> {
+            logd(TAG, "Received request to start association.");
+            mPeripheralManager.startAssociation(getNameForAssociation(),
+                    mInternalAssociationCallback);
+        }).start();
     }
 
     /** Stop the association with any device. */
