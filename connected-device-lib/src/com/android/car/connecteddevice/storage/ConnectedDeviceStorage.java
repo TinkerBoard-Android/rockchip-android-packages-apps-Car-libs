@@ -362,7 +362,7 @@ public class ConnectedDeviceStorage {
     public void addAssociatedDeviceForActiveUser(@NonNull AssociatedDevice device) {
         addAssociatedDeviceForUser(ActivityManager.getCurrentUser(), device);
         if (mAssociatedDeviceCallback != null) {
-            mAssociatedDeviceCallback.onAssociatedDeviceAdded(device.getDeviceId());
+            mAssociatedDeviceCallback.onAssociatedDeviceAdded(device);
         }
     }
 
@@ -374,7 +374,8 @@ public class ConnectedDeviceStorage {
      * @param device New associated device to be added.
      */
     public void addAssociatedDeviceForUser(int userId, @NonNull AssociatedDevice device) {
-        AssociatedDeviceEntity entity = new AssociatedDeviceEntity(userId, device);
+        AssociatedDeviceEntity entity = new AssociatedDeviceEntity(userId, device,
+                /* isConnectionEnabled= */ true);
         mAssociatedDeviceDatabase.addOrReplaceAssociatedDevice(entity);
     }
 
@@ -394,10 +395,9 @@ public class ConnectedDeviceStorage {
         entity.name = name;
         mAssociatedDeviceDatabase.addOrReplaceAssociatedDevice(entity);
         if (mAssociatedDeviceCallback != null) {
-            mAssociatedDeviceCallback.onAssociatedDeviceUpdated(
-                    new AssociatedDevice(deviceId, entity.address, name));
+            mAssociatedDeviceCallback.onAssociatedDeviceUpdated(new AssociatedDevice(deviceId,
+                    entity.address, name, entity.isConnectionEnabled));
         }
-
     }
 
     /**
@@ -412,6 +412,10 @@ public class ConnectedDeviceStorage {
             return;
         }
         mAssociatedDeviceDatabase.removeAssociatedDevice(entity);
+        if (mAssociatedDeviceCallback != null) {
+            mAssociatedDeviceCallback.onAssociatedDeviceRemoved(new AssociatedDevice(deviceId,
+                    entity.address, entity.name, entity.isConnectionEnabled));
+        }
     }
 
     /**
@@ -421,18 +425,40 @@ public class ConnectedDeviceStorage {
      */
     public void removeAssociatedDeviceForActiveUser(@NonNull String deviceId) {
         removeAssociatedDevice(ActivityManager.getCurrentUser(), deviceId);
+    }
+
+    /**
+     * Set if connection is enabled for an associated device.
+     *
+     * @param deviceId The id of the associated device.
+     * @param isConnectionEnabled If connection enabled for this device.
+     */
+    public void updateAssociatedDeviceConnectionEnabled(@NonNull String deviceId,
+            boolean isConnectionEnabled) {
+        AssociatedDeviceEntity entity = mAssociatedDeviceDatabase.getAssociatedDevice(deviceId);
+        if (entity == null) {
+            logw(TAG, "Attempt to enable or disable connection on an unrecognized device "
+                    + deviceId + ". Ignoring.");
+            return;
+        }
+        if (entity.isConnectionEnabled == isConnectionEnabled) {
+            return;
+        }
+        entity.isConnectionEnabled = isConnectionEnabled;
+        mAssociatedDeviceDatabase.addOrReplaceAssociatedDevice(entity);
         if (mAssociatedDeviceCallback != null) {
-            mAssociatedDeviceCallback.onAssociatedDeviceRemoved(deviceId);
+            mAssociatedDeviceCallback.onAssociatedDeviceUpdated(new AssociatedDevice(deviceId,
+                    entity.address, entity.name, isConnectionEnabled));
         }
     }
 
     /** Callback for association device related events. */
     public interface AssociatedDeviceCallback {
-        /** Triggered when an associated device has been added */
-        void onAssociatedDeviceAdded(@NonNull String deviceId);
+        /** Triggered when an associated device has been added. */
+        void onAssociatedDeviceAdded(@NonNull AssociatedDevice device);
 
-        /** Triggered when an associated device has been removed.  */
-        void onAssociatedDeviceRemoved(@NonNull String deviceId);
+        /** Triggered when an associated device has been removed. */
+        void onAssociatedDeviceRemoved(@NonNull AssociatedDevice device);
 
         /** Triggered when an associated device has been updated. */
         void onAssociatedDeviceUpdated(@NonNull AssociatedDevice device);

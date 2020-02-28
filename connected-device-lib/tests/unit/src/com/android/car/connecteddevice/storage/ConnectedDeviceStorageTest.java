@@ -128,7 +128,7 @@ public final class ConnectedDeviceStorageTest {
 
     private AssociatedDevice addRandomAssociatedDevice(int userId) {
         AssociatedDevice device = new AssociatedDevice(UUID.randomUUID().toString(),
-                "00:00:00:00:00:00", "Test Device");
+                "00:00:00:00:00:00", "Test Device", true);
         addAssociatedDevice(userId, device, ByteUtils.randomBytes(16));
         return device;
     }
