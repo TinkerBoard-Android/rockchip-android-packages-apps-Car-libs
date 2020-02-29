@@ -21,7 +21,6 @@ import static com.android.car.connecteddevice.util.SafeLog.logw;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.drawable.Icon;
 import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
@@ -156,7 +155,7 @@ public class Utils {
      * Creates a Letter Tile Icon that will display the given initials. If the initials are null,
      * then an avatar anonymous icon will be drawn.
      **/
-    public static Icon createLetterTile(Context context, @Nullable String initials,
+    public static Bitmap createLetterTile(Context context, @Nullable String initials,
             String identifier, int avatarSize, float cornerRadiusPercent) {
         // TODO(b/135446418): use TelecomUtils once car-telephony-common supports bp.
         LetterTileDrawable letterTileDrawable = createLetterTileDrawable(context, initials,
@@ -168,8 +167,9 @@ public class Utils {
     }
 
     /** Creates an Icon based on the given roundedBitmapDrawable. **/
-    private static Icon createFromRoundedBitmapDrawable(RoundedBitmapDrawable roundedBitmapDrawable,
-            int avatarSize, float cornerRadiusPercent) {
+    private static Bitmap createFromRoundedBitmapDrawable(
+            RoundedBitmapDrawable roundedBitmapDrawable, int avatarSize,
+            float cornerRadiusPercent) {
         // TODO(b/135446418): use TelecomUtils once car-telephony-common supports bp.
         float radius = avatarSize * cornerRadiusPercent;
         roundedBitmapDrawable.setCornerRadius(radius);
@@ -179,7 +179,7 @@ public class Utils {
         final Canvas canvas = new Canvas(result);
         roundedBitmapDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         roundedBitmapDrawable.draw(canvas);
-        return Icon.createWithBitmap(result);
+        return roundedBitmapDrawable.getBitmap();
     }
 
 
