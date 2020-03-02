@@ -128,7 +128,7 @@ public class FallbackAssistant {
             messages.add(mVerbForSays);
         }
         for (Message message : messageList) {
-            if (message.getSenderPerson() != previousSender) {
+            if (!message.getSenderPerson().equals(previousSender)) {
                 messages.add(message.getSenderPerson().getName());
                 messages.add(mVerbForSays);
                 previousSender = message.getSenderPerson();
