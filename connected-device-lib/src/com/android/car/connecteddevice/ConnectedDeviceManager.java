@@ -604,7 +604,7 @@ public class ConnectedDeviceManager {
         invokeConnectionCallbacks(isAssociated,
                 callback -> callback.onDeviceDisconnected(connectedDevice.mConnectedDevice));
 
-        if (isAssociated) {
+        if (isAssociated || mConnectedDevices.isEmpty()) {
             // Try to regain connection to active user's device.
             connectToActiveUserDevice();
         }
