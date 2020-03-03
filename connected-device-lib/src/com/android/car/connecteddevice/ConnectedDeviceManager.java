@@ -122,7 +122,8 @@ public class ConnectedDeviceManager {
                     DEVICE_ERROR_INVALID_ENCRYPTION_KEY,
                     DEVICE_ERROR_STORAGE_FAILURE,
                     DEVICE_ERROR_INVALID_SECURITY_KEY,
-                    DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED
+                    DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED,
+                    DEVICE_ERROR_UNEXPECTED_DISCONNECTION
             }
     )
     public @interface DeviceError {}
@@ -135,6 +136,7 @@ public class ConnectedDeviceManager {
     public static final int DEVICE_ERROR_STORAGE_FAILURE = 6;
     public static final int DEVICE_ERROR_INVALID_SECURITY_KEY = 7;
     public static final int DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED = 8;
+    public static final int DEVICE_ERROR_UNEXPECTED_DISCONNECTION = 9;
 
     public ConnectedDeviceManager(@NonNull Context context) {
         this(context, new ConnectedDeviceStorage(context), new BleCentralManager(context),
@@ -274,23 +276,27 @@ public class ConnectedDeviceManager {
                         + "Ignoring redundant request.");
                 return;
             }
-            List<String> userDeviceIds = mStorage.getActiveUserAssociatedDeviceIds();
-            if (userDeviceIds.isEmpty()) {
+            List<AssociatedDevice> userDevices = mStorage.getActiveUserAssociatedDevices();
+            if (userDevices.isEmpty()) {
                 logw(TAG, "No devices associated with active user. Ignoring.");
                 return;
             }
 
             // Only currently support one device per user for fast association, so take the
             // first one.
-            String userDeviceId = userDeviceIds.get(0);
-            if (mConnectedDevices.containsKey(userDeviceId)) {
+            AssociatedDevice userDevice = userDevices.get(0);
+            if (!userDevice.isConnectionEnabled()) {
+                logd(TAG, "Connection is disabled on device " + userDevice + ".");
+                return;
+            }
+            if (mConnectedDevices.containsKey(userDevice.getDeviceId())) {
                 logd(TAG, "Device has already been connected. No need to attempt connection "
                         + "again.");
                 return;
             }
             EventLog.onStartDeviceSearchStarted();
             mIsConnectingToUserDevice.set(true);
-            mPeripheralManager.connectToDevice(UUID.fromString(userDeviceId));
+            mPeripheralManager.connectToDevice(UUID.fromString(userDevice.getDeviceId()));
         } catch (Exception e) {
             loge(TAG, "Exception while attempting connection with active user's device.", e);
         }
@@ -303,7 +309,11 @@ public class ConnectedDeviceManager {
      */
     public void startAssociation(@NonNull AssociationCallback callback) {
         mAssociationCallback = callback;
-        mPeripheralManager.startAssociation(getNameForAssociation(), mInternalAssociationCallback);
+        Executors.defaultThreadFactory().newThread(() -> {
+            logd(TAG, "Received request to start association.");
+            mPeripheralManager.startAssociation(getNameForAssociation(),
+                    mInternalAssociationCallback);
+        }).start();
     }
 
     /** Stop the association with any device. */
@@ -338,12 +348,39 @@ public class ConnectedDeviceManager {
      */
     public void removeActiveUserAssociatedDevice(@NonNull String deviceId) {
         mStorage.removeAssociatedDeviceForActiveUser(deviceId);
+        disconnectDevice(deviceId);
+    }
+
+    /**
+     * Enable connection on an associated device.
+     *
+     * @param deviceId Device identifier.
+     */
+    public void enableAssociatedDeviceConnection(@NonNull String deviceId) {
+        logd(TAG, "enableAssociatedDeviceConnection() called on " + deviceId);
+        mStorage.updateAssociatedDeviceConnectionEnabled(deviceId,
+                /* isConnectionEnabled = */ true);
+        connectToActiveUserDevice();
+    }
+
+    /**
+     * Disable connection on an associated device.
+     *
+     * @param deviceId Device identifier.
+     */
+    public void disableAssociatedDeviceConnection(@NonNull String deviceId) {
+        logd(TAG, "disableAssociatedDeviceConnection() called on " + deviceId);
+        mStorage.updateAssociatedDeviceConnectionEnabled(deviceId,
+                /* isConnectionEnabled = */ false);
+        disconnectDevice(deviceId);
+    }
+
+    private void disconnectDevice(String deviceId) {
         InternalConnectedDevice device = mConnectedDevices.get(deviceId);
         if (device != null) {
             device.mCarBleManager.disconnectDevice(deviceId);
             removeConnectedDevice(deviceId, device.mCarBleManager);
         }
-        logd(TAG, "Successfully removed associated device " + deviceId + ".");
     }
 
     /**
@@ -789,15 +826,17 @@ public class ConnectedDeviceManager {
     private final AssociatedDeviceCallback mAssociatedDeviceCallback =
             new AssociatedDeviceCallback() {
         @Override
-        public void onAssociatedDeviceAdded(String deviceId) {
+        public void onAssociatedDeviceAdded(
+                AssociatedDevice device) {
             mDeviceAssociationCallbacks.invoke(callback ->
-                    callback.onAssociatedDeviceAdded(deviceId));
+                    callback.onAssociatedDeviceAdded(device));
         }
 
         @Override
-        public void onAssociatedDeviceRemoved(String deviceId) {
+        public void onAssociatedDeviceRemoved(AssociatedDevice device) {
             mDeviceAssociationCallbacks.invoke(callback ->
-                    callback.onAssociatedDeviceRemoved(deviceId));
+                    callback.onAssociatedDeviceRemoved(device));
+            logd(TAG, "Successfully removed associated device " + device + ".");
         }
 
         @Override
@@ -834,11 +873,11 @@ public class ConnectedDeviceManager {
     /** Callback for association device related events. */
     public interface DeviceAssociationCallback {
 
-        /** Triggered when an associated device has been added */
-        void onAssociatedDeviceAdded(@NonNull String deviceId);
+        /** Triggered when an associated device has been added. */
+        void onAssociatedDeviceAdded(@NonNull AssociatedDevice device);
 
-        /** Triggered when an associated device has been removed.  */
-        void onAssociatedDeviceRemoved(@NonNull String deviceId);
+        /** Triggered when an associated device has been removed. */
+        void onAssociatedDeviceRemoved(@NonNull AssociatedDevice device);
 
         /** Triggered when the name of an associated device has been updated. */
         void onAssociatedDeviceUpdated(@NonNull AssociatedDevice device);
