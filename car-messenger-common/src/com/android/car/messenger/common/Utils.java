@@ -16,7 +16,7 @@
 
 package com.android.car.messenger.common;
 
-import static com.android.car.connecteddevice.util.SafeLog.logw;
+import static com.android.car.apps.common.util.SafeLog.logw;
 
 import android.content.Context;
 import android.graphics.Bitmap;
