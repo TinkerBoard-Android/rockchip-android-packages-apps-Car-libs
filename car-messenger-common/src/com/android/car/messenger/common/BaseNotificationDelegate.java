@@ -211,7 +211,10 @@ public class BaseNotificationDelegate {
                 messagingStyle.addMessage(
                         message.getMessageText(),
                         message.getReceiveTime(),
-                        sender);
+                        notificationInfo.isGroupConvo() ? new Person.Builder()
+                                .setName(message.getSenderName())
+                                .setUri(message.getSenderContactUri())
+                                .build() : sender);
             }
         });
         if (notificationInfo.isGroupConvo()) {
