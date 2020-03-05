@@ -128,10 +128,10 @@ public final class CarUiRecyclerView extends RecyclerView implements
     })
     @Retention(SOURCE)
     public @interface ScrollBarPosition {
-        /** Position the scrollbar to the left of the screen. This is default. */
+        /** Position the scrollbar at the start of its container. This is default. */
         int START = 0;
 
-        /** Position scrollbar to the right of the screen. */
+        /** Position scrollbar at the end of its container. */
         int END = 1;
     }
 
@@ -145,10 +145,13 @@ public final class CarUiRecyclerView extends RecyclerView implements
     })
     @Retention(SOURCE)
     public @interface CarUiRecyclerViewLayout {
-        /** Position the scrollbar to the left of the screen. This is default. */
+        /**
+         * Arranges items either horizontally in a single row or vertically in a single column.
+         * This is default.
+         */
         int LINEAR = 0;
 
-        /** Position scrollbar to the right of the screen. */
+        /** Arranges items in a Grid. */
         int GRID = 2;
     }
 
