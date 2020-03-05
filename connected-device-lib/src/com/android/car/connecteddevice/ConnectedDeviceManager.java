@@ -187,22 +187,20 @@ public class ConnectedDeviceManager {
     public void start() {
         logd(TAG, "Starting ConnectedDeviceManager.");
         EventLog.onConnectedDeviceManagerStarted();
-        //mCentralManager.start();
+        // TODO (b/141312136) Start central manager
         mPeripheralManager.start();
         connectToActiveUserDevice();
     }
 
-    /** Clean up internal processes and disconnect any active connections. */
-    public void cleanup() {
-        logd(TAG, "Cleaning up ConnectedDeviceManager.");
-        mIsConnectingToUserDevice.set(false);
-        mCentralManager.stop();
+    /** Reset internal processes and disconnect any active connections. */
+    public void reset() {
+        logd(TAG, "Resetting ConnectedDeviceManager.");
+        for (InternalConnectedDevice device : mConnectedDevices.values()) {
+            removeConnectedDevice(device.mConnectedDevice.getDeviceId(), device.mCarBleManager);
+        }
         mPeripheralManager.stop();
-        mDeviceCallbacks.clear();
-        mDeviceAssociationCallbacks.clear();
-        mActiveUserConnectionCallbacks.clear();
-        mAllUserConnectionCallbacks.clear();
-        mStorage.clearAssociationDeviceCallback();
+        // TODO (b/141312136) Stop central manager
+        mIsConnectingToUserDevice.set(false);
     }
 
     /** Returns {@link List<ConnectedDevice>} of devices currently connected. */
