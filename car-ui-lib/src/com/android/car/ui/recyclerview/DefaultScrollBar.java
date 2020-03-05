@@ -198,9 +198,9 @@ class DefaultScrollBar implements ScrollBar {
         FrameLayout.LayoutParams layoutParams =
                 (FrameLayout.LayoutParams) mScrollView.getLayoutParams();
         if (position == ScrollBarPosition.START) {
-            layoutParams.gravity = Gravity.LEFT;
+            layoutParams.gravity = Gravity.START;
         } else {
-            layoutParams.gravity = Gravity.RIGHT;
+            layoutParams.gravity = Gravity.END;
         }
 
         mScrollView.requestLayout();
