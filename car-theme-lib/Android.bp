@@ -21,8 +21,6 @@ android_library {
 
     resource_dirs: ["res"],
 
-    static_libs: ["androidx.car_car"],
-
     optimize: {
         enabled: false,
     },
