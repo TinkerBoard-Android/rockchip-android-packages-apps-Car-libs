@@ -19,7 +19,4 @@ limitations under the License.
     <string name="control_bar_expand_collapse_button" msgid="3420351169078117938">"Dugme proširi/suzi"</string>
     <string name="car_drawer_open" msgid="2676372472514742324">"Otvori ladicu"</string>
     <string name="car_drawer_close" msgid="5329374630462464855">"Zatvori ladicu"</string>
-    <string name="restricted_while_driving" msgid="2278031053760704437">"Funkcija nije dostupna tokom vožnje."</string>
-    <string name="scroll_bar_page_down_button" msgid="8633547153186948066">"Klizni prema dolje"</string>
-    <string name="scroll_bar_page_up_button" msgid="8306413844913744345">"Klizni prema gore"</string>
 </resources>

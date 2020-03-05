@@ -28,6 +28,7 @@ android_app {
 
     static_libs: [
         "car-ui-lib",
+        "android.car.userlib",
     ],
 
     optimize: {

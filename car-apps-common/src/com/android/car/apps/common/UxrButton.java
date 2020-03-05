@@ -122,6 +122,14 @@ public class UxrButton extends TextView {
         mCarUxRestrictionsUtil.unregister(mListener);
     }
 
+    /**
+     * Set the UX restriction mode for this button
+     */
+    public void setUxRestrictions(int uxRestrictions) {
+        mRestrictions = uxRestrictions;
+        mHandler.post(() -> refreshDrawableState());
+    }
+
     private boolean isRestricted() {
         return CarUxRestrictionsUtil.isRestricted(mRestrictions, mActiveCarUxRestrictions);
     }

@@ -158,7 +158,7 @@ public class ImageBinder<T extends ImageBinder.ImageRef> {
             getImageFetcher(context).cancelRequest(mCurrentKey, mFetchReceiver);
             onRequestFinished();
         }
-        setDrawable(getLoadingDrawable(context));
+        setDrawable(mPlaceholderType != PlaceholderType.NONE ? getLoadingDrawable(context) : null);
     }
 
     private void onRequestFinished() {

@@ -87,7 +87,15 @@ public class BackgroundImageView extends ConstraintLayout {
 
     /** Sets the drawable that will be displayed blurred by this view. */
     public void setBackgroundDrawable(@Nullable Drawable drawable) {
-        updateBlur(drawable, true);
+        setBackgroundDrawable(drawable, true);
+    }
+
+    /**
+     * Sets the drawable that will be displayed blurred by this view specifying if animation is
+     * enabled.
+     */
+    public void setBackgroundDrawable(@Nullable Drawable drawable, boolean showAnimation) {
+        updateBlur(drawable, showAnimation);
     }
 
     private void updateBlur(@Nullable Drawable drawable, boolean showAnimation) {

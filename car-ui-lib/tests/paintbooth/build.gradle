@@ -34,7 +34,10 @@ android {
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest-gradle.xml'
-            java.srcDirs = ['src']
+            java {
+                srcDirs = ['src']
+                filter.excludes = ["com/android/car/ui/paintbooth/overlays/OverlayManagerImpl.java"]
+            }
             res.srcDirs = ['res']
         }
     }
@@ -42,6 +45,7 @@ android {
 
 dependencies {
     implementation project(':')
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.0'
     api 'androidx.annotation:annotation:1.1.0'
     api 'androidx.constraintlayout:constraintlayout:1.1.3'
     api 'androidx.recyclerview:recyclerview:1.0.0'

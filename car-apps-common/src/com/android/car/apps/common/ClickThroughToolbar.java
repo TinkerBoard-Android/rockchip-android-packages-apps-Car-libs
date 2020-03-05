@@ -28,7 +28,7 @@ import android.widget.Toolbar;
  * <p>By default, the {@link Toolbar} eats all touches on it. This view will override
  * {@link #onTouchEvent(MotionEvent)} and return {@code false} if configured to allow pass through.
  *
- * @deprecated Use {@link com.android.car.ui.Toolbar} instead
+ * @deprecated Use {@link com.android.car.ui.toolbar.Toolbar} instead
  */
 @Deprecated
 public class ClickThroughToolbar extends Toolbar {

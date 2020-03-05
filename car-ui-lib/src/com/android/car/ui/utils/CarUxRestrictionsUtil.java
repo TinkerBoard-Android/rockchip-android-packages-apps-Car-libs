@@ -27,6 +27,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.car.ui.R;
 
@@ -66,7 +67,7 @@ public class CarUxRestrictionsUtil {
                     }
                 };
 
-        mCarApi = Car.createCar(context);
+        mCarApi = Car.createCar(context.getApplicationContext());
         mObservers = Collections.newSetFromMap(new WeakHashMap<>());
 
         try {
@@ -107,8 +108,8 @@ public class CarUxRestrictionsUtil {
 
     /**
      * Registers a listener on this class for updates to CarUxRestrictions. Multiple listeners may
-     * be
-     * registered.
+     * be registered. Note that this class will only hold a weak reference to the listener, you
+     * must maintain a strong reference to it elsewhere.
      */
     public void register(OnUxRestrictionsChangedListener listener) {
         mObservers.add(listener);
@@ -118,6 +119,11 @@ public class CarUxRestrictionsUtil {
     /** Unregisters a registered listener */
     public void unregister(OnUxRestrictionsChangedListener listener) {
         mObservers.remove(listener);
+    }
+
+    @NonNull
+    public CarUxRestrictions getCurrentRestrictions() {
+        return mCarUxRestrictions;
     }
 
     /**
@@ -148,5 +154,11 @@ public class CarUxRestrictionsUtil {
         }
 
         return str;
+    }
+
+    /** Sets car UX restrictions. Only used for testing. */
+    @VisibleForTesting
+    public void setUxRestrictions(CarUxRestrictions carUxRestrictions) {
+        mCarUxRestrictions = carUxRestrictions;
     }
 }

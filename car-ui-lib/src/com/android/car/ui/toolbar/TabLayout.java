@@ -16,12 +16,12 @@
 package com.android.car.ui.toolbar;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.util.ArraySet;
 import android.util.AttributeSet;
-import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +33,7 @@ import android.widget.TextView;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StyleRes;
 
 import com.android.car.ui.R;
 
@@ -78,9 +79,8 @@ public class TabLayout extends LinearLayout {
 
     // View attributes
     private final boolean mTabFlexibleLayout;
-    private final int mTabPaddingX;
 
-    private final Set<Listener> mListeners;
+    private final Set<Listener> mListeners = new ArraySet<>();
 
     private final TabAdapter mTabAdapter;
 
@@ -94,12 +94,11 @@ public class TabLayout extends LinearLayout {
 
     public TabLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        mListeners = new ArraySet<>();
+        Resources resources = context.getResources();
 
-        mTabPaddingX = context.getResources().getDimensionPixelSize(R.dimen.car_ui_tab_padding_x);
-        mTabFlexibleLayout = context.getResources().getBoolean(R.bool.car_ui_tab_flexible_layout);
+        mTabFlexibleLayout = resources.getBoolean(R.bool.car_ui_toolbar_tab_flexible_layout);
 
-        mTabAdapter = new TabAdapter(context, R.layout.car_ui_tab_item_layout, this);
+        mTabAdapter = new TabAdapter(context, R.layout.car_ui_toolbar_tab_item_layout, this);
     }
 
     /**
@@ -184,23 +183,13 @@ public class TabLayout extends LinearLayout {
         addView(tabView, position, layoutParams);
     }
 
-    private ViewGroup createTabItemView() {
-        LinearLayout tabItemView = new LinearLayout(getContext());
-        tabItemView.setOrientation(LinearLayout.VERTICAL);
-        tabItemView.setGravity(Gravity.CENTER);
-        tabItemView.setPadding(mTabPaddingX, 0, mTabPaddingX, 0);
-        TypedValue tv = new TypedValue();
-        getContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackground,
-                tv, /* resolveRefs= */ true);
-        tabItemView.setBackgroundResource(tv.resourceId);
-        return tabItemView;
-    }
-
     private static class TabAdapter extends BaseAdapter {
         private final Context mContext;
         private final TabLayout mTabLayout;
         @LayoutRes
         private final int mTabItemLayoutRes;
+        private final Typeface mUnselectedTypeface;
+        private final Typeface mSelectedTypeface;
         private final List<Tab> mTabList;
 
         private TabAdapter(Context context, @LayoutRes int res, TabLayout tabLayout) {
@@ -208,6 +197,10 @@ public class TabLayout extends LinearLayout {
             mContext = context;
             mTabItemLayoutRes = res;
             mTabLayout = tabLayout;
+            mUnselectedTypeface = createStyledTypeface(context,
+                    R.style.TextAppearance_CarUi_Widget_Toolbar_Tab);
+            mSelectedTypeface = createStyledTypeface(context,
+                    R.style.TextAppearance_CarUi_Widget_Toolbar_Tab_Selected);
         }
 
         private void add(@NonNull Tab tab) {
@@ -242,8 +235,8 @@ public class TabLayout extends LinearLayout {
         @Override
         @NonNull
         public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-            ViewGroup tabItemView = mTabLayout.createTabItemView();
-            LayoutInflater.from(mContext).inflate(mTabItemLayoutRes, tabItemView, true);
+            View tabItemView = LayoutInflater.from(mContext)
+                    .inflate(mTabItemLayoutRes, parent, false);
 
             presentTabItemView(position, tabItemView);
             return tabItemView;
@@ -289,18 +282,33 @@ public class TabLayout extends LinearLayout {
         private void presentTabItemView(int position, @NonNull View tabItemView) {
             Tab tab = mTabList.get(position);
 
-            ImageView iconView = tabItemView.findViewById(R.id.car_ui_tab_item_icon);
-            TextView textView = tabItemView.findViewById(R.id.car_ui_tab_item_text);
+            ImageView iconView = tabItemView.findViewById(R.id.car_ui_toolbar_tab_item_icon);
+            TextView textView = tabItemView.findViewById(R.id.car_ui_toolbar_tab_item_text);
 
             tabItemView.setOnClickListener(view -> selectTab(tab));
             tab.bindText(textView);
             tab.bindIcon(iconView);
+            tabItemView.setActivated(tab.mIsSelected);
+            textView.setTypeface(tab.mIsSelected ? mSelectedTypeface : mUnselectedTypeface);
+        }
 
-            tabItemView.setSelected(tab.mIsSelected);
-            iconView.setSelected(tab.mIsSelected);
-            textView.setSelected(tab.mIsSelected);
-            // TODO(b/141109269): add indirection to allow customization.
-            textView.setTypeface(null, tab.mIsSelected ? Typeface.BOLD : Typeface.NORMAL);
+        private static Typeface createStyledTypeface(Context context, @StyleRes int styleResId) {
+            TypedArray ta = context.obtainStyledAttributes(styleResId, new int[] {
+                    android.R.attr.textStyle,
+                    android.R.attr.textFontWeight
+            });
+
+            try {
+                // If not specified, default to 0, which stands for normal.
+                int textStyle = ta.getInteger(0, 0);
+                // If not specified, default value will be 0 which is a light font.
+                int textFontWeight = ta.getInteger(1, 0);
+
+                return Typeface.create(Typeface.defaultFromStyle(textStyle), textFontWeight,
+                        (textStyle & Typeface.ITALIC) != 0);
+            } finally {
+                ta.recycle();
+            }
         }
     }
 
@@ -320,7 +328,7 @@ public class TabLayout extends LinearLayout {
             textView.setText(mText);
         }
 
-        /** Set icon drawable. */
+        /** Set icon drawable. TODO(b/139444064): revise this api.*/
         protected void bindIcon(ImageView imageView) {
             imageView.setImageDrawable(mIcon);
         }

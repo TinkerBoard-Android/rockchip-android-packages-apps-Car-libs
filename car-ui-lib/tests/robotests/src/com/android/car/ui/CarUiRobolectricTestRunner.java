@@ -25,6 +25,7 @@ import org.robolectric.manifest.AndroidManifest;
 import org.robolectric.res.Fs;
 import org.robolectric.res.ResourcePath;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -39,12 +40,12 @@ import java.util.Map;
 public class CarUiRobolectricTestRunner extends RobolectricTestRunner {
     private static final Map<String, String> AAR_VERSIONS;
     private static final String SUPPORT_RESOURCE_PATH_TEMPLATE =
-            "jar:file:prebuilts/sdk/current/androidx/m2repository/androidx/"
+            "jar:file:%3$s/prebuilts/sdk/current/androidx/m2repository/androidx/"
                     + "%1$s/%1$s/%2$s/%1$s-%2$s.aar!/res";
     // contraint-layout aar lives in separate path.
     // Note its path contains a hyphen.
     private static final String CONSTRAINT_LAYOUT_RESOURCE_PATH_TEMPLATE =
-            "jar:file:prebuilts/sdk/current/extras/constraint-layout-x/"
+            "jar:file:%3$s/prebuilts/sdk/current/extras/constraint-layout-x/"
                     + "%1$s/%2$s/%1$s-%2$s.aar!/res";
 
     static {
@@ -69,17 +70,18 @@ public class CarUiRobolectricTestRunner extends RobolectricTestRunner {
     /**
      * Create the resource path for a support library component's JAR.
      */
-    private static String createSupportResourcePathFromJar(@NonNull String componentId) {
+    private static String createSupportResourcePathFromJar(@NonNull String pathRoot,
+            @NonNull String componentId) {
         if (!AAR_VERSIONS.containsKey(componentId)) {
             throw new IllegalArgumentException("Unknown component " + componentId
                     + ". Update test with appropriate component name and version.");
         }
         if (componentId.equals("constraintlayout")) {
             return String.format(CONSTRAINT_LAYOUT_RESOURCE_PATH_TEMPLATE, componentId,
-                    AAR_VERSIONS.get(componentId));
+                    AAR_VERSIONS.get(componentId), pathRoot);
         }
         return String.format(SUPPORT_RESOURCE_PATH_TEMPLATE, componentId,
-                AAR_VERSIONS.get(componentId));
+                AAR_VERSIONS.get(componentId), pathRoot);
     }
 
     /**
@@ -88,8 +90,19 @@ public class CarUiRobolectricTestRunner extends RobolectricTestRunner {
     @Override
     protected AndroidManifest getAppManifest(Config config) {
         try {
+            final URL appRoot;
+            final String rootRelativePath;
+            // Root path is workspace root when run from command line and module root when run from
+            // Android Studio.
+            if (new File(System.getProperty("user.dir")).getName().equals("robotests")) {
+                rootRelativePath = "../../../../../../../.";
+                appRoot = new File("../../.").toURI().toURL();
+            } else {
+                appRoot = new URL("file:packages/apps/Car/libs/car-ui-lib/");
+                rootRelativePath = "./";
+            }
+
             // Using the manifest file's relative path, we can figure out the application directory.
-            URL appRoot = new URL("file:packages/apps/Car/libs/car-ui-lib/");
             URL manifestPath = new URL(appRoot, "AndroidManifest.xml");
             URL resDir = new URL(appRoot, "tests/robotests/res");
             URL assetsDir = new URL(appRoot, config.assetDir());
@@ -101,14 +114,18 @@ public class CarUiRobolectricTestRunner extends RobolectricTestRunner {
                 @Override
                 public List<ResourcePath> getIncludedResourcePaths() {
                     List<ResourcePath> paths = super.getIncludedResourcePaths();
-                    paths.add(createResourcePath("file:packages/apps/Car/libs/car-ui-lib/res"));
+                    paths.add(createResourcePath(
+                            String.format("file:%s/packages/apps/Car/libs/car-ui-lib/res",
+                                    rootRelativePath)));
 
                     // Support library resources. These need to point to the prebuilts of support
                     // library and not the source.
-                    paths.add(createResourcePath(createSupportResourcePathFromJar("appcompat")));
                     paths.add(createResourcePath(
-                            createSupportResourcePathFromJar("constraintlayout")));
-                    paths.add(createResourcePath(createSupportResourcePathFromJar("preference")));
+                            createSupportResourcePathFromJar(rootRelativePath, "appcompat")));
+                    paths.add(createResourcePath(createSupportResourcePathFromJar(rootRelativePath,
+                            "constraintlayout")));
+                    paths.add(createResourcePath(
+                            createSupportResourcePathFromJar(rootRelativePath, "preference")));
 
                     return paths;
                 }

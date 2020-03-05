@@ -24,7 +24,6 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -267,7 +266,7 @@ public class MediaItemMetadata implements Parcelable {
         if (placeHolders == null) {
             TypedArray placeholderImages = context.getResources().obtainTypedArray(
                     type == PlaceholderType.FOREGROUND
-                            ? R.array.placeholder_images : R.array.placeholder_colors);
+                            ? R.array.placeholder_images : R.array.placeholder_backgrounds);
 
             if (placeholderImages == null) {
                 throw new NullPointerException("No placeholders for " + type);
@@ -275,9 +274,7 @@ public class MediaItemMetadata implements Parcelable {
 
             placeHolders = new ArrayList<>(placeholderImages.length());
             for (int i = 0; i < placeholderImages.length(); i++) {
-                placeHolders.add(type == PlaceholderType.FOREGROUND
-                        ? placeholderImages.getDrawable(i)
-                        : new ColorDrawable(placeholderImages.getColor(i, 0)));
+                placeHolders.add(placeholderImages.getDrawable(i));
             }
             placeholderImages.recycle();
             sPlaceHolders.put(type, placeHolders);

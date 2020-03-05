@@ -38,6 +38,8 @@ import java.util.WeakHashMap;
  * This class must be a singleton because only one listener can be registered with
  * {@link CarUxRestrictionsManager} at a time, as documented in
  * {@link CarUxRestrictionsManager#registerListener}.
+ *
+ * @deprecated Use {@link com.android.car.ui.utils.CarUxRestrictionsUtil} instead
  */
 public class CarUxRestrictionsUtil {
     private static final String TAG = "CarUxRestrictionsUtil";
@@ -63,7 +65,7 @@ public class CarUxRestrictionsUtil {
             }
         };
 
-        mCarApi = Car.createCar(context);
+        mCarApi = Car.createCar(context.getApplicationContext());
         mObservers = Collections.newSetFromMap(new WeakHashMap<>());
 
         try {

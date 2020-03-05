@@ -19,12 +19,12 @@ package com.android.car.ui.paintbooth.preferences;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.preference.PreferenceFragmentCompat;
 
-import com.android.car.ui.paintbooth.R;
-
-/** Displays samples of all types of Preferences to help with verifying style changes. */
+/**
+ * Displays samples of all types of Preferences to help with verifying style changes.
+ */
 public class PreferenceActivity extends AppCompatActivity {
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,24 +33,8 @@ public class PreferenceActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(android.R.id.content, new DemoFragment())
-                    .commit();
-        }
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        onBackPressed();
-        return true;
-    }
-
-    /** PreferenceFragmentCompat that sets the preference hierarchy from XML */
-    public static class DemoFragment extends PreferenceFragmentCompat {
-
-        @Override
-        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-            // Load the preferences from an XML resource
-            setPreferencesFromResource(R.xml.preference_samples, rootKey);
+                    .replace(android.R.id.content, new PreferenceDemoFragment())
+                    .commitNow();
         }
     }
 }

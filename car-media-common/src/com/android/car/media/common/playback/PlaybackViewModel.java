@@ -335,7 +335,9 @@ public class PlaybackViewModel extends AndroidViewModel {
 
         /** Returns true if there's enough information in the state to show a UI for it. */
         public boolean shouldDisplay() {
-            return (mMetadata != null) || (getMainAction() != ACTION_DISABLED);
+            // STATE_NONE means no content to play.
+            return mState.getState() != PlaybackStateCompat.STATE_NONE && ((mMetadata != null) || (
+                    getMainAction() != ACTION_DISABLED));
         }
 
         /** Returns the main action. */
@@ -373,6 +375,13 @@ public class PlaybackViewModel extends AndroidViewModel {
         }
 
         /**
+         * Returns the currently supported playback actions
+         */
+        public long getSupportedActions() {
+            return mState.getActions();
+        }
+
+        /**
          * Returns the duration of the media item in milliseconds. The current position in this
          * duration can be obtained by calling {@link #getProgress()}.
          */
@@ -406,8 +415,10 @@ public class PlaybackViewModel extends AndroidViewModel {
         /** Returns whether the media source requires reserved space for the skip to next action. */
         public boolean isSkipNextReserved() {
             return mMediaController.getExtras() != null
-                    && mMediaController.getExtras().getBoolean(
-                    MediaConstants.SLOT_RESERVATION_SKIP_TO_NEXT);
+                    && (mMediaController.getExtras().getBoolean(
+                    MediaConstants.SLOT_RESERVATION_SKIP_TO_NEXT)
+                    || mMediaController.getExtras().getBoolean(
+                    MediaConstants.PLAYBACK_SLOT_RESERVATION_SKIP_TO_NEXT));
         }
 
         /**
@@ -415,8 +426,10 @@ public class PlaybackViewModel extends AndroidViewModel {
          */
         public boolean iSkipPreviousReserved() {
             return mMediaController.getExtras() != null
-                    && mMediaController.getExtras().getBoolean(
-                    MediaConstants.SLOT_RESERVATION_SKIP_TO_PREV);
+                    && (mMediaController.getExtras().getBoolean(
+                    MediaConstants.SLOT_RESERVATION_SKIP_TO_PREV)
+                    || mMediaController.getExtras().getBoolean(
+                    MediaConstants.PLAYBACK_SLOT_RESERVATION_SKIP_TO_PREV));
         }
 
         /** Returns whether the media source is loading (e.g.: buffering, connecting, etc.). */

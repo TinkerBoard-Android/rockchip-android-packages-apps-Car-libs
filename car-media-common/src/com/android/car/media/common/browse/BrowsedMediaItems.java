@@ -17,7 +17,6 @@
 package com.android.car.media.common.browse;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.media.MediaBrowserCompat;
@@ -53,7 +52,7 @@ class BrowsedMediaItems extends LiveData<List<MediaItemMetadata>> {
 
     private ChildrenSubscription mSubscription;
 
-    BrowsedMediaItems(@NonNull MediaBrowserCompat mediaBrowser, @Nullable String parentId) {
+    BrowsedMediaItems(@NonNull MediaBrowserCompat mediaBrowser, @NonNull String parentId) {
         mBrowser = mediaBrowser;
         mParentId = parentId;
     }
@@ -61,10 +60,7 @@ class BrowsedMediaItems extends LiveData<List<MediaItemMetadata>> {
     @Override
     protected void onActive() {
         super.onActive();
-        String rootNode = mBrowser.getRoot();
-        String itemId = mParentId != null ? mParentId : rootNode;
-
-        mSubscription = new ChildrenSubscription(itemId);
+        mSubscription = new ChildrenSubscription(mParentId);
         mSubscription.start(CHILDREN_SUBSCRIPTION_RETRIES, CHILDREN_SUBSCRIPTION_RETRY_TIME_MS);
     }
 
