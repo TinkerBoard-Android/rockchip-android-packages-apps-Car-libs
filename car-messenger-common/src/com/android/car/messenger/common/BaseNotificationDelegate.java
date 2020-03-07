@@ -175,6 +175,7 @@ public class BaseNotificationDelegate {
         NotificationCompat.Builder builder = newNotification ? new NotificationCompat.Builder(
                 mContext, channelId) : mNotificationBuilders.get(
                 conversationKey);
+        builder.setChannelId(channelId);
         Message lastMessage = mMessages.get(notificationInfo.mMessageKeys.getLast());
 
         builder.setContentTitle(notificationInfo.getConvoTitle());
