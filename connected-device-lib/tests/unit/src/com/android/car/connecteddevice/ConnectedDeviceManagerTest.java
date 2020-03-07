@@ -37,6 +37,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.android.car.connecteddevice.ConnectedDeviceManager.ConnectionCallback;
 import com.android.car.connecteddevice.ConnectedDeviceManager.DeviceAssociationCallback;
 import com.android.car.connecteddevice.ConnectedDeviceManager.DeviceCallback;
+import com.android.car.connecteddevice.ConnectedDeviceManager.MessageDeliveryDelegate;
 import com.android.car.connecteddevice.ble.CarBleCentralManager;
 import com.android.car.connecteddevice.ble.CarBleManager;
 import com.android.car.connecteddevice.ble.CarBlePeripheralManager;
@@ -620,6 +621,54 @@ public class ConnectedDeviceManagerTest {
         String deviceId = connectNewDevice(mMockPeripheralManager);
         mConnectedDeviceManager.disableAssociatedDeviceConnection(deviceId);
         verify(mMockPeripheralManager).disconnectDevice(deviceId);
+    }
+
+    @Test
+    public void onMessageReceived_deliversMessageIfDelegateIsNull() throws InterruptedException {
+        connectNewDevice(mMockCentralManager);
+        ConnectedDevice connectedDevice =
+                mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
+        Semaphore semaphore = new Semaphore(0);
+        DeviceCallback deviceCallback = createDeviceCallback(semaphore);
+        mConnectedDeviceManager.registerDeviceCallback(connectedDevice, mRecipientId,
+                deviceCallback, mCallbackExecutor);
+        DeviceMessage message = new DeviceMessage(mRecipientId, false, new byte[10]);
+        mConnectedDeviceManager.setMessageDeliveryDelegate(null);
+        mConnectedDeviceManager.onMessageReceived(connectedDevice.getDeviceId(), message);
+        assertThat(tryAcquire(semaphore)).isTrue();
+    }
+
+    @Test
+    public void onMessageReceived_deliversMessageIfDelegateAccepts() throws InterruptedException {
+        connectNewDevice(mMockCentralManager);
+        ConnectedDevice connectedDevice =
+                mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
+        Semaphore semaphore = new Semaphore(0);
+        DeviceCallback deviceCallback = createDeviceCallback(semaphore);
+        mConnectedDeviceManager.registerDeviceCallback(connectedDevice, mRecipientId,
+                deviceCallback, mCallbackExecutor);
+        DeviceMessage message = new DeviceMessage(mRecipientId, false, new byte[10]);
+        MessageDeliveryDelegate delegate = device -> true;
+        mConnectedDeviceManager.setMessageDeliveryDelegate(delegate);
+        mConnectedDeviceManager.onMessageReceived(connectedDevice.getDeviceId(), message);
+        assertThat(tryAcquire(semaphore)).isTrue();
+    }
+
+    @Test
+    public void onMessageReceived_doesNotDeliverMessageIfDelegateRejects()
+            throws InterruptedException {
+        connectNewDevice(mMockCentralManager);
+        ConnectedDevice connectedDevice =
+                mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
+        Semaphore semaphore = new Semaphore(0);
+        DeviceCallback deviceCallback = createDeviceCallback(semaphore);
+        mConnectedDeviceManager.registerDeviceCallback(connectedDevice, mRecipientId,
+                deviceCallback, mCallbackExecutor);
+        DeviceMessage message = new DeviceMessage(mRecipientId, false, new byte[10]);
+        MessageDeliveryDelegate delegate = device -> false;
+        mConnectedDeviceManager.setMessageDeliveryDelegate(delegate);
+        mConnectedDeviceManager.onMessageReceived(connectedDevice.getDeviceId(), message);
+        assertThat(tryAcquire(semaphore)).isFalse();
     }
 
     @NonNull
