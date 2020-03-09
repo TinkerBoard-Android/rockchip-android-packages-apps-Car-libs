@@ -39,6 +39,9 @@
     <!-- Color used on the fab spinner -->
     <color name="fab_spinner_indeterminate_color">@color/media_source_default_color</color>
 
+    <!-- Color used on media control buttons -->
+    <color name="media_button_tint">#FFFFFFFF</color>
+    <color name="media_button_tint_disabled">#80FFFFFF</color>
 
     <color name="placeholder_color_0">#669DF6</color>
     <color name="placeholder_color_1">#667EF6</color>
