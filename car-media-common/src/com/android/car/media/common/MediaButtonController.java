@@ -53,8 +53,6 @@ import java.util.stream.Collectors;
 public class MediaButtonController {
 
     private static final String TAG = "MediaButton";
-    private static final float ALPHA_ENABLED = 1.0F;
-    private static final float ALPHA_DISABLED = 0.5F;
 
     private Context mContext;
     private PlayPauseStopImageView mPlayPauseStopImageView;
@@ -175,12 +173,6 @@ public class MediaButtonController {
             mControlBar.setView(null, ControlBar.SLOT_LEFT);
             mSkipPrevAdded = false;
         }
-
-        if (skipPreviousEnabled) {
-            mSkipPrevButton.setAlpha(ALPHA_ENABLED);
-        } else {
-            mSkipPrevButton.setAlpha(ALPHA_DISABLED);
-        }
         mSkipPrevButton.setEnabled(skipPreviousEnabled);
 
         boolean skipNextReserved = hasState && state.isSkipNextReserved();
@@ -194,12 +186,6 @@ public class MediaButtonController {
         } else {
             mControlBar.setView(null, ControlBar.SLOT_RIGHT);
             mSkipNextAdded = false;
-        }
-
-        if (skipNextEnabled) {
-            mSkipNextButton.setAlpha(ALPHA_ENABLED);
-        } else {
-            mSkipNextButton.setAlpha(ALPHA_DISABLED);
         }
         mSkipNextButton.setEnabled(skipNextEnabled);
 
