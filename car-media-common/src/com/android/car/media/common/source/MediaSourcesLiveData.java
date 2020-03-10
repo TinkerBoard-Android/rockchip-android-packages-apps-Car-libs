@@ -16,7 +16,6 @@
 
 package com.android.car.media.common.source;
 
-import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -27,6 +26,7 @@ import android.content.pm.ResolveInfo;
 import android.service.media.MediaBrowserService;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
