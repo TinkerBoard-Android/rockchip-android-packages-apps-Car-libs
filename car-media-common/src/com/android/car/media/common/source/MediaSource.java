@@ -16,8 +16,6 @@
 
 package com.android.car.media.common.source;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +33,9 @@ import android.graphics.drawable.Drawable;
 import android.service.media.MediaBrowserService;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.car.apps.common.BitmapUtils;
 import com.android.car.media.common.R;

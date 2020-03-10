@@ -18,12 +18,12 @@ package com.android.car.apps.common.util;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.NonNull;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 

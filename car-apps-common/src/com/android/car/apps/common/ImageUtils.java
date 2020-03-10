@@ -16,7 +16,6 @@
 
 package com.android.car.apps.common;
 
-import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.renderscript.Allocation;
@@ -24,6 +23,8 @@ import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
 import android.util.Size;
+
+import androidx.annotation.NonNull;
 
 /**
  * Utility methods to manipulate images.
