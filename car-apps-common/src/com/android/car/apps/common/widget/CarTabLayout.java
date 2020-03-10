@@ -223,7 +223,7 @@ public class CarTabLayout<T extends CarTabLayout.CarTab> extends LinearLayout {
     }
 
     private ViewGroup createCarTabItemView() {
-        LinearLayout carTabItemView = new LinearLayout(mContext);
+        LinearLayout carTabItemView = new LinearLayout(getContext());
         carTabItemView.setOrientation(LinearLayout.VERTICAL);
         carTabItemView.setGravity(Gravity.CENTER);
         carTabItemView.setPadding(mTabPaddingX, 0, mTabPaddingX, 0);
