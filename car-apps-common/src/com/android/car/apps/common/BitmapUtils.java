@@ -17,9 +17,6 @@ package com.android.car.apps.common;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
 
-import android.annotation.ColorInt;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -31,6 +28,10 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.util.Size;
+
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public class BitmapUtils {
     private static final String TAG = "BitmapUtils";
