@@ -226,6 +226,9 @@
   <public type="style" name="PreferenceFragmentList.CarUi"/>
   <public type="style" name="TextAppearance.CarUi"/>
   <public type="style" name="TextAppearance.CarUi.AlertDialog.Subtitle"/>
+  <public type="style" name="TextAppearance.CarUi.Body1"/>
+  <public type="style" name="TextAppearance.CarUi.Body2"/>
+  <public type="style" name="TextAppearance.CarUi.Body3"/>
   <public type="style" name="TextAppearance.CarUi.ListItem"/>
   <public type="style" name="TextAppearance.CarUi.ListItem.Body"/>
   <public type="style" name="TextAppearance.CarUi.ListItem.Header"/>
