@@ -229,6 +229,18 @@
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
+    <style name="TextAppearance.CarUi.Body1">
+        <item name="android:textSize">@dimen/car_ui_body1_size</item>
+    </style>
+
+    <style name="TextAppearance.CarUi.Body2">
+        <item name="android:textSize">@dimen/car_ui_body2_size</item>
+    </style>
+
+    <style name="TextAppearance.CarUi.Body3">
+        <item name="android:textSize">@dimen/car_ui_body3_size</item>
+    </style>
+
     <style name="TextAppearance.CarUi.PreferenceCategoryTitle">
         <item name="android:fontFamily">@string/car_ui_preference_category_title_font_family</item>
         <item name="android:textColor">@color/car_ui_preference_category_title_text_color</item>
