@@ -19,8 +19,6 @@ package com.android.car.media.common.source;
 import static com.android.car.apps.common.util.CarAppsDebugUtils.idHash;
 import static com.android.car.arch.common.LiveDataFunctions.dataOf;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.Application;
 import android.car.Car;
 import android.car.CarNotConnectedException;
@@ -33,6 +31,8 @@ import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
