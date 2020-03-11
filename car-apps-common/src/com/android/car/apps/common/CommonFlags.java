@@ -17,10 +17,11 @@
 package com.android.car.apps.common;
 
 
-import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.SystemProperties;
+
+import androidx.annotation.NonNull;
 
 /** Singleton class regrouping common library feature flags. */
 public class CommonFlags {

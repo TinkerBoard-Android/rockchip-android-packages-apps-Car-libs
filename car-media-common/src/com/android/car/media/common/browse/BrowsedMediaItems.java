@@ -16,11 +16,11 @@
 
 package com.android.car.media.common.browse;
 
-import android.annotation.NonNull;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.media.MediaBrowserCompat;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 
 import com.android.car.media.common.MediaItemMetadata;

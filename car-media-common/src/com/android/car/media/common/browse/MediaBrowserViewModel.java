@@ -16,11 +16,11 @@
 
 package com.android.car.media.common.browse;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.annotation.UiThread;
 import android.support.v4.media.MediaBrowserCompat;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 
