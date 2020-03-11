@@ -16,12 +16,13 @@
 
 package com.android.car.apps.common.imaging;
 
-import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.Size;
 import android.widget.ImageView;
+
+import androidx.annotation.Nullable;
 
 import com.android.car.apps.common.CommonFlags;
 import com.android.car.apps.common.R;

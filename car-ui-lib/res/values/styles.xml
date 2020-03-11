@@ -242,11 +242,15 @@
     </style>
 
     <style name="TextAppearance.CarUi.Body1">
-        <item name="android:textSize">32sp</item>
+        <item name="android:textSize">@dimen/car_ui_body1_size</item>
+    </style>
+
+    <style name="TextAppearance.CarUi.Body2">
+        <item name="android:textSize">@dimen/car_ui_body2_size</item>
     </style>
 
     <style name="TextAppearance.CarUi.Body3">
-        <item name="android:textSize">24sp</item>
+        <item name="android:textSize">@dimen/car_ui_body3_size</item>
     </style>
 
     <style name="TextAppearance.CarUi.PreferenceCategoryTitle" parent="TextAppearance.CarUi.Body3">
