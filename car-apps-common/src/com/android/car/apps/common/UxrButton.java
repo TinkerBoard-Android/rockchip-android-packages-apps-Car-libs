@@ -16,7 +16,6 @@
 
 package com.android.car.apps.common;
 
-import android.annotation.Nullable;
 import android.car.drivingstate.CarUxRestrictions;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -25,6 +24,8 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
 
 /**
  * UX Restrictions compliant Button.
