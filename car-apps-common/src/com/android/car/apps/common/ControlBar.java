@@ -38,9 +38,8 @@ import android.widget.Space;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.util.Preconditions;
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
-
-import com.android.internal.util.Preconditions;
 
 import java.util.Locale;
 

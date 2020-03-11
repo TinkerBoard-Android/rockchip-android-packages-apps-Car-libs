@@ -16,10 +16,11 @@
 
 package com.android.car.media.common;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.car.media.common.playback.PlaybackViewModel.PlaybackStateWrapper;
 

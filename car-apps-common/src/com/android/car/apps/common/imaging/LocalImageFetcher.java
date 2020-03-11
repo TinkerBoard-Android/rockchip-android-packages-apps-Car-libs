@@ -16,7 +16,6 @@
 
 package com.android.car.apps.common.imaging;
 
-import android.annotation.UiThread;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
@@ -28,6 +27,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.util.LruCache;
+
+import androidx.annotation.UiThread;
 
 import com.android.car.apps.common.BitmapUtils;
 import com.android.car.apps.common.CommonFlags;
@@ -41,6 +42,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -244,7 +246,7 @@ public class LocalImageFetcher {
         };
 
         // ALLOCATOR_HARDWARE causes crashes on some emulators (in media center's queue).
-        private @ImageDecoder.Allocator int mAllocatorMode = ImageDecoder.ALLOCATOR_SOFTWARE;
+        private int mAllocatorMode = ImageDecoder.ALLOCATOR_SOFTWARE;
 
         @Override
         protected Drawable doInBackground(Void... voids) {
@@ -271,7 +273,8 @@ public class LocalImageFetcher {
                          ByteArrayOutputStream bytes = new ByteArrayOutputStream()) {
 
                         CarAppsIOUtils.copy(is, bytes);
-                        ImageDecoder.Source src = ImageDecoder.createSource(bytes.toByteArray());
+                        ImageDecoder.Source src =
+                                ImageDecoder.createSource(ByteBuffer.wrap(bytes.toByteArray()));
                         Bitmap decoded = ImageDecoder.decodeBitmap(src, mOnHeaderDecodedListener);
                         Bitmap tinted = BitmapUtils.createTintedBitmap(decoded,
                                 context.getColor(R.color.improper_image_refs_tint_color));

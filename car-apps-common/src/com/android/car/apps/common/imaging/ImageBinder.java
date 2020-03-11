@@ -17,15 +17,16 @@
 package com.android.car.apps.common.imaging;
 
 
-import static com.android.internal.util.Preconditions.checkNotNull;
+import static androidx.core.util.Preconditions.checkNotNull;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.Size;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.car.apps.common.R;
 import com.android.car.apps.common.UriUtils;
