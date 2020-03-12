@@ -64,7 +64,6 @@ public abstract class CarBleManager {
             }
         }
         mConnectedDevices.clear();
-        mCallbacks.clear();
     }
 
     /**
