@@ -61,10 +61,14 @@ public class Message {
     /**
      * Creates a Message based on {@link MessagingStyleMessage}. Returns {@code null} if the {@link
      * MessagingStyleMessage} is missing required fields.
+     *
+     * @param deviceId of the phone that received this message.
+     * @param updatedMessage containing the information to base this message object off of.
+     * @param appDisplayName of the messaging app this message belongs to.
      **/
     @Nullable
     public static Message parseFromMessage(String deviceId,
-            MessagingStyleMessage updatedMessage) {
+            MessagingStyleMessage updatedMessage, String appDisplayName) {
 
         if (!Utils.isValidMessagingStyleMessage(updatedMessage)) {
             if (Log.isLoggable(TAG, Log.DEBUG) || Build.IS_DEBUGGABLE) {
@@ -83,12 +87,13 @@ public class Message {
                 updatedMessage.getIsRead(),
                 Utils.createMessageHandle(updatedMessage),
                 MessageType.NOTIFICATION_MESSAGE,
-                /* senderContactUri= */ null);
+                /* senderContactUri */ null,
+                appDisplayName);
     }
 
     private Message(String senderName, String deviceId, String messageText, long receiveTime,
             boolean isReadOnPhone, String handle, MessageType messageType,
-            @Nullable String senderContactUri) {
+            @Nullable String senderContactUri, String senderKeyMetadata) {
         boolean missingSenderName = (senderName == null);
         boolean missingDeviceId = (deviceId == null);
         boolean missingText = (messageText == null);
@@ -122,7 +127,7 @@ public class Message {
         this.mHandle = handle;
         this.mMessageType = messageType;
         this.mSenderContactUri = senderContactUri;
-        this.mSenderKey = new SenderKey(deviceId, senderName, senderContactUri);
+        this.mSenderKey = new SenderKey(deviceId, senderName, senderKeyMetadata);
     }
 
     /**
@@ -221,7 +226,8 @@ public class Message {
                 + ", mReceiveTime=" + mReceiveTime + '\''
                 + ", mIsReadOnPhone= " + mIsReadOnPhone + '\''
                 + ", mShouldExclude= " + mShouldExclude + '\''
-                + ", mHandle='" + mHandle
+                + ", mHandle='" + mHandle + '\''
+                + ", mSenderKey='" + mSenderKey.toString()
                 + "}";
     }
 }
