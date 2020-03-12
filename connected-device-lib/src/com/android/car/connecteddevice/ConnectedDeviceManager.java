@@ -111,8 +111,6 @@ public class ConnectedDeviceManager {
 
     private AssociationCallback mAssociationCallback;
 
-    private MessageDeliveryDelegate mMessageDeliveryDelegate;
-
     @Retention(SOURCE)
     @IntDef(prefix = { "DEVICE_ERROR_" },
             value = {
@@ -189,20 +187,22 @@ public class ConnectedDeviceManager {
     public void start() {
         logd(TAG, "Starting ConnectedDeviceManager.");
         EventLog.onConnectedDeviceManagerStarted();
-        // TODO (b/141312136) Start central manager
+        //mCentralManager.start();
         mPeripheralManager.start();
         connectToActiveUserDevice();
     }
 
-    /** Reset internal processes and disconnect any active connections. */
-    public void reset() {
-        logd(TAG, "Resetting ConnectedDeviceManager.");
-        for (InternalConnectedDevice device : mConnectedDevices.values()) {
-            removeConnectedDevice(device.mConnectedDevice.getDeviceId(), device.mCarBleManager);
-        }
-        mPeripheralManager.stop();
-        // TODO (b/141312136) Stop central manager
+    /** Clean up internal processes and disconnect any active connections. */
+    public void cleanup() {
+        logd(TAG, "Cleaning up ConnectedDeviceManager.");
         mIsConnectingToUserDevice.set(false);
+        mCentralManager.stop();
+        mPeripheralManager.stop();
+        mDeviceCallbacks.clear();
+        mDeviceAssociationCallbacks.clear();
+        mActiveUserConnectionCallbacks.clear();
+        mAllUserConnectionCallbacks.clear();
+        mStorage.clearAssociationDeviceCallback();
     }
 
     /** Returns {@link List<ConnectedDevice>} of devices currently connected. */
@@ -423,15 +423,6 @@ public class ConnectedDeviceManager {
         }
     }
 
-    /**
-     * Set the delegate for message delivery operations.
-     *
-     * @param delegate The {@link MessageDeliveryDelegate} to set. {@code null} to unset.
-     */
-    public void setMessageDeliveryDelegate(@Nullable MessageDeliveryDelegate delegate) {
-        mMessageDeliveryDelegate = delegate;
-    }
-
     private void notifyOfBlacklisting(@NonNull ConnectedDevice device, @NonNull UUID recipientId,
             @NonNull DeviceCallback callback, @NonNull Executor executor) {
         loge(TAG, "Multiple callbacks registered for recipient " + recipientId + "! Your "
@@ -613,7 +604,7 @@ public class ConnectedDeviceManager {
         invokeConnectionCallbacks(isAssociated,
                 callback -> callback.onDeviceDisconnected(connectedDevice.mConnectedDevice));
 
-        if (isAssociated || mConnectedDevices.isEmpty()) {
+        if (isAssociated) {
             // Try to regain connection to active user's device.
             connectToActiveUserDevice();
         }
@@ -659,15 +650,6 @@ public class ConnectedDeviceManager {
                     + "recipient " + message.getRecipient() + ".");
             return;
         }
-
-        if (mMessageDeliveryDelegate != null
-                && !mMessageDeliveryDelegate.shouldDeliverMessageForDevice(
-                        connectedDevice.mConnectedDevice)) {
-            logw(TAG, "The message delegate has rejected this message. It will not be "
-                    + "delivered to the intended recipient.");
-            return;
-        }
-
         UUID recipientId = message.getRecipient();
         Map<UUID, ThreadSafeCallbacks<DeviceCallback>> deviceCallbacks =
                 mDeviceCallbacks.get(deviceId);
@@ -899,13 +881,6 @@ public class ConnectedDeviceManager {
 
         /** Triggered when the name of an associated device has been updated. */
         void onAssociatedDeviceUpdated(@NonNull AssociatedDevice device);
-    }
-
-    /** Delegate for message delivery operations. */
-    public interface MessageDeliveryDelegate {
-
-        /** Indicate whether a message should be delivered for the specified device. */
-        boolean shouldDeliverMessageForDevice(@NonNull ConnectedDevice device);
     }
 
     private static class InternalConnectedDevice {
