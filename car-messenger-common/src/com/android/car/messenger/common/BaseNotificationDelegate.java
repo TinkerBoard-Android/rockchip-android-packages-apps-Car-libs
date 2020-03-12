@@ -75,6 +75,7 @@ public class BaseNotificationDelegate {
     protected final Context mContext;
     protected final String mClassName;
     protected final NotificationManager mNotificationManager;
+    protected final boolean mUseLetterTile;
 
     /**
      * Maps a conversation's Notification Metadata to the conversation's unique key.
@@ -113,9 +114,16 @@ public class BaseNotificationDelegate {
     private final int mBitmapSize;
     private final float mCornerRadiusPercent;
 
-    public BaseNotificationDelegate(Context context, String className) {
+    /**
+     * Constructor for the BaseNotificationDelegate class.
+     * @param context of the calling application.
+     * @param className of the calling application.
+     * @param useLetterTile whether a letterTile icon should be used if no avatar icon is given.
+     **/
+    public BaseNotificationDelegate(Context context, String className, boolean useLetterTile) {
         mContext = context;
         mClassName = className;
+        mUseLetterTile = useLetterTile;
         mNotificationManager =
                 (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         mBitmapSize =
@@ -186,11 +194,12 @@ public class BaseNotificationDelegate {
         if (mSenderLargeIcons.containsKey(getSenderKeyFromConversation(conversationKey))) {
             builder.setLargeIcon(
                     mSenderLargeIcons.get(getSenderKeyFromConversation(conversationKey)));
-        } else {
+        } else if (mUseLetterTile) {
             builder.setLargeIcon(Utils.createLetterTile(mContext,
                     Utils.getInitials(lastMessage.getSenderName(), ""),
                     lastMessage.getSenderName(), mBitmapSize, mCornerRadiusPercent));
         }
+        // Else, no avatar icon will be shown.
 
         builder.setWhen(lastMessage.getReceiveTime());
 
