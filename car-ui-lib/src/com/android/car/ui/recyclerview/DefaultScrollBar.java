@@ -436,18 +436,16 @@ class DefaultScrollBar implements ScrollBar {
      * CarUiRecyclerView}, then the snapping will not occur.
      */
     void pageUp() {
-        int currentOffset = getRecyclerView().computeVerticalScrollOffset();
         if (getRecyclerView().getLayoutManager() == null
-                || getRecyclerView().getChildCount() == 0
-                || currentOffset == 0) {
+                || getRecyclerView().getChildCount() == 0) {
             return;
         }
 
         // Use OrientationHelper to calculate scroll distance in order to match snapping behavior.
         OrientationHelper orientationHelper =
                 getOrientationHelper(getRecyclerView().getLayoutManager());
-        int screenSize = orientationHelper.getTotalSpace();
 
+        int screenSize = getRecyclerView().getHeight();
         int scrollDistance = screenSize;
         // The iteration order matters. In case where there are 2 items longer than screen size, we
         // want to focus on upcoming view.
@@ -473,7 +471,7 @@ class DefaultScrollBar implements ScrollBar {
                 break;
             }
         }
-
+        // Distance should always be positive. Negate its value to scroll up.
         mSnapHelper.smoothScrollBy(-scrollDistance);
     }
 
@@ -493,21 +491,19 @@ class DefaultScrollBar implements ScrollBar {
 
         OrientationHelper orientationHelper =
                 getOrientationHelper(getRecyclerView().getLayoutManager());
-        int screenSize = orientationHelper.getTotalSpace();
+        int screenSize = getRecyclerView().getHeight();
         int scrollDistance = screenSize;
 
         // If the last item is partially visible, page down should bring it to the top.
         View lastChild = getRecyclerView().getChildAt(getRecyclerView().getChildCount() - 1);
-        if (getRecyclerView()
-                .getLayoutManager()
-                .isViewPartiallyVisible(
-                        lastChild, /* completelyVisible= */ false, /* acceptEndPointInclusion= */
-                        false)) {
+        if (getRecyclerView().getLayoutManager().isViewPartiallyVisible(lastChild,
+                /* completelyVisible= */ false, /* acceptEndPointInclusion= */ false)) {
             scrollDistance = orientationHelper.getDecoratedStart(lastChild);
-            if (scrollDistance < 0) {
-                // Scroll value can be negative if the child is longer than the screen size and the
-                // visible area of the screen does not show the start of the child.
-                // Scroll to the next screen if the start value is negative
+            if (scrollDistance <= 0) {
+                // - Scroll value is zero if the top of last item is aligned with top of the screen;
+                // - Scroll value can be negative if the child is longer than the screen size and
+                //   the visible area of the screen does not show the start of the child.
+                // Scroll to the next screen in both cases.
                 scrollDistance = screenSize;
             }
         }

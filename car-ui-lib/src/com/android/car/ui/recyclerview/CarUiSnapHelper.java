@@ -35,14 +35,28 @@ import androidx.recyclerview.widget.RecyclerView.LayoutManager;
  * RecyclerView is scrolling horizontally.
  */
 public class CarUiSnapHelper extends LinearSnapHelper {
+    /**
+     * The percentage of a View that needs to be completely visible for it to be a viable snap
+     * target.
+     */
+    private static final float VIEW_VISIBLE_THRESHOLD = 0.5f;
+
+    /**
+     * When a View is longer than containing RecyclerView, the percentage of the end of this View
+     * that needs to be completely visible to prevent the rest of views to be a viable snap target.
+     *
+     * <p>In other words, if a longer-than-screen View takes more than threshold screen space on its
+     * end, do not snap to any View.
+     */
+    private static final float LONG_ITEM_END_VISIBLE_THRESHOLD = 0.3f;
 
     private final Context mContext;
     private RecyclerView mRecyclerView;
     private RecyclerView.SmoothScroller mSmoothScroller;
 
     public CarUiSnapHelper(Context context) {
-        this.mContext = context;
-        mSmoothScroller = new CarUiSmoothScroller(mContext);
+        mContext = context;
+        mSmoothScroller = new CarUiSmoothScroller(context);
     }
 
     // Orientation helpers are lazily created per LayoutManager.
@@ -55,17 +69,15 @@ public class CarUiSnapHelper extends LinearSnapHelper {
     public int[] calculateDistanceToFinalSnap(
             @NonNull LayoutManager layoutManager, @NonNull View targetView) {
         int[] out = new int[2];
-        if (layoutManager.canScrollHorizontally()) {
-            out[0] = distanceToTopMargin(targetView, getHorizontalHelper(layoutManager));
-        } else {
-            out[0] = 0;
-        }
 
-        if (layoutManager.canScrollVertically()) {
-            out[1] = distanceToTopMargin(targetView, getVerticalHelper(layoutManager));
-        } else {
-            out[1] = 0;
-        }
+        out[0] = layoutManager.canScrollHorizontally()
+                ? getHorizontalHelper(layoutManager).getDecoratedStart(targetView)
+                : 0;
+
+        out[1] = layoutManager.canScrollVertically()
+                ? getVerticalHelper(layoutManager).getDecoratedStart(targetView)
+                : 0;
+
         return out;
     }
 
@@ -89,7 +101,7 @@ public class CarUiSnapHelper extends LinearSnapHelper {
      * {@link RecyclerView}
      */
     private int findTargetSnapPosition(RecyclerView.LayoutManager layoutManager,
-            int scrollDistance) {
+                                       int scrollDistance) {
 
         if (!(layoutManager instanceof RecyclerView.SmoothScroller.ScrollVectorProvider)) {
             return RecyclerView.NO_POSITION;
@@ -157,19 +169,99 @@ public class CarUiSnapHelper extends LinearSnapHelper {
         return targetPos;
     }
 
-
+    /**
+     * Finds the view to snap to. The view to snap to is the child of the LayoutManager that is
+     * closest to the start of the RecyclerView. The "start" depends on if the LayoutManager
+     * is scrolling horizontally or vertically. If it is horizontally scrolling, then the
+     * start is the view on the left (right if RTL). Otherwise, it is the top-most view.
+     *
+     * @param layoutManager The current {@link LayoutManager} for the attached RecyclerView.
+     * @return The View closest to the start of the RecyclerView. Returns {@code null}when:
+     * <ul>
+     *     <li>there is no item; or
+     *     <li>no visible item can fully fit in the containing RecyclerView; or
+     *     <li>an item longer than containing RecyclerView is about to scroll out.
+     * </ul>
+     */
     @Override
+    @Nullable
     public View findSnapView(LayoutManager layoutManager) {
-        OrientationHelper orientationHelper = getOrientationHelper(layoutManager);
-
-        if (mRecyclerView.computeVerticalScrollRange() - mRecyclerView.computeVerticalScrollOffset()
-                <= orientationHelper.getTotalSpace()
-                + mRecyclerView.getPaddingTop()
-                + mRecyclerView.getPaddingBottom()) {
+        int childCount = layoutManager.getChildCount();
+        if (childCount == 0) {
             return null;
         }
 
-        return findViewIfScrollable(layoutManager);
+        OrientationHelper orientationHelper = getOrientationHelper(layoutManager);
+
+        // If there's only one child, then that will be the snap target.
+        if (childCount == 1) {
+            View firstChild = layoutManager.getChildAt(0);
+            return isValidSnapView(firstChild, orientationHelper) ? firstChild : null;
+        }
+
+        if (mRecyclerView == null) {
+            return null;
+        }
+
+        // If the top child view is longer than the RecyclerView (long item), and it's not yet
+        // scrolled out - meaning the screen it takes up is more than threshold,
+        // do not snap to any view.
+        // This way avoids next View snapping to top "pushes" out the end of a long item.
+        View firstChild = mRecyclerView.getChildAt(0);
+        if (firstChild.getHeight() > mRecyclerView.getHeight()
+                // Long item start is scrolled past screen;
+                && orientationHelper.getDecoratedStart(firstChild) < 0
+                // and it takes up more than threshold screen size.
+                && orientationHelper.getDecoratedEnd(firstChild) > (
+                mRecyclerView.getHeight() * LONG_ITEM_END_VISIBLE_THRESHOLD)) {
+            return null;
+        }
+
+        View lastVisibleChild = layoutManager.getChildAt(childCount - 1);
+
+        // Check if the last child visible is the last item in the list.
+        boolean lastItemVisible =
+                layoutManager.getPosition(lastVisibleChild) == layoutManager.getItemCount() - 1;
+
+        // If it is, then check how much of that view is visible.
+        float lastItemPercentageVisible = lastItemVisible
+                ? getPercentageVisible(lastVisibleChild, orientationHelper) : 0;
+
+        View closestChild = null;
+        int closestDistanceToStart = Integer.MAX_VALUE;
+        float closestPercentageVisible = 0.f;
+
+        // Iterate to find the child closest to the top and more than half way visible.
+        for (int i = 0; i < childCount; i++) {
+            View child = layoutManager.getChildAt(i);
+            int startOffset = orientationHelper.getDecoratedStart(child);
+
+            if (Math.abs(startOffset) < closestDistanceToStart) {
+                float percentageVisible = getPercentageVisible(child, orientationHelper);
+
+                if (percentageVisible > VIEW_VISIBLE_THRESHOLD
+                        && percentageVisible > closestPercentageVisible) {
+                    closestDistanceToStart = startOffset;
+                    closestChild = child;
+                    closestPercentageVisible = percentageVisible;
+                }
+            }
+        }
+
+        View childToReturn = closestChild;
+
+        // If closestChild is null, then that means we were unable to find a closest child that
+        // is over the VIEW_VISIBLE_THRESHOLD. This could happen if the views are larger than
+        // the given area. In this case, consider returning the lastVisibleChild so that the screen
+        // scrolls. Also, check if the last item should be displayed anyway if it is mostly visible.
+        if ((childToReturn == null
+                || (lastItemVisible && lastItemPercentageVisible > closestPercentageVisible))) {
+            childToReturn = lastVisibleChild;
+        }
+
+        // Return null if the childToReturn is not valid. This allows the user to scroll freely
+        // with no snapping. This can allow them to see the entire view.
+        return isValidSnapView(childToReturn, orientationHelper) ? childToReturn : null;
     }
 
     private View findViewIfScrollable(LayoutManager layoutManager) {
@@ -223,14 +315,30 @@ public class CarUiSnapHelper extends LinearSnapHelper {
     }
 
     /**
+     * Returns whether or not the given View is a valid snapping view. A view is considered valid
+     * for snapping if it can fit entirely within the height of the RecyclerView it is contained
+     * within.
+     *
+     * <p>If the view is larger than the RecyclerView, then it might not want to be snapped to
+     * to allow the user to scroll and see the rest of the View.
+     *
+     * @param view   The view to determine the snapping potential.
+     * @param helper The {@link OrientationHelper} associated with the current RecyclerView.
+     * @return {@code true} if the given view is a valid snapping view; {@code false} otherwise.
+     */
+    private boolean isValidSnapView(View view, OrientationHelper helper) {
+        return helper.getDecoratedMeasurement(view) <= helper.getLayoutManager().getHeight();
+    }
+
+    /**
      * Returns the percentage of the given view that is visible, relative to its containing
      * RecyclerView.
      *
-     * @param view The View to get the percentage visible of.
+     * @param view   The View to get the percentage visible of.
      * @param helper An {@link OrientationHelper} to aid with calculation.
      * @return A float indicating the percentage of the given view that is visible.
      */
-    private static float getPercentageVisible(View view, OrientationHelper helper) {
+    private float getPercentageVisible(View view, OrientationHelper helper) {
 
         int start = helper.getStartAfterPadding();
         int end = helper.getEndAfterPadding();
@@ -262,28 +370,27 @@ public class CarUiSnapHelper extends LinearSnapHelper {
 
     @Override
     public void attachToRecyclerView(@Nullable RecyclerView recyclerView) {
-        this.mRecyclerView = recyclerView;
         super.attachToRecyclerView(recyclerView);
+        mRecyclerView = recyclerView;
     }
 
     /**
-     * Returns a scroller specific to this {@code CarUiSnapHelper}. This scroller is used for all
+     * Returns a scroller specific to this {@code PagedSnapHelper}. This scroller is used for all
      * smooth scrolling operations, including flings.
      *
-     * @param layoutManager The {@link RecyclerView.LayoutManager} associated with the attached
-     * {@link
-     * RecyclerView}.
+     * @param layoutManager The {@link LayoutManager} associated with the attached
+     *                      {@link RecyclerView}.
      * @return a {@link RecyclerView.SmoothScroller} which will handle the scrolling.
      */
     @Override
-    protected RecyclerView.SmoothScroller createScroller(RecyclerView.LayoutManager layoutManager) {
+    protected RecyclerView.SmoothScroller createScroller(@NonNull LayoutManager layoutManager) {
         return mSmoothScroller;
     }
 
     /**
-     * Calculate the estimated scroll distance in each direction given velocities on both axes. This
-     * method will clamp the maximum scroll distance so that a single fling will never scroll more
-     * than one page.
+     * Calculate the estimated scroll distance in each direction given velocities on both axes.
+     * This method will clamp the maximum scroll distance so that a single fling will never scroll
+     * more than one page.
      *
      * @param velocityX Fling velocity on the horizontal axis.
      * @param velocityY Fling velocity on the vertical axis.
@@ -297,7 +404,7 @@ public class CarUiSnapHelper extends LinearSnapHelper {
             return outDist;
         }
 
-        RecyclerView.LayoutManager layoutManager = mRecyclerView.getLayoutManager();
+        LayoutManager layoutManager = mRecyclerView.getLayoutManager();
         if (layoutManager == null || layoutManager.getChildCount() == 0) {
             return outDist;
         }
@@ -325,59 +432,54 @@ public class CarUiSnapHelper extends LinearSnapHelper {
         return outDist;
     }
 
-    /** Returns {@code true} if the RecyclerView is completely displaying the first item. */
-    boolean isAtStart(RecyclerView.LayoutManager layoutManager) {
+    /**
+     * Returns {@code true} if the RecyclerView is completely displaying the first item.
+     */
+    public boolean isAtStart(@Nullable LayoutManager layoutManager) {
         if (layoutManager == null || layoutManager.getChildCount() == 0) {
             return true;
         }
 
         View firstChild = layoutManager.getChildAt(0);
-        OrientationHelper orientationHelper =
-                layoutManager.canScrollVertically()
-                        ? getVerticalHelper(layoutManager)
-                        : getHorizontalHelper(layoutManager);
+        OrientationHelper orientationHelper = layoutManager.canScrollVertically()
+                ? getVerticalHelper(layoutManager)
+                : getHorizontalHelper(layoutManager);
 
         // Check that the first child is completely visible and is the first item in the list.
-        return orientationHelper.getDecoratedStart(firstChild)
-                >= orientationHelper.getStartAfterPadding()
+        return orientationHelper.getDecoratedStart(firstChild) >= 0
                 && layoutManager.getPosition(firstChild) == 0;
     }
 
-    /** Returns {@code true} if the RecyclerView is completely displaying the last item. */
-    public boolean isAtEnd(RecyclerView.LayoutManager layoutManager) {
+    /**
+     * Returns {@code true} if the RecyclerView is completely displaying the last item.
+     */
+    public boolean isAtEnd(@Nullable LayoutManager layoutManager) {
         if (layoutManager == null || layoutManager.getChildCount() == 0) {
             return true;
         }
 
         int childCount = layoutManager.getChildCount();
-        OrientationHelper orientationHelper =
-                layoutManager.canScrollVertically()
-                        ? getVerticalHelper(layoutManager)
-                        : getHorizontalHelper(layoutManager);
-
         View lastVisibleChild = layoutManager.getChildAt(childCount - 1);
 
         // The list has reached the bottom if the last child that is visible is the last item
         // in the list and it's fully shown.
         return layoutManager.getPosition(lastVisibleChild) == (layoutManager.getItemCount() - 1)
-                && layoutManager.getDecoratedBottom(lastVisibleChild)
-                <= orientationHelper.getEndAfterPadding();
+                && layoutManager.getDecoratedBottom(lastVisibleChild) <= layoutManager.getHeight();
     }
 
     /**
      * Returns an {@link OrientationHelper} that corresponds to the current scroll direction of the
-     * given {@link RecyclerView.LayoutManager}.
+     * given {@link LayoutManager}.
      */
     @NonNull
-    private OrientationHelper getOrientationHelper(
-            @NonNull RecyclerView.LayoutManager layoutManager) {
+    private OrientationHelper getOrientationHelper(@NonNull LayoutManager layoutManager) {
         return layoutManager.canScrollVertically()
                 ? getVerticalHelper(layoutManager)
                 : getHorizontalHelper(layoutManager);
     }
 
     @NonNull
-    private OrientationHelper getVerticalHelper(@NonNull RecyclerView.LayoutManager layoutManager) {
+    private OrientationHelper getVerticalHelper(@NonNull LayoutManager layoutManager) {
         if (mVerticalHelper == null || mVerticalHelper.getLayoutManager() != layoutManager) {
             mVerticalHelper = OrientationHelper.createVerticalHelper(layoutManager);
         }
@@ -385,8 +487,7 @@ public class CarUiSnapHelper extends LinearSnapHelper {
     }
 
     @NonNull
-    private OrientationHelper getHorizontalHelper(
-            @NonNull RecyclerView.LayoutManager layoutManager) {
+    private OrientationHelper getHorizontalHelper(@NonNull LayoutManager layoutManager) {
         if (mHorizontalHelper == null || mHorizontalHelper.getLayoutManager() != layoutManager) {
             mHorizontalHelper = OrientationHelper.createHorizontalHelper(layoutManager);
         }
@@ -399,8 +500,8 @@ public class CarUiSnapHelper extends LinearSnapHelper {
      * parameters are not well-formed, this method's behavior is undefined.
      *
      * @param value The value to clamp.
-     * @param min The minimum value the given value can be.
-     * @param max The maximum value the given value can be.
+     * @param min   The minimum value the given value can be.
+     * @param max   The maximum value the given value can be.
      * @return A number that falls between {@code min} or {@code max} or one of those values if the
      * given value is less than or greater than {@code min} and {@code max} respectively.
      */
@@ -409,7 +510,8 @@ public class CarUiSnapHelper extends LinearSnapHelper {
     }
 
     private static int estimateNextPositionDiffForFling(RecyclerView.LayoutManager layoutManager,
-            OrientationHelper helper, int scrollDistance) {
+                                                        OrientationHelper helper,
+                                                        int scrollDistance) {
         int[] distances = new int[]{scrollDistance, scrollDistance};
         float distancePerChild = computeDistancePerChild(layoutManager, helper);
 
@@ -422,7 +524,7 @@ public class CarUiSnapHelper extends LinearSnapHelper {
     }
 
     private static float computeDistancePerChild(RecyclerView.LayoutManager layoutManager,
-            OrientationHelper helper) {
+                                                 OrientationHelper helper) {
         View minPosView = null;
         View maxPosView = null;
         int minPos = Integer.MAX_VALUE;
