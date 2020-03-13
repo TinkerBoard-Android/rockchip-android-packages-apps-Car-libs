@@ -31,6 +31,8 @@ import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.car.encryptionrunner.EncryptionRunnerFactory;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelUuid;
 
 import com.android.car.connecteddevice.AssociationCallback;
@@ -79,6 +81,8 @@ public class CarBlePeripheralManager extends CarBleManager {
 
     private final BluetoothGattCharacteristic mReadCharacteristic;
 
+    private final Handler mTimeoutHandler;
+
     // BLE default is 23, minus 3 bytes for ATT_PROTOCOL.
     private int mWriteSize = 20;
 
@@ -117,6 +121,7 @@ public class CarBlePeripheralManager extends CarBleManager {
                         | BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE,
                 BluetoothGattCharacteristic.PERMISSION_WRITE);
         mReadCharacteristic.addDescriptor(mDescriptor);
+        mTimeoutHandler = new Handler(Looper.getMainLooper());
     }
 
     @Override
@@ -143,8 +148,8 @@ public class CarBlePeripheralManager extends CarBleManager {
         mConnectedDevices.clear();
     }
 
-    /** Connect to device with provided id. */
-    public void connectToDevice(@NonNull UUID deviceId) {
+    /** Attempt to connect to device with provided id within set timeout period. */
+    public void connectToDevice(@NonNull UUID deviceId, int timeoutSeconds) {
         for (BleDevice device : mConnectedDevices) {
             if (UUID.fromString(device.mDeviceId).equals(deviceId)) {
                 logd(TAG, "Already connected to device " + deviceId + ".");
@@ -160,11 +165,15 @@ public class CarBlePeripheralManager extends CarBleManager {
             @Override
             public void onStartSuccess(AdvertiseSettings settingsInEffect) {
                 super.onStartSuccess(settingsInEffect);
-                logd(TAG, "Successfully started advertising for device " + deviceId + ".");
+                mTimeoutHandler.postDelayed(mTimeoutRunnable,
+                        TimeUnit.SECONDS.toMillis(timeoutSeconds));
+                logd(TAG, "Successfully started advertising for device " + deviceId
+                        + " for " + timeoutSeconds + " seconds.");
             }
         };
         mBlePeripheralManager.unregisterCallback(mAssociationPeripheralCallback);
         mBlePeripheralManager.registerCallback(mReconnectPeripheralCallback);
+        mTimeoutHandler.removeCallbacks(mTimeoutRunnable);
         startAdvertising(deviceId, mAdvertiseCallback, /* includeDeviceName = */ false);
     }
 
@@ -314,6 +323,7 @@ public class CarBlePeripheralManager extends CarBleManager {
     private void addConnectedDevice(BluetoothDevice device, boolean isReconnect) {
         EventLog.onDeviceConnected();
         mBlePeripheralManager.stopAdvertising(mAdvertiseCallback);
+        mTimeoutHandler.removeCallbacks(mTimeoutRunnable);
         mClientDeviceAddress = device.getAddress();
         mClientDeviceName = device.getName();
         if (mClientDeviceName == null) {
@@ -512,4 +522,12 @@ public class CarBlePeripheralManager extends CarBleManager {
                     setDeviceId(deviceId);
                 }
             };
+
+    private final Runnable mTimeoutRunnable = new Runnable() {
+        @Override
+        public void run() {
+            logd(TAG, "Timeout period expired without a connection. Stopping advertisement.");
+            mBlePeripheralManager.stopAdvertising(mAdvertiseCallback);
+        }
+    };
 }

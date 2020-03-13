@@ -61,7 +61,7 @@ public class BaseNotificationDelegate {
             "com.android.car.messenger.common.ACTION_MARK_AS_READ";
 
     /* EXTRAS */
-    /** Key under which the {@link SenderKey} is provided. */
+    /** Key under which the {@link ConversationKey} is provided. */
     public static final String EXTRA_CONVERSATION_KEY =
             "com.android.car.messenger.common.EXTRA_CONVERSATION_KEY";
 
@@ -107,7 +107,8 @@ public class BaseNotificationDelegate {
      * before calling {@link BaseNotificationDelegate#postNotification(
      * ConversationKey, ConversationNotificationInfo, String)}. If the large icon is not found for
      * the {@link SenderKey} when constructing the notification, a {@link LetterTileDrawable} will
-     * be created for the sender.
+     * be created for the sender, unless {@link BaseNotificationDelegate#mUseLetterTile} is set to
+     * false.
      **/
     protected final Map<SenderKey, Bitmap> mSenderLargeIcons = new HashMap<>();
 
