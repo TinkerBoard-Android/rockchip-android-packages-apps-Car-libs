@@ -107,6 +107,8 @@ public class ConnectedDeviceManager {
 
     private final AtomicBoolean mIsConnectingToUserDevice = new AtomicBoolean(false);
 
+    private final int mReconnectTimeoutSeconds;
+
     private String mNameForAssociation;
 
     private AssociationCallback mAssociationCallback;
@@ -147,7 +149,8 @@ public class ConnectedDeviceManager {
                 UUID.fromString(context.getString(R.string.car_association_service_uuid)),
                 context.getString(R.string.car_bg_mask),
                 UUID.fromString(context.getString(R.string.car_secure_write_uuid)),
-                UUID.fromString(context.getString(R.string.car_secure_read_uuid)));
+                UUID.fromString(context.getString(R.string.car_secure_read_uuid)),
+                context.getResources().getInteger(R.integer.car_reconnect_timeout_sec));
     }
 
     private ConnectedDeviceManager(
@@ -159,19 +162,21 @@ public class ConnectedDeviceManager {
             @NonNull UUID associationServiceUuid,
             @NonNull String bgMask,
             @NonNull UUID writeCharacteristicUuid,
-            @NonNull UUID readCharacteristicUuid) {
+            @NonNull UUID readCharacteristicUuid,
+            int reconnectTimeoutSeconds) {
         this(storage,
                 new CarBleCentralManager(context, bleCentralManager, storage, serviceUuid, bgMask,
                         writeCharacteristicUuid, readCharacteristicUuid),
                 new CarBlePeripheralManager(blePeripheralManager, storage, associationServiceUuid,
-                        writeCharacteristicUuid, readCharacteristicUuid));
+                        writeCharacteristicUuid, readCharacteristicUuid), reconnectTimeoutSeconds);
     }
 
     @VisibleForTesting
     ConnectedDeviceManager(
             @NonNull ConnectedDeviceStorage storage,
             @NonNull CarBleCentralManager centralManager,
-            @NonNull CarBlePeripheralManager peripheralManager) {
+            @NonNull CarBlePeripheralManager peripheralManager,
+            int reconnectTimeoutSeconds) {
         Executor callbackExecutor = Executors.newSingleThreadExecutor();
         mStorage = storage;
         mCentralManager = centralManager;
@@ -180,6 +185,7 @@ public class ConnectedDeviceManager {
         mPeripheralManager.registerCallback(generateCarBleCallback(peripheralManager),
                 callbackExecutor);
         mStorage.setAssociatedDeviceCallback(mAssociatedDeviceCallback);
+        mReconnectTimeoutSeconds = reconnectTimeoutSeconds;
     }
 
     /**
@@ -296,7 +302,8 @@ public class ConnectedDeviceManager {
             }
             EventLog.onStartDeviceSearchStarted();
             mIsConnectingToUserDevice.set(true);
-            mPeripheralManager.connectToDevice(UUID.fromString(userDevice.getDeviceId()));
+            mPeripheralManager.connectToDevice(UUID.fromString(userDevice.getDeviceId()),
+                    mReconnectTimeoutSeconds);
         } catch (Exception e) {
             loge(TAG, "Exception while attempting connection with active user's device.", e);
         }

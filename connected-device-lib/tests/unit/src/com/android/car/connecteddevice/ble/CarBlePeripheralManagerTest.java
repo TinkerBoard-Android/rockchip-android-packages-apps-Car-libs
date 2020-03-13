@@ -92,7 +92,9 @@ public class CarBlePeripheralManagerTest {
 
     @After
     public void tearDown() {
-        mCarBlePeripheralManager.stop();
+        if (mCarBlePeripheralManager != null) {
+            mCarBlePeripheralManager.stop();
+        }
         if (mMockitoSession != null) {
             mMockitoSession.finishMocking();
         }
@@ -193,6 +195,18 @@ public class CarBlePeripheralManagerTest {
         channelCallback.onEstablishSecureChannelFailure(testErrorCode);
         assertThat(tryAcquire(semaphore)).isTrue();
         verify(callback).onAssociationError(eq(testErrorCode));
+    }
+
+    @Test
+    public void connectToDevice_stopsAdvertisingAfterTimeout() {
+        int timeoutSeconds = 2;
+        mCarBlePeripheralManager.connectToDevice(UUID.randomUUID(), timeoutSeconds);
+        ArgumentCaptor<AdvertiseCallback> callbackCaptor =
+                ArgumentCaptor.forClass(AdvertiseCallback.class);
+        verify(mMockPeripheralManager).startAdvertising(any(), any(), callbackCaptor.capture());
+        callbackCaptor.getValue().onStartSuccess(null);
+        verify(mMockPeripheralManager, timeout(TimeUnit.SECONDS.toMillis(timeoutSeconds + 1)))
+                .stopAdvertising(any(AdvertiseCallback.class));
     }
 
     private BlePeripheralManager.Callback startAssociation(AssociationCallback callback,
