@@ -19,8 +19,6 @@ import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.util.ArraySet;
 import android.util.AttributeSet;
@@ -35,7 +33,6 @@ import android.widget.TextView;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.StyleRes;
 
 import com.android.car.ui.R;
 
@@ -181,8 +178,6 @@ public class TabLayout extends LinearLayout {
         private final TabLayout mTabLayout;
         @LayoutRes
         private final int mTabItemLayoutRes;
-        private final Typeface mUnselectedTypeface;
-        private final Typeface mSelectedTypeface;
         private final List<Tab> mTabList;
 
         private TabAdapter(Context context, @LayoutRes int res, TabLayout tabLayout) {
@@ -190,10 +185,6 @@ public class TabLayout extends LinearLayout {
             mContext = context;
             mTabItemLayoutRes = res;
             mTabLayout = tabLayout;
-            mUnselectedTypeface = createStyledTypeface(context,
-                    R.style.TextAppearance_CarUi_Widget_Toolbar_Tab);
-            mSelectedTypeface = createStyledTypeface(context,
-                    R.style.TextAppearance_CarUi_Widget_Toolbar_Tab_Selected);
         }
 
         private void add(@NonNull Tab tab) {
@@ -282,26 +273,9 @@ public class TabLayout extends LinearLayout {
             tab.bindText(textView);
             tab.bindIcon(iconView);
             tabItemView.setActivated(tab.mIsSelected);
-            textView.setTypeface(tab.mIsSelected ? mSelectedTypeface : mUnselectedTypeface);
-        }
-
-        private static Typeface createStyledTypeface(Context context, @StyleRes int styleResId) {
-            TypedArray ta = context.obtainStyledAttributes(styleResId, new int[] {
-                    android.R.attr.textStyle,
-                    android.R.attr.textFontWeight
-            });
-
-            try {
-                // If not specified, default to 0, which stands for normal.
-                int textStyle = ta.getInteger(0, 0);
-                // If not specified, default value will be 0 which is a light font.
-                int textFontWeight = ta.getInteger(1, 0);
-
-                return Typeface.create(Typeface.defaultFromStyle(textStyle), textFontWeight,
-                        (textStyle & Typeface.ITALIC) != 0);
-            } finally {
-                ta.recycle();
-            }
+            textView.setTextAppearance(tab.mIsSelected
+                    ? R.style.TextAppearance_CarUi_Widget_Toolbar_Tab_Selected
+                    : R.style.TextAppearance_CarUi_Widget_Toolbar_Tab);
         }
     }
 
