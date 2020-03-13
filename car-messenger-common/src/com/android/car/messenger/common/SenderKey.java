@@ -24,11 +24,7 @@ import com.android.car.messenger.NotificationMsgProto.NotificationMsg;
  */
 public class SenderKey extends CompositeKey {
     /** Creates a senderkey for SMS, MMS, and {@link NotificationMsg}. **/
-    protected SenderKey(String deviceId, String senderName, String contactUri) {
-        // Use a combination of senderName and senderContactUri for key. Ideally we would use
-        // only senderContactUri (which is encoded phone no.). However since some phones don't
-        // provide these, we fall back to senderName. Since senderName may not be unique, we
-        // include senderContactUri also to provide uniqueness in cases it is available.
-        super(deviceId, senderName + "/" + contactUri);
+    protected SenderKey(String deviceId, String senderName, String keyMetadata) {
+        super(deviceId, senderName + "/" + keyMetadata);
     }
 }
