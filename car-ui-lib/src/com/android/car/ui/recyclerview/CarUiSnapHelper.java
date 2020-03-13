@@ -52,11 +52,9 @@ public class CarUiSnapHelper extends LinearSnapHelper {
 
     private final Context mContext;
     private RecyclerView mRecyclerView;
-    private RecyclerView.SmoothScroller mSmoothScroller;
 
     public CarUiSnapHelper(Context context) {
         mContext = context;
-        mSmoothScroller = new CarUiSmoothScroller(context);
     }
 
     // Orientation helpers are lazily created per LayoutManager.
@@ -69,14 +67,13 @@ public class CarUiSnapHelper extends LinearSnapHelper {
     public int[] calculateDistanceToFinalSnap(
             @NonNull LayoutManager layoutManager, @NonNull View targetView) {
         int[] out = new int[2];
+        if (layoutManager.canScrollHorizontally()) {
+            out[0] = distanceToTopMargin(targetView, getHorizontalHelper(layoutManager));
+        }
 
-        out[0] = layoutManager.canScrollHorizontally()
-                ? getHorizontalHelper(layoutManager).getDecoratedStart(targetView)
-                : 0;
-
-        out[1] = layoutManager.canScrollVertically()
-                ? getVerticalHelper(layoutManager).getDecoratedStart(targetView)
-                : 0;
+        if (layoutManager.canScrollVertically()) {
+            out[1] = distanceToTopMargin(targetView, getVerticalHelper(layoutManager));
+        }
 
         return out;
     }
@@ -85,23 +82,35 @@ public class CarUiSnapHelper extends LinearSnapHelper {
      * Smooth scrolls the RecyclerView by a given distance.
      */
     public void smoothScrollBy(int scrollDistance) {
-        int position = findTargetSnapPosition(mRecyclerView.getLayoutManager(), scrollDistance);
+        LayoutManager layoutManager = mRecyclerView.getLayoutManager();
+        if (layoutManager == null) {
+            return;
+        }
+
+        int position = findTargetSnapPosition(layoutManager, scrollDistance);
         if (position == RecyclerView.NO_POSITION) {
             mRecyclerView.smoothScrollBy(0, scrollDistance);
             return;
         }
-        mSmoothScroller.setTargetPosition(position);
-        mRecyclerView.getLayoutManager().startSmoothScroll(mSmoothScroller);
+
+        RecyclerView.SmoothScroller scroller = createScroller(layoutManager);
+
+        if (scroller == null) {
+            return;
+        }
+
+        scroller.setTargetPosition(position);
+        layoutManager.startSmoothScroll(scroller);
     }
 
     /**
      * Finds the target position for snapping.
      *
      * @param layoutManager the {@link RecyclerView.LayoutManager} associated with the attached
-     * {@link RecyclerView}
+     *                      {@link RecyclerView}
      */
     private int findTargetSnapPosition(RecyclerView.LayoutManager layoutManager,
-                                       int scrollDistance) {
+            int scrollDistance) {
 
         if (!(layoutManager instanceof RecyclerView.SmoothScroller.ScrollVectorProvider)) {
             return RecyclerView.NO_POSITION;
@@ -286,7 +295,7 @@ public class CarUiSnapHelper extends LinearSnapHelper {
      * view on the left (right if RTL). Otherwise, it is the top-most view.
      *
      * @param layoutManager The current {@link RecyclerView.LayoutManager} for the attached
-     * RecyclerView.
+     *                      RecyclerView.
      * @return The View closest to the start of the RecyclerView.
      */
     private static View findTopView(LayoutManager layoutManager, OrientationHelper helper) {
@@ -327,7 +336,7 @@ public class CarUiSnapHelper extends LinearSnapHelper {
      * @return {@code true} if the given view is a valid snapping view; {@code false} otherwise.
      */
     private boolean isValidSnapView(View view, OrientationHelper helper) {
-        return helper.getDecoratedMeasurement(view) <= helper.getLayoutManager().getHeight();
+        return helper.getDecoratedMeasurement(view) <= helper.getTotalSpace();
     }
 
     /**
@@ -339,32 +348,30 @@ public class CarUiSnapHelper extends LinearSnapHelper {
      * @return A float indicating the percentage of the given view that is visible.
      */
     private float getPercentageVisible(View view, OrientationHelper helper) {
-
         int start = helper.getStartAfterPadding();
         int end = helper.getEndAfterPadding();
-
-        int viewHeight = helper.getDecoratedMeasurement(view);
 
         int viewStart = helper.getDecoratedStart(view);
         int viewEnd = helper.getDecoratedEnd(view);
 
-        if (viewEnd < start) {
-            // The is outside of the bounds of the recyclerView.
-            return 0f;
-        } else if (viewStart >= start && viewEnd <= end) {
+        if (viewStart >= start && viewEnd <= end) {
             // The view is within the bounds of the RecyclerView, so it's fully visible.
             return 1.f;
+        } else if (viewEnd <= start) {
+            // The view is above the visible area of the RecyclerView.
+            return 0;
+        } else if (viewStart >= end) {
+            // The view is below the visible area of the RecyclerView.
+            return 0;
         } else if (viewStart <= start && viewEnd >= end) {
             // The view is larger than the height of the RecyclerView.
-            return 1.f - ((float) (Math.abs(viewStart) + Math.abs(viewEnd)) / viewHeight);
+            return ((float) end - start) / helper.getDecoratedMeasurement(view);
         } else if (viewStart < start) {
-            // The view is above the start of the RecyclerView, so subtract the start offset
-            // from the total height.
-            return 1.f - ((float) Math.abs(viewStart) / helper.getDecoratedMeasurement(view));
+            // The view is above the start of the RecyclerView.
+            return ((float) viewEnd - start) / helper.getDecoratedMeasurement(view);
         } else {
-            // The view is below the end of the RecyclerView, so subtract the end offset from the
-            // total height.
-            return 1.f - ((float) Math.abs(viewEnd) / helper.getDecoratedMeasurement(view));
+            // The view is below the end of the RecyclerView.
+            return ((float) end - viewStart) / helper.getDecoratedMeasurement(view);
         }
     }
 
@@ -384,7 +391,7 @@ public class CarUiSnapHelper extends LinearSnapHelper {
      */
     @Override
     protected RecyclerView.SmoothScroller createScroller(@NonNull LayoutManager layoutManager) {
-        return mSmoothScroller;
+        return new CarUiSmoothScroller(mContext);
     }
 
     /**
@@ -441,13 +448,14 @@ public class CarUiSnapHelper extends LinearSnapHelper {
         }
 
         View firstChild = layoutManager.getChildAt(0);
-        OrientationHelper orientationHelper = layoutManager.canScrollVertically()
-                ? getVerticalHelper(layoutManager)
-                : getHorizontalHelper(layoutManager);
+        OrientationHelper orientationHelper =
+                layoutManager.canScrollVertically() ? getVerticalHelper(layoutManager)
+                        : getHorizontalHelper(layoutManager);
 
         // Check that the first child is completely visible and is the first item in the list.
-        return orientationHelper.getDecoratedStart(firstChild) >= 0
-                && layoutManager.getPosition(firstChild) == 0;
+        return orientationHelper.getDecoratedStart(firstChild)
+                >= orientationHelper.getStartAfterPadding() && layoutManager.getPosition(firstChild)
+                == 0;
     }
 
     /**
@@ -459,12 +467,17 @@ public class CarUiSnapHelper extends LinearSnapHelper {
         }
 
         int childCount = layoutManager.getChildCount();
+        OrientationHelper orientationHelper =
+                layoutManager.canScrollVertically() ? getVerticalHelper(layoutManager)
+                        : getHorizontalHelper(layoutManager);
+
         View lastVisibleChild = layoutManager.getChildAt(childCount - 1);
 
         // The list has reached the bottom if the last child that is visible is the last item
         // in the list and it's fully shown.
         return layoutManager.getPosition(lastVisibleChild) == (layoutManager.getItemCount() - 1)
-                && layoutManager.getDecoratedBottom(lastVisibleChild) <= layoutManager.getHeight();
+                && layoutManager.getDecoratedBottom(lastVisibleChild)
+                <= orientationHelper.getEndAfterPadding();
     }
 
     /**
@@ -510,8 +523,8 @@ public class CarUiSnapHelper extends LinearSnapHelper {
     }
 
     private static int estimateNextPositionDiffForFling(RecyclerView.LayoutManager layoutManager,
-                                                        OrientationHelper helper,
-                                                        int scrollDistance) {
+            OrientationHelper helper,
+            int scrollDistance) {
         int[] distances = new int[]{scrollDistance, scrollDistance};
         float distancePerChild = computeDistancePerChild(layoutManager, helper);
 
@@ -524,7 +537,7 @@ public class CarUiSnapHelper extends LinearSnapHelper {
     }
 
     private static float computeDistancePerChild(RecyclerView.LayoutManager layoutManager,
-                                                 OrientationHelper helper) {
+            OrientationHelper helper) {
         View minPosView = null;
         View maxPosView = null;
         int minPos = Integer.MAX_VALUE;
