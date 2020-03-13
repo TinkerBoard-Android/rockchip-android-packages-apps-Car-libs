@@ -30,6 +30,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.car.ui.baselayout.Insets;
+import com.android.car.ui.baselayout.InsetsChangedListener;
+import com.android.car.ui.core.CarUi;
 import com.android.car.ui.paintbooth.caruirecyclerview.CarUiListItemActivity;
 import com.android.car.ui.paintbooth.caruirecyclerview.CarUiRecyclerViewActivity;
 import com.android.car.ui.paintbooth.caruirecyclerview.GridCarUiRecyclerViewActivity;
@@ -39,6 +42,7 @@ import com.android.car.ui.paintbooth.preferences.PreferenceActivity;
 import com.android.car.ui.paintbooth.toolbar.ToolbarActivity;
 import com.android.car.ui.paintbooth.widgets.WidgetActivity;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
+import com.android.car.ui.toolbar.ToolbarController;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -47,7 +51,7 @@ import java.util.List;
 /**
  * Paint booth app
  */
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements InsetsChangedListener {
 
     /**
      * List of all sample activities.
@@ -105,9 +109,13 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main_activity);
+        setContentView(R.layout.car_ui_recycler_view_activity);
 
-        CarUiRecyclerView prv = findViewById(R.id.activities);
+        ToolbarController toolbar = CarUi.requireToolbar(this);
+        toolbar.setLogo(R.drawable.ic_launcher);
+        toolbar.setTitle(getTitle());
+
+        CarUiRecyclerView prv = findViewById(R.id.list);
         prv.setAdapter(mAdapter);
 
         initLeakCanary();
@@ -188,5 +196,13 @@ public class MainActivity extends Activity {
         } catch (ClassNotFoundException e) {
             // LeakCanary is not used in this build, do nothing.
         }
+    }
+
+    @Override
+    public void onCarUiInsetsChanged(Insets insets) {
+        requireViewById(R.id.list)
+                .setPadding(0, insets.getTop(), 0, insets.getBottom());
+        requireViewById(android.R.id.content)
+                .setPadding(insets.getLeft(), 0, insets.getRight(), 0);
     }
 }
