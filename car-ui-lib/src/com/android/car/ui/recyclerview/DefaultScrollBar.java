@@ -436,16 +436,17 @@ class DefaultScrollBar implements ScrollBar {
      * CarUiRecyclerView}, then the snapping will not occur.
      */
     void pageUp() {
+        int currentOffset = getRecyclerView().computeVerticalScrollOffset();
         if (getRecyclerView().getLayoutManager() == null
-                || getRecyclerView().getChildCount() == 0) {
+                || getRecyclerView().getChildCount() == 0
+                || currentOffset == 0) {
             return;
         }
 
         // Use OrientationHelper to calculate scroll distance in order to match snapping behavior.
         OrientationHelper orientationHelper =
                 getOrientationHelper(getRecyclerView().getLayoutManager());
-
-        int screenSize = getRecyclerView().getHeight();
+        int screenSize = orientationHelper.getTotalSpace();
         int scrollDistance = screenSize;
         // The iteration order matters. In case where there are 2 items longer than screen size, we
         // want to focus on upcoming view.
@@ -491,7 +492,7 @@ class DefaultScrollBar implements ScrollBar {
 
         OrientationHelper orientationHelper =
                 getOrientationHelper(getRecyclerView().getLayoutManager());
-        int screenSize = getRecyclerView().getHeight();
+        int screenSize = orientationHelper.getTotalSpace();
         int scrollDistance = screenSize;
 
         // If the last item is partially visible, page down should bring it to the top.
