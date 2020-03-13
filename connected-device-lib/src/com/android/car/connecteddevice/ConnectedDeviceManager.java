@@ -107,9 +107,13 @@ public class ConnectedDeviceManager {
 
     private final AtomicBoolean mIsConnectingToUserDevice = new AtomicBoolean(false);
 
+    private final int mReconnectTimeoutSeconds;
+
     private String mNameForAssociation;
 
     private AssociationCallback mAssociationCallback;
+
+    private MessageDeliveryDelegate mMessageDeliveryDelegate;
 
     @Retention(SOURCE)
     @IntDef(prefix = { "DEVICE_ERROR_" },
@@ -145,7 +149,8 @@ public class ConnectedDeviceManager {
                 UUID.fromString(context.getString(R.string.car_association_service_uuid)),
                 context.getString(R.string.car_bg_mask),
                 UUID.fromString(context.getString(R.string.car_secure_write_uuid)),
-                UUID.fromString(context.getString(R.string.car_secure_read_uuid)));
+                UUID.fromString(context.getString(R.string.car_secure_read_uuid)),
+                context.getResources().getInteger(R.integer.car_reconnect_timeout_sec));
     }
 
     private ConnectedDeviceManager(
@@ -157,19 +162,21 @@ public class ConnectedDeviceManager {
             @NonNull UUID associationServiceUuid,
             @NonNull String bgMask,
             @NonNull UUID writeCharacteristicUuid,
-            @NonNull UUID readCharacteristicUuid) {
+            @NonNull UUID readCharacteristicUuid,
+            int reconnectTimeoutSeconds) {
         this(storage,
                 new CarBleCentralManager(context, bleCentralManager, storage, serviceUuid, bgMask,
                         writeCharacteristicUuid, readCharacteristicUuid),
                 new CarBlePeripheralManager(blePeripheralManager, storage, associationServiceUuid,
-                        writeCharacteristicUuid, readCharacteristicUuid));
+                        writeCharacteristicUuid, readCharacteristicUuid), reconnectTimeoutSeconds);
     }
 
     @VisibleForTesting
     ConnectedDeviceManager(
             @NonNull ConnectedDeviceStorage storage,
             @NonNull CarBleCentralManager centralManager,
-            @NonNull CarBlePeripheralManager peripheralManager) {
+            @NonNull CarBlePeripheralManager peripheralManager,
+            int reconnectTimeoutSeconds) {
         Executor callbackExecutor = Executors.newSingleThreadExecutor();
         mStorage = storage;
         mCentralManager = centralManager;
@@ -178,6 +185,7 @@ public class ConnectedDeviceManager {
         mPeripheralManager.registerCallback(generateCarBleCallback(peripheralManager),
                 callbackExecutor);
         mStorage.setAssociatedDeviceCallback(mAssociatedDeviceCallback);
+        mReconnectTimeoutSeconds = reconnectTimeoutSeconds;
     }
 
     /**
@@ -187,22 +195,20 @@ public class ConnectedDeviceManager {
     public void start() {
         logd(TAG, "Starting ConnectedDeviceManager.");
         EventLog.onConnectedDeviceManagerStarted();
-        //mCentralManager.start();
+        // TODO (b/141312136) Start central manager
         mPeripheralManager.start();
         connectToActiveUserDevice();
     }
 
-    /** Clean up internal processes and disconnect any active connections. */
-    public void cleanup() {
-        logd(TAG, "Cleaning up ConnectedDeviceManager.");
-        mIsConnectingToUserDevice.set(false);
-        mCentralManager.stop();
+    /** Reset internal processes and disconnect any active connections. */
+    public void reset() {
+        logd(TAG, "Resetting ConnectedDeviceManager.");
+        for (InternalConnectedDevice device : mConnectedDevices.values()) {
+            removeConnectedDevice(device.mConnectedDevice.getDeviceId(), device.mCarBleManager);
+        }
         mPeripheralManager.stop();
-        mDeviceCallbacks.clear();
-        mDeviceAssociationCallbacks.clear();
-        mActiveUserConnectionCallbacks.clear();
-        mAllUserConnectionCallbacks.clear();
-        mStorage.clearAssociationDeviceCallback();
+        // TODO (b/141312136) Stop central manager
+        mIsConnectingToUserDevice.set(false);
     }
 
     /** Returns {@link List<ConnectedDevice>} of devices currently connected. */
@@ -296,7 +302,8 @@ public class ConnectedDeviceManager {
             }
             EventLog.onStartDeviceSearchStarted();
             mIsConnectingToUserDevice.set(true);
-            mPeripheralManager.connectToDevice(UUID.fromString(userDevice.getDeviceId()));
+            mPeripheralManager.connectToDevice(UUID.fromString(userDevice.getDeviceId()),
+                    mReconnectTimeoutSeconds);
         } catch (Exception e) {
             loge(TAG, "Exception while attempting connection with active user's device.", e);
         }
@@ -421,6 +428,15 @@ public class ConnectedDeviceManager {
             newCallbacks.invoke(deviceCallback ->
                     deviceCallback.onMessageReceived(device, message));
         }
+    }
+
+    /**
+     * Set the delegate for message delivery operations.
+     *
+     * @param delegate The {@link MessageDeliveryDelegate} to set. {@code null} to unset.
+     */
+    public void setMessageDeliveryDelegate(@Nullable MessageDeliveryDelegate delegate) {
+        mMessageDeliveryDelegate = delegate;
     }
 
     private void notifyOfBlacklisting(@NonNull ConnectedDevice device, @NonNull UUID recipientId,
@@ -604,7 +620,7 @@ public class ConnectedDeviceManager {
         invokeConnectionCallbacks(isAssociated,
                 callback -> callback.onDeviceDisconnected(connectedDevice.mConnectedDevice));
 
-        if (isAssociated) {
+        if (isAssociated || mConnectedDevices.isEmpty()) {
             // Try to regain connection to active user's device.
             connectToActiveUserDevice();
         }
@@ -650,6 +666,15 @@ public class ConnectedDeviceManager {
                     + "recipient " + message.getRecipient() + ".");
             return;
         }
+
+        if (mMessageDeliveryDelegate != null
+                && !mMessageDeliveryDelegate.shouldDeliverMessageForDevice(
+                        connectedDevice.mConnectedDevice)) {
+            logw(TAG, "The message delegate has rejected this message. It will not be "
+                    + "delivered to the intended recipient.");
+            return;
+        }
+
         UUID recipientId = message.getRecipient();
         Map<UUID, ThreadSafeCallbacks<DeviceCallback>> deviceCallbacks =
                 mDeviceCallbacks.get(deviceId);
@@ -881,6 +906,13 @@ public class ConnectedDeviceManager {
 
         /** Triggered when the name of an associated device has been updated. */
         void onAssociatedDeviceUpdated(@NonNull AssociatedDevice device);
+    }
+
+    /** Delegate for message delivery operations. */
+    public interface MessageDeliveryDelegate {
+
+        /** Indicate whether a message should be delivered for the specified device. */
+        boolean shouldDeliverMessageForDevice(@NonNull ConnectedDevice device);
     }
 
     private static class InternalConnectedDevice {

@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.R;
 import com.android.car.ui.utils.CarUiUtils;
+
 /**
  * Code drop from {androidx.car.widget.CarUiSmoothScroller}
  *
