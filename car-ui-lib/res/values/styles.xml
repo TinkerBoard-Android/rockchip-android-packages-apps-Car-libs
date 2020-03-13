@@ -51,6 +51,7 @@
     <style name="Widget.CarUi.Toolbar.Title">
         <item name="android:layout_marginStart">@dimen/car_ui_toolbar_title_margin_start</item>
         <item name="android:textAppearance">@style/TextAppearance.CarUi.Widget.Toolbar.Title</item>
+        <item name="android:textDirection">locale</item>
     </style>
 
     <style name="Widget.CarUi.Toolbar.TextButton" parent="Widget.CarUi.Button.Borderless.Colored">
