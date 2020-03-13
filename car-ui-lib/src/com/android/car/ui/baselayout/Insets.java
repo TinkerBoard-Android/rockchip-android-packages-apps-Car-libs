@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.car.ui;
+package com.android.car.ui.baselayout;
 
 import java.util.Objects;
 
@@ -22,15 +22,24 @@ import java.util.Objects;
  * A representation of the insets into the content view that the user-accessible
  * content should have.
  *
- * See {@link CarUiAppCompatActivity#onCarUiInsetsChanged(Insets)} for more information.
+ * See {@link InsetsChangedListener} for more information.
  */
 public final class Insets {
-    /* package */ int mLeft = 0;
-    /* package */ int mRight = 0;
-    /* package */ int mTop = 0;
-    /* package */ int mBottom = 0;
+    private final int mLeft;
+    private final int mRight;
+    private final int mTop;
+    private final int mBottom;
 
-    /* package */ Insets() {}
+    public Insets() {
+        mLeft = mRight = mTop = mBottom = 0;
+    }
+
+    public Insets(int left, int top, int right, int bottom) {
+        mLeft = left;
+        mRight = right;
+        mTop = top;
+        mBottom = bottom;
+    }
 
     public int getLeft() {
         return mLeft;
@@ -49,31 +58,24 @@ public final class Insets {
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (other == this) {
-            return true;
-        }
+    public String toString() {
+        return "{ left: " + mLeft + ", right: " + mRight
+                + ", top: " + mTop + ", bottom: " + mBottom + " }";
+    }
 
-        if (other.getClass() != Insets.class) {
-            return false;
-        }
-
-        Insets otherInsets = (Insets) other;
-
-        return mLeft == otherInsets.getLeft()
-                && mRight == otherInsets.getRight()
-                && mTop == otherInsets.getTop()
-                && mBottom == otherInsets.getBottom();
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Insets insets = (Insets) o;
+        return mLeft == insets.mLeft
+                && mRight == insets.mRight
+                && mTop == insets.mTop
+                && mBottom == insets.mBottom;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getLeft(), getRight(), getTop(), getBottom());
-    }
-
-    @Override
-    public String toString() {
-        return "{ left: " + mLeft + ", right: " + mRight
-                + ", top: " + mTop + ", bottom: " + mBottom + " }";
+        return Objects.hash(mLeft, mRight, mTop, mBottom);
     }
 }

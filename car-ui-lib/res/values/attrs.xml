@@ -16,8 +16,10 @@
 <resources>
     <!-- Global theme options for CarUi -->
     <declare-styleable name="CarUi">
+        <!-- When set to true, the window decor will contain an OEM-customizable layout -->
+        <attr name="carUiBaseLayout" format="boolean"/>
         <!-- When set to true, a CarUi Toolbar will be provided in the window decor -->
-        <attr name="carUiActionBar" format="boolean"/>
+        <attr name="carUiToolbar" format="boolean"/>
     </declare-styleable>
 
     <declare-styleable name="CarUiToolbar">
