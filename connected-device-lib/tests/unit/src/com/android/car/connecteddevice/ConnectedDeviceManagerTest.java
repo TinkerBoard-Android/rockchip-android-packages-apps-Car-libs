@@ -592,23 +592,6 @@ public class ConnectedDeviceManagerTest {
     }
 
     @Test
-    public void removeConnectedDevice__doesNotAdvertiseForNonActiveUserDeviceNotLastDevice() {
-        String deviceId = UUID.randomUUID().toString();
-        String userDeviceId = UUID.randomUUID().toString();
-        when(mMockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(
-                Collections.singletonList(userDeviceId));
-        AssociatedDevice userDevice = new AssociatedDevice(userDeviceId, TEST_DEVICE_ADDRESS,
-                TEST_DEVICE_NAME, /* isConnectionEnabled = */ true);
-        when(mMockStorage.getActiveUserAssociatedDevices()).thenReturn(
-                Collections.singletonList(userDevice));
-        mConnectedDeviceManager.addConnectedDevice(deviceId, mMockPeripheralManager);
-        mConnectedDeviceManager.addConnectedDevice(userDeviceId, mMockCentralManager);
-        mConnectedDeviceManager.removeConnectedDevice(deviceId, mMockPeripheralManager);
-        verify(mMockPeripheralManager, timeout(1000).times(0))
-                .connectToDevice(eq(UUID.fromString(userDeviceId)));
-    }
-
-    @Test
     public void removeActiveUserAssociatedDevice_deletesAssociatedDeviceFromStorage() {
         String deviceId = UUID.randomUUID().toString();
         mConnectedDeviceManager.removeActiveUserAssociatedDevice(deviceId);

@@ -138,10 +138,12 @@ public class BaseNotificationDelegate {
      * Removes all messages related to the inputted predicate, and cancels their notifications.
      **/
     public void cleanupMessagesAndNotifications(Predicate<CompositeKey> predicate) {
+        clearNotifications(predicate);
+        mNotificationBuilders.entrySet().removeIf(entry -> predicate.test(entry.getKey()));
+        mNotificationInfos.entrySet().removeIf(entry -> predicate.test(entry.getKey()));
+        mSenderLargeIcons.entrySet().removeIf(entry -> predicate.test(entry.getKey()));
         mMessages.entrySet().removeIf(
                 messageKeyMapMessageEntry -> predicate.test(messageKeyMapMessageEntry.getKey()));
-        clearNotifications(predicate);
-        mNotificationInfos.entrySet().removeIf(entry -> predicate.test(entry.getKey()));
     }
 
     /**

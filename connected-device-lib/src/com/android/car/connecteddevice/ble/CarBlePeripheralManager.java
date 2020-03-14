@@ -19,6 +19,7 @@ package com.android.car.connecteddevice.ble;
 import static com.android.car.connecteddevice.ConnectedDeviceManager.DEVICE_ERROR_UNEXPECTED_DISCONNECTION;
 import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
+import static com.android.car.connecteddevice.util.SafeLog.logw;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -125,6 +126,30 @@ public class CarBlePeripheralManager extends CarBleManager {
     }
 
     @Override
+    public void start() {
+        super.start();
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter == null) {
+            return;
+        }
+        String originalBluetoothName = mStorage.getStoredBluetoothName();
+        if (originalBluetoothName == null) {
+            return;
+        }
+        if (originalBluetoothName.equals(adapter.getName())) {
+            mStorage.removeStoredBluetoothName();
+            return;
+        }
+
+        logw(TAG, "Discovered mismatch in bluetooth adapter name. Resetting back to "
+                + originalBluetoothName + ".");
+        adapter.setName(originalBluetoothName);
+        mScheduler.schedule(
+                () -> verifyBluetoothNameRestored(originalBluetoothName),
+                ASSOCIATE_ADVERTISING_DELAY_MS, TimeUnit.MILLISECONDS);
+    }
+
+    @Override
     public void stop() {
         super.stop();
         reset();
@@ -198,6 +223,7 @@ public class CarBlePeripheralManager extends CarBleManager {
         mAssociationCallback = callback;
         if (mOriginalBluetoothName == null) {
             mOriginalBluetoothName = adapter.getName();
+            mStorage.storeBluetoothName(mOriginalBluetoothName);
         }
         adapter.setName(nameForAssociation);
         logd(TAG, "Changing bluetooth adapter name from " + mOriginalBluetoothName + " to "
@@ -318,6 +344,21 @@ public class CarBlePeripheralManager extends CarBleManager {
         logd(TAG, "Changing bluetooth adapter name back to " + mOriginalBluetoothName + ".");
         BluetoothAdapter.getDefaultAdapter().setName(mOriginalBluetoothName);
         mOriginalBluetoothName = null;
+    }
+
+    private void verifyBluetoothNameRestored(@NonNull String expectedName) {
+        String currentName = BluetoothAdapter.getDefaultAdapter().getName();
+        if (expectedName.equals(currentName)) {
+            logd(TAG, "Bluetooth adapter name restoration completed successfully. Removing stored "
+                    + "adapter name.");
+            mStorage.removeStoredBluetoothName();
+            return;
+        }
+        logd(TAG, "Bluetooth adapter name restoration has not taken affect yet. Checking again in "
+                + ASSOCIATE_ADVERTISING_DELAY_MS + " milliseconds.");
+        mScheduler.schedule(
+                () -> verifyBluetoothNameRestored(expectedName),
+                ASSOCIATE_ADVERTISING_DELAY_MS, TimeUnit.MILLISECONDS);
     }
 
     private void addConnectedDevice(BluetoothDevice device, boolean isReconnect) {
