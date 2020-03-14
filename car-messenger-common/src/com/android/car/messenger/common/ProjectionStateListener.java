@@ -28,7 +28,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
 
-import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -71,17 +71,18 @@ public class ProjectionStateListener implements CarProjectionManager.ProjectionS
 
     }
 
-    /** Returns {@code true} if a projection app is active in the foreground. **/
-    public boolean isProjectionInActiveForeground() {
-        return mProjectionState == ProjectionStatus.PROJECTION_STATE_ACTIVE_FOREGROUND;
-    }
-
     /**
      * Returns {@code true} if the input device currently has a projection app running in the
      * foreground.
-     * @param bluetoothAddress of the device that should be checked.
+     * @param bluetoothAddress of the device that should be checked. If null, return whether any
+     *                         device is currently running a projection app in the foreground.
      */
-    public boolean isProjectionInActiveForeground(@NonNull String bluetoothAddress) {
+    public boolean isProjectionInActiveForeground(@Nullable String bluetoothAddress) {
+        if (bluetoothAddress == null) {
+            logi(TAG, "returning non-device-specific projection status");
+            return isProjectionInActiveForeground();
+        }
+
         if (!isProjectionInActiveForeground()) {
             return false;
         }
@@ -133,5 +134,10 @@ public class ProjectionStateListener implements CarProjectionManager.ProjectionS
 
         // No projecting apps want to suppress this device, so let it through.
         return false;
+    }
+
+    /** Returns {@code true} if a projection app is active in the foreground. **/
+    private boolean isProjectionInActiveForeground() {
+        return mProjectionState == ProjectionStatus.PROJECTION_STATE_ACTIVE_FOREGROUND;
     }
 }

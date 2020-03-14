@@ -55,11 +55,12 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.GCMParameterSpec;
 
-/** Storage for Trusted Devices in a car. */
+/** Storage for connected devices in a car. */
 public class ConnectedDeviceStorage {
     private static final String TAG = "CompanionStorage";
 
     private static final String UNIQUE_ID_KEY = "CTABM_unique_id";
+    private static final String BT_NAME_KEY = "CTABM_bt_name";
     private static final String KEY_ALIAS = "Ukey2Key";
     private static final String CIPHER_TRANSFORMATION = "AES/GCM/NoPadding";
     private static final String KEYSTORE_PROVIDER = "AndroidKeyStore";
@@ -291,6 +292,22 @@ public class ConnectedDeviceStorage {
         }
 
         return mUniqueId;
+    }
+
+    /** Store the current bluetooth adapter name. */
+    public void storeBluetoothName(@NonNull String name) {
+        getSharedPrefs().edit().putString(BT_NAME_KEY, name).apply();
+    }
+
+    /** Get the previously stored bluetooth adapter name or {@code null} if not found. */
+    @Nullable
+    public String getStoredBluetoothName() {
+        return getSharedPrefs().getString(BT_NAME_KEY, null);
+    }
+
+    /** Remove the previously stored bluetooth adapter name from storage. */
+    public void removeStoredBluetoothName() {
+        getSharedPrefs().edit().remove(BT_NAME_KEY).apply();
     }
 
     /**

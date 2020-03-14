@@ -8,7 +8,6 @@
   <public type="bool" name="car_ui_list_item_single_line_title"/>
   <public type="bool" name="car_ui_preference_list_show_full_screen"/>
   <public type="bool" name="car_ui_preference_show_chevron"/>
-  <public type="bool" name="car_ui_scrollbar_above_recycler_view"/>
   <public type="bool" name="car_ui_scrollbar_enable"/>
   <public type="bool" name="car_ui_toolbar_logo_fills_nav_icon_space"/>
   <public type="bool" name="car_ui_toolbar_nav_icon_reserve_space"/>
@@ -191,8 +190,6 @@
   <public type="drawable" name="car_ui_toolbar_search_search_icon"/>
   <public type="id" name="search"/>
   <public type="integer" name="car_ui_default_max_string_length"/>
-  <public type="integer" name="car_ui_scrollbar_gutter"/>
-  <public type="integer" name="car_ui_scrollbar_position"/>
   <public type="string" name="car_ui_alert_dialog_default_button"/>
   <public type="string" name="car_ui_dialog_preference_negative"/>
   <public type="string" name="car_ui_dialog_preference_positive"/>
@@ -210,6 +207,7 @@
   <public type="string" name="car_ui_toolbar_menu_item_search_title"/>
   <public type="string" name="car_ui_toolbar_menu_item_settings_title"/>
   <public type="style" name="CarUiPreferenceTheme"/>
+  <public type="style" name="CarUiPreferenceTheme.WithToolbar"/>
   <public type="style" name="Preference.CarUi"/>
   <public type="style" name="Preference.CarUi.Category"/>
   <public type="style" name="Preference.CarUi.CheckBoxPreference"/>
@@ -223,6 +221,7 @@
   <public type="style" name="Preference.CarUi.SeekBarPreference"/>
   <public type="style" name="Preference.CarUi.SwitchPreference"/>
   <public type="style" name="PreferenceFragment.CarUi"/>
+  <public type="style" name="PreferenceFragment.CarUi.WithToolbar"/>
   <public type="style" name="PreferenceFragmentList.CarUi"/>
   <public type="style" name="TextAppearance.CarUi"/>
   <public type="style" name="TextAppearance.CarUi.AlertDialog.Subtitle"/>
@@ -242,7 +241,8 @@
   <public type="style" name="TextAppearance.CarUi.Widget.Toolbar.Tab.Selected"/>
   <public type="style" name="TextAppearance.CarUi.Widget.Toolbar.Title"/>
   <public type="style" name="Theme.CarUi"/>
-  <public type="style" name="Theme.CarUi.WithActionBar"/>
+  <public type="style" name="Theme.CarUi.NoToolbar"/>
+  <public type="style" name="Theme.CarUi.WithToolbar"/>
   <public type="style" name="Widget.CarUi"/>
   <public type="style" name="Widget.CarUi.AlertDialog"/>
   <public type="style" name="Widget.CarUi.AlertDialog.HeaderContainer"/>
@@ -251,7 +251,6 @@
   <public type="style" name="Widget.CarUi.Button"/>
   <public type="style" name="Widget.CarUi.Button.Borderless.Colored"/>
   <public type="style" name="Widget.CarUi.CarUiRecyclerView"/>
-  <public type="style" name="Widget.CarUi.CarUiRecyclerView.NestedRecyclerView"/>
   <public type="style" name="Widget.CarUi.SeekbarPreference"/>
   <public type="style" name="Widget.CarUi.SeekbarPreference.Seekbar"/>
   <public type="style" name="Widget.CarUi.Toolbar"/>
