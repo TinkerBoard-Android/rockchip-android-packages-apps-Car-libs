@@ -19,6 +19,7 @@ package com.android.car.connecteddevice.ble;
 import static com.android.car.connecteddevice.ConnectedDeviceManager.DEVICE_ERROR_UNEXPECTED_DISCONNECTION;
 import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
+import static com.android.car.connecteddevice.util.SafeLog.logw;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -31,6 +32,8 @@ import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.car.encryptionrunner.EncryptionRunnerFactory;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelUuid;
 
 import com.android.car.connecteddevice.AssociationCallback;
@@ -79,6 +82,8 @@ public class CarBlePeripheralManager extends CarBleManager {
 
     private final BluetoothGattCharacteristic mReadCharacteristic;
 
+    private final Handler mTimeoutHandler;
+
     // BLE default is 23, minus 3 bytes for ATT_PROTOCOL.
     private int mWriteSize = 20;
 
@@ -117,6 +122,31 @@ public class CarBlePeripheralManager extends CarBleManager {
                         | BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE,
                 BluetoothGattCharacteristic.PERMISSION_WRITE);
         mReadCharacteristic.addDescriptor(mDescriptor);
+        mTimeoutHandler = new Handler(Looper.getMainLooper());
+    }
+
+    @Override
+    public void start() {
+        super.start();
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter == null) {
+            return;
+        }
+        String originalBluetoothName = mStorage.getStoredBluetoothName();
+        if (originalBluetoothName == null) {
+            return;
+        }
+        if (originalBluetoothName.equals(adapter.getName())) {
+            mStorage.removeStoredBluetoothName();
+            return;
+        }
+
+        logw(TAG, "Discovered mismatch in bluetooth adapter name. Resetting back to "
+                + originalBluetoothName + ".");
+        adapter.setName(originalBluetoothName);
+        mScheduler.schedule(
+                () -> verifyBluetoothNameRestored(originalBluetoothName),
+                ASSOCIATE_ADVERTISING_DELAY_MS, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -143,8 +173,8 @@ public class CarBlePeripheralManager extends CarBleManager {
         mConnectedDevices.clear();
     }
 
-    /** Connect to device with provided id. */
-    public void connectToDevice(@NonNull UUID deviceId) {
+    /** Attempt to connect to device with provided id within set timeout period. */
+    public void connectToDevice(@NonNull UUID deviceId, int timeoutSeconds) {
         for (BleDevice device : mConnectedDevices) {
             if (UUID.fromString(device.mDeviceId).equals(deviceId)) {
                 logd(TAG, "Already connected to device " + deviceId + ".");
@@ -160,11 +190,15 @@ public class CarBlePeripheralManager extends CarBleManager {
             @Override
             public void onStartSuccess(AdvertiseSettings settingsInEffect) {
                 super.onStartSuccess(settingsInEffect);
-                logd(TAG, "Successfully started advertising for device " + deviceId + ".");
+                mTimeoutHandler.postDelayed(mTimeoutRunnable,
+                        TimeUnit.SECONDS.toMillis(timeoutSeconds));
+                logd(TAG, "Successfully started advertising for device " + deviceId
+                        + " for " + timeoutSeconds + " seconds.");
             }
         };
         mBlePeripheralManager.unregisterCallback(mAssociationPeripheralCallback);
         mBlePeripheralManager.registerCallback(mReconnectPeripheralCallback);
+        mTimeoutHandler.removeCallbacks(mTimeoutRunnable);
         startAdvertising(deviceId, mAdvertiseCallback, /* includeDeviceName = */ false);
     }
 
@@ -189,6 +223,7 @@ public class CarBlePeripheralManager extends CarBleManager {
         mAssociationCallback = callback;
         if (mOriginalBluetoothName == null) {
             mOriginalBluetoothName = adapter.getName();
+            mStorage.storeBluetoothName(mOriginalBluetoothName);
         }
         adapter.setName(nameForAssociation);
         logd(TAG, "Changing bluetooth adapter name from " + mOriginalBluetoothName + " to "
@@ -311,9 +346,25 @@ public class CarBlePeripheralManager extends CarBleManager {
         mOriginalBluetoothName = null;
     }
 
+    private void verifyBluetoothNameRestored(@NonNull String expectedName) {
+        String currentName = BluetoothAdapter.getDefaultAdapter().getName();
+        if (expectedName.equals(currentName)) {
+            logd(TAG, "Bluetooth adapter name restoration completed successfully. Removing stored "
+                    + "adapter name.");
+            mStorage.removeStoredBluetoothName();
+            return;
+        }
+        logd(TAG, "Bluetooth adapter name restoration has not taken affect yet. Checking again in "
+                + ASSOCIATE_ADVERTISING_DELAY_MS + " milliseconds.");
+        mScheduler.schedule(
+                () -> verifyBluetoothNameRestored(expectedName),
+                ASSOCIATE_ADVERTISING_DELAY_MS, TimeUnit.MILLISECONDS);
+    }
+
     private void addConnectedDevice(BluetoothDevice device, boolean isReconnect) {
         EventLog.onDeviceConnected();
         mBlePeripheralManager.stopAdvertising(mAdvertiseCallback);
+        mTimeoutHandler.removeCallbacks(mTimeoutRunnable);
         mClientDeviceAddress = device.getAddress();
         mClientDeviceName = device.getName();
         if (mClientDeviceName == null) {
@@ -512,4 +563,12 @@ public class CarBlePeripheralManager extends CarBleManager {
                     setDeviceId(deviceId);
                 }
             };
+
+    private final Runnable mTimeoutRunnable = new Runnable() {
+        @Override
+        public void run() {
+            logd(TAG, "Timeout period expired without a connection. Stopping advertisement.");
+            mBlePeripheralManager.stopAdvertising(mAdvertiseCallback);
+        }
+    };
 }

@@ -61,7 +61,7 @@ public class BaseNotificationDelegate {
             "com.android.car.messenger.common.ACTION_MARK_AS_READ";
 
     /* EXTRAS */
-    /** Key under which the {@link SenderKey} is provided. */
+    /** Key under which the {@link ConversationKey} is provided. */
     public static final String EXTRA_CONVERSATION_KEY =
             "com.android.car.messenger.common.EXTRA_CONVERSATION_KEY";
 
@@ -75,6 +75,7 @@ public class BaseNotificationDelegate {
     protected final Context mContext;
     protected final String mClassName;
     protected final NotificationManager mNotificationManager;
+    protected final boolean mUseLetterTile;
 
     /**
      * Maps a conversation's Notification Metadata to the conversation's unique key.
@@ -106,16 +107,24 @@ public class BaseNotificationDelegate {
      * before calling {@link BaseNotificationDelegate#postNotification(
      * ConversationKey, ConversationNotificationInfo, String)}. If the large icon is not found for
      * the {@link SenderKey} when constructing the notification, a {@link LetterTileDrawable} will
-     * be created for the sender.
+     * be created for the sender, unless {@link BaseNotificationDelegate#mUseLetterTile} is set to
+     * false.
      **/
     protected final Map<SenderKey, Bitmap> mSenderLargeIcons = new HashMap<>();
 
     private final int mBitmapSize;
     private final float mCornerRadiusPercent;
 
-    public BaseNotificationDelegate(Context context, String className) {
+    /**
+     * Constructor for the BaseNotificationDelegate class.
+     * @param context of the calling application.
+     * @param className of the calling application.
+     * @param useLetterTile whether a letterTile icon should be used if no avatar icon is given.
+     **/
+    public BaseNotificationDelegate(Context context, String className, boolean useLetterTile) {
         mContext = context;
         mClassName = className;
+        mUseLetterTile = useLetterTile;
         mNotificationManager =
                 (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         mBitmapSize =
@@ -129,10 +138,12 @@ public class BaseNotificationDelegate {
      * Removes all messages related to the inputted predicate, and cancels their notifications.
      **/
     public void cleanupMessagesAndNotifications(Predicate<CompositeKey> predicate) {
+        clearNotifications(predicate);
+        mNotificationBuilders.entrySet().removeIf(entry -> predicate.test(entry.getKey()));
+        mNotificationInfos.entrySet().removeIf(entry -> predicate.test(entry.getKey()));
+        mSenderLargeIcons.entrySet().removeIf(entry -> predicate.test(entry.getKey()));
         mMessages.entrySet().removeIf(
                 messageKeyMapMessageEntry -> predicate.test(messageKeyMapMessageEntry.getKey()));
-        clearNotifications(predicate);
-        mNotificationInfos.entrySet().removeIf(entry -> predicate.test(entry.getKey()));
     }
 
     /**
@@ -186,11 +197,12 @@ public class BaseNotificationDelegate {
         if (mSenderLargeIcons.containsKey(getSenderKeyFromConversation(conversationKey))) {
             builder.setLargeIcon(
                     mSenderLargeIcons.get(getSenderKeyFromConversation(conversationKey)));
-        } else {
+        } else if (mUseLetterTile) {
             builder.setLargeIcon(Utils.createLetterTile(mContext,
                     Utils.getInitials(lastMessage.getSenderName(), ""),
                     lastMessage.getSenderName(), mBitmapSize, mCornerRadiusPercent));
         }
+        // Else, no avatar icon will be shown.
 
         builder.setWhen(lastMessage.getReceiveTime());
 
