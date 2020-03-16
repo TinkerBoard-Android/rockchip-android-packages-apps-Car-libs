@@ -21,19 +21,24 @@ import android.content.Context;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.android.car.ui.baselayout.Insets;
+import com.android.car.ui.baselayout.InsetsChangedListener;
+import com.android.car.ui.core.CarUi;
 import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.recyclerview.CarUiContentListItem;
 import com.android.car.ui.recyclerview.CarUiHeaderListItem;
 import com.android.car.ui.recyclerview.CarUiListItem;
 import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
+import com.android.car.ui.toolbar.Toolbar;
+import com.android.car.ui.toolbar.ToolbarController;
 
 import java.util.ArrayList;
 
 /**
  * Activity that shows {@link CarUiRecyclerView} with dummy {@link CarUiContentListItem} entries
  */
-public class CarUiListItemActivity extends Activity {
+public class CarUiListItemActivity extends Activity implements InsetsChangedListener {
 
     private final ArrayList<CarUiListItem> mData = new ArrayList<>();
     private CarUiListItemAdapter mAdapter;
@@ -42,8 +47,12 @@ public class CarUiListItemActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.car_ui_recycler_view_activity);
-        CarUiRecyclerView recyclerView = findViewById(R.id.list);
 
+        ToolbarController toolbar = CarUi.requireToolbar(this);
+        toolbar.setTitle(getTitle());
+        toolbar.setState(Toolbar.State.SUBPAGE);
+
+        CarUiRecyclerView recyclerView = findViewById(R.id.list);
         mAdapter = new CarUiListItemAdapter(generateDummyData());
         recyclerView.setAdapter(mAdapter);
     }
@@ -187,5 +196,13 @@ public class CarUiListItemActivity extends Activity {
         mData.add(item);
 
         return mData;
+    }
+
+    @Override
+    public void onCarUiInsetsChanged(Insets insets) {
+        requireViewById(R.id.list)
+                .setPadding(0, insets.getTop(), 0, insets.getBottom());
+        requireViewById(android.R.id.content)
+                .setPadding(insets.getLeft(), 0, insets.getRight(), 0);
     }
 }
