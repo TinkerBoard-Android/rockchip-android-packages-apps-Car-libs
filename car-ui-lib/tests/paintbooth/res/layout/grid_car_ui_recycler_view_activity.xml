@@ -14,24 +14,12 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.car.ui.recyclerview.CarUiRecyclerView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/list"
+    app:layoutStyle="grid"
+    app:numOfColumns="4"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@drawable/car_ui_activity_background">
-
-  <com.android.car.ui.toolbar.Toolbar
-      android:id="@+id/toolbar"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      app:title="@string/app_name"
-      app:state="subpage"/>
-
-  <com.android.car.ui.recyclerview.CarUiRecyclerView
-      android:id="@+id/grid_list"
-      app:layoutStyle="grid"
-      app:numOfColumns="4"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent" />
-</LinearLayout>
+    android:background="@drawable/car_ui_activity_background" />
