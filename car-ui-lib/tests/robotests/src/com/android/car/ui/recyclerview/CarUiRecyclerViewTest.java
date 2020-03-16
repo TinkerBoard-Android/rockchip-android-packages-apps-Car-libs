@@ -28,14 +28,12 @@ import android.view.View;
 
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.R;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
@@ -47,9 +45,6 @@ public class CarUiRecyclerViewTest {
     private Context mContext;
     private View mView;
     private CarUiRecyclerView mCarUiRecyclerView;
-
-    @Mock
-    private RecyclerView.Adapter mAdapter;
 
     @Before
     public void setUp() {
