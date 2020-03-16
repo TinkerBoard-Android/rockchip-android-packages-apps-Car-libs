@@ -15,8 +15,6 @@
  */
 package com.android.car.ui.recyclerview;
 
-import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,7 +55,7 @@ final class CarUiRecyclerViewAdapter
 
         NestedRowViewHolder(View view) {
             super(view);
-            frameLayout = requireViewByRefId(view, R.id.nested_recycler_view_layout);
+            frameLayout = view.findViewById(R.id.nested_recycler_view_layout);
         }
     }
 }

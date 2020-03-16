@@ -16,8 +16,6 @@
 
 package com.android.car.ui.recyclerview;
 
-import static com.android.car.ui.utils.CarUiUtils.findViewByRefId;
-
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -170,21 +168,21 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         ListItemViewHolder(@NonNull View itemView) {
             super(itemView);
-            mTitle = findViewByRefId(itemView, R.id.title);
-            mBody = findViewByRefId(itemView, R.id.body);
-            mIcon = findViewByRefId(itemView, R.id.icon);
-            mContentIcon = findViewByRefId(itemView, R.id.content_icon);
-            mAvatarIcon = findViewByRefId(itemView, R.id.avatar_icon);
-            mIconContainer = findViewByRefId(itemView, R.id.icon_container);
-            mActionContainer = findViewByRefId(itemView, R.id.action_container);
-            mActionDivider = findViewByRefId(itemView, R.id.action_divider);
-            mSwitch = findViewByRefId(itemView, R.id.switch_widget);
-            mCheckBox = findViewByRefId(itemView, R.id.checkbox_widget);
-            mRadioButton = findViewByRefId(itemView, R.id.radio_button_widget);
-            mSupplementalIcon = findViewByRefId(itemView, R.id.supplemental_icon);
-            mReducedTouchInterceptor = findViewByRefId(itemView, R.id.reduced_touch_interceptor);
-            mTouchInterceptor = findViewByRefId(itemView, R.id.touch_interceptor);
-            mActionContainerTouchInterceptor = findViewByRefId(itemView,
+            mTitle = itemView.requireViewById(R.id.title);
+            mBody = itemView.requireViewById(R.id.body);
+            mIcon = itemView.requireViewById(R.id.icon);
+            mContentIcon = itemView.requireViewById(R.id.content_icon);
+            mAvatarIcon = itemView.requireViewById(R.id.avatar_icon);
+            mIconContainer = itemView.requireViewById(R.id.icon_container);
+            mActionContainer = itemView.requireViewById(R.id.action_container);
+            mActionDivider = itemView.requireViewById(R.id.action_divider);
+            mSwitch = itemView.requireViewById(R.id.switch_widget);
+            mCheckBox = itemView.requireViewById(R.id.checkbox_widget);
+            mRadioButton = itemView.requireViewById(R.id.radio_button_widget);
+            mSupplementalIcon = itemView.requireViewById(R.id.supplemental_icon);
+            mReducedTouchInterceptor = itemView.requireViewById(R.id.reduced_touch_interceptor);
+            mTouchInterceptor = itemView.requireViewById(R.id.touch_interceptor);
+            mActionContainerTouchInterceptor = itemView.requireViewById(
                     R.id.action_container_touch_interceptor);
         }
 
@@ -359,8 +357,8 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         HeaderViewHolder(@NonNull View itemView) {
             super(itemView);
-            mTitle = findViewByRefId(itemView, R.id.title);
-            mBody = findViewByRefId(itemView, R.id.body);
+            mTitle = itemView.requireViewById(R.id.title);
+            mBody = itemView.requireViewById(R.id.body);
         }
 
         private void bind(@NonNull CarUiHeaderListItem item) {
