@@ -18,24 +18,18 @@ package com.android.car.ui.recyclerview;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-
 import android.content.Context;
-import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.R;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
@@ -47,9 +41,6 @@ public class CarUiRecyclerViewTest {
     private Context mContext;
     private View mView;
     private CarUiRecyclerView mCarUiRecyclerView;
-
-    @Mock
-    private RecyclerView.Adapter mAdapter;
 
     @Before
     public void setUp() {
@@ -101,25 +92,13 @@ public class CarUiRecyclerViewTest {
     }
 
     @Test
-    public void init_shouldContainNestedRecyclerView() {
+    public void init_shouldContainRecyclerView() {
         mView = LayoutInflater.from(mContext)
                 .inflate(R.layout.test_grid_car_ui_recycler_view, null);
 
         mCarUiRecyclerView = mView.findViewById(R.id.test_prv);
 
-        assertThat(mCarUiRecyclerView.mNestedRecyclerView).isNotNull();
-    }
-
-    @Test
-    public void init_shouldNotContainNestedRecyclerView() {
-        Context context = spy(mContext);
-        Resources resources = spy(mContext.getResources());
-        when(resources.getBoolean(R.bool.car_ui_scrollbar_enable)).thenReturn(false);
-        when(context.getResources()).thenReturn(resources);
-
-        mCarUiRecyclerView = new CarUiRecyclerView(context);
-
-        assertThat(mCarUiRecyclerView.mNestedRecyclerView).isNull();
+        assertThat(mCarUiRecyclerView).isNotNull();
     }
 
     @Test
