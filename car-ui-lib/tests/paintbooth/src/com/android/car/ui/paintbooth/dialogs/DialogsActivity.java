@@ -29,10 +29,15 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.AlertDialogBuilder;
+import com.android.car.ui.baselayout.Insets;
+import com.android.car.ui.baselayout.InsetsChangedListener;
+import com.android.car.ui.core.CarUi;
 import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.recyclerview.CarUiRadioButtonListItem;
 import com.android.car.ui.recyclerview.CarUiRadioButtonListItemAdapter;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
+import com.android.car.ui.toolbar.Toolbar;
+import com.android.car.ui.toolbar.ToolbarController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +45,7 @@ import java.util.List;
 /**
  * Activity that shows different dialogs from the device default theme.
  */
-public class DialogsActivity extends Activity {
+public class DialogsActivity extends Activity implements InsetsChangedListener {
 
     private final List<Pair<Integer, View.OnClickListener>> mButtons = new ArrayList<>();
 
@@ -48,6 +53,9 @@ public class DialogsActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.car_ui_recycler_view_activity);
+        ToolbarController toolbar = CarUi.requireToolbar(this);
+        toolbar.setTitle(getTitle());
+        toolbar.setState(Toolbar.State.SUBPAGE);
 
         mButtons.add(Pair.create(R.string.dialog_show_dialog,
                 v -> showDialog()));
@@ -225,4 +233,12 @@ public class DialogsActivity extends Activity {
                     holder.bind(pair.first, pair.second);
                 }
             };
+
+    @Override
+    public void onCarUiInsetsChanged(Insets insets) {
+        requireViewById(R.id.list)
+                .setPadding(0, insets.getTop(), 0, insets.getBottom());
+        requireViewById(android.R.id.content)
+                .setPadding(insets.getLeft(), 0, insets.getRight(), 0);
+    }
 }

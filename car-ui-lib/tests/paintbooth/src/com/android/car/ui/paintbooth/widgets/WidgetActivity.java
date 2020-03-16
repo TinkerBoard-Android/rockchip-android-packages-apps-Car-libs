@@ -19,7 +19,10 @@ package com.android.car.ui.paintbooth.widgets;
 import android.app.Activity;
 import android.os.Bundle;
 
+import com.android.car.ui.core.CarUi;
 import com.android.car.ui.paintbooth.R;
+import com.android.car.ui.toolbar.Toolbar;
+import com.android.car.ui.toolbar.ToolbarController;
 
 /**
  * Activity that shows different widgets from the device default theme.
@@ -30,5 +33,8 @@ public class WidgetActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.widgets_activity);
+        ToolbarController toolbar = CarUi.requireToolbar(this);
+        toolbar.setTitle(getTitle());
+        toolbar.setState(Toolbar.State.SUBPAGE);
     }
 }
