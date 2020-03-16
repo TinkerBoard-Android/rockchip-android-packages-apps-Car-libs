@@ -28,11 +28,13 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.AlertDialogBuilder;
-import com.android.car.ui.CarUiAppCompatActivity;
-import com.android.car.ui.Insets;
+import com.android.car.ui.baselayout.Insets;
+import com.android.car.ui.baselayout.InsetsChangedListener;
+import com.android.car.ui.core.CarUi;
 import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.MenuItem;
@@ -45,7 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ToolbarActivity extends CarUiAppCompatActivity {
+public class ToolbarActivity extends AppCompatActivity implements InsetsChangedListener {
 
     private List<MenuItem> mMenuItems = new ArrayList<>();
     private List<Pair<CharSequence, View.OnClickListener>> mButtons = new ArrayList<>();
@@ -53,11 +55,12 @@ public class ToolbarActivity extends CarUiAppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.car_ui_recycler_view_activity_without_toolbar);
+        setContentView(R.layout.car_ui_recycler_view_activity);
 
-        ToolbarController toolbar = getCarUiToolbar();
-        toolbar.setLogo(R.drawable.ic_launcher);
+        ToolbarController toolbar = CarUi.requireToolbar(this);
+        toolbar.setTitle(getTitle());
         toolbar.setState(Toolbar.State.SUBPAGE);
+        toolbar.setLogo(R.drawable.ic_launcher);
         toolbar.registerOnBackListener(
                 () -> {
                     if (toolbar.getState() == Toolbar.State.SEARCH
@@ -293,7 +296,7 @@ public class ToolbarActivity extends CarUiAppCompatActivity {
     }
 
     @Override
-    protected void onCarUiInsetsChanged(Insets insets) {
+    public void onCarUiInsetsChanged(Insets insets) {
         requireViewById(R.id.list)
                 .setPadding(0, insets.getTop(), 0, insets.getBottom());
         requireViewById(android.R.id.content)
