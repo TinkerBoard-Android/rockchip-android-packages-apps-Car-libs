@@ -91,11 +91,5 @@
         <action android:name="com.android.car.ui.paintbooth.StopService" />
       </intent-filter>
     </service>
-
-    <!-- Remove this when we decide to include the CarUiInstaller in the library -->
-    <provider
-        android:name="com.android.car.ui.core.CarUiInstaller"
-        android:authorities="${applicationId}.CarUiInstaller"
-        android:exported="false"/>
   </application>
 </manifest>
