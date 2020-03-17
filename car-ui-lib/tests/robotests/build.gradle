@@ -82,5 +82,6 @@ dependencies {
     testImplementation "com.google.truth:truth:0.29"
     testImplementation "org.testng:testng:6.9.9"
 
+    // This is the gradle equivalent of linking to android.car in our Android.mk
     implementation files('../../../../../../../out/target/common/obj/JAVA_LIBRARIES/android.car_intermediates/classes.jar')
 }
