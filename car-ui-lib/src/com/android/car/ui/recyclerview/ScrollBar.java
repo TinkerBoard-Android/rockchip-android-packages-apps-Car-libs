@@ -15,9 +15,9 @@
  */
 package com.android.car.ui.recyclerview;
 
-import androidx.recyclerview.widget.RecyclerView;
+import android.view.View;
 
-import com.android.car.ui.recyclerview.CarUiRecyclerView.ScrollBarPosition;
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * An abstract class that defines required contract for a custom scroll bar for the {@link
@@ -28,11 +28,7 @@ public interface ScrollBar {
      * The concrete class should implement this method to initialize configuration of a scrollbar
      * view.
      */
-    void initialize(
-            RecyclerView recyclerView,
-            int scrollBarContainerWidth,
-            @ScrollBarPosition int scrollBarPosition,
-            boolean scrollBarAboveRecyclerView);
+    void initialize(RecyclerView recyclerView, View scrollView);
 
     /**
      * Requests layout of the scrollbar. Should be called when there's been a change that will

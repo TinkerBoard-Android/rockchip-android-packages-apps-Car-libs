@@ -131,10 +131,6 @@
         <item name="android:scrollbars">vertical</item>
     </style>
 
-    <style name="Widget.CarUi.CarUiRecyclerView.NestedRecyclerView">
-        <item name="android:scrollbars">none</item>
-    </style>
-
     <style name="Widget.CarUi.AlertDialog"/>
 
     <style name="Widget.CarUi.AlertDialog.HeaderContainer">

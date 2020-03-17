@@ -15,17 +15,12 @@
  */
 package com.android.car.ui.recyclerview;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import androidx.annotation.IntRange;
@@ -34,7 +29,6 @@ import androidx.recyclerview.widget.OrientationHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.R;
-import com.android.car.ui.recyclerview.CarUiRecyclerView.ScrollBarPosition;
 import com.android.car.ui.utils.CarUiUtils;
 
 /**
@@ -73,35 +67,14 @@ class DefaultScrollBar implements ScrollBar {
     private OrientationHelper mOrientationHelper;
 
     @Override
-    public void initialize(
-            RecyclerView rv,
-            int scrollBarContainerWidth,
-            @ScrollBarPosition int scrollBarPosition,
-            boolean scrollBarAboveRecyclerView) {
-
+    public void initialize(RecyclerView rv, View scrollView) {
         mRecyclerView = rv;
 
-        LayoutInflater inflater =
-                (LayoutInflater) rv.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-        FrameLayout parent = (FrameLayout) getRecyclerView().getParent();
-
-        mScrollView = inflater.inflate(R.layout.car_ui_recyclerview_scrollbar, parent, false);
-        mScrollView.setLayoutParams(
-                new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
+        mScrollView = scrollView;
 
         Resources res = rv.getContext().getResources();
 
         mButtonDisabledAlpha = CarUiUtils.getFloat(res, R.dimen.car_ui_button_disabled_alpha);
-
-        if (scrollBarAboveRecyclerView) {
-            parent.addView(mScrollView);
-        } else {
-            parent.addView(mScrollView, /* index= */ 0);
-        }
-
-        setScrollBarContainerWidth(scrollBarContainerWidth);
-        setScrollBarPosition(scrollBarPosition);
 
         getRecyclerView().addOnScrollListener(mRecyclerViewOnScrollListener);
         getRecyclerView().getRecycledViewPool().setMaxRecycledViews(0, 12);
@@ -169,41 +142,11 @@ class DefaultScrollBar implements ScrollBar {
         mScrollView.requestLayout();
     }
 
-    /**
-     * Sets the width of the container that holds the scrollbar. The scrollbar will be centered
-     * within
-     * this width.
-     *
-     * @param width The width of the scrollbar container.
-     */
-    private void setScrollBarContainerWidth(int width) {
-        ViewGroup.LayoutParams layoutParams = mScrollView.getLayoutParams();
-        layoutParams.width = width;
-        mScrollView.requestLayout();
-    }
-
     @Override
     public void setPadding(int paddingStart, int paddingEnd) {
         this.mPaddingStart = paddingStart;
         this.mPaddingEnd = paddingEnd;
         requestLayout();
-    }
-
-    /**
-     * Sets the position of the scrollbar.
-     *
-     * @param position Enum value of the scrollbar position. 0 for Start and 1 for end.
-     */
-    private void setScrollBarPosition(@ScrollBarPosition int position) {
-        FrameLayout.LayoutParams layoutParams =
-                (FrameLayout.LayoutParams) mScrollView.getLayoutParams();
-        if (position == ScrollBarPosition.START) {
-            layoutParams.gravity = Gravity.START;
-        } else {
-            layoutParams.gravity = Gravity.END;
-        }
-
-        mScrollView.requestLayout();
     }
 
     /**
