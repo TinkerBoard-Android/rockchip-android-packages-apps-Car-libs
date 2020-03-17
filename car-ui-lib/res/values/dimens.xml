@@ -84,6 +84,8 @@
     <dimen name="car_ui_toolbar_title_logo_padding">0dp</dimen>
     <!-- Margin at the start of the title -->
     <dimen name="car_ui_toolbar_title_margin_start">@dimen/car_ui_padding_2</dimen>
+    <!-- Margin at the start of the title when there is no logo present -->
+    <dimen name="car_ui_toolbar_title_no_logo_margin_start">0dp</dimen>
     <!-- Space at the end and in between menu items -->
     <dimen name="car_ui_toolbar_menu_item_margin">@dimen/car_ui_padding_2</dimen>
     <!-- Ripple effect radius for icon menu items -->
@@ -178,8 +180,8 @@
     <dimen name="car_ui_list_item_header_start_inset">0dp</dimen>
     <dimen name="car_ui_list_item_start_inset">0dp</dimen>
     <dimen name="car_ui_list_item_end_inset">0dp</dimen>
-    <dimen name="car_ui_list_item_text_start_margin">24dp</dimen>
-    <dimen name="car_ui_list_item_text_no_icon_start_margin">24dp</dimen>
+    <dimen name="car_ui_list_item_text_start_margin">0dp</dimen>
+    <dimen name="car_ui_list_item_text_no_icon_start_margin">0dp</dimen>
 
     <!-- List item icons  -->
 
