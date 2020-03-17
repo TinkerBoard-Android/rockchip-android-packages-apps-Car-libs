@@ -122,9 +122,11 @@
         <TextView
             android:id="@+id/car_ui_toolbar_title"
             style="@style/Widget.CarUi.Toolbar.Title"
+            android:layout_marginStart="@dimen/car_ui_toolbar_title_margin_start"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:singleLine="true"
+            app:layout_goneMarginStart="@dimen/car_ui_toolbar_title_no_logo_margin_start"
             app:layout_constraintBottom_toTopOf="@id/car_ui_toolbar_bottom_guideline"
             app:layout_constraintEnd_toStartOf="@+id/car_ui_toolbar_menu_items_container"
             app:layout_constraintStart_toEndOf="@+id/car_ui_toolbar_title_logo_container"
