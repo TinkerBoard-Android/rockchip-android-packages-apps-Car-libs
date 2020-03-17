@@ -21,15 +21,20 @@ import android.os.Bundle;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.android.car.ui.baselayout.Insets;
+import com.android.car.ui.baselayout.InsetsChangedListener;
+import com.android.car.ui.core.CarUi;
 import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
+import com.android.car.ui.toolbar.Toolbar;
+import com.android.car.ui.toolbar.ToolbarController;
 
 import java.util.ArrayList;
 
 /**
  * Activity that shows CarUiRecyclerView example with dummy data.
  */
-public class CarUiRecyclerViewActivity extends Activity {
+public class CarUiRecyclerViewActivity extends Activity implements InsetsChangedListener {
     private final ArrayList<String> mData = new ArrayList<>();
     private final int mDataToGenerate = 100;
 
@@ -37,6 +42,11 @@ public class CarUiRecyclerViewActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.car_ui_recycler_view_activity);
+
+        ToolbarController toolbar = CarUi.requireToolbar(this);
+        toolbar.setTitle(getTitle());
+        toolbar.setState(Toolbar.State.SUBPAGE);
+
         CarUiRecyclerView recyclerView = findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -49,6 +59,14 @@ public class CarUiRecyclerViewActivity extends Activity {
             mData.add("data" + i);
         }
         return mData;
+    }
+
+    @Override
+    public void onCarUiInsetsChanged(Insets insets) {
+        requireViewById(R.id.list)
+                .setPadding(0, insets.getTop(), 0, insets.getBottom());
+        requireViewById(android.R.id.content)
+                .setPadding(insets.getLeft(), 0, insets.getRight(), 0);
     }
 }
 
