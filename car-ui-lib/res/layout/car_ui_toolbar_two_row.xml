@@ -123,6 +123,8 @@
         android:layout_height="wrap_content"
         android:singleLine="true"
         style="@style/Widget.CarUi.Toolbar.Title"
+        android:layout_marginStart="@dimen/car_ui_toolbar_title_margin_start"
+        app:layout_goneMarginStart="@dimen/car_ui_toolbar_title_no_logo_margin_start"
         app:layout_constraintTop_toTopOf="@id/car_ui_toolbar_top_guideline"
         app:layout_constraintBottom_toTopOf="@id/car_ui_toolbar_row_separator"
         app:layout_constraintStart_toEndOf="@id/car_ui_toolbar_title_logo_container"
