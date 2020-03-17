@@ -111,9 +111,9 @@ public class CarUiListItemTest {
         mListView.measure(0, 0);
         mListView.layout(0, 0, 100, 10000);
 
-        if (mListView.mNestedRecyclerView != null) {
-            mListView.mNestedRecyclerView.measure(0, 0);
-            mListView.mNestedRecyclerView.layout(0, 0, 100, 10000);
+        if (mListView != null) {
+            mListView.measure(0, 0);
+            mListView.layout(0, 0, 100, 10000);
         }
 
         // Required to init nested RecyclerView
