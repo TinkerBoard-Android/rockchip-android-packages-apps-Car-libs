@@ -79,11 +79,5 @@
           android:name="android.accessibilityservice"
           android:resource="@xml/current_activity_service"/>
     </service>
-
-    <!-- Remove this when we decide to include the CarUiInstaller in the library -->
-    <provider
-        android:name="com.android.car.ui.core.CarUiInstaller"
-        android:authorities="${applicationId}.CarUiInstaller"
-        android:exported="false"/>
   </application>
 </manifest>
