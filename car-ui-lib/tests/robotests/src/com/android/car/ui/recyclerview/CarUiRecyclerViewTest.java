@@ -76,7 +76,7 @@ public class CarUiRecyclerViewTest {
 
         mCarUiRecyclerView = mView.findViewById(R.id.test_prv);
 
-        assertThat(mCarUiRecyclerView.getEffectiveLayoutManager()).isInstanceOf(
+        assertThat(mCarUiRecyclerView.getLayoutManager()).isInstanceOf(
                 LinearLayoutManager.class);
     }
 
@@ -87,7 +87,7 @@ public class CarUiRecyclerViewTest {
 
         mCarUiRecyclerView = mView.findViewById(R.id.test_prv);
 
-        assertThat(mCarUiRecyclerView.getEffectiveLayoutManager()).isInstanceOf(
+        assertThat(mCarUiRecyclerView.getLayoutManager()).isInstanceOf(
                 GridLayoutManager.class);
     }
 
@@ -105,7 +105,7 @@ public class CarUiRecyclerViewTest {
     public void init_shouldHaveGridLayout() {
         mCarUiRecyclerView = new CarUiRecyclerView(mContext,
                 Robolectric.buildAttributeSet().addAttribute(R.attr.layoutStyle, "grid").build());
-        assertThat(mCarUiRecyclerView.getEffectiveLayoutManager()).isInstanceOf(
+        assertThat(mCarUiRecyclerView.getLayoutManager()).isInstanceOf(
                 GridLayoutManager.class);
     }
 }
