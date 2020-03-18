@@ -237,15 +237,6 @@ public final class CarUiRecyclerView extends RecyclerView implements
     }
 
     /**
-     * Returns {@code true} if the {@link CarUiRecyclerView} is fully drawn. Using a global layout
-     * mListener may not necessarily signify that this view is fully drawn (i.e. when the scrollbar
-     * is enabled).
-     */
-    public boolean fullyInitialized() {
-        return mFullyInitialized;
-    }
-
-    /**
      * Sets the number of columns in which grid needs to be divided.
      */
     public void setNumOfColumns(int numberOfColumns) {
@@ -342,15 +333,6 @@ public final class CarUiRecyclerView extends RecyclerView implements
                 mScrollBar.setPadding(paddingStart, paddingEnd);
             }
         }
-    }
-
-    /**
-     * @deprecated use {#getLayoutManager()}
-     */
-    @Nullable
-    @Deprecated
-    public LayoutManager getEffectiveLayoutManager() {
-        return super.getLayoutManager();
     }
 
     private static RuntimeException andLog(String msg, Throwable t) {
