@@ -71,7 +71,9 @@ class BaseLayoutController {
      * <p>You can get a reference to it by calling {@link #getBaseLayout(Activity)}.
      */
     /* package */ static void build(Activity activity) {
-        sBaseLayoutMap.put(activity, new BaseLayoutController(activity));
+        if (getThemeBoolean(activity, R.attr.carUiBaseLayout)) {
+            sBaseLayoutMap.put(activity, new BaseLayoutController(activity));
+        }
     }
 
     /**
@@ -102,11 +104,7 @@ class BaseLayoutController {
      * @param activity The {@link Activity} to install a base layout in.
      */
     private void installBaseLayout(Activity activity) {
-        boolean baseLayoutEnabled = getThemeBoolean(activity, R.attr.carUiBaseLayout);
         boolean toolbarEnabled = getThemeBoolean(activity, R.attr.carUiToolbar);
-        if (!baseLayoutEnabled) {
-            return;
-        }
 
         @LayoutRes final int baseLayoutRes = toolbarEnabled
                 ? R.layout.car_ui_base_layout_toolbar
@@ -140,7 +138,7 @@ class BaseLayoutController {
      * Gets the boolean value of an Attribute from an {@link Activity Activity's}
      * {@link android.content.res.Resources.Theme}.
      */
-    private boolean getThemeBoolean(Activity activity, int attr) {
+    private static boolean getThemeBoolean(Activity activity, int attr) {
         TypedArray a = activity.getTheme().obtainStyledAttributes(new int[] { attr });
 
         try {

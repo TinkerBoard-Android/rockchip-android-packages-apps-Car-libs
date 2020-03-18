@@ -8,7 +8,6 @@
   <public type="bool" name="car_ui_list_item_single_line_title"/>
   <public type="bool" name="car_ui_preference_list_show_full_screen"/>
   <public type="bool" name="car_ui_preference_show_chevron"/>
-  <public type="bool" name="car_ui_scrollbar_above_recycler_view"/>
   <public type="bool" name="car_ui_scrollbar_enable"/>
   <public type="bool" name="car_ui_toolbar_logo_fills_nav_icon_space"/>
   <public type="bool" name="car_ui_toolbar_nav_icon_reserve_space"/>
@@ -140,6 +139,7 @@
   <public type="dimen" name="car_ui_toolbar_tab_text_width"/>
   <public type="dimen" name="car_ui_toolbar_title_logo_padding"/>
   <public type="dimen" name="car_ui_toolbar_title_margin_start"/>
+  <public type="dimen" name="car_ui_toolbar_title_no_logo_margin_start"/>
   <public type="dimen" name="car_ui_toolbar_top_inset"/>
   <public type="dimen" name="car_ui_touch_target_height"/>
   <public type="dimen" name="car_ui_touch_target_width"/>
@@ -177,8 +177,6 @@
   <public type="drawable" name="car_ui_toolbar_search_search_icon"/>
   <public type="id" name="search"/>
   <public type="integer" name="car_ui_default_max_string_length"/>
-  <public type="integer" name="car_ui_scrollbar_gutter"/>
-  <public type="integer" name="car_ui_scrollbar_position"/>
   <public type="string" name="car_ui_alert_dialog_default_button"/>
   <public type="string" name="car_ui_dialog_preference_negative"/>
   <public type="string" name="car_ui_dialog_preference_positive"/>
@@ -244,7 +242,6 @@
   <public type="style" name="Widget.CarUi.Button"/>
   <public type="style" name="Widget.CarUi.Button.Borderless.Colored"/>
   <public type="style" name="Widget.CarUi.CarUiRecyclerView"/>
-  <public type="style" name="Widget.CarUi.CarUiRecyclerView.NestedRecyclerView"/>
   <public type="style" name="Widget.CarUi.SeekbarPreference"/>
   <public type="style" name="Widget.CarUi.SeekbarPreference.Seekbar"/>
   <public type="style" name="Widget.CarUi.Toolbar"/>

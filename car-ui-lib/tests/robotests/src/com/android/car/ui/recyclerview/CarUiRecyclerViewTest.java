@@ -18,11 +18,7 @@ package com.android.car.ui.recyclerview;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-
 import android.content.Context;
-import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -80,7 +76,7 @@ public class CarUiRecyclerViewTest {
 
         mCarUiRecyclerView = mView.findViewById(R.id.test_prv);
 
-        assertThat(mCarUiRecyclerView.getEffectiveLayoutManager()).isInstanceOf(
+        assertThat(mCarUiRecyclerView.getLayoutManager()).isInstanceOf(
                 LinearLayoutManager.class);
     }
 
@@ -91,37 +87,25 @@ public class CarUiRecyclerViewTest {
 
         mCarUiRecyclerView = mView.findViewById(R.id.test_prv);
 
-        assertThat(mCarUiRecyclerView.getEffectiveLayoutManager()).isInstanceOf(
+        assertThat(mCarUiRecyclerView.getLayoutManager()).isInstanceOf(
                 GridLayoutManager.class);
     }
 
     @Test
-    public void init_shouldContainNestedRecyclerView() {
+    public void init_shouldContainRecyclerView() {
         mView = LayoutInflater.from(mContext)
                 .inflate(R.layout.test_grid_car_ui_recycler_view, null);
 
         mCarUiRecyclerView = mView.findViewById(R.id.test_prv);
 
-        assertThat(mCarUiRecyclerView.mNestedRecyclerView).isNotNull();
-    }
-
-    @Test
-    public void init_shouldNotContainNestedRecyclerView() {
-        Context context = spy(mContext);
-        Resources resources = spy(mContext.getResources());
-        when(resources.getBoolean(R.bool.car_ui_scrollbar_enable)).thenReturn(false);
-        when(context.getResources()).thenReturn(resources);
-
-        mCarUiRecyclerView = new CarUiRecyclerView(context);
-
-        assertThat(mCarUiRecyclerView.mNestedRecyclerView).isNull();
+        assertThat(mCarUiRecyclerView).isNotNull();
     }
 
     @Test
     public void init_shouldHaveGridLayout() {
         mCarUiRecyclerView = new CarUiRecyclerView(mContext,
                 Robolectric.buildAttributeSet().addAttribute(R.attr.layoutStyle, "grid").build());
-        assertThat(mCarUiRecyclerView.getEffectiveLayoutManager()).isInstanceOf(
+        assertThat(mCarUiRecyclerView.getLayoutManager()).isInstanceOf(
                 GridLayoutManager.class);
     }
 }
