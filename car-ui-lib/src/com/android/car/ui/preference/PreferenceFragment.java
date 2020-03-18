@@ -77,7 +77,9 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
         ToolbarController baseLayoutToolbar = CarUi.getToolbar(getActivity());
         if (baseLayoutToolbar != null) {
             baseLayoutToolbar.setState(Toolbar.State.SUBPAGE);
-            baseLayoutToolbar.setTitle(getPreferenceScreen().getTitle());
+            if (getPreferenceScreen() != null) {
+                baseLayoutToolbar.setTitle(getPreferenceScreen().getTitle());
+            }
         }
 
         // TODO(b/150230923) remove the code for the old toolbar height change when apps are ready
@@ -99,7 +101,9 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
         });
 
         recyclerView.setClipToPadding(false);
-        toolbar.setTitle(getPreferenceScreen().getTitle());
+        if (getPreferenceScreen() != null) {
+            toolbar.setTitle(getPreferenceScreen().getTitle());
+        }
     }
 
     @Override
