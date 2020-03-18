@@ -16,10 +16,7 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.car.ui.captureviewhierarchy">
-    <uses-sdk
-        android:minSdkVersion="28"
-        android:targetSdkVersion="28" />
+    package="com.android.car.ui.captureviewhierarchy">
     <application>
         <service android:name = "service.EscrowService">
             <intent-filter>

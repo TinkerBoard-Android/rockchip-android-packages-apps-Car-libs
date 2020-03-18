@@ -15,7 +15,7 @@
 
 android_library {
     name: "car-ui-capture-view-hierarchy",
-	  sdk_version: "system_current",
+    sdk_version: "system_current",
     min_sdk_version: "28",
     srcs: [
         "src/**/*.java",
