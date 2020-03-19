@@ -79,13 +79,7 @@ public class ToolbarActivity extends AppCompatActivity implements InsetsChangedL
         toolbar.setMenuItems(mMenuItems);
 
         mButtons.add(Pair.create("Toggle progress bar", v -> {
-            if (toolbar.getProgressBar().getVisibility() == View.GONE) {
-                toolbar.showProgressBar();
-                Toast.makeText(this, "showing progress bar", Toast.LENGTH_SHORT).show();
-            } else {
-                toolbar.hideProgressBar();
-                Toast.makeText(this, "hiding progress bar", Toast.LENGTH_SHORT).show();
-            }
+            toolbar.getProgressBar().setVisible(!toolbar.getProgressBar().isVisible());
         }));
 
         mButtons.add(Pair.create("Change title", v ->
