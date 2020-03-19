@@ -33,7 +33,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.DrawableRes;
@@ -106,7 +105,7 @@ public class ToolbarControllerImpl implements ToolbarController {
     private boolean mNavIconSpaceReserved;
     private boolean mLogoFillsNavIconSpace;
     private boolean mShowLogo;
-    private ProgressBar mProgressBar;
+    private ProgressBarController mProgressBar;
     private MenuItem.Listener mOverflowItemListener = () -> {
         createOverflowDialog();
         setState(getState());
@@ -159,7 +158,8 @@ public class ToolbarControllerImpl implements ToolbarController {
         mTitleLogoContainer = requireViewByRefId(view, R.id.car_ui_toolbar_title_logo_container);
         mTitleLogo = requireViewByRefId(view, R.id.car_ui_toolbar_title_logo);
         mSearchViewContainer = requireViewByRefId(view, R.id.car_ui_toolbar_search_view_container);
-        mProgressBar = requireViewByRefId(view, R.id.car_ui_toolbar_progress_bar);
+        mProgressBar = new ProgressBarControllerImpl(
+                requireViewByRefId(view, R.id.car_ui_toolbar_progress_bar));
 
         mTabLayout.addListener(new TabLayout.Listener() {
             @Override
@@ -789,18 +789,8 @@ public class ToolbarControllerImpl implements ToolbarController {
         return mOnBackListeners.remove(listener);
     }
 
-    /** Shows the progress bar */
-    public void showProgressBar() {
-        mProgressBar.setVisibility(View.VISIBLE);
-    }
-
-    /** Hides the progress bar */
-    public void hideProgressBar() {
-        mProgressBar.setVisibility(View.GONE);
-    }
-
     /** Returns the progress bar */
-    public ProgressBar getProgressBar() {
+    public ProgressBarController getProgressBar() {
         return mProgressBar;
     }
 }

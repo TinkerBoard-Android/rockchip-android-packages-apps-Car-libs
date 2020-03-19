@@ -23,7 +23,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.widget.FrameLayout;
-import android.widget.ProgressBar;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -611,18 +610,8 @@ public class Toolbar extends FrameLayout implements ToolbarController {
         return mController.unregisterOnBackListener(listener);
     }
 
-    /** Shows the progress bar */
-    public void showProgressBar() {
-        mController.showProgressBar();
-    }
-
-    /** Hides the progress bar */
-    public void hideProgressBar() {
-        mController.hideProgressBar();
-    }
-
     /** Returns the progress bar */
-    public ProgressBar getProgressBar() {
+    public ProgressBarController getProgressBar() {
         return mController.getProgressBar();
     }
 }
