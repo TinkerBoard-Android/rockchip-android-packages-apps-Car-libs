@@ -15,7 +15,6 @@
  */
 package com.android.car.ui.paintbooth.toolbar;
 
-import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
@@ -29,20 +28,26 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.AlertDialogBuilder;
+import com.android.car.ui.baselayout.Insets;
+import com.android.car.ui.baselayout.InsetsChangedListener;
+import com.android.car.ui.core.CarUi;
 import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.MenuItem;
 import com.android.car.ui.toolbar.TabLayout;
 import com.android.car.ui.toolbar.Toolbar;
+import com.android.car.ui.toolbar.ToolbarController;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ToolbarActivity extends Activity {
+public class ToolbarActivity extends AppCompatActivity implements InsetsChangedListener {
 
     private List<MenuItem> mMenuItems = new ArrayList<>();
     private List<Pair<CharSequence, View.OnClickListener>> mButtons = new ArrayList<>();
@@ -52,7 +57,10 @@ public class ToolbarActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.car_ui_recycler_view_activity);
 
-        Toolbar toolbar = requireViewById(R.id.toolbar);
+        ToolbarController toolbar = CarUi.requireToolbar(this);
+        toolbar.setTitle(getTitle());
+        toolbar.setState(Toolbar.State.SUBPAGE);
+        toolbar.setLogo(R.drawable.ic_launcher);
         toolbar.registerOnBackListener(
                 () -> {
                     if (toolbar.getState() == Toolbar.State.SEARCH
@@ -270,6 +278,9 @@ public class ToolbarActivity extends Activity {
                     .show();
         }));
 
+        mButtons.add(Pair.create(getString(R.string.toolbar_show_tabs_in_subpage), v ->
+                toolbar.setShowTabsInSubpage(!toolbar.getShowTabsInSubpage())));
+
         Mutable<Boolean> showingLauncherIcon = new Mutable<>(false);
         mButtons.add(Pair.create(getString(R.string.toolbar_toggle_search_icon), v -> {
             if (showingLauncherIcon.value) {
@@ -282,6 +293,14 @@ public class ToolbarActivity extends Activity {
 
         CarUiRecyclerView prv = requireViewById(R.id.list);
         prv.setAdapter(mAdapter);
+    }
+
+    @Override
+    public void onCarUiInsetsChanged(Insets insets) {
+        requireViewById(R.id.list)
+                .setPadding(0, insets.getTop(), 0, insets.getBottom());
+        requireViewById(android.R.id.content)
+                .setPadding(insets.getLeft(), 0, insets.getRight(), 0);
     }
 
     public void xmlMenuItemClicked(MenuItem item) {
@@ -312,7 +331,7 @@ public class ToolbarActivity extends Activity {
                 }).show();
     }
 
-    private static class ViewHolder extends CarUiRecyclerView.ViewHolder {
+    private static class ViewHolder extends RecyclerView.ViewHolder {
 
         private final Button mButton;
 
@@ -327,8 +346,8 @@ public class ToolbarActivity extends Activity {
         }
     }
 
-    private CarUiRecyclerView.Adapter<ViewHolder> mAdapter =
-            new CarUiRecyclerView.Adapter<ViewHolder>() {
+    private final RecyclerView.Adapter<ViewHolder> mAdapter =
+            new RecyclerView.Adapter<ViewHolder>() {
                 @Override
                 public int getItemCount() {
                     return mButtons.size();

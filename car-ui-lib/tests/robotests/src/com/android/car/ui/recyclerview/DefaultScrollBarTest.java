@@ -29,16 +29,15 @@ import android.widget.FrameLayout;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.car.ui.CarUiRobolectricTestRunner;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
-@RunWith(CarUiRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class DefaultScrollBarTest {
 
     private Context mContext;
@@ -68,8 +67,6 @@ public class DefaultScrollBarTest {
         when(mRecyclerView.getRecycledViewPool()).thenReturn(mRecycledViewPool);
         when(mParent.generateLayoutParams(any())).thenReturn(mLayoutParams);
 
-        mScrollBar.initialize(mRecyclerView, 10, CarUiRecyclerView.ScrollBarPosition.START, true);
-
         // called once in DefaultScrollBar and once in SnapHelper while setting up the call backs
         // when we use attachToRecyclerView(recyclerview)
         verify(mRecyclerView, times(2)).addOnScrollListener(
@@ -83,8 +80,6 @@ public class DefaultScrollBarTest {
         when(mRecyclerView.getRecycledViewPool()).thenReturn(mRecycledViewPool);
         when(mParent.generateLayoutParams(any())).thenReturn(mLayoutParams);
 
-        mScrollBar.initialize(mRecyclerView, 10, CarUiRecyclerView.ScrollBarPosition.START, true);
-
         verify(mRecycledViewPool).setMaxRecycledViews(0, 12);
     }
 
@@ -94,8 +89,6 @@ public class DefaultScrollBarTest {
         when(mRecyclerView.getParent()).thenReturn(mParent);
         when(mRecyclerView.getRecycledViewPool()).thenReturn(mRecycledViewPool);
         when(mParent.generateLayoutParams(any())).thenReturn(mLayoutParams);
-
-        mScrollBar.initialize(mRecyclerView, 10, CarUiRecyclerView.ScrollBarPosition.START, true);
 
         verify(mRecyclerView).setOnFlingListener(null);
     }
@@ -107,7 +100,6 @@ public class DefaultScrollBarTest {
         when(mRecyclerView.getRecycledViewPool()).thenReturn(mRecycledViewPool);
         when(mParent.generateLayoutParams(any())).thenReturn(mLayoutParams);
 
-        mScrollBar.initialize(mRecyclerView, 10, CarUiRecyclerView.ScrollBarPosition.START, true);
         mScrollBar.setPadding(10, 20);
 
         DefaultScrollBar defaultScrollBar = (DefaultScrollBar) mScrollBar;

@@ -101,8 +101,12 @@
         <item name="android:letterSpacing">@dimen/letter_spacing_body3</item>
     </style>
 
-    <style name="MinimizedControlBarTitle" parent="TextAppearance.Body1"/>
-    <style name="MinimizedControlBarSubtitle" parent="TextAppearance.Body3"/>
+    <style name="MinimizedControlBarTitle" parent="TextAppearance.Body1">
+        <item name="android:textDirection">locale</item>
+    </style>
+    <style name="MinimizedControlBarSubtitle" parent="TextAppearance.Body3">
+        <item name="android:textDirection">locale</item>
+    </style>
 
     <!-- Styles for ControlBar -->
     <style name="ControlBar">

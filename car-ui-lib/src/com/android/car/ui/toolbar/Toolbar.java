@@ -15,8 +15,6 @@
  */
 package com.android.car.ui.toolbar;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -24,13 +22,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -39,16 +32,8 @@ import androidx.annotation.StringRes;
 import androidx.annotation.XmlRes;
 
 import com.android.car.ui.R;
-import com.android.car.ui.utils.CarUiUtils;
-import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * A toolbar for Android Automotive OS apps.
@@ -59,7 +44,7 @@ import java.util.concurrent.CompletableFuture;
  *
  * <p>The toolbar supports a navigation button, title, tabs, search, and {@link MenuItem MenuItems}
  */
-public class Toolbar extends FrameLayout {
+public class Toolbar extends FrameLayout implements ToolbarController {
 
     /** Callback that will be issued whenever the height of toolbar is changed. */
     public interface OnHeightChangedListener {
@@ -133,52 +118,9 @@ public class Toolbar extends FrameLayout {
         EDIT,
     }
 
-    private final boolean mIsTabsInSecondRow;
-
-    private ImageView mNavIcon;
-    private ImageView mLogoInNavIconSpace;
-    private ViewGroup mNavIconContainer;
-    private TextView mTitle;
-    private ImageView mTitleLogo;
-    private ViewGroup mTitleLogoContainer;
-    private TabLayout mTabLayout;
-    private LinearLayout mMenuItemsContainer;
-    private FrameLayout mSearchViewContainer;
-    private SearchView mSearchView;
-
-    // Cached values that we will send to views when they are inflated
-    private CharSequence mSearchHint;
-    private Drawable mSearchIcon;
-    private String mSearchQuery;
-    private final Set<OnSearchListener> mOnSearchListeners = new HashSet<>();
-    private final Set<OnSearchCompletedListener> mOnSearchCompletedListeners = new HashSet<>();
-
-    private final Set<OnBackListener> mOnBackListeners = new HashSet<>();
-    private final Set<OnTabSelectedListener> mOnTabSelectedListeners = new HashSet<>();
-    private final Set<OnHeightChangedListener> mOnHeightChangedListeners = new HashSet<>();
-
-    private final MenuItem mOverflowButton;
-    private boolean mHasLogo = false;
-    private boolean mShowMenuItemsWhileSearching;
-    private State mState = State.HOME;
-    private NavButtonMode mNavButtonMode = NavButtonMode.BACK;
-    @NonNull
-    private List<MenuItem> mMenuItems = Collections.emptyList();
-    private List<MenuItem> mOverflowItems = new ArrayList<>();
-    private final List<MenuItemRenderer> mMenuItemRenderers = new ArrayList<>();
-    private CompletableFuture<Void> mMenuItemViewsFuture;
-    private int mMenuItemsXmlId = 0;
-    private AlertDialog mOverflowDialog;
-    private boolean mNavIconSpaceReserved;
-    private boolean mLogoFillsNavIconSpace;
-    private boolean mShowLogo;
+    private ToolbarControllerImpl mController;
     private boolean mEatingTouch = false;
     private boolean mEatingHover = false;
-    private ProgressBar mProgressBar;
-    private MenuItem.Listener mOverflowItemListener = () -> {
-        createOverflowDialog();
-        setState(getState());
-    };
 
     public Toolbar(Context context) {
         this(context, null);
@@ -195,55 +137,21 @@ public class Toolbar extends FrameLayout {
     public Toolbar(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        mOverflowButton = MenuItem.builder(getContext())
-                .setIcon(R.drawable.car_ui_icon_overflow_menu)
-                .setTitle(R.string.car_ui_toolbar_menu_item_overflow_title)
-                .setOnClickListener(v -> {
-                    if (mOverflowDialog == null) {
-                        if (Log.isLoggable(TAG, Log.ERROR)) {
-                            Log.e(TAG, "Overflow dialog was null when trying to show it!");
-                        }
-                    } else {
-                        mOverflowDialog.show();
-                    }
-                })
-                .build();
+        LayoutInflater inflater = (LayoutInflater) context
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        inflater.inflate(getToolbarLayout(), this, true);
+
+        mController = new ToolbarControllerImpl(this);
 
         TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.CarUiToolbar, defStyleAttr, defStyleRes);
 
         try {
-
-            mIsTabsInSecondRow = context.getResources().getBoolean(
-                    R.bool.car_ui_toolbar_tabs_on_second_row);
-            mNavIconSpaceReserved = context.getResources().getBoolean(
-                    R.bool.car_ui_toolbar_nav_icon_reserve_space);
-            mLogoFillsNavIconSpace = context.getResources().getBoolean(
-                    R.bool.car_ui_toolbar_logo_fills_nav_icon_space);
-            mShowLogo = context.getResources().getBoolean(
-                    R.bool.car_ui_toolbar_show_logo);
-
-            LayoutInflater inflater = (LayoutInflater) context
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            inflater.inflate(getToolbarLayout(), this, true);
-
-            mTabLayout = requireViewById(R.id.car_ui_toolbar_tabs);
-            mNavIcon = requireViewById(R.id.car_ui_toolbar_nav_icon);
-            mLogoInNavIconSpace = requireViewById(R.id.car_ui_toolbar_logo);
-            mNavIconContainer = requireViewById(R.id.car_ui_toolbar_nav_icon_container);
-            mMenuItemsContainer = requireViewById(R.id.car_ui_toolbar_menu_items_container);
-            mTitle = requireViewById(R.id.car_ui_toolbar_title);
-            mTitleLogoContainer = requireViewById(R.id.car_ui_toolbar_title_logo_container);
-            mTitleLogo = requireViewById(R.id.car_ui_toolbar_title_logo);
-            mSearchViewContainer = requireViewById(R.id.car_ui_toolbar_search_view_container);
-            mProgressBar = requireViewById(R.id.car_ui_toolbar_progress_bar);
-
-            mTitle.setText(a.getString(R.styleable.CarUiToolbar_title));
+            setShowTabsInSubpage(a.getBoolean(R.styleable.CarUiToolbar_showTabsInSubpage, false));
+            setTitle(a.getString(R.styleable.CarUiToolbar_title));
             setLogo(a.getResourceId(R.styleable.CarUiToolbar_logo, 0));
             setBackgroundShown(a.getBoolean(R.styleable.CarUiToolbar_showBackground, true));
             setMenuItems(a.getResourceId(R.styleable.CarUiToolbar_menuItems, 0));
-            mShowMenuItemsWhileSearching = a.getBoolean(
-                    R.styleable.CarUiToolbar_showMenuItemsWhileSearching, false);
             String searchHint = a.getString(R.styleable.CarUiToolbar_searchHint);
             if (searchHint != null) {
                 setSearchHint(searchHint);
@@ -285,15 +193,6 @@ public class Toolbar extends FrameLayout {
         } finally {
             a.recycle();
         }
-
-        mTabLayout.addListener(new TabLayout.Listener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                for (OnTabSelectedListener listener : mOnTabSelectedListeners) {
-                    listener.onTabSelected(tab);
-                }
-            }
-        });
     }
 
     /**
@@ -302,47 +201,19 @@ public class Toolbar extends FrameLayout {
      * <p>Non-system apps should not use this, as customising the layout isn't possible with RROs
      */
     protected int getToolbarLayout() {
-        if (mIsTabsInSecondRow) {
+        if (getContext().getResources().getBoolean(
+                R.bool.car_ui_toolbar_tabs_on_second_row)) {
             return R.layout.car_ui_toolbar_two_row;
         }
 
         return R.layout.car_ui_toolbar;
     }
 
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        for (OnHeightChangedListener listener : mOnHeightChangedListeners) {
-            listener.onHeightChanged(getHeight());
-        }
-    }
-
     /**
      * Returns {@code true} if a two row layout in enabled for the toolbar.
      */
     public boolean isTabsInSecondRow() {
-        return mIsTabsInSecondRow;
-    }
-
-    private final CarUxRestrictionsUtil.OnUxRestrictionsChangedListener
-            mOnUxRestrictionsChangedListener = restrictions -> {
-                for (MenuItemRenderer renderer : mMenuItemRenderers) {
-                    renderer.setCarUxRestrictions(restrictions);
-                }
-            };
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        CarUxRestrictionsUtil.getInstance(getContext())
-                .register(mOnUxRestrictionsChangedListener);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        CarUxRestrictionsUtil.getInstance(getContext())
-                .unregister(mOnUxRestrictionsChangedListener);
+        return mController.isTabsInSecondRow();
     }
 
     /**
@@ -351,8 +222,7 @@ public class Toolbar extends FrameLayout {
      * <p>The title may not always be shown, for example with one row layout with tabs.
      */
     public void setTitle(@StringRes int title) {
-        mTitle.setText(title);
-        setState(getState());
+        mController.setTitle(title);
     }
 
     /**
@@ -361,19 +231,18 @@ public class Toolbar extends FrameLayout {
      * <p>The title may not always be shown, for example with one row layout with tabs.
      */
     public void setTitle(CharSequence title) {
-        mTitle.setText(title);
-        setState(getState());
+        mController.setTitle(title);
     }
 
     public CharSequence getTitle() {
-        return mTitle.getText();
+        return mController.getTitle();
     }
 
     /**
      * Gets the {@link TabLayout} for this toolbar.
      */
     public TabLayout getTabLayout() {
-        return mTabLayout;
+        return mController.getTabLayout();
     }
 
     /**
@@ -381,14 +250,12 @@ public class Toolbar extends FrameLayout {
      * {@link #registerOnTabSelectedListener(OnTabSelectedListener)}.
      */
     public void addTab(TabLayout.Tab tab) {
-        mTabLayout.addTab(tab);
-        setState(getState());
+        mController.addTab(tab);
     }
 
     /** Removes all the tabs. */
     public void clearAllTabs() {
-        mTabLayout.clearAllTabs();
-        setState(getState());
+        mController.clearAllTabs();
     }
 
     /**
@@ -396,7 +263,7 @@ public class Toolbar extends FrameLayout {
      * {@link #addTab(TabLayout.Tab)}.
      */
     public TabLayout.Tab getTab(int position) {
-        return mTabLayout.get(position);
+        return mController.getTab(position);
     }
 
     /**
@@ -404,7 +271,21 @@ public class Toolbar extends FrameLayout {
      * {@link #addTab(TabLayout.Tab)}.
      */
     public void selectTab(int position) {
-        mTabLayout.selectTab(position);
+        mController.selectTab(position);
+    }
+
+    /**
+     * Sets whether or not tabs should also be shown in the SUBPAGE {@link State}.
+     */
+    public void setShowTabsInSubpage(boolean showTabs) {
+        mController.setShowTabsInSubpage(showTabs);
+    }
+
+    /**
+     * Gets whether or not tabs should also be shown in the SUBPAGE {@link State}.
+     */
+    public boolean getShowTabsInSubpage() {
+        return mController.getShowTabsInSubpage();
     }
 
     /**
@@ -412,7 +293,7 @@ public class Toolbar extends FrameLayout {
      * will be displayed next to the title.
      */
     public void setLogo(@DrawableRes int resId) {
-        setLogo(resId != 0 ? getContext().getDrawable(resId) : null);
+        mController.setLogo(resId);
     }
 
     /**
@@ -420,38 +301,22 @@ public class Toolbar extends FrameLayout {
      * will be displayed next to the title.
      */
     public void setLogo(Drawable drawable) {
-        if (!mShowLogo) {
-            // If no logo should be shown then we act as if we never received one.
-            return;
-        }
-        if (drawable != null) {
-            mLogoInNavIconSpace.setImageDrawable(drawable);
-            mTitleLogo.setImageDrawable(drawable);
-            mHasLogo = true;
-        } else {
-            mHasLogo = false;
-        }
-        setState(mState);
+        mController.setLogo(drawable);
     }
 
     /** Sets the hint for the search bar. */
     public void setSearchHint(@StringRes int resId) {
-        setSearchHint(getContext().getString(resId));
+        mController.setSearchHint(resId);
     }
 
     /** Sets the hint for the search bar. */
     public void setSearchHint(CharSequence hint) {
-        if (!Objects.equals(hint, mSearchHint)) {
-            mSearchHint = hint;
-            if (mSearchView != null) {
-                mSearchView.setHint(mSearchHint);
-            }
-        }
+        mController.setSearchHint(hint);
     }
 
     /** Gets the search hint */
     public CharSequence getSearchHint() {
-        return mSearchHint;
+        return mController.getSearchHint();
     }
 
     /**
@@ -461,7 +326,7 @@ public class Toolbar extends FrameLayout {
      * a similar place.
      */
     public void setSearchIcon(@DrawableRes int resId) {
-        setSearchIcon(getContext().getDrawable(resId));
+        mController.setSearchIcon(resId);
     }
 
     /**
@@ -471,12 +336,7 @@ public class Toolbar extends FrameLayout {
      * a similar place.
      */
     public void setSearchIcon(Drawable d) {
-        if (!Objects.equals(d, mSearchIcon)) {
-            mSearchIcon = d;
-            if (mSearchView != null) {
-                mSearchView.setIcon(mSearchIcon);
-            }
-        }
+        mController.setSearchIcon(d);
     }
 
     /**
@@ -494,15 +354,12 @@ public class Toolbar extends FrameLayout {
 
     /** Sets the {@link NavButtonMode} */
     public void setNavButtonMode(NavButtonMode style) {
-        if (style != mNavButtonMode) {
-            mNavButtonMode = style;
-            setState(mState);
-        }
+        mController.setNavButtonMode(style);
     }
 
     /** Gets the {@link NavButtonMode} */
     public NavButtonMode getNavButtonMode() {
-        return mNavButtonMode;
+        return mController.getNavButtonMode();
     }
 
     /**
@@ -517,76 +374,19 @@ public class Toolbar extends FrameLayout {
 
     /** Show/hide the background. When hidden, the toolbar is completely transparent. */
     public void setBackgroundShown(boolean shown) {
-        if (shown) {
-            super.setBackground(getContext().getDrawable(R.drawable.car_ui_toolbar_background));
-        } else {
-            super.setBackground(null);
-        }
+        mController.setBackgroundShown(shown);
     }
 
     /** Returns true is the toolbar background is shown */
     public boolean getBackgroundShown() {
-        return super.getBackground() != null;
-    }
-
-    private void setMenuItemsInternal(@Nullable List<MenuItem> items) {
-        if (items == null) {
-            items = Collections.emptyList();
-        }
-
-        if (items.equals(mMenuItems)) {
-            return;
-        }
-
-        // Copy the list so that if the list is modified and setMenuItems is called again,
-        // the equals() check will fail. Note that the MenuItems are not copied here.
-        mMenuItems = new ArrayList<>(items);
-
-        mOverflowItems.clear();
-        mMenuItemRenderers.clear();
-        mMenuItemsContainer.removeAllViews();
-
-        List<CompletableFuture<View>> viewFutures = new ArrayList<>();
-        for (MenuItem item : mMenuItems) {
-            if (item.getDisplayBehavior() == MenuItem.DisplayBehavior.NEVER) {
-                mOverflowItems.add(item);
-                item.setListener(mOverflowItemListener);
-            } else {
-                MenuItemRenderer renderer = new MenuItemRenderer(item, mMenuItemsContainer);
-                mMenuItemRenderers.add(renderer);
-                viewFutures.add(renderer.createView());
-            }
-        }
-
-        if (!mOverflowItems.isEmpty()) {
-            MenuItemRenderer renderer = new MenuItemRenderer(mOverflowButton, mMenuItemsContainer);
-            mMenuItemRenderers.add(renderer);
-            viewFutures.add(renderer.createView());
-            createOverflowDialog();
-        }
-
-        if (mMenuItemViewsFuture != null) {
-            mMenuItemViewsFuture.cancel(false);
-        }
-
-        mMenuItemViewsFuture = CompletableFuture.allOf(
-            viewFutures.toArray(new CompletableFuture[0]));
-        mMenuItemViewsFuture.thenRunAsync(() -> {
-            for (CompletableFuture<View> future : viewFutures) {
-                mMenuItemsContainer.addView(future.join());
-            }
-            mMenuItemViewsFuture = null;
-        }, getContext().getMainExecutor());
-
-        setState(mState);
+        return mController.getBackgroundShown();
     }
 
     /**
      * Sets the {@link MenuItem Menuitems} to display.
      */
     public void setMenuItems(@Nullable List<MenuItem> items) {
-        mMenuItemsXmlId = 0;
-        setMenuItemsInternal(items);
+        mController.setMenuItems(items);
     }
 
     /**
@@ -619,76 +419,25 @@ public class Toolbar extends FrameLayout {
      * @return The MenuItems that were loaded from XML.
      */
     public List<MenuItem> setMenuItems(@XmlRes int resId) {
-        if (mMenuItemsXmlId != 0 && mMenuItemsXmlId == resId) {
-            return mMenuItems;
-        }
-
-        mMenuItemsXmlId = resId;
-        List<MenuItem> menuItems = MenuItemRenderer.readMenuItemList(getContext(), resId);
-        setMenuItemsInternal(menuItems);
-        return menuItems;
+        return mController.setMenuItems(resId);
     }
 
     /** Gets the {@link MenuItem MenuItems} currently displayed */
     @NonNull
     public List<MenuItem> getMenuItems() {
-        return Collections.unmodifiableList(mMenuItems);
+        return mController.getMenuItems();
     }
 
     /** Gets a {@link MenuItem} by id. */
     @Nullable
     public MenuItem findMenuItemById(int id) {
-        for (MenuItem item : mMenuItems) {
-            if (item.getId() == id) {
-                return item;
-            }
-        }
-        return null;
+        return mController.findMenuItemById(id);
     }
 
     /** Gets a {@link MenuItem} by id. Will throw an exception if not found. */
     @NonNull
     public MenuItem requireMenuItemById(int id) {
-        MenuItem result = findMenuItemById(id);
-
-        if (result == null) {
-            throw new IllegalArgumentException("ID does not reference a MenuItem on this Toolbar");
-        }
-
-        return result;
-    }
-
-    private int countVisibleOverflowItems() {
-        int numVisibleItems = 0;
-        for (MenuItem item : mOverflowItems) {
-            if (item.isVisible()) {
-                numVisibleItems++;
-            }
-        }
-        return numVisibleItems;
-    }
-
-    private void createOverflowDialog() {
-        // TODO(b/140564530) Use a carui alert with a (car ui)recyclerview here
-        // TODO(b/140563930) Support enabled/disabled overflow items
-
-        CharSequence[] itemTitles = new CharSequence[countVisibleOverflowItems()];
-        int i = 0;
-        for (MenuItem item : mOverflowItems) {
-            if (item.isVisible()) {
-                itemTitles[i++] = item.getTitle();
-            }
-        }
-
-        mOverflowDialog = new AlertDialog.Builder(getContext())
-                .setItems(itemTitles, (dialog, which) -> {
-                    MenuItem item = mOverflowItems.get(which);
-                    MenuItem.OnClickListener listener = item.getOnClickListener();
-                    if (listener != null) {
-                        listener.onClick(item);
-                    }
-                })
-                .create();
+        return mController.requireMenuItemById(id);
     }
 
     /**
@@ -697,29 +446,19 @@ public class Toolbar extends FrameLayout {
      * {@link MenuItem.Builder#setToSearch()} will still be hidden.
      */
     public void setShowMenuItemsWhileSearching(boolean showMenuItems) {
-        mShowMenuItemsWhileSearching = showMenuItems;
-        setState(mState);
+        mController.setShowMenuItemsWhileSearching(showMenuItems);
     }
 
     /** Returns if {@link MenuItem MenuItems} are shown while searching */
     public boolean getShowMenuItemsWhileSearching() {
-        return mShowMenuItemsWhileSearching;
+        return mController.getShowMenuItemsWhileSearching();
     }
 
     /**
      * Sets the search query.
      */
     public void setSearchQuery(String query) {
-        if (!Objects.equals(mSearchQuery, query)) {
-            mSearchQuery = query;
-            if (mSearchView != null) {
-                mSearchView.setSearchQuery(query);
-            } else {
-                for (OnSearchListener listener : mOnSearchListeners) {
-                    listener.onSearch(query);
-                }
-            }
-        }
+        mController.setSearchQuery(query);
     }
 
     /**
@@ -727,105 +466,12 @@ public class Toolbar extends FrameLayout {
      * for the desired state.
      */
     public void setState(State state) {
-        mState = state;
-
-        if (mSearchView == null && (state == State.SEARCH || state == State.EDIT)) {
-            SearchView searchView = new SearchView(getContext());
-            searchView.setHint(mSearchHint);
-            searchView.setIcon(mSearchIcon);
-            searchView.setSearchListeners(mOnSearchListeners);
-            searchView.setSearchCompletedListeners(mOnSearchCompletedListeners);
-            searchView.setSearchQuery(mSearchQuery);
-            searchView.setVisibility(View.GONE);
-
-            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT);
-            mSearchViewContainer.addView(searchView, layoutParams);
-
-            mSearchView = searchView;
-        }
-
-        for (MenuItemRenderer renderer : mMenuItemRenderers) {
-            renderer.setToolbarState(mState);
-        }
-
-        View.OnClickListener backClickListener = (v) -> {
-            boolean absorbed = false;
-            List<OnBackListener> listenersCopy = new ArrayList<>(mOnBackListeners);
-            for (OnBackListener listener : listenersCopy) {
-                absorbed = absorbed || listener.onBack();
-            }
-
-            if (!absorbed) {
-                Activity activity = CarUiUtils.getActivity(getContext());
-                if (activity != null) {
-                    activity.onBackPressed();
-                }
-            }
-        };
-
-        switch (mNavButtonMode) {
-            case CLOSE:
-                mNavIcon.setImageResource(R.drawable.car_ui_icon_close);
-                break;
-            case DOWN:
-                mNavIcon.setImageResource(R.drawable.car_ui_icon_down);
-                break;
-            default:
-                mNavIcon.setImageResource(R.drawable.car_ui_icon_arrow_back);
-                break;
-        }
-
-        mNavIcon.setVisibility(state != State.HOME ? VISIBLE : GONE);
-
-        // Show the logo in the nav space if that's enabled, we have a logo,
-        // and we're in the Home state.
-        mLogoInNavIconSpace.setVisibility(mHasLogo
-                && state == State.HOME
-                && mLogoFillsNavIconSpace
-                ? VISIBLE : INVISIBLE);
-
-        // Show logo next to the title if we're in the subpage state or we're configured to not show
-        // the logo in the nav icon space.
-        mTitleLogoContainer.setVisibility(mHasLogo
-                && (state == State.SUBPAGE || !mLogoFillsNavIconSpace)
-                ? VISIBLE : GONE);
-
-        // Show the nav icon container if we're not in the home space or the logo fills the nav icon
-        // container. If car_ui_toolbar_nav_icon_reserve_space is true, hiding it will still reserve
-        // its space
-        mNavIconContainer.setVisibility(state != State.HOME || (mHasLogo && mLogoFillsNavIconSpace)
-                ? VISIBLE : (mNavIconSpaceReserved ? INVISIBLE : GONE));
-        mNavIconContainer.setOnClickListener(state != State.HOME ? backClickListener : null);
-        mNavIconContainer.setClickable(state != State.HOME);
-
-        boolean hasTabs = mTabLayout.getTabCount() > 0;
-        // Show the title if we're in the subpage state, or in the home state with no tabs or tabs
-        // on the second row
-        mTitle.setVisibility(state == State.SUBPAGE
-                || (state == State.HOME && (!hasTabs || mIsTabsInSecondRow))
-                ? VISIBLE : GONE);
-        mTabLayout.setVisibility(state == State.HOME && hasTabs ? VISIBLE : GONE);
-
-        if (mSearchView != null) {
-            if (state == State.SEARCH || state == State.EDIT) {
-                mSearchView.setPlainText(state == State.EDIT);
-                mSearchView.setVisibility(VISIBLE);
-            } else {
-                mSearchView.setVisibility(GONE);
-            }
-        }
-
-        boolean showButtons = (state != State.SEARCH && state != State.EDIT)
-                || mShowMenuItemsWhileSearching;
-        mMenuItemsContainer.setVisibility(showButtons ? VISIBLE : GONE);
-        mOverflowButton.setVisible(showButtons && countVisibleOverflowItems() > 0);
+        mController.setState(state);
     }
 
     /** Gets the current {@link State} of the toolbar. */
     public State getState() {
-        return mState;
+        return mController.getState();
     }
 
     @Override
@@ -891,67 +537,67 @@ public class Toolbar extends FrameLayout {
      */
     public void registerToolbarHeightChangeListener(
             OnHeightChangedListener listener) {
-        mOnHeightChangedListeners.add(listener);
+        mController.registerToolbarHeightChangeListener(listener);
     }
 
     /** Unregisters an existing {@link OnHeightChangedListener} from the list of listeners. */
     public boolean unregisterToolbarHeightChangeListener(
             OnHeightChangedListener listener) {
-        return mOnHeightChangedListeners.remove(listener);
+        return mController.unregisterToolbarHeightChangeListener(listener);
     }
 
     /** Registers a new {@link OnTabSelectedListener} to the list of listeners. */
     public void registerOnTabSelectedListener(OnTabSelectedListener listener) {
-        mOnTabSelectedListeners.add(listener);
+        mController.registerOnTabSelectedListener(listener);
     }
 
     /** Unregisters an existing {@link OnTabSelectedListener} from the list of listeners. */
     public boolean unregisterOnTabSelectedListener(OnTabSelectedListener listener) {
-        return mOnTabSelectedListeners.remove(listener);
+        return mController.unregisterOnTabSelectedListener(listener);
     }
 
     /** Registers a new {@link OnSearchListener} to the list of listeners. */
     public void registerOnSearchListener(OnSearchListener listener) {
-        mOnSearchListeners.add(listener);
+        mController.registerOnSearchListener(listener);
     }
 
     /** Unregisters an existing {@link OnSearchListener} from the list of listeners. */
     public boolean unregisterOnSearchListener(OnSearchListener listener) {
-        return mOnSearchListeners.remove(listener);
+        return mController.unregisterOnSearchListener(listener);
     }
 
     /** Registers a new {@link OnSearchCompletedListener} to the list of listeners. */
     public void registerOnSearchCompletedListener(OnSearchCompletedListener listener) {
-        mOnSearchCompletedListeners.add(listener);
+        mController.registerOnSearchCompletedListener(listener);
     }
 
     /** Unregisters an existing {@link OnSearchCompletedListener} from the list of listeners. */
     public boolean unregisterOnSearchCompletedListener(OnSearchCompletedListener listener) {
-        return mOnSearchCompletedListeners.remove(listener);
+        return mController.unregisterOnSearchCompletedListener(listener);
     }
 
     /** Registers a new {@link OnBackListener} to the list of listeners. */
     public void registerOnBackListener(OnBackListener listener) {
-        mOnBackListeners.add(listener);
+        mController.registerOnBackListener(listener);
     }
 
-    /** Unregisters an existing {@link OnTabSelectedListener} from the list of listeners. */
+    /** Unregisters an existing {@link OnBackListener} from the list of listeners. */
     public boolean unregisterOnBackListener(OnBackListener listener) {
-        return mOnBackListeners.remove(listener);
+        return mController.unregisterOnBackListener(listener);
     }
 
     /** Shows the progress bar */
     public void showProgressBar() {
-        mProgressBar.setVisibility(View.VISIBLE);
+        mController.showProgressBar();
     }
 
     /** Hides the progress bar */
     public void hideProgressBar() {
-        mProgressBar.setVisibility(View.GONE);
+        mController.hideProgressBar();
     }
 
     /** Returns the progress bar */
     public ProgressBar getProgressBar() {
-        return mProgressBar;
+        return mController.getProgressBar();
     }
 }

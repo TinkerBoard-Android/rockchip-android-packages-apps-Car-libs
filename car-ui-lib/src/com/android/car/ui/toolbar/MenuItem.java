@@ -309,8 +309,8 @@ public class MenuItem {
     public static final class Builder {
         private final Context mContext;
 
-        private CharSequence mSearchTitle;
-        private CharSequence mSettingsTitle;
+        private String mSearchTitle;
+        private String mSettingsTitle;
         private Drawable mSearchIcon;
         private Drawable mSettingsIcon;
 
@@ -353,7 +353,7 @@ public class MenuItem {
                 throw new IllegalStateException("Can't have both a search and settings MenuItem");
             }
 
-            if (mIsSearch && (!mSearchTitle.equals(mTitle)
+            if (mIsSearch && (!mSearchTitle.contentEquals(mTitle)
                     || !mSearchIcon.equals(mIcon)
                     || mIsCheckable
                     || mIsActivatable
@@ -363,14 +363,13 @@ public class MenuItem {
                 throw new IllegalStateException("Invalid search MenuItem");
             }
 
-            if (mIsSettings && (!mSettingsTitle.equals(mTitle)
+            if (mIsSettings && (!mSettingsTitle.contentEquals(mTitle)
                     || !mSettingsIcon.equals(mIcon)
                     || mIsCheckable
                     || mIsActivatable
                     || !mIsTinted
                     || mShowIconAndTitle
-                    || mDisplayBehavior != DisplayBehavior.ALWAYS
-                    || mUxRestrictions != CarUxRestrictions.UX_RESTRICTIONS_NO_SETUP)) {
+                    || mDisplayBehavior != DisplayBehavior.ALWAYS)) {
                 throw new IllegalStateException("Invalid settings MenuItem");
             }
 
