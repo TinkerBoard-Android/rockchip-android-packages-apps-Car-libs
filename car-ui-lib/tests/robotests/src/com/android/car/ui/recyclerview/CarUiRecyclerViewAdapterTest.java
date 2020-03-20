@@ -24,15 +24,19 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.view.ViewGroup;
 
+import com.android.car.ui.CarUiRobolectricTestRunner;
+import com.android.car.ui.CarUiTestUtil;
+import com.android.car.ui.TestConfig;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(CarUiRobolectricTestRunner.class)
+@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class CarUiRecyclerViewAdapterTest {
 
     private Context mContext;
@@ -46,8 +50,7 @@ public class CarUiRecyclerViewAdapterTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-
-        mContext = RuntimeEnvironment.application;
+        mContext = CarUiTestUtil.getMockContext();
         mCarUiRecyclerViewAdapter = new CarUiRecyclerViewAdapter();
     }
 
