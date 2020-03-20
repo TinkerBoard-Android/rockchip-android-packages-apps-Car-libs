@@ -77,7 +77,7 @@ android {
 dependencies {
     implementation project(':')
     testImplementation "androidx.test.ext:junit:1.1.1"
-    testImplementation 'org.robolectric:robolectric:4.2'
+    testImplementation "org.robolectric:robolectric:4.0-alpha-3"
     testImplementation "org.mockito:mockito-core:2.19.0"
     testImplementation "com.google.truth:truth:0.29"
     testImplementation "org.testng:testng:6.9.9"
