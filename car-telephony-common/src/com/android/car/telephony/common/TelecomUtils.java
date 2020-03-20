@@ -65,6 +65,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public class TelecomUtils {
     private static final String TAG = "CD.TelecomUtils";
+    private static final int PII_STRING_LENGTH = 4;
 
     private static String sVoicemailNumber;
     private static TelephonyManager sTelephonyManager;
@@ -550,7 +551,7 @@ public class TelecomUtils {
         RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(
                 context.getResources(), letterTileDrawable.toBitmap(avatarSize));
         return createFromRoundedBitmapDrawable(roundedBitmapDrawable, avatarSize,
-            cornerRadiusPercent);
+                cornerRadiusPercent);
     }
 
     /** Creates an Icon based on the given roundedBitmapDrawable. **/
@@ -575,4 +576,13 @@ public class TelecomUtils {
                 .build();
     }
 
+    /**
+     * This is a workaround for Log.Pii(). It will only show the last {@link #PII_STRING_LENGTH}
+     * characters.
+     */
+    public static String piiLog(Object pii) {
+        String piiString = String.valueOf(pii);
+        return piiString.length() >= PII_STRING_LENGTH ? "*" + piiString.substring(
+                piiString.length() - PII_STRING_LENGTH) : piiString;
+    }
 }
