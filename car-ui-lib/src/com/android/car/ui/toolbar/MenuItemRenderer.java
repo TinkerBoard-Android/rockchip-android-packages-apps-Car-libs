@@ -86,7 +86,7 @@ class MenuItemRenderer implements MenuItem.Listener {
     }
 
     @Override
-    public void onMenuItemChanged() {
+    public void onMenuItemChanged(MenuItem changedItem) {
         updateView();
     }
 

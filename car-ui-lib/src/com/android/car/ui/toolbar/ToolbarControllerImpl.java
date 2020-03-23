@@ -38,7 +38,11 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.annotation.XmlRes;
 
+import com.android.car.ui.AlertDialogBuilder;
 import com.android.car.ui.R;
+import com.android.car.ui.recyclerview.CarUiContentListItem;
+import com.android.car.ui.recyclerview.CarUiListItem;
+import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.utils.CarUiUtils;
 import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
@@ -93,6 +97,8 @@ public class ToolbarControllerImpl implements ToolbarController {
     @NonNull
     private List<MenuItem> mMenuItems = Collections.emptyList();
     private List<MenuItem> mOverflowItems = new ArrayList<>();
+    private List<CarUiListItem> mUiOverflowItems = new ArrayList<>();
+    private CarUiListItemAdapter mOverflowAdapter;
     private final List<MenuItemRenderer> mMenuItemRenderers = new ArrayList<>();
     private View[] mMenuItemViews;
     private int mMenuItemsXmlId = 0;
@@ -101,8 +107,8 @@ public class ToolbarControllerImpl implements ToolbarController {
     private boolean mLogoFillsNavIconSpace;
     private boolean mShowLogo;
     private ProgressBar mProgressBar;
-    private MenuItem.Listener mOverflowItemListener = () -> {
-        createOverflowDialog();
+    private MenuItem.Listener mOverflowItemListener = item -> {
+        updateOverflowDialog(item);
         setState(getState());
     };
     // Despite the warning, this has to be a field so it's not garbage-collected.
@@ -170,6 +176,8 @@ public class ToolbarControllerImpl implements ToolbarController {
         });
 
         setBackgroundShown(true);
+
+        mOverflowAdapter = new CarUiListItemAdapter(mUiOverflowItems);
 
         // This holds weak references so we don't need to unregister later
         CarUxRestrictionsUtil.getInstance(getContext())
@@ -516,28 +524,43 @@ public class ToolbarControllerImpl implements ToolbarController {
     }
 
     private void createOverflowDialog() {
-        // TODO(b/140564530) Use a carui alert with a (car ui)recyclerview here
-        // TODO(b/140563930) Support enabled/disabled overflow items
-
-        CharSequence[] itemTitles = new CharSequence[countVisibleOverflowItems()];
-        int i = 0;
-        for (MenuItem item : mOverflowItems) {
-            if (item.isVisible()) {
-                itemTitles[i++] = item.getTitle();
+        mUiOverflowItems.clear();
+        for (MenuItem menuItem : mOverflowItems) {
+            if (menuItem.isVisible()) {
+                mUiOverflowItems.add(toCarUiContentListItem(menuItem));
             }
         }
 
-        mOverflowDialog = new AlertDialog.Builder(getContext())
-                .setItems(itemTitles, (dialog, which) -> {
-                    MenuItem item = mOverflowItems.get(which);
-                    MenuItem.OnClickListener listener = item.getOnClickListener();
-                    if (listener != null) {
-                        listener.onClick(item);
-                    }
-                })
+        mOverflowDialog = new AlertDialogBuilder(getContext())
+                .setAdapter(mOverflowAdapter)
                 .create();
     }
 
+    private void updateOverflowDialog(MenuItem changedItem) {
+        int itemIndex = mOverflowItems.indexOf(changedItem);
+        if (itemIndex >= 0) {
+            mUiOverflowItems.set(itemIndex, toCarUiContentListItem(changedItem));
+            mOverflowAdapter.notifyItemChanged(itemIndex);
+        } else {
+            createOverflowDialog();
+        }
+    }
+
+    private CarUiContentListItem toCarUiContentListItem(MenuItem menuItem) {
+        CarUiContentListItem carUiItem;
+        if (menuItem.isCheckable()) {
+            carUiItem = new CarUiContentListItem(CarUiContentListItem.Action.SWITCH);
+        } else {
+            carUiItem = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
+        }
+        carUiItem.setIcon(menuItem.getIcon());
+        carUiItem.setActivated(menuItem.isActivated());
+        carUiItem.setChecked(menuItem.isChecked());
+        carUiItem.setEnabled(menuItem.isEnabled());
+        carUiItem.setTitle(menuItem.getTitle());
+        carUiItem.setOnItemClickedListener(item -> menuItem.performClick());
+        return carUiItem;
+    }
 
     /**
      * Set whether or not to show the {@link MenuItem MenuItems} while searching. Default false.
@@ -639,8 +662,7 @@ public class ToolbarControllerImpl implements ToolbarController {
         // Show logo next to the title if we're in the subpage state or we're configured to not show
         // the logo in the nav icon space.
         mTitleLogoContainer.setVisibility(mHasLogo
-                && (state == Toolbar.State.SUBPAGE
-                || (state == Toolbar.State.HOME && !mLogoFillsNavIconSpace))
+                && (state == Toolbar.State.SUBPAGE || !mLogoFillsNavIconSpace)
                 ? VISIBLE : GONE);
 
         // Show the nav icon container if we're not in the home space or the logo fills the nav icon
