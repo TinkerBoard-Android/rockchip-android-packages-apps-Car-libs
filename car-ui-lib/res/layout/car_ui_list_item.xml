@@ -20,6 +20,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:tag="carUiListItem"
     android:minHeight="@dimen/car_ui_list_item_height">
 
     <!-- The following touch interceptor views are sized to encompass the specific sub-sections of
