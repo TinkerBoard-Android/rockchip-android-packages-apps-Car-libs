@@ -19,7 +19,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:tag="carUiToolbar">
 
     <!-- When the user finishes searching, we call clearFocus() on the editText in the search bar.
      clearFocus() will actually send the focus to the first focusable thing in the layout.
