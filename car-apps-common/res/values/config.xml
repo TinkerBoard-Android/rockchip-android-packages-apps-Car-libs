@@ -15,16 +15,6 @@
   ~ limitations under the License
   -->
 <resources>
-    <!--
-    Configuration for a default scrollbar for the PagedRecyclerView. This component must inherit
-    abstract class ScrollBarUI. If the ScrollBar is enabled, the component will be initialized from
-    PagedRecyclerView#createScrollBarFromConfig().
-    -->
-    <string name="config_scrollBarComponent" translatable="false">
-        com.android.car.apps.common.widget.CarScrollBar
-    </string>
-
-
     <!-- This value must remain false for production builds. It is intended to be overlaid in
         the simulator, so third party app developers can notice quickly that they are sending
         improper image references.
