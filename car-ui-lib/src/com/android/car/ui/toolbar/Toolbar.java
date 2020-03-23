@@ -157,7 +157,7 @@ public class Toolbar extends FrameLayout implements ToolbarController {
                 setSearchHint(searchHint);
             }
 
-            switch (a.getInt(R.styleable.CarUiToolbar_state, 0)) {
+            switch (a.getInt(R.styleable.CarUiToolbar_car_ui_state, 0)) {
                 case 0:
                     setState(State.HOME);
                     break;
@@ -174,7 +174,7 @@ public class Toolbar extends FrameLayout implements ToolbarController {
                     break;
             }
 
-            switch (a.getInt(R.styleable.CarUiToolbar_navButtonMode, 0)) {
+            switch (a.getInt(R.styleable.CarUiToolbar_car_ui_navButtonMode, 0)) {
                 case 0:
                     setNavButtonMode(NavButtonMode.BACK);
                     break;
