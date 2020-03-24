@@ -35,8 +35,8 @@ import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.toolbar.ToolbarController;
 import com.android.car.ui.toolbar.ToolbarControllerImpl;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * BaseLayoutController accepts an {@link Activity} and sets up the base layout inside of it.
@@ -45,7 +45,7 @@ import java.util.Map;
  */
 class BaseLayoutController {
 
-    private static Map<Activity, BaseLayoutController> sBaseLayoutMap = new HashMap<>();
+    private static Map<Activity, BaseLayoutController> sBaseLayoutMap = new WeakHashMap<>();
 
     private InsetsUpdater mInsetsUpdater;
 
