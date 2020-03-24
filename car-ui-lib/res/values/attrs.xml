@@ -32,7 +32,7 @@
         <!-- Whether or not to show the MenuItems while searching. Default false. -->
         <attr name="showMenuItemsWhileSearching" format="boolean"/>
         <!-- Initial state of the toolbar. See the Toolbar.State enum for more information -->
-        <attr name="state" format="enum">
+        <attr name="car_ui_state" format="enum">
             <enum name="home" value="0"/>
             <enum name="subpage" value="1"/>
             <enum name="search" value="2"/>
@@ -40,7 +40,7 @@
         <!-- Whether or not the toolbar should have a background. Default true. -->
         <attr name="showBackground" format="boolean"/>
         <!-- Mode of the navigation button See the Toolbar.NavButtonMode enum for more information -->
-        <attr name="navButtonMode" format="enum">
+        <attr name="car_ui_navButtonMode" format="enum">
             <enum name="back" value="0"/>
             <enum name="close" value="1"/>
             <enum name="down" value="2"/>
