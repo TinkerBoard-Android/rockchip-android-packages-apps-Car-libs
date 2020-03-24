@@ -50,10 +50,6 @@
   <public type="dimen" name="car_ui_dialog_edittext_margin_top"/>
   <public type="dimen" name="car_ui_dialog_icon_size"/>
   <public type="dimen" name="car_ui_dialog_title_margin"/>
-  <public type="dimen" name="car_ui_keyline_1"/>
-  <public type="dimen" name="car_ui_keyline_2"/>
-  <public type="dimen" name="car_ui_keyline_3"/>
-  <public type="dimen" name="car_ui_keyline_4"/>
   <public type="dimen" name="car_ui_letter_spacing_body1"/>
   <public type="dimen" name="car_ui_letter_spacing_body3"/>
   <public type="dimen" name="car_ui_list_item_action_divider_height"/>
