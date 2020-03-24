@@ -46,10 +46,6 @@
   <public type="dimen" name="car_ui_dialog_title_margin"/>
   <public type="dimen" name="car_ui_divider_width"/>
   <public type="dimen" name="car_ui_header_list_item_text_start_margin"/>
-  <public type="dimen" name="car_ui_keyline_1"/>
-  <public type="dimen" name="car_ui_keyline_2"/>
-  <public type="dimen" name="car_ui_keyline_3"/>
-  <public type="dimen" name="car_ui_keyline_4"/>
   <public type="dimen" name="car_ui_list_item_action_divider_height"/>
   <public type="dimen" name="car_ui_list_item_action_divider_width"/>
   <public type="dimen" name="car_ui_list_item_avatar_icon_height"/>
