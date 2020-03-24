@@ -110,11 +110,9 @@ class DefaultScrollBar implements ScrollBar {
                         int oldBottom) -> {
                     int width = right - left;
 
-                    OrientationHelper orientationHelper =
-                            getOrientationHelper(getRecyclerView().getLayoutManager());
-
                     // This value will keep track of the top of the current view being laid out.
-                    int layoutTop = orientationHelper.getStartAfterPadding() + mPaddingStart;
+                    int layoutTop = getRecyclerView().getTop()
+                            + getRecyclerView().getPaddingTop() + mPaddingStart;
 
                     // Lay out the up button at the top of the view.
                     layoutViewCenteredFromTop(mUpButton, layoutTop, width);
@@ -125,7 +123,8 @@ class DefaultScrollBar implements ScrollBar {
                     layoutViewCenteredFromTop(mScrollThumb, layoutTop, width);
 
                     // Lay out the bottom button at the bottom of the view.
-                    int downBottom = orientationHelper.getEndAfterPadding() - mPaddingEnd;
+                    int downBottom = getRecyclerView().getBottom()
+                            - getRecyclerView().getPaddingBottom() - mPaddingEnd;
                     layoutViewCenteredFromBottom(mDownButton, downBottom, width);
 
                     mHandler.post(this::calculateScrollThumbTrackHeight);
