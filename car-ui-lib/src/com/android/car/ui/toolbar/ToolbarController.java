@@ -17,7 +17,6 @@
 package com.android.car.ui.toolbar;
 
 import android.graphics.drawable.Drawable;
-import android.widget.ProgressBar;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -253,12 +252,26 @@ public interface ToolbarController {
     /** Unregisters an existing {@link Toolbar.OnBackListener} from the list of listeners. */
     boolean unregisterOnBackListener(Toolbar.OnBackListener listener);
 
-    /** Shows the progress bar */
-    void showProgressBar();
+    /** Gets a {@link ProgressBarController} */
+    ProgressBarController getProgressBar();
 
-    /** Hides the progress bar */
-    void hideProgressBar();
+    /**
+     * Shows the progress bar.
+     *
+     * @deprecated use {@link #getProgressBar()} instead.
+     */
+    @Deprecated
+    default void showProgressBar() {
+        getProgressBar().setVisible(true);
+    }
 
-    /** Returns the progress bar */
-    ProgressBar getProgressBar();
+    /**
+     * Hides the progress bar
+     *
+     * @deprecated use {@link #getProgressBar()} instead.
+     */
+    @Deprecated
+    default void hideProgressBar() {
+        getProgressBar().setVisible(false);
+    }
 }
