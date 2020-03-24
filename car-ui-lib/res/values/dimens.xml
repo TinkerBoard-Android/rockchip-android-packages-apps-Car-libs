@@ -38,12 +38,6 @@
     <dimen name="car_ui_body2_size">28sp</dimen>
     <dimen name="car_ui_body3_size">24sp</dimen>
 
-    <!-- Keylines -->
-    <dimen name="car_ui_keyline_1">24dp</dimen>
-    <dimen name="car_ui_keyline_2">96dp</dimen>
-    <dimen name="car_ui_keyline_3">112dp</dimen>
-    <dimen name="car_ui_keyline_4">148dp</dimen>
-
     <!-- Tabs -->
 
     <!-- Exact size of the tab textbox. Use @dimen/wrap_content if this must be flexible -->
@@ -171,7 +165,7 @@
     <dimen name="car_ui_dialog_edittext_margin_start">22dp</dimen>
     <dimen name="car_ui_dialog_edittext_margin_end">22dp</dimen>
     <dimen name="car_ui_dialog_icon_size">56dp</dimen>
-    <dimen name="car_ui_dialog_title_margin">@dimen/car_ui_keyline_1</dimen>
+    <dimen name="car_ui_dialog_title_margin">24dp</dimen>
 
     <!-- List item  -->
 
