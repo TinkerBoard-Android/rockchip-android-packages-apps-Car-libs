@@ -36,7 +36,7 @@ import java.util.LinkedList;
  * ConversationNotificationInfo object.
  **/
 public class ConversationNotificationInfo {
-    private static final String TAG = "CMC.ConversationNotificationInfo";
+    private static final String TAG = "CMC.ConvoNotifInfo";
     private static int sNextNotificationId = 0;
     final int mNotificationId = sNextNotificationId++;
 
@@ -51,6 +51,7 @@ public class ConversationNotificationInfo {
     private final String mNotificationKey;
     @Nullable
     private final String mAppDisplayName;
+    private final String mAppPackageName;
     @Nullable
     private final String mUserDisplayName;
     private final int mAppSmallIconResId;
@@ -81,14 +82,15 @@ public class ConversationNotificationInfo {
                 messagingStyle.getConvoTitle(),
                 messagingStyle.getIsGroupConvo(), notificationKey,
                 conversation.getMessagingAppDisplayName(),
+                conversation.getMessagingAppPackageName(),
                 messagingStyle.getUserDisplayName(), /* appSmallIconResId= */ 0);
 
     }
 
     private ConversationNotificationInfo(@Nullable String deviceName, String deviceId,
             String convoTitle, boolean isGroupConvo, @Nullable String notificationKey,
-            @Nullable String appDisplayName, @Nullable String userDisplayName,
-            int appSmallIconResId) {
+            @Nullable String appDisplayName, String appPackageName,
+            @Nullable String userDisplayName, int appSmallIconResId) {
         boolean missingDeviceId = (deviceId == null);
         boolean missingTitle = (convoTitle == null);
         if (missingDeviceId || missingTitle) {
@@ -107,6 +109,7 @@ public class ConversationNotificationInfo {
         this.mIsGroupConvo = isGroupConvo;
         this.mNotificationKey = notificationKey;
         this.mAppDisplayName = appDisplayName;
+        this.mAppPackageName = appPackageName;
         this.mUserDisplayName = userDisplayName;
         this.mAppSmallIconResId = appSmallIconResId;
     }
@@ -155,6 +158,13 @@ public class ConversationNotificationInfo {
     @Nullable
     public String getAppDisplayName() {
         return mAppDisplayName;
+    }
+
+    /**
+     * Returns the package name of the application that posted this notification.
+     **/
+    public String getAppPackageName() {
+        return mAppPackageName;
     }
 
     /**
