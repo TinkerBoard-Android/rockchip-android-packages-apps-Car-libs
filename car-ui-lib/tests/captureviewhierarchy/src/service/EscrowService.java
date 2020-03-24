@@ -26,6 +26,7 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -59,7 +60,20 @@ public class EscrowService extends Service {
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            dumpRootView(" ", mRootView);
+            CarUiComponents carUiComponents = new CarUiComponents();
+            checkForCarUiComponents(mRootView, carUiComponents);
+            if (carUiComponents.mIsUsingCarUiRecyclerView
+                    && !carUiComponents.mIsCarUiRecyclerViewUsingListItem) {
+                Log.e(TAG, "CarUiListItem are not used within CarUiRecyclerView: ");
+                Toast.makeText(getApplicationContext(),
+                        "CarUiListItem are not used within CarUiRecyclerView",
+                        Toast.LENGTH_LONG).show();
+            }
+            if (!carUiComponents.mIsUsingCarUiToolbar) {
+                Log.e(TAG, "CarUiToolbar is not used: ");
+                Toast.makeText(getApplicationContext(), "CarUiToolbar is not used",
+                        Toast.LENGTH_LONG).show();
+            }
         }
     };
 
@@ -129,7 +143,78 @@ public class EscrowService extends Service {
         Toast.makeText(this, "Escrow service destroyed", Toast.LENGTH_LONG).show();
     }
 
-    private void dumpRootView(String indent, View view) {
+    private void checkForCarUiComponents(View view, CarUiComponents carUiComponents) {
+
+        if (view == null) {
+            return;
+        }
+
+        if (isCarUiRecyclerView(view)) {
+            carUiComponents.mIsUsingCarUiRecyclerView = true;
+            if (isCarUiListItemFound(view)) {
+                carUiComponents.mIsCarUiRecyclerViewUsingListItem = true;
+            }
+            return;
+        }
+
+        if (isCarUiToolbar(view)) {
+            carUiComponents.mIsUsingCarUiToolbar = true;
+        }
+
+        if (view instanceof ViewGroup) {
+            for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+                checkForCarUiComponents(((ViewGroup) view).getChildAt(i), carUiComponents);
+            }
+        }
+    }
+
+    private boolean isCarUiListItemFound(View view) {
+
+        if (view == null) {
+            return false;
+        }
+
+        if (isCarUiListItem(view)) {
+            return true;
+        }
+
+        if (!(view instanceof ViewGroup)) {
+            return false;
+        }
+
+        for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+            if (isCarUiListItemFound(((ViewGroup) view).getChildAt(i))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isCarUiRecyclerView(View view) {
+        return view.getTag() != null && view.getTag().toString().equals("carUiRecyclerView");
+    }
+
+    private boolean isCarUiListItem(View view) {
+        return view.getTag() != null && view.getTag().toString().equals("carUiListItem");
+    }
+
+    private boolean isCarUiToolbar(View view) {
+        return view.getTag() != null && (view.getTag().toString().equals("carUiToolbar")
+                || view.getTag().toString().equals(
+                "CarUiBaseLayoutToolbar"));
+    }
+
+    private static class CarUiComponents {
+        boolean mIsUsingCarUiRecyclerView;
+        boolean mIsCarUiRecyclerViewUsingListItem;
+        boolean mIsUsingCarUiToolbar;
+    }
+
+    /**
+     * Dump's the view hierarchy.
+     */
+    private void printViewHierarchy(String indent, View view) {
         StringBuilder sb = new StringBuilder();
         sb.append("\n ");
         sb.append(indent);
@@ -146,15 +231,14 @@ public class EscrowService extends Service {
         sb.append("name= " + view.getAccessibilityClassName() + ", ");
 
         sb.append('}');
-        // Used in testing to dump the view hierarchy
-        // System.out.println(sb.toString());
+        System.out.println(sb.toString());
 
         indent += "  ";
         if (!(view instanceof ViewGroup)) {
             return;
         }
         for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-            dumpRootView(indent, ((ViewGroup) view).getChildAt(i));
+            printViewHierarchy(indent, ((ViewGroup) view).getChildAt(i));
         }
     }
 }
