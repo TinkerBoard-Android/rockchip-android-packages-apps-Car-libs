@@ -558,7 +558,10 @@ public class ToolbarControllerImpl implements ToolbarController {
         carUiItem.setChecked(menuItem.isChecked());
         carUiItem.setEnabled(menuItem.isEnabled());
         carUiItem.setTitle(menuItem.getTitle());
-        carUiItem.setOnItemClickedListener(item -> menuItem.performClick());
+        carUiItem.setOnItemClickedListener(item -> {
+            menuItem.performClick();
+            mOverflowDialog.hide();
+        });
         return carUiItem;
     }
 
