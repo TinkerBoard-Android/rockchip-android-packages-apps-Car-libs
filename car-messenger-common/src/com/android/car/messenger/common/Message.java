@@ -64,11 +64,11 @@ public class Message {
      *
      * @param deviceId of the phone that received this message.
      * @param updatedMessage containing the information to base this message object off of.
-     * @param appDisplayName of the messaging app this message belongs to.
+     * @param appPackageName of the messaging app this message belongs to.
      **/
     @Nullable
     public static Message parseFromMessage(String deviceId,
-            MessagingStyleMessage updatedMessage, String appDisplayName) {
+            MessagingStyleMessage updatedMessage, String appPackageName) {
 
         if (!Utils.isValidMessagingStyleMessage(updatedMessage)) {
             if (Log.isLoggable(TAG, Log.DEBUG) || Build.IS_DEBUGGABLE) {
@@ -88,7 +88,7 @@ public class Message {
                 Utils.createMessageHandle(updatedMessage),
                 MessageType.NOTIFICATION_MESSAGE,
                 /* senderContactUri */ null,
-                appDisplayName);
+                appPackageName);
     }
 
     private Message(String senderName, String deviceId, String messageText, long receiveTime,
