@@ -55,8 +55,9 @@ public class CarUi {
     public static ToolbarController requireToolbar(Activity activity) {
         ToolbarController result = getToolbar(activity);
         if (result == null) {
-            throw new IllegalArgumentException("Activity does not have a CarUi Toolbar! "
-                    + "Are you using Theme.CarUi.WithToolbar?");
+            throw new IllegalArgumentException("Activity " + activity
+                    + " does not have a CarUi Toolbar!"
+                    + " Are you using Theme.CarUi.WithToolbar?");
         }
 
         return result;
@@ -93,8 +94,9 @@ public class CarUi {
     public static Insets requireInsets(Activity activity) {
         Insets result = getInsets(activity);
         if (result == null) {
-            throw new IllegalArgumentException("Activity does not have a base layout! "
-                    + "Are you using Theme.CarUi.WithToolbar or Theme.CarUi.NoToolbar?");
+            throw new IllegalArgumentException("Activity " + activity
+                    + " does not have a base layout!"
+                    + " Are you using Theme.CarUi.WithToolbar or Theme.CarUi.NoToolbar?");
         }
 
         return result;
