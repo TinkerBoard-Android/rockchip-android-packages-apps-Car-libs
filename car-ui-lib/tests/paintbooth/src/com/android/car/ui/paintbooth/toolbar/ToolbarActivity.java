@@ -116,19 +116,6 @@ public class ToolbarActivity extends AppCompatActivity implements InsetsChangedL
             toolbar.setMenuItems(mMenuItems);
         }));
 
-        Mutable<Integer> overflowCounter = new Mutable<>(1);
-        mButtons.add(Pair.create(getString(R.string.toolbar_add_overflow), v -> {
-            mMenuItems.add(MenuItem.builder(this)
-                    .setTitle("Foo " + overflowCounter.value)
-                    .setOnClickListener(
-                            i -> Toast.makeText(this, "Clicked",
-                                    Toast.LENGTH_SHORT).show())
-                    .setDisplayBehavior(MenuItem.DisplayBehavior.NEVER)
-                    .build());
-            toolbar.setMenuItems(mMenuItems);
-            overflowCounter.value++;
-        }));
-
         mButtons.add(Pair.create(getString(R.string.toolbar_add_switch), v -> {
             mMenuItems.add(MenuItem.builder(this)
                     .setCheckable()
@@ -193,6 +180,47 @@ public class ToolbarActivity extends AppCompatActivity implements InsetsChangedL
                     .setTitle("Become icon")
                     .setOnClickListener(i ->
                             i.setIcon(i.getIcon() == null ? R.drawable.ic_tracklist : 0))
+                    .build());
+            toolbar.setMenuItems(mMenuItems);
+        }));
+
+        Mutable<Integer> overflowCounter = new Mutable<>(1);
+        mButtons.add(Pair.create(getString(R.string.toolbar_add_overflow), v -> {
+            mMenuItems.add(MenuItem.builder(this)
+                    .setTitle("Foo " + overflowCounter.value)
+                    .setOnClickListener(
+                            i -> Toast.makeText(this, "Clicked",
+                                    Toast.LENGTH_SHORT).show())
+                    .setDisplayBehavior(MenuItem.DisplayBehavior.NEVER)
+                    .build());
+            toolbar.setMenuItems(mMenuItems);
+            overflowCounter.value++;
+        }));
+
+        mButtons.add(Pair.create(getString(R.string.toolbar_add_overflow_switch), v -> {
+            mMenuItems.add(MenuItem.builder(this)
+                    .setTitle("Foo " + overflowCounter.value)
+                    .setOnClickListener(
+                            i -> Toast.makeText(this,
+                                    i.isChecked() ? "Checked" : "Unchecked" ,
+                                    Toast.LENGTH_SHORT)
+                                    .show())
+                    .setDisplayBehavior(MenuItem.DisplayBehavior.NEVER)
+                    .setCheckable()
+                    .build());
+            toolbar.setMenuItems(mMenuItems);
+            overflowCounter.value++;
+        }));
+
+        mButtons.add(Pair.create(getString(R.string.toolbar_add_icon_text_overflow), v -> {
+            mMenuItems.add(MenuItem.builder(this)
+                    .setIcon(R.drawable.ic_tracklist)
+                    .setTitle("Bar")
+                    .setShowIconAndTitle(true)
+                    .setOnClickListener(
+                            i -> Toast.makeText(this, "Clicked",
+                                    Toast.LENGTH_SHORT).show())
+                    .setDisplayBehavior(MenuItem.DisplayBehavior.NEVER)
                     .build());
             toolbar.setMenuItems(mMenuItems);
         }));
