@@ -26,7 +26,7 @@
     <public type="style" name="Theme.CarUi" id="0x000c0000" />
 
     <public type="attr" name="logo" id="0x000d0001" />
-    <public type="attr" name="state" id="0x000d0002" />
+    <public type="attr" name="car_ui_state" id="0x000d0002" />
     <public type="attr" name="title" id="0x000d0003" />
     <public type="attr" name="layoutStyle" id="0x000d0004" />
     <public type="attr" name="numOfColumns" id="0x000d0005" />
