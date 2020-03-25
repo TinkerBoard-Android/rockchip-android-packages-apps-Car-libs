@@ -42,24 +42,35 @@ public class ProjectionStateListener implements CarProjectionManager.ProjectionS
     static final String PROJECTION_STATUS_EXTRA_DEVICE_STATE =
             "android.car.projection.DEVICE_STATE";
 
-    private final CarProjectionManager mCarProjectionManager;
+    private CarProjectionManager mCarProjectionManager = null;
+    private Car mCar;
 
     private int mProjectionState = ProjectionStatus.PROJECTION_STATE_INACTIVE;
     private List<ProjectionStatus> mProjectionDetails = Collections.emptyList();
 
     public ProjectionStateListener(Context context) {
-        mCarProjectionManager = (CarProjectionManager)
-                Car.createCar(context).getCarManager(Car.PROJECTION_SERVICE);
-    }
-
-    /** Registers the listener. Should be called when the caller starts up. **/
-    public void start() {
-        mCarProjectionManager.registerProjectionStatusListener(this);
+        Car.createCar(context, /* handler= */ null, Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT,
+                (car, ready) -> {
+                    mCar = car;
+                    mCarProjectionManager = (CarProjectionManager) mCar.getCarManager(
+                            Car.PROJECTION_SERVICE);
+                    if (mCarProjectionManager != null) {
+                        mCarProjectionManager.registerProjectionStatusListener(this);
+                    }
+                });
     }
 
     /** Unregisters the listener. Should be called when the caller's lifecycle is ending. **/
-    public void stop() {
-        mCarProjectionManager.unregisterProjectionStatusListener(this);
+    public void destroy() {
+        if (mCarProjectionManager != null) {
+            mCarProjectionManager.unregisterProjectionStatusListener(this);
+        }
+        if (mCar != null) {
+            mCar.disconnect();
+            mCar = null;
+        }
+        mProjectionState = ProjectionStatus.PROJECTION_STATE_INACTIVE;
+        mProjectionDetails = Collections.emptyList();
     }
 
 
@@ -68,7 +79,6 @@ public class ProjectionStateListener implements CarProjectionManager.ProjectionS
             List<ProjectionStatus> details) {
         mProjectionState = state;
         mProjectionDetails = details;
-
     }
 
     /**
