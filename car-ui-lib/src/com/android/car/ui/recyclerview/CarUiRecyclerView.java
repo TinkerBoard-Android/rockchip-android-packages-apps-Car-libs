@@ -20,6 +20,8 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.car.drivingstate.CarUxRestrictions;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -227,7 +229,8 @@ public final class CarUiRecyclerView extends RecyclerView implements
                         // Scroll to the top after the first global layout, so that
                         // we can set padding for the insets and still have the
                         // recyclerview start at the top.
-                        getHandler().post(() -> getLayoutManager().scrollToPosition(0));
+                        (new Handler(Looper.myLooper())).post(() ->
+                                getLayoutManager().scrollToPosition(0));
                         mHasScrolledToTop = true;
                     }
 
