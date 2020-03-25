@@ -65,8 +65,8 @@ public final class CarUiRecyclerView extends RecyclerView implements
     private boolean mScrollBarEnabled;
     private String mScrollBarClass;
     private boolean mFullyInitialized;
-    private float mScrollBarPaddingStart;
-    private float mScrollBarPaddingEnd;
+    private int mScrollBarPaddingStart;
+    private int mScrollBarPaddingEnd;
 
     private ScrollBar mScrollBar;
     private int mInitialTopPadding;
@@ -155,10 +155,10 @@ public final class CarUiRecyclerView extends RecyclerView implements
         mScrollBarEnabled = context.getResources().getBoolean(R.bool.car_ui_scrollbar_enable);
         mFullyInitialized = false;
 
-        mScrollBarPaddingStart =
-                context.getResources().getDimension(R.dimen.car_ui_scrollbar_padding_start);
-        mScrollBarPaddingEnd =
-                context.getResources().getDimension(R.dimen.car_ui_scrollbar_padding_end);
+        mScrollBarPaddingStart = context.getResources()
+                .getDimensionPixelSize(R.dimen.car_ui_scrollbar_padding_start);
+        mScrollBarPaddingEnd = context.getResources()
+                .getDimensionPixelSize(R.dimen.car_ui_scrollbar_padding_end);
 
         mCarUiRecyclerViewLayout =
                 a.getInt(R.styleable.CarUiRecyclerView_layoutStyle, CarUiRecyclerViewLayout.LINEAR);
@@ -332,13 +332,25 @@ public final class CarUiRecyclerView extends RecyclerView implements
 
         mScrollBar.initialize(this, scrollView);
 
-        mScrollBar.setPadding((int) mScrollBarPaddingStart, (int) mScrollBarPaddingEnd);
+        setScrollBarPadding(mScrollBarPaddingStart, mScrollBarPaddingEnd);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mCarUxRestrictionsUtil.unregister(mListener);
+    }
+
+    @Override
+    public void setPadding(int left, int top, int right, int bottom) {
+        super.setPadding(left, top, right, bottom);
+        setScrollBarPadding(mScrollBarPaddingStart, mScrollBarPaddingEnd);
+    }
+
+    @Override
+    public void setPaddingRelative(int start, int top, int end, int bottom) {
+        super.setPaddingRelative(start, top, end, bottom);
+        setScrollBarPadding(mScrollBarPaddingStart, mScrollBarPaddingEnd);
     }
 
     /**
@@ -351,7 +363,8 @@ public final class CarUiRecyclerView extends RecyclerView implements
             mScrollBarPaddingEnd = paddingEnd;
 
             if (mScrollBar != null) {
-                mScrollBar.setPadding(paddingStart, paddingEnd);
+                mScrollBar.setPadding(paddingStart + getPaddingTop(),
+                        paddingEnd + getPaddingBottom());
             }
         }
     }
