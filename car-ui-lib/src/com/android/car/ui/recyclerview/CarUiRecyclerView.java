@@ -48,9 +48,9 @@ import com.android.car.ui.utils.CarUxRestrictionsUtil;
 import java.lang.annotation.Retention;
 
 /**
- * View that extends a {@link RecyclerView} and creates a nested {@code RecyclerView} which could
- * potentially include a scrollbar that has page up and down arrows. Interaction with this view is
- * similar to a {@code RecyclerView} as it takes the same adapter and the layout manager.
+ * View that extends a {@link RecyclerView} and wraps itself into a {@link LinearLayout} which
+ * could potentially include a scrollbar that has page up and down arrows. Interaction with this
+ * view is similar to a {@code RecyclerView} as it takes the same adapter and the layout manager.
  */
 public final class CarUiRecyclerView extends RecyclerView implements
         Toolbar.OnHeightChangedListener {
@@ -62,9 +62,9 @@ public final class CarUiRecyclerView extends RecyclerView implements
     private CarUxRestrictionsUtil mCarUxRestrictionsUtil;
     private boolean mScrollBarEnabled;
     private String mScrollBarClass;
-    private boolean mFullyInitialized;
-    private float mScrollBarPaddingStart;
-    private float mScrollBarPaddingEnd;
+    private int mScrollBarPaddingStart;
+    private int mScrollBarPaddingEnd;
+    private boolean mHasScrolledToTop = false;
 
     private ScrollBar mScrollBar;
     private int mInitialTopPadding;
@@ -75,6 +75,8 @@ public final class CarUiRecyclerView extends RecyclerView implements
     private int mCarUiRecyclerViewLayout;
     private int mNumOfColumns;
     private boolean mInstallingExtScrollBar = false;
+    private int mContainerVisibility = View.VISIBLE;
+    private LinearLayout mContainer;
 
     /**
      * The possible values for setScrollBarPosition. The default value is actually {@link
@@ -141,6 +143,7 @@ public final class CarUiRecyclerView extends RecyclerView implements
     }
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr) {
+        setClipToPadding(false);
         mCarUxRestrictionsUtil = CarUxRestrictionsUtil.getInstance(context);
         TypedArray a = context.obtainStyledAttributes(
                 attrs,
@@ -149,12 +152,11 @@ public final class CarUiRecyclerView extends RecyclerView implements
                 R.style.Widget_CarUi_CarUiRecyclerView);
 
         mScrollBarEnabled = context.getResources().getBoolean(R.bool.car_ui_scrollbar_enable);
-        mFullyInitialized = false;
 
-        mScrollBarPaddingStart =
-                context.getResources().getDimension(R.dimen.car_ui_scrollbar_padding_start);
-        mScrollBarPaddingEnd =
-                context.getResources().getDimension(R.dimen.car_ui_scrollbar_padding_end);
+        mScrollBarPaddingStart = context.getResources()
+                .getDimensionPixelSize(R.dimen.car_ui_scrollbar_padding_start);
+        mScrollBarPaddingEnd = context.getResources()
+                .getDimensionPixelSize(R.dimen.car_ui_scrollbar_padding_end);
 
         mCarUiRecyclerViewLayout =
                 a.getInt(R.styleable.CarUiRecyclerView_layoutStyle, CarUiRecyclerViewLayout.LINEAR);
@@ -213,20 +215,25 @@ public final class CarUiRecyclerView extends RecyclerView implements
             setNumOfColumns(mNumOfColumns);
         }
 
+        a.recycle();
         if (!mScrollBarEnabled) {
-            a.recycle();
-            mFullyInitialized = true;
             return;
         }
 
         mScrollBarClass = context.getResources().getString(R.string.car_ui_scrollbar_component);
-        a.recycle();
         this.getViewTreeObserver()
                 .addOnGlobalLayoutListener(() -> {
+                    if (!mHasScrolledToTop && getLayoutManager() != null) {
+                        // Scroll to the top after the first global layout, so that
+                        // we can set padding for the insets and still have the
+                        // recyclerview start at the top.
+                        getHandler().post(() -> getLayoutManager().scrollToPosition(0));
+                        mHasScrolledToTop = true;
+                    }
+
                     if (mInitialTopPadding == 0) {
                         mInitialTopPadding = getPaddingTop();
                     }
-                    mFullyInitialized = true;
                 });
     }
 
@@ -246,6 +253,14 @@ public final class CarUiRecyclerView extends RecyclerView implements
         }
         if (mDividerItemDecoration != null) {
             mDividerItemDecoration.setNumOfColumns(mNumOfColumns);
+        }
+    }
+
+    @Override
+    public void setVisibility(int visibility) {
+        mContainerVisibility = visibility;
+        if (mContainer != null) {
+            mContainer.setVisibility(visibility);
         }
     }
 
@@ -273,25 +288,24 @@ public final class CarUiRecyclerView extends RecyclerView implements
      */
     private void installExternalScrollBar() {
         ViewGroup parent = (ViewGroup) getParent();
-
-        LinearLayout container = new LinearLayout(getContext());
+        mContainer = new LinearLayout(getContext());
         LayoutInflater inflater = LayoutInflater.from(getContext());
-        inflater.inflate(R.layout.car_ui_recycler_view, container, true);
+        inflater.inflate(R.layout.car_ui_recycler_view, mContainer, true);
 
-        container.setLayoutParams(getLayoutParams());
-
+        mContainer.setLayoutParams(getLayoutParams());
+        mContainer.setVisibility(mContainerVisibility);
         int index = parent.indexOfChild(this);
         parent.removeView(this);
-        ((FrameLayout) container.findViewById(R.id.car_ui_recycler_view))
+        ((FrameLayout) mContainer.findViewById(R.id.car_ui_recycler_view))
                 .addView(this,
                         new FrameLayout.LayoutParams(
                                 ViewGroup.LayoutParams.MATCH_PARENT,
                                 ViewGroup.LayoutParams.MATCH_PARENT));
         setVerticalScrollBarEnabled(false);
         setHorizontalScrollBarEnabled(false);
-        parent.addView(container, index);
+        parent.addView(mContainer, index);
 
-        createScrollBarFromConfig(container.findViewById(R.id.car_ui_scroll_bar));
+        createScrollBarFromConfig(mContainer.findViewById(R.id.car_ui_scroll_bar));
     }
 
     private void createScrollBarFromConfig(View scrollView) {
@@ -311,7 +325,7 @@ public final class CarUiRecyclerView extends RecyclerView implements
 
         mScrollBar.initialize(this, scrollView);
 
-        mScrollBar.setPadding((int) mScrollBarPaddingStart, (int) mScrollBarPaddingEnd);
+        mScrollBar.setPadding(mScrollBarPaddingStart, mScrollBarPaddingEnd);
     }
 
     @Override
@@ -322,7 +336,7 @@ public final class CarUiRecyclerView extends RecyclerView implements
 
     /**
      * Sets the scrollbar's padding start (top) and end (bottom).
-     * This padding is applied in addition to the padding of the inner RecyclerView.
+     * This padding is applied in addition to the padding of the RecyclerView.
      */
     public void setScrollBarPadding(int paddingStart, int paddingEnd) {
         if (mScrollBarEnabled) {

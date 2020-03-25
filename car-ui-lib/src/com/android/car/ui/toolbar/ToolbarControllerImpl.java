@@ -29,7 +29,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.DrawableRes;
@@ -106,7 +105,7 @@ public class ToolbarControllerImpl implements ToolbarController {
     private boolean mNavIconSpaceReserved;
     private boolean mLogoFillsNavIconSpace;
     private boolean mShowLogo;
-    private ProgressBar mProgressBar;
+    private ProgressBarController mProgressBar;
     private MenuItem.Listener mOverflowItemListener = item -> {
         updateOverflowDialog(item);
         setState(getState());
@@ -155,7 +154,8 @@ public class ToolbarControllerImpl implements ToolbarController {
         mTitleLogoContainer = view.requireViewById(R.id.car_ui_toolbar_title_logo_container);
         mTitleLogo = view.requireViewById(R.id.car_ui_toolbar_title_logo);
         mSearchViewContainer = view.requireViewById(R.id.car_ui_toolbar_search_view_container);
-        mProgressBar = view.requireViewById(R.id.car_ui_toolbar_progress_bar);
+        mProgressBar = new ProgressBarControllerImpl(
+                view.requireViewById(R.id.car_ui_toolbar_progress_bar));
 
         mTabLayout.addListener(new TabLayout.Listener() {
             @Override
@@ -558,7 +558,10 @@ public class ToolbarControllerImpl implements ToolbarController {
         carUiItem.setChecked(menuItem.isChecked());
         carUiItem.setEnabled(menuItem.isEnabled());
         carUiItem.setTitle(menuItem.getTitle());
-        carUiItem.setOnItemClickedListener(item -> menuItem.performClick());
+        carUiItem.setOnItemClickedListener(item -> {
+            menuItem.performClick();
+            mOverflowDialog.hide();
+        });
         return carUiItem;
     }
 
@@ -770,18 +773,8 @@ public class ToolbarControllerImpl implements ToolbarController {
         return mOnBackListeners.remove(listener);
     }
 
-    /** Shows the progress bar */
-    public void showProgressBar() {
-        mProgressBar.setVisibility(View.VISIBLE);
-    }
-
-    /** Hides the progress bar */
-    public void hideProgressBar() {
-        mProgressBar.setVisibility(View.GONE);
-    }
-
     /** Returns the progress bar */
-    public ProgressBar getProgressBar() {
+    public ProgressBarController getProgressBar() {
         return mProgressBar;
     }
 }

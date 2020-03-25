@@ -29,6 +29,7 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
 import com.android.car.apps.common.LetterTileDrawable;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg;
+import com.android.car.messenger.NotificationMsgProto.NotificationMsg.AvatarIconSync;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.ConversationNotification;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.MessagingStyle;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.MessagingStyleMessage;
@@ -146,6 +147,29 @@ public class Utils {
     public static boolean isValidSender(Person person) {
         if (person.getName() == null) {
             logw(TAG, "Person is missing required field: name");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Ensure the {@link AvatarIconSync} object has all the required fields.
+     **/
+    public static boolean isValidAvatarIconSync(AvatarIconSync iconSync) {
+        if (iconSync == null) {
+            logw(TAG, "AvatarIconSync is null");
+            return false;
+        } else if (iconSync.getMessagingAppDisplayName() == null) {
+            logw(TAG, "AvatarIconSync is missing required field: appDisplayName");
+            return false;
+        } else if (iconSync.getMessagingAppPackageName() == null) {
+            logw(TAG, "AvatarIconSync is missing required field: appPackageName");
+            return false;
+        } else if (iconSync.getPerson().getName() == null) {
+            logw(TAG, "AvatarIconSync is missing required field: Person's name");
+            return false;
+        } else if (iconSync.getPerson().getAvatar() == null) {
+            logw(TAG, "AvatarIconSync is missing required field: Person's avatar");
             return false;
         }
         return true;
