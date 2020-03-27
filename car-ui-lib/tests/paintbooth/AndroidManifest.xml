@@ -96,5 +96,12 @@
         <action android:name="com.android.car.ui.paintbooth.StopService" />
       </intent-filter>
     </service>
+    <service
+        android:name=".VisibleBoundsSimulator"
+        android:exported="true">
+      <intent-filter>
+        <action android:name="com.android.car.ui.paintbooth.VisibleBoundsSimulator.StopService" />
+      </intent-filter>
+    </service>
   </application>
 </manifest>
