@@ -107,6 +107,8 @@ public class ConnectedDeviceManager {
 
     private final AtomicBoolean mIsConnectingToUserDevice = new AtomicBoolean(false);
 
+    private final AtomicBoolean mHasStarted = new AtomicBoolean(false);
+
     private final int mReconnectTimeoutSeconds;
 
     private String mNameForAssociation;
@@ -193,8 +195,12 @@ public class ConnectedDeviceManager {
      * connections can be made using {@link #connectToActiveUserDevice()}.
      */
     public void start() {
-        logd(TAG, "Starting ConnectedDeviceManager.");
-        EventLog.onConnectedDeviceManagerStarted();
+        if (mHasStarted.getAndSet(true)) {
+            reset();
+        } else {
+            logd(TAG, "Starting ConnectedDeviceManager.");
+            EventLog.onConnectedDeviceManagerStarted();
+        }
         // TODO (b/141312136) Start central manager
         mPeripheralManager.start();
         connectToActiveUserDevice();
