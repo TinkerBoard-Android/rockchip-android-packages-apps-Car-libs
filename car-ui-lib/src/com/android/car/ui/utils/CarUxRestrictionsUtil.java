@@ -34,6 +34,10 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+// This can't be in the middle of the rest of the imports on gerrit or it will
+// fail our style checks
+// copybara:insert import android.car.CarNotConnectedException;
+
 /**
  * Utility class to access Car Restriction Manager.
  *
@@ -44,6 +48,10 @@ import java.util.WeakHashMap;
 public class CarUxRestrictionsUtil {
     private static final String TAG = "CarUxRestrictionsUtil";
 
+    /* copybara:insert
+    private final Car mCarApi;
+    private CarUxRestrictionsManager mCarUxRestrictionsManager;
+    */
     @NonNull
     private CarUxRestrictions mCarUxRestrictions = getDefaultRestrictions();
 
@@ -65,6 +73,7 @@ public class CarUxRestrictionsUtil {
                     }
                 };
 
+        // copybara:strip_begin
         Car.createCar(context.getApplicationContext(), null, Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT,
                 (Car car, boolean ready) -> {
                     if (ready) {
@@ -79,6 +88,21 @@ public class CarUxRestrictionsUtil {
                         listener.onUxRestrictionsChanged(null);
                     }
                 });
+        /* copybara:strip_end_and_replace
+        mCarApi = Car.createCar(context.getApplicationContext());
+
+        try {
+            mCarUxRestrictionsManager =
+                    (CarUxRestrictionsManager) mCarApi.getCarManager(
+                            Car.CAR_UX_RESTRICTION_SERVICE);
+            mCarUxRestrictionsManager.registerListener(listener);
+            listener.onUxRestrictionsChanged(
+                    mCarUxRestrictionsManager.getCurrentCarUxRestrictions());
+        } catch (CarNotConnectedException | NullPointerException e) {
+            Log.e(TAG, "Car not connected", e);
+            // mCarUxRestrictions will be the default
+        }
+        */
     }
 
     @NonNull
