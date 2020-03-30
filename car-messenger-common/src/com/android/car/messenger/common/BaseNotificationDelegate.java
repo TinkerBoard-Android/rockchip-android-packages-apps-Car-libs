@@ -16,6 +16,7 @@
 
 package com.android.car.messenger.common;
 
+import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -28,8 +29,6 @@ import android.os.Bundle;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationCompat.Action;
 import androidx.core.app.Person;
-
-import com.android.car.apps.common.LetterTileDrawable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -101,17 +100,6 @@ public class BaseNotificationDelegate {
      **/
     protected final Map<MessageKey, Message> mMessages = new HashMap<>();
 
-    /**
-     * Maps a Bitmap of a sender's Large Icon to the sender's unique key.
-     * The extending class should always keep this map updated with the loaded Sender large icons
-     * before calling {@link BaseNotificationDelegate#postNotification(
-     * ConversationKey, ConversationNotificationInfo, String)}. If the large icon is not found for
-     * the {@link SenderKey} when constructing the notification, a {@link LetterTileDrawable} will
-     * be created for the sender, unless {@link BaseNotificationDelegate#mUseLetterTile} is set to
-     * false.
-     **/
-    protected final Map<SenderKey, Bitmap> mSenderLargeIcons = new HashMap<>();
-
     private final int mBitmapSize;
     private final float mCornerRadiusPercent;
 
@@ -141,7 +129,6 @@ public class BaseNotificationDelegate {
         clearNotifications(predicate);
         mNotificationBuilders.entrySet().removeIf(entry -> predicate.test(entry.getKey()));
         mNotificationInfos.entrySet().removeIf(entry -> predicate.test(entry.getKey()));
-        mSenderLargeIcons.entrySet().removeIf(entry -> predicate.test(entry.getKey()));
         mMessages.entrySet().removeIf(
                 messageKeyMapMessageEntry -> predicate.test(messageKeyMapMessageEntry.getKey()));
     }
@@ -180,7 +167,8 @@ public class BaseNotificationDelegate {
      * and all of its {@link Message} objects have been linked to it.
      **/
     protected void postNotification(ConversationKey conversationKey,
-            ConversationNotificationInfo notificationInfo, String channelId) {
+            ConversationNotificationInfo notificationInfo, String channelId,
+            @Nullable Bitmap avatarIcon) {
         boolean newNotification = !mNotificationBuilders.containsKey(conversationKey);
 
         NotificationCompat.Builder builder = newNotification ? new NotificationCompat.Builder(
@@ -194,9 +182,8 @@ public class BaseNotificationDelegate {
                 R.plurals.notification_new_message, notificationInfo.mMessageKeys.size(),
                 notificationInfo.mMessageKeys.size()));
 
-        if (mSenderLargeIcons.containsKey(getSenderKeyFromConversation(conversationKey))) {
-            builder.setLargeIcon(
-                    mSenderLargeIcons.get(getSenderKeyFromConversation(conversationKey)));
+        if (avatarIcon != null) {
+            builder.setLargeIcon(avatarIcon);
         } else if (mUseLetterTile) {
             builder.setLargeIcon(Utils.createLetterTile(mContext,
                     Utils.getInitials(lastMessage.getSenderName(), ""),
@@ -324,11 +311,6 @@ public class BaseNotificationDelegate {
 
         return PendingIntent.getForegroundService(mContext, notificationId, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
-    }
-
-    protected SenderKey getSenderKeyFromConversation(ConversationKey conversationKey) {
-        ConversationNotificationInfo info = mNotificationInfos.get(conversationKey);
-        return mMessages.get(info.getLastMessageKey()).getSenderKey();
     }
 
 }
