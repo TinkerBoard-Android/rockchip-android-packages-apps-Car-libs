@@ -264,6 +264,7 @@ public final class CarUiRecyclerView extends RecyclerView implements
 
     @Override
     public void setVisibility(int visibility) {
+        super.setVisibility(visibility);
         mContainerVisibility = visibility;
         if (mContainer != null) {
             mContainer.setVisibility(visibility);
