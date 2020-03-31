@@ -23,7 +23,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
-import android.widget.ImageView;
 
 import androidx.annotation.IntRange;
 import androidx.annotation.VisibleForTesting;
@@ -49,17 +48,13 @@ class DefaultScrollBar implements ScrollBar {
     private float mButtonDisabledAlpha;
     private CarUiSnapHelper mSnapHelper;
 
-    private ImageView mUpButton;
     private View mScrollView;
+    private View mScrollTrack;
     private View mScrollThumb;
-    private ImageView mDownButton;
-
-    private int mSeparatingMargin;
+    private View mUpButton;
+    private View mDownButton;
 
     private RecyclerView mRecyclerView;
-
-    /** The amount of space that the scroll thumb is allowed to roam over. */
-    private int mScrollThumbTrackHeight;
 
     private final Interpolator mPaginationInterpolator = new AccelerateDecelerateInterpolator();
 
@@ -81,19 +76,16 @@ class DefaultScrollBar implements ScrollBar {
         getRecyclerView().addOnScrollListener(mRecyclerViewOnScrollListener);
         getRecyclerView().getRecycledViewPool().setMaxRecycledViews(0, 12);
 
-        mSeparatingMargin = res.getDimensionPixelSize(R.dimen.car_ui_scrollbar_separator_margin);
+        mUpButton = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_page_up);
+        mUpButton.setOnClickListener(
+                new PaginateButtonClickListener(PaginationListener.PAGE_UP));
 
-        mUpButton = requireViewByRefId(mScrollView, R.id.page_up);
-        PaginateButtonClickListener upButtonClickListener =
-                new PaginateButtonClickListener(PaginationListener.PAGE_UP);
-        mUpButton.setOnClickListener(upButtonClickListener);
+        mDownButton = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_page_down);
+        mDownButton.setOnClickListener(
+                new PaginateButtonClickListener(PaginationListener.PAGE_DOWN));
 
-        mDownButton = requireViewByRefId(mScrollView, R.id.page_down);
-        PaginateButtonClickListener downButtonClickListener =
-                new PaginateButtonClickListener(PaginationListener.PAGE_DOWN);
-        mDownButton.setOnClickListener(downButtonClickListener);
-
-        mScrollThumb = requireViewByRefId(mScrollView, R.id.scrollbar_thumb);
+        mScrollTrack = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_track);
+        mScrollThumb = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_thumb);
 
         mSnapHelper = new CarUiSnapHelper(rv.getContext());
         getRecyclerView().setOnFlingListener(null);
@@ -109,7 +101,6 @@ class DefaultScrollBar implements ScrollBar {
                         int oldTop,
                         int oldRight,
                         int oldBottom) -> {
-                    mHandler.post(this::calculateScrollThumbTrackHeight);
                     mHandler.post(() -> updatePaginationButtons(/* animate= */ false));
                 });
     }
@@ -168,21 +159,6 @@ class DefaultScrollBar implements ScrollBar {
     }
 
     /**
-     * Calculate the amount of space that the scroll bar thumb is allowed to roam. The thumb is
-     * allowed to take up the space between the down bottom and the up or alpha jump button,
-     * depending
-     * on if the latter is visible.
-     */
-    private void calculateScrollThumbTrackHeight() {
-        // Subtracting (2 * mSeparatingMargin) for the top/bottom margin above and below the
-        // scroll bar thumb.
-        mScrollThumbTrackHeight = mDownButton.getTop() - (2 * mSeparatingMargin);
-
-        // If there's an alpha jump button, then the thumb is laid out starting from below that.
-        mScrollThumbTrackHeight -= mUpButton.getBottom();
-    }
-
-    /**
      * Sets the range, offset and extent of the scroll bar. The range represents the size of a
      * container for the scrollbar thumb; offset is the distance from the start of the container to
      * where the thumb should be; and finally, extent is the size of the thumb.
@@ -236,7 +212,7 @@ class DefaultScrollBar implements ScrollBar {
      */
     private int calculateScrollThumbLength(int range, int extent) {
         // Scale the length by the available space that the thumb can fill.
-        return Math.round(((float) extent / range) * mScrollThumbTrackHeight);
+        return Math.round(((float) extent / range) * mScrollTrack.getHeight());
     }
 
     /**
@@ -254,11 +230,11 @@ class DefaultScrollBar implements ScrollBar {
         // Ensure that if the user has reached the bottom of the list, then the scroll bar is
         // aligned to the bottom as well. Otherwise, scale the offset appropriately.
         // This offset will be a value relative to the parent of this scrollbar, so start by where
-        // the top of mScrollThumb is.
-        return mScrollThumb.getTop()
+        // the top of scrollbar track is.
+        return mScrollTrack.getTop()
                 + (isDownEnabled()
-                ? Math.round(((float) offset / range) * mScrollThumbTrackHeight)
-                : mScrollThumbTrackHeight - thumbLength);
+                ? Math.round(((float) offset / range) * mScrollTrack.getHeight())
+                : mScrollTrack.getHeight() - thumbLength);
     }
 
     /** Moves the given view to the specified 'y' position. */
