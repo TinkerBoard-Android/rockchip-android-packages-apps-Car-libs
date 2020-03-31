@@ -19,14 +19,8 @@ android_library {
     min_sdk_version: "28",
     srcs: [
         "src/**/*.java",
-        "src/**/*.kt",
     ],
     optimize: {
         enabled: false,
     },
-    static_libs: [
-    	"guava",
-    	"gson-prebuilt-jar",
-    	"androidx-constraintlayout_constraintlayout",
-    ],
 }

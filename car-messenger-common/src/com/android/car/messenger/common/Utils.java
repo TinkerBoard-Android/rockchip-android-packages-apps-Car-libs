@@ -159,9 +159,6 @@ public class Utils {
         if (iconSync == null) {
             logw(TAG, "AvatarIconSync is null");
             return false;
-        } else if (iconSync.getMessagingAppDisplayName() == null) {
-            logw(TAG, "AvatarIconSync is missing required field: appDisplayName");
-            return false;
         } else if (iconSync.getMessagingAppPackageName() == null) {
             logw(TAG, "AvatarIconSync is missing required field: appPackageName");
             return false;
