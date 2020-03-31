@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,26 +60,18 @@ public class MainActivity extends Activity implements InsetsChangedListener {
     /**
      * List of all sample activities.
      */
-    private final List<Pair<String, Class<? extends Activity>>> mActivities = Arrays.asList(
-            Pair.create("Dialogs sample", DialogsActivity.class),
-            Pair.create("List sample", CarUiRecyclerViewActivity.class),
-            Pair.create("Grid sample", GridCarUiRecyclerViewActivity.class),
-            Pair.create("Preferences sample", PreferenceActivity.class),
-            Pair.create("Overlays", OverlayActivity.class),
-            Pair.create("Toolbar sample", ToolbarActivity.class),
-            Pair.create("No CarUiToolbar sample", NoCarUiToolbarActivity.class),
-            Pair.create("Widget sample", WidgetActivity.class),
-            Pair.create("ListItem sample", CarUiListItemActivity.class)
-    );
-
-    private final List<Pair<String, View.OnClickListener>> mSwitches = Arrays.asList(
-            Pair.create("Show foreground activities", v -> {
-                Intent intent = new Intent(this, CurrentActivityService.class);
-                if (isCurrentActivityServiceRunning()) {
-                    intent.setAction(CurrentActivityService.STOP_SERVICE);
-                }
-                startForegroundService(intent);
-            })
+    private final List<Element> mActivities = Arrays.asList(
+            new Element("Show foreground activities", CurrentActivityService.class, true),
+            new Element("Simulate Screen Bounds", VisibleBoundsSimulator.class, true),
+            new Element("Dialogs sample", DialogsActivity.class, false),
+            new Element("List sample", CarUiRecyclerViewActivity.class, false),
+            new Element("Grid sample", GridCarUiRecyclerViewActivity.class, false),
+            new Element("Preferences sample", PreferenceActivity.class, false),
+            new Element("Overlays", OverlayActivity.class, false),
+            new Element("Toolbar sample", ToolbarActivity.class, false),
+            new Element("No CarUiToolbar sample", NoCarUiToolbarActivity.class, false),
+            new Element("Widget sample", WidgetActivity.class, false),
+            new Element("ListItem sample", CarUiListItemActivity.class, false)
     );
 
     private class ViewHolder extends RecyclerView.ViewHolder {
@@ -91,12 +82,12 @@ public class MainActivity extends Activity implements InsetsChangedListener {
             mButton = itemView.findViewById(R.id.button);
         }
 
-        void bind(String text, View.OnClickListener listener) {
-            mButton.setText(text);
-            mButton.setOnClickListener(listener);
+        void bind(Element element) {
+            mButton.setText(element.mDisplayText);
+            mButton.setOnClickListener(element.mOnClickListener);
 
-            if (mButton instanceof Switch) {
-                ((Switch) mButton).setChecked(isCurrentActivityServiceRunning());
+            if (element.mIsService && mButton instanceof Switch) {
+                ((Switch) mButton).setChecked(isServiceRunning(element.mClass));
             }
         }
     }
@@ -120,29 +111,41 @@ public class MainActivity extends Activity implements InsetsChangedListener {
                 @Override
                 public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
                     if (getItemViewType(position) == TYPE_SWITCH) {
-                        Pair<String, View.OnClickListener> item = mSwitches.get(position);
-                        holder.bind(item.first, item.second);
+                        Element item = mActivities.get(position);
+                        item.mOnClickListener = v -> {
+                            Intent intent = new Intent(holder.itemView.getContext(), item.mClass);
+                            if (isServiceRunning(item.mClass)) {
+                                // If you are about to add a new service you should extract an
+                                // interface and generalize this instead.
+                                if (item.mClass.getName().equals(
+                                        CurrentActivityService.class.getName())) {
+                                    intent.setAction(CurrentActivityService.STOP_SERVICE);
+                                } else if (item.mClass.getName().equals(
+                                        VisibleBoundsSimulator.class.getName())) {
+                                    intent.setAction(VisibleBoundsSimulator.STOP_SERVICE);
+                                }
+                            }
+                            startForegroundService(intent);
+                        };
+                        holder.bind(item);
                     } else {
-                        Pair<String, Class<? extends Activity>> item =
-                                mActivities.get(position - mSwitches.size());
-                        holder.bind(item.first, v -> {
-                            Intent intent = new Intent(holder.itemView.getContext(), item.second);
+                        Element item = mActivities.get(position);
+                        item.mOnClickListener = v -> {
+                            Intent intent = new Intent(holder.itemView.getContext(), item.mClass);
                             startActivity(intent);
-                        });
+                        };
+                        holder.bind(item);
                     }
                 }
 
                 @Override
                 public int getItemCount() {
-                    return mSwitches.size() + mActivities.size();
+                    return mActivities.size();
                 }
 
                 @Override
                 public int getItemViewType(int position) {
-                    if (position < mSwitches.size()) {
-                        return TYPE_SWITCH;
-                    }
-                    return TYPE_ACTIVITY;
+                    return mActivities.get(position).mIsService ? TYPE_SWITCH : TYPE_ACTIVITY;
                 }
             };
 
@@ -238,11 +241,11 @@ public class MainActivity extends Activity implements InsetsChangedListener {
         }
     }
 
-    private boolean isCurrentActivityServiceRunning() {
+    private boolean isServiceRunning(Class serviceClazz) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(
                 Integer.MAX_VALUE)) {
-            if (CurrentActivityService.class.getName().equals(service.service.getClassName())) {
+            if (serviceClazz.getName().equals(service.service.getClassName())) {
                 return true;
             }
         }
@@ -255,5 +258,18 @@ public class MainActivity extends Activity implements InsetsChangedListener {
                 .setPadding(0, insets.getTop(), 0, insets.getBottom());
         requireViewById(android.R.id.content)
                 .setPadding(insets.getLeft(), 0, insets.getRight(), 0);
+    }
+
+    private class Element {
+        String mDisplayText;
+        Class mClass;
+        boolean mIsService;
+        View.OnClickListener mOnClickListener;
+
+        Element(String displayText, Class clazz, boolean isService) {
+            this.mDisplayText = displayText;
+            this.mClass = clazz;
+            this.mIsService = isService;
+        }
     }
 }
