@@ -121,10 +121,8 @@ public class DefaultScrollBarTest {
         mScrollBar.initialize(mRecyclerView, scrollView);
         mScrollBar.setPadding(10, 20);
 
-        DefaultScrollBar defaultScrollBar = (DefaultScrollBar) mScrollBar;
-
-        assertThat(defaultScrollBar.mPaddingStart).isEqualTo(10);
-        assertThat(defaultScrollBar.mPaddingEnd).isEqualTo(20);
+        assertThat(scrollView.getPaddingTop()).isEqualTo(10);
+        assertThat(scrollView.getPaddingBottom()).isEqualTo(20);
     }
 
     @Test
