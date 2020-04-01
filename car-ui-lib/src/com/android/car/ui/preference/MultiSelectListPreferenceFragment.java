@@ -30,11 +30,15 @@ import androidx.preference.DialogPreference;
 import androidx.preference.Preference;
 
 import com.android.car.ui.R;
+import com.android.car.ui.baselayout.Insets;
+import com.android.car.ui.baselayout.InsetsChangedListener;
+import com.android.car.ui.core.CarUi;
 import com.android.car.ui.recyclerview.CarUiContentListItem;
 import com.android.car.ui.recyclerview.CarUiListItem;
 import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.Toolbar;
+import com.android.car.ui.toolbar.ToolbarController;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -45,7 +49,7 @@ import java.util.Set;
  * A fragment that provides a layout with a list of options associated with a {@link
  * CarUiMultiSelectListPreference}.
  */
-public class MultiSelectListPreferenceFragment extends Fragment {
+public class MultiSelectListPreferenceFragment extends Fragment implements InsetsChangedListener {
 
     private CarUiMultiSelectListPreference mPreference;
     private Set<String> mNewValues;
@@ -67,30 +71,41 @@ public class MultiSelectListPreferenceFragment extends Fragment {
     public View onCreateView(
             @NonNull LayoutInflater inflater, @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.car_ui_list_preference, container, false);
+        if (CarUi.getToolbar(getActivity()) == null) {
+            return inflater.inflate(R.layout.car_ui_list_preference_with_toolbar, container, false);
+        } else {
+            return inflater.inflate(R.layout.car_ui_list_preference, container, false);
+        }
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         final CarUiRecyclerView recyclerView = view.requireViewById(R.id.list);
-        final Toolbar toolbar = view.requireViewById(R.id.toolbar);
+        ToolbarController toolbar = CarUi.getToolbar(requireActivity());
 
-        recyclerView.setPadding(0, toolbar.getHeight(), 0, 0);
-        toolbar.registerToolbarHeightChangeListener(newHeight -> {
-            if (recyclerView.getPaddingTop() == newHeight) {
-                return;
-            }
+        // TODO(b/150230923) remove the code for the old toolbar height change when apps are ready
+        if (toolbar == null) {
+            Toolbar toolbarView = view.requireViewById(R.id.toolbar);
+            toolbar = toolbarView;
 
-            int oldHeight = recyclerView.getPaddingTop();
-            recyclerView.setPadding(0, newHeight, 0, 0);
-            recyclerView.scrollBy(0, oldHeight - newHeight);
-        });
+            recyclerView.setPadding(0, toolbarView.getHeight(), 0, 0);
+            toolbarView.registerToolbarHeightChangeListener(newHeight -> {
+                if (recyclerView.getPaddingTop() == newHeight) {
+                    return;
+                }
+
+                int oldHeight = recyclerView.getPaddingTop();
+                recyclerView.setPadding(0, newHeight, 0, 0);
+                recyclerView.scrollBy(0, oldHeight - newHeight);
+            });
+        }
 
         mPreference = getPreference();
 
         recyclerView.setClipToPadding(false);
         toolbar.setTitle(mPreference.getTitle());
+        toolbar.setState(Toolbar.State.SUBPAGE);
 
         mNewValues = new HashSet<>(mPreference.getValues());
         CharSequence[] entries = mPreference.getEntries();
@@ -141,6 +156,15 @@ public class MultiSelectListPreferenceFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        Insets insets = CarUi.getInsets(getActivity());
+        if (insets != null) {
+            onCarUiInsetsChanged(insets);
+        }
+    }
+
     private CarUiMultiSelectListPreference getPreference() {
         if (getArguments() == null) {
             throw new IllegalStateException("Preference arguments cannot be null");
@@ -170,5 +194,13 @@ public class MultiSelectListPreferenceFragment extends Fragment {
         }
 
         return (CarUiMultiSelectListPreference) preference;
+    }
+
+    @Override
+    public void onCarUiInsetsChanged(Insets insets) {
+        View view = requireView();
+        view.requireViewById(R.id.list)
+                .setPadding(0, insets.getTop(), 0, insets.getBottom());
+        view.setPadding(insets.getLeft(), 0, insets.getRight(), 0);
     }
 }
