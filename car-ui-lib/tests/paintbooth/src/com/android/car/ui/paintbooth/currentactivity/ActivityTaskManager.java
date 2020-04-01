@@ -70,9 +70,9 @@ interface ActivityTaskManager {
     @NonNull
     static ActivityTaskManager getService() {
         try {
-            Class clazz = Class.forName(
+            Class<?> clazz = Class.forName(
                     "com.android.car.ui.paintbooth.currentactivity.ActivityTaskManagerImpl");
-            Constructor constructor = clazz.getDeclaredConstructor();
+            Constructor<?> constructor = clazz.getDeclaredConstructor();
             constructor.setAccessible(true);
             return (ActivityTaskManager) constructor.newInstance();
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException

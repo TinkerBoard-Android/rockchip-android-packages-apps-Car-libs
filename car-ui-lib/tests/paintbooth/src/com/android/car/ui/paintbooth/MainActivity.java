@@ -18,6 +18,7 @@ package com.android.car.ui.paintbooth;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -57,85 +58,100 @@ import java.util.List;
  */
 public class MainActivity extends Activity implements InsetsChangedListener {
 
+    public static final String STOP_SERVICE = "com.android.car.ui.paintbooth.StopService";
+
     /**
      * List of all sample activities.
      */
-    private final List<Element> mActivities = Arrays.asList(
-            new Element("Show foreground activities", CurrentActivityService.class, true),
-            new Element("Simulate Screen Bounds", VisibleBoundsSimulator.class, true),
-            new Element("Dialogs sample", DialogsActivity.class, false),
-            new Element("List sample", CarUiRecyclerViewActivity.class, false),
-            new Element("Grid sample", GridCarUiRecyclerViewActivity.class, false),
-            new Element("Preferences sample", PreferenceActivity.class, false),
-            new Element("Overlays", OverlayActivity.class, false),
-            new Element("Toolbar sample", ToolbarActivity.class, false),
-            new Element("No CarUiToolbar sample", NoCarUiToolbarActivity.class, false),
-            new Element("Widget sample", WidgetActivity.class, false),
-            new Element("ListItem sample", CarUiListItemActivity.class, false)
+    private final List<ListElement> mActivities = Arrays.asList(
+            new ServiceElement("Show foreground activities", CurrentActivityService.class),
+            new ServiceElement("Simulate Screen Bounds", VisibleBoundsSimulator.class),
+            new ActivityElement("Dialogs sample", DialogsActivity.class),
+            new ActivityElement("List sample", CarUiRecyclerViewActivity.class),
+            new ActivityElement("Grid sample", GridCarUiRecyclerViewActivity.class),
+            new ActivityElement("Preferences sample", PreferenceActivity.class),
+            new ActivityElement("Overlays", OverlayActivity.class),
+            new ActivityElement("Toolbar sample", ToolbarActivity.class),
+            new ActivityElement("No CarUiToolbar sample", NoCarUiToolbarActivity.class),
+            new ActivityElement("Widget sample", WidgetActivity.class),
+            new ActivityElement("ListItem sample", CarUiListItemActivity.class)
     );
 
-    private class ViewHolder extends RecyclerView.ViewHolder {
-        private Button mButton;
+    private abstract static class ViewHolder extends RecyclerView.ViewHolder {
 
         ViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
+
+        public abstract void bind(ListElement element);
+    }
+
+    private class ActivityViewHolder extends ViewHolder {
+        private Button mButton;
+
+        ActivityViewHolder(@NonNull View itemView) {
             super(itemView);
             mButton = itemView.findViewById(R.id.button);
         }
 
-        void bind(Element element) {
-            mButton.setText(element.mDisplayText);
-            mButton.setOnClickListener(element.mOnClickListener);
-
-            if (element.mIsService && mButton instanceof Switch) {
-                ((Switch) mButton).setChecked(isServiceRunning(element.mClass));
+        @Override
+        public void bind(ListElement e) {
+            if (!(e instanceof ActivityElement)) {
+                throw new IllegalArgumentException("Expected an ActivityElement");
             }
+            ActivityElement element = (ActivityElement) e;
+            mButton.setText(element.getText());
+            mButton.setOnClickListener(v ->
+                    startActivity(new Intent(itemView.getContext(), element.getActivity())));
+        }
+    }
+
+    private class ServiceViewHolder extends ViewHolder {
+        private Switch mSwitch;
+
+        ServiceViewHolder(@NonNull View itemView) {
+            super(itemView);
+            mSwitch = itemView.findViewById(R.id.button);
+        }
+
+        @Override
+        public void bind(ListElement e) {
+            if (!(e instanceof ServiceElement)) {
+                throw new IllegalArgumentException("Expected an ActivityElement");
+            }
+            ServiceElement element = (ServiceElement) e;
+            mSwitch.setChecked(isServiceRunning(element.getService()));
+            mSwitch.setText(element.getText());
+            mSwitch.setOnClickListener(v -> {
+                Intent intent = new Intent(itemView.getContext(), element.getService());
+                if (isServiceRunning(element.getService())) {
+                    intent.setAction(STOP_SERVICE);
+                }
+                startForegroundService(intent);
+            });
         }
     }
 
     private final RecyclerView.Adapter<ViewHolder> mAdapter =
             new RecyclerView.Adapter<ViewHolder>() {
-
-                private static final int TYPE_SWITCH = 0;
-                private static final int TYPE_ACTIVITY = 1;
-
                 @NonNull
                 @Override
                 public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                    View item = LayoutInflater.from(parent.getContext()).inflate(
-                            viewType == TYPE_SWITCH ? R.layout.list_item_switch
-                                    : R.layout.list_item,
-                            parent, false);
-                    return new ViewHolder(item);
+                    LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+                    if (viewType == ListElement.TYPE_ACTIVITY) {
+                        return new ActivityViewHolder(
+                                inflater.inflate(R.layout.list_item, parent, false));
+                    } else if (viewType == ListElement.TYPE_SERVICE) {
+                        return new ServiceViewHolder(
+                                inflater.inflate(R.layout.list_item_switch, parent, false));
+                    } else {
+                        throw new IllegalArgumentException("Unknown viewType: " + viewType);
+                    }
                 }
 
                 @Override
                 public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-                    if (getItemViewType(position) == TYPE_SWITCH) {
-                        Element item = mActivities.get(position);
-                        item.mOnClickListener = v -> {
-                            Intent intent = new Intent(holder.itemView.getContext(), item.mClass);
-                            if (isServiceRunning(item.mClass)) {
-                                // If you are about to add a new service you should extract an
-                                // interface and generalize this instead.
-                                if (item.mClass.getName().equals(
-                                        CurrentActivityService.class.getName())) {
-                                    intent.setAction(CurrentActivityService.STOP_SERVICE);
-                                } else if (item.mClass.getName().equals(
-                                        VisibleBoundsSimulator.class.getName())) {
-                                    intent.setAction(VisibleBoundsSimulator.STOP_SERVICE);
-                                }
-                            }
-                            startForegroundService(intent);
-                        };
-                        holder.bind(item);
-                    } else {
-                        Element item = mActivities.get(position);
-                        item.mOnClickListener = v -> {
-                            Intent intent = new Intent(holder.itemView.getContext(), item.mClass);
-                            startActivity(intent);
-                        };
-                        holder.bind(item);
-                    }
+                    holder.bind(mActivities.get(position));
                 }
 
                 @Override
@@ -145,7 +161,7 @@ public class MainActivity extends Activity implements InsetsChangedListener {
 
                 @Override
                 public int getItemViewType(int position) {
-                    return mActivities.get(position).mIsService ? TYPE_SWITCH : TYPE_ACTIVITY;
+                    return mActivities.get(position).getType();
                 }
             };
 
@@ -241,7 +257,7 @@ public class MainActivity extends Activity implements InsetsChangedListener {
         }
     }
 
-    private boolean isServiceRunning(Class serviceClazz) {
+    private boolean isServiceRunning(Class<? extends Service> serviceClazz) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(
                 Integer.MAX_VALUE)) {
@@ -260,16 +276,56 @@ public class MainActivity extends Activity implements InsetsChangedListener {
                 .setPadding(insets.getLeft(), 0, insets.getRight(), 0);
     }
 
-    private class Element {
-        String mDisplayText;
-        Class mClass;
-        boolean mIsService;
-        View.OnClickListener mOnClickListener;
+    private abstract static class ListElement {
+        static final int TYPE_ACTIVITY = 0;
+        static final int TYPE_SERVICE = 1;
 
-        Element(String displayText, Class clazz, boolean isService) {
-            this.mDisplayText = displayText;
-            this.mClass = clazz;
-            this.mIsService = isService;
+        private final String mText;
+
+        ListElement(String text) {
+            mText = text;
+        }
+
+        String getText() {
+            return mText;
+        }
+
+        abstract int getType();
+    }
+
+    private static class ActivityElement extends ListElement {
+        private final Class<? extends Activity> mActivityClass;
+
+        ActivityElement(String text, Class<? extends Activity> activityClass) {
+            super(text);
+            mActivityClass = activityClass;
+        }
+
+        Class<? extends Activity> getActivity() {
+            return mActivityClass;
+        }
+
+        @Override
+        int getType() {
+            return TYPE_ACTIVITY;
+        }
+    }
+
+    private static class ServiceElement extends ListElement {
+        private final Class<? extends Service> mServiceClass;
+
+        ServiceElement(String text, Class<? extends Service> serviceClass) {
+            super(text);
+            mServiceClass = serviceClass;
+        }
+
+        Class<? extends Service> getService() {
+            return mServiceClass;
+        }
+
+        @Override
+        int getType() {
+            return TYPE_SERVICE;
         }
     }
 }
