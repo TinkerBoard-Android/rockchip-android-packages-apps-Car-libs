@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -238,6 +239,15 @@ public final class CarUiRecyclerView extends RecyclerView implements
                         mInitialTopPadding = getPaddingTop();
                     }
                 });
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        super.onRestoreInstanceState(state);
+
+        // If we're restoring an existing RecyclerView, we don't want
+        // to do the initial scroll to top
+        mHasScrolledToTop = true;
     }
 
     @Override
