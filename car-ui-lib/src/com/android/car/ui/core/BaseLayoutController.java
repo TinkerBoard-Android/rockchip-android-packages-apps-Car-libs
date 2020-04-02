@@ -17,6 +17,7 @@ package com.android.car.ui.core;
 
 import android.app.Activity;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -105,10 +106,16 @@ class BaseLayoutController {
      */
     private void installBaseLayout(Activity activity) {
         boolean toolbarEnabled = getThemeBoolean(activity, R.attr.carUiToolbar);
+        boolean legacyToolbar = Build.VERSION.SDK_INT <= Build.VERSION_CODES.P;
+        @LayoutRes final int baseLayoutRes;
 
-        @LayoutRes final int baseLayoutRes = toolbarEnabled
-                ? R.layout.car_ui_base_layout_toolbar
-                : R.layout.car_ui_base_layout;
+        if (toolbarEnabled) {
+            baseLayoutRes = legacyToolbar
+                    ? R.layout.car_ui_base_layout_toolbar_legacy
+                    : R.layout.car_ui_base_layout_toolbar;
+        } else {
+            baseLayoutRes = R.layout.car_ui_base_layout;
+        }
 
         View baseLayout = LayoutInflater.from(activity)
                 .inflate(baseLayoutRes, null, false);
@@ -127,7 +134,11 @@ class BaseLayoutController {
                 ViewGroup.LayoutParams.MATCH_PARENT));
 
         if (toolbarEnabled) {
-            mToolbarController = new ToolbarControllerImpl(baseLayout);
+            if (legacyToolbar) {
+                mToolbarController = baseLayout.requireViewById(R.id.car_ui_toolbar);
+            } else {
+                mToolbarController = new ToolbarControllerImpl(baseLayout);
+            }
         }
 
         mInsetsUpdater = new InsetsUpdater(activity, baseLayout, windowContentView);
