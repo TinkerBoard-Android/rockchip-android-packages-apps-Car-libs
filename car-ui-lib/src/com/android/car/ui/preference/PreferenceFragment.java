@@ -107,12 +107,20 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        Insets insets = CarUi.getInsets(getActivity());
+        if (insets != null) {
+            onCarUiInsetsChanged(insets);
+        }
+    }
+
+    @Override
     public void onCarUiInsetsChanged(Insets insets) {
         View view = requireView();
         view.requireViewById(R.id.recycler_view)
                 .setPadding(0, insets.getTop(), 0, insets.getBottom());
-        view.getRootView().requireViewById(android.R.id.content)
-                .setPadding(insets.getLeft(), 0, insets.getRight(), 0);
+        view.setPadding(insets.getLeft(), 0, insets.getRight(), 0);
     }
 
     /**
