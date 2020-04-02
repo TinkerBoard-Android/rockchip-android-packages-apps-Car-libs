@@ -28,6 +28,9 @@ import com.android.car.ui.toolbar.ToolbarController;
  */
 public class CarUi {
 
+    /** Prevent instantiating this class */
+    private CarUi() {}
+
     /**
      * Gets the {@link ToolbarController} for an activity. Requires that the Activity uses
      * Theme.CarUi.WithToolbar, or otherwise sets carUiBaseLayout and carUiToolbar to true.
