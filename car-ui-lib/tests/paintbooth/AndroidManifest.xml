@@ -32,6 +32,8 @@
   <uses-permission android:name="android.permission.MANAGE_ACTIVITY_STACKS" />
   <uses-permission android:name="android.permission.REAL_GET_TASKS" />
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <!-- Required for using TYPE_APPLICATION_OVERLAY to display overlays -->
+  <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
   <application
       android:icon="@drawable/ic_launcher"
@@ -91,17 +93,10 @@
     <service
         android:label="Current Activity Service"
         android:exported="false"
-        android:name=".currentactivity.CurrentActivityService">
-      <intent-filter>
-        <action android:name="com.android.car.ui.paintbooth.StopService" />
-      </intent-filter>
-    </service>
+        android:name=".currentactivity.CurrentActivityService"/>
     <service
-        android:name=".VisibleBoundsSimulator"
-        android:exported="true">
-      <intent-filter>
-        <action android:name="com.android.car.ui.paintbooth.VisibleBoundsSimulator.StopService" />
-      </intent-filter>
-    </service>
+        android:label="Visible Bounds Simulator"
+        android:exported="false"
+        android:name=".VisibleBoundsSimulator"/>
   </application>
 </manifest>

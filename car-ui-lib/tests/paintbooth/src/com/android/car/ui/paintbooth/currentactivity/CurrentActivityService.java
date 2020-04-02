@@ -42,6 +42,7 @@ import android.widget.Toast;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
+import com.android.car.ui.paintbooth.MainActivity;
 import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.paintbooth.currentactivity.ActivityTaskManager.TaskStackListener;
 
@@ -56,8 +57,6 @@ import java.util.List;
  * com.android.car.ui.paintbooth.StopService
  */
 public class CurrentActivityService extends Service {
-
-    public static final String STOP_SERVICE = "com.android.car.ui.paintbooth.StopService";
     private static final int FOREGROUND_SERVICE_ID = 111;
 
     private WindowManager mWindowManager;
@@ -160,7 +159,7 @@ public class CurrentActivityService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (STOP_SERVICE.equals(intent.getAction())) {
+        if (MainActivity.STOP_SERVICE.equals(intent.getAction())) {
             stopSelf();
         }
 
