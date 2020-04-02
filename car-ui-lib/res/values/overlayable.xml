@@ -120,8 +120,8 @@
       <item type="dimen" name="car_ui_scrollbar_deceleration_times_divisor"/>
       <item type="dimen" name="car_ui_scrollbar_margin"/>
       <item type="dimen" name="car_ui_scrollbar_milliseconds_per_inch"/>
-      <item type="dimen" name="car_ui_scrollbar_padding_end"/>
-      <item type="dimen" name="car_ui_scrollbar_padding_start"/>
+      <item type="dimen" name="car_ui_scrollbar_padding_bottom"/>
+      <item type="dimen" name="car_ui_scrollbar_padding_top"/>
       <item type="dimen" name="car_ui_scrollbar_separator_margin"/>
       <item type="dimen" name="car_ui_scrollbar_thumb_radius"/>
       <item type="dimen" name="car_ui_scrollbar_thumb_width"/>
