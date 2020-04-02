@@ -335,7 +335,7 @@ public class CarUiSnapHelper extends LinearSnapHelper {
      * @param helper The {@link OrientationHelper} associated with the current RecyclerView.
      * @return {@code true} if the given view is a valid snapping view; {@code false} otherwise.
      */
-    private boolean isValidSnapView(View view, OrientationHelper helper) {
+    private static boolean isValidSnapView(View view, OrientationHelper helper) {
         return helper.getDecoratedMeasurement(view) <= helper.getTotalSpace();
     }
 
@@ -347,7 +347,7 @@ public class CarUiSnapHelper extends LinearSnapHelper {
      * @param helper An {@link OrientationHelper} to aid with calculation.
      * @return A float indicating the percentage of the given view that is visible.
      */
-    private float getPercentageVisible(View view, OrientationHelper helper) {
+    private static float getPercentageVisible(View view, OrientationHelper helper) {
         int start = helper.getStartAfterPadding();
         int end = helper.getEndAfterPadding();
 

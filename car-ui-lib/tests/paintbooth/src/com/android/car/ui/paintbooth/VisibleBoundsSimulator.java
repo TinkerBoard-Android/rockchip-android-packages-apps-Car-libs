@@ -47,9 +47,6 @@ import androidx.core.app.NotificationCompat;
  * used to display different screen styles from OEMs.
  */
 public class VisibleBoundsSimulator extends Service {
-
-    public static final String STOP_SERVICE =
-            "com.android.car.ui.paintbooth.DisplayService.StopService";
     private static final int FOREGROUND_SERVICE_ID = 222;
     private View mContainer;
 
@@ -62,7 +59,7 @@ public class VisibleBoundsSimulator extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (STOP_SERVICE.equals(intent.getAction())) {
+        if (MainActivity.STOP_SERVICE.equals(intent.getAction())) {
             stopSelf();
         }
 
@@ -112,7 +109,9 @@ public class VisibleBoundsSimulator extends Service {
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY,
+                // WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY is a hidden api, so
+                // use its value here so we can still compile on gradle / google3
+                WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW + 26,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                         | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
