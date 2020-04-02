@@ -70,14 +70,11 @@
 
     <service
         android:label="Current Activity Service"
-        android:name=".currentactivity.CurrentActivityService"
-        android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
-      <intent-filter>
-        <action android:name="android.accessibilityservice.AccessibilityService"/>
-      </intent-filter>
-      <meta-data
-          android:name="android.accessibilityservice"
-          android:resource="@xml/current_activity_service"/>
-    </service>
+        android:exported="false"
+        android:name=".currentactivity.CurrentActivityService"/>
+    <service
+        android:label="Visible Bounds Simulator"
+        android:exported="false"
+        android:name=".VisibleBoundsSimulator"/>
   </application>
 </manifest>
