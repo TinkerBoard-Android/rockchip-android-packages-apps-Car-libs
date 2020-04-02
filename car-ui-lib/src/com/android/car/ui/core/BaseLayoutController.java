@@ -46,7 +46,7 @@ import java.util.WeakHashMap;
  */
 class BaseLayoutController {
 
-    private static Map<Activity, BaseLayoutController> sBaseLayoutMap = new WeakHashMap<>();
+    private static final Map<Activity, BaseLayoutController> sBaseLayoutMap = new WeakHashMap<>();
 
     private InsetsUpdater mInsetsUpdater;
 
@@ -255,8 +255,10 @@ class BaseLayoutController {
             View content = mActivity.requireViewById(android.R.id.content);
 
             // Calculate how much each inset view overlays the content view
-            int top, bottom, left, right;
-            top = bottom = left = right = 0;
+            int top = 0;
+            int left = 0;
+            int right = 0;
+            int bottom = 0;
             if (mTopInsetView != null) {
                 top = Math.max(0, getBottomOfView(mTopInsetView) - getTopOfView(content));
             }
