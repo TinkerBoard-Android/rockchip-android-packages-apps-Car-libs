@@ -48,6 +48,7 @@ def main():
         compare_resources(ROOT_FOLDER+'/res', OUTPUT_FILE_PATH + 'current.xml')
     else:
         generate_current_file(ROOT_FOLDER+'/res', output_file)
+        generate_overlayable_file(ROOT_FOLDER+'/res')
 
 def generate_current_file(res_folder, output_file='current.xml'):
     resources = remove_layout_resources(get_all_resources(res_folder))
@@ -68,6 +69,47 @@ def generate_current_file(res_folder, output_file='current.xml'):
     data = etree.ElementTree(root)
 
     with open(OUTPUT_FILE_PATH + output_file, 'w') as f:
+        data.write(f, pretty_print=True, xml_declaration=True, encoding='utf-8')
+
+def generate_overlayable_file(res_folder):
+    resources = remove_layout_resources(get_all_resources(res_folder))
+    resources = sorted(resources, key=lambda x: x.type + x.name)
+
+    # defer importing lxml to here so that people who aren't editing chassis don't have to have
+    # lxml installed
+    import lxml.etree as etree
+
+    root = etree.Element('resources')
+
+    root.addprevious(etree.Comment(' Copyright (C) 2020 The Android Open Source Project\n\n' +
+
+    '     Licensed under the Apache License, Version 2.0 (the "License");\n' +
+    '     you may not use this file except in compliance with the License.\n' +
+    '     You may obtain a copy of the License at\n\n' +
+
+    '     http://www.apache.org/licenses/LICENSE-2.0\n\n'
+
+    '     Unless required by applicable law or agreed to in writing, software\n'
+    '     distributed under the License is distributed on an "AS IS" BASIS,\n'
+    '     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n'
+    '     See the License for the specific language governing permissions and\n'
+    '     limitations under the License.\n'))
+
+    overlayable = etree.SubElement(root, 'overlayable')
+    overlayable.set('name', 'CarUiLibOverlayableResources')
+
+    policy = etree.SubElement(overlayable, 'policy')
+    policy.set('type', 'public')
+
+    for resource in resources:
+        item = etree.SubElement(policy, 'item')
+        item.set('type', resource.type)
+        item.set('name', resource.name)
+
+    data = etree.ElementTree(root)
+
+    output_file=ROOT_FOLDER+'/res/values/overlayable.xml'
+    with open(output_file, 'w') as f:
         data.write(f, pretty_print=True, xml_declaration=True, encoding='utf-8')
 
 def compare_resources(res_folder, res_public_file):
