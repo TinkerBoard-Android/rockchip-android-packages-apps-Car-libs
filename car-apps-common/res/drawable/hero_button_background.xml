@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-        android:color="@*android:color/car_card_ripple_background">
+        android:color="@color/car_card_ripple_background">
     <item>
         <shape android:shape="rectangle">
             <solid android:color="@color/hero_button_background_color" />
