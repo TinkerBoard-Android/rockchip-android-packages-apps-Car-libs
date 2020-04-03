@@ -16,8 +16,10 @@
 <resources>
     <!-- General resources -->
 
-    <dimen name="car_ui_touch_target_width">76dp</dimen>
-    <dimen name="car_ui_touch_target_height">76dp</dimen>
+    <dimen name="car_ui_touch_target_size">76dp</dimen>
+    <dimen name="car_ui_touch_target_width">@dimen/car_ui_touch_target_size</dimen>
+    <dimen name="car_ui_touch_target_height">@dimen/car_ui_touch_target_size</dimen>
+
     <dimen name="car_ui_primary_icon_size">44dp</dimen>
 
     <!-- Horizontal margin between screen content and display border. In reference
