@@ -74,8 +74,6 @@ public final class CarUiRecyclerView extends RecyclerView implements
 
     private GridOffsetItemDecoration mOffsetItemDecoration;
     private GridDividerItemDecoration mDividerItemDecoration;
-    @CarUiRecyclerViewLayout
-    private int mCarUiRecyclerViewLayout;
     private int mNumOfColumns;
     private boolean mInstallingExtScrollBar = false;
     private int mContainerVisibility = View.VISIBLE;
@@ -161,13 +159,13 @@ public final class CarUiRecyclerView extends RecyclerView implements
         mScrollBarPaddingEnd = context.getResources()
                 .getDimensionPixelSize(R.dimen.car_ui_scrollbar_padding_end);
 
-        mCarUiRecyclerViewLayout =
+        @CarUiRecyclerViewLayout int carUiRecyclerViewLayout =
                 a.getInt(R.styleable.CarUiRecyclerView_layoutStyle, CarUiRecyclerViewLayout.LINEAR);
         mNumOfColumns = a.getInt(R.styleable.CarUiRecyclerView_numOfColumns, /* defValue= */ 2);
         boolean enableDivider =
                 a.getBoolean(R.styleable.CarUiRecyclerView_enableDivider, /* defValue= */ false);
 
-        if (mCarUiRecyclerViewLayout == CarUiRecyclerViewLayout.LINEAR) {
+        if (carUiRecyclerViewLayout == CarUiRecyclerViewLayout.LINEAR) {
 
             int linearTopOffset =
                     a.getInteger(R.styleable.CarUiRecyclerView_startOffset, /* defValue= */ 0);
@@ -230,7 +228,7 @@ public final class CarUiRecyclerView extends RecyclerView implements
                         // Scroll to the top after the first global layout, so that
                         // we can set padding for the insets and still have the
                         // recyclerview start at the top.
-                        (new Handler(Looper.myLooper())).post(() ->
+                        new Handler(Looper.myLooper()).post(() ->
                                 getLayoutManager().scrollToPosition(0));
                         mHasScrolledToTop = true;
                     }

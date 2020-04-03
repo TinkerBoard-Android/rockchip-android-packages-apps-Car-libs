@@ -29,7 +29,7 @@ import androidx.annotation.NonNull;
 class ProgressBarControllerImpl implements ProgressBarController {
 
     @NonNull
-    private ProgressBar mProgressBar;
+    private final ProgressBar mProgressBar;
 
     ProgressBarControllerImpl(@NonNull ProgressBar progressBar) {
         mProgressBar = progressBar;
