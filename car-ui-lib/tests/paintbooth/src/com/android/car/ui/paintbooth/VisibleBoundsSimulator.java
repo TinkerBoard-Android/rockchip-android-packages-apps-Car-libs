@@ -114,8 +114,7 @@ public class VisibleBoundsSimulator extends Service {
                 WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW + 26,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                        | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-                        & ~WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 PixelFormat.TRANSLUCENT);
 
         params.packageName = this.getPackageName();
