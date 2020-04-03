@@ -87,11 +87,11 @@ public class MainActivity extends Activity implements InsetsChangedListener {
     }
 
     private class ActivityViewHolder extends ViewHolder {
-        private Button mButton;
+        private final Button mButton;
 
         ActivityViewHolder(@NonNull View itemView) {
             super(itemView);
-            mButton = itemView.findViewById(R.id.button);
+            mButton = itemView.requireViewById(R.id.button);
         }
 
         @Override
@@ -107,11 +107,11 @@ public class MainActivity extends Activity implements InsetsChangedListener {
     }
 
     private class ServiceViewHolder extends ViewHolder {
-        private Switch mSwitch;
+        private final Switch mSwitch;
 
         ServiceViewHolder(@NonNull View itemView) {
             super(itemView);
-            mSwitch = itemView.findViewById(R.id.button);
+            mSwitch = itemView.requireViewById(R.id.button);
         }
 
         @Override
