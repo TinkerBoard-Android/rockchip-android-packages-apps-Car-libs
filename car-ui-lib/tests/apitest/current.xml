@@ -139,6 +139,7 @@
   <public type="dimen" name="car_ui_toolbar_title_no_logo_margin_start"/>
   <public type="dimen" name="car_ui_toolbar_top_inset"/>
   <public type="dimen" name="car_ui_touch_target_height"/>
+  <public type="dimen" name="car_ui_touch_target_size"/>
   <public type="dimen" name="car_ui_touch_target_width"/>
   <public type="dimen" name="wrap_content"/>
   <public type="drawable" name="car_ui_activity_background"/>
