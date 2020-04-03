@@ -16,7 +16,6 @@
 <resources>
     <overlayable name="CarUiOverlayableResources">
         <policy type="public">
-            <item type="string" name="car_ui_dialog_preference_positive" />
             <item type="attr" name="title" />
             <item type="attr" name="logo" />
             <item type="attr" name="numOfColumns" />

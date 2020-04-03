@@ -105,7 +105,7 @@ def get_resources_from_single_file(filename):
 def remove_layout_resources(resourceSet):
     result = set()
     for resource in resourceSet:
-        if resource.type != 'layout':
+        if resource.type != 'layout' and resource.type != 'overlayable':
             result.add(resource)
     return result
 
