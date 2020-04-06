@@ -107,9 +107,9 @@
         <!-- Whether to enable the car_ui_recyclerview_divider for linear layout or not. -->
         <attr name="enableDivider" format="boolean" />
         <!-- Top offset for car ui recycler view. -->
-        <attr name="startOffset" format="integer" />
+        <attr name="topOffset" format="integer" />
         <!-- Bottom offset for car ui recycler view for linear layout. -->
-        <attr name="endOffset" format="integer" />
+        <attr name="bottomOffset" format="integer" />
 
         <!-- Number of columns in a grid layout. -->
         <attr name="numOfColumns" format="integer" />
