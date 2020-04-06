@@ -242,11 +242,13 @@ public class BlePeripheralManager {
             return;
         }
 
-        logd(TAG, "stopGattServer");
+        logd(TAG, "Stopping gatt server.");
         BluetoothGatt bluetoothGatt = mBluetoothGatt.getAndSet(null);
         if (bluetoothGatt != null) {
             gattServer.cancelConnection(bluetoothGatt.getDevice());
+            logd(TAG, "Disconnecting gatt.");
             bluetoothGatt.disconnect();
+            bluetoothGatt.close();
         }
         gattServer.clearServices();
         gattServer.close();
@@ -306,6 +308,11 @@ public class BlePeripheralManager {
                     logd(TAG, "BLE Connection State Change: " + newState);
                     switch (newState) {
                         case BluetoothProfile.STATE_CONNECTED:
+                            BluetoothGattServer gattServer = mGattServer.get();
+                            if (gattServer == null) {
+                                return;
+                            }
+                            gattServer.connect(device, /* autoConnect= */ false);
                             for (Callback callback : mCallbacks) {
                                 callback.onRemoteDeviceConnected(device);
                             }

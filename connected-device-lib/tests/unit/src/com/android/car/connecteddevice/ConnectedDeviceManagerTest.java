@@ -24,6 +24,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mockitoSession;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
@@ -58,6 +59,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -79,6 +81,10 @@ public class ConnectedDeviceManagerTest {
 
     private final UUID mRecipientId = UUID.randomUUID();
 
+    private final List<String> mUserDeviceIds = new ArrayList<>();
+
+    private final List<AssociatedDevice> mUserDevices = new ArrayList<>();
+
     @Mock
     private ConnectedDeviceStorage mMockStorage;
 
@@ -98,13 +104,15 @@ public class ConnectedDeviceManagerTest {
     public void setUp() {
         mMockingSession = mockitoSession()
                 .initMocks(this)
-                .strictness(Strictness.LENIENT)
+                .strictness(Strictness.WARN)
                 .startMocking();
         ArgumentCaptor<AssociatedDeviceCallback> callbackCaptor = ArgumentCaptor
                 .forClass(AssociatedDeviceCallback.class);
         mConnectedDeviceManager = new ConnectedDeviceManager(mMockStorage, mMockCentralManager,
             mMockPeripheralManager, DEFAULT_RECONNECT_TIMEOUT);
         verify(mMockStorage).setAssociatedDeviceCallback(callbackCaptor.capture());
+        when(mMockStorage.getActiveUserAssociatedDevices()).thenReturn(mUserDevices);
+        when(mMockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(mUserDeviceIds);
         mAssociatedDeviceCallback = callbackCaptor.getValue();
         mConnectedDeviceManager.start();
     }
@@ -126,8 +134,8 @@ public class ConnectedDeviceManagerTest {
         String deviceId = connectNewDevice(mMockCentralManager);
         List<ConnectedDevice> activeUserDevices =
                 mConnectedDeviceManager.getActiveUserConnectedDevices();
-        ConnectedDevice expectedDevice = new ConnectedDevice(deviceId, /* deviceName = */ null,
-                /* belongsToActiveUser = */ true, /* hasSecureChannel = */ false);
+        ConnectedDevice expectedDevice = new ConnectedDevice(deviceId, /* deviceName= */ null,
+                /* belongsToActiveUser= */ true, /* hasSecureChannel= */ false);
         assertThat(activeUserDevices).containsExactly(expectedDevice);
     }
 
@@ -511,7 +519,7 @@ public class ConnectedDeviceManagerTest {
         mConnectedDeviceManager.registerDeviceAssociationCallback(callback, mCallbackExecutor);
         String deviceId = UUID.randomUUID().toString();
         AssociatedDevice testDevice = new AssociatedDevice(deviceId, TEST_DEVICE_ADDRESS,
-                TEST_DEVICE_NAME, /* isConnectionEnabled = */ true);
+                TEST_DEVICE_NAME, /* isConnectionEnabled= */ true);
         mAssociatedDeviceCallback.onAssociatedDeviceAdded(testDevice);
         assertThat(tryAcquire(semaphore)).isTrue();
         verify(callback).onAssociatedDeviceAdded(eq(testDevice));
@@ -524,7 +532,7 @@ public class ConnectedDeviceManagerTest {
         mConnectedDeviceManager.registerDeviceAssociationCallback(callback, mCallbackExecutor);
         String deviceId = UUID.randomUUID().toString();
         AssociatedDevice testDevice = new AssociatedDevice(deviceId, TEST_DEVICE_ADDRESS,
-                TEST_DEVICE_NAME, /* isConnectionEnabled = */ true);
+                TEST_DEVICE_NAME, /* isConnectionEnabled= */ true);
         mAssociatedDeviceCallback.onAssociatedDeviceRemoved(testDevice);
         assertThat(tryAcquire(semaphore)).isTrue();
         verify(callback).onAssociatedDeviceRemoved(eq(testDevice));
@@ -537,7 +545,7 @@ public class ConnectedDeviceManagerTest {
         mConnectedDeviceManager.registerDeviceAssociationCallback(callback, mCallbackExecutor);
         String deviceId = UUID.randomUUID().toString();
         AssociatedDevice testDevice = new AssociatedDevice(deviceId, TEST_DEVICE_ADDRESS,
-                TEST_DEVICE_NAME, /* isConnectionEnabled = */ true);
+                TEST_DEVICE_NAME, /* isConnectionEnabled= */ true);
         mAssociatedDeviceCallback.onAssociatedDeviceUpdated(testDevice);
         assertThat(tryAcquire(semaphore)).isTrue();
         verify(callback).onAssociatedDeviceUpdated(eq(testDevice));
@@ -549,9 +557,10 @@ public class ConnectedDeviceManagerTest {
         when(mMockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(
                 Collections.singletonList(deviceId));
         AssociatedDevice device = new AssociatedDevice(deviceId, TEST_DEVICE_ADDRESS,
-                TEST_DEVICE_NAME, /* isConnectionEnabled = */ true);
+                TEST_DEVICE_NAME, /* isConnectionEnabled= */ true);
         when(mMockStorage.getActiveUserAssociatedDevices()).thenReturn(
                 Collections.singletonList(device));
+        clearInvocations(mMockPeripheralManager);
         mConnectedDeviceManager.addConnectedDevice(deviceId, mMockPeripheralManager);
         mConnectedDeviceManager.removeConnectedDevice(deviceId, mMockPeripheralManager);
         verify(mMockPeripheralManager, timeout(1000))
@@ -565,10 +574,11 @@ public class ConnectedDeviceManagerTest {
         when(mMockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(
                 Collections.singletonList(userDeviceId));
         AssociatedDevice userDevice = new AssociatedDevice(userDeviceId, TEST_DEVICE_ADDRESS,
-                TEST_DEVICE_NAME, /* isConnectionEnabled = */ true);
+                TEST_DEVICE_NAME, /* isConnectionEnabled= */ true);
         when(mMockStorage.getActiveUserAssociatedDevices()).thenReturn(
                 Collections.singletonList(userDevice));
         mConnectedDeviceManager.addConnectedDevice(deviceId, mMockPeripheralManager);
+        clearInvocations(mMockPeripheralManager);
         mConnectedDeviceManager.removeConnectedDevice(deviceId, mMockPeripheralManager);
         verify(mMockPeripheralManager, timeout(1000))
                 .connectToDevice(eq(UUID.fromString(userDeviceId)), anyInt());
@@ -581,14 +591,15 @@ public class ConnectedDeviceManagerTest {
         when(mMockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(
                 Collections.singletonList(userDeviceId));
         AssociatedDevice userDevice = new AssociatedDevice(userDeviceId, TEST_DEVICE_ADDRESS,
-                TEST_DEVICE_NAME, /* isConnectionEnabled = */ true);
+                TEST_DEVICE_NAME, /* isConnectionEnabled= */ true);
         when(mMockStorage.getActiveUserAssociatedDevices()).thenReturn(
                 Collections.singletonList(userDevice));
+        clearInvocations(mMockPeripheralManager);
         mConnectedDeviceManager.addConnectedDevice(deviceId, mMockPeripheralManager);
         mConnectedDeviceManager.addConnectedDevice(userDeviceId, mMockCentralManager);
         mConnectedDeviceManager.removeConnectedDevice(deviceId, mMockPeripheralManager);
         verify(mMockPeripheralManager, timeout(1000).times(0))
-                .connectToDevice(eq(UUID.fromString(userDeviceId)), anyInt());
+                .connectToDevice(any(), anyInt());
     }
 
     @Test
@@ -678,11 +689,9 @@ public class ConnectedDeviceManagerTest {
     private String connectNewDevice(@NonNull CarBleManager carBleManager) {
         String deviceId = UUID.randomUUID().toString();
         AssociatedDevice device = new AssociatedDevice(deviceId, TEST_DEVICE_ADDRESS,
-                TEST_DEVICE_NAME, /* isConnectionEnabled = */ true);
-        when(mMockStorage.getActiveUserAssociatedDevices()).thenReturn(
-                Collections.singletonList(device));
-        when(mMockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(
-                Collections.singletonList(deviceId));
+                TEST_DEVICE_NAME, /* isConnectionEnabled= */ true);
+        mUserDeviceIds.add(deviceId);
+        mUserDevices.add(device);
         mConnectedDeviceManager.addConnectedDevice(deviceId, carBleManager);
         return deviceId;
     }
