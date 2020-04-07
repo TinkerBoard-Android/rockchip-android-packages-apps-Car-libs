@@ -19,6 +19,9 @@ package com.android.car.messenger.common;
 import static com.android.car.apps.common.util.SafeLog.logw;
 
 import android.annotation.Nullable;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothMapClient;
+import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
 
@@ -64,11 +67,12 @@ public class Message {
      *
      * @param deviceId of the phone that received this message.
      * @param updatedMessage containing the information to base this message object off of.
-     * @param appPackageName of the messaging app this message belongs to.
+     * @param senderKey of the sender of the message. Not guaranteed to be unique for all senders
+     *                  if this message is part of a group conversation.
      **/
     @Nullable
     public static Message parseFromMessage(String deviceId,
-            MessagingStyleMessage updatedMessage, String appPackageName) {
+            MessagingStyleMessage updatedMessage, SenderKey senderKey) {
 
         if (!Utils.isValidMessagingStyleMessage(updatedMessage)) {
             if (Log.isLoggable(TAG, Log.DEBUG) || Build.IS_DEBUGGABLE) {
@@ -88,12 +92,44 @@ public class Message {
                 Utils.createMessageHandle(updatedMessage),
                 MessageType.NOTIFICATION_MESSAGE,
                 /* senderContactUri */ null,
-                appPackageName);
+                senderKey);
+    }
+
+    /**
+     * Creates a Message based on {@link BluetoothMapClient} intent. Returns {@code null} if the
+     * intent is missing required fields.
+     **/
+    public static Message parseFromIntent(Intent intent) {
+        if (!Utils.isValidMapClientIntent(intent)) {
+            if (Log.isLoggable(TAG, Log.DEBUG) || Build.IS_DEBUGGABLE) {
+                throw new IllegalArgumentException(
+                        "BluetoothMapClient intent is missing required fields");
+            } else {
+                logw(TAG, "BluetoothMapClient intent is missing required fields");
+                return null;
+            }
+        }
+        BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+        String senderUri = Utils.getSenderUri(intent);
+
+        return new Message(
+                Utils.getSenderName(intent),
+                device.getAddress(),
+                intent.getStringExtra(android.content.Intent.EXTRA_TEXT),
+                intent.getLongExtra(BluetoothMapClient.EXTRA_MESSAGE_TIMESTAMP,
+                        System.currentTimeMillis()),
+                intent.getBooleanExtra(BluetoothMapClient.EXTRA_MESSAGE_READ_STATUS,
+                        false),
+                intent.getStringExtra(BluetoothMapClient.EXTRA_MESSAGE_HANDLE),
+                MessageType.BLUETOOTH_MAP_MESSAGE,
+                senderUri,
+                SenderKey.createSenderKey(intent)
+        );
     }
 
     private Message(String senderName, String deviceId, String messageText, long receiveTime,
             boolean isReadOnPhone, String handle, MessageType messageType,
-            @Nullable String senderContactUri, String senderKeyMetadata) {
+            @Nullable String senderContactUri, SenderKey senderKey) {
         boolean missingSenderName = (senderName == null);
         boolean missingDeviceId = (deviceId == null);
         boolean missingText = (messageText == null);
@@ -127,7 +163,7 @@ public class Message {
         this.mHandle = handle;
         this.mMessageType = messageType;
         this.mSenderContactUri = senderContactUri;
-        this.mSenderKey = new SenderKey(deviceId, senderName, senderKeyMetadata);
+        this.mSenderKey = senderKey;
     }
 
     /**
@@ -196,7 +232,12 @@ public class Message {
     }
 
     /**
-     * Returns the {@link SenderKey} that is unique for each contact per device.
+     * If the message came from {@link BluetoothMapClient}, this retrieves a key that is unique
+     * for each contact per device.
+     * If the message came from {@link NotificationMsg}, this retrieves a key that is only
+     * guaranteed to be unique per sender in a 1-1 conversation. If this message is part of a
+     * group conversation, the senderKey will not be unique if more than one participant in the
+     * conversation share the same name.
      */
     public SenderKey getSenderKey() {
         return mSenderKey;
