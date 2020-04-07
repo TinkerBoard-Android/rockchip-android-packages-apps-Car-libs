@@ -20,11 +20,12 @@ import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.database.Cursor;
-import android.util.Log;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.android.car.apps.common.log.L;
 
 /**
  * Asynchronously queries data and observes them. A new query will be triggered automatically if
@@ -81,7 +82,7 @@ public class ObservableAsyncQuery {
      */
     @MainThread
     public void startQuery() {
-        Log.d(TAG, "startQuery");
+        L.d(TAG, "startQuery");
         mAsyncQueryHandler.cancelOperation(mToken); // Cancel the query task.
         mContentResolver.unregisterContentObserver(mContentObserver);
 
@@ -109,7 +110,7 @@ public class ObservableAsyncQuery {
      */
     @MainThread
     public void stopQuery() {
-        Log.d(TAG, "stopQuery");
+        L.d(TAG, "stopQuery");
         mIsActive = false;
         mContentResolver.unregisterContentObserver(mContentObserver);
         mAsyncQueryHandler.cancelOperation(mToken); // Cancel the query task.
@@ -119,7 +120,7 @@ public class ObservableAsyncQuery {
         if (!mIsActive) {
             return;
         }
-        Log.d(TAG, "onQueryComplete");
+        L.d(TAG, "onQueryComplete");
         if (mOnQueryFinishedListener != null) {
             mOnQueryFinishedListener.onQueryFinished(cursor);
         }

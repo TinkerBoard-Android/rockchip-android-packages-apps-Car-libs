@@ -19,12 +19,13 @@ package com.android.car.telephony.common;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.lifecycle.LiveData;
+
+import com.android.car.apps.common.log.L;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -78,7 +79,7 @@ public abstract class AsyncQueryLiveData<T> extends LiveData<T> {
     protected abstract T convertToEntity(@NonNull Cursor cursor);
 
     private void onCursorLoaded(Cursor cursor) {
-        Log.d(TAG, "onCursorLoaded: " + this);
+        L.d(TAG, "onCursorLoaded: " + this);
         if (mCurrentCursorRunnable != null) {
             mCurrentCursorRunnable.closeCursorIfNecessary();
             mCurrentRunnableFuture.cancel(false);

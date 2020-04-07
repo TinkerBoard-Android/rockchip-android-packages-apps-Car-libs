@@ -24,10 +24,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.android.car.apps.common.log.L;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -233,7 +234,7 @@ public class Contact implements Parcelable, Comparable<Contact> {
 
         if (!TextUtils.equals(accountName, contact.mAccountName)
                 || !TextUtils.equals(lookupKey, contact.mLookupKey)) {
-            Log.w(TAG, "A wrong contact is passed in. A new contact will be created.");
+            L.w(TAG, "A wrong contact is passed in. A new contact will be created.");
             contact = new Contact();
             contact.loadBasicInfo(cursor);
         }
@@ -253,8 +254,7 @@ public class Contact implements Parcelable, Comparable<Contact> {
                 contact.addPostalAddress(cursor);
                 break;
             default:
-                Log.d(TAG,
-                        String.format("This mimetype %s will not be loaded right now.", mimeType));
+                L.d(TAG, String.format("This mimetype %s will not be loaded right now.", mimeType));
         }
 
         return contact;

@@ -22,11 +22,11 @@ import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.ContactsContract;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
-
 import com.android.car.apps.common.NavigationUtils;
+import com.android.car.apps.common.log.L;
+
 
 /**
  * Encapsulates data about an address entry. Typically loaded from the local Address store.
@@ -109,15 +109,16 @@ public class PostalAddress implements Parcelable {
      * Returns the address Intent for {@link #mFormattedAddress}.
      */
     public Intent getAddressIntent(Resources res) {
-        Log.d(TAG, "Get address intent");
+        L.d(TAG, "Get address intent");
         return NavigationUtils.getViewAddressIntent(res, mFormattedAddress);
     }
 
     /**
      * Returns the navigation Intent for {@link #mFormattedAddress}.
      */
+
     public Intent getNavigationIntent(Resources res) {
-        Log.d(TAG, "Get navigation intent");
+        L.d(TAG, "Get navigation intent");
         return NavigationUtils.getNavigationIntent(res, mFormattedAddress);
     }
 

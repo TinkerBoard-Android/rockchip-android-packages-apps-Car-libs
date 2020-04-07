@@ -20,14 +20,16 @@ import android.content.Context;
 import android.database.Cursor;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+
 import android.util.ArrayMap;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
+
+import com.android.car.apps.common.log.L;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -168,13 +170,13 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
      */
     @Nullable
     public Contact lookupContactEntry(String phoneNumber) {
-        Log.v(TAG, String.format("lookupContactEntry: %s", phoneNumber));
+        L.v(TAG, String.format("lookupContactEntry: %s", phoneNumber));
         if (!isLoaded()) {
-            Log.w(TAG, "looking up a contact while loading.");
+            L.w(TAG, "looking up a contact while loading.");
         }
 
         if (TextUtils.isEmpty(phoneNumber)) {
-            Log.w(TAG, "looking up an empty phone number.");
+            L.w(TAG, "looking up an empty phone number.");
             return null;
         }
 
@@ -190,10 +192,10 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
     @Nullable
     public Contact lookupContactByKey(String lookupKey, @Nullable String accountName) {
         if (!isLoaded()) {
-            Log.w(TAG, "looking up a contact while loading.");
+            L.w(TAG, "looking up a contact while loading.");
         }
         if (TextUtils.isEmpty(lookupKey)) {
-            Log.w(TAG, "looking up an empty lookup key.");
+            L.w(TAG, "looking up an empty lookup key.");
             return null;
         }
         if (mLookupKeyContactMap.containsKey(accountName)) {
@@ -211,11 +213,11 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
     @NonNull
     public List<Contact> lookupContactByKey(String lookupKey) {
         if (!isLoaded()) {
-            Log.w(TAG, "looking up a contact while loading.");
+            L.w(TAG, "looking up a contact while loading.");
         }
 
         if (TextUtils.isEmpty(lookupKey)) {
-            Log.w(TAG, "looking up an empty lookup key.");
+            L.w(TAG, "looking up an empty lookup key.");
             return Collections.emptyList();
         }
         List<Contact> results = new ArrayList<>();
@@ -271,7 +273,7 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
 
     @Override
     public void onChanged(List<Contact> contacts) {
-        Log.d(TAG, "Contacts loaded:" + (contacts == null ? 0 : contacts.size()));
+        L.d(TAG, "Contacts loaded:" + (contacts == null ? 0 : contacts.size()));
         mIsLoaded = true;
     }
 }
