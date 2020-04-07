@@ -18,7 +18,10 @@ package com.android.car.messenger.common;
 
 import static com.android.car.apps.common.util.SafeLog.logw;
 
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothMapClient;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.text.TextUtils;
@@ -34,6 +37,11 @@ import com.android.car.messenger.NotificationMsgProto.NotificationMsg.Conversati
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.MessagingStyle;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.MessagingStyleMessage;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.Person;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /** Utils methods for the car-messenger-common lib. **/
 public class Utils {
@@ -173,6 +181,29 @@ public class Utils {
     }
 
     /**
+     * Ensure the {@link BluetoothMapClient} intent has all the required fields.
+     **/
+    public static boolean isValidMapClientIntent(Intent intent) {
+        if (intent == null) {
+            logw(TAG, "BluetoothMapClient intent is null");
+            return false;
+        } else if (intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE) == null) {
+            logw(TAG, "BluetoothMapClient intent is missing required field: device");
+            return false;
+        } else if (intent.getStringExtra(BluetoothMapClient.EXTRA_MESSAGE_HANDLE) == null) {
+            logw(TAG, "BluetoothMapClient intent is missing required field: senderName");
+            return false;
+        } else if (intent.getStringExtra(BluetoothMapClient.EXTRA_SENDER_CONTACT_NAME) == null) {
+            logw(TAG, "BluetoothMapClient intent is missing required field: handle");
+            return false;
+        } else if (intent.getStringExtra(android.content.Intent.EXTRA_TEXT) == null) {
+            logw(TAG, "BluetoothMapClient intent is missing required field: messageText");
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Creates a Letter Tile Icon that will display the given initials. If the initials are null,
      * then an avatar anonymous icon will be drawn.
      **/
@@ -247,4 +278,30 @@ public class Utils {
         return initials.toString();
     }
 
+    /** Returns whether the {@link BluetoothMapClient} intent represents a group conversation. **/
+    public static boolean isGroupConversation(Intent intent) {
+        return (intent.getStringArrayExtra(Intent.EXTRA_CC) != null
+                && intent.getStringArrayExtra(Intent.EXTRA_CC).length > 0);
+    }
+
+    /** Returns the list of sender uri for a {@link BluetoothMapClient} intent. **/
+    public static String getSenderUri(Intent intent) {
+        return intent.getStringExtra(BluetoothMapClient.EXTRA_SENDER_CONTACT_URI);
+    }
+
+    /** Returns the sender name for a {@link BluetoothMapClient} intent. **/
+    public static String getSenderName(Intent intent) {
+        return intent.getStringExtra(BluetoothMapClient.EXTRA_SENDER_CONTACT_NAME);
+    }
+
+    /** Returns the list of recipient uris for a {@link BluetoothMapClient} intent. **/
+    public static List<String> getInclusiveRecipientsUrisList(Intent intent) {
+        List<String> ccUris = new ArrayList<>();
+        ccUris.add(getSenderUri(intent));
+        if (isGroupConversation(intent)) {
+            ccUris.addAll(Arrays.asList(intent.getStringArrayExtra(Intent.EXTRA_CC)));
+            Collections.sort(ccUris);
+        }
+        return ccUris;
+    }
 }
