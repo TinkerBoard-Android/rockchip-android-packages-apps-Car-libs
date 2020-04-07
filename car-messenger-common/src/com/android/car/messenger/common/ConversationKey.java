@@ -16,6 +16,9 @@
 
 package com.android.car.messenger.common;
 
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothMapClient;
+import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -27,6 +30,18 @@ public class ConversationKey extends CompositeKey implements Parcelable {
 
     public ConversationKey(String deviceId, String key) {
         super(deviceId, key);
+    }
+
+    /** Creates a ConversationKey from a {@link BluetoothMapClient} intent. **/
+    public static ConversationKey createConversationKey(Intent intent) {
+        BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+        String senderUri = Utils.getSenderUri(intent);
+        String senderName = Utils.getSenderName(intent);
+        String subKey = senderName + "/" + senderUri;
+        if (Utils.isGroupConversation(intent)) {
+            subKey = Utils.getInclusiveRecipientsUrisList(intent).toString();
+        }
+        return new ConversationKey(device.getAddress(), subKey);
     }
 
     @Override
