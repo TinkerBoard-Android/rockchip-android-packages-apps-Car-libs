@@ -72,7 +72,6 @@ public class BaseNotificationDelegate {
             "com.android.car.messenger.common.REMOTE_INPUT_KEY";
 
     protected final Context mContext;
-    protected final String mClassName;
     protected final NotificationManager mNotificationManager;
     protected final boolean mUseLetterTile;
 
@@ -106,12 +105,10 @@ public class BaseNotificationDelegate {
     /**
      * Constructor for the BaseNotificationDelegate class.
      * @param context of the calling application.
-     * @param className of the calling application.
      * @param useLetterTile whether a letterTile icon should be used if no avatar icon is given.
      **/
-    public BaseNotificationDelegate(Context context, String className, boolean useLetterTile) {
+    public BaseNotificationDelegate(Context context, boolean useLetterTile) {
         mContext = context;
-        mClassName = className;
         mUseLetterTile = useLetterTile;
         mNotificationManager =
                 (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -144,6 +141,23 @@ public class BaseNotificationDelegate {
                 mNotificationManager.cancel(notificationInfo.getNotificationId());
             }
         });
+    }
+
+    protected void dismissInternal(ConversationKey convoKey) {
+        clearNotifications(key -> key.equals(convoKey));
+        excludeFromNotification(convoKey);
+    }
+
+    /**
+     * Excludes messages from a notification so that the messages are not shown to the user once
+     * the notification gets updated with newer messages.
+     */
+    protected void excludeFromNotification(ConversationKey convoKey) {
+        ConversationNotificationInfo info = mNotificationInfos.get(convoKey);
+        for (MessageKey key : info.mMessageKeys) {
+            Message message = mMessages.get(key);
+            message.excludeFromNotification();
+        }
     }
 
     /**
@@ -306,7 +320,7 @@ public class BaseNotificationDelegate {
             String action) {
         Intent intent = new Intent(mContext, mContext.getClass())
                 .setAction(action)
-                .setClassName(mContext, mClassName)
+                .setClassName(mContext, mContext.getClass().getName())
                 .putExtra(EXTRA_CONVERSATION_KEY, conversationKey);
 
         return PendingIntent.getForegroundService(mContext, notificationId, intent,
