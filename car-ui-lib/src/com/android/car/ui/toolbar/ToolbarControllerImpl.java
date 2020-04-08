@@ -140,6 +140,7 @@ public class ToolbarControllerImpl implements ToolbarController {
                 R.bool.car_ui_toolbar_logo_fills_nav_icon_space);
         mShowLogo = getContext().getResources().getBoolean(
                 R.bool.car_ui_toolbar_show_logo);
+        mSearchHint = getContext().getString(R.string.car_ui_toolbar_default_search_hint);
 
         mBackground = requireViewByRefId(view, R.id.car_ui_toolbar_background);
         mTabLayout = requireViewByRefId(view, R.id.car_ui_toolbar_tabs);
