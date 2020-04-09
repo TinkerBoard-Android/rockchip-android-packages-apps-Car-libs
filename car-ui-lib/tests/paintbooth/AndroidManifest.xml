@@ -26,6 +26,18 @@
   <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL"/>
   <uses-permission android:name="android.permission.CHANGE_OVERLAY_PACKAGES"/>
   <uses-permission android:name="android.permission.MANAGE_USERS"/>
+  <!-- Required to use the TYPE_DISPLAY_OVERLAY layout param for the current activity overlay -->
+  <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
+  <!-- Required for listening to android task stack changes -->
+  <uses-permission android:name="android.permission.MANAGE_ACTIVITY_STACKS" />
+  <uses-permission android:name="android.permission.REAL_GET_TASKS" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <!-- Required for using TYPE_APPLICATION_OVERLAY to display overlays -->
+  <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+  <!-- Required to test permission dialogs -->
+  <uses-permission android:name="android.permission.CAMERA"/>
+  <uses-permission android:name="android.permission.READ_CONTACTS"/>
+  <uses-permission android:name="android.permission.SEND_SMS"/>
 
   <application
       android:supportsRtl="true"
