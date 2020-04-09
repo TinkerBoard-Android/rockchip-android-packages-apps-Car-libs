@@ -22,9 +22,10 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.ContactsContract;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
+
+import com.android.car.apps.common.log.L;
 
 /**
  * Encapsulates data about an address entry. Typically loaded from the local Address store.
@@ -109,7 +110,7 @@ public class PostalAddress implements Parcelable {
     public Uri getAddressUri(Resources res) {
         String address = String.format(res.getString(R.string.address_uri_format),
                 Uri.encode(mFormattedAddress));
-        Log.d(TAG, "The address is: " + address);
+        L.d(TAG, "The address is: " + TelecomUtils.piiLog(address));
         return Uri.parse(address);
     }
 
@@ -119,7 +120,7 @@ public class PostalAddress implements Parcelable {
     public Uri getNavigationUri(Resources res) {
         String address = String.format(res.getString(R.string.navigation_uri_format),
                 Uri.encode(mFormattedAddress));
-        Log.d(TAG, "The address is: " + address);
+        L.d(TAG, "The address is: " + TelecomUtils.piiLog(address));
         return Uri.parse(address);
     }
 
