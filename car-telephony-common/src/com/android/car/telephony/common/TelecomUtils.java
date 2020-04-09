@@ -39,7 +39,6 @@ import android.telecom.Call;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
@@ -48,6 +47,7 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
 import com.android.car.apps.common.LetterTileDrawable;
+import com.android.car.apps.common.log.L;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -114,24 +114,20 @@ public class TelecomUtils {
      * Format a number as a phone number.
      */
     public static String getFormattedNumber(Context context, String number) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "getFormattedNumber: " + number);
-        }
+        L.d(TAG, "getFormattedNumber: " + piiLog(number));
         if (number == null) {
             return "";
         }
 
         String countryIso = getCurrentCountryIso(context);
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "PhoneNumberUtils.formatNumberToE16, number: "
-                    + number + ", country: " + countryIso);
-        }
+        L.d(TAG, "PhoneNumberUtils.formatNumberToE16, number: "
+                    + piiLog(number) + ", country: " + countryIso);
+
         String e164 = PhoneNumberUtils.formatNumberToE164(number, countryIso);
         String formattedNumber = PhoneNumberUtils.formatNumber(number, e164, countryIso);
         formattedNumber = TextUtils.isEmpty(formattedNumber) ? number : formattedNumber;
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "getFormattedNumber, result: " + formattedNumber);
-        }
+        L.d(TAG, "getFormattedNumber, result: " + piiLog(formattedNumber));
+
         return formattedNumber;
     }
 
@@ -147,16 +143,16 @@ public class TelecomUtils {
             if (country != null) {
                 countryIso = country.getCountryIso();
             } else {
-                Log.e(TAG, "CountryDetector.detectCountry() returned null.");
+                L.e(TAG, "CountryDetector.detectCountry() returned null.");
             }
         }
         if (countryIso == null) {
             countryIso = locale.getCountry();
-            Log.w(TAG, "No CountryDetector; falling back to countryIso based on locale: "
+            L.w(TAG, "No CountryDetector; falling back to countryIso based on locale: "
                     + countryIso);
         }
         if (countryIso == null || countryIso.length() != 2) {
-            Log.w(TAG, "Invalid locale, falling back to US");
+            L.w(TAG, "Invalid locale, falling back to US");
             countryIso = "US";
         }
         return countryIso;
@@ -487,7 +483,7 @@ public class TelecomUtils {
     public static void markCallLogAsRead(Context context, String phoneNumberString) {
         if (context.checkSelfPermission(Manifest.permission.WRITE_CALL_LOG)
                 != PackageManager.PERMISSION_GRANTED) {
-            Log.w(TAG, "Missing WRITE_CALL_LOG permission; not marking missed calls as read.");
+            L.w(TAG, "Missing WRITE_CALL_LOG permission; not marking missed calls as read.");
             return;
         }
         ContentValues contentValues = new ContentValues();
@@ -517,7 +513,7 @@ public class TelecomUtils {
                             where.toString(),
                             selectionArgs.toArray(selectionArgsArray));
         } catch (IllegalArgumentException e) {
-            Log.e(TAG, "markCallLogAsRead failed", e);
+            L.e(TAG, "markCallLogAsRead failed", e);
         }
     }
 
