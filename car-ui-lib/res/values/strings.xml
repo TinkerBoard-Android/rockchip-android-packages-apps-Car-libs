@@ -37,9 +37,9 @@ limitations under the License.
     <string name="car_ui_toolbar_menu_item_overflow_title">Overflow</string>
 
     <!-- Positive option for a preference dialog. [CHAR_LIMIT=30] -->
-    <string name="car_ui_dialog_preference_positive">Ok</string>
+    <string name="car_ui_dialog_preference_positive">@android:string/ok</string>
     <!-- Negative option for a preference dialog. [CHAR_LIMIT=30] -->
-    <string name="car_ui_dialog_preference_negative">Cancel</string>
+    <string name="car_ui_dialog_preference_negative">@android:string/cancel</string>
     <!-- Text to show when a preference switch is on. [CHAR_LIMIT=30] -->
     <string name="car_ui_preference_switch_on">On</string>
     <!-- Text to show when a preference switch is off. [CHAR_LIMIT=30] -->
