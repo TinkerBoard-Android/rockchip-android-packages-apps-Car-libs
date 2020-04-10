@@ -50,9 +50,9 @@ import com.android.car.ui.utils.CarUxRestrictionsUtil;
 import java.lang.annotation.Retention;
 
 /**
- * View that extends a {@link RecyclerView} and creates a nested {@code RecyclerView} which could
- * potentially include a scrollbar that has page up and down arrows. Interaction with this view is
- * similar to a {@code RecyclerView} as it takes the same adapter and the layout manager.
+ * View that extends a {@link RecyclerView} and wraps itself into a {@link LinearLayout} which
+ * could potentially include a scrollbar that has page up and down arrows. Interaction with this
+ * view is similar to a {@code RecyclerView} as it takes the same adapter and the layout manager.
  */
 public final class CarUiRecyclerView extends RecyclerView implements
         Toolbar.OnHeightChangedListener {
@@ -77,6 +77,8 @@ public final class CarUiRecyclerView extends RecyclerView implements
     private int mCarUiRecyclerViewLayout;
     private int mNumOfColumns;
     private boolean mInstallingExtScrollBar = false;
+    private int mContainerVisibility = View.VISIBLE;
+    private LinearLayout mContainer;
 
     /**
      * The possible values for setScrollBarPosition. The default value is actually {@link
@@ -261,6 +263,15 @@ public final class CarUiRecyclerView extends RecyclerView implements
     }
 
     @Override
+    public void setVisibility(int visibility) {
+        super.setVisibility(visibility);
+        mContainerVisibility = visibility;
+        if (mContainer != null) {
+            mContainer.setVisibility(visibility);
+        }
+    }
+
+    @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mCarUxRestrictionsUtil.register(mListener);
@@ -284,25 +295,24 @@ public final class CarUiRecyclerView extends RecyclerView implements
      */
     private void installExternalScrollBar() {
         ViewGroup parent = (ViewGroup) getParent();
-
-        LinearLayout container = new LinearLayout(getContext());
+        mContainer = new LinearLayout(getContext());
         LayoutInflater inflater = LayoutInflater.from(getContext());
-        inflater.inflate(R.layout.car_ui_recycler_view, container, true);
+        inflater.inflate(R.layout.car_ui_recycler_view, mContainer, true);
 
-        container.setLayoutParams(getLayoutParams());
-
+        mContainer.setLayoutParams(getLayoutParams());
+        mContainer.setVisibility(mContainerVisibility);
         int index = parent.indexOfChild(this);
         parent.removeView(this);
-        ((FrameLayout) requireViewByRefId(container, R.id.car_ui_recycler_view))
+        ((FrameLayout) requireViewByRefId(mContainer, R.id.car_ui_recycler_view))
                 .addView(this,
                         new FrameLayout.LayoutParams(
                                 ViewGroup.LayoutParams.MATCH_PARENT,
                                 ViewGroup.LayoutParams.MATCH_PARENT));
         setVerticalScrollBarEnabled(false);
         setHorizontalScrollBarEnabled(false);
-        parent.addView(container, index);
+        parent.addView(mContainer, index);
 
-        createScrollBarFromConfig(requireViewByRefId(container, R.id.car_ui_scroll_bar));
+        createScrollBarFromConfig(requireViewByRefId(mContainer, R.id.car_ui_scroll_bar));
     }
 
     private void createScrollBarFromConfig(View scrollView) {
