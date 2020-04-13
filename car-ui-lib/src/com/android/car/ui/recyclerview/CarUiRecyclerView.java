@@ -318,10 +318,10 @@ public final class CarUiRecyclerView extends RecyclerView implements
                     mContainerPaddingRelative.top, mContainerPaddingRelative.right,
                     mContainerPaddingRelative.bottom);
         } else {
-            mContainer.setPadding(getPaddingLeft(), /* Top = */ 0,
-                    getPaddingRight(), /* Bottom = */ 0);
-            setPadding(/* Left = */ 0, getPaddingTop(),
-                    /* Right = */ 0, getPaddingBottom());
+            mContainer.setPadding(getPaddingLeft(), /* top= */ 0,
+                    getPaddingRight(), /* bottom= */ 0);
+            setPadding(/* left= */ 0, getPaddingTop(),
+                    /* right= */ 0, getPaddingBottom());
         }
 
         mContainer.setLayoutParams(getLayoutParams());
