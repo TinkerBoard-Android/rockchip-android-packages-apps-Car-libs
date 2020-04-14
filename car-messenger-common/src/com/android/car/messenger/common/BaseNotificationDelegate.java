@@ -240,10 +240,10 @@ public class BaseNotificationDelegate {
         // We are creating this notification for the first time.
         if (newNotification) {
             builder.setCategory(Notification.CATEGORY_MESSAGE);
-            if (notificationInfo.getAppSmallIconResId() == 0) {
-                builder.setSmallIcon(R.drawable.ic_message);
+            if (notificationInfo.getAppIcon() != null) {
+                builder.setSmallIcon(notificationInfo.getAppIcon());
             } else {
-                builder.setSmallIcon(notificationInfo.getAppSmallIconResId());
+                builder.setSmallIcon(R.drawable.ic_message);
             }
 
             builder.setShowWhen(true);
