@@ -21,10 +21,13 @@ import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import java.util.Locale;
 
 /**
  * {@link ContentProvider ContentProvider's} onCreate() methods are "called for all registered
@@ -33,6 +36,10 @@ import androidx.annotation.Nullable;
  * have started, for installing the CarUi base layout into all activities.
  */
 public class CarUiInstaller extends ContentProvider {
+
+    private static final boolean IS_DEBUG_DEVICE =
+            Build.TYPE.toLowerCase(Locale.ROOT).contains("debug")
+                    || Build.TYPE.toLowerCase(Locale.ROOT).equals("eng");
 
     @Override
     public boolean onCreate() {
@@ -69,6 +76,11 @@ public class CarUiInstaller extends ContentProvider {
                         BaseLayoutController.destroy(activity);
                     }
                 });
+        // Check only if we are in debug mode.
+        if (IS_DEBUG_DEVICE) {
+            CheckCarUiComponents checkCarUiComponents = new CheckCarUiComponents(getContext());
+            application.registerActivityLifecycleCallbacks(checkCarUiComponents);
+        }
         return true;
     }
 
