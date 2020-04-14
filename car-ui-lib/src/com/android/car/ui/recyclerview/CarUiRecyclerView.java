@@ -61,7 +61,8 @@ public final class CarUiRecyclerView extends RecyclerView implements
 
     private static final String TAG = "CarUiRecyclerView";
 
-    private final UxRestrictionChangedListener mListener = new UxRestrictionChangedListener();
+    private final CarUxRestrictionsUtil.OnUxRestrictionsChangedListener mListener =
+            new UxRestrictionChangedListener();
 
     private CarUxRestrictionsUtil mCarUxRestrictionsUtil;
     private boolean mScrollBarEnabled;
@@ -224,6 +225,13 @@ public final class CarUiRecyclerView extends RecyclerView implements
             return;
         }
 
+        mContainer = new LinearLayout(getContext());
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        inflater.inflate(R.layout.car_ui_recycler_view, mContainer, true);
+        mContainer.setVisibility(mContainerVisibility);
+        setVerticalScrollBarEnabled(false);
+        setHorizontalScrollBarEnabled(false);
+
         mScrollBarClass = context.getResources().getString(R.string.car_ui_scrollbar_component);
         this.getViewTreeObserver()
                 .addOnGlobalLayoutListener(() -> {
@@ -302,43 +310,29 @@ public final class CarUiRecyclerView extends RecyclerView implements
      * parent where the recycler view was set with the same layout params.
      */
     private void installExternalScrollBar() {
-        ViewGroup parent = (ViewGroup) getParent();
-        mContainer = new LinearLayout(getContext());
-        LayoutInflater inflater = LayoutInflater.from(getContext());
-        inflater.inflate(R.layout.car_ui_recycler_view, mContainer, true);
-
-        mContainer.setLayoutParams(getLayoutParams());
-        mContainer.setVisibility(mContainerVisibility);
         if (mContainerPadding != null) {
-            mContainer.setPadding(mContainerPadding.left,
-                    mContainerPadding.top,
-                    mContainerPadding.right,
-                    mContainerPadding.bottom);
+            mContainer.setPadding(mContainerPadding.left, mContainerPadding.top,
+                    mContainerPadding.right, mContainerPadding.bottom);
         } else if (mContainerPaddingRelative != null) {
             mContainer.setPaddingRelative(mContainerPaddingRelative.left,
-                    mContainerPaddingRelative.top,
-                    mContainerPaddingRelative.right,
+                    mContainerPaddingRelative.top, mContainerPaddingRelative.right,
                     mContainerPaddingRelative.bottom);
         } else {
-            mContainer.setPadding(getPaddingLeft(),
-                    /* Top = */ 0,
-                    getPaddingRight(),
-                    /* Bottom = */ 0);
-            setPadding(/* Left = */ 0,
-                    getPaddingTop(),
-                    /* Right = */ 0,
-                    getPaddingBottom());
-
+            mContainer.setPadding(getPaddingLeft(), /* top= */ 0,
+                    getPaddingRight(), /* bottom= */ 0);
+            setPadding(/* left= */ 0, getPaddingTop(),
+                    /* right= */ 0, getPaddingBottom());
         }
+
+        mContainer.setLayoutParams(getLayoutParams());
+        ViewGroup parent = (ViewGroup) getParent();
         int index = parent.indexOfChild(this);
-        parent.removeView(this);
-        ((FrameLayout) mContainer.findViewById(R.id.car_ui_recycler_view))
-                .addView(this,
-                        new FrameLayout.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.MATCH_PARENT));
-        setVerticalScrollBarEnabled(false);
-        setHorizontalScrollBarEnabled(false);
+        parent.removeViewInLayout(this);
+
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        ((CarUiRecyclerViewContainer) mContainer.findViewById(R.id.car_ui_recycler_view))
+                .addRecyclerView(this, params);
         parent.addView(mContainer, index);
 
         createScrollBarFromConfig(mContainer.findViewById(R.id.car_ui_scroll_bar));
