@@ -17,7 +17,7 @@
 import argparse
 import os
 import sys
-from resource_utils import get_all_resources, get_resources_from_single_file
+from resource_utils import get_all_resources, get_resources_from_single_file, add_resource_to_set, Resource
 from git_utils import has_chassis_changes
 
 # path to 'packages/apps/Car/libs/car-ui-lib/'
@@ -73,6 +73,23 @@ def generate_current_file(res_folder, output_file='current.xml'):
 
 def generate_overlayable_file(res_folder):
     resources = get_all_resources(res_folder)
+    # We need these to be able to use base layouts in RROs
+    # This should become unnecessary in S
+    add_resource_to_set(resources, Resource('layout_constraintGuide_begin', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintGuide_end', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintHorizontal_bias', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintTop_toTopOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintTop_toBottomOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintBottom_toBottomOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintBottom_toTopOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintStart_toStartOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintStart_toEndOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintEnd_toEndOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintEnd_toStartOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintLeft_toLeftOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintLeft_toRightOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintRight_toRightOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintRight_toLeftOf', 'attr'))
     resources = sorted(resources, key=lambda x: x.type + x.name)
 
     # defer importing lxml to here so that people who aren't editing chassis don't have to have
