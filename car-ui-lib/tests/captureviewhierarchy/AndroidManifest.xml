@@ -21,7 +21,8 @@
         android:minSdkVersion="28"
         android:targetSdkVersion="28" />
     <application>
-        <service android:name = "service.EscrowService">
+        <service android:name = "service.EscrowService"
+                 android:exported="false">
             <intent-filter>
                 <action android:name="com.android.car.ui.service.EscrowService"/>
             </intent-filter>
