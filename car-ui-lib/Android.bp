@@ -25,7 +25,6 @@ android_library {
     },
     libs: ["android.car-stubs"],
     static_libs: [
-        "car-ui-capture-view-hierarchy",
         "androidx.annotation_annotation",
         "androidx.appcompat_appcompat",
         "androidx-constraintlayout_constraintlayout",
