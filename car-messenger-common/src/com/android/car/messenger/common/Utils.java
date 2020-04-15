@@ -52,6 +52,12 @@ public class Utils {
      */
     private static final int MAX_SUB_MESSAGE_LENGTH = 5;
 
+    /** The Regex format of a telephone number in a {@link BluetoothMapClient} contact URI. **/
+    private static final String MAP_CLIENT_URI_REGEX = "tel:(.+)";
+
+    /** The starting substring index for a string formatted with the MAP_CLIENT_URI_REGEX above. **/
+    private static final int MAP_CLIENT_URI_PHONE_NUMBER_SUBSTRING_INDEX = 4;
+
     /** Gets the latest message for a {@link NotificationMsg} Conversation. **/
     public static MessagingStyleMessage getLatestMessage(
             ConversationNotification notification) {
@@ -303,5 +309,17 @@ public class Utils {
             Collections.sort(ccUris);
         }
         return ccUris;
+    }
+
+    /**
+     * Extracts the phone number from the {@link BluetoothMapClient} contact Uri.
+     **/
+    @Nullable
+    public static String getPhoneNumberFromMapClient(@Nullable String senderContactUri) {
+        if (senderContactUri == null || !senderContactUri.matches(MAP_CLIENT_URI_REGEX)) {
+            return null;
+        }
+
+        return senderContactUri.substring(MAP_CLIENT_URI_PHONE_NUMBER_SUBSTRING_INDEX);
     }
 }
