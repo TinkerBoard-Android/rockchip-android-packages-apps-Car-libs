@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,48 +14,34 @@
  * limitations under the License.
  */
 
-package service;
+package com.android.car.ui.core;
 
 import android.app.Activity;
 import android.app.Application;
-import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import java.util.Locale;
+import com.android.car.ui.utils.CarUiUtils;
 
 /**
- * To start the service:
- * adb shell am startservice <package-name>/service.EscrowService
+ * Class used to traverse through the view hierarchy of the activity and check if carUI components
+ * are being used as expected.
  *
- * To stop the service:
- * adb shell am stopservice <package-name>/service.EscrowService
- *
- * To test the components
- * adb shell am broadcast -a com.android.car.ui.intent.DUMP_VIEW_HIERARCHY
- *
- * Start the service, navigate to the screen to be tested. Fire the intent.
+ * To check if the activity is using the CarUI components properly, navigate to the activity and
+ * run: adb shell am broadcast -a com.android.car.ui.intent.CHECK_CAR_UI_COMPONENTS. Filter
+ * the logs with "CheckCarUiComponents". This is ONLY available for debug and eng builds.
  */
-public class EscrowService extends Service {
-
-    private static final String TAG = EscrowService.class.getSimpleName();
-    private static final String INTENT_FILTER = "com.android.car.ui.intent.DUMP_VIEW_HIERARCHY";
-
+class CheckCarUiComponents implements Application.ActivityLifecycleCallbacks {
+    private static final String TAG = CheckCarUiComponents.class.getSimpleName();
+    private static final String INTENT_FILTER = "com.android.car.ui.intent.CHECK_CAR_UI_COMPONENTS";
     private View mRootView;
-    private Application.ActivityLifecycleCallbacks mActivityLifecycleCallbacks;
-
-    public static final boolean IS_DEBUG_DEVICE =
-            Build.TYPE.toLowerCase(Locale.ROOT).contains("debug")
-                    || Build.TYPE.toLowerCase(Locale.ROOT).equals("eng");
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -65,82 +51,55 @@ public class EscrowService extends Service {
             if (carUiComponents.mIsUsingCarUiRecyclerView
                     && !carUiComponents.mIsCarUiRecyclerViewUsingListItem) {
                 Log.e(TAG, "CarUiListItem are not used within CarUiRecyclerView: ");
-                Toast.makeText(getApplicationContext(),
+                Toast.makeText(context,
                         "CarUiListItem are not used within CarUiRecyclerView",
                         Toast.LENGTH_LONG).show();
             }
             if (!carUiComponents.mIsUsingCarUiToolbar) {
                 Log.e(TAG, "CarUiToolbar is not used: ");
-                Toast.makeText(getApplicationContext(), "CarUiToolbar is not used",
+                Toast.makeText(context, "CarUiToolbar is not used",
                         Toast.LENGTH_LONG).show();
             }
         }
     };
 
-    @Override
-    public void onCreate() {
-        mActivityLifecycleCallbacks = new Application.ActivityLifecycleCallbacks() {
-            @Override
-            public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-            }
-
-            @Override
-            public void onActivityStarted(Activity activity) {
-            }
-
-            @Override
-            public void onActivityResumed(Activity activity) {
-                mRootView = activity.getWindow().getDecorView().getRootView();
-            }
-
-            @Override
-            public void onActivityPaused(Activity activity) {
-            }
-
-            @Override
-            public void onActivityStopped(Activity activity) {
-            }
-
-            @Override
-            public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-            }
-
-            @Override
-            public void onActivityDestroyed(Activity activity) {
-            }
-        };
-        ((Application) getApplicationContext()).registerActivityLifecycleCallbacks(
-                mActivityLifecycleCallbacks);
+    CheckCarUiComponents(Context context) {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(INTENT_FILTER);
+        context.registerReceiver(mReceiver, filter);
     }
 
     @Override
-    public IBinder onBind(Intent intent) {
-        return null;
+    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Toast.makeText(this, "Escrow service started", Toast.LENGTH_LONG).show();
+    public void onActivityStarted(Activity activity) {
+    }
 
-        // Register the filter only if we are in debug mode.
-        if (IS_DEBUG_DEVICE) {
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(INTENT_FILTER);
-            registerReceiver(mReceiver, filter);
-        } else {
-            stopSelf();
+    @Override
+    public void onActivityResumed(Activity activity) {
+        mRootView = activity.getWindow().getDecorView().getRootView();
+    }
+
+    @Override
+    public void onActivityPaused(Activity activity) {
+    }
+
+    @Override
+    public void onActivityStopped(Activity activity) {
+    }
+
+    @Override
+    public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+    }
+
+    @Override
+    public void onActivityDestroyed(Activity activity) {
+        if (mRootView != null
+                && CarUiUtils.getActivity(mRootView.getContext()) == activity) {
+            mRootView = null;
         }
-
-        return START_STICKY;
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        unregisterReceiver(mReceiver);
-        ((Application) getApplicationContext()).unregisterActivityLifecycleCallbacks(
-                mActivityLifecycleCallbacks);
-        Toast.makeText(this, "Escrow service destroyed", Toast.LENGTH_LONG).show();
     }
 
     private void checkForCarUiComponents(View view, CarUiComponents carUiComponents) {
