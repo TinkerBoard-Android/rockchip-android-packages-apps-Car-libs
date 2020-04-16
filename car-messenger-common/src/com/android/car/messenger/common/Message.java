@@ -39,7 +39,7 @@ public class Message {
     private final String mSenderName;
     private final String mDeviceId;
     private final String mMessageText;
-    private final long mReceiveTime;
+    private final long mReceivedTime;
     private final boolean mIsReadOnPhone;
     private boolean mShouldExclude;
     private final String mHandle;
@@ -127,7 +127,7 @@ public class Message {
         );
     }
 
-    private Message(String senderName, String deviceId, String messageText, long receiveTime,
+    private Message(String senderName, String deviceId, String messageText, long receivedTime,
             boolean isReadOnPhone, String handle, MessageType messageType,
             @Nullable String senderContactUri, SenderKey senderKey) {
         boolean missingSenderName = (senderName == null);
@@ -157,7 +157,7 @@ public class Message {
         this.mSenderName = senderName;
         this.mDeviceId = deviceId;
         this.mMessageText = messageText;
-        this.mReceiveTime = receiveTime;
+        this.mReceivedTime = receivedTime;
         this.mIsReadOnPhone = isReadOnPhone;
         this.mShouldExclude = false;
         this.mHandle = handle;
@@ -193,8 +193,8 @@ public class Message {
      * Returns the milliseconds since epoch at which this message notification was received on the
      * head-unit.
      */
-    public long getReceiveTime() {
-        return mReceiveTime;
+    public long getReceivedTime() {
+        return mReceivedTime;
     }
 
     /**
@@ -264,7 +264,7 @@ public class Message {
                 + " mSenderName='" + mSenderName + '\''
                 + ", mMessageText='" + mMessageText + '\''
                 + ", mSenderContactUri='" + mSenderContactUri + '\''
-                + ", mReceiveTime=" + mReceiveTime + '\''
+                + ", mReceiveTime=" + mReceivedTime + '\''
                 + ", mIsReadOnPhone= " + mIsReadOnPhone + '\''
                 + ", mShouldExclude= " + mShouldExclude + '\''
                 + ", mHandle='" + mHandle + '\''
