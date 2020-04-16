@@ -205,7 +205,7 @@ public class BaseNotificationDelegate {
         }
         // Else, no avatar icon will be shown.
 
-        builder.setWhen(lastMessage.getReceiveTime());
+        builder.setWhen(lastMessage.getReceivedTime());
 
         // Create MessagingStyle
         String userName = (notificationInfo.getUserDisplayName() == null
@@ -224,7 +224,7 @@ public class BaseNotificationDelegate {
             if (!message.shouldExcludeFromNotification()) {
                 messagingStyle.addMessage(
                         message.getMessageText(),
-                        message.getReceiveTime(),
+                        message.getReceivedTime(),
                         notificationInfo.isGroupConvo() ? new Person.Builder()
                                 .setName(message.getSenderName())
                                 .setUri(message.getSenderContactUri())
