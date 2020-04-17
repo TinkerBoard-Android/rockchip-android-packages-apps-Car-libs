@@ -92,7 +92,7 @@ def get_ids_from_layout_file(filename):
     with open(filename, 'r') as file:
         r = re.compile("@\+id/([a-zA-Z0-9_]+)")
         for i in r.findall(file.read()):
-            add_resource_to_set(result, Resource(i, 'id', ResourceLocation(filename, -1)))
+            add_resource_to_set(result, Resource(i, 'id', ResourceLocation(filename)))
     return result
 
 def get_resources_from_single_file(filename):
