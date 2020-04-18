@@ -244,10 +244,12 @@
       <item type="id" name="car_ui_toolbar_search_icon"/>
       <item type="id" name="car_ui_toolbar_search_view_container"/>
       <item type="id" name="car_ui_toolbar_start_guideline"/>
+      <item type="id" name="car_ui_toolbar_subtitle"/>
       <item type="id" name="car_ui_toolbar_tab_item_icon"/>
       <item type="id" name="car_ui_toolbar_tab_item_text"/>
       <item type="id" name="car_ui_toolbar_tabs"/>
       <item type="id" name="car_ui_toolbar_title"/>
+      <item type="id" name="car_ui_toolbar_title_container"/>
       <item type="id" name="car_ui_toolbar_title_logo"/>
       <item type="id" name="car_ui_toolbar_title_logo_container"/>
       <item type="id" name="car_ui_toolbar_top_guideline"/>
@@ -399,6 +401,7 @@
       <item type="style" name="Widget.CarUi.Toolbar.Search.EditText"/>
       <item type="style" name="Widget.CarUi.Toolbar.Search.SearchIcon"/>
       <item type="style" name="Widget.CarUi.Toolbar.SeparatorView"/>
+      <item type="style" name="Widget.CarUi.Toolbar.Subtitle"/>
       <item type="style" name="Widget.CarUi.Toolbar.Tab"/>
       <item type="style" name="Widget.CarUi.Toolbar.Tab.Container"/>
       <item type="style" name="Widget.CarUi.Toolbar.Tab.Icon"/>

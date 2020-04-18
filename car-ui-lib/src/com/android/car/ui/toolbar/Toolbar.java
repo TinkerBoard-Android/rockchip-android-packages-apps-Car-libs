@@ -242,6 +242,31 @@ public class Toolbar extends FrameLayout implements ToolbarController {
     }
 
     /**
+     * Sets the subtitle of the toolbar to a string resource.
+     *
+     * <p>The title may not always be shown, for example with one row layout with tabs.
+     */
+    @Override
+    public void setSubtitle(@StringRes int title) {
+        mController.setSubtitle(title);
+    }
+
+    /**
+     * Sets the subtitle of the toolbar to a CharSequence.
+     *
+     * <p>The title may not always be shown, for example with one row layout with tabs.
+     */
+    @Override
+    public void setSubtitle(CharSequence title) {
+        mController.setSubtitle(title);
+    }
+
+    @Override
+    public CharSequence getSubtitle() {
+        return mController.getSubtitle();
+    }
+
+    /**
      * Gets the {@link TabLayout} for this toolbar.
      */
     @Override
@@ -437,8 +462,8 @@ public class Toolbar extends FrameLayout implements ToolbarController {
      * </MenuItems>
      * </pre>
      *
-     * @see #setMenuItems(List)
      * @return The MenuItems that were loaded from XML.
+     * @see #setMenuItems(List)
      */
     @Override
     public List<MenuItem> setMenuItems(@XmlRes int resId) {
