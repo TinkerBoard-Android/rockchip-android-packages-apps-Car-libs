@@ -91,6 +91,35 @@ public class ToolbarActivity extends AppCompatActivity implements InsetsChangedL
         mButtons.add(Pair.create("Change title", v ->
                 toolbar.setTitle(toolbar.getTitle() + " X")));
 
+        mButtons.add(Pair.create("Add subtitle", v -> {
+            toolbar.setSubtitle("subtitle");
+        }));
+
+        mButtons.add(Pair.create("Update subtitle every 1 sec", v -> {
+            final int[] count = {0};
+            Thread t = new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        while (count[0] < 6) {
+                            Thread.sleep(1000);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    toolbar.setSubtitle(
+                                            "subtitle updating count: " + count[0]);
+                                    count[0]++;
+                                }
+                            });
+                        }
+                    } catch (InterruptedException e) {
+                        // Do nothing
+                    }
+                }
+            };
+            t.start();
+        }));
+
         mButtons.add(Pair.create(getString(R.string.toolbar_set_xml_resource), v -> {
             mMenuItems.clear();
             toolbar.setMenuItems(R.xml.menuitems);

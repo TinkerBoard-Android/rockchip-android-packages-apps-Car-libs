@@ -265,6 +265,7 @@
   <public type="style" name="Widget.CarUi.Toolbar.Search.EditText"/>
   <public type="style" name="Widget.CarUi.Toolbar.Search.SearchIcon"/>
   <public type="style" name="Widget.CarUi.Toolbar.SeparatorView"/>
+  <public type="style" name="Widget.CarUi.Toolbar.Subtitle"/>
   <public type="style" name="Widget.CarUi.Toolbar.Tab"/>
   <public type="style" name="Widget.CarUi.Toolbar.Tab.Container"/>
   <public type="style" name="Widget.CarUi.Toolbar.Tab.Icon"/>
