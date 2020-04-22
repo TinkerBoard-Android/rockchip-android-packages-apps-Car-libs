@@ -24,11 +24,13 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.DrawableRes;
@@ -64,7 +66,9 @@ public class ToolbarControllerImpl implements ToolbarController {
     private ImageView mNavIcon;
     private ImageView mLogoInNavIconSpace;
     private ViewGroup mNavIconContainer;
+    private LinearLayout mTitleContainer;
     private TextView mTitle;
+    private TextView mSubtitle;
     private ImageView mTitleLogo;
     private ViewGroup mTitleLogoContainer;
     private TabLayout mTabLayout;
@@ -110,6 +114,7 @@ public class ToolbarControllerImpl implements ToolbarController {
         updateOverflowDialog(item);
         setState(getState());
     };
+
     // Despite the warning, this has to be a field so it's not garbage-collected.
     // The only other reference to it is a weak reference
     private final CarUxRestrictionsUtil.OnUxRestrictionsChangedListener
@@ -118,6 +123,7 @@ public class ToolbarControllerImpl implements ToolbarController {
                     renderer.setCarUxRestrictions(restrictions);
                 }
             };
+
 
     public ToolbarControllerImpl(View view) {
         mContext = view.getContext();
@@ -151,6 +157,8 @@ public class ToolbarControllerImpl implements ToolbarController {
         mLogoInNavIconSpace = view.requireViewById(R.id.car_ui_toolbar_logo);
         mNavIconContainer = view.requireViewById(R.id.car_ui_toolbar_nav_icon_container);
         mMenuItemsContainer = view.requireViewById(R.id.car_ui_toolbar_menu_items_container);
+        mTitleContainer = view.requireViewById(R.id.car_ui_toolbar_title_container);
+        mSubtitle = view.requireViewById(R.id.car_ui_toolbar_subtitle);
         mTitle = view.requireViewById(R.id.car_ui_toolbar_title);
         mTitleLogoContainer = view.requireViewById(R.id.car_ui_toolbar_title_logo_container);
         mTitleLogo = view.requireViewById(R.id.car_ui_toolbar_title_logo);
@@ -222,6 +230,33 @@ public class ToolbarControllerImpl implements ToolbarController {
     @Override
     public CharSequence getTitle() {
         return mTitle.getText();
+    }
+
+    /**
+     * Sets the subtitle of the toolbar to a string resource.
+     *
+     * <p>The title may not always be shown, for example with one row layout with tabs.
+     */
+    @Override
+    public void setSubtitle(@StringRes int title) {
+        mSubtitle.setText(title);
+        setState(getState());
+    }
+
+    /**
+     * Sets the subtitle of the toolbar to a CharSequence.
+     *
+     * <p>The title may not always be shown, for example with one row layout with tabs.
+     */
+    @Override
+    public void setSubtitle(CharSequence title) {
+        mSubtitle.setText(title);
+        setState(getState());
+    }
+
+    @Override
+    public CharSequence getSubtitle() {
+        return mSubtitle.getText();
     }
 
     /**
@@ -714,9 +749,13 @@ public class ToolbarControllerImpl implements ToolbarController {
                 || (state == Toolbar.State.SUBPAGE && mShowTabsInSubpage));
         // Show the title if we're in the subpage state, or in the home state with no tabs or tabs
         // on the second row
-        mTitle.setVisibility((state == Toolbar.State.SUBPAGE || state == Toolbar.State.HOME)
+        int visibility = (state == Toolbar.State.SUBPAGE || state == Toolbar.State.HOME)
                 && (!hasTabs || mIsTabsInSecondRow)
-                ? VISIBLE : GONE);
+                ? VISIBLE : GONE;
+        mTitleContainer.setVisibility(visibility);
+        mSubtitle.setVisibility(
+                TextUtils.isEmpty(mSubtitle.getText()) ? GONE : VISIBLE);
+
         mTabLayout.setVisibility(hasTabs ? VISIBLE : GONE);
 
         if (mSearchView != null) {
