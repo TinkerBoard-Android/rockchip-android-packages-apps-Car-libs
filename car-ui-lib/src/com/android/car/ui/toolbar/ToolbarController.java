@@ -57,6 +57,25 @@ public interface ToolbarController {
     CharSequence getTitle();
 
     /**
+     * Sets the subtitle of the toolbar to a string resource.
+     *
+     * <p>The title may not always be shown, for example with one row layout with tabs.
+     */
+    void setSubtitle(@StringRes int title);
+
+    /**
+     * Sets the subtitle of the toolbar to a CharSequence.
+     *
+     * <p>The title may not always be shown, for example with one row layout with tabs.
+     */
+    void setSubtitle(CharSequence title);
+
+    /**
+     * Gets the current toolbar subtitle.
+     */
+    CharSequence getSubtitle();
+
+    /**
      * Gets the {@link TabLayout} for this toolbar.
      */
     TabLayout getTabLayout();
