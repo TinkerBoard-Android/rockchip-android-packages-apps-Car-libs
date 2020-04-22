@@ -214,10 +214,12 @@
   <public type="id" name="car_ui_toolbar_search_icon"/>
   <public type="id" name="car_ui_toolbar_search_view_container"/>
   <public type="id" name="car_ui_toolbar_start_guideline"/>
+  <public type="id" name="car_ui_toolbar_subtitle"/>
   <public type="id" name="car_ui_toolbar_tab_item_icon"/>
   <public type="id" name="car_ui_toolbar_tab_item_text"/>
   <public type="id" name="car_ui_toolbar_tabs"/>
   <public type="id" name="car_ui_toolbar_title"/>
+  <public type="id" name="car_ui_toolbar_title_container"/>
   <public type="id" name="car_ui_toolbar_title_logo"/>
   <public type="id" name="car_ui_toolbar_title_logo_container"/>
   <public type="id" name="car_ui_toolbar_top_guideline"/>
@@ -369,6 +371,7 @@
   <public type="style" name="Widget.CarUi.Toolbar.Search.EditText"/>
   <public type="style" name="Widget.CarUi.Toolbar.Search.SearchIcon"/>
   <public type="style" name="Widget.CarUi.Toolbar.SeparatorView"/>
+  <public type="style" name="Widget.CarUi.Toolbar.Subtitle"/>
   <public type="style" name="Widget.CarUi.Toolbar.Tab"/>
   <public type="style" name="Widget.CarUi.Toolbar.Tab.Container"/>
   <public type="style" name="Widget.CarUi.Toolbar.Tab.Icon"/>
