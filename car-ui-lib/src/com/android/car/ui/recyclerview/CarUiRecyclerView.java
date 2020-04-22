@@ -225,10 +225,6 @@ public final class CarUiRecyclerView extends RecyclerView implements
             return;
         }
 
-        mContainer = new LinearLayout(getContext());
-        LayoutInflater inflater = LayoutInflater.from(getContext());
-        inflater.inflate(R.layout.car_ui_recycler_view, mContainer, true);
-        mContainer.setVisibility(mContainerVisibility);
         setVerticalScrollBarEnabled(false);
         setHorizontalScrollBarEnabled(false);
 
@@ -310,6 +306,11 @@ public final class CarUiRecyclerView extends RecyclerView implements
      * parent where the recycler view was set with the same layout params.
      */
     private void installExternalScrollBar() {
+        mContainer = new LinearLayout(getContext());
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        inflater.inflate(R.layout.car_ui_recycler_view, mContainer, true);
+        mContainer.setVisibility(mContainerVisibility);
+
         if (mContainerPadding != null) {
             mContainer.setPadding(mContainerPadding.left, mContainerPadding.top,
                     mContainerPadding.right, mContainerPadding.bottom);
