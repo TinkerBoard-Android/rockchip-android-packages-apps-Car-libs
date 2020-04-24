@@ -37,10 +37,14 @@ import com.android.car.messenger.NotificationMsgProto.NotificationMsg.Conversati
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.MessagingStyle;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.MessagingStyleMessage;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.Person;
+import com.android.i18n.phonenumbers.NumberParseException;
+import com.android.i18n.phonenumbers.PhoneNumberUtil;
+import com.android.i18n.phonenumbers.Phonenumber;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /** Utils methods for the car-messenger-common lib. **/
@@ -322,4 +326,37 @@ public class Utils {
 
         return senderContactUri.substring(MAP_CLIENT_URI_PHONE_NUMBER_SUBSTRING_INDEX);
     }
+
+    /** Comparator that sorts names alphabetically first, then phone numbers numerically. **/
+    public static final Comparator<String> ALPHA_THEN_NUMERIC_COMPARATOR =
+            new Comparator<String>() {
+                private boolean isPhoneNumber(String input) {
+                    PhoneNumberUtil util = PhoneNumberUtil.getInstance();
+                    try {
+                        Phonenumber.PhoneNumber phoneNumber = util.parse(input, /* defaultRegion */
+                                null);
+                        return util.isValidNumber(phoneNumber);
+                    } catch (NumberParseException e) {
+                        return false;
+                    }
+                }
+
+                private boolean isOfSameType(String o1, String o2) {
+                    boolean isO1PhoneNumber = isPhoneNumber(o1);
+                    boolean isO2PhoneNumber = isPhoneNumber(o2);
+                    return isO1PhoneNumber == isO2PhoneNumber;
+                }
+
+                @Override
+                public int compare(String o1, String o2) {
+                    // if both are names, sort based on names.
+                    // if both are number, sort numerically.
+                    // if one is phone number and the other is a name, give name precedence.
+                    if (!isOfSameType(o1, o2)) {
+                        return isPhoneNumber(o1) ? 1 : -1;
+                    } else {
+                        return o1.compareTo(o2);
+                    }
+                }
+            };
 }
