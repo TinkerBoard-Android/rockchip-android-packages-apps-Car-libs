@@ -57,7 +57,7 @@ public class MediaBrowserConnector {
      *
      * @param context The Context with which to build MediaBrowsers.
      */
-    MediaBrowserConnector(@NonNull Context context, @NonNull Callback callback) {
+    public MediaBrowserConnector(@NonNull Context context, @NonNull Callback callback) {
         mContext = context;
         mCallback = callback;
         mMaxBitmapSizePx = mContext.getResources().getInteger(
