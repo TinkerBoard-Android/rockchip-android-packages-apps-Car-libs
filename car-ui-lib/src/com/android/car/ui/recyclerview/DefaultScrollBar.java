@@ -109,26 +109,6 @@ class DefaultScrollBar implements ScrollBar {
                         int oldTop,
                         int oldRight,
                         int oldBottom) -> {
-                    int width = right - left;
-
-                    OrientationHelper orientationHelper =
-                            getOrientationHelper(getRecyclerView().getLayoutManager());
-
-                    // This value will keep track of the top of the current view being laid out.
-                    int layoutTop = orientationHelper.getStartAfterPadding() + mPaddingStart;
-
-                    // Lay out the up button at the top of the view.
-                    layoutViewCenteredFromTop(mUpButton, layoutTop, width);
-                    layoutTop = mUpButton.getBottom();
-
-                    // Lay out the scroll thumb
-                    layoutTop += mSeparatingMargin;
-                    layoutViewCenteredFromTop(mScrollThumb, layoutTop, width);
-
-                    // Lay out the bottom button at the bottom of the view.
-                    int downBottom = orientationHelper.getEndAfterPadding() - mPaddingEnd;
-                    layoutViewCenteredFromBottom(mDownButton, downBottom, width);
-
                     mHandler.post(this::calculateScrollThumbTrackHeight);
                     mHandler.post(() -> updatePaginationButtons(/* animate= */ false));
                 });
@@ -145,9 +125,8 @@ class DefaultScrollBar implements ScrollBar {
 
     @Override
     public void setPadding(int paddingStart, int paddingEnd) {
-        this.mPaddingStart = paddingStart;
-        this.mPaddingEnd = paddingEnd;
-        requestLayout();
+        mScrollView.setPadding(mScrollView.getPaddingLeft(), paddingStart,
+                mScrollView.getPaddingRight(), paddingEnd);
     }
 
     /**
@@ -201,36 +180,6 @@ class DefaultScrollBar implements ScrollBar {
 
         // If there's an alpha jump button, then the thumb is laid out starting from below that.
         mScrollThumbTrackHeight -= mUpButton.getBottom();
-    }
-
-    /**
-     * Lays out the given View starting from the given {@code top} value downwards and centered
-     * within the given {@code availableWidth}.
-     *
-     * @param view The view to lay out.
-     * @param top The top value to start laying out from. This value will be the resulting top value
-     * of the view.
-     * @param availableWidth The width in which to center the given view.
-     */
-    private static void layoutViewCenteredFromTop(View view, int top, int availableWidth) {
-        int viewWidth = view.getMeasuredWidth();
-        int viewLeft = (availableWidth - viewWidth) / 2;
-        view.layout(viewLeft, top, viewLeft + viewWidth, top + view.getMeasuredHeight());
-    }
-
-    /**
-     * Lays out the given View starting from the given {@code bottom} value upwards and centered
-     * within the given {@code availableSpace}.
-     *
-     * @param view The view to lay out.
-     * @param bottom The bottom value to start laying out from. This value will be the resulting
-     * bottom value of the view.
-     * @param availableWidth The width in which to center the given view.
-     */
-    private static void layoutViewCenteredFromBottom(View view, int bottom, int availableWidth) {
-        int viewWidth = view.getMeasuredWidth();
-        int viewLeft = (availableWidth - viewWidth) / 2;
-        view.layout(viewLeft, bottom - view.getMeasuredHeight(), viewLeft + viewWidth, bottom);
     }
 
     /**
