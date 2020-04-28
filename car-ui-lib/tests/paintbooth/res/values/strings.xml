@@ -267,6 +267,12 @@
   <!-- Text to show Dialog with single choice items-->
   <string name="dialog_show_single_choice">Show with single choice items</string>
 
+  <!-- Text to show a permission Dialog-->
+  <string name="dialog_show_permission_dialog">Show permission dialog</string>
+
+  <!-- Text to show a permission Dialog for multiple permissions-->
+  <string name="dialog_show_multi_permission_dialog">Show multiple permissions dialog</string>
+
   <!--This section is for widget attributes -->
   <eat-comment/>
   <!-- Text for checkbox [CHAR_LIMIT=16]-->
