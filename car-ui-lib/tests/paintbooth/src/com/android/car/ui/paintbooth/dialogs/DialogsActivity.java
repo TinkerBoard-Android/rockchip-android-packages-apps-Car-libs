@@ -16,7 +16,9 @@
 
 package com.android.car.ui.paintbooth.dialogs;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -79,7 +81,10 @@ public class DialogsActivity extends Activity implements InsetsChangedListener {
                 v -> showDialogWithSubtitleAndIcon()));
         mButtons.add(Pair.create(R.string.dialog_show_single_choice,
                 v -> showDialogWithSingleChoiceItems()));
-
+        mButtons.add(Pair.create(R.string.dialog_show_permission_dialog,
+                v -> showPermissionDialog()));
+        mButtons.add(Pair.create(R.string.dialog_show_multi_permission_dialog,
+                v -> showMultiPermissionDialog()));
 
         CarUiRecyclerView recyclerView = requireViewById(R.id.list);
         recyclerView.setAdapter(mAdapter);
@@ -195,6 +200,44 @@ public class DialogsActivity extends Activity implements InsetsChangedListener {
                 .setMessage("My Message!")
                 .setIcon(R.drawable.ic_tracklist)
                 .show();
+    }
+
+    private void showPermissionDialog() {
+        if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "Permission already granted. Remove CAMERA permission from "
+                    + "Settings > All apps > PaintBooth", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        requestPermissions(new String[]{Manifest.permission.CAMERA}, 1);
+    }
+
+    private void showMultiPermissionDialog() {
+        if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+                && checkSelfPermission(Manifest.permission.SEND_SMS)
+                    == PackageManager.PERMISSION_GRANTED
+                && checkSelfPermission(Manifest.permission.READ_CONTACTS)
+                    == PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "Permissions are already granted. Remove CAMERA, SEND_SMS or "
+                    + "READ_CONTACTS permission from Settings > All apps > PaintBooth",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+        requestPermissions(new String[]{Manifest.permission.CAMERA,
+                Manifest.permission.READ_CONTACTS, Manifest.permission.SEND_SMS}, 1);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            int[] grantResults) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Permission ");
+        for (int i = 0; i < permissions.length; i++) {
+            sb.append(permissions[i]);
+            sb.append("=");
+            sb.append(grantResults[i] == PackageManager.PERMISSION_GRANTED ? "granted" : "denied");
+            sb.append("\n");
+        }
+        Toast.makeText(this, sb.toString(), Toast.LENGTH_SHORT).show();
     }
 
     private static class ViewHolder extends RecyclerView.ViewHolder {
