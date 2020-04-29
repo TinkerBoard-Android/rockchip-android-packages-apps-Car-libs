@@ -24,6 +24,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,22 +39,20 @@ import java.util.Locale;
  */
 public class CarUiInstaller extends ContentProvider {
 
+    public static String TAG = "CarUiInstaller";
+
     private static final boolean IS_DEBUG_DEVICE =
             Build.TYPE.toLowerCase(Locale.ROOT).contains("debug")
                     || Build.TYPE.toLowerCase(Locale.ROOT).equals("eng");
 
-    private static boolean sIsInstalled = false;
-
-    /**
-     * If for some reason the ContentProvider cannot be used, this method can be
-     * used instead. Be sure to call it before the first activity is created, so ideally
-     * in your {@link Application} class. This should only be used as a last resort,
-     * prefer relying on the ContentProvider to call this for you.
-     */
-    public static void install(Context context) {
-        if (sIsInstalled) {
-            return;
+    @Override
+    public boolean onCreate() {
+        Context context = getContext();
+        if (context == null) {
+            Log.e(TAG, "CarUiInstaller had a null context!");
+            return false;
         }
+        Log.i(TAG, "CarUiInstaller started for " + context.getPackageName());
 
         Application application = (Application) context.getApplicationContext();
         application.registerActivityLifecycleCallbacks(
@@ -95,12 +94,6 @@ public class CarUiInstaller extends ContentProvider {
             application.registerActivityLifecycleCallbacks(checkCarUiComponents);
         }
 
-        sIsInstalled = true;
-    }
-
-    @Override
-    public boolean onCreate() {
-        install(getContext());
         return true;
     }
 
