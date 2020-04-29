@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.car.ui.tests.unit;
+package com.android.car.ui;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -27,6 +27,6 @@ public class TestActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.list_test_activity);
+        setContentView(R.layout.empty_test_activity);
     }
 }
