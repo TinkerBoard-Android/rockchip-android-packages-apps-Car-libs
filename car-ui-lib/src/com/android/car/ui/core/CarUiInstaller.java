@@ -19,6 +19,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -41,9 +42,20 @@ public class CarUiInstaller extends ContentProvider {
             Build.TYPE.toLowerCase(Locale.ROOT).contains("debug")
                     || Build.TYPE.toLowerCase(Locale.ROOT).equals("eng");
 
-    @Override
-    public boolean onCreate() {
-        Application application = (Application) getContext().getApplicationContext();
+    private static boolean sIsInstalled = false;
+
+    /**
+     * If for some reason the ContentProvider cannot be used, this method can be
+     * used instead. Be sure to call it before the first activity is created, so ideally
+     * in your {@link Application} class. This should only be used as a last resort,
+     * prefer relying on the ContentProvider to call this for you.
+     */
+    public static void install(Context context) {
+        if (sIsInstalled) {
+            return;
+        }
+
+        Application application = (Application) context.getApplicationContext();
         application.registerActivityLifecycleCallbacks(
                 new Application.ActivityLifecycleCallbacks() {
                     @Override
@@ -76,11 +88,19 @@ public class CarUiInstaller extends ContentProvider {
                         BaseLayoutController.destroy(activity);
                     }
                 });
+
         // Check only if we are in debug mode.
         if (IS_DEBUG_DEVICE) {
-            CheckCarUiComponents checkCarUiComponents = new CheckCarUiComponents(getContext());
+            CheckCarUiComponents checkCarUiComponents = new CheckCarUiComponents(application);
             application.registerActivityLifecycleCallbacks(checkCarUiComponents);
         }
+
+        sIsInstalled = true;
+    }
+
+    @Override
+    public boolean onCreate() {
+        install(getContext());
         return true;
     }
 
