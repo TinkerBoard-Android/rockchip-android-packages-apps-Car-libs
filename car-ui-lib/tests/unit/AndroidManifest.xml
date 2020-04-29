@@ -18,7 +18,7 @@
           package="com.android.car.ui.tests.unit">
     <application android:debuggable="true">
         <uses-library android:name="android.test.runner" />
-        <activity android:name="com.android.car.ui.tests.unit.TestActivity" />
+        <activity android:name="com.android.car.ui.TestActivity" />
     </application>
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
         android:targetPackage="com.android.car.ui.tests.unit"
