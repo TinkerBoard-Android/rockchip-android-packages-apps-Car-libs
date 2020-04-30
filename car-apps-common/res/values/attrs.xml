@@ -37,13 +37,6 @@
         <attr name="textAppearanceGridItemSecondary" format="reference" />
     </declare-styleable>
 
-    <!-- Attributes for tab layout. -->
-    <declare-styleable name="CarTabLayout">
-        <attr name="tabPaddingX" format="reference|dimension"/>
-        <attr name="tabFlexibleLayout" format="reference|boolean"/>
-        <attr name="tabItemLayout" format="reference"/>
-    </declare-styleable>
-
     <declare-styleable name="CrossfadeImageView">
         <attr name="align_horizontal" format="enum">
             <enum name="center" value="0"/>
