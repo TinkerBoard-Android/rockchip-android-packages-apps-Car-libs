@@ -27,6 +27,8 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import com.android.car.ui.utils.CarUxRestrictionsUtil;
+
 /**
  * UX Restrictions compliant Button.
  * This class will automatically listen to Car UXRestrictions, and respond to click event
