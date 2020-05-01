@@ -19,10 +19,12 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -37,13 +39,22 @@ import java.util.Locale;
  */
 public class CarUiInstaller extends ContentProvider {
 
+    public static String TAG = "CarUiInstaller";
+
     private static final boolean IS_DEBUG_DEVICE =
             Build.TYPE.toLowerCase(Locale.ROOT).contains("debug")
                     || Build.TYPE.toLowerCase(Locale.ROOT).equals("eng");
 
     @Override
     public boolean onCreate() {
-        Application application = (Application) getContext().getApplicationContext();
+        Context context = getContext();
+        if (context == null) {
+            Log.e(TAG, "CarUiInstaller had a null context!");
+            return false;
+        }
+        Log.i(TAG, "CarUiInstaller started for " + context.getPackageName());
+
+        Application application = (Application) context.getApplicationContext();
         application.registerActivityLifecycleCallbacks(
                 new Application.ActivityLifecycleCallbacks() {
                     @Override
@@ -76,11 +87,13 @@ public class CarUiInstaller extends ContentProvider {
                         BaseLayoutController.destroy(activity);
                     }
                 });
+
         // Check only if we are in debug mode.
         if (IS_DEBUG_DEVICE) {
-            CheckCarUiComponents checkCarUiComponents = new CheckCarUiComponents(getContext());
+            CheckCarUiComponents checkCarUiComponents = new CheckCarUiComponents(application);
             application.registerActivityLifecycleCallbacks(checkCarUiComponents);
         }
+
         return true;
     }
 

@@ -25,6 +25,7 @@
         <provider
             android:name="com.android.car.ui.core.CarUiInstaller"
             android:authorities="${applicationId}.CarUiInstaller"
+            android:directBootAware="true"
             android:exported="false"/>
     </application>
 </manifest>
