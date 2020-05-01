@@ -36,7 +36,7 @@ public class RecyclerViewAdapter extends
 
     private ArrayList<String> mData;
 
-    RecyclerViewAdapter(ArrayList<String> data) {
+    public RecyclerViewAdapter(ArrayList<String> data) {
         this.mData = data;
     }
 
