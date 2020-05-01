@@ -28,7 +28,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.android.car.ui.utils.CarUiUtils;
+
+import java.util.function.Predicate;
 
 /**
  * Class used to traverse through the view hierarchy of the activity and check if carUI components
@@ -42,23 +46,39 @@ class CheckCarUiComponents implements Application.ActivityLifecycleCallbacks {
     private static final String TAG = CheckCarUiComponents.class.getSimpleName();
     private static final String INTENT_FILTER = "com.android.car.ui.intent.CHECK_CAR_UI_COMPONENTS";
     private View mRootView;
+    private boolean mIsScreenVisible;
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (!mIsScreenVisible) {
+                return;
+            }
+
             CarUiComponents carUiComponents = new CarUiComponents();
             checkForCarUiComponents(mRootView, carUiComponents);
             if (carUiComponents.mIsUsingCarUiRecyclerView
                     && !carUiComponents.mIsCarUiRecyclerViewUsingListItem) {
                 Log.e(TAG, "CarUiListItem are not used within CarUiRecyclerView: ");
-                Toast.makeText(context,
-                        "CarUiListItem are not used within CarUiRecyclerView",
-                        Toast.LENGTH_LONG).show();
+                showToast(context, "CarUiListItem are not used within CarUiRecyclerView");
+            }
+            if (carUiComponents.mIsUsingAndroidXRecyclerView) {
+                Log.e(TAG, "CarUiRecyclerView not used: ");
+                showToast(context, "CarUiRecycler is not used");
             }
             if (!carUiComponents.mIsUsingCarUiToolbar) {
                 Log.e(TAG, "CarUiToolbar is not used: ");
-                Toast.makeText(context, "CarUiToolbar is not used",
-                        Toast.LENGTH_LONG).show();
+                showToast(context, "CarUiToolbar is not used");
+            }
+            if (!carUiComponents.mIsUsingCarUiBaseLayoutToolbar
+                    && carUiComponents.mIsUsingCarUiToolbar) {
+                Log.e(TAG, "CarUiBaseLayoutToolbar is not used: ");
+                showToast(context, "CarUiBaseLayoutToolbar is not used");
+            }
+            if (carUiComponents.mIsUsingCarUiRecyclerViewForPreference
+                    && !carUiComponents.mIsUsingCarUiPreference) {
+                Log.e(TAG, "CarUiPreference is not used: ");
+                showToast(context, "CarUiPreference is not used");
             }
         }
     };
@@ -80,10 +100,12 @@ class CheckCarUiComponents implements Application.ActivityLifecycleCallbacks {
     @Override
     public void onActivityResumed(Activity activity) {
         mRootView = activity.getWindow().getDecorView().getRootView();
+        mIsScreenVisible = true;
     }
 
     @Override
     public void onActivityPaused(Activity activity) {
+        mIsScreenVisible = false;
     }
 
     @Override
@@ -102,51 +124,50 @@ class CheckCarUiComponents implements Application.ActivityLifecycleCallbacks {
         }
     }
 
-    private void checkForCarUiComponents(View view, CarUiComponents carUiComponents) {
+    private void checkForCarUiComponents(View v, CarUiComponents carUiComponents) {
+        viewHasChildMatching(v, view -> {
+            if (isCarUiRecyclerView(view)) {
+                carUiComponents.mIsUsingCarUiRecyclerView = true;
 
-        if (view == null) {
-            return;
-        }
+                if (viewHasChildMatching(view, this::isCarUiPreference)) {
+                    carUiComponents.mIsUsingCarUiPreference = true;
+                    return false;
+                }
 
-        if (isCarUiRecyclerView(view)) {
-            carUiComponents.mIsUsingCarUiRecyclerView = true;
-            if (isCarUiListItemFound(view)) {
-                carUiComponents.mIsCarUiRecyclerViewUsingListItem = true;
+                carUiComponents.mIsCarUiRecyclerViewUsingListItem = viewHasChildMatching(view,
+                        this::isCarUiListItem);
+                return false;
             }
-            return;
-        }
 
-        if (isCarUiToolbar(view)) {
-            carUiComponents.mIsUsingCarUiToolbar = true;
-        }
-
-        if (view instanceof ViewGroup) {
-            for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-                checkForCarUiComponents(((ViewGroup) view).getChildAt(i), carUiComponents);
+            if (isAndroidXRecyclerView(view)) {
+                carUiComponents.mIsUsingAndroidXRecyclerView = true;
             }
-        }
+
+            if (isCarUiToolbar(view)) {
+                carUiComponents.mIsUsingCarUiToolbar = true;
+            }
+
+            if (isCarUiBaseLayoutToolbar(view)) {
+                carUiComponents.mIsUsingCarUiBaseLayoutToolbar = true;
+            }
+            return false;
+        });
     }
 
-    private boolean isCarUiListItemFound(View view) {
-
+    private boolean viewHasChildMatching(View view, Predicate<View> p) {
         if (view == null) {
             return false;
         }
-
-        if (isCarUiListItem(view)) {
+        if (p.test(view)) {
             return true;
         }
-
-        if (!(view instanceof ViewGroup)) {
-            return false;
-        }
-
-        for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-            if (isCarUiListItemFound(((ViewGroup) view).getChildAt(i))) {
-                return true;
+        if (view instanceof ViewGroup) {
+            for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+                if (viewHasChildMatching(((ViewGroup) view).getChildAt(i), p)) {
+                    return true;
+                }
             }
         }
-
         return false;
     }
 
@@ -158,16 +179,35 @@ class CheckCarUiComponents implements Application.ActivityLifecycleCallbacks {
         return view.getTag() != null && view.getTag().toString().equals("carUiListItem");
     }
 
+    private boolean isCarUiPreference(View view) {
+        return view.getTag() != null && view.getTag().toString().equals("carUiPreference");
+    }
+
     private boolean isCarUiToolbar(View view) {
         return view.getTag() != null && (view.getTag().toString().equals("carUiToolbar")
-                || view.getTag().toString().equals(
-                "CarUiBaseLayoutToolbar"));
+                || view.getTag().toString().equals("CarUiBaseLayoutToolbar"));
+    }
+
+    private boolean isCarUiBaseLayoutToolbar(View view) {
+        return view.getTag() != null && view.getTag().toString().equals("CarUiBaseLayoutToolbar");
+    }
+
+    private boolean isAndroidXRecyclerView(View view) {
+        return view.getClass() == RecyclerView.class;
+    }
+
+    private void showToast(Context context, String message) {
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show();
     }
 
     private static class CarUiComponents {
         boolean mIsUsingCarUiRecyclerView;
+        boolean mIsUsingCarUiRecyclerViewForPreference;
         boolean mIsCarUiRecyclerViewUsingListItem;
         boolean mIsUsingCarUiToolbar;
+        boolean mIsUsingCarUiBaseLayoutToolbar;
+        boolean mIsUsingCarUiPreference;
+        boolean mIsUsingAndroidXRecyclerView;
     }
 
     /**
