@@ -81,6 +81,11 @@
         android:parentActivityName=".MainActivity"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
     <activity
+        android:name=".toolbar.NoCarUiBaseLayoutToolbarActivity"
+        android:exported="false"
+        android:parentActivityName=".MainActivity"
+        android:theme="@style/Theme.CarUi"/>
+    <activity
         android:name=".overlays.OverlayActivity"
         android:exported="false"
         android:parentActivityName=".MainActivity">
