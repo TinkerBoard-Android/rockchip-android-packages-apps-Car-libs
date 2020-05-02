@@ -322,6 +322,7 @@
       <item type="string" name="car_ui_alert_dialog_default_button"/>
       <item type="string" name="car_ui_dialog_preference_negative"/>
       <item type="string" name="car_ui_dialog_preference_positive"/>
+      <item type="string" name="car_ui_direct_manipulation"/>
       <item type="string" name="car_ui_ellipsis"/>
       <item type="string" name="car_ui_preference_switch_off"/>
       <item type="string" name="car_ui_preference_switch_on"/>
