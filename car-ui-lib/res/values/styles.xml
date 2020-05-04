@@ -60,6 +60,7 @@
     <style name="Widget.CarUi.Toolbar.TextButton" parent="Widget.CarUi.Button.Borderless.Colored">
         <item name="android:drawableTint">@color/car_ui_toolbar_menu_item_icon_color</item>
         <item name="android:drawablePadding">10dp</item>
+        <item name="android:maxWidth">350dp</item>
     </style>
 
     <style name="Widget.CarUi.Toolbar.TextButton.WithIcon">
