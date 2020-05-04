@@ -20,6 +20,9 @@
         <uses-library android:name="android.test.runner" />
         <activity android:name="com.android.car.ui.TestActivity" />
         <activity android:name="com.android.car.ui.FocusParkingViewTestActivity" />
+        <activity
+            android:name="com.android.car.ui.toolbar.ToolbarTestActivity"
+            android:theme="@style/Theme.CarUi.WithToolbar"/>
     </application>
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
         android:targetPackage="com.android.car.ui.tests.unit"
