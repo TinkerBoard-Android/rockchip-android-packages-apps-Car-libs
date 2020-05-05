@@ -446,6 +446,12 @@
     <style name="Widget.Car.Button.ActionBar">
         <item name="android:scaleType">fitCenter</item>
         <item name="android:padding">@dimen/car_action_button_icon_inset</item>
+        <!-- Added paddingStart/End explicitly to make sure style works the same regardless of -->
+        <!-- whether RTL is enabled or disabled. -->
+        <!-- Note: When RTL is enabled, paddingStart/End overrides value of padding, -->
+        <!-- while padding overrides value of paddingStart/End when RTL is disabled. -->
+        <item name="android:paddingStart">@dimen/car_action_button_icon_inset</item>
+        <item name="android:paddingEnd">@dimen/car_action_button_icon_inset</item>
         <item name="android:background">@drawable/car_action_button_background</item>
         <item name="android:tint">@color/car_tint</item>
     </style>
