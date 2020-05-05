@@ -25,7 +25,6 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 
 import androidx.annotation.IntRange;
-import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.OrientationHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -39,11 +38,6 @@ import com.android.car.ui.utils.CarUiUtils;
  * been ported from the PLV with minor updates.
  */
 class DefaultScrollBar implements ScrollBar {
-
-    @VisibleForTesting
-    int mPaddingStart;
-    @VisibleForTesting
-    int mPaddingEnd;
 
     private float mButtonDisabledAlpha;
     private CarUiSnapHelper mSnapHelper;
@@ -167,11 +161,11 @@ class DefaultScrollBar implements ScrollBar {
      * The
      * values should also be positive.
      *
-     * @param range The range of the scrollbar's thumb
-     * @param offset The offset of the scrollbar's thumb
-     * @param extent The extent of the scrollbar's thumb
+     * @param range   The range of the scrollbar's thumb
+     * @param offset  The offset of the scrollbar's thumb
+     * @param extent  The extent of the scrollbar's thumb
      * @param animate Whether or not the thumb should animate from its current position to the
-     * position specified by the given range, offset and extent.
+     *                position specified by the given range, offset and extent.
      */
     private void setParameters(
             @IntRange(from = 0) int range,
@@ -206,7 +200,7 @@ class DefaultScrollBar implements ScrollBar {
      * Calculates and returns how big the scroll bar thumb should be based on the given range and
      * extent.
      *
-     * @param range The total amount of space the scroll bar is allowed to roam over.
+     * @param range  The total amount of space the scroll bar is allowed to roam over.
      * @param extent The amount of space that the scroll bar takes up relative to the range.
      * @return The height of the scroll bar thumb in pixels.
      */
@@ -220,9 +214,10 @@ class DefaultScrollBar implements ScrollBar {
      * has
      * been laid out.
      *
-     * @param range The total amount of space the scroll bar is allowed to roam over.
-     * @param offset The amount the scroll bar should be offset, expressed in the same units as the
-     * given range.
+     * @param range       The total amount of space the scroll bar is allowed to roam over.
+     * @param offset      The amount the scroll bar should be offset, expressed in the same units as
+     *                    the
+     *                    given range.
      * @param thumbLength The current length of the thumb in pixels.
      * @return The amount the thumb should be offset in pixels.
      */
@@ -416,8 +411,8 @@ class DefaultScrollBar implements ScrollBar {
      * may not be correct.
      *
      * @param animate {@code true} if the scrollbar should animate to its new position. {@code
-     * false}
-     * if no animation is used
+     *                false}
+     *                if no animation is used
      */
     private void updatePaginationButtons(boolean animate) {
 
