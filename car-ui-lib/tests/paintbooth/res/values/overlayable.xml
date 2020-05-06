@@ -15,9 +15,10 @@
 -->
 
 <resources>
-    <overlayable name="MyOverlayableResources">
+    <overlayable name="PaintboothOverlayableResources">
         <policy type="public">
             <item type="drawable" name="ic_launcher" />
+            <item type="drawable" name="simulated_screen_shape"/>
             <item type="string" name="app_name" />
             <item type="id" name="home" />
             <item type="attr" name="title" />
