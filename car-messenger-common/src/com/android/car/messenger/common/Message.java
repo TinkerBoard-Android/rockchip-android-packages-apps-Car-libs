@@ -17,10 +17,12 @@
 package com.android.car.messenger.common;
 
 import static com.android.car.apps.common.util.SafeLog.logw;
+import static com.android.car.messenger.common.Utils.BMC_EXTRA_MESSAGE_HANDLE;
+import static com.android.car.messenger.common.Utils.BMC_EXTRA_MESSAGE_READ_STATUS;
+import static com.android.car.messenger.common.Utils.BMC_EXTRA_MESSAGE_TIMESTAMP;
 
 import android.annotation.Nullable;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothMapClient;
 import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
@@ -96,7 +98,7 @@ public class Message {
     }
 
     /**
-     * Creates a Message based on {@link BluetoothMapClient} intent. Returns {@code null} if the
+     * Creates a Message based on BluetoothMapClient intent. Returns {@code null} if the
      * intent is missing required fields.
      **/
     public static Message parseFromIntent(Intent intent) {
@@ -116,11 +118,11 @@ public class Message {
                 Utils.getSenderName(intent),
                 device.getAddress(),
                 intent.getStringExtra(android.content.Intent.EXTRA_TEXT),
-                intent.getLongExtra(BluetoothMapClient.EXTRA_MESSAGE_TIMESTAMP,
+                intent.getLongExtra(BMC_EXTRA_MESSAGE_TIMESTAMP,
                         System.currentTimeMillis()),
-                intent.getBooleanExtra(BluetoothMapClient.EXTRA_MESSAGE_READ_STATUS,
+                intent.getBooleanExtra(BMC_EXTRA_MESSAGE_READ_STATUS,
                         false),
-                intent.getStringExtra(BluetoothMapClient.EXTRA_MESSAGE_HANDLE),
+                intent.getStringExtra(BMC_EXTRA_MESSAGE_HANDLE),
                 MessageType.BLUETOOTH_MAP_MESSAGE,
                 senderUri,
                 SenderKey.createSenderKey(intent)
@@ -232,7 +234,7 @@ public class Message {
     }
 
     /**
-     * If the message came from {@link BluetoothMapClient}, this retrieves a key that is unique
+     * If the message came from BluetoothMapClient, this retrieves a key that is unique
      * for each contact per device.
      * If the message came from {@link NotificationMsg}, this retrieves a key that is only
      * guaranteed to be unique per sender in a 1-1 conversation. If this message is part of a
