@@ -20,6 +20,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import androidx.test.rule.ActivityTestRule;
 
+import com.android.car.ui.tests.unit.R;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
