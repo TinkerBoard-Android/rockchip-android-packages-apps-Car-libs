@@ -17,7 +17,6 @@
 package com.android.car.messenger.common;
 
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothMapClient;
 import android.content.Intent;
 
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg;
@@ -33,7 +32,7 @@ public class SenderKey extends CompositeKey {
     }
 
     /**
-     * Returns the SenderKey for the {@link BluetoothMapClient} intent. This should be unique
+     * Returns the SenderKey for the BluetoothMapClient intent. This should be unique
      * for each contact per device.
      */
     public static SenderKey createSenderKey(Intent intent) {
