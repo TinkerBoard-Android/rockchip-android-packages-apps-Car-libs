@@ -21,7 +21,6 @@ import static com.android.car.apps.common.util.SafeLog.logw;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothMapClient;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.os.Build;
@@ -103,7 +102,7 @@ public class ConversationNotificationInfo {
                 /* ccUris= */null);
 
     }
-    /** Creates a ConversationNotificationInfo for a {@link BluetoothMapClient} intent. **/
+    /** Creates a ConversationNotificationInfo for a BluetoothMapClient intent. **/
     public static ConversationNotificationInfo createConversationNotificationInfo(Intent intent,
             String conversationTitle, String appPackageName, @Nullable Icon appIcon) {
         BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
