@@ -28,11 +28,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.core.util.Predicate;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.utils.CarUiUtils;
-
-import java.util.function.Predicate;
 
 /**
  * Class used to traverse through the view hierarchy of the activity and check if carUI components
