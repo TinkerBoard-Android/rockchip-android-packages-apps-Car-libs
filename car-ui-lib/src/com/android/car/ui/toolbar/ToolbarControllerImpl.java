@@ -30,7 +30,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.DrawableRes;
@@ -66,7 +65,7 @@ public class ToolbarControllerImpl implements ToolbarController {
     private ImageView mNavIcon;
     private ImageView mLogoInNavIconSpace;
     private ViewGroup mNavIconContainer;
-    private LinearLayout mTitleContainer;
+    private ViewGroup mTitleContainer;
     private TextView mTitle;
     private TextView mSubtitle;
     private ImageView mTitleLogo;
