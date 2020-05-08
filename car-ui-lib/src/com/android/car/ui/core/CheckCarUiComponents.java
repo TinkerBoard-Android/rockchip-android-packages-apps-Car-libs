@@ -28,7 +28,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import androidx.core.util.Predicate;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.utils.CarUiUtils;
@@ -47,7 +46,7 @@ class CheckCarUiComponents implements Application.ActivityLifecycleCallbacks {
     private View mRootView;
     private boolean mIsScreenVisible;
 
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (!mIsScreenVisible) {
@@ -128,13 +127,13 @@ class CheckCarUiComponents implements Application.ActivityLifecycleCallbacks {
             if (isCarUiRecyclerView(view)) {
                 carUiComponents.mIsUsingCarUiRecyclerView = true;
 
-                if (viewHasChildMatching(view, this::isCarUiPreference)) {
+                if (viewHasChildMatching(view, CheckCarUiComponents::isCarUiPreference)) {
                     carUiComponents.mIsUsingCarUiPreference = true;
                     return false;
                 }
 
                 carUiComponents.mIsCarUiRecyclerViewUsingListItem = viewHasChildMatching(view,
-                        this::isCarUiListItem);
+                        CheckCarUiComponents::isCarUiListItem);
                 return false;
             }
 
@@ -153,7 +152,7 @@ class CheckCarUiComponents implements Application.ActivityLifecycleCallbacks {
         });
     }
 
-    private boolean viewHasChildMatching(View view, Predicate<View> p) {
+    private static boolean viewHasChildMatching(View view, Predicate<View> p) {
         if (view == null) {
             return false;
         }
@@ -170,32 +169,32 @@ class CheckCarUiComponents implements Application.ActivityLifecycleCallbacks {
         return false;
     }
 
-    private boolean isCarUiRecyclerView(View view) {
+    private static boolean isCarUiRecyclerView(View view) {
         return view.getTag() != null && view.getTag().toString().equals("carUiRecyclerView");
     }
 
-    private boolean isCarUiListItem(View view) {
+    private static boolean isCarUiListItem(View view) {
         return view.getTag() != null && view.getTag().toString().equals("carUiListItem");
     }
 
-    private boolean isCarUiPreference(View view) {
+    private static boolean isCarUiPreference(View view) {
         return view.getTag() != null && view.getTag().toString().equals("carUiPreference");
     }
 
-    private boolean isCarUiToolbar(View view) {
+    private static boolean isCarUiToolbar(View view) {
         return view.getTag() != null && (view.getTag().toString().equals("carUiToolbar")
                 || view.getTag().toString().equals("CarUiBaseLayoutToolbar"));
     }
 
-    private boolean isCarUiBaseLayoutToolbar(View view) {
+    private static boolean isCarUiBaseLayoutToolbar(View view) {
         return view.getTag() != null && view.getTag().toString().equals("CarUiBaseLayoutToolbar");
     }
 
-    private boolean isAndroidXRecyclerView(View view) {
+    private static boolean isAndroidXRecyclerView(View view) {
         return view.getClass() == RecyclerView.class;
     }
 
-    private void showToast(Context context, String message) {
+    private static void showToast(Context context, String message) {
         Toast.makeText(context, message, Toast.LENGTH_LONG).show();
     }
 
@@ -212,7 +211,7 @@ class CheckCarUiComponents implements Application.ActivityLifecycleCallbacks {
     /**
      * Dump's the view hierarchy.
      */
-    private void printViewHierarchy(String indent, View view) {
+    private static void printViewHierarchy(String indent, View view) {
         StringBuilder sb = new StringBuilder();
         sb.append("\n ");
         sb.append(indent);
@@ -224,9 +223,9 @@ class CheckCarUiComponents implements Application.ActivityLifecycleCallbacks {
             return;
         }
 
-        sb.append("viewNode= " + view.toString() + ", ");
-        sb.append("id= " + view.getId() + ", ");
-        sb.append("name= " + view.getAccessibilityClassName() + ", ");
+        sb.append("viewNode= ").append(view.toString()).append(", ");
+        sb.append("id= ").append(view.getId()).append(", ");
+        sb.append("name= ").append(view.getAccessibilityClassName()).append(", ");
 
         sb.append('}');
         System.out.println(sb.toString());
@@ -238,5 +237,9 @@ class CheckCarUiComponents implements Application.ActivityLifecycleCallbacks {
         for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
             printViewHierarchy(indent, ((ViewGroup) view).getChildAt(i));
         }
+    }
+
+    private interface Predicate<T> {
+        boolean test(T input);
     }
 }
