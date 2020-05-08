@@ -21,7 +21,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:tag="carUiListItem"
-    android:minHeight="@dimen/car_ui_list_item_height">
+    android:minHeight="@dimen/car_ui_list_item_height"
+    app:layout_optimizationLevel="none">
 
     <!-- The following touch interceptor views are sized to encompass the specific sub-sections of
     the list item view to easily control the bounds of a background ripple effects. -->
