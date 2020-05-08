@@ -15,7 +15,9 @@
  */
 package com.android.car.ui.utils;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.os.Build;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
@@ -25,6 +27,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import androidx.annotation.NonNull;
 
 import com.android.car.ui.R;
+
+import java.lang.reflect.Method;
 
 /** Helper class to toggle direct manipulation mode. */
 public final class DirectManipulationHelper {
@@ -74,7 +78,30 @@ public final class DirectManipulationHelper {
     }
 
     /** Returns whether the given {@code node} supports direct manipulation. */
+    @TargetApi(Build.VERSION_CODES.R)
     public boolean supportDirectManipulation(@NonNull AccessibilityNodeInfo node) {
-        return TextUtils.equals(mDirectManipulation, node.getStateDescription());
+        try {
+            // TODO(b/156115044): remove the reflection once Android R sdk is publicly released.
+            Method getStateDescription =
+                    AccessibilityNodeInfo.class.getMethod("getStateDescription");
+            CharSequence stateDescription = (CharSequence) getStateDescription.invoke(node);
+            return TextUtils.equals(mDirectManipulation, stateDescription);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /** Sets whether the given {@code view} supports direct manipulation. */
+    @TargetApi(Build.VERSION_CODES.R)
+    public void setSupportsDirectManipulation(@NonNull View view, boolean enable) {
+        try {
+            // TODO(b/156115044): remove the reflection once Android R sdk is publicly released.
+            Method setStateDescription =
+                    View.class.getMethod("setStateDescription", CharSequence.class);
+            CharSequence stateDescription = enable ? mDirectManipulation : null;
+            setStateDescription.invoke(view, stateDescription);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
