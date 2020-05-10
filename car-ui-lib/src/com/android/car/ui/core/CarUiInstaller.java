@@ -39,7 +39,7 @@ import java.util.Locale;
  */
 public class CarUiInstaller extends ContentProvider {
 
-    public static String TAG = "CarUiInstaller";
+    private static final String TAG = "CarUiInstaller";
 
     private static final boolean IS_DEBUG_DEVICE =
             Build.TYPE.toLowerCase(Locale.ROOT).contains("debug")
