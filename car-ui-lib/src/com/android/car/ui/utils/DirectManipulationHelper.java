@@ -17,7 +17,6 @@ package com.android.car.ui.utils;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.os.Build;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
@@ -78,7 +77,7 @@ public final class DirectManipulationHelper {
     }
 
     /** Returns whether the given {@code node} supports direct manipulation. */
-    @TargetApi(Build.VERSION_CODES.R)
+    @TargetApi(30)
     public boolean supportDirectManipulation(@NonNull AccessibilityNodeInfo node) {
         try {
             // TODO(b/156115044): remove the reflection once Android R sdk is publicly released.
@@ -92,7 +91,7 @@ public final class DirectManipulationHelper {
     }
 
     /** Sets whether the given {@code view} supports direct manipulation. */
-    @TargetApi(Build.VERSION_CODES.R)
+    @TargetApi(30)
     public void setSupportsDirectManipulation(@NonNull View view, boolean enable) {
         try {
             // TODO(b/156115044): remove the reflection once Android R sdk is publicly released.
