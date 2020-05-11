@@ -50,10 +50,4 @@ limitations under the License.
 
     <!-- Shown in a toast when the user attempts to do something distracting while driving [CHAR_LIMIT=200] -->
     <string name="car_ui_restricted_while_driving">Feature not available while driving</string>
-
-    <!-- StateDescription for a view to support direct manipulation mode. It's also used by
-         CarRotaryUtils to indicate that an AccessibilityEvent represents a request to toggle direct
-         manipulation mode. -->
-    <string name="car_ui_direct_manipulation" translatable="false">
-        android.rotary.DIRECT_MANIPULATION</string>
 </resources>
