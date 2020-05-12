@@ -19,6 +19,8 @@ package com.android.car.ui;
 import android.app.Activity;
 import android.os.Bundle;
 
+import com.android.car.ui.tests.unit.R;
+
 /**
  * An empty activity to be used for testing.
  */

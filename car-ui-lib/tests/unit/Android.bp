@@ -29,7 +29,6 @@ android_test {
         "androidx.test.espresso.core",
         "car-ui-lib",
         "platform-test-annotations",
-        "testables",
         "mockito-target-inline-minus-junit4",
         "truth-prebuilt",
     ],
