@@ -39,9 +39,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.testing.TestableContext;
-import android.testing.TestableResources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,27 +70,26 @@ public class CarUiRecyclerViewTest {
     public ActivityTestRule<TestActivity> mActivityRule =
             new ActivityTestRule<>(TestActivity.class);
 
-    @Rule
-    public TestableContext mTestableContext = new TestableContext(
-            InstrumentationRegistry.getInstrumentation().getTargetContext());
-
     private TestActivity mActivity;
-    private TestableResources mTestableResources;
+    private Context mTestableContext;
+    private Resources mTestableResources;
 
     @Before
     public void setUp() {
         mActivity = mActivityRule.getActivity();
-        mTestableResources = mTestableContext.getOrCreateTestableResources();
+        mTestableContext = spy(mActivity);
+        mTestableResources = spy(mActivity.getResources());
+        when(mTestableContext.getResources()).thenReturn(mTestableResources);
     }
 
     @Test
     public void testIsScrollbarPresent_scrollbarEnabled() {
-        mTestableResources.addOverride(R.bool.car_ui_scrollbar_enable, true);
+        doReturn(true).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
         CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerView(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         container.post(() -> {
             container.addView(carUiRecyclerView);
-            carUiRecyclerView.setAdapter(new TestAdapter(10));
+            carUiRecyclerView.setAdapter(new TestAdapter(100));
         });
 
         onView(withId(R.id.car_ui_scroll_bar)).check(matches(isDisplayed()));
@@ -99,12 +97,12 @@ public class CarUiRecyclerViewTest {
 
     @Test
     public void testIsScrollbarPresent_scrollbarDisabled() {
-        mTestableResources.addOverride(R.bool.car_ui_scrollbar_enable, false);
+        doReturn(false).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
         CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerView(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         container.post(() -> {
             container.addView(carUiRecyclerView);
-            carUiRecyclerView.setAdapter(new TestAdapter(10));
+            carUiRecyclerView.setAdapter(new TestAdapter(100));
         });
 
         onView(withId(R.id.car_ui_scroll_bar)).check(doesNotExist());
