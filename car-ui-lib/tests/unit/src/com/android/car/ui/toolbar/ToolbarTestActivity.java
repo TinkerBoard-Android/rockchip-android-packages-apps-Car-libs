@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-include ':PaintBooth'
-project(':PaintBooth').projectDir = new File('./tests/paintbooth')
-include ':RoboTests'
-project(':RoboTests').projectDir = new File('./tests/robotests')
-include ':InstrumentionTests'
-project(':InstrumentionTests').projectDir = new File('./tests/unit')
+package com.android.car.ui.toolbar;
 
-rootProject.name='Chassis'
+import android.app.Activity;
+import android.os.Bundle;
+
+import com.android.car.ui.R;
+
+/** An Activity used for testing {@link ToolbarController}. */
+public class ToolbarTestActivity extends Activity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.empty_test_activity);
+    }
+}

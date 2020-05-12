@@ -36,9 +36,10 @@ import com.android.car.messenger.NotificationMsgProto.NotificationMsg.Conversati
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.MessagingStyle;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.MessagingStyleMessage;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.Person;
-import com.android.i18n.phonenumbers.NumberParseException;
-import com.android.i18n.phonenumbers.PhoneNumberUtil;
-import com.android.i18n.phonenumbers.Phonenumber;
+
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
 
 import java.util.ArrayList;
 import java.util.Arrays;

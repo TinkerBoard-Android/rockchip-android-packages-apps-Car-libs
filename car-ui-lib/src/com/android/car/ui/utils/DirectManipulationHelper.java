@@ -17,7 +17,6 @@ package com.android.car.ui.utils;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.os.Build;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
@@ -25,8 +24,6 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.NonNull;
-
-import com.android.car.ui.R;
 
 import java.lang.reflect.Method;
 
@@ -38,11 +35,11 @@ public final class DirectManipulationHelper {
      * class name of {@link AccessibilityEvent} to indicate that the AccessibilityEvent represents
      * a request to toggle direct manipulation mode.
      */
-    private final String mDirectManipulation;
+    private static final String DIRECT_MANIPULATION =
+            "com.android.car.ui.utils.DIRECT_MANIPULATION";
 
-    public DirectManipulationHelper(@NonNull Context context) {
-        mDirectManipulation =
-                context.getResources().getString(R.string.car_ui_direct_manipulation);
+    /** This is a utility class. */
+    private DirectManipulationHelper() {
     }
 
     /**
@@ -56,14 +53,14 @@ public final class DirectManipulationHelper {
      * @param enable true to enter direct manipulation mode, false to exit direct manipulation mode
      * @return whether the AccessibilityEvent was sent
      */
-    public boolean enableDirectManipulationMode(@NonNull View view, boolean enable) {
+    public static boolean enableDirectManipulationMode(@NonNull View view, boolean enable) {
         AccessibilityManager accessibilityManager = (AccessibilityManager)
                 view.getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
         if (accessibilityManager == null || !accessibilityManager.isEnabled()) {
             return false;
         }
         AccessibilityEvent event = AccessibilityEvent.obtain();
-        event.setClassName(mDirectManipulation);
+        event.setClassName(DIRECT_MANIPULATION);
         event.setSource(view);
         event.setEventType(enable
                 ? AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED
@@ -73,32 +70,32 @@ public final class DirectManipulationHelper {
     }
 
     /** Returns whether the given {@code event} is for direct manipulation. */
-    public boolean isDirectManipulation(@NonNull AccessibilityEvent event) {
-        return TextUtils.equals(mDirectManipulation, event.getClassName());
+    public static boolean isDirectManipulation(@NonNull AccessibilityEvent event) {
+        return TextUtils.equals(DIRECT_MANIPULATION, event.getClassName());
     }
 
     /** Returns whether the given {@code node} supports direct manipulation. */
-    @TargetApi(Build.VERSION_CODES.R)
-    public boolean supportDirectManipulation(@NonNull AccessibilityNodeInfo node) {
+    @TargetApi(30)
+    public static boolean supportDirectManipulation(@NonNull AccessibilityNodeInfo node) {
         try {
             // TODO(b/156115044): remove the reflection once Android R sdk is publicly released.
             Method getStateDescription =
                     AccessibilityNodeInfo.class.getMethod("getStateDescription");
             CharSequence stateDescription = (CharSequence) getStateDescription.invoke(node);
-            return TextUtils.equals(mDirectManipulation, stateDescription);
+            return TextUtils.equals(DIRECT_MANIPULATION, stateDescription);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
     }
 
     /** Sets whether the given {@code view} supports direct manipulation. */
-    @TargetApi(Build.VERSION_CODES.R)
-    public void setSupportsDirectManipulation(@NonNull View view, boolean enable) {
+    @TargetApi(30)
+    public static void setSupportsDirectManipulation(@NonNull View view, boolean enable) {
         try {
             // TODO(b/156115044): remove the reflection once Android R sdk is publicly released.
             Method setStateDescription =
                     View.class.getMethod("setStateDescription", CharSequence.class);
-            CharSequence stateDescription = enable ? mDirectManipulation : null;
+            CharSequence stateDescription = enable ? DIRECT_MANIPULATION : null;
             setStateDescription.invoke(view, stateDescription);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);

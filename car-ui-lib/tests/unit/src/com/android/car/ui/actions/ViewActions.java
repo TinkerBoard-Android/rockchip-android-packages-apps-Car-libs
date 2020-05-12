@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
-include ':PaintBooth'
-project(':PaintBooth').projectDir = new File('./tests/paintbooth')
-include ':RoboTests'
-project(':RoboTests').projectDir = new File('./tests/robotests')
-include ':InstrumentionTests'
-project(':InstrumentionTests').projectDir = new File('./tests/unit')
+package com.android.car.ui.actions;
 
-rootProject.name='Chassis'
+import android.view.View;
+
+import androidx.test.espresso.ViewAction;
+
+import org.hamcrest.Matcher;
+
+public class ViewActions {
+
+    public static ViewAction waitForView(Matcher<View> matcher, long waitTimeMillis) {
+        return new WaitForViewAction(matcher, waitTimeMillis);
+    }
+}

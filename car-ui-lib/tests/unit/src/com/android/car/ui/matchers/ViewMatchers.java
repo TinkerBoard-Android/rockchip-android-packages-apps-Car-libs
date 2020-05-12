@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,18 @@
  * limitations under the License.
  */
 
-include ':PaintBooth'
-project(':PaintBooth').projectDir = new File('./tests/paintbooth')
-include ':RoboTests'
-project(':RoboTests').projectDir = new File('./tests/robotests')
-include ':InstrumentionTests'
-project(':InstrumentionTests').projectDir = new File('./tests/unit')
+package com.android.car.ui.matchers;
 
-rootProject.name='Chassis'
+import android.view.View;
+
+import org.hamcrest.Matcher;
+
+public class ViewMatchers {
+    public static Matcher<View> withDrawable(int drawableId) {
+        return new DrawableMatcher(drawableId);
+    }
+
+    public static Matcher<View> nthChildOfView(Matcher<View> parentMatcher, int n) {
+        return new NthChildMatcher(parentMatcher, n);
+    }
+}
