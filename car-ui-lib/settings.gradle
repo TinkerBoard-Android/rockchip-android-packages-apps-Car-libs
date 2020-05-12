@@ -18,4 +18,7 @@ include ':PaintBooth'
 project(':PaintBooth').projectDir = new File('./tests/paintbooth')
 include ':RoboTests'
 project(':RoboTests').projectDir = new File('./tests/robotests')
+include ':InstrumentionTests'
+project(':InstrumentionTests').projectDir = new File('./tests/unit')
+
 rootProject.name='Chassis'
