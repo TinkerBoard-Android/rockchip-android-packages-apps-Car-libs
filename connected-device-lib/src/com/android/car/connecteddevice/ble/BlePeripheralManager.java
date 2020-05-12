@@ -247,6 +247,7 @@ public class BlePeripheralManager {
         if (bluetoothGatt != null) {
             gattServer.cancelConnection(bluetoothGatt.getDevice());
             bluetoothGatt.disconnect();
+            bluetoothGatt.close();
         }
         gattServer.clearServices();
         gattServer.close();
