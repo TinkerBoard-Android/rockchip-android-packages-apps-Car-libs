@@ -69,6 +69,7 @@
     <style name="TextAppearance">
         <item name="android:fontFamily">roboto-regular</item>
         <item name="android:textColor">@color/primary_text_color</item>
+        <item name="android:textAlignment">viewStart</item>
     </style>
 
     <style name="TextAppearance.Display1" parent="TextAppearance">
@@ -101,12 +102,8 @@
         <item name="android:letterSpacing">@dimen/letter_spacing_body3</item>
     </style>
 
-    <style name="MinimizedControlBarTitle" parent="TextAppearance.Body1">
-        <item name="android:textDirection">locale</item>
-    </style>
-    <style name="MinimizedControlBarSubtitle" parent="TextAppearance.Body3">
-        <item name="android:textDirection">locale</item>
-    </style>
+    <style name="MinimizedControlBarTitle" parent="TextAppearance.Body1"/>
+    <style name="MinimizedControlBarSubtitle" parent="TextAppearance.Body3"/>
 
     <!-- Styles for ControlBar -->
     <style name="ControlBar">
