@@ -53,6 +53,14 @@ public class MultiSelectListPreferenceFragment extends Fragment implements Inset
 
     private CarUiMultiSelectListPreference mPreference;
     private Set<String> mNewValues;
+    private ToolbarController mToolbar;
+    private final Toolbar.OnBackListener mOnBackListener = () -> {
+        if (mPreference.callChangeListener(mNewValues)) {
+            mPreference.setValues(mNewValues);
+        }
+
+        return false;
+    };
 
     /**
      * Returns a new instance of {@link MultiSelectListPreferenceFragment} for the {@link
@@ -82,12 +90,12 @@ public class MultiSelectListPreferenceFragment extends Fragment implements Inset
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         final CarUiRecyclerView recyclerView = view.requireViewById(R.id.list);
-        ToolbarController toolbar = CarUi.getToolbar(requireActivity());
+        mToolbar = CarUi.getToolbar(requireActivity());
 
         // TODO(b/150230923) remove the code for the old toolbar height change when apps are ready
-        if (toolbar == null) {
+        if (mToolbar == null) {
             Toolbar toolbarView = view.requireViewById(R.id.toolbar);
-            toolbar = toolbarView;
+            mToolbar = toolbarView;
 
             recyclerView.setPadding(0, toolbarView.getHeight(), 0, 0);
             toolbarView.registerToolbarHeightChangeListener(newHeight -> {
@@ -104,8 +112,8 @@ public class MultiSelectListPreferenceFragment extends Fragment implements Inset
         mPreference = getPreference();
 
         recyclerView.setClipToPadding(false);
-        toolbar.setTitle(mPreference.getTitle());
-        toolbar.setState(Toolbar.State.SUBPAGE);
+        mToolbar.setTitle(mPreference.getTitle());
+        mToolbar.setState(Toolbar.State.SUBPAGE);
 
         mNewValues = new HashSet<>(mPreference.getValues());
         CharSequence[] entries = mPreference.getEntries();
@@ -146,23 +154,22 @@ public class MultiSelectListPreferenceFragment extends Fragment implements Inset
 
         CarUiListItemAdapter adapter = new CarUiListItemAdapter(listItems);
         recyclerView.setAdapter(adapter);
-
-        toolbar.registerOnBackListener(() -> {
-            if (mPreference.callChangeListener(mNewValues)) {
-                mPreference.setValues(mNewValues);
-            }
-
-            return false;
-        });
     }
 
     @Override
     public void onStart() {
         super.onStart();
+        mToolbar.registerOnBackListener(mOnBackListener);
         Insets insets = CarUi.getInsets(getActivity());
         if (insets != null) {
             onCarUiInsetsChanged(insets);
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mToolbar.unregisterOnBackListener(mOnBackListener);
     }
 
     private CarUiMultiSelectListPreference getPreference() {
