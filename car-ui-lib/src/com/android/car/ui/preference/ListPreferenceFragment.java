@@ -50,8 +50,21 @@ import java.util.List;
  */
 public class ListPreferenceFragment extends Fragment implements InsetsChangedListener {
 
+    private ToolbarController mToolbar;
     private ListPreference mPreference;
     private CarUiContentListItem mSelectedItem;
+    private int mSelectedIndex = -1;
+    private final Toolbar.OnBackListener mOnBackListener = () -> {
+        if (mSelectedIndex >= 0 && mPreference != null) {
+            String entryValue = mPreference.getEntryValues()[mSelectedIndex].toString();
+
+            if (mPreference.callChangeListener(entryValue)) {
+                mPreference.setValue(entryValue);
+            }
+        }
+
+        return false;
+    };
 
     /**
      * Returns a new instance of {@link ListPreferenceFragment} for the {@link ListPreference} with
@@ -81,12 +94,12 @@ public class ListPreferenceFragment extends Fragment implements InsetsChangedLis
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         final CarUiRecyclerView carUiRecyclerView = view.requireViewById(R.id.list);
-        ToolbarController toolbar = CarUi.getToolbar(getActivity());
+        mToolbar = CarUi.getToolbar(getActivity());
 
         // TODO(b/150230923) remove the code for the old toolbar height change when apps are ready
-        if (toolbar == null) {
+        if (mToolbar == null) {
             Toolbar toolbarView = view.requireViewById(R.id.toolbar);
-            toolbar = toolbarView;
+            mToolbar = toolbarView;
 
             carUiRecyclerView.setPadding(0, toolbarView.getHeight(), 0, 0);
             toolbarView.registerToolbarHeightChangeListener(newHeight -> {
@@ -102,8 +115,8 @@ public class ListPreferenceFragment extends Fragment implements InsetsChangedLis
 
         carUiRecyclerView.setClipToPadding(false);
         mPreference = getListPreference();
-        toolbar.setTitle(mPreference.getTitle());
-        toolbar.setState(Toolbar.State.SUBPAGE);
+        mToolbar.setTitle(mPreference.getTitle());
+        mToolbar.setState(Toolbar.State.SUBPAGE);
 
         CharSequence[] entries = mPreference.getEntries();
         CharSequence[] entryValues = mPreference.getEntryValues();
@@ -118,7 +131,7 @@ public class ListPreferenceFragment extends Fragment implements InsetsChangedLis
                     "ListPreference entries array length does not match entryValues array length.");
         }
 
-        int selectedEntryIndex = mPreference.findIndexOfValue(mPreference.getValue());
+        mSelectedIndex = mPreference.findIndexOfValue(mPreference.getValue());
         List<CarUiListItem> listItems = new ArrayList<>();
         CarUiListItemAdapter adapter = new CarUiListItemAdapter(listItems);
 
@@ -128,7 +141,7 @@ public class ListPreferenceFragment extends Fragment implements InsetsChangedLis
                     CarUiContentListItem.Action.RADIO_BUTTON);
             item.setTitle(entry);
 
-            if (i == selectedEntryIndex) {
+            if (i == mSelectedIndex) {
                 item.setChecked(true);
                 mSelectedItem = item;
             }
@@ -139,23 +152,11 @@ public class ListPreferenceFragment extends Fragment implements InsetsChangedLis
                     adapter.notifyItemChanged(listItems.indexOf(mSelectedItem));
                 }
                 mSelectedItem = listItem;
+                mSelectedIndex = listItems.indexOf(mSelectedItem);
             });
 
             listItems.add(item);
         }
-
-        toolbar.registerOnBackListener(() -> {
-            if (mSelectedItem != null) {
-                int selectedIndex = listItems.indexOf(mSelectedItem);
-                String entryValue = entryValues[selectedIndex].toString();
-
-                if (mPreference.callChangeListener(entryValue)) {
-                    mPreference.setValue(entryValue);
-                }
-            }
-
-            return false;
-        });
 
         carUiRecyclerView.setAdapter(adapter);
     }
@@ -163,10 +164,17 @@ public class ListPreferenceFragment extends Fragment implements InsetsChangedLis
     @Override
     public void onStart() {
         super.onStart();
+        mToolbar.registerOnBackListener(mOnBackListener);
         Insets insets = CarUi.getInsets(getActivity());
         if (insets != null) {
             onCarUiInsetsChanged(insets);
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mToolbar.unregisterOnBackListener(mOnBackListener);
     }
 
     private ListPreference getListPreference() {
