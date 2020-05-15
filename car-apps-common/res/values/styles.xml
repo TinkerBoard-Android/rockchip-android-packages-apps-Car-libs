@@ -29,6 +29,12 @@
         <item name="android:layout_height">@dimen/control_bar_button_size</item>
         <!-- This padding is used to force resizing of provided icons. -->
         <item name="android:padding">@dimen/control_bar_button_padding</item>
+        <!-- Added paddingStart/End explicitly to make sure style works regardless of whether -->
+        <!-- RTL is enabled or disabled. -->
+        <!-- Note: When RTL is enabled, paddingStart/End overrides value of padding, -->
+        <!-- while padding overrides value of paddingStart/End when RTL is disabled. -->
+        <item name="android:paddingStart">@dimen/control_bar_button_padding</item>
+        <item name="android:paddingEnd">@dimen/control_bar_button_padding</item>
         <!-- Note: fitCenter makes icons disappear if the view is too small... -->
         <item name="android:scaleType">fitCenter</item>
         <item name="android:layout_gravity">center</item>
