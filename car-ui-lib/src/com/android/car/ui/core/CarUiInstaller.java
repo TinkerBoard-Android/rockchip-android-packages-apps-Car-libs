@@ -29,6 +29,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.lang.reflect.Method;
 import java.util.Locale;
 
 /**
@@ -59,7 +60,12 @@ public class CarUiInstaller extends ContentProvider {
                 new Application.ActivityLifecycleCallbacks() {
                     @Override
                     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-                        BaseLayoutController.build(activity);
+                        if (activity.getClassLoader()
+                                .equals(CarUiInstaller.class.getClassLoader())) {
+                            BaseLayoutController.build(activity);
+                        } else {
+                            callBaseLayoutControllerMethod("build", activity);
+                        }
                     }
 
                     @Override
@@ -84,7 +90,12 @@ public class CarUiInstaller extends ContentProvider {
 
                     @Override
                     public void onActivityDestroyed(Activity activity) {
-                        BaseLayoutController.destroy(activity);
+                        if (activity.getClassLoader()
+                                .equals(CarUiInstaller.class.getClassLoader())) {
+                            BaseLayoutController.destroy(activity);
+                        } else {
+                            callBaseLayoutControllerMethod("destroy", activity);
+                        }
                     }
                 });
 
@@ -126,5 +137,21 @@ public class CarUiInstaller extends ContentProvider {
     public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection,
             @Nullable String[] selectionArgs) {
         return 0;
+    }
+
+    private static void callBaseLayoutControllerMethod(String methodName, Activity activity) {
+        // Note: (b/156532465)
+        // The usage of the alternate classloader is to accommodate GMSCore.
+        // Some activities are loaded dynamically from external modules.
+        try {
+            Class baseLayoutControllerClass =
+                    activity.getClassLoader()
+                            .loadClass(BaseLayoutController.class.getName());
+            Method method = baseLayoutControllerClass
+                    .getDeclaredMethod(methodName, Activity.class);
+            method.invoke(null, activity);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

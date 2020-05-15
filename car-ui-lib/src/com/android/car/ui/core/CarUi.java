@@ -23,6 +23,8 @@ import androidx.annotation.Nullable;
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.toolbar.ToolbarController;
 
+import java.lang.reflect.Method;
+
 /**
  * Public interface for general CarUi static functions.
  */
@@ -39,7 +41,7 @@ public class CarUi {
      */
     @Nullable
     public static ToolbarController getToolbar(Activity activity) {
-        BaseLayoutController controller = BaseLayoutController.getBaseLayout(activity);
+        BaseLayoutController controller = getBaseLayoutController(activity);
         if (controller != null) {
             return controller.getToolbarController();
         }
@@ -76,7 +78,7 @@ public class CarUi {
      */
     @Nullable
     public static Insets getInsets(Activity activity) {
-        BaseLayoutController controller = BaseLayoutController.getBaseLayout(activity);
+        BaseLayoutController controller = getBaseLayoutController(activity);
         if (controller != null) {
             return controller.getInsets();
         }
@@ -103,5 +105,24 @@ public class CarUi {
         }
 
         return result;
+    }
+
+    private static BaseLayoutController getBaseLayoutController(Activity activity) {
+        if (activity.getClassLoader().equals(CarUi.class.getClassLoader())) {
+            return BaseLayoutController.getBaseLayout(activity);
+        } else {
+            // Note: (b/156532465)
+            // The usage of the alternate classloader is to accommodate GMSCore.
+            // Some activities are loaded dynamically from external modules.
+            try {
+                Class baseLayoutControllerClass = activity.getClassLoader()
+                        .loadClass(BaseLayoutController.class.getName());
+                Method method = baseLayoutControllerClass
+                        .getDeclaredMethod("getBaseLayout", Activity.class);
+                return (BaseLayoutController) method.invoke(null, activity);
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
