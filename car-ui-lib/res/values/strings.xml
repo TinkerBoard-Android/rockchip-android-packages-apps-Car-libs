@@ -50,4 +50,10 @@ limitations under the License.
 
     <!-- Shown in a toast when the user attempts to do something distracting while driving [CHAR_LIMIT=200] -->
     <string name="car_ui_restricted_while_driving">Feature not available while driving</string>
+
+    <!-- Mostly used for GMSCore, this attribute is used to launch CarUiInstaller in a process -->
+    <!-- that can register to Application.ActivityLifecycleCallbacks. -->
+    <!-- Clients should override this value instead of changing the process name -->
+    <!-- from manifest file. -->
+    <string name="car_ui_installer_process_name" translatable="false"></string>
 </resources>
