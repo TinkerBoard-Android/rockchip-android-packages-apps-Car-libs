@@ -15,6 +15,8 @@
  */
 package com.android.car.ui.toolbar;
 
+import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -264,8 +266,8 @@ public class TabLayout extends LinearLayout {
         private void presentTabItemView(int position, @NonNull View tabItemView) {
             Tab tab = mTabList.get(position);
 
-            ImageView iconView = tabItemView.findViewById(R.id.car_ui_toolbar_tab_item_icon);
-            TextView textView = tabItemView.findViewById(R.id.car_ui_toolbar_tab_item_text);
+            ImageView iconView = requireViewByRefId(tabItemView, R.id.car_ui_toolbar_tab_item_icon);
+            TextView textView = requireViewByRefId(tabItemView, R.id.car_ui_toolbar_tab_item_text);
 
             tabItemView.setOnClickListener(view -> selectTab(tab));
             tab.bindText(textView);
