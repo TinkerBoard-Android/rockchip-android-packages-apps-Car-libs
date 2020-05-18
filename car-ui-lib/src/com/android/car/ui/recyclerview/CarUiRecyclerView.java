@@ -15,6 +15,8 @@
  */
 package com.android.car.ui.recyclerview;
 
+import static com.android.car.ui.utils.CarUiUtils.findViewByRefId;
+
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.car.drivingstate.CarUxRestrictions;
@@ -332,11 +334,11 @@ public final class CarUiRecyclerView extends RecyclerView implements
 
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        ((CarUiRecyclerViewContainer) mContainer.findViewById(R.id.car_ui_recycler_view))
+        ((CarUiRecyclerViewContainer) findViewByRefId(mContainer, R.id.car_ui_recycler_view))
                 .addRecyclerView(this, params);
         parent.addView(mContainer, index);
 
-        createScrollBarFromConfig(mContainer.findViewById(R.id.car_ui_scroll_bar));
+        createScrollBarFromConfig(findViewByRefId(mContainer, R.id.car_ui_scroll_bar));
     }
 
     private void createScrollBarFromConfig(View scrollView) {
