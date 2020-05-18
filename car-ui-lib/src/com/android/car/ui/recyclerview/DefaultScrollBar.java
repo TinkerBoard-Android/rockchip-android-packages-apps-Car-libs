@@ -15,6 +15,8 @@
  */
 package com.android.car.ui.recyclerview;
 
+import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
+
 import android.content.res.Resources;
 import android.os.Handler;
 import android.view.View;
@@ -68,16 +70,16 @@ class DefaultScrollBar implements ScrollBar {
         getRecyclerView().addOnScrollListener(mRecyclerViewOnScrollListener);
         getRecyclerView().getRecycledViewPool().setMaxRecycledViews(0, 12);
 
-        mUpButton = mScrollView.findViewById(R.id.car_ui_scrollbar_page_up);
+        mUpButton = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_page_up);
         mUpButton.setOnClickListener(
                 new PaginateButtonClickListener(PaginationListener.PAGE_UP));
 
-        mDownButton = mScrollView.findViewById(R.id.car_ui_scrollbar_page_down);
+        mDownButton = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_page_down);
         mDownButton.setOnClickListener(
                 new PaginateButtonClickListener(PaginationListener.PAGE_DOWN));
 
-        mScrollTrack = mScrollView.findViewById(R.id.car_ui_scrollbar_track);
-        mScrollThumb = mScrollView.findViewById(R.id.car_ui_scrollbar_thumb);
+        mScrollTrack = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_track);
+        mScrollThumb = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_thumb);
 
         mSnapHelper = new CarUiSnapHelper(rv.getContext());
         getRecyclerView().setOnFlingListener(null);
