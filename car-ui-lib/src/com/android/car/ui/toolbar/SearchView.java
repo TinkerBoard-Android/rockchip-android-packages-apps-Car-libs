@@ -15,6 +15,8 @@
  */
 package com.android.car.ui.toolbar;
 
+import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
@@ -84,9 +86,10 @@ public class SearchView extends ConstraintLayout {
         LayoutInflater inflater = LayoutInflater.from(context);
         inflater.inflate(R.layout.car_ui_toolbar_search_view, this, true);
 
-        mSearchText = requireViewById(R.id.car_ui_toolbar_search_bar);
-        mIcon = requireViewById(R.id.car_ui_toolbar_search_icon);
-        mCloseIcon = requireViewById(R.id.car_ui_toolbar_search_close);
+        mSearchText = requireViewByRefId(this, R.id.car_ui_toolbar_search_bar);
+        mIcon = requireViewByRefId(this, R.id.car_ui_toolbar_search_icon);
+        mCloseIcon = requireViewByRefId(this, R.id.car_ui_toolbar_search_close);
+
         mCloseIcon.setOnClickListener(view -> mSearchText.getText().clear());
         mCloseIcon.setVisibility(View.GONE);
 

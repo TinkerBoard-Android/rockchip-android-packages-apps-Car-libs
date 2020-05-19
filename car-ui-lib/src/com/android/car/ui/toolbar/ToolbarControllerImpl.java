@@ -20,6 +20,8 @@ import static android.view.View.GONE;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
+import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -150,20 +152,20 @@ public class ToolbarControllerImpl implements ToolbarController {
                 R.bool.car_ui_toolbar_show_logo);
         mSearchHint = getContext().getString(R.string.car_ui_toolbar_default_search_hint);
 
-        mBackground = view.requireViewById(R.id.car_ui_toolbar_background);
-        mTabLayout = view.requireViewById(R.id.car_ui_toolbar_tabs);
-        mNavIcon = view.requireViewById(R.id.car_ui_toolbar_nav_icon);
-        mLogoInNavIconSpace = view.requireViewById(R.id.car_ui_toolbar_logo);
-        mNavIconContainer = view.requireViewById(R.id.car_ui_toolbar_nav_icon_container);
-        mMenuItemsContainer = view.requireViewById(R.id.car_ui_toolbar_menu_items_container);
-        mTitleContainer = view.requireViewById(R.id.car_ui_toolbar_title_container);
-        mSubtitle = view.requireViewById(R.id.car_ui_toolbar_subtitle);
-        mTitle = view.requireViewById(R.id.car_ui_toolbar_title);
-        mTitleLogoContainer = view.requireViewById(R.id.car_ui_toolbar_title_logo_container);
-        mTitleLogo = view.requireViewById(R.id.car_ui_toolbar_title_logo);
-        mSearchViewContainer = view.requireViewById(R.id.car_ui_toolbar_search_view_container);
+        mBackground = requireViewByRefId(view, R.id.car_ui_toolbar_background);
+        mTabLayout = requireViewByRefId(view, R.id.car_ui_toolbar_tabs);
+        mNavIcon = requireViewByRefId(view, R.id.car_ui_toolbar_nav_icon);
+        mLogoInNavIconSpace = requireViewByRefId(view, R.id.car_ui_toolbar_logo);
+        mNavIconContainer = requireViewByRefId(view, R.id.car_ui_toolbar_nav_icon_container);
+        mMenuItemsContainer = requireViewByRefId(view, R.id.car_ui_toolbar_menu_items_container);
+        mTitleContainer = requireViewByRefId(view, R.id.car_ui_toolbar_title_container);
+        mSubtitle = requireViewByRefId(view, R.id.car_ui_toolbar_subtitle);
+        mTitle = requireViewByRefId(view, R.id.car_ui_toolbar_title);
+        mTitleLogoContainer = requireViewByRefId(view, R.id.car_ui_toolbar_title_logo_container);
+        mTitleLogo = requireViewByRefId(view, R.id.car_ui_toolbar_title_logo);
+        mSearchViewContainer = requireViewByRefId(view, R.id.car_ui_toolbar_search_view_container);
         mProgressBar = new ProgressBarControllerImpl(
-                view.requireViewById(R.id.car_ui_toolbar_progress_bar));
+                requireViewByRefId(view, R.id.car_ui_toolbar_progress_bar));
 
         mTabLayout.addListener(new TabLayout.Listener() {
             @Override
