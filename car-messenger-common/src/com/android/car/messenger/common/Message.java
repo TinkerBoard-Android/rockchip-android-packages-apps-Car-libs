@@ -36,7 +36,7 @@ public class Message {
     private final String mSenderName;
     private final String mDeviceId;
     private final String mMessageText;
-    private final long mReceiveTime;
+    private final long mReceivedTime;
     private final boolean mIsReadOnPhone;
     private boolean mShouldExclude;
     private final String mHandle;
@@ -64,11 +64,12 @@ public class Message {
      *
      * @param deviceId of the phone that received this message.
      * @param updatedMessage containing the information to base this message object off of.
-     * @param appDisplayName of the messaging app this message belongs to.
+     * @param senderKey of the sender of the message. Not guaranteed to be unique for all senders
+     *                  if this message is part of a group conversation.
      **/
     @Nullable
     public static Message parseFromMessage(String deviceId,
-            MessagingStyleMessage updatedMessage, String appDisplayName) {
+            MessagingStyleMessage updatedMessage, SenderKey senderKey) {
 
         if (!Utils.isValidMessagingStyleMessage(updatedMessage)) {
             if (Log.isLoggable(TAG, Log.DEBUG) || Build.IS_DEBUGGABLE) {
@@ -88,12 +89,12 @@ public class Message {
                 Utils.createMessageHandle(updatedMessage),
                 MessageType.NOTIFICATION_MESSAGE,
                 /* senderContactUri */ null,
-                appDisplayName);
+                senderKey);
     }
 
-    private Message(String senderName, String deviceId, String messageText, long receiveTime,
+    private Message(String senderName, String deviceId, String messageText, long receivedTime,
             boolean isReadOnPhone, String handle, MessageType messageType,
-            @Nullable String senderContactUri, String senderKeyMetadata) {
+            @Nullable String senderContactUri, SenderKey senderKey) {
         boolean missingSenderName = (senderName == null);
         boolean missingDeviceId = (deviceId == null);
         boolean missingText = (messageText == null);
@@ -121,13 +122,13 @@ public class Message {
         this.mSenderName = senderName;
         this.mDeviceId = deviceId;
         this.mMessageText = messageText;
-        this.mReceiveTime = receiveTime;
+        this.mReceivedTime = receivedTime;
         this.mIsReadOnPhone = isReadOnPhone;
         this.mShouldExclude = false;
         this.mHandle = handle;
         this.mMessageType = messageType;
         this.mSenderContactUri = senderContactUri;
-        this.mSenderKey = new SenderKey(deviceId, senderName, senderKeyMetadata);
+        this.mSenderKey = senderKey;
     }
 
     /**
@@ -157,8 +158,8 @@ public class Message {
      * Returns the milliseconds since epoch at which this message notification was received on the
      * head-unit.
      */
-    public long getReceiveTime() {
-        return mReceiveTime;
+    public long getReceivedTime() {
+        return mReceivedTime;
     }
 
     /**
@@ -196,7 +197,12 @@ public class Message {
     }
 
     /**
-     * Returns the {@link SenderKey} that is unique for each contact per device.
+     * If the message came from BluetoothMapClient, this retrieves a key that is unique
+     * for each contact per device.
+     * If the message came from {@link NotificationMsg}, this retrieves a key that is only
+     * guaranteed to be unique per sender in a 1-1 conversation. If this message is part of a
+     * group conversation, the senderKey will not be unique if more than one participant in the
+     * conversation share the same name.
      */
     public SenderKey getSenderKey() {
         return mSenderKey;
@@ -223,7 +229,7 @@ public class Message {
                 + " mSenderName='" + mSenderName + '\''
                 + ", mMessageText='" + mMessageText + '\''
                 + ", mSenderContactUri='" + mSenderContactUri + '\''
-                + ", mReceiveTime=" + mReceiveTime + '\''
+                + ", mReceiveTime=" + mReceivedTime + '\''
                 + ", mIsReadOnPhone= " + mIsReadOnPhone + '\''
                 + ", mShouldExclude= " + mShouldExclude + '\''
                 + ", mHandle='" + mHandle + '\''

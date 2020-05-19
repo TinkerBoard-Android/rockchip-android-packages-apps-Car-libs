@@ -152,6 +152,26 @@ public class Utils {
     }
 
     /**
+     * Ensure the {@link NotificationMsg.AvatarIconSync} object has all the required fields.
+     **/
+    public static boolean isValidAvatarIconSync(NotificationMsg.AvatarIconSync iconSync) {
+        if (iconSync == null) {
+            logw(TAG, "AvatarIconSync is null");
+            return false;
+        } else if (iconSync.getMessagingAppPackageName() == null) {
+            logw(TAG, "AvatarIconSync is missing required field: appPackageName");
+            return false;
+        } else if (iconSync.getPerson().getName() == null) {
+            logw(TAG, "AvatarIconSync is missing required field: Person's name");
+            return false;
+        } else if (iconSync.getPerson().getAvatar() == null) {
+            logw(TAG, "AvatarIconSync is missing required field: Person's avatar");
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Creates a Letter Tile Icon that will display the given initials. If the initials are null,
      * then an avatar anonymous icon will be drawn.
      **/

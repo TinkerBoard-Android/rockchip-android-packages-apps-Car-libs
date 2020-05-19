@@ -23,8 +23,19 @@ import com.android.car.messenger.NotificationMsgProto.NotificationMsg;
  * unique Key.
  */
 public class SenderKey extends CompositeKey {
+    /**
+     * Returns the SenderKey based on a {@link NotificationMsg} DAO. This key is only
+     * guaranteed to be unique for a 1-1 conversation. If the ConversationKey is for a
+     * group conversation, the senderKey will not be unique if more than one participant in the
+     * conversation share the same name.
+     */
+    public static SenderKey createSenderKey(ConversationKey convoKey,
+            NotificationMsg.Person person) {
+        return new SenderKey(convoKey.getDeviceId(), person.getName(), convoKey.getSubKey());
+    }
+
     /** Creates a senderkey for SMS, MMS, and {@link NotificationMsg}. **/
-    protected SenderKey(String deviceId, String senderName, String keyMetadata) {
+    private SenderKey(String deviceId, String senderName, String keyMetadata) {
         super(deviceId, senderName + "/" + keyMetadata);
     }
 }
