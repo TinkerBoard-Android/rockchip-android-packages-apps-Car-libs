@@ -29,6 +29,7 @@ import android.os.Bundle;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationCompat.Action;
 import androidx.core.app.Person;
+import androidx.core.graphics.drawable.IconCompat;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -241,7 +242,7 @@ public class BaseNotificationDelegate {
         if (newNotification) {
             builder.setCategory(Notification.CATEGORY_MESSAGE);
             if (notificationInfo.getAppIcon() != null) {
-                builder.setSmallIcon(notificationInfo.getAppIcon());
+                builder.setSmallIcon(IconCompat.createFromIcon(notificationInfo.getAppIcon()));
             } else {
                 builder.setSmallIcon(R.drawable.ic_message);
             }
