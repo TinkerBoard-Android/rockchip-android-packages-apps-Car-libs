@@ -24,7 +24,9 @@ import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LifecycleOwner;
 
+import com.android.car.apps.common.BackgroundImageView;
 import com.android.car.apps.common.MinimizedControlBar;
+import com.android.car.apps.common.imaging.ImageBinder;
 import com.android.car.media.common.playback.PlaybackViewModel;
 
 /**
@@ -39,6 +41,7 @@ public class MinimizedPlaybackControlBar extends MinimizedControlBar {
     private MetadataController mMetadataController;
     private ProgressBar mLinearProgressBar;
     private ProgressBar mCircularProgressBar;
+    private ImageBinder<MediaItemMetadata.ArtworkRef> mArtBinder = null;
     private PlaybackViewModel mPlaybackViewModel;
 
     private boolean mShowLinearProgressBar;
@@ -68,6 +71,15 @@ public class MinimizedPlaybackControlBar extends MinimizedControlBar {
         mShowCircularProgressBar = context.getResources().getBoolean(
                 R.bool.show_circular_progress_bar);
         mCircularProgressBar = findViewById(R.id.circular_progress_bar);
+
+        BackgroundImageView artBackground = findViewById(R.id.art_background);
+        if (artBackground != null) {
+            int max = getResources().getInteger(R.integer.media_items_bitmap_max_size_px);
+            Size maxArtSize = new Size(max, max);
+            mArtBinder = new ImageBinder<>(
+                    ImageBinder.PlaceholderType.BACKGROUND, maxArtSize,
+                    drawable -> artBackground.setBackgroundDrawable(drawable));
+        }
     }
 
     /** Connects the bar to the {@link PlaybackViewModel}. */
@@ -82,5 +94,11 @@ public class MinimizedPlaybackControlBar extends MinimizedControlBar {
                 mLinearProgressBar, mShowLinearProgressBar);
         ControlBarHelper.initProgressBar(getContext(), owner, mPlaybackViewModel,
                 mCircularProgressBar, mShowCircularProgressBar);
+
+        if (mArtBinder != null) {
+            mPlaybackViewModel.getMetadata().observe(owner,
+                    item -> mArtBinder.setImage(getContext(),
+                            item != null ? item.getArtworkKey() : null));
+        }
     }
 }
