@@ -33,6 +33,7 @@ android_library {
         "androidx.room_room-runtime",
         "connected-device-protos",
         "encryption-runner",
+        "guava",
     ],
 
     plugins: [
