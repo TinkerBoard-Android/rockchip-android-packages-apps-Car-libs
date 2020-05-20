@@ -18,6 +18,8 @@ package com.android.car.connecteddevice.storage;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.testng.Assert.assertThrows;
+
 import android.content.Context;
 import android.util.Pair;
 
@@ -32,6 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -124,6 +127,15 @@ public final class ConnectedDeviceStorageTest {
         String deviceId = addRandomAssociatedDevice(mActiveUserId).getDeviceId();
         mConnectedDeviceStorage.saveEncryptionKey(deviceId, ByteUtils.randomBytes(16));
         assertThat(mConnectedDeviceStorage.getEncryptionKey(UUID.randomUUID().toString())).isNull();
+    }
+
+    @Test
+    public void saveChallengeSecret_throwsForInvalidLengthSecret() {
+        byte[] invalidSecret =
+                ByteUtils.randomBytes(ConnectedDeviceStorage.CHALLENGE_SECRET_BYTES - 1);
+        assertThrows(InvalidParameterException.class,
+                () -> mConnectedDeviceStorage.saveChallengeSecret(UUID.randomUUID().toString(),
+                        invalidSecret));
     }
 
     private AssociatedDevice addRandomAssociatedDevice(int userId) {
