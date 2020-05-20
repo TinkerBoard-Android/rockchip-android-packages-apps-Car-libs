@@ -111,13 +111,7 @@ public abstract class CarBleManager {
         }
 
         logd(TAG, "Writing " + message.getMessage().length + " bytes to " + deviceId + ".");
-
-
-        if (message.isMessageEncrypted()) {
-            device.mSecureChannel.sendEncryptedMessage(message);
-        } else {
-            device.mSecureChannel.getStream().writeMessage(message);
-        }
+        device.mSecureChannel.sendClientMessage(message);
     }
 
     /**
