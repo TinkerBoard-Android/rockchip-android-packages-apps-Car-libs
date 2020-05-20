@@ -149,6 +149,7 @@ public class ConnectedDeviceManager {
                 new BlePeripheralManager(context),
                 UUID.fromString(context.getString(R.string.car_service_uuid)),
                 UUID.fromString(context.getString(R.string.car_association_service_uuid)),
+                UUID.fromString(context.getString(R.string.car_reconnect_service_uuid)),
                 context.getString(R.string.car_bg_mask),
                 UUID.fromString(context.getString(R.string.car_secure_write_uuid)),
                 UUID.fromString(context.getString(R.string.car_secure_read_uuid)),
@@ -162,6 +163,7 @@ public class ConnectedDeviceManager {
             @NonNull BlePeripheralManager blePeripheralManager,
             @NonNull UUID serviceUuid,
             @NonNull UUID associationServiceUuid,
+            @NonNull UUID reconnectServiceUuid,
             @NonNull String bgMask,
             @NonNull UUID writeCharacteristicUuid,
             @NonNull UUID readCharacteristicUuid,
@@ -170,7 +172,8 @@ public class ConnectedDeviceManager {
                 new CarBleCentralManager(context, bleCentralManager, storage, serviceUuid, bgMask,
                         writeCharacteristicUuid, readCharacteristicUuid),
                 new CarBlePeripheralManager(blePeripheralManager, storage, associationServiceUuid,
-                        writeCharacteristicUuid, readCharacteristicUuid), reconnectTimeoutSeconds);
+                        reconnectServiceUuid, writeCharacteristicUuid, readCharacteristicUuid),
+                reconnectTimeoutSeconds);
     }
 
     @VisibleForTesting
@@ -372,7 +375,7 @@ public class ConnectedDeviceManager {
     public void enableAssociatedDeviceConnection(@NonNull String deviceId) {
         logd(TAG, "enableAssociatedDeviceConnection() called on " + deviceId);
         mStorage.updateAssociatedDeviceConnectionEnabled(deviceId,
-                /* isConnectionEnabled = */ true);
+                /* isConnectionEnabled= */ true);
         connectToActiveUserDevice();
     }
 
@@ -384,7 +387,7 @@ public class ConnectedDeviceManager {
     public void disableAssociatedDeviceConnection(@NonNull String deviceId) {
         logd(TAG, "disableAssociatedDeviceConnection() called on " + deviceId);
         mStorage.updateAssociatedDeviceConnectionEnabled(deviceId,
-                /* isConnectionEnabled = */ false);
+                /* isConnectionEnabled= */ false);
         disconnectDevice(deviceId);
     }
 
@@ -519,7 +522,7 @@ public class ConnectedDeviceManager {
      */
     public void sendMessageSecurely(@NonNull ConnectedDevice device, @NonNull UUID recipientId,
             @NonNull byte[] message) throws IllegalStateException {
-        sendMessage(device, recipientId, message, /* isEncrypted = */ true);
+        sendMessage(device, recipientId, message, /* isEncrypted= */ true);
     }
 
     /**
@@ -531,7 +534,7 @@ public class ConnectedDeviceManager {
      */
     public void sendMessageUnsecurely(@NonNull ConnectedDevice device, @NonNull UUID recipientId,
             @NonNull byte[] message) {
-        sendMessage(device, recipientId, message, /* isEncrypted = */ false);
+        sendMessage(device, recipientId, message, /* isEncrypted= */ false);
     }
 
     private void sendMessage(@NonNull ConnectedDevice device, @NonNull UUID recipientId,
@@ -596,9 +599,9 @@ public class ConnectedDeviceManager {
         logd(TAG, "New device with id " + deviceId + " connected.");
         ConnectedDevice connectedDevice = new ConnectedDevice(
                 deviceId,
-                /* deviceName = */ null,
+                /* deviceName= */ null,
                 mStorage.getActiveUserAssociatedDeviceIds().contains(deviceId),
-                /* hasSecureChannel = */ false
+                /* hasSecureChannel= */ false
         );
 
         mConnectedDevices.put(deviceId, new InternalConnectedDevice(connectedDevice, bleManager));
@@ -642,7 +645,7 @@ public class ConnectedDeviceManager {
         ConnectedDevice connectedDevice = mConnectedDevices.get(deviceId).mConnectedDevice;
         ConnectedDevice updatedConnectedDevice = new ConnectedDevice(connectedDevice.getDeviceId(),
                 connectedDevice.getDeviceName(), connectedDevice.isAssociatedWithActiveUser(),
-                /* hasSecureChannel = */ true);
+                /* hasSecureChannel= */ true);
 
         boolean notifyCallbacks = getConnectedDeviceForManager(deviceId, bleManager) != null;
 

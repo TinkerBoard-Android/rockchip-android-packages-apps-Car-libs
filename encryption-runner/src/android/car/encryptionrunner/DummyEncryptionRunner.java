@@ -175,6 +175,11 @@ public class DummyEncryptionRunner implements EncryptionRunner {
         mIsReconnect = isReconnect;
     }
 
+    /** Method to throw a HandshakeException for testing. */
+    public static void throwHandshakeException(String message) throws HandshakeException {
+        throw new HandshakeException(message);
+    }
+
     private class DummyKey implements Key {
         @Override
         public byte[] asBytes() {
