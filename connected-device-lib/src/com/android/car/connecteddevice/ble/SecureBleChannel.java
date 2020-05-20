@@ -23,21 +23,15 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.car.encryptionrunner.EncryptionRunner;
-import android.car.encryptionrunner.EncryptionRunnerFactory;
 import android.car.encryptionrunner.HandshakeException;
-import android.car.encryptionrunner.HandshakeMessage;
-import android.car.encryptionrunner.HandshakeMessage.HandshakeState;
 import android.car.encryptionrunner.Key;
 
 import com.android.car.connecteddevice.BleStreamProtos.BleOperationProto.OperationType;
-import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
-import com.android.car.connecteddevice.util.ByteUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.security.SignatureException;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -45,7 +39,9 @@ import java.util.function.Consumer;
  * Establishes a secure channel with {@link EncryptionRunner} over {@link BleDeviceMessageStream} as
  * server side, sends and receives messages securely after the secure channel has been established.
  */
-class SecureBleChannel {
+abstract class SecureBleChannel {
+
+    private static final String TAG = "SecureBleChannel";
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "CHANNEL_ERROR" },
@@ -71,211 +67,67 @@ class SecureBleChannel {
     static final int CHANNEL_ERROR_INVALID_VERIFICATION = 3;
     /** Encountered an unexpected handshake state. */
     static final int CHANNEL_ERROR_INVALID_STATE = 4;
-    /** Failed to get a valid previous/new encryption key.*/
+    /** Failed to get a valid previous/new encryption key. */
     static final int CHANNEL_ERROR_INVALID_ENCRYPTION_KEY = 5;
-    /** Failed to save the encryption key*/
+    /** Failed to save or retrieve security keys. */
     static final int CHANNEL_ERROR_STORAGE_ERROR = 6;
 
-    @VisibleForTesting
-    static final byte[] CONFIRMATION_SIGNAL = "True".getBytes();
-
-    private static final String TAG = "SecureBleChannel";
 
     private final BleDeviceMessageStream mStream;
-
-    private final ConnectedDeviceStorage mStorage;
-
-    private final boolean mIsReconnect;
 
     private final EncryptionRunner mEncryptionRunner;
 
     private final AtomicReference<Key> mEncryptionKey = new AtomicReference<>();
 
-    private @HandshakeState int mState = HandshakeState.UNKNOWN;
-
-    private String mDeviceId;
-
     private Callback mCallback;
 
-    private ShowVerificationCodeListener mShowVerificationCodeListener;
-
     SecureBleChannel(@NonNull BleDeviceMessageStream stream,
-            @NonNull ConnectedDeviceStorage storage) {
-        this(stream, storage, /* isReconnect = */ true, EncryptionRunnerFactory.newRunner());
-    }
-
-    SecureBleChannel(@NonNull BleDeviceMessageStream stream,
-            @NonNull ConnectedDeviceStorage storage, boolean isReconnect,
             @NonNull EncryptionRunner encryptionRunner) {
         mStream = stream;
-        mStorage = storage;
-        mIsReconnect = isReconnect;
         mEncryptionRunner = encryptionRunner;
-        mEncryptionRunner.setIsReconnect(isReconnect);
-        mStream.setMessageReceivedListener(mStreamListener);
+        mStream.setMessageReceivedListener(this::onMessageReceived);
     }
 
-    private void processHandshake(@NonNull byte[] message) throws HandshakeException {
-        switch (mState) {
-            case HandshakeState.UNKNOWN:
-                processHandshakeUnknown(message);
-                break;
-            case HandshakeState.IN_PROGRESS:
-                processHandshakeInProgress(message);
-                break;
-            case HandshakeState.RESUMING_SESSION:
-                processHandshakeResumingSession(message);
-                break;
-            default:
-                loge(TAG, "Encountered unexpected handshake state: " + mState + ". Received "
-                        + "message: " + ByteUtils.byteArrayToHexString(message) + ".");
-                notifySecureChannelFailure(CHANNEL_ERROR_INVALID_STATE);
-        }
-    }
+    /** Logic for processing a handshake message from device. */
+    abstract void processHandshake(byte[] message) throws HandshakeException;
 
-    private void processHandshakeUnknown(@NonNull byte[] message) throws HandshakeException {
-        if (mDeviceId != null) {
-            logd(TAG, "Responding to handshake init request.");
-            HandshakeMessage handshakeMessage = mEncryptionRunner.respondToInitRequest(message);
-            mState = handshakeMessage.getHandshakeState();
-            sendHandshakeMessage(handshakeMessage.getNextMessage());
-            return;
-        }
-        UUID deviceId = ByteUtils.bytesToUUID(message);
-        if (deviceId == null) {
-            loge(TAG, "Received invalid device id. Ignoring.");
-            return;
-        }
-        mDeviceId = deviceId.toString();
-        if (mIsReconnect && !hasEncryptionKey(mDeviceId)) {
-            loge(TAG, "Attempted to reconnect device but no key found. Aborting secure channel.");
-            notifySecureChannelFailure(CHANNEL_ERROR_INVALID_DEVICE_ID);
-            return;
-        }
-        notifyCallback(callback -> callback.onDeviceIdReceived(mDeviceId));
-        sendUniqueIdToClient();
-    }
-
-    private void processHandshakeInProgress(@NonNull byte[] message) throws HandshakeException {
-        logd(TAG, "Continuing handshake.");
-        HandshakeMessage handshakeMessage = mEncryptionRunner.continueHandshake(message);
-        mState = handshakeMessage.getHandshakeState();
-
-        boolean isValidStateForAssociation = !mIsReconnect
-                && mState == HandshakeState.VERIFICATION_NEEDED;
-        boolean isValidStateForReconnect = mIsReconnect
-                && mState == HandshakeState.RESUMING_SESSION;
-        if (!isValidStateForAssociation && !isValidStateForReconnect) {
-            loge(TAG, "processHandshakeInProgress: Encountered unexpected handshake state: "
-                    + mState + ".");
-            notifySecureChannelFailure(CHANNEL_ERROR_INVALID_STATE);
-            return;
-        }
-
-        if (!isValidStateForAssociation) {
-            return;
-        }
-
-        String code = handshakeMessage.getVerificationCode();
-        if (code == null) {
-            loge(TAG, "Unable to get verification code.");
-            notifySecureChannelFailure(CHANNEL_ERROR_INVALID_VERIFICATION);
-            return;
-        }
-
-        if (mShowVerificationCodeListener != null) {
-            logd(TAG, "Showing pairing code: " + code);
-            mShowVerificationCodeListener.showVerificationCode(code);
-        }
-    }
-
-    private void processHandshakeResumingSession(@NonNull byte[] message)
-            throws HandshakeException {
-        logd(TAG, "Start reconnection authentication.");
-        if (mDeviceId == null) {
-            loge(TAG, "processHandshakeResumingSession: Unable to resume session, device id is "
-                    + "null.");
-            notifySecureChannelFailure(CHANNEL_ERROR_INVALID_DEVICE_ID);
-            return;
-        }
-
-        byte[] previousKey = mStorage.getEncryptionKey(mDeviceId);
-        if (previousKey == null) {
-            loge(TAG, "Unable to resume session, previous key is null.");
-            notifySecureChannelFailure(CHANNEL_ERROR_INVALID_ENCRYPTION_KEY);
-            return;
-        }
-
-        HandshakeMessage handshakeMessage = mEncryptionRunner.authenticateReconnection(message,
-                previousKey);
-        mState = handshakeMessage.getHandshakeState();
-        if (mState != HandshakeState.FINISHED) {
-            loge(TAG, "Unable to resume session, unexpected next handshake state: " + mState + ".");
-            notifySecureChannelFailure(CHANNEL_ERROR_INVALID_STATE);
-            return;
-        }
-
-        Key newKey = handshakeMessage.getKey();
-        if (newKey == null) {
-            loge(TAG, "Unable to resume session, new key is null.");
-            notifySecureChannelFailure(CHANNEL_ERROR_INVALID_ENCRYPTION_KEY);
-            return;
-        }
-
-        logd(TAG, "Saved new key for reconnection.");
-        mStorage.saveEncryptionKey(mDeviceId, newKey.asBytes());
-        mEncryptionKey.set(newKey);
-        sendServerAuthToClient(handshakeMessage.getNextMessage());
-        notifyCallback(callback -> callback.onSecureChannelEstablished());
-    }
-
-    private void sendUniqueIdToClient() {
-        UUID uniqueId = mStorage.getUniqueId();
-        DeviceMessage deviceMessage = new DeviceMessage(/* recipient = */ null,
-                /* isMessageEncrypted = */ false, ByteUtils.uuidToBytes(uniqueId));
-        logd(TAG, "Sending car's device id of " + uniqueId + " to device.");
-        mStream.writeMessage(deviceMessage, OperationType.ENCRYPTION_HANDSHAKE);
-    }
-
-    private boolean hasEncryptionKey(@NonNull String id) {
-        return mStorage.getEncryptionKey(id) != null;
-    }
-
-    private void sendHandshakeMessage(@Nullable byte[] message) {
+    void sendHandshakeMessage(@Nullable byte[] message, boolean isEncrypted) {
         if (message == null) {
             loge(TAG, "Unable to send next handshake message, message is null.");
             notifySecureChannelFailure(CHANNEL_ERROR_INVALID_MSG);
             return;
         }
 
-        logd(TAG, "Send handshake message: " + ByteUtils.byteArrayToHexString(message) + ".");
-        DeviceMessage deviceMessage = new DeviceMessage(/* recipient = */ null,
-                /* isMessageEncrypted = */ false, message);
+        logd(TAG, "Sending handshake message.");
+        DeviceMessage deviceMessage = new DeviceMessage(/* recipient= */ null,
+                isEncrypted, message);
+        if (deviceMessage.isMessageEncrypted()) {
+            encryptMessage(deviceMessage);
+        }
         mStream.writeMessage(deviceMessage, OperationType.ENCRYPTION_HANDSHAKE);
     }
 
-    private void sendServerAuthToClient(@Nullable byte[] message) {
-        if (message == null) {
-            loge(TAG, "Unable to send server authentication message to client, message is null.");
-            notifySecureChannelFailure(CHANNEL_ERROR_INVALID_MSG);
-            return;
-        }
-        DeviceMessage deviceMessage = new DeviceMessage(/* recipient = */ null,
-                /* isMessageEncrypted = */ false, message);
-        mStream.writeMessage(deviceMessage, OperationType.ENCRYPTION_HANDSHAKE);
+    /** Set the encryption key that secures this channel. */
+    void setEncryptionKey(@Nullable Key encryptionKey) {
+        mEncryptionKey.set(encryptionKey);
     }
 
     /**
-     * Send an encrypted message.
-     * <p>Note: This should be called only after the secure channel has been established.</p>
+     * Send a client message.
+     * <p>Note: This should be called with an encrypted message only after the secure channel has
+     * been established.</p>
      *
-     * @param deviceMessage The {@link DeviceMessage} to encrypt and send.
+     * @param deviceMessage The {@link DeviceMessage} to send.
      */
-    void sendEncryptedMessage(@NonNull DeviceMessage deviceMessage) throws IllegalStateException {
-        if (!deviceMessage.isMessageEncrypted()) {
-            loge(TAG, "Encryption not required for this message " + deviceMessage + ".");
-            return;
+    void sendClientMessage(@NonNull DeviceMessage deviceMessage)
+            throws IllegalStateException {
+        if (deviceMessage.isMessageEncrypted()) {
+            encryptMessage(deviceMessage);
         }
+        mStream.writeMessage(deviceMessage, OperationType.CLIENT_MESSAGE);
+    }
+
+    private void encryptMessage(@NonNull DeviceMessage deviceMessage) {
         Key key = mEncryptionKey.get();
         if (key == null) {
             throw new IllegalStateException("Secure channel has not been established.");
@@ -283,67 +135,12 @@ class SecureBleChannel {
 
         byte[] encryptedMessage = key.encryptData(deviceMessage.getMessage());
         deviceMessage.setMessage(encryptedMessage);
-        mStream.writeMessage(deviceMessage, OperationType.CLIENT_MESSAGE);
-    }
-
-    /**
-     * Called by the client to notify that the user has accepted a pairing code or any out-of-band
-     * confirmation, and send confirmation signals to remote bluetooth device.
-     */
-    void notifyOutOfBandAccepted() {
-        HandshakeMessage message;
-        try {
-            message = mEncryptionRunner.verifyPin();
-        } catch (HandshakeException e) {
-            loge(TAG, "Error during PIN verification", e);
-            notifySecureChannelFailure(CHANNEL_ERROR_INVALID_VERIFICATION);
-            return;
-        }
-        if (message.getHandshakeState() != HandshakeState.FINISHED) {
-            loge(TAG, "Handshake not finished after calling verify PIN. Instead got "
-                    + "state: " + message.getHandshakeState() + ".");
-            notifySecureChannelFailure(CHANNEL_ERROR_INVALID_STATE);
-            return;
-        }
-
-        Key localKey = message.getKey();
-        if (localKey == null) {
-            loge(TAG, "Unable to finish association, generated key is null.");
-            notifySecureChannelFailure(CHANNEL_ERROR_INVALID_ENCRYPTION_KEY);
-            return;
-        }
-
-        mState = message.getHandshakeState();
-        mStorage.saveEncryptionKey(mDeviceId, localKey.asBytes());
-        mEncryptionKey.set(localKey);
-        if (mDeviceId == null) {
-            loge(TAG, "Unable to finish association, device id is null.");
-            notifySecureChannelFailure(CHANNEL_ERROR_INVALID_DEVICE_ID);
-            return;
-        }
-        logd(TAG, "Pairing code successfully verified and encryption key saved. Sending "
-                + "confirmation to device.");
-        notifyCallback(Callback::onSecureChannelEstablished);
-        DeviceMessage deviceMessage = new DeviceMessage(/* recipient = */ null,
-                /* isMessageEncrypted = */ false, CONFIRMATION_SIGNAL);
-        mStream.writeMessage(deviceMessage, OperationType.ENCRYPTION_HANDSHAKE);
     }
 
     /** Get the BLE stream backing this channel. */
     @NonNull
     BleDeviceMessageStream getStream() {
         return mStream;
-    }
-
-    /**Set the listener that notifies to show verification code. {@code null} to clear.*/
-    void setShowVerificationCodeListener(@Nullable ShowVerificationCodeListener listener) {
-        mShowVerificationCodeListener = listener;
-    }
-
-    @VisibleForTesting
-    @Nullable
-    ShowVerificationCodeListener getShowVerificationCodeListener() {
-        return mShowVerificationCodeListener;
     }
 
     /** Register a callback that notifies secure channel events. */
@@ -364,64 +161,92 @@ class SecureBleChannel {
         return mCallback;
     }
 
-    private void notifyCallback(Consumer<Callback> notification) {
+    void notifyCallback(@NonNull Consumer<Callback> notification) {
         if (mCallback != null) {
             notification.accept(mCallback);
         }
     }
 
-    private void notifySecureChannelFailure(@ChannelError int error) {
+    /** Notify callbacks that an error has occurred. */
+    void notifySecureChannelFailure(@ChannelError int error) {
         loge(TAG, "Secure channel error: " + error);
         notifyCallback(callback -> callback.onEstablishSecureChannelFailure(error));
     }
 
-    private final BleDeviceMessageStream.MessageReceivedListener mStreamListener =
-            new BleDeviceMessageStream.MessageReceivedListener() {
-                @Override
-                public void onMessageReceived(DeviceMessage deviceMessage,
-                        OperationType operationType) {
-                    byte[] message = deviceMessage.getMessage();
-                    switch(operationType) {
-                        case ENCRYPTION_HANDSHAKE:
-                            logd(TAG, "Message received and handed off to handshake.");
-                            try {
-                                processHandshake(message);
-                            } catch (HandshakeException e) {
-                                loge(TAG, "Handshake failed.", e);
-                                notifyCallback(callback -> callback.onEstablishSecureChannelFailure(
-                                        CHANNEL_ERROR_INVALID_HANDSHAKE));
-                            }
-                            break;
-                        case CLIENT_MESSAGE:
-                            logd(TAG, "Received client message.");
-                            if (!deviceMessage.isMessageEncrypted()) {
-                                notifyCallback(callback -> callback.onMessageReceived(
-                                        deviceMessage));
-                                return;
-                            }
-                            Key key = mEncryptionKey.get();
-                            if (key == null) {
-                                loge(TAG, "Received encrypted message before secure channel has "
-                                        + "been established.");
-                                notifyCallback(callback -> callback.onMessageReceivedError(null));
-                                return;
-                            }
-                            try {
-                                byte[] decryptedPayload =
-                                        key.decryptData(deviceMessage.getMessage());
-                                deviceMessage.setMessage(decryptedPayload);
-                                notifyCallback(
-                                        callback -> callback.onMessageReceived(deviceMessage));
-                            } catch (SignatureException e) {
-                                loge(TAG, "Could not decrypt client credentials.", e);
-                                notifyCallback(callback -> callback.onMessageReceivedError(e));
-                            }
-                            break;
-                        default:
-                            loge(TAG, "Received unexpected operation type: " + operationType + ".");
-                    }
+    /** Return the {@link EncryptionRunner} for this channel. */
+    @NonNull
+    EncryptionRunner getEncryptionRunner() {
+        return mEncryptionRunner;
+    }
+
+    /**
+     * Process the inner message and replace with decrypted value if necessary. If an error occurs
+     * the inner message will be replaced with {@code null} and call
+     * {@link Callback#onMessageReceivedError(Exception)} on the registered callback.
+     *
+     * @param deviceMessage The message to process.
+     * @return {@code true} if message was successfully processed. {@code false} if an error
+     * occurred.
+     */
+    @VisibleForTesting
+    boolean processMessage(@NonNull DeviceMessage deviceMessage) {
+        if (!deviceMessage.isMessageEncrypted()) {
+            logd(TAG, "Message was not decrypted. No further action necessary.");
+            return true;
+        }
+        Key key = mEncryptionKey.get();
+        if (key == null) {
+            loge(TAG, "Received encrypted message before secure channel has "
+                    + "been established.");
+            notifyCallback(callback -> callback.onMessageReceivedError(null));
+            deviceMessage.setMessage(null);
+            return false;
+        }
+        try {
+            byte[] decryptedMessage = key.decryptData(deviceMessage.getMessage());
+            deviceMessage.setMessage(decryptedMessage);
+            logd(TAG, "Decrypted secure message.");
+            return true;
+        } catch (SignatureException e) {
+            loge(TAG, "Could not decrypt client credentials.", e);
+            notifyCallback(callback -> callback.onMessageReceivedError(e));
+            deviceMessage.setMessage(null);
+
+            return false;
+        }
+    }
+
+    @VisibleForTesting
+    void onMessageReceived(@NonNull DeviceMessage deviceMessage, OperationType operationType) {
+        boolean success = processMessage(deviceMessage);
+        switch(operationType) {
+            case ENCRYPTION_HANDSHAKE:
+                if (!success) {
+                    notifyCallback(callback -> callback.onEstablishSecureChannelFailure(
+                            CHANNEL_ERROR_INVALID_HANDSHAKE));
+                    break;
                 }
-            };
+                logd(TAG, "Received handshake message.");
+                try {
+                    processHandshake(deviceMessage.getMessage());
+                } catch (HandshakeException e) {
+                    loge(TAG, "Handshake failed.", e);
+                    notifyCallback(callback -> callback.onEstablishSecureChannelFailure(
+                            CHANNEL_ERROR_INVALID_HANDSHAKE));
+                }
+                break;
+            case CLIENT_MESSAGE:
+                if (!success || deviceMessage.getMessage() == null) {
+                    break;
+                }
+                logd(TAG, "Received client message.");
+                notifyCallback(
+                        callback -> callback.onMessageReceived(deviceMessage));
+                break;
+            default:
+                loge(TAG, "Received unexpected operation type: " + operationType + ".");
+        }
+    }
 
     /**
      * Callbacks that will be invoked during establishing secure channel, sending and receiving
@@ -431,7 +256,7 @@ class SecureBleChannel {
         /**
          * Invoked when secure channel has been established successfully.
          */
-        void onSecureChannelEstablished();
+        default void onSecureChannelEstablished() { }
 
         /**
          * Invoked when a {@link ChannelError} has been encountered in attempting to establish
@@ -439,39 +264,27 @@ class SecureBleChannel {
          *
          * @param error The failure indication.
          */
-        void onEstablishSecureChannelFailure(@SecureBleChannel.ChannelError int error);
+        default void onEstablishSecureChannelFailure(@SecureBleChannel.ChannelError int error) { }
 
         /**
          * Invoked when a complete message is received securely from the client and decrypted.
          *
          * @param deviceMessage The {@link DeviceMessage} with decrypted message.
          */
-        void onMessageReceived(@NonNull DeviceMessage deviceMessage);
+        default void onMessageReceived(@NonNull DeviceMessage deviceMessage) { }
 
         /**
          * Invoked when there was an error during a processing or decrypting of a client message.
          *
          * @param exception The error.
          */
-        void onMessageReceivedError(@Nullable Exception exception);
+        default void onMessageReceivedError(@Nullable Exception exception) { }
 
         /**
          * Invoked when the device id was received from the client.
          *
          * @param deviceId The unique device id of client.
          */
-        void onDeviceIdReceived(@NonNull String deviceId);
-    }
-
-    /**
-     * Listener that will be invoked to display verification code.
-     */
-    interface ShowVerificationCodeListener {
-        /**
-         * Invoke when a verification need to be displayed during device association.
-         *
-         * @param code The verification code to show.
-         */
-        void showVerificationCode(@NonNull String code);
+        default void onDeviceIdReceived(@NonNull String deviceId) { }
     }
 }
