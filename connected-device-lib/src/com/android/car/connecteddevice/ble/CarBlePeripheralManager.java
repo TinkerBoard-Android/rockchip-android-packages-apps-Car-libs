@@ -16,6 +16,7 @@
 
 package com.android.car.connecteddevice.ble;
 
+import static com.android.car.connecteddevice.ConnectedDeviceManager.DEVICE_ERROR_INVALID_HANDSHAKE;
 import static com.android.car.connecteddevice.ConnectedDeviceManager.DEVICE_ERROR_UNEXPECTED_DISCONNECTION;
 import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
@@ -389,6 +390,9 @@ public class CarBlePeripheralManager extends CarBleManager {
 
     private void disconnectWithError(@NonNull String errorMessage) {
         loge(TAG, errorMessage);
+        if (isAssociating()) {
+            mAssociationCallback.onAssociationError(DEVICE_ERROR_INVALID_HANDSHAKE);
+        }
         reset();
     }
 
@@ -430,6 +434,10 @@ public class CarBlePeripheralManager extends CarBleManager {
 
         BleDeviceMessageStream secureStream = new BleDeviceMessageStream(mBlePeripheralManager,
                 device, mWriteCharacteristic, mReadCharacteristic);
+        secureStream.setMessageReceivedErrorListener(
+                exception -> {
+                    disconnectWithError("Error occurred in stream: " + exception.getMessage());
+                });
         secureStream.setMaxWriteSize(mWriteSize);
         SecureBleChannel secureChannel;
         if (isReconnect) {
