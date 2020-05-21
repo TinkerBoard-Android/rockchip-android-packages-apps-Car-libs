@@ -16,6 +16,7 @@
 
 package com.android.car.connecteddevice.ble;
 
+import static com.android.car.connecteddevice.ConnectedDeviceManager.DEVICE_ERROR_INVALID_HANDSHAKE;
 import static com.android.car.connecteddevice.ConnectedDeviceManager.DEVICE_ERROR_UNEXPECTED_DISCONNECTION;
 import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
@@ -31,7 +32,6 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
-import android.car.encryptionrunner.EncryptionRunnerFactory;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
@@ -39,9 +39,11 @@ import android.os.ParcelUuid;
 import com.android.car.connecteddevice.AssociationCallback;
 import com.android.car.connecteddevice.model.AssociatedDevice;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
+import com.android.car.connecteddevice.util.ByteUtils;
 import com.android.car.connecteddevice.util.EventLog;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -66,6 +68,12 @@ public class CarBlePeripheralManager extends CarBleManager {
     private static final UUID CLIENT_CHARACTERISTIC_CONFIG =
             UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
+    private static final int SALT_BYTES = 8;
+
+    private static final int TOTAL_AD_DATA_BYTES = 16;
+
+    private static final int TRUNCATED_BYTES = 3;
+
     private final BluetoothGattDescriptor mDescriptor =
             new BluetoothGattDescriptor(CLIENT_CHARACTERISTIC_CONFIG,
                     BluetoothGattDescriptor.PERMISSION_READ
@@ -77,6 +85,8 @@ public class CarBlePeripheralManager extends CarBleManager {
     private final BlePeripheralManager mBlePeripheralManager;
 
     private final UUID mAssociationServiceUuid;
+
+    private final UUID mReconnectServiceUuid;
 
     private final BluetoothGattCharacteristic mWriteCharacteristic;
 
@@ -93,6 +103,10 @@ public class CarBlePeripheralManager extends CarBleManager {
 
     private String mClientDeviceAddress;
 
+    private String mReconnectDeviceId;
+
+    private byte[] mReconnectChallenge;
+
     private AssociationCallback mAssociationCallback;
 
     private AdvertiseCallback mAdvertiseCallback;
@@ -103,16 +117,20 @@ public class CarBlePeripheralManager extends CarBleManager {
      * @param blePeripheralManager {@link BlePeripheralManager} for establishing connection.
      * @param connectedDeviceStorage Shared {@link ConnectedDeviceStorage} for companion features.
      * @param associationServiceUuid {@link UUID} of association service.
+     * @param reconnectServiceUuid {@link UUID} of reconnect service.
      * @param writeCharacteristicUuid {@link UUID} of characteristic the car will write to.
      * @param readCharacteristicUuid {@link UUID} of characteristic the device will write to.
      */
     public CarBlePeripheralManager(@NonNull BlePeripheralManager blePeripheralManager,
             @NonNull ConnectedDeviceStorage connectedDeviceStorage,
-            @NonNull UUID associationServiceUuid, @NonNull UUID writeCharacteristicUuid,
+            @NonNull UUID associationServiceUuid,
+            @NonNull UUID reconnectServiceUuid,
+            @NonNull UUID writeCharacteristicUuid,
             @NonNull UUID readCharacteristicUuid) {
         super(connectedDeviceStorage);
         mBlePeripheralManager = blePeripheralManager;
         mAssociationServiceUuid = associationServiceUuid;
+        mReconnectServiceUuid = reconnectServiceUuid;
         mDescriptor.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
         mWriteCharacteristic = new BluetoothGattCharacteristic(writeCharacteristicUuid,
                 BluetoothGattCharacteristic.PROPERTY_NOTIFY,
@@ -171,6 +189,8 @@ public class CarBlePeripheralManager extends CarBleManager {
         mAssociationCallback = null;
         mBlePeripheralManager.cleanup();
         mConnectedDevices.clear();
+        mReconnectDeviceId = null;
+        mReconnectChallenge = null;
     }
 
     /** Attempt to connect to device with provided id within set timeout period. */
@@ -185,7 +205,7 @@ public class CarBlePeripheralManager extends CarBleManager {
 
         // Clear any previous session before starting a new one.
         reset();
-
+        mReconnectDeviceId = deviceId.toString();
         mAdvertiseCallback = new AdvertiseCallback() {
             @Override
             public void onStartSuccess(AdvertiseSettings settingsInEffect) {
@@ -199,7 +219,38 @@ public class CarBlePeripheralManager extends CarBleManager {
         mBlePeripheralManager.unregisterCallback(mAssociationPeripheralCallback);
         mBlePeripheralManager.registerCallback(mReconnectPeripheralCallback);
         mTimeoutHandler.removeCallbacks(mTimeoutRunnable);
-        startAdvertising(deviceId, mAdvertiseCallback, /* includeDeviceName = */ false);
+        byte[] advertiseData = createReconnectData(mReconnectDeviceId);
+        if (advertiseData == null) {
+            loge(TAG, "Unable to create advertisement data. Aborting reconnect.");
+            return;
+        }
+        startAdvertising(mReconnectServiceUuid, mAdvertiseCallback, /* includeDeviceName= */ false,
+                advertiseData);
+    }
+
+    /**
+     * Create data for reconnection advertisement.
+     *
+     * <p></p><p>Process:</p>
+     * <ol>
+     * <li>Generate random {@value SALT_BYTES} byte salt and zero-pad to
+     * {@value TOTAL_AD_DATA_BYTES} bytes.
+     * <li>Hash with stored challenge secret and truncate to {@value TRUNCATED_BYTES} bytes.
+     * <li>Concatenate hashed {@value TRUNCATED_BYTES} bytes with salt and return.
+     * </ol>
+     */
+    @Nullable
+    private byte[] createReconnectData(String deviceId) {
+        byte[] salt = ByteUtils.randomBytes(SALT_BYTES);
+        byte[] zeroPadded = ByteUtils.concatByteArrays(salt,
+                new byte[TOTAL_AD_DATA_BYTES - SALT_BYTES]);
+        mReconnectChallenge = mStorage.hashWithChallengeSecret(deviceId, zeroPadded);
+        if (mReconnectChallenge == null) {
+            return null;
+        }
+        return ByteUtils.concatByteArrays(Arrays.copyOf(mReconnectChallenge, TRUNCATED_BYTES),
+                salt);
+
     }
 
     @Nullable
@@ -261,7 +312,7 @@ public class CarBlePeripheralManager extends CarBleManager {
         if (mOriginalBluetoothName != null
                 && adapterName.equals(BluetoothAdapter.getDefaultAdapter().getName())) {
             startAdvertising(mAssociationServiceUuid, mAdvertiseCallback,
-                    /* includeDeviceName = */ true);
+                    /* includeDeviceName= */ true, /* serviceData= */ null);
             return;
         }
 
@@ -278,17 +329,21 @@ public class CarBlePeripheralManager extends CarBleManager {
     }
 
     private void startAdvertising(@NonNull UUID serviceUuid, @NonNull AdvertiseCallback callback,
-            boolean includeDeviceName) {
+            boolean includeDeviceName, @Nullable byte[] serviceData) {
         BluetoothGattService gattService = new BluetoothGattService(serviceUuid,
                 BluetoothGattService.SERVICE_TYPE_PRIMARY);
         gattService.addCharacteristic(mWriteCharacteristic);
         gattService.addCharacteristic(mReadCharacteristic);
 
-        AdvertiseData advertiseData = new AdvertiseData.Builder()
-                .setIncludeDeviceName(includeDeviceName)
-                .addServiceUuid(new ParcelUuid(serviceUuid))
-                .build();
-        mBlePeripheralManager.startAdvertising(gattService, advertiseData, callback);
+        AdvertiseData.Builder builder = new AdvertiseData.Builder()
+                .setIncludeDeviceName(includeDeviceName);
+        ParcelUuid uuid = new ParcelUuid(serviceUuid);
+        builder.addServiceUuid(uuid);
+        if (serviceData != null) {
+            builder.addServiceData(uuid, serviceData);
+        }
+
+        mBlePeripheralManager.startAdvertising(gattService, builder.build(), callback);
     }
 
     /** Notify that the user has accepted a pairing code or other out-of-band confirmation. */
@@ -299,7 +354,8 @@ public class CarBlePeripheralManager extends CarBleManager {
             return;
         }
 
-        SecureBleChannel secureChannel = getConnectedDevice().mSecureChannel;
+        AssociationSecureChannel secureChannel =
+                (AssociationSecureChannel) getConnectedDevice().mSecureChannel;
         if (secureChannel == null) {
             disconnectWithError("Null SecureBleChannel found for the current connected device "
                     + "when out-of-band confirmation received.");
@@ -334,6 +390,9 @@ public class CarBlePeripheralManager extends CarBleManager {
 
     private void disconnectWithError(@NonNull String errorMessage) {
         loge(TAG, errorMessage);
+        if (isAssociating()) {
+            mAssociationCallback.onAssociationError(DEVICE_ERROR_INVALID_HANDSHAKE);
+        }
         reset();
     }
 
@@ -375,13 +434,27 @@ public class CarBlePeripheralManager extends CarBleManager {
 
         BleDeviceMessageStream secureStream = new BleDeviceMessageStream(mBlePeripheralManager,
                 device, mWriteCharacteristic, mReadCharacteristic);
+        secureStream.setMessageReceivedErrorListener(
+                exception -> {
+                    disconnectWithError("Error occurred in stream: " + exception.getMessage());
+                });
         secureStream.setMaxWriteSize(mWriteSize);
-        SecureBleChannel secureChannel = new SecureBleChannel(secureStream, mStorage, isReconnect,
-                EncryptionRunnerFactory.newRunner());
+        SecureBleChannel secureChannel;
+        if (isReconnect) {
+            secureChannel = new ReconnectSecureChannel(secureStream, mStorage, mReconnectDeviceId,
+                    mReconnectChallenge);
+        } else {
+            secureChannel = new AssociationSecureChannel(secureStream, mStorage);
+        }
         secureChannel.registerCallback(mSecureChannelCallback);
-        BleDevice bleDevice = new BleDevice(device, /* gatt = */ null);
+        BleDevice bleDevice = new BleDevice(device, /* gatt= */ null);
         bleDevice.mSecureChannel = secureChannel;
         addConnectedDevice(bleDevice);
+        if (isReconnect) {
+            setDeviceId(mReconnectDeviceId);
+            mReconnectDeviceId = null;
+            mReconnectChallenge = null;
+        }
     }
 
     private void setMtuSize(int mtuSize) {
@@ -418,7 +491,7 @@ public class CarBlePeripheralManager extends CarBleManager {
 
                 @Override
                 public void onRemoteDeviceDisconnected(BluetoothDevice device) {
-                    String deviceId = null;
+                    String deviceId = mReconnectDeviceId;
                     BleDevice connectedDevice = getConnectedDevice(device);
                     // Reset before invoking callbacks to avoid a race condition with reconnect
                     // logic.
@@ -457,19 +530,20 @@ public class CarBlePeripheralManager extends CarBleManager {
                 @Override
                 public void onRemoteDeviceConnected(BluetoothDevice device) {
                     resetBluetoothAdapterName();
-                    addConnectedDevice(device, /* isReconnect = */ false);
+                    addConnectedDevice(device, /* isReconnect= */ false);
                     BleDevice connectedDevice = getConnectedDevice();
                     if (connectedDevice == null || connectedDevice.mSecureChannel == null) {
                         return;
                     }
-                    connectedDevice.mSecureChannel.setShowVerificationCodeListener(
-                            code -> {
-                                if (!isAssociating()) {
-                                    loge(TAG, "No valid callback for association.");
-                                    return;
-                                }
-                                mAssociationCallback.onVerificationCodeAvailable(code);
-                            });
+                    ((AssociationSecureChannel) connectedDevice.mSecureChannel)
+                            .setShowVerificationCodeListener(
+                                    code -> {
+                                        if (!isAssociating()) {
+                                            loge(TAG, "No valid callback for association.");
+                                            return;
+                                        }
+                                        mAssociationCallback.onVerificationCodeAvailable(code);
+                                    });
                 }
 
                 @Override
@@ -510,7 +584,7 @@ public class CarBlePeripheralManager extends CarBleManager {
                                 + "association of that device for current user.");
                         mStorage.addAssociatedDeviceForActiveUser(
                                 new AssociatedDevice(deviceId, mClientDeviceAddress,
-                                        mClientDeviceName, /* isConnectionEnabled = */ true));
+                                        mClientDeviceName, /* isConnectionEnabled= */ true));
                         if (mAssociationCallback != null) {
                             mAssociationCallback.onAssociationCompleted(deviceId);
                             mAssociationCallback = null;
@@ -532,8 +606,9 @@ public class CarBlePeripheralManager extends CarBleManager {
 
                     if (isAssociating()) {
                         mAssociationCallback.onAssociationError(error);
-                        disconnectWithError("Error while establishing secure connection.");
                     }
+
+                    disconnectWithError("Error while establishing secure connection.");
                 }
 
                 @Override
@@ -556,6 +631,7 @@ public class CarBlePeripheralManager extends CarBleManager {
                 public void onMessageReceivedError(Exception exception) {
                     // TODO(b/143879960) Extend the message error from here to continue up the
                     // chain.
+                    disconnectWithError("Error while receiving message.");
                 }
 
                 @Override

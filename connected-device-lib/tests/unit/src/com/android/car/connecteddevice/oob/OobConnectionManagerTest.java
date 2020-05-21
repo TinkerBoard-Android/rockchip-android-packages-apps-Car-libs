@@ -16,9 +16,13 @@
 
 package com.android.car.connecteddevice.oob;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import android.security.keystore.KeyProperties;
+
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import static com.google.common.truth.Truth.assertThat;
+import com.google.common.primitives.Bytes;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +30,9 @@ import org.junit.runner.RunWith;
 import org.testng.Assert;
 
 import java.security.InvalidKeyException;
+import java.security.SecureRandom;
 
+import javax.crypto.AEADBadTagException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
@@ -35,11 +41,20 @@ public class OobConnectionManagerTest {
     private static final byte[] TEST_MESSAGE = "testMessage".getBytes();
     private TestChannel mTestChannel;
     private SecretKey mTestKey;
+    private byte[] mTestEncryptionIv = new byte[OobConnectionManager.NONCE_LENGTH_BYTES];
+    private byte[] mTestDecryptionIv = new byte[OobConnectionManager.NONCE_LENGTH_BYTES];
+    private byte[] mTestOobData;
 
     @Before
     public void setUp() throws Exception {
         mTestChannel = new TestChannel();
-        mTestKey = KeyGenerator.getInstance("AES").generateKey();
+        mTestKey = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES).generateKey();
+
+        SecureRandom secureRandom = new SecureRandom();
+        secureRandom.nextBytes(mTestEncryptionIv);
+        secureRandom.nextBytes(mTestDecryptionIv);
+
+        mTestOobData = Bytes.concat(mTestDecryptionIv, mTestEncryptionIv, mTestKey.getEncoded());
     }
 
     @Test
@@ -55,10 +70,13 @@ public class OobConnectionManagerTest {
     }
 
     @Test
-    public void testServer_onOobDataReceived_setsKey() {
+    public void testServer_onOobDataReceived_setsKeyAndNonce() {
         OobConnectionManager oobConnectionManager = OobConnectionManager.forServer(mTestChannel);
-        mTestChannel.onOobDataReceived(mTestKey);
+        mTestChannel.onOobDataReceived(mTestOobData);
         assertThat(oobConnectionManager.mEncryptionKey).isEqualTo(mTestKey);
+        // The decryption IV for the server is the encryption IV for the client and vice versa
+        assertThat(oobConnectionManager.mDecryptionIv).isEqualTo(mTestEncryptionIv);
+        assertThat(oobConnectionManager.mEncryptionIv).isEqualTo(mTestDecryptionIv);
     }
 
     @Test
@@ -68,28 +86,67 @@ public class OobConnectionManagerTest {
     }
 
     @Test
-    public void testInitAsClient_keyIsNonNullAndSent() {
+    public void testInitAsClient_keyAndNoncesAreNonNullAndSent() {
         OobConnectionManager oobConnectionManager = OobConnectionManager.forClient(mTestChannel);
         assertThat(oobConnectionManager.mEncryptionKey).isNotNull();
-        assertThat(mTestChannel.mSentOobData).isEqualTo(oobConnectionManager.mEncryptionKey);
+        assertThat(oobConnectionManager.mEncryptionIv).isNotNull();
+        assertThat(oobConnectionManager.mDecryptionIv).isNotNull();
+        assertThat(mTestChannel.mSentOobData).isEqualTo(Bytes.concat(
+                oobConnectionManager.mDecryptionIv,
+                oobConnectionManager.mEncryptionIv,
+                oobConnectionManager.mEncryptionKey.getEncoded()
+        ));
     }
 
     @Test
-    public void testClient_encryptAndDecrypt() throws Exception {
+    public void testServerEncryptAndClientDecrypt() throws Exception {
+        OobConnectionManager clientOobConnectionManager = OobConnectionManager.forClient(
+                mTestChannel);
+        OobConnectionManager serverOobConnectionManager = OobConnectionManager.forServer(
+                mTestChannel);
+        mTestChannel.mOobDataReceivedListener.accept(mTestChannel.mSentOobData);
+
+        byte[] encryptedTestMessage = clientOobConnectionManager.encryptVerificationCode(
+                TEST_MESSAGE);
+        byte[] decryptedTestMessage = serverOobConnectionManager.decryptVerificationCode(
+                encryptedTestMessage);
+
+        assertThat(decryptedTestMessage).isEqualTo(TEST_MESSAGE);
+    }
+
+    @Test
+    public void testClientEncryptAndServerDecrypt() throws Exception {
+        OobConnectionManager clientOobConnectionManager = OobConnectionManager.forClient(
+                mTestChannel);
+        OobConnectionManager serverOobConnectionManager = OobConnectionManager.forServer(
+                mTestChannel);
+        mTestChannel.mOobDataReceivedListener.accept(mTestChannel.mSentOobData);
+
+        byte[] encryptedTestMessage = serverOobConnectionManager.encryptVerificationCode(
+                TEST_MESSAGE);
+        byte[] decryptedTestMessage = clientOobConnectionManager.decryptVerificationCode(
+                encryptedTestMessage);
+
+        assertThat(decryptedTestMessage).isEqualTo(TEST_MESSAGE);
+    }
+
+    @Test
+    public void testEncryptAndDecryptWithDifferentNonces_throwsAEADBadTagException()
+            throws Exception {
+        // The OobConnectionManager stores a different nonce for encryption and decryption, so it
+        // can't decrypt messages that it encrypted itself. It can only send encrypted messages to
+        // an OobConnectionManager on another device that share its nonces and encryption key.
         OobConnectionManager oobConnectionManager = OobConnectionManager.forClient(mTestChannel);
         byte[] encryptedMessage = oobConnectionManager.encryptVerificationCode(TEST_MESSAGE);
-        byte[] decryptedMessage = oobConnectionManager.decryptVerificationCode(encryptedMessage);
-        assertThat(decryptedMessage).isEqualTo(TEST_MESSAGE);
+        Assert.assertThrows(AEADBadTagException.class,
+                () -> oobConnectionManager.decryptVerificationCode(encryptedMessage));
     }
 
     @Test
-    public void testServer_encryptAndDecrypt() throws Exception {
-        OobConnectionManager oobConnectionManager = OobConnectionManager.forServer(mTestChannel);
-        mTestChannel.onOobDataReceived(mTestKey);
-
-        byte[] encryptedMessage = oobConnectionManager.encryptVerificationCode(TEST_MESSAGE);
-        byte[] decryptedMessage = oobConnectionManager.decryptVerificationCode(encryptedMessage);
-        assertThat(decryptedMessage).isEqualTo(TEST_MESSAGE);
+    public void testDecryptWithShortMessage_throwsAEADBadTagException() {
+        OobConnectionManager oobConnectionManager = OobConnectionManager.forClient(mTestChannel);
+        Assert.assertThrows(AEADBadTagException.class,
+                () -> oobConnectionManager.decryptVerificationCode("short".getBytes()));
     }
 
     @Test
@@ -107,10 +164,10 @@ public class OobConnectionManagerTest {
     }
 
     private static class TestChannel extends OobConnectionManager.Channel {
-        SecretKey mSentOobData = null;
+        byte[] mSentOobData = null;
 
         @Override
-        public void sendOobData(SecretKey oobData) {
+        public void sendOobData(byte[] oobData) {
             mSentOobData = oobData;
         }
     }

@@ -57,7 +57,7 @@ public class SafeLog {
 
     /** Log message if tag is whitelisted for {@code Log.ERROR}. */
     public static void loge(@NonNull String tag, @NonNull String message) {
-        loge(tag, message, /* exception = */ null);
+        loge(tag, message, /* exception= */ null);
     }
 
     /** Log message and optional exception if tag is whitelisted for {@code Log.ERROR}. */

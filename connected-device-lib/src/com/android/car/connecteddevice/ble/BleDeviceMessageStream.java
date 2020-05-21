@@ -51,9 +51,9 @@ class BleDeviceMessageStream {
 
     private static final String TAG = "BleDeviceMessageStream";
 
-    // Only version 2 of the messaging and version 1 of the security supported.
+    // Only version 2 of the messaging and version 2 of the security supported.
     private static final int MESSAGING_VERSION = 2;
-    private static final int SECURITY_VERSION = 1;
+    private static final int SECURITY_VERSION = 2;
 
     /*
      * During bandwidth testing, it was discovered that allowing the stream to send as fast as it
@@ -174,7 +174,7 @@ class BleDeviceMessageStream {
                     + packet.getTotalPackets() + " for " + packet.getMessageId() + ".");
             mWriteCharacteristic.setValue(packet.toByteArray());
             mBlePeripheralManager.notifyCharacteristicChanged(mDevice, mWriteCharacteristic,
-                    /* confirm = */ false);
+                    /* confirm= */ false);
         }, mThrottleDelay.get());
     }
 
@@ -261,7 +261,7 @@ class BleDeviceMessageStream {
                 .build();
         mWriteCharacteristic.setValue(headunitVersion.toByteArray());
         mBlePeripheralManager.notifyCharacteristicChanged(device, mWriteCharacteristic,
-                /* confirm = */ false);
+                /* confirm= */ false);
         mIsVersionExchanged.set(true);
         logd(TAG, "Sent supported version to the phone.");
     }
