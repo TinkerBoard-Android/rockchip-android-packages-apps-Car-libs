@@ -81,13 +81,11 @@ public class FocusParkingView extends View {
     }
 
     @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-
-        // This view must have non-zero size to be able to take focus.
-        if (getWidth() == 0 || getHeight() == 0) {
-            throw new IllegalArgumentException("FocusParkingView must have non-zero size");
-        }
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        // This size of the view is always 1 x 1 pixel, no matter what value is set in the layout
+        // file (match_parent, wrap_content, 100dp, 0dp, etc). Small size is to ensure it has little
+        // impact on the layout, non-zero size is to ensure it can take focus.
+        setMeasuredDimension(1, 1);
     }
 
     @Override
