@@ -39,6 +39,7 @@ import com.android.car.ui.paintbooth.caruirecyclerview.GridCarUiRecyclerViewActi
 import com.android.car.ui.paintbooth.dialogs.DialogsActivity;
 import com.android.car.ui.paintbooth.overlays.OverlayActivity;
 import com.android.car.ui.paintbooth.preferences.PreferenceActivity;
+import com.android.car.ui.paintbooth.toolbar.OldToolbarActivity;
 import com.android.car.ui.paintbooth.toolbar.ToolbarActivity;
 import com.android.car.ui.paintbooth.widgets.WidgetActivity;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
@@ -63,6 +64,7 @@ public class MainActivity extends Activity implements InsetsChangedListener {
             Pair.create("Preferences sample", PreferenceActivity.class),
             Pair.create("Overlays", OverlayActivity.class),
             Pair.create("Toolbar sample", ToolbarActivity.class),
+            Pair.create("Old Toolbar sample", OldToolbarActivity.class),
             Pair.create("Widget sample", WidgetActivity.class),
             Pair.create("ListItem sample", CarUiListItemActivity.class)
     );
