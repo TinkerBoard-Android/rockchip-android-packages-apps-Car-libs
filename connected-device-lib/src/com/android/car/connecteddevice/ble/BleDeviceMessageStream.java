@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -66,8 +67,10 @@ class BleDeviceMessageStream {
 
     private final ArrayDeque<BlePacket> mPacketQueue = new ArrayDeque<>();
 
-    private final HashMap<Integer, ByteArrayOutputStream> mPendingData =
-            new HashMap<>();
+    private final Map<Integer, ByteArrayOutputStream> mPendingData = new HashMap<>();
+
+    // messageId -> nextExpectedPacketNumber
+    private final Map<Integer, Integer> mPendingPacketNumber = new HashMap<>();
 
     private final MessageIdGenerator mMessageIdGenerator = new MessageIdGenerator();
 
@@ -273,6 +276,24 @@ class BleDeviceMessageStream {
         mThrottleDelay.set(THROTTLE_WAIT_MS);
 
         int messageId = packet.getMessageId();
+        int packetNumber = packet.getPacketNumber();
+        int expectedPacket = mPendingPacketNumber.getOrDefault(messageId, 1);
+        if (packetNumber == expectedPacket - 1) {
+            logw(TAG, "Received duplicate packet " + packet.getPacketNumber() + " for message "
+                    + messageId + ". Ignoring.");
+            return;
+        }
+        if (packetNumber != expectedPacket) {
+            loge(TAG, "Received unexpected packet " + packetNumber + " for message "
+                    + messageId + ".");
+            if (mMessageReceivedErrorListener != null) {
+                mMessageReceivedErrorListener.onMessageReceivedError(
+                        new IllegalStateException("Packet received out of order."));
+            }
+            return;
+        }
+        mPendingPacketNumber.put(messageId, packetNumber + 1);
+
         ByteArrayOutputStream currentPayloadStream =
                 mPendingData.getOrDefault(messageId, new ByteArrayOutputStream());
         mPendingData.putIfAbsent(messageId, currentPayloadStream);
