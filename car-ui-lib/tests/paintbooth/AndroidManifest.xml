@@ -81,7 +81,7 @@
         android:parentActivityName=".MainActivity"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
     <activity
-        android:name=".toolbar.NoCarUiBaseLayoutToolbarActivity"
+        android:name=".toolbar.OldToolbarActivity"
         android:exported="false"
         android:parentActivityName=".MainActivity"
         android:theme="@style/Theme.CarUi"/>
