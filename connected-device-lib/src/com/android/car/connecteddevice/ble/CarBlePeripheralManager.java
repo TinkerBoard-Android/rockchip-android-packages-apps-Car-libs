@@ -16,8 +16,11 @@
 
 package com.android.car.connecteddevice.ble;
 
+import static android.car.encryptionrunner.EncryptionRunnerFactory.EncryptionRunnerType.OOB_UKEY2;
+
 import static com.android.car.connecteddevice.ConnectedDeviceManager.DEVICE_ERROR_INVALID_HANDSHAKE;
 import static com.android.car.connecteddevice.ConnectedDeviceManager.DEVICE_ERROR_UNEXPECTED_DISCONNECTION;
+import static com.android.car.connecteddevice.ble.SecureBleChannel.CHANNEL_ERROR_INVALID_HANDSHAKE;
 import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
 import static com.android.car.connecteddevice.util.SafeLog.logw;
@@ -32,23 +35,31 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
+import android.car.encryptionrunner.EncryptionRunnerFactory;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
 
 import com.android.car.connecteddevice.AssociationCallback;
 import com.android.car.connecteddevice.model.AssociatedDevice;
+import com.android.car.connecteddevice.oob.OobConnectionManager;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
 import com.android.car.connecteddevice.util.ByteUtils;
 import com.android.car.connecteddevice.util.EventLog;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
 
 /**
  * Communication manager that allows for targeted connections to a specific device in the car.
@@ -64,6 +75,8 @@ public class CarBlePeripheralManager extends CarBleManager {
     // Arbitrary delay time for a retry of association advertising if bluetooth adapter name change
     // fails.
     private static final long ASSOCIATE_ADVERTISING_DELAY_MS = 10L;
+
+    private static final Duration OOB_CODE_EXCHANGE_TIMEOUT = Duration.ofSeconds(5);
 
     private static final UUID CLIENT_CHARACTERISTIC_CONFIG =
             UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
@@ -114,12 +127,12 @@ public class CarBlePeripheralManager extends CarBleManager {
     /**
      * Initialize a new instance of manager.
      *
-     * @param blePeripheralManager {@link BlePeripheralManager} for establishing connection.
-     * @param connectedDeviceStorage Shared {@link ConnectedDeviceStorage} for companion features.
-     * @param associationServiceUuid {@link UUID} of association service.
-     * @param reconnectServiceUuid {@link UUID} of reconnect service.
+     * @param blePeripheralManager    {@link BlePeripheralManager} for establishing connection.
+     * @param connectedDeviceStorage  Shared {@link ConnectedDeviceStorage} for companion features.
+     * @param associationServiceUuid  {@link UUID} of association service.
+     * @param reconnectServiceUuid    {@link UUID} of reconnect service.
      * @param writeCharacteristicUuid {@link UUID} of characteristic the car will write to.
-     * @param readCharacteristicUuid {@link UUID} of characteristic the device will write to.
+     * @param readCharacteristicUuid  {@link UUID} of characteristic the device will write to.
      */
     public CarBlePeripheralManager(@NonNull BlePeripheralManager blePeripheralManager,
             @NonNull ConnectedDeviceStorage connectedDeviceStorage,
@@ -307,6 +320,96 @@ public class CarBlePeripheralManager extends CarBleManager {
         reset();
     }
 
+    /** Start the association with a new device using out of band verification code exchange */
+    public void startOutOfBandAssociation(@NonNull BluetoothDevice bluetoothDevice,
+            @NonNull OobConnectionManager oobConnectionManager,
+            @NonNull AssociationCallback callback) {
+
+        logd(TAG, "Starting out of band association.");
+        reset();
+        mAssociationCallback = callback;
+        addConnectedDevice(bluetoothDevice, /* isReconnect= */ false, /* isOob= */ true);
+        BleDevice connectedDevice = getConnectedDevice();
+        if (connectedDevice == null || connectedDevice.mSecureChannel == null) {
+            loge(TAG, "Connected device or secure channel are null");
+            return;
+        }
+
+        logd(TAG, "Setting out of band verification listener.");
+        ((AssociationSecureChannel) connectedDevice.mSecureChannel)
+                .setShowVerificationCodeListener(
+                        code -> {
+                            logd(TAG, "onShowVerificationCode called for out of band exchange");
+                            if (!isAssociating()) {
+                                loge(TAG, "No valid callback for association.");
+                                return;
+                            }
+
+                            performOutOfBandVerification(code.getBytes(), connectedDevice,
+                                    oobConnectionManager);
+                        });
+    }
+
+    private void performOutOfBandVerification(byte[] code, BleDevice connectedDevice,
+            OobConnectionManager oobConnectionManager) {
+        byte[] encryptedCode;
+        try {
+            encryptedCode = oobConnectionManager.encryptVerificationCode(code);
+        } catch (InvalidKeyException | InvalidAlgorithmParameterException
+                | IllegalBlockSizeException | BadPaddingException e) {
+            loge(TAG, "Encryption failed for verification code exchange.", e);
+            connectedDevice.mSecureChannel.notifySecureChannelFailure(
+                    CHANNEL_ERROR_INVALID_HANDSHAKE);
+            return;
+        }
+
+        Handler handler = Handler.getMain();
+        SecureBleChannel.Callback oobExchangeCallback = new SecureBleChannel.Callback() {
+            @Override
+            public void onMessageReceived(DeviceMessage deviceMessage) {
+                handler.removeCallbacksAndMessages(null);
+                connectedDevice.mSecureChannel.unregisterCallback(this);
+                connectedDevice.mSecureChannel.registerCallback(mSecureChannelCallback);
+
+                byte[] serverEncryptedCode = deviceMessage.getMessage();
+                byte[] decryptedCode;
+                try {
+                    decryptedCode =
+                            oobConnectionManager.decryptVerificationCode(serverEncryptedCode);
+                } catch (InvalidKeyException | InvalidAlgorithmParameterException
+                        | IllegalBlockSizeException | BadPaddingException e) {
+                    loge(TAG, "Decryption failed for verification code exchange", e);
+                    connectedDevice.mSecureChannel.notifySecureChannelFailure(
+                            CHANNEL_ERROR_INVALID_HANDSHAKE);
+                    return;
+                }
+
+                if (!Arrays.equals(code, decryptedCode)) {
+                    loge(TAG, "Exchanged verification codes don't match. Code is "
+                            + new String(code) + "and decrypted code is "
+                            + new String(decryptedCode));
+                    connectedDevice.mSecureChannel.notifySecureChannelFailure(
+                            CHANNEL_ERROR_INVALID_HANDSHAKE);
+                }
+            }
+        };
+
+        connectedDevice.mSecureChannel.unregisterCallback(mSecureChannelCallback);
+        connectedDevice.mSecureChannel.registerCallback(oobExchangeCallback);
+
+        handler.postDelayed(() -> {
+            connectedDevice.mSecureChannel.unregisterCallback(oobExchangeCallback);
+            connectedDevice.mSecureChannel.registerCallback(mSecureChannelCallback);
+
+            loge(TAG, "Verification code exchange failed due to a timeout.");
+            connectedDevice.mSecureChannel.notifySecureChannelFailure(
+                    CHANNEL_ERROR_INVALID_HANDSHAKE);
+        }, OOB_CODE_EXCHANGE_TIMEOUT.toMillis());
+
+        connectedDevice.mSecureChannel.sendHandshakeMessage(encryptedCode,
+                /* isEncrypted= */ false);
+    }
+
     private void attemptAssociationAdvertising(@NonNull String adapterName,
             @NonNull AssociationCallback callback) {
         if (mOriginalBluetoothName != null
@@ -421,6 +524,10 @@ public class CarBlePeripheralManager extends CarBleManager {
     }
 
     private void addConnectedDevice(BluetoothDevice device, boolean isReconnect) {
+        addConnectedDevice(device, isReconnect, /* isOob= */ false);
+    }
+
+    private void addConnectedDevice(BluetoothDevice device, boolean isReconnect, boolean isOob) {
         EventLog.onDeviceConnected();
         mBlePeripheralManager.stopAdvertising(mAdvertiseCallback);
         mTimeoutHandler.removeCallbacks(mTimeoutRunnable);
@@ -440,9 +547,13 @@ public class CarBlePeripheralManager extends CarBleManager {
                 });
         secureStream.setMaxWriteSize(mWriteSize);
         SecureBleChannel secureChannel;
+        // TODO(b/157492943): Define an out of band version of ReconnectSecureChannel
         if (isReconnect) {
             secureChannel = new ReconnectSecureChannel(secureStream, mStorage, mReconnectDeviceId,
                     mReconnectChallenge);
+        } else if (isOob) {
+            secureChannel = new AssociationSecureChannel(secureStream, mStorage,
+                    EncryptionRunnerFactory.newRunner(OOB_UKEY2));
         } else {
             secureChannel = new AssociationSecureChannel(secureStream, mStorage);
         }
@@ -623,7 +734,7 @@ public class CarBlePeripheralManager extends CarBleManager {
                             + " with " + deviceMessage.getMessage().length + " bytes in its "
                             + "payload. Notifying " + mCallbacks.size() + " callbacks.");
                     mCallbacks.invoke(
-                            callback ->callback.onMessageReceived(connectedDevice.mDeviceId,
+                            callback -> callback.onMessageReceived(connectedDevice.mDeviceId,
                                     deviceMessage));
                 }
 
