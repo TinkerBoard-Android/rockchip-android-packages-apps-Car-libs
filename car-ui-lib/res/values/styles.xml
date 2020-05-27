@@ -235,6 +235,7 @@
 
     <style name="TextAppearance.CarUi" parent="android:TextAppearance.DeviceDefault">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textAlignment">viewStart</item>
     </style>
 
     <style name="TextAppearance.CarUi.Body1">
@@ -270,9 +271,13 @@
         <item name="android:textSize">@dimen/car_ui_preference_edit_text_dialog_message_text_size</item>
     </style>
 
-    <style name="TextAppearance.CarUi.AlertDialog.Subtitle" parent="android:TextAppearance.DeviceDefault"/>
+    <style name="TextAppearance.CarUi.AlertDialog.Subtitle" parent="android:TextAppearance.DeviceDefault">
+        <item name="android:textAlignment">viewStart</item>
+    </style>
 
-    <style name="TextAppearance.CarUi.Widget" parent="android:TextAppearance.DeviceDefault.Widget"/>
+    <style name="TextAppearance.CarUi.Widget" parent="android:TextAppearance.DeviceDefault.Widget">
+        <item name="android:textAlignment">viewStart</item>
+    </style>
 
     <style name="TextAppearance.CarUi.Widget.Toolbar"/>
 
