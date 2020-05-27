@@ -338,7 +338,7 @@ class DefaultScrollBar implements ScrollBar {
             }
         }
         // Distance should always be positive. Negate its value to scroll up.
-        mSnapHelper.smoothScrollBy(-scrollDistance);
+        mRecyclerView.smoothScrollBy(0, -scrollDistance);
     }
 
     /**
@@ -398,7 +398,7 @@ class DefaultScrollBar implements ScrollBar {
             }
         }
 
-        mSnapHelper.smoothScrollBy(scrollDistance);
+        mRecyclerView.smoothScrollBy(0, scrollDistance);
     }
 
     /**
