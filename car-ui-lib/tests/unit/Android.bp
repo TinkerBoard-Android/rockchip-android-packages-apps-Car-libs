@@ -27,6 +27,7 @@ android_test {
     static_libs: [
         "androidx.test.rules",
         "androidx.test.espresso.core",
+	"androidx.test.espresso.contrib",
         "car-ui-lib",
         "platform-test-annotations",
         "mockito-target-inline-minus-junit4",
