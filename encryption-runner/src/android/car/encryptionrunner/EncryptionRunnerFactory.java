@@ -62,11 +62,20 @@ public class EncryptionRunnerFactory {
     }
 
     /**
-     * Creates a new {@link EncryptionRunner} one that doesn't actually do encryption but is useful
+     * Creates a new {@link EncryptionRunner} that doesn't actually do encryption but is useful
      * for testing.
      */
     @VisibleForTesting
     public static EncryptionRunner newDummyRunner() {
         return new DummyEncryptionRunner();
+    }
+
+    /**
+     * Creates a new {@link EncryptionRunner} that doesn't actually do encryption but is useful
+     * for out of band association testing.
+     */
+    @VisibleForTesting
+    public static EncryptionRunner newOobDummyRunner() {
+        return new OobDummyEncryptionRunner();
     }
 }
