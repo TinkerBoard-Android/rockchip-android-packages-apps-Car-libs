@@ -27,7 +27,7 @@ import androidx.preference.DialogPreference;
  * A {@link androidx.preference.Preference} should implement this, and its {@link DialogPreference}
  * will call these methods on the Preference.
  */
-public interface IDialogFragmentCallbacks extends DialogInterface.OnClickListener {
+public interface DialogFragmentCallbacks extends DialogInterface.OnClickListener {
 
     /** See {@link CarUiDialogFragment#onPrepareDialogBuilder(AlertDialog.Builder)}. */
     default void onPrepareDialogBuilder(AlertDialog.Builder builder) {}
