@@ -42,7 +42,7 @@ public class SeekbarPreferenceDialogFragment extends PreferenceDialogFragment {
     protected void onBindDialogView(View view) {
         super.onBindDialogView(view);
 
-        IDialogFragmentCallbacks dialogPreference = (IDialogFragmentCallbacks) getPreference();
+        DialogFragmentCallbacks dialogPreference = (DialogFragmentCallbacks) getPreference();
         dialogPreference.onBindDialogView(view);
     }
 
@@ -50,19 +50,19 @@ public class SeekbarPreferenceDialogFragment extends PreferenceDialogFragment {
     public void onClick(DialogInterface dialog, int which) {
         super.onClick(dialog, which);
 
-        IDialogFragmentCallbacks dialogPreference = (IDialogFragmentCallbacks) getPreference();
+        DialogFragmentCallbacks dialogPreference = (DialogFragmentCallbacks) getPreference();
         dialogPreference.onClick(dialog, which);
     }
 
     @Override
     protected void onDialogClosed(boolean positiveResult) {
-        IDialogFragmentCallbacks dialogPreference = (IDialogFragmentCallbacks) getPreference();
+        DialogFragmentCallbacks dialogPreference = (DialogFragmentCallbacks) getPreference();
         dialogPreference.onDialogClosed(positiveResult);
     }
 
     @Override
     protected void onPrepareDialogBuilder(AlertDialog.Builder builder) {
-        IDialogFragmentCallbacks dialogPreference = (IDialogFragmentCallbacks) getPreference();
+        DialogFragmentCallbacks dialogPreference = (DialogFragmentCallbacks) getPreference();
         dialogPreference.onPrepareDialogBuilder(builder);
     }
 }
