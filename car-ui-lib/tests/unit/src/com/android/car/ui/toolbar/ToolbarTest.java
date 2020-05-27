@@ -45,8 +45,8 @@ import android.view.View;
 
 import androidx.test.rule.ActivityTestRule;
 
-import com.android.car.ui.R;
 import com.android.car.ui.core.CarUi;
+import com.android.car.ui.tests.unit.R;
 
 import org.hamcrest.Matcher;
 import org.junit.Rule;
