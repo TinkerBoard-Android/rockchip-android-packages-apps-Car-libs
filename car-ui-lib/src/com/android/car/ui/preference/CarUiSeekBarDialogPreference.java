@@ -28,7 +28,7 @@ import com.android.car.ui.R;
 
 /** A class implements some basic methods of a seekbar dialog preference. */
 public class CarUiSeekBarDialogPreference extends DialogPreference
-        implements IDialogFragmentCallbacks {
+        implements DialogFragmentCallbacks {
 
     private int mSeekBarProgress;
     private SeekBar mSeekBar;
