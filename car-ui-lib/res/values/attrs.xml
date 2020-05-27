@@ -104,7 +104,9 @@
     <attr name="CarUiToolbarStyle" format="reference"/>
 
     <declare-styleable name="CarUiRecyclerView">
-        <!-- Whether to enable the car_ui_recyclerview_divider for linear layout or not. -->
+        <!-- Whether to enable the dividers or not. Linear and grid layout uses
+        car_ui_recyclerview_divider.xml and car_ui_divider.xml drawables
+        respectively for styling dividers. -->
         <attr name="enableDivider" format="boolean" />
         <!-- Top offset for car ui recycler view. -->
         <attr name="topOffset" format="integer" />
