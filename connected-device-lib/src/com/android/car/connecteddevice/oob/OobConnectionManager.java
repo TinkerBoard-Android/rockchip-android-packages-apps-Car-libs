@@ -75,7 +75,7 @@ import javax.crypto.spec.SecretKeySpec;
  *     fail handshake
  * }</pre>
  */
-class OobConnectionManager {
+public class OobConnectionManager {
     private static final String TAG = "OobConnectionManager";
     private static final String ALGORITHM = "AES/GCM/NoPadding";
     // The nonce length is chosen to be consistent with the standard specification:
