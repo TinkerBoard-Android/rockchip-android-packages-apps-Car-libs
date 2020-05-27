@@ -19,7 +19,7 @@ package com.android.car.ui.toolbar;
 import android.app.Activity;
 import android.os.Bundle;
 
-import com.android.car.ui.R;
+import com.android.car.ui.tests.unit.R;
 
 /** An Activity used for testing {@link ToolbarController}. */
 public class ToolbarTestActivity extends Activity {
