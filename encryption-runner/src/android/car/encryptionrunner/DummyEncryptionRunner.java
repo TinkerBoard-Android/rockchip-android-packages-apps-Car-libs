@@ -42,7 +42,7 @@ public class DummyEncryptionRunner implements EncryptionRunner {
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({Mode.UNKNOWN, Mode.CLIENT, Mode.SERVER})
-    private @interface Mode {
+    @interface Mode {
 
         int UNKNOWN = 0;
         int CLIENT = 1;
@@ -81,6 +81,20 @@ public class DummyEncryptionRunner implements EncryptionRunner {
                 .setHandshakeState(HandshakeMessage.HandshakeState.IN_PROGRESS)
                 .setNextMessage(INIT_RESPONSE.getBytes())
                 .build();
+    }
+
+    @Mode
+    protected int getMode() {
+        return mMode;
+    }
+
+    @HandshakeMessage.HandshakeState
+    protected int getState() {
+        return mState;
+    }
+
+    protected void setState(@HandshakeMessage.HandshakeState int state) {
+        mState = state;
     }
 
     private void checkRunnerIsNew() {
@@ -180,7 +194,7 @@ public class DummyEncryptionRunner implements EncryptionRunner {
         throw new HandshakeException(message);
     }
 
-    private class DummyKey implements Key {
+    class DummyKey implements Key {
         @Override
         public byte[] asBytes() {
             return KEY.getBytes();

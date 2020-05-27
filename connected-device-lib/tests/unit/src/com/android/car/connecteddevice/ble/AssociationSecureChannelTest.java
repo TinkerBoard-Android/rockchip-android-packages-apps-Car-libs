@@ -28,6 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.car.encryptionrunner.DummyEncryptionRunner;
+import android.car.encryptionrunner.EncryptionRunner;
 import android.car.encryptionrunner.EncryptionRunnerFactory;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -58,8 +59,10 @@ public final class AssociationSecureChannelTest {
             UUID.fromString("a29f0c74-2014-4b14-ac02-be6ed15b545a");
     private static final byte[] CLIENT_SECRET = ByteUtils.randomBytes(32);
 
-    @Mock private BleDeviceMessageStream mStreamMock;
-    @Mock private ConnectedDeviceStorage mStorageMock;
+    @Mock
+    private BleDeviceMessageStream mStreamMock;
+    @Mock
+    private ConnectedDeviceStorage mStorageMock;
     @Mock
     private AssociationSecureChannel.ShowVerificationCodeListener mShowVerificationCodeListenerMock;
     private MockitoSession mMockitoSession;
@@ -87,7 +90,39 @@ public final class AssociationSecureChannelTest {
     public void testEncryptionHandshake_Association() throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
         ChannelCallback callbackSpy = spy(new ChannelCallback(semaphore));
-        setupAssociationSecureChannel(callbackSpy);
+        setupAssociationSecureChannel(callbackSpy, EncryptionRunnerFactory::newDummyRunner);
+        ArgumentCaptor<String> deviceIdCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<DeviceMessage> messageCaptor =
+                ArgumentCaptor.forClass(DeviceMessage.class);
+
+        initHandshakeMessage();
+        verify(mStreamMock).writeMessage(messageCaptor.capture(), any());
+        byte[] response = messageCaptor.getValue().getMessage();
+        assertThat(response).isEqualTo(DummyEncryptionRunner.INIT_RESPONSE.getBytes());
+
+        respondToContinueMessage();
+        verify(mShowVerificationCodeListenerMock).showVerificationCode(anyString());
+
+        mChannel.notifyOutOfBandAccepted();
+        sendDeviceId();
+        assertThat(semaphore.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
+        verify(callbackSpy).onDeviceIdReceived(deviceIdCaptor.capture());
+        verify(mStreamMock, times(2)).writeMessage(messageCaptor.capture(), any());
+        byte[] deviceIdMessage = messageCaptor.getValue().getMessage();
+        assertThat(deviceIdMessage).isEqualTo(ByteUtils.uuidToBytes(SERVER_DEVICE_ID));
+        assertThat(deviceIdCaptor.getValue()).isEqualTo(CLIENT_DEVICE_ID.toString());
+        verify(mStorageMock).saveEncryptionKey(eq(CLIENT_DEVICE_ID.toString()), any());
+        verify(mStorageMock).saveChallengeSecret(CLIENT_DEVICE_ID.toString(), CLIENT_SECRET);
+
+        assertThat(semaphore.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
+        verify(callbackSpy).onSecureChannelEstablished();
+    }
+
+    @Test
+    public void testEncryptionHandshake_oobAssociation() throws InterruptedException {
+        Semaphore semaphore = new Semaphore(0);
+        ChannelCallback callbackSpy = spy(new ChannelCallback(semaphore));
+        setupAssociationSecureChannel(callbackSpy, EncryptionRunnerFactory::newOobDummyRunner);
         ArgumentCaptor<String> deviceIdCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<DeviceMessage> messageCaptor =
                 ArgumentCaptor.forClass(DeviceMessage.class);
@@ -120,7 +155,7 @@ public final class AssociationSecureChannelTest {
             throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
         ChannelCallback callbackSpy = spy(new ChannelCallback(semaphore));
-        setupAssociationSecureChannel(callbackSpy);
+        setupAssociationSecureChannel(callbackSpy, EncryptionRunnerFactory::newDummyRunner);
 
         // Wrong init handshake message
         respondToContinueMessage();
@@ -135,7 +170,7 @@ public final class AssociationSecureChannelTest {
             throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
         ChannelCallback callbackSpy = spy(new ChannelCallback(semaphore));
-        setupAssociationSecureChannel(callbackSpy);
+        setupAssociationSecureChannel(callbackSpy, EncryptionRunnerFactory::newDummyRunner);
 
         initHandshakeMessage();
 
@@ -147,9 +182,10 @@ public final class AssociationSecureChannelTest {
         );
     }
 
-    private void setupAssociationSecureChannel(ChannelCallback callback) {
+    private void setupAssociationSecureChannel(ChannelCallback callback,
+            EncryptionRunnerProvider encryptionRunnerProvider) {
         mChannel = new AssociationSecureChannel(mStreamMock, mStorageMock,
-                EncryptionRunnerFactory.newDummyRunner());
+                encryptionRunnerProvider.getEncryptionRunner());
         mChannel.registerCallback(callback);
         mChannel.setShowVerificationCodeListener(mShowVerificationCodeListenerMock);
         ArgumentCaptor<MessageReceivedListener> listenerCaptor =
@@ -195,9 +231,11 @@ public final class AssociationSecureChannelTest {
      */
     private static class ChannelCallback implements SecureBleChannel.Callback {
         private final Semaphore mSemaphore;
+
         ChannelCallback(Semaphore semaphore) {
             mSemaphore = semaphore;
         }
+
         @Override
         public void onSecureChannelEstablished() {
             mSemaphore.release();
@@ -222,5 +260,9 @@ public final class AssociationSecureChannelTest {
         public void onDeviceIdReceived(String deviceId) {
             mSemaphore.release();
         }
+    }
+
+    interface EncryptionRunnerProvider {
+        EncryptionRunner getEncryptionRunner();
     }
 }
