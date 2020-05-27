@@ -77,7 +77,8 @@ public final class CarUiRecyclerView extends RecyclerView implements
     private int mInitialTopPadding;
 
     private GridOffsetItemDecoration mOffsetItemDecoration;
-    private GridDividerItemDecoration mDividerItemDecoration;
+    private GridDividerItemDecoration mDividerItemDecorationGrid;
+    private RecyclerView.ItemDecoration mDividerItemDecorationLinear;
     private int mNumOfColumns;
     private boolean mInstallingExtScrollBar = false;
     private int mContainerVisibility = View.VISIBLE;
@@ -171,6 +172,15 @@ public final class CarUiRecyclerView extends RecyclerView implements
         boolean enableDivider =
                 a.getBoolean(R.styleable.CarUiRecyclerView_enableDivider, /* defValue= */ false);
 
+        mDividerItemDecorationLinear = new LinearDividerItemDecoration(
+                context.getDrawable(R.drawable.car_ui_recyclerview_divider));
+
+        mDividerItemDecorationGrid =
+                new GridDividerItemDecoration(
+                        context.getDrawable(R.drawable.car_ui_divider),
+                        context.getDrawable(R.drawable.car_ui_divider),
+                        mNumOfColumns);
+
         if (carUiRecyclerViewLayout == CarUiRecyclerViewLayout.LINEAR) {
 
             int linearTopOffset =
@@ -179,10 +189,7 @@ public final class CarUiRecyclerView extends RecyclerView implements
                     a.getInteger(R.styleable.CarUiRecyclerView_bottomOffset, /* defValue= */ 0);
 
             if (enableDivider) {
-                RecyclerView.ItemDecoration dividerItemDecoration =
-                        new LinearDividerItemDecoration(
-                                context.getDrawable(R.drawable.car_ui_recyclerview_divider));
-                addItemDecoration(dividerItemDecoration);
+                addItemDecoration(mDividerItemDecorationLinear);
             }
             RecyclerView.ItemDecoration topOffsetItemDecoration =
                     new LinearOffsetItemDecoration(linearTopOffset, OffsetPosition.START);
@@ -200,12 +207,7 @@ public final class CarUiRecyclerView extends RecyclerView implements
                     a.getInteger(R.styleable.CarUiRecyclerView_bottomOffset, /* defValue= */ 0);
 
             if (enableDivider) {
-                mDividerItemDecoration =
-                        new GridDividerItemDecoration(
-                                context.getDrawable(R.drawable.car_ui_divider),
-                                context.getDrawable(R.drawable.car_ui_divider),
-                                mNumOfColumns);
-                addItemDecoration(mDividerItemDecoration);
+                addItemDecoration(mDividerItemDecorationGrid);
             }
 
             mOffsetItemDecoration =
@@ -271,8 +273,8 @@ public final class CarUiRecyclerView extends RecyclerView implements
         if (mOffsetItemDecoration != null) {
             mOffsetItemDecoration.setNumOfColumns(mNumOfColumns);
         }
-        if (mDividerItemDecoration != null) {
-            mDividerItemDecoration.setNumOfColumns(mNumOfColumns);
+        if (mDividerItemDecorationGrid != null) {
+            mDividerItemDecorationGrid.setNumOfColumns(mNumOfColumns);
         }
     }
 
@@ -403,6 +405,28 @@ public final class CarUiRecyclerView extends RecyclerView implements
                         paddingBottom + getPaddingBottom());
             }
         }
+    }
+
+    /**
+     * Sets divider item decoration for linear layout.
+     */
+    public void setLinearDividerItemDecoration(boolean enableDividers) {
+        if (enableDividers) {
+            addItemDecoration(mDividerItemDecorationLinear);
+            return;
+        }
+        removeItemDecoration(mDividerItemDecorationLinear);
+    }
+
+    /**
+     * Sets divider item decoration for grid layout.
+     */
+    public void setGridDividerItemDecoration(boolean enableDividers) {
+        if (enableDividers) {
+            addItemDecoration(mDividerItemDecorationGrid);
+            return;
+        }
+        removeItemDecoration(mDividerItemDecorationGrid);
     }
 
     private static RuntimeException andLog(String msg, Throwable t) {
