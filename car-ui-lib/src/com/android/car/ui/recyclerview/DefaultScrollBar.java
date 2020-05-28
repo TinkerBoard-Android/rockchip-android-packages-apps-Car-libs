@@ -25,6 +25,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 
 import androidx.annotation.IntRange;
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.OrientationHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -52,7 +53,6 @@ class DefaultScrollBar implements ScrollBar {
 
     private final Interpolator mPaginationInterpolator = new AccelerateDecelerateInterpolator();
 
-    private final int mRowsPerPage = -1;
     private final Handler mHandler = new Handler();
 
     private OrientationHelper mOrientationHelper;
@@ -95,9 +95,7 @@ class DefaultScrollBar implements ScrollBar {
                         int oldLeft,
                         int oldTop,
                         int oldRight,
-                        int oldBottom) -> {
-                    mHandler.post(() -> updatePaginationButtons(/* animate= */ false));
-                });
+                        int oldBottom) -> mHandler.post(this::updatePaginationButtons));
     }
 
     public RecyclerView getRecyclerView() {
@@ -148,9 +146,6 @@ class DefaultScrollBar implements ScrollBar {
     interface PaginationListener {
         int PAGE_UP = 0;
         int PAGE_DOWN = 1;
-
-        /** Called when the linked view should be paged in the given direction */
-        void onPaginate(int direction);
     }
 
     /**
@@ -162,17 +157,14 @@ class DefaultScrollBar implements ScrollBar {
      * The
      * values should also be positive.
      *
-     * @param range   The range of the scrollbar's thumb
-     * @param offset  The offset of the scrollbar's thumb
-     * @param extent  The extent of the scrollbar's thumb
-     * @param animate Whether or not the thumb should animate from its current position to the
-     *                position specified by the given range, offset and extent.
+     * @param range  The range of the scrollbar's thumb
+     * @param offset The offset of the scrollbar's thumb
+     * @param extent The extent of the scrollbar's thumb
      */
     private void setParameters(
             @IntRange(from = 0) int range,
             @IntRange(from = 0) int offset,
-            @IntRange(from = 0) int extent,
-            boolean animate) {
+            @IntRange(from = 0) int extent) {
         // Not laid out yet, so values cannot be calculated.
         if (!mScrollView.isLaidOut()) {
             return;
@@ -194,7 +186,7 @@ class DefaultScrollBar implements ScrollBar {
             mScrollThumb.requestLayout();
         }
 
-        moveY(mScrollThumb, thumbOffset, animate);
+        moveY(mScrollThumb, thumbOffset);
     }
 
     /**
@@ -234,18 +226,16 @@ class DefaultScrollBar implements ScrollBar {
     }
 
     /** Moves the given view to the specified 'y' position. */
-    private void moveY(final View view, float newPosition, boolean animate) {
-        final int duration = animate ? 200 : 0;
+    private void moveY(final View view, float newPosition) {
         view.animate()
                 .y(newPosition)
-                .setDuration(duration)
+                .setDuration(/* duration= */ 0)
                 .setInterpolator(mPaginationInterpolator)
                 .start();
     }
 
     private class PaginateButtonClickListener implements View.OnClickListener {
         private final int mPaginateDirection;
-        private PaginationListener mPaginationListener;
 
         PaginateButtonClickListener(int paginateDirection) {
             this.mPaginateDirection = paginateDirection;
@@ -253,9 +243,6 @@ class DefaultScrollBar implements ScrollBar {
 
         @Override
         public void onClick(View v) {
-            if (mPaginationListener != null) {
-                mPaginationListener.onPaginate(mPaginateDirection);
-            }
             if (mPaginateDirection == PaginationListener.PAGE_DOWN) {
                 pageDown();
             } else if (mPaginateDirection == PaginationListener.PAGE_UP) {
@@ -267,21 +254,10 @@ class DefaultScrollBar implements ScrollBar {
     private final RecyclerView.OnScrollListener mRecyclerViewOnScrollListener =
             new RecyclerView.OnScrollListener() {
                 @Override
-                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                    updatePaginationButtons(false);
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                    updatePaginationButtons();
                 }
             };
-
-    /** Returns the page the given position is on, starting with page 0. */
-    int getPage(int position) {
-        if (mRowsPerPage == -1) {
-            return -1;
-        }
-        if (mRowsPerPage == 0) {
-            return 0;
-        }
-        return position / mRowsPerPage;
-    }
 
     private OrientationHelper getOrientationHelper(RecyclerView.LayoutManager layoutManager) {
         if (mOrientationHelper == null || mOrientationHelper.getLayoutManager() != layoutManager) {
@@ -410,12 +386,8 @@ class DefaultScrollBar implements ScrollBar {
      * this is called after an adapter change but before the new layout, the visibility
      * determination
      * may not be correct.
-     *
-     * @param animate {@code true} if the scrollbar should animate to its new position. {@code
-     *                false}
-     *                if no animation is used
      */
-    private void updatePaginationButtons(boolean animate) {
+    private void updatePaginationButtons() {
 
         boolean isAtStart = isAtStart();
         boolean isAtEnd = isAtEnd();
@@ -438,14 +410,12 @@ class DefaultScrollBar implements ScrollBar {
             setParameters(
                     getRecyclerView().computeVerticalScrollRange(),
                     getRecyclerView().computeVerticalScrollOffset(),
-                    getRecyclerView().computeVerticalScrollExtent(),
-                    animate);
+                    getRecyclerView().computeVerticalScrollExtent());
         } else {
             setParameters(
                     getRecyclerView().computeHorizontalScrollRange(),
                     getRecyclerView().computeHorizontalScrollOffset(),
-                    getRecyclerView().computeHorizontalScrollExtent(),
-                    animate);
+                    getRecyclerView().computeHorizontalScrollExtent());
         }
 
         mScrollView.invalidate();

@@ -101,7 +101,7 @@ public class CarUiContentListItem extends CarUiListItem {
     private Drawable mSupplementalIcon;
     private CharSequence mTitle;
     private CharSequence mBody;
-    private Action mAction;
+    private final Action mAction;
     private IconType mPrimaryIconType;
     private boolean mIsActionDividerVisible;
     private boolean mIsChecked;
