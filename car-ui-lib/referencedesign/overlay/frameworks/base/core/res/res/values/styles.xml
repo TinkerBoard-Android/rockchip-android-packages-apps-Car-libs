@@ -1,0 +1,13 @@
+<resources>
+
+    <style name="TextAppearance.CarUi.Widget" parent="android:TextAppearance.DeviceDefault.Widget">
+        <item name="android:textAlignment">viewStart</item>
+    </style>
+
+    <style name="TextAppearance.CarUi.Widget.Toolbar"/>
+
+    <style name="TextAppearance.CarUi.Widget.Toolbar.Title">
+        <item name="android:singleLine">true</item>
+        <item name="android:textSize">32sp</item>
+    </style>
+</resources>

@@ -1,0 +1,4 @@
+<resources>
+    <dimen name="car_ui_toolbar_logo_size">44dp</dimen>
+    <dimen name="car_ui_toolbar_nav_icon_size">44dp</dimen>
+</resources>

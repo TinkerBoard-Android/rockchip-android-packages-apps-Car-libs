@@ -1,0 +1,22 @@
+<resources>
+    <item type="layout" name="car_ui_base_layout_toolbar">@*android:layout/car_ui_base_layout_toolbar</item>
+    <item type="layout" name="car_ui_toolbar">@*android:layout/car_ui_toolbar</item>
+    <item type="layout" name="car_ui_toolbar_two_row">@*android:layout/car_ui_toolbar_two_row</item>
+    <item type="bool" name="car_ui_toolbar_nav_icon_reserve_space">false</item>
+    <item type="bool" name="car_ui_toolbar_logo_fills_nav_icon_space">false</item>
+
+    <item type="id" name="car_ui_toolbar_background">@*android:id/car_ui_toolbar_background</item>
+    <item type="id" name="car_ui_toolbar_nav_icon_container">@*android:id/car_ui_toolbar_nav_icon_container</item>
+    <item type="id" name="car_ui_toolbar_nav_icon">@*android:id/car_ui_toolbar_nav_icon</item>
+    <item type="id" name="car_ui_toolbar_logo">@*android:id/car_ui_toolbar_logo</item>
+    <item type="id" name="car_ui_toolbar_title_logo">@*android:id/car_ui_toolbar_title_logo</item>
+    <item type="id" name="car_ui_toolbar_title_container">@*android:id/car_ui_toolbar_title_container</item>
+    <item type="id" name="car_ui_toolbar_menu_items_container">@*android:id/car_ui_toolbar_menu_items_container</item>
+    <item type="id" name="car_ui_toolbar_title">@*android:id/car_ui_toolbar_title</item>
+    <item type="id" name="car_ui_toolbar_subtitle">@*android:id/car_ui_toolbar_subtitle</item>
+    <item type="id" name="car_ui_toolbar_tabs">@*android:id/car_ui_toolbar_tabs</item>
+    <item type="id" name="car_ui_toolbar_search_view_container">@*android:id/car_ui_toolbar_search_view_container</item>
+    <item type="id" name="car_ui_toolbar_progress_bar">@*android:id/car_ui_toolbar_progress_bar</item>
+    <item type="id" name="car_ui_toolbar_title_logo_container">@*android:id/car_ui_toolbar_title_logo_container</item>
+    <item type="id" name="content">@*android:id/car_ui_content</item>
+</resources>
