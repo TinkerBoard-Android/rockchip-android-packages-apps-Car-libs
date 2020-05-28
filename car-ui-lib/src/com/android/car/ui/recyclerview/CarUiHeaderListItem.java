@@ -23,8 +23,8 @@ import androidx.annotation.NonNull;
  */
 public class CarUiHeaderListItem extends CarUiListItem {
 
-    private CharSequence mTitle;
-    private CharSequence mBody;
+    private final CharSequence mTitle;
+    private final CharSequence mBody;
 
     public CarUiHeaderListItem(@NonNull CharSequence title) {
         this(title, "");

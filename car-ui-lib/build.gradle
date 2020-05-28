@@ -76,6 +76,7 @@ dependencies {
     api 'androidx.preference:preference:1.1.0'
     api 'androidx.recyclerview:recyclerview:1.0.0'
     api 'androidx.core:core:1.2.0'
+    implementation 'com.android.support:support-annotations:28.0.0'
 
     // This is the gradle equivalent of the libs: ["android.car"] in our Android.bp
     implementation files('../../../../../out/target/common/obj/JAVA_LIBRARIES/android.car_intermediates/classes.jar')
