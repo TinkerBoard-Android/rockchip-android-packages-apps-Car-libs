@@ -52,7 +52,7 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
     static final int VIEW_TYPE_LIST_ITEM = 1;
     static final int VIEW_TYPE_LIST_HEADER = 2;
 
-    private List<? extends CarUiListItem> mItems;
+    private final List<? extends CarUiListItem> mItems;
     private int mMaxItems = CarUiRecyclerView.ItemCap.UNLIMITED;
 
     public CarUiListItemAdapter(List<? extends CarUiListItem> items) {
@@ -110,7 +110,7 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
                 CarUiListItem item = mItems.get(position);
                 if (!(item instanceof CarUiContentListItem)) {
                     throw new IllegalStateException(
-                            "Expected item to be bound to viewholder to be instance of "
+                            "Expected item to be bound to viewHolder to be instance of "
                                     + "CarUiContentListItem.");
                 }
 
@@ -124,7 +124,7 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
                 CarUiListItem header = mItems.get(position);
                 if (!(header instanceof CarUiHeaderListItem)) {
                     throw new IllegalStateException(
-                            "Expected item to be bound to viewholder to be instance of "
+                            "Expected item to be bound to viewHolder to be instance of "
                                     + "CarUiHeaderListItem.");
                 }
 

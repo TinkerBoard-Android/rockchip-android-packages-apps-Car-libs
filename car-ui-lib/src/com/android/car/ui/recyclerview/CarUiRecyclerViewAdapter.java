@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.R;
@@ -42,18 +43,18 @@ final class CarUiRecyclerViewAdapter
     // Replace the contents of a view (invoked by the layout manager). Intentionally left empty
     // since this adapter is an empty shell for the nested recyclerview.
     @Override
-    public void onBindViewHolder(NestedRowViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull NestedRowViewHolder holder, int position) {
     }
 
-    // Return the size of your dataset (invoked by the layout manager)
+    // Return the size of your data set (invoked by the layout manager)
     @Override
     public int getItemCount() {
         return 1;
     }
 
-    /** The viewholder class for the parent recyclerview. */
+    /** The viewHolder class for the parent recyclerview. */
     static class NestedRowViewHolder extends RecyclerView.ViewHolder {
-        public FrameLayout frameLayout;
+        public final FrameLayout frameLayout;
 
         NestedRowViewHolder(View view) {
             super(view);
