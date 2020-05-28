@@ -258,6 +258,14 @@ public final class CarUiRecyclerView extends RecyclerView implements
     }
 
     @Override
+    public void requestLayout() {
+        super.requestLayout();
+        if (mScrollBar != null) {
+            mScrollBar.requestLayout();
+        }
+    }
+
+    @Override
     public void onHeightChanged(int height) {
         setPaddingRelative(getPaddingStart(), mInitialTopPadding + height,
                 getPaddingEnd(), getPaddingBottom());
