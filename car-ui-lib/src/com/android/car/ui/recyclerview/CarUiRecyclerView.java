@@ -52,6 +52,7 @@ import com.android.car.ui.toolbar.Toolbar;
 import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
 import java.lang.annotation.Retention;
+import java.util.Objects;
 
 /**
  * View that extends a {@link RecyclerView} and wraps itself into a {@link LinearLayout} which
@@ -66,23 +67,33 @@ public final class CarUiRecyclerView extends RecyclerView implements
     private final CarUxRestrictionsUtil.OnUxRestrictionsChangedListener mListener =
             new UxRestrictionChangedListener();
 
-    private CarUxRestrictionsUtil mCarUxRestrictionsUtil;
+    @NonNull
+    private final CarUxRestrictionsUtil mCarUxRestrictionsUtil;
     private boolean mScrollBarEnabled;
+    @Nullable
     private String mScrollBarClass;
     private int mScrollBarPaddingTop;
     private int mScrollBarPaddingBottom;
     private boolean mHasScrolledToTop = false;
 
+    @Nullable
     private ScrollBar mScrollBar;
     private int mInitialTopPadding;
 
+    @Nullable
     private GridOffsetItemDecoration mOffsetItemDecoration;
-    private GridDividerItemDecoration mDividerItemDecoration;
+    @NonNull
+    private GridDividerItemDecoration mDividerItemDecorationGrid;
+    @NonNull
+    private RecyclerView.ItemDecoration mDividerItemDecorationLinear;
     private int mNumOfColumns;
     private boolean mInstallingExtScrollBar = false;
     private int mContainerVisibility = View.VISIBLE;
+    @Nullable
     private Rect mContainerPadding;
+    @Nullable
     private Rect mContainerPaddingRelative;
+    @Nullable
     private LinearLayout mContainer;
 
     /**
@@ -146,12 +157,12 @@ public final class CarUiRecyclerView extends RecyclerView implements
     public CarUiRecyclerView(@NonNull Context context, @Nullable AttributeSet attrs,
             int defStyle) {
         super(context, attrs, defStyle);
+        mCarUxRestrictionsUtil = CarUxRestrictionsUtil.getInstance(context);
         init(context, attrs, defStyle);
     }
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr) {
         setClipToPadding(false);
-        mCarUxRestrictionsUtil = CarUxRestrictionsUtil.getInstance(context);
         TypedArray a = context.obtainStyledAttributes(
                 attrs,
                 R.styleable.CarUiRecyclerView,
@@ -171,6 +182,15 @@ public final class CarUiRecyclerView extends RecyclerView implements
         boolean enableDivider =
                 a.getBoolean(R.styleable.CarUiRecyclerView_enableDivider, /* defValue= */ false);
 
+        mDividerItemDecorationLinear = new LinearDividerItemDecoration(
+                context.getDrawable(R.drawable.car_ui_recyclerview_divider));
+
+        mDividerItemDecorationGrid =
+                new GridDividerItemDecoration(
+                        context.getDrawable(R.drawable.car_ui_divider),
+                        context.getDrawable(R.drawable.car_ui_divider),
+                        mNumOfColumns);
+
         if (carUiRecyclerViewLayout == CarUiRecyclerViewLayout.LINEAR) {
 
             int linearTopOffset =
@@ -179,10 +199,7 @@ public final class CarUiRecyclerView extends RecyclerView implements
                     a.getInteger(R.styleable.CarUiRecyclerView_bottomOffset, /* defValue= */ 0);
 
             if (enableDivider) {
-                RecyclerView.ItemDecoration dividerItemDecoration =
-                        new LinearDividerItemDecoration(
-                                context.getDrawable(R.drawable.car_ui_recyclerview_divider));
-                addItemDecoration(dividerItemDecoration);
+                addItemDecoration(mDividerItemDecorationLinear);
             }
             RecyclerView.ItemDecoration topOffsetItemDecoration =
                     new LinearOffsetItemDecoration(linearTopOffset, OffsetPosition.START);
@@ -200,12 +217,7 @@ public final class CarUiRecyclerView extends RecyclerView implements
                     a.getInteger(R.styleable.CarUiRecyclerView_bottomOffset, /* defValue= */ 0);
 
             if (enableDivider) {
-                mDividerItemDecoration =
-                        new GridDividerItemDecoration(
-                                context.getDrawable(R.drawable.car_ui_divider),
-                                context.getDrawable(R.drawable.car_ui_divider),
-                                mNumOfColumns);
-                addItemDecoration(mDividerItemDecoration);
+                addItemDecoration(mDividerItemDecorationGrid);
             }
 
             mOffsetItemDecoration =
@@ -237,7 +249,7 @@ public final class CarUiRecyclerView extends RecyclerView implements
                         // Scroll to the top after the first global layout, so that
                         // we can set padding for the insets and still have the
                         // recyclerview start at the top.
-                        new Handler(Looper.myLooper()).post(() ->
+                        new Handler(Objects.requireNonNull(Looper.myLooper())).post(() ->
                                 getLayoutManager().scrollToPosition(0));
                         mHasScrolledToTop = true;
                     }
@@ -279,8 +291,8 @@ public final class CarUiRecyclerView extends RecyclerView implements
         if (mOffsetItemDecoration != null) {
             mOffsetItemDecoration.setNumOfColumns(mNumOfColumns);
         }
-        if (mDividerItemDecoration != null) {
-            mDividerItemDecoration.setNumOfColumns(mNumOfColumns);
+        if (mDividerItemDecorationGrid != null) {
+            mDividerItemDecorationGrid.setNumOfColumns(mNumOfColumns);
         }
     }
 
@@ -341,8 +353,9 @@ public final class CarUiRecyclerView extends RecyclerView implements
         parent.removeViewInLayout(this);
 
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        ((CarUiRecyclerViewContainer) findViewByRefId(mContainer, R.id.car_ui_recycler_view))
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        ((CarUiRecyclerViewContainer) Objects.requireNonNull(
+                findViewByRefId(mContainer, R.id.car_ui_recycler_view)))
                 .addRecyclerView(this, params);
         parent.addView(mContainer, index);
 
@@ -411,6 +424,28 @@ public final class CarUiRecyclerView extends RecyclerView implements
                         paddingBottom + getPaddingBottom());
             }
         }
+    }
+
+    /**
+     * Sets divider item decoration for linear layout.
+     */
+    public void setLinearDividerItemDecoration(boolean enableDividers) {
+        if (enableDividers) {
+            addItemDecoration(mDividerItemDecorationLinear);
+            return;
+        }
+        removeItemDecoration(mDividerItemDecorationLinear);
+    }
+
+    /**
+     * Sets divider item decoration for grid layout.
+     */
+    public void setGridDividerItemDecoration(boolean enableDividers) {
+        if (enableDividers) {
+            addItemDecoration(mDividerItemDecorationGrid);
+            return;
+        }
+        removeItemDecoration(mDividerItemDecorationGrid);
     }
 
     private static RuntimeException andLog(String msg, Throwable t) {
