@@ -78,7 +78,7 @@ public class CarUiRadioButtonListItemAdapter extends CarUiListItemAdapter {
             CarUiListItem item = getItems().get(position);
             if (!(item instanceof CarUiRadioButtonListItem)) {
                 throw new IllegalStateException(
-                        "Expected item to be bound to viewholder to be instance of "
+                        "Expected item to be bound to viewHolder to be instance of "
                                 + "CarUiRadioButtonListItem.");
             }
 
