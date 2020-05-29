@@ -39,6 +39,7 @@ import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.Toolbar;
 import com.android.car.ui.toolbar.ToolbarController;
+import com.android.car.ui.utils.CarUiUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -89,12 +90,12 @@ public class MultiSelectListPreferenceFragment extends Fragment implements Inset
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        final CarUiRecyclerView recyclerView = view.requireViewById(R.id.list);
+        final CarUiRecyclerView recyclerView = CarUiUtils.requireViewByRefId(view, R.id.list);
         mToolbar = CarUi.getToolbar(requireActivity());
 
         // TODO(b/150230923) remove the code for the old toolbar height change when apps are ready
         if (mToolbar == null) {
-            Toolbar toolbarView = view.requireViewById(R.id.toolbar);
+            Toolbar toolbarView = CarUiUtils.requireViewByRefId(view, R.id.toolbar);
             mToolbar = toolbarView;
 
             recyclerView.setPadding(0, toolbarView.getHeight(), 0, 0);
@@ -206,7 +207,7 @@ public class MultiSelectListPreferenceFragment extends Fragment implements Inset
     @Override
     public void onCarUiInsetsChanged(Insets insets) {
         View view = requireView();
-        view.requireViewById(R.id.list)
+        CarUiUtils.requireViewByRefId(view, R.id.list)
                 .setPadding(0, insets.getTop(), 0, insets.getBottom());
         view.setPadding(insets.getLeft(), 0, insets.getRight(), 0);
     }

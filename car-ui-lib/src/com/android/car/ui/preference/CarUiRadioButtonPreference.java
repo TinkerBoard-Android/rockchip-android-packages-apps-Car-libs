@@ -24,6 +24,7 @@ import androidx.preference.PreferenceViewHolder;
 import androidx.preference.TwoStatePreference;
 
 import com.android.car.ui.R;
+import com.android.car.ui.utils.CarUiUtils;
 
 /** A preference which shows a radio button at the start of the preference. */
 public class CarUiRadioButtonPreference extends TwoStatePreference {
@@ -58,7 +59,8 @@ public class CarUiRadioButtonPreference extends TwoStatePreference {
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
 
-        RadioButton radioButton = (RadioButton) holder.findViewById(R.id.radio_button);
+        RadioButton radioButton = (RadioButton) CarUiUtils.findViewByRefId(holder.itemView,
+                R.id.radio_button);
         radioButton.setChecked(isChecked());
     }
 }
