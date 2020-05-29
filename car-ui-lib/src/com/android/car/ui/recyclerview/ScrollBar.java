@@ -38,5 +38,5 @@ public interface ScrollBar {
     void requestLayout();
 
     /** Sets the padding of the scrollbar, relative to the padding of the RecyclerView. */
-    void setPadding(int padddingStart, int paddingEnd);
+    void setPadding(int paddingStart, int paddingEnd);
 }
