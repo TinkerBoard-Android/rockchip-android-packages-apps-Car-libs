@@ -36,6 +36,8 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import androidx.preference.DialogPreference;
 
+import com.android.car.ui.utils.CarUiUtils;
+
 /**
  * Abstract base class which presents a dialog associated with a {@link
  * androidx.preference.DialogPreference}. Since the preference object may not be available during
@@ -193,7 +195,7 @@ public abstract class CarUiDialogFragment extends DialogFragment implements
      */
     @CallSuper
     protected void onBindDialogView(View view) {
-        View dialogMessageView = view.findViewById(android.R.id.message);
+        View dialogMessageView = CarUiUtils.findViewByRefId(view, android.R.id.message);
 
         if (dialogMessageView != null) {
             CharSequence message = mDialogMessage;
