@@ -259,6 +259,8 @@
   <public type="id" name="toolbar"/>
   <public type="id" name="touch_interceptor"/>
   <public type="integer" name="car_ui_default_max_string_length"/>
+  <public type="integer" name="car_ui_scrollbar_longpress_initial_delay"/>
+  <public type="integer" name="car_ui_scrollbar_longpress_repeat_interval"/>
   <public type="layout" name="car_ui_alert_dialog_edit_text"/>
   <public type="layout" name="car_ui_alert_dialog_list"/>
   <public type="layout" name="car_ui_alert_dialog_title_with_subtitle"/>
