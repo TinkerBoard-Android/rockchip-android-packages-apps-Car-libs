@@ -17,4 +17,6 @@
 <resources>
     <!-- Default max string length -->
     <integer name="car_ui_default_max_string_length">120</integer>
+    <integer name="car_ui_scrollbar_longpress_initial_delay">1000</integer>
+    <integer name="car_ui_scrollbar_longpress_repeat_interval">100</integer>
 </resources>

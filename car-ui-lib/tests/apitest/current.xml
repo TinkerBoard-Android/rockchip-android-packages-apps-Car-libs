@@ -187,6 +187,8 @@
   <public type="drawable" name="car_ui_toolbar_search_search_icon"/>
   <public type="id" name="search"/>
   <public type="integer" name="car_ui_default_max_string_length"/>
+  <public type="integer" name="car_ui_scrollbar_longpress_initial_delay"/>
+  <public type="integer" name="car_ui_scrollbar_longpress_repeat_interval"/>
   <public type="string" name="car_ui_alert_dialog_default_button"/>
   <public type="string" name="car_ui_dialog_preference_negative"/>
   <public type="string" name="car_ui_dialog_preference_positive"/>
