@@ -96,7 +96,7 @@ public class ConnectedDeviceManager {
             new ConcurrentHashMap<>();
 
     // recipientId -> (deviceId -> message bytes)
-    private final Map<UUID, Map<String, byte[]>> mRecipientMissedMessages =
+    private final Map<UUID, Map<String, List<byte[]>>> mRecipientMissedMessages =
             new ConcurrentHashMap<>();
 
     // Recipient ids that received multiple callback registrations indicate that the recipient id
@@ -432,10 +432,12 @@ public class ConnectedDeviceManager {
         newCallbacks.add(callback, executor);
         recipientCallbacks.put(recipientId, newCallbacks);
 
-        byte[] message = popMissedMessage(recipientId, device.getDeviceId());
-        if (message != null) {
-            newCallbacks.invoke(deviceCallback ->
-                    deviceCallback.onMessageReceived(device, message));
+        List<byte[]> messages = popMissedMessages(recipientId, device.getDeviceId());
+        if (messages != null) {
+            for (byte[] message : messages) {
+                newCallbacks.invoke(deviceCallback ->
+                        deviceCallback.onMessageReceived(device, message));
+            }
         }
     }
 
@@ -461,8 +463,8 @@ public class ConnectedDeviceManager {
         // Store last message in case recipient registers callbacks in the future.
         logd(TAG, "No recipient registered for device " + deviceId + " and recipient "
                 + recipientId + " combination. Saving message.");
-        mRecipientMissedMessages.putIfAbsent(recipientId, new HashMap<>());
-        mRecipientMissedMessages.get(recipientId).putIfAbsent(deviceId, message);
+        mRecipientMissedMessages.computeIfAbsent(recipientId, __ -> new HashMap<>())
+                .computeIfAbsent(deviceId, __ -> new ArrayList<>()).add(message);
     }
 
     /**
@@ -471,12 +473,12 @@ public class ConnectedDeviceManager {
      *
      * @param recipientId Recipient's id
      * @param deviceId Device id
-     * @return The last missed {@code byte[]} of the message, or {@code null} if no messages were
+     * @return The missed {@code byte[]} messages, or {@code null} if no messages were
      *         missed.
      */
     @Nullable
-    private byte[] popMissedMessage(@NonNull UUID recipientId, @NonNull String deviceId) {
-        Map<String, byte[]> missedMessages = mRecipientMissedMessages.get(recipientId);
+    private List<byte[]> popMissedMessages(@NonNull UUID recipientId, @NonNull String deviceId) {
+        Map<String, List<byte[]>> missedMessages = mRecipientMissedMessages.get(recipientId);
         if (missedMessages == null) {
             return null;
         }
