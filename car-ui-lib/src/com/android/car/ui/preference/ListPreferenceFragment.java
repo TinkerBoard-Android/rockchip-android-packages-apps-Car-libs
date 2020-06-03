@@ -36,6 +36,7 @@ import com.android.car.ui.recyclerview.CarUiListItem;
 import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.Toolbar;
+import com.android.car.ui.utils.CarUiUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,8 +73,8 @@ public class ListPreferenceFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        final CarUiRecyclerView carUiRecyclerView = view.requireViewById(R.id.list);
-        final Toolbar toolbar = view.requireViewById(R.id.toolbar);
+        final CarUiRecyclerView carUiRecyclerView = CarUiUtils.requireViewByRefId(view, R.id.list);
+        final Toolbar toolbar = CarUiUtils.requireViewByRefId(view, R.id.toolbar);
 
         carUiRecyclerView.setPadding(0, toolbar.getHeight(), 0, 0);
         toolbar.registerToolbarHeightChangeListener(newHeight -> {
