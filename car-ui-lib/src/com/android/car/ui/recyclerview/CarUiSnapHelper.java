@@ -68,6 +68,12 @@ public class CarUiSnapHelper extends LinearSnapHelper {
     public int[] calculateDistanceToFinalSnap(
             @NonNull LayoutManager layoutManager, @NonNull View targetView) {
         int[] out = new int[2];
+
+        // Don't snap when not in touch mode, i.e. when using rotary.
+        if (!mRecyclerView.isInTouchMode()) {
+            return out;
+        }
+
         if (layoutManager.canScrollHorizontally()) {
             out[0] = distanceToTopMargin(targetView, getHorizontalHelper(layoutManager));
         }
