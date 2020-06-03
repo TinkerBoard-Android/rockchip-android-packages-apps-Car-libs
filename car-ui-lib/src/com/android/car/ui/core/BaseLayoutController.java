@@ -35,6 +35,7 @@ import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.toolbar.ToolbarController;
 import com.android.car.ui.toolbar.ToolbarControllerImpl;
+import com.android.car.ui.utils.CarUiUtils;
 
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -71,7 +72,8 @@ class BaseLayoutController {
      *
      * <p>You can get a reference to it by calling {@link #getBaseLayout(Activity)}.
      */
-    /* package */ static void build(Activity activity) {
+    /* package */
+    static void build(Activity activity) {
         if (getThemeBoolean(activity, R.attr.carUiBaseLayout)) {
             sBaseLayoutMap.put(activity, new BaseLayoutController(activity));
         }
@@ -80,7 +82,8 @@ class BaseLayoutController {
     /**
      * Destroy the BaseLayoutController for the given {@link Activity}.
      */
-    /* package */ static void destroy(Activity activity) {
+    /* package */
+    static void destroy(Activity activity) {
         sBaseLayoutMap.remove(activity);
     }
 
@@ -121,21 +124,22 @@ class BaseLayoutController {
                 .inflate(baseLayoutRes, null, false);
 
         // Replace windowContentView with baseLayout
-        ViewGroup windowContentView = activity.getWindow().findViewById(android.R.id.content);
+        ViewGroup windowContentView = CarUiUtils.findViewByRefId(
+                activity.getWindow().getDecorView(), android.R.id.content);
         ViewGroup contentViewParent = (ViewGroup) windowContentView.getParent();
         int contentIndex = contentViewParent.indexOfChild(windowContentView);
         contentViewParent.removeView(windowContentView);
         contentViewParent.addView(baseLayout, contentIndex, windowContentView.getLayoutParams());
 
         // Add windowContentView to the baseLayout's content view
-        FrameLayout contentView = baseLayout.requireViewById(R.id.content);
+        FrameLayout contentView = CarUiUtils.requireViewByRefId(baseLayout, R.id.content);
         contentView.addView(windowContentView, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
 
         if (toolbarEnabled) {
             if (legacyToolbar) {
-                mToolbarController = baseLayout.requireViewById(R.id.car_ui_toolbar);
+                mToolbarController = CarUiUtils.requireViewByRefId(baseLayout, R.id.car_ui_toolbar);
             } else {
                 mToolbarController = new ToolbarControllerImpl(baseLayout);
             }
@@ -150,7 +154,7 @@ class BaseLayoutController {
      * {@link android.content.res.Resources.Theme}.
      */
     private static boolean getThemeBoolean(Activity activity, int attr) {
-        TypedArray a = activity.getTheme().obtainStyledAttributes(new int[] { attr });
+        TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]{attr});
 
         try {
             return a.getBoolean(0, false);
@@ -191,8 +195,8 @@ class BaseLayoutController {
         /**
          * Constructs an InsetsUpdater that calculates and dispatches insets to an {@link Activity}.
          *
-         * @param activity The activity that is using base layouts
-         * @param baseLayout The root view of the base layout
+         * @param activity    The activity that is using base layouts
+         * @param baseLayout  The root view of the base layout
          * @param contentView The android.R.id.content View
          */
         InsetsUpdater(Activity activity, View baseLayout, View contentView) {
@@ -252,7 +256,8 @@ class BaseLayoutController {
                 return;
             }
 
-            View content = mActivity.requireViewById(android.R.id.content);
+            View content = CarUiUtils.requireViewByRefId(mActivity.getWindow().getDecorView(),
+                    android.R.id.content);
 
             // Calculate how much each inset view overlays the content view
             int top = 0;
@@ -305,8 +310,9 @@ class BaseLayoutController {
             }
 
             if (!handled) {
-                mActivity.requireViewById(android.R.id.content).setPadding(
-                        insets.getLeft(), insets.getTop(), insets.getRight(), insets.getBottom());
+                CarUiUtils.requireViewByRefId(mActivity.getWindow().getDecorView(),
+                        android.R.id.content).setPadding(insets.getLeft(), insets.getTop(),
+                        insets.getRight(), insets.getBottom());
             }
         }
 
