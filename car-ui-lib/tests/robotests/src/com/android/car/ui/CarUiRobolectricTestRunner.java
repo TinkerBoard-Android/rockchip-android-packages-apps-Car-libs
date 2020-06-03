@@ -50,9 +50,9 @@ public class CarUiRobolectricTestRunner extends RobolectricTestRunner {
 
     static {
         AAR_VERSIONS = new HashMap<>();
-        AAR_VERSIONS.put("appcompat", "1.1.0-alpha01");
+        AAR_VERSIONS.put("appcompat", "1.2.0-alpha01");
         AAR_VERSIONS.put("constraintlayout", "1.1.2");
-        AAR_VERSIONS.put("preference", "1.1.0-alpha02");
+        AAR_VERSIONS.put("preference", "1.2.0-alpha01");
     }
 
     public CarUiRobolectricTestRunner(Class<?> testClass) throws InitializationError {

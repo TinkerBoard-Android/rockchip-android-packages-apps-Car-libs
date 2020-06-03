@@ -20,10 +20,10 @@ buildscript {
     repositories {
         google()
         jcenter()
-
     }
+
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.0'
+        classpath 'com.android.tools.build:gradle:3.5.3'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -72,7 +72,6 @@ android {
             includeAndroidResources = true
         }
     }
-
 }
 
 dependencies {
@@ -83,5 +82,6 @@ dependencies {
     testImplementation "com.google.truth:truth:0.29"
     testImplementation "org.testng:testng:6.9.9"
 
+    // This is the gradle equivalent of linking to android.car in our Android.mk
     implementation files('../../../../../../../out/target/common/obj/JAVA_LIBRARIES/android.car_intermediates/classes.jar')
 }

@@ -30,14 +30,42 @@ public class CarUiContentListItem extends CarUiListItem {
     /**
      * Callback to be invoked when the checked state of a list item changed.
      */
-    public interface OnCheckedChangedListener {
+    public interface OnCheckedChangeListener {
         /**
          * Called when the checked state of a list item has changed.
          *
-         * @param item The item whose checked state changed.
+         * @param item      whose checked state changed.
          * @param isChecked new checked state of list item.
          */
-        void onCheckedChanged(CarUiContentListItem item, boolean isChecked);
+        void onCheckedChanged(@NonNull CarUiContentListItem item, boolean isChecked);
+    }
+
+    /**
+     * Callback to be invoked when an item is clicked.
+     */
+    public interface OnClickListener {
+        /**
+         * Called when the item has been clicked.
+         *
+         * @param item whose checked state changed.
+         */
+        void onClick(@NonNull CarUiContentListItem item);
+    }
+
+    public enum IconType {
+        /**
+         * For an icon type of CONTENT, the primary icon is a larger than {@code STANDARD}.
+         */
+        CONTENT,
+        /**
+         * For an icon type of STANDARD, the primary icon is the standard size.
+         */
+        STANDARD,
+        /**
+         * For an icon type of AVATAR, the primary icon is masked to provide an icon with a modified
+         * shape.
+         */
+        AVATAR
     }
 
     /**
@@ -58,8 +86,8 @@ public class CarUiContentListItem extends CarUiListItem {
          */
         CHECK_BOX,
         /**
-         * For an action value of CHECK_BOX, a radio button is shown for the action element of the
-         * list item.
+         * For an action value of RADIO_BUTTON, a radio button is shown for the action element of
+         * the list item.
          */
         RADIO_BUTTON,
         /**
@@ -74,13 +102,19 @@ public class CarUiContentListItem extends CarUiListItem {
     private CharSequence mTitle;
     private CharSequence mBody;
     private Action mAction;
+    private IconType mPrimaryIconType;
     private boolean mIsActionDividerVisible;
     private boolean mIsChecked;
-    private OnCheckedChangedListener mOnCheckedChangedListener;
+    private boolean mIsEnabled = true;
+    private boolean mIsActivated;
+    private OnClickListener mOnClickListener;
+    private OnCheckedChangeListener mOnCheckedChangeListener;
     private View.OnClickListener mSupplementalIconOnClickListener;
 
-    public CarUiContentListItem() {
-        mAction = Action.NONE;
+
+    public CarUiContentListItem(Action action) {
+        mAction = action;
+        mPrimaryIconType = IconType.STANDARD;
     }
 
     /**
@@ -135,6 +169,54 @@ public class CarUiContentListItem extends CarUiListItem {
     }
 
     /**
+     * Returns the primary icon type for the item.
+     */
+    public IconType getPrimaryIconType() {
+        return mPrimaryIconType;
+    }
+
+    /**
+     * Sets the primary icon type for the item.
+     *
+     * @param icon the icon type for the item.
+     */
+    public void setPrimaryIconType(IconType icon) {
+        mPrimaryIconType = icon;
+    }
+
+    /**
+     * Returns {@code true} if the item is activated.
+     */
+    public boolean isActivated() {
+        return mIsActivated;
+    }
+
+    /**
+     * Sets the activated state of the item.
+     *
+     * @param activated the activated state for the item.
+     */
+    public void setActivated(boolean activated) {
+        mIsActivated = activated;
+    }
+
+    /**
+     * Returns {@code true} if the item is enabled.
+     */
+    public boolean isEnabled() {
+        return mIsEnabled;
+    }
+
+    /**
+     * Sets the enabled state of the item.
+     *
+     * @param enabled the enabled state for the item.
+     */
+    public void setEnabled(boolean enabled) {
+        mIsEnabled = enabled;
+    }
+
+    /**
      * Returns {@code true} if the item is checked. Will always return {@code false} when the action
      * type for the item is {@code Action.NONE}.
      */
@@ -148,10 +230,18 @@ public class CarUiContentListItem extends CarUiListItem {
      * @param checked the checked state for the item.
      */
     public void setChecked(boolean checked) {
+        if (checked == mIsChecked) {
+            return;
+        }
+
         // Checked state can only be set when action type is checkbox, radio button or switch.
         if (mAction == Action.CHECK_BOX || mAction == Action.SWITCH
                 || mAction == Action.RADIO_BUTTON) {
             mIsChecked = checked;
+
+            if (mOnCheckedChangeListener != null) {
+                mOnCheckedChangeListener.onCheckedChanged(this, mIsChecked);
+            }
         }
     }
 
@@ -176,22 +266,6 @@ public class CarUiContentListItem extends CarUiListItem {
      */
     public Action getAction() {
         return mAction;
-    }
-
-    /**
-     * Sets the action type for the item.
-     *
-     * @param action the action type for the item.
-     */
-    public void setAction(Action action) {
-        mAction = action;
-
-        // Cannot have checked state be true when there action type is not checkbox, radio button or
-        // switch.
-        if (mAction != Action.CHECK_BOX && mAction != Action.SWITCH
-                && mAction != Action.RADIO_BUTTON) {
-            mIsChecked = false;
-        }
     }
 
     /**
@@ -223,17 +297,36 @@ public class CarUiContentListItem extends CarUiListItem {
      */
     public void setSupplementalIcon(@Nullable Drawable icon,
             @Nullable View.OnClickListener listener) {
-        mAction = Action.ICON;
-
-        // Cannot have checked state when action type is {@code Action.ICON}.
-        mIsChecked = false;
+        if (mAction != Action.ICON) {
+            throw new IllegalStateException(
+                    "Cannot set supplemental icon on list item that does not have an action of "
+                            + "type ICON");
+        }
 
         mSupplementalIcon = icon;
         mSupplementalIconOnClickListener = listener;
     }
 
-    View.OnClickListener getSupplementalIconOnClickListener() {
+    @Nullable
+    public View.OnClickListener getSupplementalIconOnClickListener() {
         return mSupplementalIconOnClickListener;
+    }
+
+    /**
+     * Registers a callback to be invoked when the item is clicked.
+     *
+     * @param listener callback to be invoked when item is clicked.
+     */
+    public void setOnItemClickedListener(@Nullable OnClickListener listener) {
+        mOnClickListener = listener;
+    }
+
+    /**
+     * Returns the {@link OnClickListener} registered for this item.
+     */
+    @Nullable
+    public OnClickListener getOnClickListener() {
+        return mOnClickListener;
     }
 
     /**
@@ -244,13 +337,16 @@ public class CarUiContentListItem extends CarUiListItem {
      *
      * @param listener callback to be invoked when the checked state shown in the UI changes.
      */
-    public void setOnCheckedChangedListener(
-            @NonNull OnCheckedChangedListener listener) {
-        mOnCheckedChangedListener = listener;
+    public void setOnCheckedChangeListener(
+            @Nullable OnCheckedChangeListener listener) {
+        mOnCheckedChangeListener = listener;
     }
 
+    /**
+     * Returns the {@link OnCheckedChangeListener} registered for this item.
+     */
     @Nullable
-    OnCheckedChangedListener getOnCheckedChangedListener() {
-        return mOnCheckedChangedListener;
+    public OnCheckedChangeListener getOnCheckedChangeListener() {
+        return mOnCheckedChangeListener;
     }
 }

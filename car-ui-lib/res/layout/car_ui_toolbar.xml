@@ -19,6 +19,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="@dimen/car_ui_toolbar_first_row_height"
+    android:id="@+id/car_ui_toolbar_background"
     style="@style/Widget.CarUi.Toolbar.Container">
 
     <!-- When the user finishes searching, we call clearFocus() on the editText in the search bar.

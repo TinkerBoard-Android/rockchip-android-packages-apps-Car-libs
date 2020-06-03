@@ -209,6 +209,9 @@
   <!-- Text for add tab with custom text button [CHAR_LIMIT=40]-->
   <string name="toolbar_add_tab_with_custom_text">Add tab with custom text</string>
 
+  <!-- Text for showing tabs in subpages [CHAR_LIMIT=50]-->
+  <string name="toolbar_show_tabs_in_subpage">Toggle showing tabs in subpages</string>
+
   <!-- Text for toggle search icon button [CHAR_LIMIT=30]-->
   <string name="toolbar_toggle_search_icon">Toggle search icon</string>
 
@@ -244,6 +247,9 @@
 
   <!-- Button that shows a dialog with a subtitle and icon [CHAR_LIMIT=50]-->
   <string name="dialog_show_subtitle_and_icon">Show Dialog with title, subtitle, and icon</string>
+
+  <!-- Text to show Dialog with single choice items-->
+  <string name="dialog_show_single_choice">Show with single choice items</string>
 
   <!--This section is for widget attributes -->
   <eat-comment/>

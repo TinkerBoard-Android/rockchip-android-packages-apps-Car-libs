@@ -26,6 +26,8 @@
 
     <style name="Widget.CarUi.Toolbar"/>
 
+    <style name="Widget.CarUi.SeekbarPreference"/>
+
     <style name="Widget.CarUi.Toolbar.Container"/>
 
     <style name="Widget.CarUi.Toolbar.NavIconContainer"/>
@@ -49,6 +51,7 @@
     <style name="Widget.CarUi.Toolbar.Title">
         <item name="android:layout_marginStart">@dimen/car_ui_toolbar_title_margin_start</item>
         <item name="android:textAppearance">@style/TextAppearance.CarUi.Widget.Toolbar.Title</item>
+        <item name="android:textDirection">locale</item>
     </style>
 
     <style name="Widget.CarUi.Toolbar.TextButton" parent="Widget.CarUi.Button.Borderless.Colored">
@@ -58,6 +61,13 @@
 
     <style name="Widget.CarUi.Toolbar.TextButton.WithIcon">
         <item name="android:textColor">@color/car_ui_toolbar_menu_item_icon_color</item>
+    </style>
+
+    <!-- Style applied to the seekbar widget within the seekbar preference -->
+    <style name="Widget.CarUi.SeekbarPreference.Seekbar">
+        <item name="android:background">@null</item>
+        <item name="android:clickable">false</item>
+        <item name="android:focusable">false</item>
     </style>
 
     <!-- Style applied to the decoration view between toolbar rows -->
@@ -72,9 +82,17 @@
         <item name="android:background">@android:color/transparent</item>
     </style>
 
-    <style name="Widget.CarUi.Toolbar.MenuItem.Container" parent="@style/Widget.CarUi.Toolbar">
+    <style name="Widget.CarUi.Toolbar.MenuItem"/>
+
+    <style name="Widget.CarUi.Toolbar.MenuItem.Container">
         <item name="android:divider">@drawable/car_ui_toolbar_menu_item_divider</item>
         <item name="android:showDividers">beginning|middle|end</item>
+    </style>
+
+    <style name="Widget.CarUi.Toolbar.MenuItem.IndividualContainer">
+        <item name="android:minHeight">@dimen/car_ui_touch_target_height</item>
+        <item name="android:minWidth">@dimen/car_ui_touch_target_width</item>
+        <item name="android:layout_gravity">center_vertical</item>
     </style>
 
     <!-- Style applied to the edit box inside the toolbar search area -->
@@ -113,10 +131,6 @@
         <item name="android:scrollbars">vertical</item>
     </style>
 
-    <style name="Widget.CarUi.CarUiRecyclerView.NestedRecyclerView">
-        <item name="android:scrollbars">none</item>
-    </style>
-
     <style name="Widget.CarUi.AlertDialog"/>
 
     <style name="Widget.CarUi.AlertDialog.HeaderContainer">
@@ -140,6 +154,8 @@
     <!-- Preference Styles -->
 
     <style name="Preference.CarUi">
+        <item name="allowDividerBelow">false</item>
+        <item name="allowDividerAbove">false</item>
         <item name="android:layout">@layout/car_ui_preference</item>
     </style>
 
@@ -192,6 +208,12 @@
 
     <style name="PreferenceFragment.CarUi">
         <item name="android:divider">?android:attr/listDivider</item>
+        <!-- TODO(b/150230923) change this to car_ui_preference_fragment -->
+        <item name="android:layout">@layout/car_ui_preference_fragment_with_toolbar</item>
+    </style>
+
+    <!-- TODO(b/150230923) remove this when other apps are ready -->
+    <style name="PreferenceFragment.CarUi.WithToolbar">
         <item name="android:layout">@layout/car_ui_preference_fragment</item>
     </style>
 
@@ -208,6 +230,18 @@
 
     <style name="TextAppearance.CarUi" parent="android:TextAppearance.DeviceDefault">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="TextAppearance.CarUi.Body1">
+        <item name="android:textSize">@dimen/car_ui_body1_size</item>
+    </style>
+
+    <style name="TextAppearance.CarUi.Body2">
+        <item name="android:textSize">@dimen/car_ui_body2_size</item>
+    </style>
+
+    <style name="TextAppearance.CarUi.Body3">
+        <item name="android:textSize">@dimen/car_ui_body3_size</item>
     </style>
 
     <style name="TextAppearance.CarUi.PreferenceCategoryTitle">

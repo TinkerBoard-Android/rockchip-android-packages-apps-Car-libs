@@ -19,13 +19,19 @@ package com.android.car.ui.paintbooth.caruirecyclerview;
 import android.app.Activity;
 import android.os.Bundle;
 
+import com.android.car.ui.baselayout.Insets;
+import com.android.car.ui.baselayout.InsetsChangedListener;
+import com.android.car.ui.core.CarUi;
 import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
+import com.android.car.ui.toolbar.Toolbar;
+import com.android.car.ui.toolbar.ToolbarController;
 
 import java.util.ArrayList;
 
 /** Activity that shows GridCarUiRecyclerView example with dummy data. */
-public class GridCarUiRecyclerViewActivity extends Activity {
+public class GridCarUiRecyclerViewActivity extends Activity implements
+        InsetsChangedListener {
     private final ArrayList<String> mData = new ArrayList<>();
     private final int mDataToGenerate = 200;
 
@@ -33,7 +39,12 @@ public class GridCarUiRecyclerViewActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.grid_car_ui_recycler_view_activity);
-        CarUiRecyclerView recyclerView = findViewById(R.id.grid_list);
+
+        ToolbarController toolbar = CarUi.requireToolbar(this);
+        toolbar.setTitle(getTitle());
+        toolbar.setState(Toolbar.State.SUBPAGE);
+
+        CarUiRecyclerView recyclerView = findViewById(R.id.list);
 
         RecyclerViewAdapter adapter = new RecyclerViewAdapter(generateDummyData());
         recyclerView.setAdapter(adapter);
@@ -44,5 +55,13 @@ public class GridCarUiRecyclerViewActivity extends Activity {
             mData.add("data" + i);
         }
         return mData;
+    }
+
+    @Override
+    public void onCarUiInsetsChanged(Insets insets) {
+        requireViewById(R.id.list)
+                .setPadding(0, insets.getTop(), 0, insets.getBottom());
+        requireViewById(android.R.id.content)
+                .setPadding(insets.getLeft(), 0, insets.getRight(), 0);
     }
 }

@@ -15,6 +15,8 @@
  */
 package com.android.car.ui.toolbar;
 
+import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
+
 import android.app.Activity;
 import android.car.drivingstate.CarUxRestrictions;
 import android.content.Context;
@@ -32,6 +34,7 @@ import android.widget.TextView;
 
 import androidx.annotation.XmlRes;
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
+import androidx.core.util.Consumer;
 
 import com.android.car.ui.R;
 import com.android.car.ui.utils.CarUiUtils;
@@ -45,7 +48,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 class MenuItemRenderer implements MenuItem.Listener {
 
@@ -90,22 +92,22 @@ class MenuItemRenderer implements MenuItem.Listener {
         updateView();
     }
 
-    CompletableFuture<View> createView() {
-        CompletableFuture<View> future = new CompletableFuture<>();
+    void createView(Consumer<View> callback) {
         AsyncLayoutInflater inflater = new AsyncLayoutInflater(mParentView.getContext());
         inflater.inflate(R.layout.car_ui_toolbar_menu_item, mParentView, (View view, int resid,
                 ViewGroup parent) -> {
             mView = view;
-            mIconContainer = mView.requireViewById(R.id.car_ui_toolbar_menu_item_icon_container);
-            mIconView = mView.requireViewById(R.id.car_ui_toolbar_menu_item_icon);
-            mSwitch = mView.requireViewById(R.id.car_ui_toolbar_menu_item_switch);
-            mTextView = mView.requireViewById(R.id.car_ui_toolbar_menu_item_text);
-            mTextWithIconView = mView.requireViewById(R.id.car_ui_toolbar_menu_item_text_with_icon);
-            updateView();
-            future.complete(view);
-        });
 
-        return future;
+            mIconContainer =
+                    requireViewByRefId(mView, R.id.car_ui_toolbar_menu_item_icon_container);
+            mIconView = requireViewByRefId(mView, R.id.car_ui_toolbar_menu_item_icon);
+            mSwitch = requireViewByRefId(mView, R.id.car_ui_toolbar_menu_item_switch);
+            mTextView = requireViewByRefId(mView, R.id.car_ui_toolbar_menu_item_text);
+            mTextWithIconView =
+                    requireViewByRefId(mView, R.id.car_ui_toolbar_menu_item_text_with_icon);
+            updateView();
+            callback.accept(mView);
+        });
     }
 
     private void updateView() {

@@ -27,7 +27,15 @@ import com.android.car.apps.common.CommonFlags;
 import com.android.car.apps.common.R;
 
 /**
- * Binds images to an image view.
+ * Binds images to an image view.<p/>
+ * While making a new image request (including passing a null {@link ImageBinder.ImageRef} in
+ * {@link #setImage}) will cancel the current image request (if any), RecyclerView doesn't
+ * always reuse all its views, causing multiple requests to not be canceled. On a slow network,
+ * those requests then take time to execute and can make it look like the application has
+ * stopped loading images if the user keeps browsing. To prevent that, override:
+ * {@link RecyclerView.Adapter#onViewDetachedFromWindow} and call {@link #maybeCancelLoading}
+ * {@link RecyclerView.Adapter#onViewAttachedToWindow} and call {@link #maybeRestartLoading}.
+ *
  * @param <T> see {@link ImageRef}.
  */
 public class ImageViewBinder<T extends ImageBinder.ImageRef> extends ImageBinder<T> {
@@ -35,6 +43,9 @@ public class ImageViewBinder<T extends ImageBinder.ImageRef> extends ImageBinder
     @Nullable
     private final ImageView mImageView;
     private final boolean mFlagBitmaps;
+
+    private T mSavedRef;
+    private boolean mCancelled;
 
     /** See {@link ImageViewBinder} and {@link ImageBinder}. */
     public ImageViewBinder(Size maxImageSize, @Nullable ImageView imageView) {
@@ -71,10 +82,36 @@ public class ImageViewBinder<T extends ImageBinder.ImageRef> extends ImageBinder
         }
     }
 
+    /**
+     * Loads a new {@link ImageRef}. The previous request (if any) will be canceled.
+     */
     @Override
     public void setImage(Context context, @Nullable T newRef) {
+        mSavedRef = newRef;
+        mCancelled = false;
         if (mImageView != null) {
             super.setImage(context, newRef);
+        }
+    }
+
+    /**
+     * Restarts the image loading request if {@link #setImage} was called with a valid reference
+     * that could not be loaded before {@link #maybeCancelLoading} was called.
+     */
+    public void maybeRestartLoading(Context context) {
+        if (mCancelled) {
+            setImage(context, mSavedRef);
+        }
+    }
+
+    /**
+     * Cancels the current loading request (if any) so it doesn't take cycles when the imageView
+     * doesn't need the image (like when the view was moved off screen).
+     */
+    public void maybeCancelLoading(Context context) {
+        mCancelled = true;
+        if (mImageView != null) {
+            super.setImage(context, null); // Call super to keep mSavedRef.
         }
     }
 

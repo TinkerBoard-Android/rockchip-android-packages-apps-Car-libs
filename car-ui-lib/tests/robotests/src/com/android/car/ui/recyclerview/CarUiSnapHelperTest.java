@@ -19,26 +19,23 @@ package com.android.car.ui.recyclerview;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.graphics.PointF;
 import android.view.View;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.android.car.ui.CarUiRobolectricTestRunner;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
-@RunWith(CarUiRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class CarUiSnapHelperTest {
 
     private Context mContext;
@@ -64,89 +61,6 @@ public class CarUiSnapHelperTest {
 
         when(mRecyclerView.getContext()).thenReturn(mContext);
         mCarUiSnapHelper.attachToRecyclerView(mRecyclerView);
-    }
-
-    @Test
-    public void smoothScrollBy_invalidSnapPosition_shouldCallRecylerViewSmoothScrollBy() {
-        when(mRecyclerView.getLayoutManager()).thenReturn(mLayoutManager);
-
-        mCarUiSnapHelper.smoothScrollBy(10);
-
-        verify(mRecyclerView).smoothScrollBy(0, 10);
-    }
-
-    @Test
-    public void smoothScrollBy_invalidSnapPositionNoItem_shouldCallRecylerViewSmoothScrollBy() {
-        when(mRecyclerView.getLayoutManager()).thenReturn(mLayoutManager);
-        when(mLayoutManager.getItemCount()).thenReturn(0);
-
-        mCarUiSnapHelper.smoothScrollBy(10);
-
-        verify(mRecyclerView).smoothScrollBy(0, 10);
-    }
-
-    @Test
-    public void smoothScrollBy_invalidSnapPositionNoView_shouldCallRecylerViewSmoothScrollBy() {
-        when(mRecyclerView.getLayoutManager()).thenReturn(mLayoutManager);
-        when(mLayoutManager.getItemCount()).thenReturn(10);
-        when(mLayoutManager.canScrollVertically()).thenReturn(false);
-        when(mLayoutManager.canScrollHorizontally()).thenReturn(false);
-
-        mCarUiSnapHelper.smoothScrollBy(10);
-
-        verify(mRecyclerView).smoothScrollBy(0, 10);
-    }
-
-    @Test
-    public void smoothScrollBy_invalidSnapPositionNoVectore_shouldCallRecylerViewSmoothScrollBy() {
-        when(mRecyclerView.getLayoutManager()).thenReturn(mLayoutManager);
-        when(mLayoutManager.getItemCount()).thenReturn(10);
-        when(mLayoutManager.canScrollVertically()).thenReturn(true);
-        when(mLayoutManager.getChildCount()).thenReturn(1);
-        when(mChild.getLayoutParams()).thenReturn(mLayoutParams);
-        when(mLayoutManager.getChildAt(0)).thenReturn(mChild);
-
-        mCarUiSnapHelper.smoothScrollBy(10);
-
-        verify(mRecyclerView).smoothScrollBy(0, 10);
-    }
-
-    @Test
-    public void smoothScrollBy_invalidSnapPositionNoDelta_shouldCallRecylerViewSmoothScrollBy() {
-        when(mRecyclerView.getLayoutManager()).thenReturn(mLayoutManager);
-        when(mLayoutManager.getItemCount()).thenReturn(1);
-        when(mLayoutManager.canScrollVertically()).thenReturn(true);
-        when(mLayoutManager.getChildCount()).thenReturn(1);
-        // no delta
-        when(mLayoutManager.getDecoratedBottom(any())).thenReturn(0);
-        when(mChild.getLayoutParams()).thenReturn(mLayoutParams);
-        when(mLayoutManager.getChildAt(0)).thenReturn(mChild);
-
-        PointF vectorForEnd = new PointF(100, 100);
-        when(mLayoutManager.computeScrollVectorForPosition(0)).thenReturn(vectorForEnd);
-
-        mCarUiSnapHelper.smoothScrollBy(10);
-
-        verify(mRecyclerView).smoothScrollBy(0, 10);
-    }
-
-    @Test
-    public void smoothScrollBy_validSnapPosition_shouldCallRecylerViewSmoothScrollBy() {
-        when(mRecyclerView.getLayoutManager()).thenReturn(mLayoutManager);
-        when(mLayoutManager.getItemCount()).thenReturn(1);
-        when(mLayoutManager.canScrollVertically()).thenReturn(true);
-        when(mLayoutManager.getChildCount()).thenReturn(1);
-        // some delta
-        when(mLayoutManager.getDecoratedBottom(any())).thenReturn(10);
-        when(mChild.getLayoutParams()).thenReturn(mLayoutParams);
-        when(mLayoutManager.getChildAt(0)).thenReturn(mChild);
-
-        PointF vectorForEnd = new PointF(100, 100);
-        when(mLayoutManager.computeScrollVectorForPosition(0)).thenReturn(vectorForEnd);
-
-        mCarUiSnapHelper.smoothScrollBy(10);
-
-        verify(mLayoutManager).startSmoothScroll(any(RecyclerView.SmoothScroller.class));
     }
 
     @Test

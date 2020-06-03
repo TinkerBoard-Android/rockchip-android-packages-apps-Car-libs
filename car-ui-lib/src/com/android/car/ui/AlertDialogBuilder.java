@@ -34,7 +34,13 @@ import android.widget.TextView;
 import androidx.annotation.ArrayRes;
 import androidx.annotation.AttrRes;
 import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.android.car.ui.recyclerview.CarUiListItemAdapter;
+import com.android.car.ui.recyclerview.CarUiRadioButtonListItemAdapter;
 
 /**
  * Wrapper for AlertDialog.Builder
@@ -324,18 +330,34 @@ public class AlertDialogBuilder {
     }
 
     /**
-     * Set a list of items, which are supplied by the given {@link ListAdapter}, to be
-     * displayed in the dialog as the content, you will be notified of the
-     * selected item via the supplied listener.
+     * This was not supposed to be in the Chassis API because it allows custom views.
      *
-     * @param adapter The {@link ListAdapter} to supply the list of items
-     * @param listener The listener that will be called when an item is clicked.
-     * @return This Builder object to allow for chaining of calls to set methods
+     * @deprecated Use {@link #setAdapter(CarUiListItemAdapter)} instead.
      */
+    @Deprecated
     public AlertDialogBuilder setAdapter(final ListAdapter adapter,
             final DialogInterface.OnClickListener listener) {
         mBuilder.setAdapter(adapter, listener);
         return this;
+    }
+
+    /**
+     * Display all the {@link com.android.car.ui.recyclerview.CarUiListItem CarUiListItems} in a
+     * {@link CarUiListItemAdapter}. You should set click listeners on the CarUiListItems as
+     * opposed to a callback in this function.
+     */
+    public AlertDialogBuilder setAdapter(final CarUiListItemAdapter adapter) {
+        setCustomList(adapter);
+        return this;
+    }
+
+    private void setCustomList(@NonNull CarUiListItemAdapter adapter) {
+        View customList = LayoutInflater.from(mContext).inflate(
+                R.layout.car_ui_alert_dialog_list, null);
+        RecyclerView mList = customList.requireViewById(R.id.list);
+        mList.setLayoutManager(new LinearLayoutManager(mContext));
+        mList.setAdapter(adapter);
+        mBuilder.setView(customList);
     }
 
     /**
@@ -488,21 +510,51 @@ public class AlertDialogBuilder {
     }
 
     /**
+     * This was not supposed to be in the Chassis API because it allows custom views.
+     *
+     * @deprecated Use {@link #setSingleChoiceItems(CarUiRadioButtonListItemAdapter,
+     * DialogInterface.OnClickListener)} instead.
+     */
+    @Deprecated
+    public AlertDialogBuilder setSingleChoiceItems(ListAdapter adapter, int checkedItem,
+            final DialogInterface.OnClickListener listener) {
+        mBuilder.setSingleChoiceItems(adapter, checkedItem, listener);
+        return this;
+    }
+
+    /**
      * Set a list of items to be displayed in the dialog as the content, you will be notified of
      * the selected item via the supplied listener. The list will have a check mark displayed to
      * the right of the text for the checked item. Clicking on an item in the list will not
      * dismiss the dialog. Clicking on a button will dismiss the dialog.
      *
-     * @param adapter The {@link ListAdapter} to supply the list of items
-     * @param checkedItem specifies which item is checked. If -1 no items are checked.
+     * @param adapter The {@link CarUiRadioButtonListItemAdapter} to supply the list of items
      * @param listener notified when an item on the list is clicked. The dialog will not be
      * dismissed when an item is clicked. It will only be dismissed if clicked on a
      * button, if no buttons are supplied it's up to the user to dismiss the dialog.
      * @return This Builder object to allow for chaining of calls to set methods
+     *
+     * @deprecated Use {@link #setSingleChoiceItems(CarUiRadioButtonListItemAdapter)} instead.
      */
-    public AlertDialogBuilder setSingleChoiceItems(ListAdapter adapter, int checkedItem,
+    @Deprecated
+    public AlertDialogBuilder setSingleChoiceItems(CarUiRadioButtonListItemAdapter adapter,
             final DialogInterface.OnClickListener listener) {
-        mBuilder.setSingleChoiceItems(adapter, checkedItem, listener);
+        setCustomList(adapter);
+        return this;
+    }
+
+    /**
+     * Set a list of items to be displayed in the dialog as the content,The list will have a check
+     * mark displayed to the right of the text for the checked item. Clicking on an item in the list
+     * will not dismiss the dialog. Clicking on a button will dismiss the dialog.
+     *
+     * @param adapter The {@link CarUiRadioButtonListItemAdapter} to supply the list of items
+     * dismissed when an item is clicked. It will only be dismissed if clicked on a
+     * button, if no buttons are supplied it's up to the user to dismiss the dialog.
+     * @return This Builder object to allow for chaining of calls to set methods
+     */
+    public AlertDialogBuilder setSingleChoiceItems(CarUiRadioButtonListItemAdapter adapter) {
+        setCustomList(adapter);
         return this;
     }
 

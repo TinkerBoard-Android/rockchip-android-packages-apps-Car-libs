@@ -164,6 +164,13 @@ public class ViewUtils {
         }
     }
 
+    /** Sets the activated state of the (optional) view. */
+    public static void setActivated(@Nullable View view, boolean activated) {
+        if (view != null) {
+            view.setActivated(activated);
+        }
+    }
+
     /** Sets onClickListener for the (optional) view. */
     public static void setOnClickListener(@Nullable View view, @Nullable View.OnClickListener l) {
         if (view != null) {
