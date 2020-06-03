@@ -83,8 +83,8 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
         }
 
         // TODO(b/150230923) remove the code for the old toolbar height change when apps are ready
-        final RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
-        final Toolbar toolbar = view.findViewById(R.id.toolbar);
+        final RecyclerView recyclerView = CarUiUtils.findViewByRefId(view, R.id.recycler_view);
+        final Toolbar toolbar = CarUiUtils.findViewByRefId(view, R.id.toolbar);
         if (recyclerView == null || toolbar == null) {
             return;
         }
@@ -118,7 +118,7 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
     @Override
     public void onCarUiInsetsChanged(Insets insets) {
         View view = requireView();
-        view.requireViewById(R.id.recycler_view)
+        CarUiUtils.requireViewByRefId(view, R.id.recycler_view)
                 .setPadding(0, insets.getTop(), 0, insets.getBottom());
         view.setPadding(insets.getLeft(), 0, insets.getRight(), 0);
     }

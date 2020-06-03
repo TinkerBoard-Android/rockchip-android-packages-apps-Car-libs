@@ -28,6 +28,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.preference.EditTextPreference;
 
+import com.android.car.ui.utils.CarUiUtils;
+
 /**
  * Presents a dialog with an {@link EditText} associated with an {@link EditTextPreference}.
  *
@@ -78,7 +80,7 @@ public class EditTextPreferenceDialogFragment extends PreferenceDialogFragment i
     protected void onBindDialogView(View view) {
         super.onBindDialogView(view);
 
-        mEditText = view.findViewById(android.R.id.edit);
+        mEditText = CarUiUtils.findViewByRefId(view, android.R.id.edit);
 
         if (mEditText == null) {
             throw new IllegalStateException(
