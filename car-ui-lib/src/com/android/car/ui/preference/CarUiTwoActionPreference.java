@@ -24,6 +24,7 @@ import android.view.View;
 import androidx.preference.PreferenceViewHolder;
 
 import com.android.car.ui.R;
+import com.android.car.ui.utils.CarUiUtils;
 
 /**
  * A preference which can perform two actions. The secondary action is shown by default.
@@ -85,8 +86,9 @@ public class CarUiTwoActionPreference extends CarUiPreference {
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
-        View actionContainer = holder.findViewById(R.id.action_widget_container);
-        View widgetFrame = holder.findViewById(android.R.id.widget_frame);
+        View actionContainer = CarUiUtils.findViewByRefId(holder.itemView,
+                R.id.action_widget_container);
+        View widgetFrame = CarUiUtils.findViewByRefId(holder.itemView, android.R.id.widget_frame);
         if (mIsActionShown) {
             actionContainer.setVisibility(View.VISIBLE);
             onBindWidgetFrame(widgetFrame);

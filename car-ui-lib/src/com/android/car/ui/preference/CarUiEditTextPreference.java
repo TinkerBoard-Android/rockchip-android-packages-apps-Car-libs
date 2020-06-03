@@ -25,6 +25,7 @@ import androidx.preference.EditTextPreference;
 import androidx.preference.PreferenceViewHolder;
 
 import com.android.car.ui.R;
+import com.android.car.ui.utils.CarUiUtils;
 
 /**
  * This class extends the base {@link EditTextPreference} class. Adds the drawable icon to
@@ -65,7 +66,7 @@ public class CarUiEditTextPreference extends EditTextPreference {
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     public View getWidgetActionContainer(PreferenceViewHolder holder) {
-        return holder.findViewById(R.id.action_widget_container);
+        return CarUiUtils.findViewByRefId(holder.itemView, R.id.action_widget_container);
     }
 
     @Override
