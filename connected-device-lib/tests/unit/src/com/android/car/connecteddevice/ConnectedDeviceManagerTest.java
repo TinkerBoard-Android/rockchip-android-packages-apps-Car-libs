@@ -459,6 +459,27 @@ public class ConnectedDeviceManagerTest {
     }
 
     @Test
+    public void registerDeviceCallback_sendsMultipleMissedMessagesAfterRegistration()
+            throws InterruptedException {
+        Semaphore semaphore = new Semaphore(0);
+        connectNewDevice(mMockCentralManager);
+        ConnectedDevice connectedDevice =
+                mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
+        byte[] payload1 = ByteUtils.randomBytes(10);
+        byte[] payload2 = ByteUtils.randomBytes(10);
+        DeviceMessage message1 = new DeviceMessage(mRecipientId, false, payload1);
+        DeviceMessage message2 = new DeviceMessage(mRecipientId, false, payload2);
+        mConnectedDeviceManager.onMessageReceived(connectedDevice.getDeviceId(), message1);
+        mConnectedDeviceManager.onMessageReceived(connectedDevice.getDeviceId(), message2);
+        DeviceCallback deviceCallback = createDeviceCallback(semaphore);
+        mConnectedDeviceManager.registerDeviceCallback(connectedDevice, mRecipientId,
+                deviceCallback, mCallbackExecutor);
+        assertThat(tryAcquire(semaphore)).isTrue();
+        verify(deviceCallback).onMessageReceived(connectedDevice, payload1);
+        verify(deviceCallback, timeout(1000)).onMessageReceived(connectedDevice, payload2);
+    }
+
+    @Test
     public void registerDeviceCallback_doesNotSendMissedMessageForDifferentRecipient()
             throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
