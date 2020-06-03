@@ -46,25 +46,25 @@
             android:layout_width="@dimen/app_selector_icon_size"
             android:layout_height="@dimen/app_selector_icon_size"
             android:layout_gravity="center"
-            android:layout_marginLeft="@dimen/playback_fragment_text_margin_x"
+            android:layout_marginStart="@dimen/playback_fragment_text_margin_x"
             android:background="?android:attr/selectableItemBackground"
             android:src="@drawable/ic_app_switch"
             app:layout_constraintTop_toTopOf="@+id/app_name"
             app:layout_constraintBottom_toBottomOf="@+id/app_name"
-            app:layout_constraintLeft_toLeftOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"/>
 
         <TextView
             android:id="@+id/app_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/playback_fragment_text_margin_top"
-            android:layout_marginLeft="@dimen/playback_fragment_text_margin_x"
-            android:layout_marginRight="@dimen/playback_fragment_text_margin_x"
+            android:layout_marginStart="@dimen/playback_fragment_text_margin_x"
+            android:layout_marginEnd="@dimen/playback_fragment_text_margin_x"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:singleLine="true"
             android:includeFontPadding="false"
-            app:layout_constraintLeft_toRightOf="@+id/app_icon"
-            app:layout_constraintRight_toLeftOf="@+id/app_selector_container"
+            app:layout_constraintStart_toEndOf="@+id/app_icon"
+            app:layout_constraintEnd_toStartOf="@+id/app_selector_container"
             app:layout_constraintTop_toTopOf="parent"/>
 
         <TextView
@@ -73,10 +73,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/playback_fragment_text_margin_top"
-            android:layout_marginLeft="@dimen/playback_fragment_text_margin_x"
-            android:layout_marginRight="@dimen/playback_fragment_text_margin_x"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginStart="@dimen/playback_fragment_text_margin_x"
+            android:layout_marginEnd="@dimen/playback_fragment_text_margin_x"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/app_name"/>
 
         <TextView
@@ -85,10 +85,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/playback_fragment_text_margin_top"
-            android:layout_marginLeft="@dimen/playback_fragment_text_margin_x"
-            android:layout_marginRight="@dimen/playback_fragment_text_margin_x"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toLeftOf="@+id/app_selector_container"
+            android:layout_marginStart="@dimen/playback_fragment_text_margin_x"
+            android:layout_marginEnd="@dimen/playback_fragment_text_margin_x"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/app_selector_container"
             app:layout_constraintTop_toBottomOf="@+id/title"/>
 
         <FrameLayout
@@ -97,10 +97,10 @@
             android:layout_width="@dimen/app_selector_icon_touch_target"
             android:layout_height="@dimen/app_selector_icon_touch_target"
             android:background="?android:attr/selectableItemBackground"
-            android:layout_marginRight="@dimen/app_selector_margin_x"
+            android:layout_marginEnd="@dimen/app_selector_margin_x"
             app:layout_constraintTop_toTopOf="@+id/app_name"
             app:layout_constraintBottom_toBottomOf="@+id/app_name"
-            app:layout_constraintRight_toRightOf="parent">
+            app:layout_constraintEnd_toEndOf="parent">
 
             <ImageView
                 android:id="@+id/app_selector"
@@ -119,8 +119,8 @@
             app:columns="3"
             app:enableOverflow="false"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
