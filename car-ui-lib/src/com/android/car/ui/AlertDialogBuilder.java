@@ -42,6 +42,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.recyclerview.CarUiRadioButtonListItemAdapter;
+import com.android.car.ui.utils.CarUiUtils;
 
 /**
  * Wrapper for AlertDialog.Builder
@@ -366,7 +367,7 @@ public class AlertDialogBuilder {
     private void setCustomList(@NonNull CarUiListItemAdapter adapter) {
         View customList = LayoutInflater.from(mContext).inflate(
                 R.layout.car_ui_alert_dialog_list, null);
-        RecyclerView mList = customList.requireViewById(R.id.list);
+        RecyclerView mList = CarUiUtils.requireViewByRefId(customList, R.id.list);
         mList.setLayoutManager(new LinearLayoutManager(mContext));
         mList.setAdapter(adapter);
         mBuilder.setView(customList);
@@ -599,7 +600,7 @@ public class AlertDialogBuilder {
         View contentView = LayoutInflater.from(mContext).inflate(
                 R.layout.car_ui_alert_dialog_edit_text, null);
 
-        EditText editText = contentView.requireViewById(R.id.textbox);
+        EditText editText = CarUiUtils.requireViewByRefId(contentView, R.id.textbox);
         editText.setText(prompt);
 
         if (textChangedListener != null) {
@@ -638,9 +639,9 @@ public class AlertDialogBuilder {
         View customTitle = LayoutInflater.from(mContext).inflate(
                 R.layout.car_ui_alert_dialog_title_with_subtitle, null);
 
-        TextView mTitleView = customTitle.requireViewById(R.id.alertTitle);
-        TextView mSubtitleView = customTitle.requireViewById(R.id.alertSubtitle);
-        ImageView mIconView = customTitle.requireViewById(R.id.icon);
+        TextView mTitleView = CarUiUtils.requireViewByRefId(customTitle, R.id.alertTitle);
+        TextView mSubtitleView = CarUiUtils.requireViewByRefId(customTitle, R.id.alertSubtitle);
+        ImageView mIconView = CarUiUtils.requireViewByRefId(customTitle, R.id.icon);
 
         mTitleView.setText(mTitle);
         mTitleView.setVisibility(TextUtils.isEmpty(mTitle) ? View.GONE : View.VISIBLE);
