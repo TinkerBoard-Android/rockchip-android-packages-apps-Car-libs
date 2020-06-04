@@ -29,8 +29,13 @@ import static androidx.test.espresso.contrib.RecyclerViewActions.scrollToPositio
 import static androidx.test.espresso.matcher.ViewMatchers.assertThat;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isEnabled;
+import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+
+import static com.android.car.ui.actions.LowLevelActions.pressAndHold;
+import static com.android.car.ui.actions.LowLevelActions.release;
+import static com.android.car.ui.actions.ViewActions.waitForView;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
@@ -321,6 +326,33 @@ public class CarUiRecyclerViewTest {
         }
 
         assertEquals(layoutManager.findFirstVisibleItemPosition(), topPosition);
+    }
+
+    @Test
+    public void testContinuousScroll() {
+        mActivity.runOnUiThread(
+                () -> mActivity.setContentView(R.layout.car_ui_recycler_view_test_activity));
+
+        onView(withId(R.id.list)).check(matches(isDisplayed()));
+
+        CarUiRecyclerView carUiRecyclerView = mActivity.requireViewById(R.id.list);
+        TestAdapter adapter = new TestAdapter(50);
+        mActivity.runOnUiThread(() -> {
+            carUiRecyclerView.setAdapter(adapter);
+        });
+
+        IdlingRegistry.getInstance().register(new ScrollIdlingResource(carUiRecyclerView));
+        onView(withText(adapter.getItemText(0))).check(matches(isDisplayed()));
+
+        LinearLayoutManager layoutManager =
+                (LinearLayoutManager) carUiRecyclerView.getLayoutManager();
+
+        // Press and hold the down button for 2 seconds to scroll the list to bottom.
+        onView(withId(R.id.car_ui_scrollbar_page_down)).perform(pressAndHold());
+        onView(isRoot()).perform(waitForView(withText("Sample item #49"), 3000));
+        onView(withId(R.id.car_ui_scrollbar_page_down)).perform(release());
+
+        assertEquals(layoutManager.findLastCompletelyVisibleItemPosition(), 49);
     }
 
     @Test
