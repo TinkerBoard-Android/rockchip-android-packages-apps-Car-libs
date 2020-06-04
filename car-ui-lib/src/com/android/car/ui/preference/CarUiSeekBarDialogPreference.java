@@ -25,6 +25,7 @@ import android.widget.TextView;
 import androidx.preference.DialogPreference;
 
 import com.android.car.ui.R;
+import com.android.car.ui.utils.CarUiUtils;
 
 /** A class implements some basic methods of a seekbar dialog preference. */
 public class CarUiSeekBarDialogPreference extends DialogPreference
@@ -83,10 +84,10 @@ public class CarUiSeekBarDialogPreference extends DialogPreference
 
     @Override
     public void onBindDialogView(View view) {
-        mSeekBar = view.findViewById(R.id.seek_bar);
-        mSeekBarTopTextView = view.findViewById(R.id.seek_bar_text_top);
-        mSeekBarLeftTextView = view.findViewById(R.id.seek_bar_text_left);
-        mSeekBarRightTextView = view.findViewById(R.id.seek_bar_text_right);
+        mSeekBar = CarUiUtils.findViewByRefId(view, R.id.seek_bar);
+        mSeekBarTopTextView = CarUiUtils.findViewByRefId(view, R.id.seek_bar_text_top);
+        mSeekBarLeftTextView = CarUiUtils.findViewByRefId(view, R.id.seek_bar_text_left);
+        mSeekBarRightTextView = CarUiUtils.findViewByRefId(view, R.id.seek_bar_text_right);
 
         setProgress(mSeekBarProgress);
 
