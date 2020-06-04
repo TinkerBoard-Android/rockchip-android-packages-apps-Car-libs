@@ -363,7 +363,7 @@ public class CarBlePeripheralManager extends CarBleManager {
             return;
         }
 
-        Handler handler = Handler.getMain();
+        Handler handler = new Handler(Looper.getMainLooper());
         SecureBleChannel.Callback oobExchangeCallback = new SecureBleChannel.Callback() {
             @Override
             public void onMessageReceived(DeviceMessage deviceMessage) {
