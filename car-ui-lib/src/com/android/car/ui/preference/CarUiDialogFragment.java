@@ -33,6 +33,7 @@ import android.widget.TextView;
 import androidx.annotation.CallSuper;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.preference.DialogPreference;
 
@@ -76,7 +77,7 @@ public abstract class CarUiDialogFragment extends DialogFragment implements
     private int mWhichButtonClicked;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState != null) {
@@ -108,7 +109,7 @@ public abstract class CarUiDialogFragment extends DialogFragment implements
 
     @Override
     @NonNull
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         Context context = getActivity();
         mWhichButtonClicked = DialogInterface.BUTTON_NEGATIVE;
 
@@ -145,7 +146,7 @@ public abstract class CarUiDialogFragment extends DialogFragment implements
      *
      * <p>Do not {@link AlertDialog.Builder#create()} or {@link AlertDialog.Builder#show()}.
      */
-    protected void onPrepareDialogBuilder(AlertDialog.Builder builder) {
+    protected void onPrepareDialogBuilder(@NonNull AlertDialog.Builder builder) {
     }
 
     /**
@@ -194,7 +195,7 @@ public abstract class CarUiDialogFragment extends DialogFragment implements
      * @param view the content View of the dialog, if it is custom.
      */
     @CallSuper
-    protected void onBindDialogView(View view) {
+    protected void onBindDialogView(@NonNull View view) {
         View dialogMessageView = CarUiUtils.findViewByRefId(view, android.R.id.message);
 
         if (dialogMessageView != null) {
@@ -221,7 +222,7 @@ public abstract class CarUiDialogFragment extends DialogFragment implements
     }
 
     @Override
-    public void onDismiss(DialogInterface dialog) {
+    public void onDismiss(@NonNull DialogInterface dialog) {
         super.onDismiss(dialog);
         onDialogClosed(mWhichButtonClicked == DialogInterface.BUTTON_POSITIVE);
     }

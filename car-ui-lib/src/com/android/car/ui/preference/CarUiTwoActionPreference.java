@@ -21,6 +21,7 @@ import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.preference.PreferenceViewHolder;
 
 import com.android.car.ui.R;
@@ -104,6 +105,6 @@ public class CarUiTwoActionPreference extends CarUiPreference {
      *
      * @param widgetFrame The widget frame which controls the 2nd action.
      */
-    protected void onBindWidgetFrame(View widgetFrame) {
+    protected void onBindWidgetFrame(@NonNull View widgetFrame) {
     }
 }
