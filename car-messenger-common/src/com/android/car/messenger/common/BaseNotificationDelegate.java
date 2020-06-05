@@ -73,7 +73,7 @@ public class BaseNotificationDelegate {
             "com.android.car.messenger.common.REMOTE_INPUT_KEY";
 
     protected final Context mContext;
-    protected final NotificationManager mNotificationManager;
+    protected NotificationManager mNotificationManager;
     protected final boolean mUseLetterTile;
 
     /**
