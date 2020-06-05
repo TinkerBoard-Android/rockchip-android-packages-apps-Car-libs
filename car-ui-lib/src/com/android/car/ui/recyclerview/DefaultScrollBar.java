@@ -71,12 +71,18 @@ class DefaultScrollBar implements ScrollBar {
         getRecyclerView().getRecycledViewPool().setMaxRecycledViews(0, 12);
 
         mUpButton = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_page_up);
-        mUpButton.setOnClickListener(
-                new PaginateButtonClickListener(PaginationListener.PAGE_UP));
+        PaginateButtonClickListener paginateUpButtonClickListener =
+                new PaginateButtonClickListener(PaginationListener.PAGE_UP);
+        mUpButton.setOnClickListener(paginateUpButtonClickListener);
+        mUpButton.setOnTouchListener(
+                new OnContinuousScrollListener(rv.getContext(), paginateUpButtonClickListener));
 
         mDownButton = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_page_down);
-        mDownButton.setOnClickListener(
-                new PaginateButtonClickListener(PaginationListener.PAGE_DOWN));
+        PaginateButtonClickListener paginateDownButtonClickListener =
+                new PaginateButtonClickListener(PaginationListener.PAGE_DOWN);
+        mDownButton.setOnClickListener(paginateDownButtonClickListener);
+        mDownButton.setOnTouchListener(
+                new OnContinuousScrollListener(rv.getContext(), paginateDownButtonClickListener));
 
         mScrollTrack = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_track);
         mScrollThumb = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_thumb);
