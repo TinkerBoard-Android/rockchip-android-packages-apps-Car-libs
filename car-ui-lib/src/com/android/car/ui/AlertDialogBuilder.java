@@ -639,9 +639,10 @@ public class AlertDialogBuilder {
         View customTitle = LayoutInflater.from(mContext).inflate(
                 R.layout.car_ui_alert_dialog_title_with_subtitle, null);
 
-        TextView mTitleView = CarUiUtils.requireViewByRefId(customTitle, R.id.alertTitle);
-        TextView mSubtitleView = CarUiUtils.requireViewByRefId(customTitle, R.id.alertSubtitle);
-        ImageView mIconView = CarUiUtils.requireViewByRefId(customTitle, R.id.icon);
+        TextView mTitleView = CarUiUtils.requireViewByRefId(customTitle, R.id.car_ui_alert_title);
+        TextView mSubtitleView =
+                CarUiUtils.requireViewByRefId(customTitle, R.id.car_ui_alert_subtitle);
+        ImageView mIconView = CarUiUtils.requireViewByRefId(customTitle, R.id.car_ui_alert_icon);
 
         mTitleView.setText(mTitle);
         mTitleView.setVisibility(TextUtils.isEmpty(mTitle) ? View.GONE : View.VISIBLE);
