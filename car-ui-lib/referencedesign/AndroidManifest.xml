@@ -1,0 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="{{RRO_PACKAGE_NAME}}">
+    <application android:hasCode="false"/>
+    <overlay android:priority="10"
+        android:targetPackage="{{TARGET_PACKAGE_NAME}}"
+        android:isStatic="true"
+        android:requiredSystemPropertyName="ro.build.characteristics"
+        android:requiredSystemPropertyValue="automotive"/>
+</manifest>
