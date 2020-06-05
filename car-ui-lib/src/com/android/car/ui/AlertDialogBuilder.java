@@ -22,6 +22,7 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.text.InputFilter;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -624,24 +625,23 @@ public class AlertDialogBuilder {
 
     /** Final steps common to both {@link #create()} and {@link #show()} */
     private void prepareDialog() {
-        if (mSubtitle != null) {
+        View customTitle = LayoutInflater.from(mContext).inflate(
+                R.layout.car_ui_alert_dialog_title_with_subtitle, null);
 
-            View customTitle = LayoutInflater.from(mContext).inflate(
-                    R.layout.car_ui_alert_dialog_title_with_subtitle, null);
+        TextView mTitleView =
+                CarUiUtils.requireViewByRefId(customTitle, R.id.car_ui_alert_title);
+        TextView mSubtitleView =
+                CarUiUtils.requireViewByRefId(customTitle, R.id.car_ui_alert_subtitle);
+        ImageView mIconView =
+                CarUiUtils.requireViewByRefId(customTitle, R.id.car_ui_alert_icon);
 
-            TextView mTitleView =
-                    CarUiUtils.requireViewByRefId(customTitle, R.id.car_ui_alert_title);
-            TextView mSubtitleView =
-                    CarUiUtils.requireViewByRefId(customTitle, R.id.car_ui_alert_subtitle);
-            ImageView mIconView =
-                    CarUiUtils.requireViewByRefId(customTitle, R.id.car_ui_alert_icon);
-
-            mTitleView.setText(mTitle);
-            mSubtitleView.setText(mSubtitle);
-            mIconView.setImageDrawable(mIcon);
-            mIconView.setVisibility(mIcon != null ? View.VISIBLE : View.GONE);
-            mBuilder.setCustomTitle(customTitle);
-        }
+        mTitleView.setText(mTitle);
+        mTitleView.setVisibility(TextUtils.isEmpty(mTitle) ? View.GONE : View.VISIBLE);
+        mSubtitleView.setText(mSubtitle);
+        mSubtitleView.setVisibility(TextUtils.isEmpty(mSubtitle) ? View.GONE : View.VISIBLE);
+        mIconView.setImageDrawable(mIcon);
+        mIconView.setVisibility(mIcon != null ? View.VISIBLE : View.GONE);
+        mBuilder.setCustomTitle(customTitle);
 
         if (!mNeutralButtonSet && !mNegativeButtonSet && !mPositiveButtonSet) {
             String mDefaultButtonText = mContext.getString(
