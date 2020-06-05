@@ -67,6 +67,7 @@ public class MultiSelectListPreferenceFragment extends Fragment implements Inset
      * Returns a new instance of {@link MultiSelectListPreferenceFragment} for the {@link
      * CarUiMultiSelectListPreference} with the given {@code key}.
      */
+    @NonNull
     static MultiSelectListPreferenceFragment newInstance(String key) {
         MultiSelectListPreferenceFragment fragment = new MultiSelectListPreferenceFragment();
         Bundle b = new Bundle(/* capacity= */ 1);
@@ -205,7 +206,7 @@ public class MultiSelectListPreferenceFragment extends Fragment implements Inset
     }
 
     @Override
-    public void onCarUiInsetsChanged(Insets insets) {
+    public void onCarUiInsetsChanged(@NonNull Insets insets) {
         View view = requireView();
         CarUiUtils.requireViewByRefId(view, R.id.list)
                 .setPadding(0, insets.getTop(), 0, insets.getBottom());
