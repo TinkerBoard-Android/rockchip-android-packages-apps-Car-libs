@@ -41,4 +41,10 @@
          1 (show one letter) or 0 (show avatar anonymous icon)
     -->
     <integer name="config_number_of_letters_shown_for_avatar">1</integer>
+
+    <!-- String format used to format a address Uri. -->
+    <string name="config_address_uri_format" translatable="false">geo:0,0?q=%s</string>
+    <!-- String format used to format a navigation Uri. -->
+    <string name="config_navigation_uri_format" translatable="false">google.navigation:q=%s</string>
+
 </resources>
