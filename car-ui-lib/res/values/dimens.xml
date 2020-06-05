@@ -39,6 +39,9 @@
     <dimen name="car_ui_body1_size">32sp</dimen>
     <dimen name="car_ui_body2_size">28sp</dimen>
     <dimen name="car_ui_body3_size">24sp</dimen>
+    <dimen name="car_ui_sub1_size">22sp</dimen>
+    <dimen name="car_ui_sub2_size">20sp</dimen>
+    <dimen name="car_ui_sub3_size">18sp</dimen>
 
     <!-- Tabs -->
 
