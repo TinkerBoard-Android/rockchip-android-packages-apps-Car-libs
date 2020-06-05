@@ -73,6 +73,8 @@ public class CarUiPreference extends Preference implements DisabledPreferenceCal
         mShowChevron = a.getBoolean(R.styleable.CarUiPreference_showChevron, true);
         mShouldShowRippleOnDisabledPreference = a.getBoolean(
                 R.styleable.CarUiPreference_showRippleOnDisabledPreference, false);
+
+        a.recycle();
     }
 
 
