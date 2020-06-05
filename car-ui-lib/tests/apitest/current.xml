@@ -182,10 +182,11 @@
   <public type="id" name="action_container_touch_interceptor"/>
   <public type="id" name="action_divider"/>
   <public type="id" name="action_widget_container"/>
-  <public type="id" name="alertSubtitle"/>
-  <public type="id" name="alertTitle"/>
   <public type="id" name="avatar_icon"/>
   <public type="id" name="body"/>
+  <public type="id" name="car_ui_alert_icon"/>
+  <public type="id" name="car_ui_alert_subtitle"/>
+  <public type="id" name="car_ui_alert_title"/>
   <public type="id" name="car_ui_check_box_end_guideline"/>
   <public type="id" name="car_ui_check_box_start_guideline"/>
   <public type="id" name="car_ui_list_item_end_guideline"/>
