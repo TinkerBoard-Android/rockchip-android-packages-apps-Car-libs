@@ -66,6 +66,7 @@ import java.util.concurrent.CompletableFuture;
 public class TelecomUtils {
     private static final String TAG = "CD.TelecomUtils";
     private static final int PII_STRING_LENGTH = 4;
+    private static final String COUNTRY_US = "US";
 
     private static String sVoicemailNumber;
     private static TelephonyManager sTelephonyManager;
@@ -119,7 +120,7 @@ public class TelecomUtils {
             return "";
         }
 
-        String countryIso = getCurrentCountryIso(context);
+        String countryIso = getCurrentCountryIsoFromLocale(context);
         L.d(TAG, "PhoneNumberUtils.formatNumberToE16, number: "
                     + piiLog(number) + ", country: " + countryIso);
 
@@ -153,13 +154,25 @@ public class TelecomUtils {
         }
         if (countryIso == null || countryIso.length() != 2) {
             L.w(TAG, "Invalid locale, falling back to US");
-            countryIso = "US";
+            countryIso = COUNTRY_US;
         }
         return countryIso;
     }
 
     private static String getCurrentCountryIso(Context context) {
         return getCurrentCountryIso(context, Locale.getDefault());
+    }
+
+    private static String getCurrentCountryIsoFromLocale(Context context) {
+        String countryIso;
+        countryIso = context.getResources().getConfiguration().getLocales().get(0).getCountry();
+
+        if (countryIso == null) {
+            L.w(TAG, "Invalid locale, falling back to US");
+            countryIso = COUNTRY_US;
+        }
+
+        return countryIso;
     }
 
     /**
