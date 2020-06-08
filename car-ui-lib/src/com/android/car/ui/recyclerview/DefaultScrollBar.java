@@ -71,18 +71,16 @@ class DefaultScrollBar implements ScrollBar {
         getRecyclerView().getRecycledViewPool().setMaxRecycledViews(0, 12);
 
         mUpButton = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_page_up);
-        PaginateButtonClickListener paginateUpButtonClickListener =
-                new PaginateButtonClickListener(PaginationListener.PAGE_UP);
-        mUpButton.setOnClickListener(paginateUpButtonClickListener);
+        View.OnClickListener paginateUpButtonOnClickListener = v -> pageUp();
+        mUpButton.setOnClickListener(paginateUpButtonOnClickListener);
         mUpButton.setOnTouchListener(
-                new OnContinuousScrollListener(rv.getContext(), paginateUpButtonClickListener));
+                new OnContinuousScrollListener(rv.getContext(), paginateUpButtonOnClickListener));
 
         mDownButton = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_page_down);
-        PaginateButtonClickListener paginateDownButtonClickListener =
-                new PaginateButtonClickListener(PaginationListener.PAGE_DOWN);
-        mDownButton.setOnClickListener(paginateDownButtonClickListener);
+        View.OnClickListener paginateDownButtonOnClickListener = v -> pageDown();
+        mDownButton.setOnClickListener(paginateDownButtonOnClickListener);
         mDownButton.setOnTouchListener(
-                new OnContinuousScrollListener(rv.getContext(), paginateDownButtonClickListener));
+                new OnContinuousScrollListener(rv.getContext(), paginateDownButtonOnClickListener));
 
         mScrollTrack = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_track);
         mScrollThumb = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_thumb);
@@ -146,12 +144,6 @@ class DefaultScrollBar implements ScrollBar {
      */
     private boolean isDownEnabled() {
         return mDownButton.isEnabled();
-    }
-
-    /** Listener for when the list should paginate. */
-    interface PaginationListener {
-        int PAGE_UP = 0;
-        int PAGE_DOWN = 1;
     }
 
     /**
@@ -238,23 +230,6 @@ class DefaultScrollBar implements ScrollBar {
                 .setDuration(/* duration= */ 0)
                 .setInterpolator(mPaginationInterpolator)
                 .start();
-    }
-
-    private class PaginateButtonClickListener implements View.OnClickListener {
-        private final int mPaginateDirection;
-
-        PaginateButtonClickListener(int paginateDirection) {
-            this.mPaginateDirection = paginateDirection;
-        }
-
-        @Override
-        public void onClick(View v) {
-            if (mPaginateDirection == PaginationListener.PAGE_DOWN) {
-                pageDown();
-            } else if (mPaginateDirection == PaginationListener.PAGE_UP) {
-                pageUp();
-            }
-        }
     }
 
     private final RecyclerView.OnScrollListener mRecyclerViewOnScrollListener =
