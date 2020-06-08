@@ -69,6 +69,7 @@ public class CarUiSwitchPreference extends SwitchPreference implements DisabledP
                 R.styleable.CarUiPreference);
         mShouldShowRippleOnDisabledPreference = preferenceAttributes.getBoolean(
                 R.styleable.CarUiPreference_showRippleOnDisabledPreference, false);
+        preferenceAttributes.recycle();
     }
 
     @Override
