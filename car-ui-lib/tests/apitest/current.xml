@@ -113,6 +113,9 @@
   <public type="dimen" name="car_ui_scrollbar_separator_margin"/>
   <public type="dimen" name="car_ui_scrollbar_thumb_radius"/>
   <public type="dimen" name="car_ui_scrollbar_thumb_width"/>
+  <public type="dimen" name="car_ui_sub1_size"/>
+  <public type="dimen" name="car_ui_sub2_size"/>
+  <public type="dimen" name="car_ui_sub3_size"/>
   <public type="dimen" name="car_ui_toolbar_bottom_inset"/>
   <public type="dimen" name="car_ui_toolbar_bottom_view_height"/>
   <public type="dimen" name="car_ui_toolbar_end_inset"/>
@@ -337,6 +340,7 @@
   <public type="style" name="PreferenceFragmentList.CarUi"/>
   <public type="style" name="TextAppearance.CarUi"/>
   <public type="style" name="TextAppearance.CarUi.AlertDialog.Subtitle"/>
+  <public type="style" name="TextAppearance.CarUi.AlertDialog.Title"/>
   <public type="style" name="TextAppearance.CarUi.Body1"/>
   <public type="style" name="TextAppearance.CarUi.Body2"/>
   <public type="style" name="TextAppearance.CarUi.Body3"/>
@@ -347,6 +351,9 @@
   <public type="style" name="TextAppearance.CarUi.PreferenceEditTextDialogMessage"/>
   <public type="style" name="TextAppearance.CarUi.PreferenceSummary"/>
   <public type="style" name="TextAppearance.CarUi.PreferenceTitle"/>
+  <public type="style" name="TextAppearance.CarUi.Sub1"/>
+  <public type="style" name="TextAppearance.CarUi.Sub2"/>
+  <public type="style" name="TextAppearance.CarUi.Sub3"/>
   <public type="style" name="TextAppearance.CarUi.Widget"/>
   <public type="style" name="TextAppearance.CarUi.Widget.Toolbar"/>
   <public type="style" name="TextAppearance.CarUi.Widget.Toolbar.Tab"/>
