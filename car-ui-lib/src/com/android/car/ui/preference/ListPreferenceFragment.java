@@ -71,6 +71,7 @@ public class ListPreferenceFragment extends Fragment implements InsetsChangedLis
      * Returns a new instance of {@link ListPreferenceFragment} for the {@link ListPreference} with
      * the given {@code key}.
      */
+    @NonNull
     static ListPreferenceFragment newInstance(String key) {
         ListPreferenceFragment fragment = new ListPreferenceFragment();
         Bundle b = new Bundle(/* capacity= */ 1);

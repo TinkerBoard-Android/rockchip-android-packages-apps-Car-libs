@@ -19,6 +19,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.preference.DialogPreference;
 
 /**
@@ -30,14 +31,14 @@ import androidx.preference.DialogPreference;
 public interface DialogFragmentCallbacks extends DialogInterface.OnClickListener {
 
     /** See {@link CarUiDialogFragment#onPrepareDialogBuilder(AlertDialog.Builder)}. */
-    default void onPrepareDialogBuilder(AlertDialog.Builder builder) {}
+    default void onPrepareDialogBuilder(@NonNull AlertDialog.Builder builder) {}
 
     @Override
-    default void onClick(DialogInterface dialog, int which) {}
+    default void onClick(@NonNull DialogInterface dialog, int which) {}
 
     /** See {@link CarUiDialogFragment#onDialogClosed(boolean)}. */
     default void onDialogClosed(boolean positiveResult) {}
 
     /** See {@link CarUiDialogFragment#onBindDialogView(View)}. */
-    default void onBindDialogView(View view) {}
+    default void onBindDialogView(@NonNull View view) {}
 }
