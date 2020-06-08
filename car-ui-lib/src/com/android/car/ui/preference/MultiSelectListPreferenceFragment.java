@@ -67,6 +67,7 @@ public class MultiSelectListPreferenceFragment extends Fragment implements Inset
      * Returns a new instance of {@link MultiSelectListPreferenceFragment} for the {@link
      * CarUiMultiSelectListPreference} with the given {@code key}.
      */
+    @NonNull
     static MultiSelectListPreferenceFragment newInstance(String key) {
         MultiSelectListPreferenceFragment fragment = new MultiSelectListPreferenceFragment();
         Bundle b = new Bundle(/* capacity= */ 1);
