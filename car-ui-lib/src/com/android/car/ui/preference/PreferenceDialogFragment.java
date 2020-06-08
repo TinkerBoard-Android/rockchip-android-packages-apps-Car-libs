@@ -24,6 +24,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.preference.DialogPreference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -50,7 +51,7 @@ public abstract class PreferenceDialogFragment extends CarUiDialogFragment imple
     private DialogPreference mPreference;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Fragment rawFragment = getTargetFragment();
