@@ -16,6 +16,8 @@
 
 package com.android.car.ui.preference;
 
+import androidx.annotation.NonNull;
+
 /**
  * Interface for preferences to handle clicks when its disabled.
  */
@@ -29,5 +31,5 @@ public interface DisabledPreferenceCallback {
     /**
      * Sets the message to be displayed when the disabled preference is clicked.
      */
-    default void setMessageToShowWhenDisabledPreferenceClicked(String message) {}
+    default void setMessageToShowWhenDisabledPreferenceClicked(@NonNull String message) {}
 }
