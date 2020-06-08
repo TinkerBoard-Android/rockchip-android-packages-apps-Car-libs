@@ -66,6 +66,7 @@ public class CarUiTwoActionPreference extends CarUiPreference {
         mIsActionShown = preferenceAttributes.getBoolean(
                 R.styleable.CarUiTwoActionPreference_actionShown, true);
         setShowChevron(false);
+        preferenceAttributes.recycle();
     }
 
     /**
