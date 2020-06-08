@@ -211,7 +211,7 @@ public class ListPreferenceFragment extends Fragment implements InsetsChangedLis
     }
 
     @Override
-    public void onCarUiInsetsChanged(Insets insets) {
+    public void onCarUiInsetsChanged(@NonNull Insets insets) {
         View view = requireView();
         CarUiUtils.requireViewByRefId(view, R.id.list)
                 .setPadding(0, insets.getTop(), 0, insets.getBottom());
