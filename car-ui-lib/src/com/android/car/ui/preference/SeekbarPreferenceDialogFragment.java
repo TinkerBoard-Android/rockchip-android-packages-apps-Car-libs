@@ -21,6 +21,8 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+
 /**
  * A fragment that provides a layout with a seekbar within a dialog.
  */
@@ -39,7 +41,7 @@ public class SeekbarPreferenceDialogFragment extends PreferenceDialogFragment {
     }
 
     @Override
-    protected void onBindDialogView(View view) {
+    protected void onBindDialogView(@NonNull View view) {
         super.onBindDialogView(view);
 
         DialogFragmentCallbacks dialogPreference = (DialogFragmentCallbacks) getPreference();
@@ -61,7 +63,7 @@ public class SeekbarPreferenceDialogFragment extends PreferenceDialogFragment {
     }
 
     @Override
-    protected void onPrepareDialogBuilder(AlertDialog.Builder builder) {
+    protected void onPrepareDialogBuilder(@NonNull AlertDialog.Builder builder) {
         DialogFragmentCallbacks dialogPreference = (DialogFragmentCallbacks) getPreference();
         dialogPreference.onPrepareDialogBuilder(builder);
     }
