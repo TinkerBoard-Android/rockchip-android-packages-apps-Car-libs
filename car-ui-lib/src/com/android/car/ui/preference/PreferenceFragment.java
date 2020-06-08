@@ -116,7 +116,7 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
     }
 
     @Override
-    public void onCarUiInsetsChanged(Insets insets) {
+    public void onCarUiInsetsChanged(@NonNull Insets insets) {
         View view = requireView();
         CarUiUtils.requireViewByRefId(view, R.id.recycler_view)
                 .setPadding(0, insets.getTop(), 0, insets.getBottom());
