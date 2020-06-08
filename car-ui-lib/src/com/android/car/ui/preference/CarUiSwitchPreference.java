@@ -23,6 +23,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.preference.PreferenceViewHolder;
 import androidx.preference.SwitchPreference;
 
@@ -107,7 +108,7 @@ public class CarUiSwitchPreference extends SwitchPreference implements DisabledP
     }
 
     @Override
-    public void setMessageToShowWhenDisabledPreferenceClicked(String message) {
+    public void setMessageToShowWhenDisabledPreferenceClicked(@NonNull String message) {
         mMessageToShowWhenDisabledPreferenceClicked = message;
     }
 }
