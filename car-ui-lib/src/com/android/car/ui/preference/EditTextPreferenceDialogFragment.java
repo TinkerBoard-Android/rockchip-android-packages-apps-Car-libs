@@ -51,6 +51,7 @@ public class EditTextPreferenceDialogFragment extends PreferenceDialogFragment i
      * Returns a new instance of {@link EditTextPreferenceDialogFragment} for the {@link
      * EditTextPreference} with the given {@code key}.
      */
+    @NonNull
     public static EditTextPreferenceDialogFragment newInstance(String key) {
         EditTextPreferenceDialogFragment fragment =
                 new EditTextPreferenceDialogFragment();
@@ -77,7 +78,7 @@ public class EditTextPreferenceDialogFragment extends PreferenceDialogFragment i
     }
 
     @Override
-    protected void onBindDialogView(View view) {
+    protected void onBindDialogView(@NonNull View view) {
         super.onBindDialogView(view);
 
         mEditText = CarUiUtils.findViewByRefId(view, android.R.id.edit);

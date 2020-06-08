@@ -22,6 +22,8 @@ import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.preference.DialogPreference;
 
 import com.android.car.ui.R;
@@ -83,7 +85,7 @@ public class CarUiSeekBarDialogPreference extends DialogPreference
     }
 
     @Override
-    public void onBindDialogView(View view) {
+    public void onBindDialogView(@NonNull View view) {
         mSeekBar = CarUiUtils.findViewByRefId(view, R.id.seek_bar);
         mSeekBarTopTextView = CarUiUtils.findViewByRefId(view, R.id.seek_bar_text_top);
         mSeekBarLeftTextView = CarUiUtils.findViewByRefId(view, R.id.seek_bar_text_left);
@@ -152,6 +154,7 @@ public class CarUiSeekBarDialogPreference extends DialogPreference
     /**
      * Gets the text on top of the seekbar.
      */
+    @Nullable
     public String getSeekBarTopTextViewText() {
         if (mSeekBarTopTextView != null) {
             return mSeekBarTopTextView.getText().toString();
@@ -182,6 +185,7 @@ public class CarUiSeekBarDialogPreference extends DialogPreference
     /**
      * Gets the text on left of the seekbar.
      */
+    @Nullable
     public String getSeekBarLeftTextViewText() {
         if (mSeekBarLeftTextView != null) {
             return mSeekBarLeftTextView.getText().toString();
@@ -192,7 +196,7 @@ public class CarUiSeekBarDialogPreference extends DialogPreference
     /**
      * Sets the text on Left of the seekbar.
      */
-    public void setSeekBarLeftTextViewText(String text) {
+    public void setSeekBarLeftTextViewText(@Nullable String text) {
         if (mSeekBarLeftTextView != null) {
             mSeekBarLeftTextView.setText(text);
         }
@@ -213,6 +217,7 @@ public class CarUiSeekBarDialogPreference extends DialogPreference
     /**
      * Gets the text on right of the seekbar.
      */
+    @Nullable
     public String getSeekBarRightTextViewText() {
         if (mSeekBarRightTextView != null) {
             return mSeekBarRightTextView.getText().toString();
@@ -224,7 +229,7 @@ public class CarUiSeekBarDialogPreference extends DialogPreference
     /**
      * Sets the text on right of the seekbar.
      */
-    public void setSeekBarRightTextViewText(String text) {
+    public void setSeekBarRightTextViewText(@Nullable String text) {
         if (mSeekBarRightTextView != null) {
             mSeekBarRightTextView.setText(text);
         }
