@@ -390,24 +390,32 @@ public final class CarUiRecyclerView extends RecyclerView implements
 
     @Override
     public void setPadding(int left, int top, int right, int bottom) {
-        super.setPadding(0, top, 0, bottom);
         mContainerPaddingRelative = null;
-        mContainerPadding = new Rect(left, 0, right, 0);
-        if (mContainer != null) {
-            mContainer.setPadding(left, 0, right, 0);
+        if (mScrollBarEnabled) {
+            super.setPadding(0, top, 0, bottom);
+            mContainerPadding = new Rect(left, 0, right, 0);
+            if (mContainer != null) {
+                mContainer.setPadding(left, 0, right, 0);
+            }
+            setScrollBarPadding(mScrollBarPaddingTop, mScrollBarPaddingBottom);
+        } else {
+            super.setPadding(left, top, right, bottom);
         }
-        setScrollBarPadding(mScrollBarPaddingTop, mScrollBarPaddingBottom);
     }
 
     @Override
     public void setPaddingRelative(int start, int top, int end, int bottom) {
-        super.setPaddingRelative(0, top, 0, bottom);
         mContainerPadding = null;
-        mContainerPaddingRelative = new Rect(start, 0, end, 0);
-        if (mContainer != null) {
-            mContainer.setPaddingRelative(start, 0, end, 0);
+        if (mScrollBarEnabled) {
+            super.setPaddingRelative(0, top, 0, bottom);
+            mContainerPaddingRelative = new Rect(start, 0, end, 0);
+            if (mContainer != null) {
+                mContainer.setPaddingRelative(start, 0, end, 0);
+            }
+            setScrollBarPadding(mScrollBarPaddingTop, mScrollBarPaddingBottom);
+        } else {
+            super.setPaddingRelative(start, top, end, bottom);
         }
-        setScrollBarPadding(mScrollBarPaddingTop, mScrollBarPaddingBottom);
     }
 
     /**

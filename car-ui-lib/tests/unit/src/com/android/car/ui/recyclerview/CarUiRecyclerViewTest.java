@@ -552,6 +552,83 @@ public class CarUiRecyclerViewTest {
                 not(equalTo(carUiRecyclerView.getHeight())));
     }
 
+
+    @Test
+    public void testSetPaddingToRecyclerViewContainerWithScrollbar() {
+        doReturn(true).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
+
+        CarUiRecyclerView mCarUiRecyclerView = new CarUiRecyclerView(mTestableContext);
+
+        assertThat(mCarUiRecyclerView.getPaddingBottom(), is(equalTo(0)));
+        assertThat(mCarUiRecyclerView.getPaddingTop(), is(equalTo(0)));
+        assertThat(mCarUiRecyclerView.getPaddingStart(), is(equalTo(0)));
+        assertThat(mCarUiRecyclerView.getPaddingEnd(), is(equalTo(0)));
+
+        mCarUiRecyclerView.setPadding(10, 10, 10, 10);
+
+        assertThat(mCarUiRecyclerView.getPaddingTop(), is(equalTo(10)));
+        assertThat(mCarUiRecyclerView.getPaddingBottom(), is(equalTo(10)));
+        assertThat(mCarUiRecyclerView.getPaddingStart(), is(equalTo(0)));
+        assertThat(mCarUiRecyclerView.getPaddingEnd(), is(equalTo(0)));
+    }
+
+    @Test
+    public void testSetPaddingToRecyclerViewContainerWithoutScrollbar() {
+        doReturn(false).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
+
+        CarUiRecyclerView mCarUiRecyclerView = new CarUiRecyclerView(mTestableContext);
+
+        assertThat(mCarUiRecyclerView.getPaddingBottom(), is(equalTo(0)));
+        assertThat(mCarUiRecyclerView.getPaddingTop(), is(equalTo(0)));
+        assertThat(mCarUiRecyclerView.getPaddingStart(), is(equalTo(0)));
+        assertThat(mCarUiRecyclerView.getPaddingEnd(), is(equalTo(0)));
+
+        mCarUiRecyclerView.setPadding(10, 10, 10, 10);
+
+        assertThat(mCarUiRecyclerView.getPaddingTop(), is(equalTo(10)));
+        assertThat(mCarUiRecyclerView.getPaddingBottom(), is(equalTo(10)));
+        assertThat(mCarUiRecyclerView.getPaddingStart(), is(equalTo(10)));
+        assertThat(mCarUiRecyclerView.getPaddingEnd(), is(equalTo(10)));
+    }
+
+    @Test
+    public void testSetPaddingRelativeToRecyclerViewContainerWithScrollbar() {
+        doReturn(true).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
+
+        CarUiRecyclerView mCarUiRecyclerView = new CarUiRecyclerView(mTestableContext);
+
+        assertThat(mCarUiRecyclerView.getPaddingBottom(), is(equalTo(0)));
+        assertThat(mCarUiRecyclerView.getPaddingTop(), is(equalTo(0)));
+        assertThat(mCarUiRecyclerView.getPaddingStart(), is(equalTo(0)));
+        assertThat(mCarUiRecyclerView.getPaddingEnd(), is(equalTo(0)));
+
+        mCarUiRecyclerView.setPaddingRelative(10, 10, 10, 10);
+
+        assertThat(mCarUiRecyclerView.getPaddingTop(), is(equalTo(10)));
+        assertThat(mCarUiRecyclerView.getPaddingBottom(), is(equalTo(10)));
+        assertThat(mCarUiRecyclerView.getPaddingStart(), is(equalTo(0)));
+        assertThat(mCarUiRecyclerView.getPaddingEnd(), is(equalTo(0)));
+    }
+
+    @Test
+    public void testSetPaddingRelativeToRecyclerViewContainerWithoutScrollbar() {
+        doReturn(false).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
+
+        CarUiRecyclerView mCarUiRecyclerView = new CarUiRecyclerView(mTestableContext);
+
+        assertThat(mCarUiRecyclerView.getPaddingBottom(), is(equalTo(0)));
+        assertThat(mCarUiRecyclerView.getPaddingTop(), is(equalTo(0)));
+        assertThat(mCarUiRecyclerView.getPaddingStart(), is(equalTo(0)));
+        assertThat(mCarUiRecyclerView.getPaddingEnd(), is(equalTo(0)));
+
+        mCarUiRecyclerView.setPaddingRelative(10, 10, 10, 10);
+
+        assertThat(mCarUiRecyclerView.getPaddingTop(), is(equalTo(10)));
+        assertThat(mCarUiRecyclerView.getPaddingBottom(), is(equalTo(10)));
+        assertThat(mCarUiRecyclerView.getPaddingStart(), is(equalTo(10)));
+        assertThat(mCarUiRecyclerView.getPaddingEnd(), is(equalTo(10)));
+    }
+
     /**
      * Returns an item in the current list view whose height is taller than that of
      * the CarUiRecyclerView. If that item exists, then it is returned; otherwise an {@link
