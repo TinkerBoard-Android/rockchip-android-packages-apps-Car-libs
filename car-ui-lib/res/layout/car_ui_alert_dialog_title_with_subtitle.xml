@@ -34,11 +34,9 @@
         style="@style/Widget.CarUi.AlertDialog.TitleContainer">
         <TextView
             android:id="@+id/car_ui_alert_title"
-            android:singleLine="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAlignment="viewStart"
-            style="?android:attr/windowTitleStyle" />
+            android:textAppearance="@style/TextAppearance.CarUi.AlertDialog.Title" />
 
         <TextView
             android:layout_width="match_parent"
