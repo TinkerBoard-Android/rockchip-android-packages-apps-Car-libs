@@ -291,7 +291,7 @@ public class DialogsActivity extends Activity implements InsetsChangedListener {
             };
 
     @Override
-    public void onCarUiInsetsChanged(Insets insets) {
+    public void onCarUiInsetsChanged(@NonNull Insets insets) {
         requireViewById(R.id.list)
                 .setPadding(0, insets.getTop(), 0, insets.getBottom());
         requireViewById(android.R.id.content)
