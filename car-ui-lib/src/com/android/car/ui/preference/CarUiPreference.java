@@ -23,6 +23,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
@@ -73,6 +74,8 @@ public class CarUiPreference extends Preference implements DisabledPreferenceCal
         mShowChevron = a.getBoolean(R.styleable.CarUiPreference_showChevron, true);
         mShouldShowRippleOnDisabledPreference = a.getBoolean(
                 R.styleable.CarUiPreference_showRippleOnDisabledPreference, false);
+
+        a.recycle();
     }
 
 
@@ -133,7 +136,7 @@ public class CarUiPreference extends Preference implements DisabledPreferenceCal
     }
 
     @Override
-    public void setMessageToShowWhenDisabledPreferenceClicked(String message) {
+    public void setMessageToShowWhenDisabledPreferenceClicked(@NonNull String message) {
         mMessageToShowWhenDisabledPreferenceClicked = message;
     }
 }

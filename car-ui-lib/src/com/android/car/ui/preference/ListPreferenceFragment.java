@@ -71,6 +71,7 @@ public class ListPreferenceFragment extends Fragment implements InsetsChangedLis
      * Returns a new instance of {@link ListPreferenceFragment} for the {@link ListPreference} with
      * the given {@code key}.
      */
+    @NonNull
     static ListPreferenceFragment newInstance(String key) {
         ListPreferenceFragment fragment = new ListPreferenceFragment();
         Bundle b = new Bundle(/* capacity= */ 1);
@@ -210,7 +211,7 @@ public class ListPreferenceFragment extends Fragment implements InsetsChangedLis
     }
 
     @Override
-    public void onCarUiInsetsChanged(Insets insets) {
+    public void onCarUiInsetsChanged(@NonNull Insets insets) {
         View view = requireView();
         CarUiUtils.requireViewByRefId(view, R.id.list)
                 .setPadding(0, insets.getTop(), 0, insets.getBottom());

@@ -79,6 +79,8 @@ public class DialogsActivity extends Activity implements InsetsChangedListener {
                 v -> showDialogWithSubtitle()));
         mButtons.add(Pair.create(R.string.dialog_show_subtitle_and_icon,
                 v -> showDialogWithSubtitleAndIcon()));
+        mButtons.add(Pair.create(R.string.dialog_show_long_subtitle_and_icon,
+                v -> showDialogWithLongSubtitleAndIcon()));
         mButtons.add(Pair.create(R.string.dialog_show_single_choice,
                 v -> showDialogWithSingleChoiceItems()));
         mButtons.add(Pair.create(R.string.dialog_show_permission_dialog,
@@ -202,6 +204,17 @@ public class DialogsActivity extends Activity implements InsetsChangedListener {
                 .show();
     }
 
+    private void showDialogWithLongSubtitleAndIcon() {
+        new AlertDialogBuilder(this)
+                .setTitle("This is a very long title. It should likely span across "
+                            + "multiple lines or something. It shouldn't get cut off.")
+                .setSubtitle("This is a very long subtitle. It should likely span across "
+                        + "multiple lines or something. It shouldn't get cut off.")
+                .setMessage("My Message!")
+                .setIcon(R.drawable.ic_tracklist)
+                .show();
+    }
+
     private void showPermissionDialog() {
         if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(this, "Permission already granted. Remove CAMERA permission from "
@@ -278,7 +291,7 @@ public class DialogsActivity extends Activity implements InsetsChangedListener {
             };
 
     @Override
-    public void onCarUiInsetsChanged(Insets insets) {
+    public void onCarUiInsetsChanged(@NonNull Insets insets) {
         requireViewById(R.id.list)
                 .setPadding(0, insets.getTop(), 0, insets.getBottom());
         requireViewById(android.R.id.content)
