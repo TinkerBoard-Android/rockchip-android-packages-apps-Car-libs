@@ -266,19 +266,24 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
                 case RADIO_BUTTON:
                     bindCompoundButton(item, mRadioButton, itemOnClickListener);
                     break;
+                case CHEVRON:
+                    mSupplementalIcon.setVisibility(View.VISIBLE);
+                    mSupplementalIcon.setImageDrawable(itemView.getContext().getDrawable(
+                            R.drawable.car_ui_preference_icon_chevron));
+                    mActionContainer.setVisibility(View.VISIBLE);
+                    mTouchInterceptor.setVisibility(View.VISIBLE);
+                    mTouchInterceptor.setOnClickListener(v -> {
+                        if (itemOnClickListener != null) {
+                            itemOnClickListener.onClick(item);
+                        }
+                    });
+                    mReducedTouchInterceptor.setVisibility(View.GONE);
+                    mActionContainerTouchInterceptor.setVisibility(View.GONE);
+                    break;
                 case ICON:
                     mSupplementalIcon.setVisibility(View.VISIBLE);
                     mSupplementalIcon.setImageDrawable(item.getSupplementalIcon());
                     mActionContainer.setVisibility(View.VISIBLE);
-                    mActionContainerTouchInterceptor.setOnClickListener(
-                            (container) -> {
-                                if (item.getSupplementalIconOnClickListener() != null) {
-                                    item.getSupplementalIconOnClickListener().onClick(mIcon);
-                                }
-                                if (itemOnClickListener != null) {
-                                    itemOnClickListener.onClick(item);
-                                }
-                            });
 
                     // If the icon has a click listener, use a reduced touch interceptor to create
                     // two distinct touch area; the action container and the remainder of the list
@@ -301,6 +306,15 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
                             }
                         });
                         mActionContainerTouchInterceptor.setVisibility(View.VISIBLE);
+                        mActionContainerTouchInterceptor.setOnClickListener(
+                                (container) -> {
+                                    if (item.getSupplementalIconOnClickListener() != null) {
+                                        item.getSupplementalIconOnClickListener().onClick(mIcon);
+                                    }
+                                    if (itemOnClickListener != null) {
+                                        itemOnClickListener.onClick(item);
+                                    }
+                                });
                         mTouchInterceptor.setVisibility(View.GONE);
                     }
                     break;
