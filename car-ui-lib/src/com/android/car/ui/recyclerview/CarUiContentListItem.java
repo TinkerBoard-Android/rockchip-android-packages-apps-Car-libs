@@ -93,7 +93,12 @@ public class CarUiContentListItem extends CarUiListItem {
         /**
          * For an action value of ICON, an icon is shown for the action element of the list item.
          */
-        ICON
+        ICON,
+        /**
+         * For an action value CHEVRON, a chevron is shown for the action element of the list
+         * item.
+         */
+        CHEVRON
     }
 
     private Drawable mIcon;
