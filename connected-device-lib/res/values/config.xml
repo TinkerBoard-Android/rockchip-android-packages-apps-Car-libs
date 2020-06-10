@@ -26,6 +26,4 @@
     <string name="car_secure_write_uuid" translatable="false">5e2a68a5-27be-43f9-8d1e-4546976fabd7</string>
 
     <string name="connected_device_shared_preferences" translatable="false">com.android.car.connecteddevice</string>
-
-    <integer name="car_reconnect_timeout_sec">60</integer>
 </resources>
