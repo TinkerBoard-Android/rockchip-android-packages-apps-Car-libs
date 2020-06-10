@@ -58,6 +58,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
+import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -74,6 +75,8 @@ public class CarBlePeripheralManagerTest {
     private static final String TEST_VERIFICATION_CODE = "000000";
     private static final String TEST_ENCRYPTED_VERIFICATION_CODE = "12345";
     private static final byte[] TEST_KEY = "Key".getBytes();
+    private static final Duration RECONNECT_ADVERTISEMENT_DURATION = Duration.ofSeconds(2);
+
     private static String sAdapterName;
 
     @Mock
@@ -99,7 +102,8 @@ public class CarBlePeripheralManagerTest {
                 .strictness(Strictness.WARN)
                 .startMocking();
         mCarBlePeripheralManager = new CarBlePeripheralManager(mMockPeripheralManager, mMockStorage,
-                ASSOCIATION_SERVICE_UUID, RECONNECT_SERVICE_UUID, WRITE_UUID, READ_UUID);
+                ASSOCIATION_SERVICE_UUID, RECONNECT_SERVICE_UUID, WRITE_UUID, READ_UUID,
+                RECONNECT_ADVERTISEMENT_DURATION);
 
         when(mMockOobConnectionManager.encryptVerificationCode(
                 TEST_VERIFICATION_CODE.getBytes())).thenReturn(
@@ -220,13 +224,13 @@ public class CarBlePeripheralManagerTest {
     public void connectToDevice_stopsAdvertisingAfterTimeout() {
         when(mMockStorage.hashWithChallengeSecret(any(), any()))
                 .thenReturn(ByteUtils.randomBytes(32));
-        int timeoutSeconds = 2;
-        mCarBlePeripheralManager.connectToDevice(UUID.randomUUID(), timeoutSeconds);
+        mCarBlePeripheralManager.connectToDevice(UUID.randomUUID());
         ArgumentCaptor<AdvertiseCallback> callbackCaptor =
                 ArgumentCaptor.forClass(AdvertiseCallback.class);
         verify(mMockPeripheralManager).startAdvertising(any(), any(), callbackCaptor.capture());
         callbackCaptor.getValue().onStartSuccess(null);
-        verify(mMockPeripheralManager, timeout(TimeUnit.SECONDS.toMillis(timeoutSeconds + 1)))
+        verify(mMockPeripheralManager,
+                timeout(RECONNECT_ADVERTISEMENT_DURATION.plusSeconds(1).toMillis()))
                 .stopAdvertising(any(AdvertiseCallback.class));
     }
 
