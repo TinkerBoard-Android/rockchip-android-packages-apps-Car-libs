@@ -39,10 +39,10 @@ import com.android.car.connecteddevice.ConnectedDeviceManager.ConnectionCallback
 import com.android.car.connecteddevice.ConnectedDeviceManager.DeviceAssociationCallback;
 import com.android.car.connecteddevice.ConnectedDeviceManager.DeviceCallback;
 import com.android.car.connecteddevice.ConnectedDeviceManager.MessageDeliveryDelegate;
-import com.android.car.connecteddevice.ble.CarBleCentralManager;
-import com.android.car.connecteddevice.ble.CarBleManager;
-import com.android.car.connecteddevice.ble.CarBlePeripheralManager;
-import com.android.car.connecteddevice.ble.DeviceMessage;
+import com.android.car.connecteddevice.connection.DeviceMessage;
+import com.android.car.connecteddevice.connection.ble.CarBleCentralManager;
+import com.android.car.connecteddevice.connection.ble.CarBleManager;
+import com.android.car.connecteddevice.connection.ble.CarBlePeripheralManager;
 import com.android.car.connecteddevice.model.AssociatedDevice;
 import com.android.car.connecteddevice.model.ConnectedDevice;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
