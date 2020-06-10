@@ -22,7 +22,6 @@ import static com.android.car.connecteddevice.ConnectedDeviceManager.DEVICE_ERRO
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mockitoSession;
@@ -75,7 +74,6 @@ public class ConnectedDeviceManagerTest {
 
     private static final String TEST_DEVICE_NAME = "TEST_DEVICE_NAME";
 
-    private static final int DEFAULT_RECONNECT_TIMEOUT = 5;
 
     private final Executor mCallbackExecutor = Executors.newSingleThreadExecutor();
 
@@ -109,7 +107,7 @@ public class ConnectedDeviceManagerTest {
         ArgumentCaptor<AssociatedDeviceCallback> callbackCaptor = ArgumentCaptor
                 .forClass(AssociatedDeviceCallback.class);
         mConnectedDeviceManager = new ConnectedDeviceManager(mMockStorage, mMockCentralManager,
-            mMockPeripheralManager, DEFAULT_RECONNECT_TIMEOUT);
+            mMockPeripheralManager);
         verify(mMockStorage).setAssociatedDeviceCallback(callbackCaptor.capture());
         when(mMockStorage.getActiveUserAssociatedDevices()).thenReturn(mUserDevices);
         when(mMockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(mUserDeviceIds);
@@ -585,7 +583,7 @@ public class ConnectedDeviceManagerTest {
         mConnectedDeviceManager.addConnectedDevice(deviceId, mMockPeripheralManager);
         mConnectedDeviceManager.removeConnectedDevice(deviceId, mMockPeripheralManager);
         verify(mMockPeripheralManager, timeout(1000))
-                .connectToDevice(eq(UUID.fromString(deviceId)), anyInt());
+                .connectToDevice(eq(UUID.fromString(deviceId)));
     }
 
     @Test
@@ -602,7 +600,7 @@ public class ConnectedDeviceManagerTest {
         clearInvocations(mMockPeripheralManager);
         mConnectedDeviceManager.removeConnectedDevice(deviceId, mMockPeripheralManager);
         verify(mMockPeripheralManager, timeout(1000))
-                .connectToDevice(eq(UUID.fromString(userDeviceId)), anyInt());
+                .connectToDevice(eq(UUID.fromString(userDeviceId)));
     }
 
     @Test
@@ -620,7 +618,7 @@ public class ConnectedDeviceManagerTest {
         mConnectedDeviceManager.addConnectedDevice(userDeviceId, mMockCentralManager);
         mConnectedDeviceManager.removeConnectedDevice(deviceId, mMockPeripheralManager);
         verify(mMockPeripheralManager, timeout(1000).times(0))
-                .connectToDevice(any(), anyInt());
+                .connectToDevice(any());
     }
 
     @Test

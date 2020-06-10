@@ -107,6 +107,8 @@ public class CarBlePeripheralManager extends CarBleManager {
 
     private final Handler mTimeoutHandler;
 
+    private final Duration mMaxReconnectAdvertisementDuration;
+
     // BLE default is 23, minus 3 bytes for ATT_PROTOCOL.
     private int mWriteSize = 20;
 
@@ -133,13 +135,16 @@ public class CarBlePeripheralManager extends CarBleManager {
      * @param reconnectServiceUuid    {@link UUID} of reconnect service.
      * @param writeCharacteristicUuid {@link UUID} of characteristic the car will write to.
      * @param readCharacteristicUuid  {@link UUID} of characteristic the device will write to.
+     * @param maxReconnectAdvertisementDuration Maximum duration to advertise for reconnect before
+     *                                          restarting.
      */
     public CarBlePeripheralManager(@NonNull BlePeripheralManager blePeripheralManager,
             @NonNull ConnectedDeviceStorage connectedDeviceStorage,
             @NonNull UUID associationServiceUuid,
             @NonNull UUID reconnectServiceUuid,
             @NonNull UUID writeCharacteristicUuid,
-            @NonNull UUID readCharacteristicUuid) {
+            @NonNull UUID readCharacteristicUuid,
+            @NonNull Duration maxReconnectAdvertisementDuration) {
         super(connectedDeviceStorage);
         mBlePeripheralManager = blePeripheralManager;
         mAssociationServiceUuid = associationServiceUuid;
@@ -154,6 +159,7 @@ public class CarBlePeripheralManager extends CarBleManager {
                 BluetoothGattCharacteristic.PERMISSION_WRITE);
         mReadCharacteristic.addDescriptor(mDescriptor);
         mTimeoutHandler = new Handler(Looper.getMainLooper());
+        mMaxReconnectAdvertisementDuration = maxReconnectAdvertisementDuration;
     }
 
     @Override
@@ -206,8 +212,8 @@ public class CarBlePeripheralManager extends CarBleManager {
         mReconnectChallenge = null;
     }
 
-    /** Attempt to connect to device with provided id within set timeout period. */
-    public void connectToDevice(@NonNull UUID deviceId, int timeoutSeconds) {
+    /** Attempt to connect to device with provided id. */
+    public void connectToDevice(@NonNull UUID deviceId) {
         for (BleDevice device : mConnectedDevices) {
             if (UUID.fromString(device.mDeviceId).equals(deviceId)) {
                 logd(TAG, "Already connected to device " + deviceId + ".");
@@ -224,9 +230,8 @@ public class CarBlePeripheralManager extends CarBleManager {
             public void onStartSuccess(AdvertiseSettings settingsInEffect) {
                 super.onStartSuccess(settingsInEffect);
                 mTimeoutHandler.postDelayed(mTimeoutRunnable,
-                        TimeUnit.SECONDS.toMillis(timeoutSeconds));
-                logd(TAG, "Successfully started advertising for device " + deviceId
-                        + " for " + timeoutSeconds + " seconds.");
+                        mMaxReconnectAdvertisementDuration.toMillis());
+                logd(TAG, "Successfully started advertising for device " + deviceId + ".");
             }
         };
         mBlePeripheralManager.unregisterCallback(mAssociationPeripheralCallback);
@@ -754,8 +759,9 @@ public class CarBlePeripheralManager extends CarBleManager {
     private final Runnable mTimeoutRunnable = new Runnable() {
         @Override
         public void run() {
-            logd(TAG, "Timeout period expired without a connection. Stopping advertisement.");
+            logd(TAG, "Timeout period expired without a connection. Restarting advertisement.");
             mBlePeripheralManager.stopAdvertising(mAdvertiseCallback);
+            connectToDevice(UUID.fromString(mReconnectDeviceId));
         }
     };
 }
