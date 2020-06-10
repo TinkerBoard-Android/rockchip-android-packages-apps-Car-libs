@@ -109,7 +109,7 @@ class BaseLayoutController {
      */
     private void installBaseLayout(Activity activity) {
         boolean toolbarEnabled = getThemeBoolean(activity, R.attr.carUiToolbar);
-        boolean legacyToolbar = Build.VERSION.SDK_INT <= Build.VERSION_CODES.P;
+        boolean legacyToolbar = Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q;
         @LayoutRes final int baseLayoutRes;
 
         if (toolbarEnabled) {
