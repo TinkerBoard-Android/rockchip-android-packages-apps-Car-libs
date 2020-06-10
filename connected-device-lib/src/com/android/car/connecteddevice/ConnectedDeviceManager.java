@@ -44,6 +44,7 @@ import com.android.car.connecteddevice.util.ThreadSafeCallbacks;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -71,6 +72,10 @@ public class ConnectedDeviceManager {
     // which leaves 10 bytes.
     // Subtracting 2 bytes used by header, we have 8 bytes for device name.
     private static final int DEVICE_NAME_LENGTH_LIMIT = 8;
+
+    // The mac address randomly rotates every 7-15 minutes. To be safe, we will rotate our
+    // reconnect advertisement every 6 minutes to avoid crossing a rotation.
+    private static final Duration MAX_ADVERTISEMENT_DURATION = Duration.ofMinutes(6);
 
     private final ConnectedDeviceStorage mStorage;
 
@@ -108,8 +113,6 @@ public class ConnectedDeviceManager {
     private final AtomicBoolean mIsConnectingToUserDevice = new AtomicBoolean(false);
 
     private final AtomicBoolean mHasStarted = new AtomicBoolean(false);
-
-    private final int mReconnectTimeoutSeconds;
 
     private String mNameForAssociation;
 
@@ -152,8 +155,7 @@ public class ConnectedDeviceManager {
                 UUID.fromString(context.getString(R.string.car_reconnect_service_uuid)),
                 context.getString(R.string.car_bg_mask),
                 UUID.fromString(context.getString(R.string.car_secure_write_uuid)),
-                UUID.fromString(context.getString(R.string.car_secure_read_uuid)),
-                context.getResources().getInteger(R.integer.car_reconnect_timeout_sec));
+                UUID.fromString(context.getString(R.string.car_secure_read_uuid)));
     }
 
     private ConnectedDeviceManager(
@@ -166,22 +168,20 @@ public class ConnectedDeviceManager {
             @NonNull UUID reconnectServiceUuid,
             @NonNull String bgMask,
             @NonNull UUID writeCharacteristicUuid,
-            @NonNull UUID readCharacteristicUuid,
-            int reconnectTimeoutSeconds) {
+            @NonNull UUID readCharacteristicUuid) {
         this(storage,
                 new CarBleCentralManager(context, bleCentralManager, storage, serviceUuid, bgMask,
                         writeCharacteristicUuid, readCharacteristicUuid),
                 new CarBlePeripheralManager(blePeripheralManager, storage, associationServiceUuid,
-                        reconnectServiceUuid, writeCharacteristicUuid, readCharacteristicUuid),
-                reconnectTimeoutSeconds);
+                        reconnectServiceUuid, writeCharacteristicUuid, readCharacteristicUuid,
+                        MAX_ADVERTISEMENT_DURATION));
     }
 
     @VisibleForTesting
     ConnectedDeviceManager(
             @NonNull ConnectedDeviceStorage storage,
             @NonNull CarBleCentralManager centralManager,
-            @NonNull CarBlePeripheralManager peripheralManager,
-            int reconnectTimeoutSeconds) {
+            @NonNull CarBlePeripheralManager peripheralManager) {
         Executor callbackExecutor = Executors.newSingleThreadExecutor();
         mStorage = storage;
         mCentralManager = centralManager;
@@ -190,7 +190,6 @@ public class ConnectedDeviceManager {
         mPeripheralManager.registerCallback(generateCarBleCallback(peripheralManager),
                 callbackExecutor);
         mStorage.setAssociatedDeviceCallback(mAssociatedDeviceCallback);
-        mReconnectTimeoutSeconds = reconnectTimeoutSeconds;
     }
 
     /**
@@ -311,8 +310,7 @@ public class ConnectedDeviceManager {
             }
             EventLog.onStartDeviceSearchStarted();
             mIsConnectingToUserDevice.set(true);
-            mPeripheralManager.connectToDevice(UUID.fromString(userDevice.getDeviceId()),
-                    mReconnectTimeoutSeconds);
+            mPeripheralManager.connectToDevice(UUID.fromString(userDevice.getDeviceId()));
         } catch (Exception e) {
             loge(TAG, "Exception while attempting connection with active user's device.", e);
         }
