@@ -16,15 +16,16 @@
 
 package com.android.car.telephony.common;
 
+import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.ContactsContract;
 
 import androidx.annotation.Nullable;
 
+import com.android.car.apps.common.NavigationUtils;
 import com.android.car.apps.common.log.L;
 
 /**
@@ -107,21 +108,17 @@ public class PostalAddress implements Parcelable {
     /**
      * Returns the address Uri for {@link #mFormattedAddress}.
      */
-    public Uri getAddressUri(Resources res) {
-        String address = String.format(res.getString(R.string.address_uri_format),
-                Uri.encode(mFormattedAddress));
-        L.d(TAG, "The address is: " + TelecomUtils.piiLog(address));
-        return Uri.parse(address);
+    public Intent getAddressIntent(Resources res) {
+        L.d(TAG, "The address is: " + TelecomUtils.piiLog(mFormattedAddress));
+        return NavigationUtils.getViewAddressIntent(res, mFormattedAddress);
     }
 
     /**
      * Returns the navigation Uri for {@link #mFormattedAddress}.
      */
-    public Uri getNavigationUri(Resources res) {
-        String address = String.format(res.getString(R.string.navigation_uri_format),
-                Uri.encode(mFormattedAddress));
-        L.d(TAG, "The address is: " + TelecomUtils.piiLog(address));
-        return Uri.parse(address);
+    public Intent getNavigationIntent(Resources res) {
+        L.d(TAG, "The address is: " + TelecomUtils.piiLog(mFormattedAddress));
+        return NavigationUtils.getNavigationIntent(res, mFormattedAddress);
     }
 
     @Override
