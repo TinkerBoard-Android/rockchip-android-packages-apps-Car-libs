@@ -84,7 +84,7 @@ public class BleDeviceMessageStreamTest {
                 .startMocking();
 
         mStream = new BleDeviceMessageStream(mMockBlePeripheralManager, mMockBluetoothDevice,
-                mMockWriteCharacteristic, mMockReadCharacteristic);
+                mMockWriteCharacteristic, mMockReadCharacteristic, PACKET_SIZE);
     }
 
     @After
