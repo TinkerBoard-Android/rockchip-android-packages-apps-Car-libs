@@ -38,6 +38,8 @@ import android.provider.Settings;
 import android.telecom.Call;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
+import android.text.BidiFormatter;
+import android.text.TextDirectionHeuristics;
 import android.text.TextUtils;
 import android.widget.ImageView;
 
@@ -575,6 +577,13 @@ public class TelecomUtils {
         roundedBitmapDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         roundedBitmapDrawable.draw(canvas);
         return Icon.createWithBitmap(result);
+    }
+
+    /**
+     * Sets the direction of a string, used for displaying phone numbers.
+     */
+    public static String getBidiWrappedNumber(String string) {
+        return BidiFormatter.getInstance().unicodeWrap(string, TextDirectionHeuristics.LTR);
     }
 
     private static Uri makeResourceUri(Context context, int resourceId) {
