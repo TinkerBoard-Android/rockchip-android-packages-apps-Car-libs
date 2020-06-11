@@ -109,8 +109,7 @@ public class CarBlePeripheralManager extends CarBleManager {
 
     private final Duration mMaxReconnectAdvertisementDuration;
 
-    // BLE default is 23, minus 3 bytes for ATT_PROTOCOL.
-    private int mWriteSize = 20;
+    private final int mDefaultMtuSize;
 
     private String mOriginalBluetoothName;
 
@@ -137,6 +136,7 @@ public class CarBlePeripheralManager extends CarBleManager {
      * @param readCharacteristicUuid  {@link UUID} of characteristic the device will write to.
      * @param maxReconnectAdvertisementDuration Maximum duration to advertise for reconnect before
      *                                          restarting.
+     * @param defaultMtuSize          Default MTU size for new channels.
      */
     public CarBlePeripheralManager(@NonNull BlePeripheralManager blePeripheralManager,
             @NonNull ConnectedDeviceStorage connectedDeviceStorage,
@@ -144,7 +144,8 @@ public class CarBlePeripheralManager extends CarBleManager {
             @NonNull UUID reconnectServiceUuid,
             @NonNull UUID writeCharacteristicUuid,
             @NonNull UUID readCharacteristicUuid,
-            @NonNull Duration maxReconnectAdvertisementDuration) {
+            @NonNull Duration maxReconnectAdvertisementDuration,
+            int defaultMtuSize) {
         super(connectedDeviceStorage);
         mBlePeripheralManager = blePeripheralManager;
         mAssociationServiceUuid = associationServiceUuid;
@@ -160,6 +161,7 @@ public class CarBlePeripheralManager extends CarBleManager {
         mReadCharacteristic.addDescriptor(mDescriptor);
         mTimeoutHandler = new Handler(Looper.getMainLooper());
         mMaxReconnectAdvertisementDuration = maxReconnectAdvertisementDuration;
+        mDefaultMtuSize = defaultMtuSize;
     }
 
     @Override
@@ -545,12 +547,12 @@ public class CarBlePeripheralManager extends CarBleManager {
         }
 
         BleDeviceMessageStream secureStream = new BleDeviceMessageStream(mBlePeripheralManager,
-                device, mWriteCharacteristic, mReadCharacteristic);
+                device, mWriteCharacteristic, mReadCharacteristic,
+                mDefaultMtuSize - ATT_PROTOCOL_BYTES);
         secureStream.setMessageReceivedErrorListener(
                 exception -> {
                     disconnectWithError("Error occurred in stream: " + exception.getMessage());
                 });
-        secureStream.setMaxWriteSize(mWriteSize);
         SecureBleChannel secureChannel;
         // TODO(b/157492943): Define an out of band version of ReconnectSecureChannel
         if (isReconnect) {
@@ -574,12 +576,12 @@ public class CarBlePeripheralManager extends CarBleManager {
     }
 
     private void setMtuSize(int mtuSize) {
-        mWriteSize = mtuSize - ATT_PROTOCOL_BYTES;
         BleDevice connectedDevice = getConnectedDevice();
         if (connectedDevice != null
                 && connectedDevice.mSecureChannel != null
                 && connectedDevice.mSecureChannel.getStream() != null) {
-            connectedDevice.mSecureChannel.getStream().setMaxWriteSize(mWriteSize);
+            connectedDevice.mSecureChannel.getStream()
+                    .setMaxWriteSize(mtuSize - ATT_PROTOCOL_BYTES);
         }
     }
 

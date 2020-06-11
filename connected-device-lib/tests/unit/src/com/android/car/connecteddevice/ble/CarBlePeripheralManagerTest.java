@@ -76,6 +76,7 @@ public class CarBlePeripheralManagerTest {
     private static final String TEST_ENCRYPTED_VERIFICATION_CODE = "12345";
     private static final byte[] TEST_KEY = "Key".getBytes();
     private static final Duration RECONNECT_ADVERTISEMENT_DURATION = Duration.ofSeconds(2);
+    private static final int DEFAULT_MTU_SIZE = 23;
 
     private static String sAdapterName;
 
@@ -103,7 +104,7 @@ public class CarBlePeripheralManagerTest {
                 .startMocking();
         mCarBlePeripheralManager = new CarBlePeripheralManager(mMockPeripheralManager, mMockStorage,
                 ASSOCIATION_SERVICE_UUID, RECONNECT_SERVICE_UUID, WRITE_UUID, READ_UUID,
-                RECONNECT_ADVERTISEMENT_DURATION);
+                RECONNECT_ADVERTISEMENT_DURATION, DEFAULT_MTU_SIZE);
 
         when(mMockOobConnectionManager.encryptVerificationCode(
                 TEST_VERIFICATION_CODE.getBytes())).thenReturn(
