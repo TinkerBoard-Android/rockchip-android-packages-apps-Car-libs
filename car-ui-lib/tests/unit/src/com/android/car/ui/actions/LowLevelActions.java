@@ -16,6 +16,7 @@
 
 package com.android.car.ui.actions;
 
+import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayingAtLeast;
 
 import android.view.MotionEvent;
@@ -88,5 +89,85 @@ public class LowLevelActions {
             float[] coords = GeneralLocation.CENTER.calculateCoordinates(view);
             MotionEvents.sendUp(uiController, sMotionEventDownHeldView, coords);
         }
+    }
+
+    public static ViewAction touchDownAndUp(final float x, final float y) {
+        return new ViewAction() {
+            @Override
+            public Matcher<View> getConstraints() {
+                return isDisplayed();
+            }
+
+            @Override
+            public String getDescription() {
+                return "Send touch events.";
+            }
+
+            @Override
+            public void perform(UiController uiController, final View view) {
+                // Get view absolute position
+                int[] location = new int[2];
+                view.getLocationOnScreen(location);
+
+                // Offset coordinates by view position
+                float[] coordinates = new float[]{x + location[0], y + location[1]};
+                float[] precision = new float[]{1f, 1f};
+
+                // Send down event, pause, and send up
+                MotionEvent down = MotionEvents.sendDown(uiController, coordinates, precision).down;
+                uiController.loopMainThreadForAtLeast(200);
+                MotionEvents.sendUp(uiController, down, coordinates);
+            }
+        };
+    }
+
+    /**
+     * Performs the down, move and up touch actions for the given coordinates. deltaX and deltaY
+     * coordinates are used for moving the view from the downX and downY position. The interval
+     * defines the number of time the value should be increased via delta. Also, limitY or limitX
+     * can be provided to stop the movement if that value is reached.
+     */
+    public static ViewAction performDrag(final float downX, final float downY,
+            final float deltaX, final float deltaY, final float interval, final float limitX,
+            final float limitY) {
+        return new ViewAction() {
+            @Override
+            public Matcher<View> getConstraints() {
+                return isDisplayed();
+            }
+
+            @Override
+            public String getDescription() {
+                return "Send touch events.";
+            }
+
+            @Override
+            public void perform(UiController uiController, final View view) {
+                // Get view absolute position
+                int[] location = new int[2];
+                view.getLocationOnScreen(location);
+
+                // Offset coordinates by view position
+                float[] coordinatesDown = new float[]{downX + location[0], downY + location[1]};
+                float[] coordinatesMove = new float[]{downX + location[0], downY + location[1]};
+                float[] precision = new float[]{1f, 1f};
+                // Send down event, pause, and send up
+                MotionEvent down = MotionEvents.sendDown(uiController, coordinatesDown,
+                        precision).down;
+                uiController.loopMainThreadForAtLeast(200);
+                for (int i = 0; i < interval; i++) {
+                    MotionEvents.sendMovement(uiController, down, coordinatesMove);
+                    uiController.loopMainThreadForAtLeast(100);
+
+                    coordinatesMove[0] = coordinatesMove[0] + deltaX;
+                    coordinatesMove[1] = coordinatesMove[1] + deltaY;
+                    if (coordinatesMove[1] > limitY + location[1]
+                            || coordinatesMove[0] > limitX + location[0]) {
+                        break;
+                    }
+                }
+                MotionEvents.sendUp(uiController, down, coordinatesMove);
+            }
+        };
     }
 }
