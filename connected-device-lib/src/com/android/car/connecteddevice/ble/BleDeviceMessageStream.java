@@ -94,22 +94,20 @@ class BleDeviceMessageStream {
 
     private MessageReceivedErrorListener mMessageReceivedErrorListener;
 
-    /*
-     * This initial value is 20 because BLE has a default write of 23 bytes. However, 3 bytes are
-     * subtracted due to bytes being reserved for the command type and attribute ID.
-     */
-    private int mMaxWriteSize = 20;
+    private int mMaxWriteSize;
 
     BleDeviceMessageStream(@NonNull BlePeripheralManager blePeripheralManager,
             @NonNull BluetoothDevice device,
             @NonNull BluetoothGattCharacteristic writeCharacteristic,
-            @NonNull BluetoothGattCharacteristic readCharacteristic) {
+            @NonNull BluetoothGattCharacteristic readCharacteristic,
+            int defaultMaxWriteSize) {
         mBlePeripheralManager = blePeripheralManager;
         mDevice = device;
         mWriteCharacteristic = writeCharacteristic;
         mReadCharacteristic = readCharacteristic;
         mBlePeripheralManager.addOnCharacteristicWriteListener(this::onCharacteristicWrite);
         mBlePeripheralManager.addOnCharacteristicReadListener(this::onCharacteristicRead);
+        mMaxWriteSize = defaultMaxWriteSize;
     }
 
     /**
@@ -135,7 +133,8 @@ class BleDeviceMessageStream {
      * @param operationType The {@link OperationType} of this message.
      */
     void writeMessage(@NonNull DeviceMessage deviceMessage, OperationType operationType) {
-        logd(TAG, "Writing message to device: " + mDevice.getAddress() + ".");
+        logd(TAG, "Writing message with " + deviceMessage.getMessage().length + " bytes to device: "
+                + mDevice.getAddress() + ".");
         BleDeviceMessage.Builder builder = BleDeviceMessage.newBuilder()
                 .setOperation(operationType)
                 .setIsPayloadEncrypted(deviceMessage.isMessageEncrypted())
@@ -346,6 +345,9 @@ class BleDeviceMessageStream {
 
     /** The maximum amount of bytes that can be written over BLE. */
     void setMaxWriteSize(int maxWriteSize) {
+        if (maxWriteSize <= 0) {
+            return;
+        }
         mMaxWriteSize = maxWriteSize;
     }
 
