@@ -41,10 +41,4 @@
     <string name="call_state_call_ringing">Ringing&#8230;</string>
     <!-- Status label for phone state. &#8230; is an ellipsis. [CHAR LIMIT=25] -->
     <string name="call_state_call_ending">Disconnecting&#8230;</string>
-
-    <!-- String format used to format a address Uri. -->
-    <string name="address_uri_format" translatable="false">geo:0,0?q=%s</string>
-    <!-- String format used to format a navigation Uri. -->
-    <string name="navigation_uri_format" translatable="false">google.navigation:q=%s</string>
-
 </resources>
