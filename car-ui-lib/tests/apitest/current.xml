@@ -315,6 +315,7 @@
   <public type="string" name="car_ui_toolbar_menu_item_overflow_title"/>
   <public type="string" name="car_ui_toolbar_menu_item_search_title"/>
   <public type="string" name="car_ui_toolbar_menu_item_settings_title"/>
+  <public type="string" name="car_ui_toolbar_nav_icon_content_description"/>
   <public type="style" name="CarUiPreferenceTheme"/>
   <public type="style" name="CarUiPreferenceTheme.WithToolbar"/>
   <public type="style" name="Preference.CarUi"/>
