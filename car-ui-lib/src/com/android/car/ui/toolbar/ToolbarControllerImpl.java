@@ -744,6 +744,9 @@ public class ToolbarControllerImpl implements ToolbarController {
         mNavIconContainer.setOnClickListener(
                 state != Toolbar.State.HOME ? backClickListener : null);
         mNavIconContainer.setClickable(state != Toolbar.State.HOME);
+        mNavIconContainer.setContentDescription(state != Toolbar.State.HOME
+                ? mContext.getString(R.string.car_ui_toolbar_nav_icon_content_description)
+                : null);
 
         boolean hasTabs = mTabLayout.getTabCount() > 0
                 && (state == Toolbar.State.HOME
