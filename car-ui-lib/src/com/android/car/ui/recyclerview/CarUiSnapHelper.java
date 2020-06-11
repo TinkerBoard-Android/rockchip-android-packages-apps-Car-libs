@@ -181,15 +181,6 @@ public class CarUiSnapHelper extends LinearSnapHelper {
         return isValidSnapView(childToReturn, orientationHelper) ? childToReturn : null;
     }
 
-    private View findViewIfScrollable(LayoutManager layoutManager) {
-        if (layoutManager.canScrollVertically()) {
-            return findTopView(layoutManager, getVerticalHelper(layoutManager));
-        } else if (layoutManager.canScrollHorizontally()) {
-            return findTopView(layoutManager, getHorizontalHelper(layoutManager));
-        }
-        return null;
-    }
-
     private static int distanceToTopMargin(@NonNull View targetView, OrientationHelper helper) {
         final int childTop = helper.getDecoratedStart(targetView);
         final int containerTop = helper.getStartAfterPadding();
