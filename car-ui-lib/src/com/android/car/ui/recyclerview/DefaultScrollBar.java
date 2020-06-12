@@ -91,6 +91,10 @@ class DefaultScrollBar implements ScrollBar {
         getRecyclerView().setOnFlingListener(null);
         mSnapHelper.attachToRecyclerView(getRecyclerView());
 
+        // enables fast scrolling.
+        FastScroller fastScroller = new FastScroller(mRecyclerView, mScrollTrack, mScrollView);
+        fastScroller.enable();
+
         mScrollView.addOnLayoutChangeListener(
                 (View v,
                         int left,
