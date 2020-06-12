@@ -107,7 +107,7 @@ public class CarUi {
         return result;
     }
 
-    private static BaseLayoutController getBaseLayoutController(Activity activity) {
+    /* package */ static BaseLayoutController getBaseLayoutController(Activity activity) {
         if (activity.getClassLoader().equals(CarUi.class.getClassLoader())) {
             return BaseLayoutController.getBaseLayout(activity);
         } else {

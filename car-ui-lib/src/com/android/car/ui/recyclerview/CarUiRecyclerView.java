@@ -42,6 +42,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.car.ui.FocusArea;
 import com.android.car.ui.R;
 import com.android.car.ui.recyclerview.decorations.grid.GridDividerItemDecoration;
 import com.android.car.ui.recyclerview.decorations.grid.GridOffsetItemDecoration;
@@ -94,7 +95,8 @@ public final class CarUiRecyclerView extends RecyclerView implements
     @Nullable
     private Rect mContainerPaddingRelative;
     @Nullable
-    private LinearLayout mContainer;
+    private FocusArea mContainer;
+
 
     /**
      * The possible values for setScrollBarPosition. The default value is actually {@link
@@ -191,41 +193,35 @@ public final class CarUiRecyclerView extends RecyclerView implements
                         context.getDrawable(R.drawable.car_ui_divider),
                         mNumOfColumns);
 
+        int topOffset = a.getInteger(R.styleable.CarUiRecyclerView_topOffset, /* defValue= */0);
+        int bottomOffset = a.getInteger(
+                R.styleable.CarUiRecyclerView_bottomOffset, /* defValue= */0);
         if (carUiRecyclerViewLayout == CarUiRecyclerViewLayout.LINEAR) {
-
-            int linearTopOffset =
-                    a.getInteger(R.styleable.CarUiRecyclerView_topOffset, /* defValue= */ 0);
-            int linearBottomOffset =
-                    a.getInteger(R.styleable.CarUiRecyclerView_bottomOffset, /* defValue= */ 0);
 
             if (enableDivider) {
                 addItemDecoration(mDividerItemDecorationLinear);
             }
             RecyclerView.ItemDecoration topOffsetItemDecoration =
-                    new LinearOffsetItemDecoration(linearTopOffset, OffsetPosition.START);
+                    new LinearOffsetItemDecoration(topOffset, OffsetPosition.START);
 
             RecyclerView.ItemDecoration bottomOffsetItemDecoration =
-                    new LinearOffsetItemDecoration(linearBottomOffset, OffsetPosition.END);
+                    new LinearOffsetItemDecoration(bottomOffset, OffsetPosition.END);
 
             addItemDecoration(topOffsetItemDecoration);
             addItemDecoration(bottomOffsetItemDecoration);
             setLayoutManager(new LinearLayoutManager(getContext()));
         } else {
-            int gridTopOffset =
-                    a.getInteger(R.styleable.CarUiRecyclerView_topOffset, /* defValue= */ 0);
-            int gridBottomOffset =
-                    a.getInteger(R.styleable.CarUiRecyclerView_bottomOffset, /* defValue= */ 0);
 
             if (enableDivider) {
                 addItemDecoration(mDividerItemDecorationGrid);
             }
 
             mOffsetItemDecoration =
-                    new GridOffsetItemDecoration(gridTopOffset, mNumOfColumns,
+                    new GridOffsetItemDecoration(topOffset, mNumOfColumns,
                             OffsetPosition.START);
 
             GridOffsetItemDecoration bottomOffsetItemDecoration =
-                    new GridOffsetItemDecoration(gridBottomOffset, mNumOfColumns,
+                    new GridOffsetItemDecoration(bottomOffset, mNumOfColumns,
                             OffsetPosition.END);
 
             addItemDecoration(mOffsetItemDecoration);
@@ -324,14 +320,15 @@ public final class CarUiRecyclerView extends RecyclerView implements
 
     /**
      * This method will detach the current recycler view from its parent and attach it to the
-     * container which is a LinearLayout. Later the entire container is attached to the
+     * container which is a FocusArea. Later the entire container is attached to the
      * parent where the recycler view was set with the same layout params.
      */
     private void installExternalScrollBar() {
-        mContainer = new LinearLayout(getContext());
+        mContainer = new FocusArea(getContext());
         LayoutInflater inflater = LayoutInflater.from(getContext());
         inflater.inflate(R.layout.car_ui_recycler_view, mContainer, true);
         mContainer.setVisibility(mContainerVisibility);
+        mContainer.setId(R.id.car_ui_recycler_view_container);
 
         if (mContainerPadding != null) {
             mContainer.setPadding(mContainerPadding.left, mContainerPadding.top,

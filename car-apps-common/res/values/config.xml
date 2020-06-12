@@ -39,4 +39,10 @@
     <string name="config_crop_icon_mask" translatable="false">
         M0,50 a50,50 0 1,0 100,0 a50,50 0 1,0 -100,0
     </string>
+
+    <!-- String format used to format a address Uri. -->
+    <string name="config_address_uri_format" translatable="false">geo:0,0?q=%s</string>
+    <!-- String format used to format a navigation Uri. -->
+    <string name="config_navigation_uri_format" translatable="false">google.navigation:q=%s</string>
+
 </resources>
