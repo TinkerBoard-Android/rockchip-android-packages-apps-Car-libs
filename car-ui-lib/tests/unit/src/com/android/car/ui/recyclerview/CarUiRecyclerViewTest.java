@@ -33,8 +33,10 @@ import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
+import static com.android.car.ui.actions.LowLevelActions.performDrag;
 import static com.android.car.ui.actions.LowLevelActions.pressAndHold;
 import static com.android.car.ui.actions.LowLevelActions.release;
+import static com.android.car.ui.actions.LowLevelActions.touchDownAndUp;
 import static com.android.car.ui.actions.ViewActions.waitForView;
 
 import static org.hamcrest.Matchers.equalTo;
@@ -353,6 +355,84 @@ public class CarUiRecyclerViewTest {
         onView(withId(R.id.car_ui_scrollbar_page_down)).perform(release());
 
         assertEquals(layoutManager.findLastCompletelyVisibleItemPosition(), 49);
+    }
+
+    @Test
+    public void testAlphaJumpToMiddleForThumbWhenTrackClicked() {
+        mActivity.runOnUiThread(
+                () -> mActivity.setContentView(R.layout.car_ui_recycler_view_test_activity));
+
+        onView(withId(R.id.list)).check(matches(isDisplayed()));
+
+        CarUiRecyclerView carUiRecyclerView = mActivity.requireViewById(R.id.list);
+        TestAdapter adapter = new TestAdapter(50);
+        mActivity.runOnUiThread(() -> {
+            carUiRecyclerView.setAdapter(adapter);
+        });
+
+        IdlingRegistry.getInstance().register(new ScrollIdlingResource(carUiRecyclerView));
+        onView(withText(adapter.getItemText(0))).check(matches(isDisplayed()));
+
+        View trackView = mActivity.requireViewById(R.id.car_ui_scrollbar_track);
+        // scroll to the middle
+        onView(withId(R.id.car_ui_scrollbar_track)).perform(
+                touchDownAndUp(0f, (trackView.getHeight() / 2f)));
+        onView(withText(adapter.getItemText(25))).check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void testAlphaJumpToEndAndStartForThumbWhenTrackClicked() {
+        mActivity.runOnUiThread(
+                () -> mActivity.setContentView(R.layout.car_ui_recycler_view_test_activity));
+
+        onView(withId(R.id.list)).check(matches(isDisplayed()));
+
+        CarUiRecyclerView carUiRecyclerView = mActivity.requireViewById(R.id.list);
+        TestAdapter adapter = new TestAdapter(50);
+        mActivity.runOnUiThread(() -> {
+            carUiRecyclerView.setAdapter(adapter);
+        });
+
+        IdlingRegistry.getInstance().register(new ScrollIdlingResource(carUiRecyclerView));
+        onView(withText(adapter.getItemText(0))).check(matches(isDisplayed()));
+
+        View trackView = mActivity.requireViewById(R.id.car_ui_scrollbar_track);
+        View thumbView = mActivity.requireViewById(R.id.car_ui_scrollbar_thumb);
+        // scroll to the end
+        onView(withId(R.id.car_ui_scrollbar_track)).perform(
+                touchDownAndUp(0f, trackView.getHeight() - 1));
+        onView(withText(adapter.getItemText(49))).check(matches(isDisplayed()));
+
+        // scroll to the start
+        onView(withId(R.id.car_ui_scrollbar_track)).perform(
+                touchDownAndUp(0f, (thumbView.getHeight() / 2f) + 1));
+        onView(withText(adapter.getItemText(0))).check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void testThumbDragToCenter() {
+        mActivity.runOnUiThread(
+                () -> mActivity.setContentView(R.layout.car_ui_recycler_view_test_activity));
+
+        onView(withId(R.id.list)).check(matches(isDisplayed()));
+
+        CarUiRecyclerView carUiRecyclerView = mActivity.requireViewById(R.id.list);
+        TestAdapter adapter = new TestAdapter(50);
+        mActivity.runOnUiThread(() -> {
+            carUiRecyclerView.setAdapter(adapter);
+        });
+
+        IdlingRegistry.getInstance().register(new ScrollIdlingResource(carUiRecyclerView));
+        onView(withText(adapter.getItemText(0))).check(matches(isDisplayed()));
+
+        View trackView = mActivity.requireViewById(R.id.car_ui_scrollbar_track);
+        View thumbView = mActivity.requireViewById(R.id.car_ui_scrollbar_thumb);
+        // drag and scroll to the middle
+        onView(withId(R.id.car_ui_scrollbar_track)).perform(
+                performDrag(0f, (thumbView.getHeight() / 2f), 0,
+                        (thumbView.getHeight() / 2f) - 1, 10, Float.MAX_VALUE,
+                        trackView.getHeight() / 2f));
+        onView(withText(adapter.getItemText(25))).check(matches(isDisplayed()));
     }
 
     @Test
