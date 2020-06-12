@@ -100,6 +100,10 @@ class BaseLayoutController {
         return mInsetsUpdater.getInsets();
     }
 
+    /* package */ void dispatchNewInsets(Insets insets) {
+        mInsetsUpdater.dispatchNewInsets(insets);
+    }
+
     /**
      * Installs the base layout into an activity, moving its content view under the base layout.
      *
@@ -292,7 +296,9 @@ class BaseLayoutController {
          *
          * @param insets The newly-changed insets.
          */
-        private void dispatchNewInsets(Insets insets) {
+        /* package */ void dispatchNewInsets(Insets insets) {
+            mInsets = insets;
+
             boolean handled = false;
             if (mActivity instanceof InsetsChangedListener) {
                 ((InsetsChangedListener) mActivity).onCarUiInsetsChanged(insets);
