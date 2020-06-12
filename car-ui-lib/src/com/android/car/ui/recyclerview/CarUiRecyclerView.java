@@ -191,41 +191,35 @@ public final class CarUiRecyclerView extends RecyclerView implements
                         context.getDrawable(R.drawable.car_ui_divider),
                         mNumOfColumns);
 
+        int topOffset = a.getInteger(R.styleable.CarUiRecyclerView_topOffset, /* defValue= */0);
+        int bottomOffset = a.getInteger(
+                R.styleable.CarUiRecyclerView_bottomOffset, /* defValue= */0);
         if (carUiRecyclerViewLayout == CarUiRecyclerViewLayout.LINEAR) {
-
-            int linearTopOffset =
-                    a.getInteger(R.styleable.CarUiRecyclerView_topOffset, /* defValue= */ 0);
-            int linearBottomOffset =
-                    a.getInteger(R.styleable.CarUiRecyclerView_bottomOffset, /* defValue= */ 0);
 
             if (enableDivider) {
                 addItemDecoration(mDividerItemDecorationLinear);
             }
             RecyclerView.ItemDecoration topOffsetItemDecoration =
-                    new LinearOffsetItemDecoration(linearTopOffset, OffsetPosition.START);
+                    new LinearOffsetItemDecoration(topOffset, OffsetPosition.START);
 
             RecyclerView.ItemDecoration bottomOffsetItemDecoration =
-                    new LinearOffsetItemDecoration(linearBottomOffset, OffsetPosition.END);
+                    new LinearOffsetItemDecoration(bottomOffset, OffsetPosition.END);
 
             addItemDecoration(topOffsetItemDecoration);
             addItemDecoration(bottomOffsetItemDecoration);
             setLayoutManager(new LinearLayoutManager(getContext()));
         } else {
-            int gridTopOffset =
-                    a.getInteger(R.styleable.CarUiRecyclerView_topOffset, /* defValue= */ 0);
-            int gridBottomOffset =
-                    a.getInteger(R.styleable.CarUiRecyclerView_bottomOffset, /* defValue= */ 0);
 
             if (enableDivider) {
                 addItemDecoration(mDividerItemDecorationGrid);
             }
 
             mOffsetItemDecoration =
-                    new GridOffsetItemDecoration(gridTopOffset, mNumOfColumns,
+                    new GridOffsetItemDecoration(topOffset, mNumOfColumns,
                             OffsetPosition.START);
 
             GridOffsetItemDecoration bottomOffsetItemDecoration =
-                    new GridOffsetItemDecoration(gridBottomOffset, mNumOfColumns,
+                    new GridOffsetItemDecoration(bottomOffset, mNumOfColumns,
                             OffsetPosition.END);
 
             addItemDecoration(mOffsetItemDecoration);
