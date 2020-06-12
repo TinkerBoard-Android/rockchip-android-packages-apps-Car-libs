@@ -19,6 +19,7 @@
     <application android:debuggable="true">
         <uses-library android:name="android.test.runner" />
         <activity android:name="com.android.car.ui.TestActivity" />
+        <activity android:name="com.android.car.ui.recyclerview.CarUiRecyclerViewTestActivity" />
         <activity android:name="com.android.car.ui.FocusAreaTestActivity" />
         <activity android:name="com.android.car.ui.FocusParkingViewTestActivity" />
         <activity
