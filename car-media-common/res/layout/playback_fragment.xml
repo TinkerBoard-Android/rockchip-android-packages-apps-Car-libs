@@ -63,6 +63,7 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:singleLine="true"
             android:includeFontPadding="false"
+            android:textAlignment="viewStart"
             app:layout_constraintStart_toEndOf="@+id/app_icon"
             app:layout_constraintEnd_toStartOf="@+id/app_selector_container"
             app:layout_constraintTop_toTopOf="parent"/>
