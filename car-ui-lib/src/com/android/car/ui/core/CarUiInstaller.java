@@ -15,6 +15,8 @@
  */
 package com.android.car.ui.core;
 
+import static com.android.car.ui.core.CarUi.getBaseLayoutController;
+
 import android.app.Activity;
 import android.app.Application;
 import android.content.ContentProvider;
@@ -29,6 +31,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.car.ui.baselayout.Insets;
+
 import java.lang.reflect.Method;
 import java.util.Locale;
 
@@ -41,6 +45,10 @@ import java.util.Locale;
 public class CarUiInstaller extends ContentProvider {
 
     private static final String TAG = "CarUiInstaller";
+    private static final String CAR_UI_INSET_LEFT = "CAR_UI_INSET_LEFT";
+    private static final String CAR_UI_INSET_RIGHT = "CAR_UI_INSET_RIGHT";
+    private static final String CAR_UI_INSET_TOP = "CAR_UI_INSET_TOP";
+    private static final String CAR_UI_INSET_BOTTOM = "CAR_UI_INSET_BOTTOM";
 
     private static final boolean IS_DEBUG_DEVICE =
             Build.TYPE.toLowerCase(Locale.ROOT).contains("debug")
@@ -69,6 +77,21 @@ public class CarUiInstaller extends ContentProvider {
                     }
 
                     @Override
+                    public void onActivityPostCreated(Activity activity,
+                            Bundle savedInstanceState) {
+                        BaseLayoutController controller = getBaseLayoutController(activity);
+                        if (savedInstanceState != null && controller != null) {
+                            int inset_left = savedInstanceState.getInt(CAR_UI_INSET_LEFT);
+                            int inset_top = savedInstanceState.getInt(CAR_UI_INSET_TOP);
+                            int inset_right = savedInstanceState.getInt(CAR_UI_INSET_RIGHT);
+                            int inset_bottom = savedInstanceState.getInt(CAR_UI_INSET_BOTTOM);
+                            Insets insets = new Insets(inset_left, inset_top, inset_right,
+                                    inset_bottom);
+                            controller.dispatchNewInsets(insets);
+                        }
+                    }
+
+                    @Override
                     public void onActivityStarted(Activity activity) {
                     }
 
@@ -86,6 +109,14 @@ public class CarUiInstaller extends ContentProvider {
 
                     @Override
                     public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+                        BaseLayoutController controller = getBaseLayoutController(activity);
+                        if (controller != null) {
+                            Insets insets = controller.getInsets();
+                            outState.putInt(CAR_UI_INSET_LEFT, insets.getLeft());
+                            outState.putInt(CAR_UI_INSET_TOP, insets.getTop());
+                            outState.putInt(CAR_UI_INSET_RIGHT, insets.getRight());
+                            outState.putInt(CAR_UI_INSET_BOTTOM, insets.getBottom());
+                        }
                     }
 
                     @Override
