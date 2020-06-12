@@ -59,6 +59,8 @@ public class BleDeviceMessageStreamTest {
 
     private static final String TAG = "BleDeviceMessageStreamTest";
 
+    private static final int PACKET_SIZE = 500;
+
     private BleDeviceMessageStream mStream;
 
     @Mock
@@ -83,7 +85,7 @@ public class BleDeviceMessageStreamTest {
                 .startMocking();
 
         mStream = new BleDeviceMessageStream(mMockBlePeripheralManager, mMockBluetoothDevice,
-                mMockWriteCharacteristic, mMockReadCharacteristic);
+                mMockWriteCharacteristic, mMockReadCharacteristic, PACKET_SIZE);
     }
 
     @After

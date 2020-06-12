@@ -67,6 +67,8 @@ public class CarBlePeripheralManagerTest {
     private static final UUID TEST_REMOTE_DEVICE_ID = UUID.randomUUID();
     private static final String TEST_VERIFICATION_CODE = "000000";
     private static final byte[] TEST_KEY = "Key".getBytes();
+    private static final int DEFAULT_MTU_SIZE = 23;
+
     private static String sAdapterName;
 
     @Mock private BlePeripheralManager mMockPeripheralManager;
@@ -87,7 +89,7 @@ public class CarBlePeripheralManagerTest {
                 .strictness(Strictness.LENIENT)
                 .startMocking();
         mCarBlePeripheralManager = new CarBlePeripheralManager(mMockPeripheralManager, mMockStorage,
-                ASSOCIATION_SERVICE_UUID, WRITE_UUID, READ_UUID);
+                ASSOCIATION_SERVICE_UUID, WRITE_UUID, READ_UUID, DEFAULT_MTU_SIZE);
     }
 
     @After

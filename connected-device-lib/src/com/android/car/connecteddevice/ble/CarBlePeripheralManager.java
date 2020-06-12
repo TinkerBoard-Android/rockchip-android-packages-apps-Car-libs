@@ -84,8 +84,7 @@ public class CarBlePeripheralManager extends CarBleManager {
 
     private final Handler mTimeoutHandler;
 
-    // BLE default is 23, minus 3 bytes for ATT_PROTOCOL.
-    private int mWriteSize = 20;
+    private final int mDefaultMtuSize;
 
     private String mOriginalBluetoothName;
 
@@ -104,12 +103,15 @@ public class CarBlePeripheralManager extends CarBleManager {
      * @param connectedDeviceStorage Shared {@link ConnectedDeviceStorage} for companion features.
      * @param associationServiceUuid {@link UUID} of association service.
      * @param writeCharacteristicUuid {@link UUID} of characteristic the car will write to.
-     * @param readCharacteristicUuid {@link UUID} of characteristic the device will write to.
+     * @param readCharacteristicUuid  {@link UUID} of characteristic the device will write to.
+     * @param defaultMtuSize          Default MTU size for new channels.
      */
     public CarBlePeripheralManager(@NonNull BlePeripheralManager blePeripheralManager,
             @NonNull ConnectedDeviceStorage connectedDeviceStorage,
-            @NonNull UUID associationServiceUuid, @NonNull UUID writeCharacteristicUuid,
-            @NonNull UUID readCharacteristicUuid) {
+            @NonNull UUID associationServiceUuid,
+            @NonNull UUID writeCharacteristicUuid,
+            @NonNull UUID readCharacteristicUuid,
+            int defaultMtuSize) {
         super(connectedDeviceStorage);
         mBlePeripheralManager = blePeripheralManager;
         mAssociationServiceUuid = associationServiceUuid;
@@ -123,6 +125,7 @@ public class CarBlePeripheralManager extends CarBleManager {
                 BluetoothGattCharacteristic.PERMISSION_WRITE);
         mReadCharacteristic.addDescriptor(mDescriptor);
         mTimeoutHandler = new Handler(Looper.getMainLooper());
+        mDefaultMtuSize = defaultMtuSize;
     }
 
     @Override
@@ -374,8 +377,8 @@ public class CarBlePeripheralManager extends CarBleManager {
         }
 
         BleDeviceMessageStream secureStream = new BleDeviceMessageStream(mBlePeripheralManager,
-                device, mWriteCharacteristic, mReadCharacteristic);
-        secureStream.setMaxWriteSize(mWriteSize);
+                device, mWriteCharacteristic, mReadCharacteristic,
+                mDefaultMtuSize - ATT_PROTOCOL_BYTES);
         SecureBleChannel secureChannel = new SecureBleChannel(secureStream, mStorage, isReconnect,
                 EncryptionRunnerFactory.newRunner());
         secureChannel.registerCallback(mSecureChannelCallback);
@@ -385,12 +388,12 @@ public class CarBlePeripheralManager extends CarBleManager {
     }
 
     private void setMtuSize(int mtuSize) {
-        mWriteSize = mtuSize - ATT_PROTOCOL_BYTES;
         BleDevice connectedDevice = getConnectedDevice();
         if (connectedDevice != null
                 && connectedDevice.mSecureChannel != null
                 && connectedDevice.mSecureChannel.getStream() != null) {
-            connectedDevice.mSecureChannel.getStream().setMaxWriteSize(mWriteSize);
+            connectedDevice.mSecureChannel.getStream()
+                    .setMaxWriteSize(mtuSize - ATT_PROTOCOL_BYTES);
         }
     }
 
