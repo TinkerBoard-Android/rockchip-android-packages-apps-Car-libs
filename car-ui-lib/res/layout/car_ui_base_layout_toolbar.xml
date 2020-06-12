@@ -35,132 +35,135 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"/>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/car_ui_toolbar_background"
-        style="@style/Widget.CarUi.Toolbar.Container"
+    <com.android.car.ui.FocusArea
         android:layout_width="match_parent"
-        android:layout_height="@dimen/car_ui_toolbar_first_row_height"
-        android:tag="car_ui_top_inset"
-        app:layout_constraintTop_toTopOf="parent">
-        <com.android.car.ui.baselayout.ClickBlockingView
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-
-        <!-- The horizontal bias set to 0.0 here is so that when you set this view as GONE, it will
-             be treated as if it's all the way to the left instead of centered in the margin -->
-        <FrameLayout
-            android:id="@+id/car_ui_toolbar_nav_icon_container"
-            style="@style/Widget.CarUi.Toolbar.NavIconContainer"
-            android:layout_width="@dimen/car_ui_toolbar_margin"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <ImageView
-                android:id="@+id/car_ui_toolbar_nav_icon"
-                style="@style/Widget.CarUi.Toolbar.NavIcon"
-                android:layout_width="@dimen/car_ui_toolbar_nav_icon_size"
-                android:layout_height="@dimen/car_ui_toolbar_nav_icon_size"
-                android:layout_gravity="center"
-                android:scaleType="fitXY" />
-
-            <ImageView
-                android:id="@+id/car_ui_toolbar_logo"
-                android:layout_width="@dimen/car_ui_toolbar_logo_size"
-                android:layout_height="@dimen/car_ui_toolbar_logo_size"
-                android:layout_gravity="center"
-                android:scaleType="fitXY" />
-        </FrameLayout>
-
-        <FrameLayout
-            android:id="@+id/car_ui_toolbar_title_logo_container"
-            style="@style/Widget.CarUi.Toolbar.LogoContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/car_ui_toolbar_nav_icon_container"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <ImageView
-                android:id="@+id/car_ui_toolbar_title_logo"
-                style="@style/Widget.CarUi.Toolbar.Logo"
-                android:layout_width="@dimen/car_ui_toolbar_logo_size"
-                android:layout_height="@dimen/car_ui_toolbar_logo_size"
-                android:layout_gravity="center"
-                android:scaleType="fitXY" />
-        </FrameLayout>
-
-        <LinearLayout android:layout_height="wrap_content"
-                      android:layout_width="0dp"
-                      android:id="@+id/car_ui_toolbar_title_container"
-                      android:orientation="vertical"
-                      android:layout_marginStart="@dimen/car_ui_toolbar_title_margin_start"
-                      app:layout_goneMarginStart="@dimen/car_ui_toolbar_title_no_logo_margin_start"
-                      app:layout_constraintBottom_toBottomOf="parent"
-                      app:layout_constraintEnd_toStartOf="@+id/car_ui_toolbar_menu_items_container"
-                      app:layout_constraintStart_toEndOf="@+id/car_ui_toolbar_title_logo_container"
-                      app:layout_constraintTop_toTopOf="parent">
-            <TextView android:id="@+id/car_ui_toolbar_title"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:singleLine="true"
-                      style="@style/Widget.CarUi.Toolbar.Title"/>
-            <TextView android:id="@+id/car_ui_toolbar_subtitle"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:visibility="gone"
-                      style="@style/Widget.CarUi.Toolbar.Subtitle"/>
-        </LinearLayout>
-
-        <com.android.car.ui.toolbar.TabLayout
-            android:id="@+id/car_ui_toolbar_tabs"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/car_ui_toolbar_menu_items_container"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toEndOf="@+id/car_ui_toolbar_title_logo_container"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <LinearLayout
-            android:id="@+id/car_ui_toolbar_menu_items_container"
-            style="@style/Widget.CarUi.Toolbar.MenuItem.Container"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:orientation="horizontal"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <FrameLayout
-            android:id="@+id/car_ui_toolbar_search_view_container"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/car_ui_toolbar_search_height"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/car_ui_toolbar_menu_items_container"
-            app:layout_constraintStart_toEndOf="@+id/car_ui_toolbar_nav_icon_container"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ProgressBar
-            android:id="@+id/car_ui_toolbar_progress_bar"
-            style="@style/Widget.CarUi.Toolbar.ProgressBar"
+        android:layout_height="@dimen/car_ui_toolbar_first_row_height">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/car_ui_toolbar_background"
+            style="@style/Widget.CarUi.Toolbar.Container"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:indeterminate="true"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            android:layout_height="match_parent"
+            android:tag="car_ui_top_inset"
+            app:layout_constraintTop_toTopOf="parent">
+            <com.android.car.ui.baselayout.ClickBlockingView
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <!-- The horizontal bias set to 0.0 here is so that when you set this view as GONE, it will
+                 be treated as if it's all the way to the left instead of centered in the margin -->
+            <FrameLayout
+                android:id="@+id/car_ui_toolbar_nav_icon_container"
+                style="@style/Widget.CarUi.Toolbar.NavIconContainer"
+                android:layout_width="@dimen/car_ui_toolbar_margin"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/car_ui_toolbar_nav_icon"
+                    style="@style/Widget.CarUi.Toolbar.NavIcon"
+                    android:layout_width="@dimen/car_ui_toolbar_nav_icon_size"
+                    android:layout_height="@dimen/car_ui_toolbar_nav_icon_size"
+                    android:layout_gravity="center"
+                    android:scaleType="fitXY"/>
+
+                <ImageView
+                    android:id="@+id/car_ui_toolbar_logo"
+                    android:layout_width="@dimen/car_ui_toolbar_logo_size"
+                    android:layout_height="@dimen/car_ui_toolbar_logo_size"
+                    android:layout_gravity="center"
+                    android:scaleType="fitXY"/>
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/car_ui_toolbar_title_logo_container"
+                style="@style/Widget.CarUi.Toolbar.LogoContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/car_ui_toolbar_nav_icon_container"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/car_ui_toolbar_title_logo"
+                    style="@style/Widget.CarUi.Toolbar.Logo"
+                    android:layout_width="@dimen/car_ui_toolbar_logo_size"
+                    android:layout_height="@dimen/car_ui_toolbar_logo_size"
+                    android:layout_gravity="center"
+                    android:scaleType="fitXY"/>
+            </FrameLayout>
+
+            <LinearLayout android:layout_height="wrap_content"
+                          android:layout_width="0dp"
+                          android:id="@+id/car_ui_toolbar_title_container"
+                          android:orientation="vertical"
+                          android:layout_marginStart="@dimen/car_ui_toolbar_title_margin_start"
+                          app:layout_goneMarginStart="@dimen/car_ui_toolbar_title_no_logo_margin_start"
+                          app:layout_constraintBottom_toBottomOf="parent"
+                          app:layout_constraintEnd_toStartOf="@+id/car_ui_toolbar_menu_items_container"
+                          app:layout_constraintStart_toEndOf="@+id/car_ui_toolbar_title_logo_container"
+                          app:layout_constraintTop_toTopOf="parent">
+                <TextView android:id="@+id/car_ui_toolbar_title"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:singleLine="true"
+                          style="@style/Widget.CarUi.Toolbar.Title"/>
+                <TextView android:id="@+id/car_ui_toolbar_subtitle"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:visibility="gone"
+                          style="@style/Widget.CarUi.Toolbar.Subtitle"/>
+            </LinearLayout>
+
+            <com.android.car.ui.toolbar.TabLayout
+                android:id="@+id/car_ui_toolbar_tabs"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/car_ui_toolbar_menu_items_container"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toEndOf="@+id/car_ui_toolbar_title_logo_container"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <LinearLayout
+                android:id="@+id/car_ui_toolbar_menu_items_container"
+                style="@style/Widget.CarUi.Toolbar.MenuItem.Container"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <FrameLayout
+                android:id="@+id/car_ui_toolbar_search_view_container"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/car_ui_toolbar_search_height"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/car_ui_toolbar_menu_items_container"
+                app:layout_constraintStart_toEndOf="@+id/car_ui_toolbar_nav_icon_container"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <ProgressBar
+                android:id="@+id/car_ui_toolbar_progress_bar"
+                style="@style/Widget.CarUi.Toolbar.ProgressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.android.car.ui.FocusArea>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-
