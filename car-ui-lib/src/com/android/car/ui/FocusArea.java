@@ -75,6 +75,12 @@ public class FocusArea extends LinearLayout {
      */
     private Drawable mBackgroundHighlight;
 
+    /** The padding (in pixels) of the FocusArea highlight. */
+    private int mPaddingLeft;
+    private int mPaddingRight;
+    private int mPaddingTop;
+    private int mPaddingBottom;
+
     public FocusArea(Context context) {
         super(context);
         init();
@@ -131,8 +137,11 @@ public class FocusArea extends LinearLayout {
         // Draw highlight on top of this FocusArea (including its background and content) but
         // behind its children.
         if (mEnableBackgroundHighlight && mHasFocus) {
-            mBackgroundHighlight.setBounds(getScrollX(), getScrollY(),
-                    getScrollX() + getWidth(), getScrollY() + getHeight());
+            mBackgroundHighlight.setBounds(
+                    mPaddingLeft + getScrollX(),
+                    mPaddingTop + getScrollY(),
+                    getScrollX() + getWidth() - mPaddingRight,
+                    getScrollY() + getHeight() - mPaddingBottom);
             mBackgroundHighlight.draw(canvas);
         }
     }
@@ -144,8 +153,11 @@ public class FocusArea extends LinearLayout {
         // Draw highlight on top of this FocusArea (including its background and content) and its
         // children (including background, content, focus highlight, etc).
         if (mEnableForegroundHighlight && mHasFocus) {
-            mForegroundHighlight.setBounds(getScrollX(), getScrollY(),
-                    getScrollX() + getWidth(), getScrollY() + getHeight());
+            mForegroundHighlight.setBounds(
+                    mPaddingLeft + getScrollX(),
+                    mPaddingTop + getScrollY(),
+                    getScrollX() + getWidth() - mPaddingRight,
+                    getScrollY() + getHeight() - mPaddingBottom);
             mForegroundHighlight.draw(canvas);
         }
     }
@@ -153,5 +165,18 @@ public class FocusArea extends LinearLayout {
     @Override
     public CharSequence getAccessibilityClassName() {
         return FocusArea.class.getName();
+    }
+
+    /** Sets the padding (in pixels) of the FocusArea highlight. */
+    public void setHighlightPadding(int left, int top, int right, int bottom) {
+        if (mPaddingLeft == left && mPaddingTop == top && mPaddingRight == right
+                && mPaddingBottom == bottom) {
+            return;
+        }
+        mPaddingLeft = left;
+        mPaddingTop = top;
+        mPaddingRight = right;
+        mPaddingBottom = bottom;
+        invalidate();
     }
 }
