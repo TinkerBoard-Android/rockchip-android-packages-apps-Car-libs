@@ -196,6 +196,7 @@
   <public type="id" name="car_ui_list_item_start_guideline"/>
   <public type="id" name="car_ui_preference_fragment_container"/>
   <public type="id" name="car_ui_recycler_view"/>
+  <public type="id" name="car_ui_recycler_view_container"/>
   <public type="id" name="car_ui_scroll_bar"/>
   <public type="id" name="car_ui_scrollbar_page_down"/>
   <public type="id" name="car_ui_scrollbar_page_up"/>
