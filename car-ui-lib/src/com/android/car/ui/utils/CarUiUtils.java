@@ -182,7 +182,9 @@ public final class CarUiUtils {
     public static <T extends View> T requireViewByRefId(@NonNull View root, @IdRes int id) {
         T view = findViewByRefId(root, id);
         if (view == null) {
-            throw new IllegalArgumentException("ID does not reference a View inside this View");
+            throw new IllegalArgumentException("ID "
+                    + root.getResources().getResourceName(id)
+                    + " does not reference a View inside this View");
         }
         return view;
     }
