@@ -21,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.car.ui.baselayout.Insets;
+import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.toolbar.ToolbarController;
 
 import java.lang.reflect.Method;
@@ -66,6 +67,17 @@ public class CarUi {
         }
 
         return result;
+    }
+
+    /**
+     * Registering a listener to receive the InsetsChanged updates instead of the Activity.
+     */
+    public static void replaceInsetsChangedListenerWith(Activity activity,
+            InsetsChangedListener listener) {
+        BaseLayoutController controller = getBaseLayoutController(activity);
+        if (controller != null) {
+            controller.replaceInsetsChangedListenerWith(listener);
+        }
     }
 
     /**
