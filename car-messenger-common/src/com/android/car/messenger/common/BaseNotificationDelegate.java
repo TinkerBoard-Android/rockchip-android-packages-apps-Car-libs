@@ -18,17 +18,15 @@ package com.android.car.messenger.common;
 
 import android.annotation.Nullable;
 import android.app.Notification;
+import android.app.Notification.Action;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Person;
 import android.app.RemoteInput;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationCompat.Action;
-import androidx.core.app.Person;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -88,7 +86,7 @@ public class BaseNotificationDelegate {
      * Maps a conversation's Notification Builder to the conversation's unique key. When the
      * conversation gets updated, this builder should be retrieved, updated, and reposted.
      **/
-    private final Map<ConversationKey, NotificationCompat.Builder> mNotificationBuilders =
+    private final Map<ConversationKey, Notification.Builder> mNotificationBuilders =
             new HashMap<>();
 
     /**
@@ -185,7 +183,7 @@ public class BaseNotificationDelegate {
             @Nullable Bitmap avatarIcon) {
         boolean newNotification = !mNotificationBuilders.containsKey(conversationKey);
 
-        NotificationCompat.Builder builder = newNotification ? new NotificationCompat.Builder(
+        Notification.Builder builder = newNotification ? new Notification.Builder(
                 mContext, channelId) : mNotificationBuilders.get(
                 conversationKey);
         builder.setChannelId(channelId);
@@ -214,7 +212,7 @@ public class BaseNotificationDelegate {
         Person user = new Person.Builder()
                 .setName(userName)
                 .build();
-        NotificationCompat.MessagingStyle messagingStyle = new NotificationCompat.MessagingStyle(
+        Notification.MessagingStyle messagingStyle = new Notification.MessagingStyle(
                 user);
         Person sender = new Person.Builder()
                 .setName(lastMessage.getSenderName())
@@ -240,10 +238,10 @@ public class BaseNotificationDelegate {
         // We are creating this notification for the first time.
         if (newNotification) {
             builder.setCategory(Notification.CATEGORY_MESSAGE);
-            if (notificationInfo.getAppSmallIconResId() == 0) {
-                builder.setSmallIcon(R.drawable.ic_message);
+            if (notificationInfo.getAppIcon() != null) {
+                builder.setSmallIcon(notificationInfo.getAppIcon());
             } else {
-                builder.setSmallIcon(notificationInfo.getAppSmallIconResId());
+                builder.setSmallIcon(R.drawable.ic_message);
             }
 
             builder.setShowWhen(true);
@@ -282,7 +280,7 @@ public class BaseNotificationDelegate {
             int notificationId) {
         final int icon = android.R.drawable.ic_media_play;
 
-        final List<NotificationCompat.Action> actionList = new ArrayList<>();
+        final List<Notification.Action> actionList = new ArrayList<>();
 
         // Reply action
         if (shouldAddReplyAction(conversationKey.getDeviceId())) {
@@ -290,14 +288,9 @@ public class BaseNotificationDelegate {
             PendingIntent replyIntent = createServiceIntent(conversationKey, notificationId,
                     ACTION_REPLY);
             actionList.add(
-                    new NotificationCompat.Action.Builder(icon, replyString, replyIntent)
-                            .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_REPLY)
-                            .setShowsUserInterface(false)
-                            .addRemoteInput(
-                                    new androidx.core.app.RemoteInput.Builder(
-                                            EXTRA_REMOTE_INPUT_KEY)
-                                            .build()
-                            )
+                    new Notification.Action.Builder(icon, replyString, replyIntent)
+                            .setSemanticAction(Notification.Action.SEMANTIC_ACTION_REPLY)
+                            .addRemoteInput(new RemoteInput.Builder(EXTRA_REMOTE_INPUT_KEY).build())
                             .build()
             );
         }
@@ -307,9 +300,8 @@ public class BaseNotificationDelegate {
         PendingIntent markAsReadIntent = createServiceIntent(conversationKey, notificationId,
                 ACTION_MARK_AS_READ);
         actionList.add(
-                new NotificationCompat.Action.Builder(icon, markAsRead, markAsReadIntent)
-                        .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_MARK_AS_READ)
-                        .setShowsUserInterface(false)
+                new Notification.Action.Builder(icon, markAsRead, markAsReadIntent)
+                        .setSemanticAction(Notification.Action.SEMANTIC_ACTION_MARK_AS_READ)
                         .build()
         );
 

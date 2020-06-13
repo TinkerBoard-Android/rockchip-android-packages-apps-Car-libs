@@ -20,6 +20,7 @@ import static com.android.car.apps.common.util.SafeLog.logw;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.util.Log;
 
@@ -54,7 +55,8 @@ public class ConversationNotificationInfo {
     private final String mAppPackageName;
     @Nullable
     private final String mUserDisplayName;
-    private final int mAppSmallIconResId;
+    @Nullable
+    private final Icon mAppIcon;
 
     public final LinkedList<MessageKey> mMessageKeys = new LinkedList<>();
 
@@ -78,20 +80,28 @@ public class ConversationNotificationInfo {
             }
         }
 
+        Icon appIcon = null;
+        if (conversation.getAppIcon() != null) {
+            byte[] iconBytes = conversation.getAppIcon().toByteArray();
+            if (iconBytes != null && iconBytes.length > 0) {
+                appIcon = Icon.createWithData(iconBytes, 0, iconBytes.length);
+            }
+        }
+
         return new ConversationNotificationInfo(deviceName, deviceId,
                 messagingStyle.getConvoTitle(),
                 messagingStyle.getIsGroupConvo(), notificationKey,
                 conversation.getMessagingAppDisplayName(),
                 conversation.getMessagingAppPackageName(),
                 messagingStyle.getUserDisplayName(),
-                /* appSmallIconResId= */ 0);
+                appIcon);
 
     }
 
     private ConversationNotificationInfo(@Nullable String deviceName, String deviceId,
             String convoTitle, boolean isGroupConvo, @Nullable String notificationKey,
             @Nullable String appDisplayName, String appPackageName,
-            @Nullable String userDisplayName, int appSmallIconResId) {
+            @Nullable String userDisplayName, @Nullable Icon appIcon) {
         boolean missingDeviceId = (deviceId == null);
         boolean missingTitle = (convoTitle == null);
         if (missingDeviceId || missingTitle) {
@@ -112,7 +122,7 @@ public class ConversationNotificationInfo {
         this.mAppDisplayName = appDisplayName;
         this.mAppPackageName = appPackageName;
         this.mUserDisplayName = userDisplayName;
-        this.mAppSmallIconResId = appSmallIconResId;
+        this.mAppIcon = appIcon;
     }
 
     /** Returns the id that should be used for this object's {@link android.app.Notification} **/
@@ -178,9 +188,10 @@ public class ConversationNotificationInfo {
     }
 
 
-    /** Returns the icon's resource id of the application that posted this notification. **/
-    public int getAppSmallIconResId() {
-        return mAppSmallIconResId;
+    /** Returns the app's icon of the application that posted this notification. **/
+    @Nullable
+    public Icon getAppIcon() {
+        return mAppIcon;
     }
 
     public MessageKey getLastMessageKey() {
