@@ -273,24 +273,4 @@ public interface ToolbarController {
 
     /** Gets a {@link ProgressBarController} */
     ProgressBarController getProgressBar();
-
-    /**
-     * Shows the progress bar.
-     *
-     * @deprecated use {@link #getProgressBar()} instead.
-     */
-    @Deprecated
-    default void showProgressBar() {
-        getProgressBar().setVisible(true);
-    }
-
-    /**
-     * Hides the progress bar
-     *
-     * @deprecated use {@link #getProgressBar()} instead.
-     */
-    @Deprecated
-    default void hideProgressBar() {
-        getProgressBar().setVisible(false);
-    }
 }
