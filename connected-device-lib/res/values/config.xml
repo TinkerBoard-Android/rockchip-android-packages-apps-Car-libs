@@ -16,10 +16,11 @@
   -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-
-    <string name="car_service_uuid" translatable="false">5e2a68a8-27be-43f9-8d1e-4546976fabd7</string>
-    <string name="car_association_service_uuid" translatable="false">5e2a68a4-27be-43f9-8d1e-4546976fabd7</string>
-    <string name="car_reconnect_service_uuid" translatable="false">00003ac5-0000-1000-8000-00805f9b34fb</string>
+    <!-- These values must be modified for the connected device lib to function properly.-->
+    <string name="car_service_uuid" translatable="false">00000000-0000-0000-0000-000000000000</string>
+    <string name="car_association_service_uuid" translatable="false">00000000-0000-0000-0000-000000000000</string>
+    <string name="car_reconnect_service_uuid" translatable="false">00000000-0000-0000-0000-000000000000</string>
+    <string name="car_reconnect_data_uuid" translatable="false">00000000-0000-0000-0000-000000000000</string>
     <string name="car_bg_mask" translatable="false">00000000000000000000000000000000</string>
 
     <string name="car_secure_read_uuid" translatable="false">5e2a68a6-27be-43f9-8d1e-4546976fabd7</string>
