@@ -104,6 +104,10 @@ class BaseLayoutController {
         mInsetsUpdater.dispatchNewInsets(insets);
     }
 
+    /* package */ void replaceInsetsChangedListenerWith(InsetsChangedListener listener) {
+        mInsetsUpdater.replaceInsetsChangedListenerWith(listener);
+    }
+
     /**
      * Installs the base layout into an activity, moving its content view under the base layout.
      *
@@ -191,6 +195,7 @@ class BaseLayoutController {
         private final View mRightInsetView;
         private final View mTopInsetView;
         private final View mBottomInsetView;
+        private InsetsChangedListener mInsetsChangedListenerDelegate;
 
         private boolean mInsetsDirty = true;
         @NonNull
@@ -251,6 +256,10 @@ class BaseLayoutController {
             return mInsets;
         }
 
+        public void replaceInsetsChangedListenerWith(InsetsChangedListener listener) {
+            mInsetsChangedListenerDelegate = listener;
+        }
+
         /**
          * onGlobalLayout() should recalculate the amount of insets we need, and then dispatch them.
          */
@@ -300,17 +309,25 @@ class BaseLayoutController {
             mInsets = insets;
 
             boolean handled = false;
-            if (mActivity instanceof InsetsChangedListener) {
-                ((InsetsChangedListener) mActivity).onCarUiInsetsChanged(insets);
-                handled = true;
-            }
 
-            if (mActivity instanceof FragmentActivity) {
-                for (Fragment fragment : ((FragmentActivity) mActivity).getSupportFragmentManager()
-                        .getFragments()) {
-                    if (fragment instanceof InsetsChangedListener) {
-                        ((InsetsChangedListener) fragment).onCarUiInsetsChanged(insets);
-                        handled = true;
+            if (mInsetsChangedListenerDelegate != null) {
+                mInsetsChangedListenerDelegate.onCarUiInsetsChanged(insets);
+                handled = true;
+            } else {
+                // If an explicit InsetsChangedListener is not provided,
+                // pass the insets to activities and fragments
+                if (mActivity instanceof InsetsChangedListener) {
+                    ((InsetsChangedListener) mActivity).onCarUiInsetsChanged(insets);
+                    handled = true;
+                }
+
+                if (mActivity instanceof FragmentActivity) {
+                    for (Fragment fragment : ((FragmentActivity) mActivity)
+                            .getSupportFragmentManager().getFragments()) {
+                        if (fragment instanceof InsetsChangedListener) {
+                            ((InsetsChangedListener) fragment).onCarUiInsetsChanged(insets);
+                            handled = true;
+                        }
                     }
                 }
             }
