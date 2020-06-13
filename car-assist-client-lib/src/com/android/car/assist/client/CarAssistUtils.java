@@ -164,8 +164,7 @@ public class CarAssistUtils {
         return hasMessagingStyle(sbn)
                 && hasRequiredAssistantCallbacks(sbn)
                 && ((getReplyAction(sbn.getNotification()) == null)
-                    || replyCallbackHasRemoteInput(sbn))
-                && assistantCallbacksShowNoUi(sbn);
+                    || replyCallbackHasRemoteInput(sbn));
     }
 
     /** Returns true if the semantic action provided can be supported. */
