@@ -101,6 +101,8 @@ public class CarBlePeripheralManager extends CarBleManager {
 
     private final UUID mReconnectServiceUuid;
 
+    private final UUID mReconnectDataUuid;
+
     private final BluetoothGattCharacteristic mWriteCharacteristic;
 
     private final BluetoothGattCharacteristic mReadCharacteristic;
@@ -132,6 +134,7 @@ public class CarBlePeripheralManager extends CarBleManager {
      * @param connectedDeviceStorage  Shared {@link ConnectedDeviceStorage} for companion features.
      * @param associationServiceUuid  {@link UUID} of association service.
      * @param reconnectServiceUuid    {@link UUID} of reconnect service.
+     * @param reconnectDataUuid       {@link UUID} key of reconnect advertisement data.
      * @param writeCharacteristicUuid {@link UUID} of characteristic the car will write to.
      * @param readCharacteristicUuid  {@link UUID} of characteristic the device will write to.
      * @param maxReconnectAdvertisementDuration Maximum duration to advertise for reconnect before
@@ -142,6 +145,7 @@ public class CarBlePeripheralManager extends CarBleManager {
             @NonNull ConnectedDeviceStorage connectedDeviceStorage,
             @NonNull UUID associationServiceUuid,
             @NonNull UUID reconnectServiceUuid,
+            @NonNull UUID reconnectDataUuid,
             @NonNull UUID writeCharacteristicUuid,
             @NonNull UUID readCharacteristicUuid,
             @NonNull Duration maxReconnectAdvertisementDuration,
@@ -150,6 +154,7 @@ public class CarBlePeripheralManager extends CarBleManager {
         mBlePeripheralManager = blePeripheralManager;
         mAssociationServiceUuid = associationServiceUuid;
         mReconnectServiceUuid = reconnectServiceUuid;
+        mReconnectDataUuid = reconnectDataUuid;
         mDescriptor.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
         mWriteCharacteristic = new BluetoothGattCharacteristic(writeCharacteristicUuid,
                 BluetoothGattCharacteristic.PROPERTY_NOTIFY,
@@ -245,7 +250,7 @@ public class CarBlePeripheralManager extends CarBleManager {
             return;
         }
         startAdvertising(mReconnectServiceUuid, mAdvertiseCallback, /* includeDeviceName= */ false,
-                advertiseData);
+                advertiseData, mReconnectDataUuid);
     }
 
     /**
@@ -422,7 +427,8 @@ public class CarBlePeripheralManager extends CarBleManager {
         if (mOriginalBluetoothName != null
                 && adapterName.equals(BluetoothAdapter.getDefaultAdapter().getName())) {
             startAdvertising(mAssociationServiceUuid, mAdvertiseCallback,
-                    /* includeDeviceName= */ true, /* serviceData= */ null);
+                    /* includeDeviceName= */ true, /* serviceData= */ null,
+                    /* serviceDataUuid= */ null);
             return;
         }
 
@@ -439,7 +445,8 @@ public class CarBlePeripheralManager extends CarBleManager {
     }
 
     private void startAdvertising(@NonNull UUID serviceUuid, @NonNull AdvertiseCallback callback,
-            boolean includeDeviceName, @Nullable byte[] serviceData) {
+            boolean includeDeviceName, @Nullable byte[] serviceData,
+            @Nullable UUID serviceDataUuid) {
         BluetoothGattService gattService = new BluetoothGattService(serviceUuid,
                 BluetoothGattService.SERVICE_TYPE_PRIMARY);
         gattService.addCharacteristic(mWriteCharacteristic);
@@ -450,7 +457,11 @@ public class CarBlePeripheralManager extends CarBleManager {
         ParcelUuid uuid = new ParcelUuid(serviceUuid);
         builder.addServiceUuid(uuid);
         if (serviceData != null) {
-            builder.addServiceData(uuid, serviceData);
+            ParcelUuid dataUuid = uuid;
+            if (serviceDataUuid != null) {
+                dataUuid = new ParcelUuid(serviceDataUuid);
+            }
+            builder.addServiceData(dataUuid, serviceData);
         }
 
         mBlePeripheralManager.startAdvertising(gattService, builder.build(), callback);

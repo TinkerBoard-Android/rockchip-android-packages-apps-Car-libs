@@ -153,6 +153,7 @@ public class ConnectedDeviceManager {
                 UUID.fromString(context.getString(R.string.car_service_uuid)),
                 UUID.fromString(context.getString(R.string.car_association_service_uuid)),
                 UUID.fromString(context.getString(R.string.car_reconnect_service_uuid)),
+                UUID.fromString(context.getString(R.string.car_reconnect_data_uuid)),
                 context.getString(R.string.car_bg_mask),
                 UUID.fromString(context.getString(R.string.car_secure_write_uuid)),
                 UUID.fromString(context.getString(R.string.car_secure_read_uuid)),
@@ -167,6 +168,7 @@ public class ConnectedDeviceManager {
             @NonNull UUID serviceUuid,
             @NonNull UUID associationServiceUuid,
             @NonNull UUID reconnectServiceUuid,
+            @NonNull UUID reconnectDataUuid,
             @NonNull String bgMask,
             @NonNull UUID writeCharacteristicUuid,
             @NonNull UUID readCharacteristicUuid,
@@ -175,8 +177,8 @@ public class ConnectedDeviceManager {
                 new CarBleCentralManager(context, bleCentralManager, storage, serviceUuid, bgMask,
                         writeCharacteristicUuid, readCharacteristicUuid),
                 new CarBlePeripheralManager(blePeripheralManager, storage, associationServiceUuid,
-                        reconnectServiceUuid, writeCharacteristicUuid, readCharacteristicUuid,
-                        MAX_ADVERTISEMENT_DURATION, defaultMtuSize));
+                        reconnectServiceUuid, reconnectDataUuid, writeCharacteristicUuid,
+                        readCharacteristicUuid, MAX_ADVERTISEMENT_DURATION, defaultMtuSize));
     }
 
     @VisibleForTesting
