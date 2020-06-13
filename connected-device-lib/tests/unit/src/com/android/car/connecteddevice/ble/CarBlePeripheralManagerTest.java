@@ -67,6 +67,7 @@ import java.util.concurrent.TimeUnit;
 public class CarBlePeripheralManagerTest {
     private static final UUID ASSOCIATION_SERVICE_UUID = UUID.randomUUID();
     private static final UUID RECONNECT_SERVICE_UUID = UUID.randomUUID();
+    private static final UUID RECONNECT_DATA_UUID = UUID.randomUUID();
     private static final UUID WRITE_UUID = UUID.randomUUID();
     private static final UUID READ_UUID = UUID.randomUUID();
     private static final int DEVICE_NAME_LENGTH_LIMIT = 8;
@@ -103,8 +104,8 @@ public class CarBlePeripheralManagerTest {
                 .strictness(Strictness.WARN)
                 .startMocking();
         mCarBlePeripheralManager = new CarBlePeripheralManager(mMockPeripheralManager, mMockStorage,
-                ASSOCIATION_SERVICE_UUID, RECONNECT_SERVICE_UUID, WRITE_UUID, READ_UUID,
-                RECONNECT_ADVERTISEMENT_DURATION, DEFAULT_MTU_SIZE);
+                ASSOCIATION_SERVICE_UUID, RECONNECT_SERVICE_UUID, RECONNECT_DATA_UUID,
+                WRITE_UUID, READ_UUID, RECONNECT_ADVERTISEMENT_DURATION, DEFAULT_MTU_SIZE);
 
         when(mMockOobConnectionManager.encryptVerificationCode(
                 TEST_VERIFICATION_CODE.getBytes())).thenReturn(
