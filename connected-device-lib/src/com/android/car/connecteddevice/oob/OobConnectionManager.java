@@ -32,7 +32,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.function.Consumer;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -45,10 +44,11 @@ import javax.crypto.spec.SecretKeySpec;
 
 /**
  * This is a class that manages a token--{@link OobConnectionManager#mEncryptionKey}-- passed via
- * an out of band {@link Channel} that is distinct from the channel that is currently being secured.
+ * an out of band {@link OobChannel} that is distinct from the channel that is currently being
+ * secured.
  *
  * <p>Intended usage as client:
- * {@link OobConnectionManager#forClient(Channel)}
+ * {@link OobConnectionManager#forClient(OobChannel)}
  *
  * <pre>{@code When a message is received:
  *   verificationCode = OobConnectionManager#decryptVerificationCode(byte[])
@@ -62,9 +62,13 @@ import javax.crypto.spec.SecretKeySpec;
  * }</pre>
  *
  * <p>Intended usage as server:
- * {@link OobConnectionManager#forServer(Channel)}
+ * {@link OobConnectionManager#forServer(OobChannel)}
  *
- * <pre>{@code encryptedMessage = OobConnectionManager#encryptVerificationCode(byte[])
+ * <pre>{@code
+ * when oobData is received via the out of band channel:
+ *   OobConnectionManager#setOobData(byte[])
+ *
+ * encryptedMessage = OobConnectionManager#encryptVerificationCode(byte[])
  * sendMessage
  * when a message is received:
  *   verificationCode = OobConnectionManager#decryptVerificationCode(byte[])
@@ -97,7 +101,7 @@ public class OobConnectionManager {
      * @param oobChannel to send out of band data to server
      */
     @Nullable
-    public static OobConnectionManager forClient(@NonNull Channel oobChannel) {
+    static OobConnectionManager forClient(@NonNull OobChannel oobChannel) {
         try {
             return new OobConnectionManager(oobChannel, /* isClient= */ true);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
@@ -112,7 +116,7 @@ public class OobConnectionManager {
      * @param oobChannel to listen for out of band data to be sent from client
      */
     @Nullable
-    public static OobConnectionManager forServer(@NonNull Channel oobChannel) {
+    static OobConnectionManager forServer(@NonNull OobChannel oobChannel) {
         try {
             return new OobConnectionManager(oobChannel, /* isClient= */ false);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
@@ -121,14 +125,12 @@ public class OobConnectionManager {
         return null;
     }
 
-    private OobConnectionManager(Channel oobChannel, boolean isClient)
+    private OobConnectionManager(OobChannel oobChannel, boolean isClient)
             throws NoSuchAlgorithmException, NoSuchPaddingException {
         mCipher = Cipher.getInstance(ALGORITHM);
 
         if (isClient) {
             initAsClient(oobChannel);
-        } else {
-            initAsServer(oobChannel);
         }
     }
 
@@ -154,7 +156,17 @@ public class OobConnectionManager {
         return mCipher.doFinal(encryptedMessage);
     }
 
-    private void initAsClient(@NonNull Channel oobChannel) throws NoSuchAlgorithmException {
+    void setOobData(@NonNull byte[] oobData) {
+        mEncryptionIv = Arrays.copyOfRange(oobData, 0, NONCE_LENGTH_BYTES);
+        mDecryptionIv = Arrays.copyOfRange(oobData, NONCE_LENGTH_BYTES,
+                NONCE_LENGTH_BYTES * 2);
+        mEncryptionKey = new SecretKeySpec(
+                Arrays.copyOfRange(oobData, NONCE_LENGTH_BYTES * 2, oobData.length),
+                KeyProperties.KEY_ALGORITHM_AES);
+    }
+
+
+    private void initAsClient(@NonNull OobChannel oobChannel) throws NoSuchAlgorithmException {
         if (oobChannel == null) {
             logw(TAG, "OOB channel is null, cannot send data.");
             return;
@@ -168,41 +180,5 @@ public class OobConnectionManager {
 
         oobChannel.sendOobData(
                 Bytes.concat(mDecryptionIv, mEncryptionIv, mEncryptionKey.getEncoded()));
-    }
-
-    private void initAsServer(@NonNull Channel oobChannel) {
-        oobChannel.mOobDataReceivedListener = (oobData) -> {
-            mEncryptionIv = Arrays.copyOfRange(oobData, 0, NONCE_LENGTH_BYTES);
-            mDecryptionIv = Arrays.copyOfRange(oobData, NONCE_LENGTH_BYTES,
-                    NONCE_LENGTH_BYTES * 2);
-            mEncryptionKey = new SecretKeySpec(
-                    Arrays.copyOfRange(oobData, NONCE_LENGTH_BYTES * 2, oobData.length),
-                    KeyProperties.KEY_ALGORITHM_AES);
-        };
-    }
-
-    /**
-     * An abstract class that represents the out of band channel and can be used to exchange the
-     * token before the handshake begins.
-     */
-    public abstract static class Channel {
-        @VisibleForTesting
-        Consumer<byte[]> mOobDataReceivedListener;
-
-        /**
-         * Callback to be invoked when {@param oobData} is received via the out of band channel.
-         */
-        public final void onOobDataReceived(@NonNull byte[] oobData) {
-            if (mOobDataReceivedListener == null) {
-                loge(TAG, "OobDataReceivedListener is null, returning");
-                return;
-            }
-            mOobDataReceivedListener.accept(oobData);
-        }
-
-        /**
-         * Sends {@param oobData} over the out of band channel.
-         */
-        public abstract void sendOobData(@NonNull byte[] oobData);
     }
 }
