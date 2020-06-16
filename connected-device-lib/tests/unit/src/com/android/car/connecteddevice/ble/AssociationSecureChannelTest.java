@@ -119,38 +119,6 @@ public final class AssociationSecureChannelTest {
     }
 
     @Test
-    public void testEncryptionHandshake_oobAssociation() throws InterruptedException {
-        Semaphore semaphore = new Semaphore(0);
-        ChannelCallback callbackSpy = spy(new ChannelCallback(semaphore));
-        setupAssociationSecureChannel(callbackSpy, EncryptionRunnerFactory::newOobDummyRunner);
-        ArgumentCaptor<String> deviceIdCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<DeviceMessage> messageCaptor =
-                ArgumentCaptor.forClass(DeviceMessage.class);
-
-        initHandshakeMessage();
-        verify(mStreamMock).writeMessage(messageCaptor.capture(), any());
-        byte[] response = messageCaptor.getValue().getMessage();
-        assertThat(response).isEqualTo(DummyEncryptionRunner.INIT_RESPONSE.getBytes());
-
-        respondToContinueMessage();
-        verify(mShowVerificationCodeListenerMock).showVerificationCode(anyString());
-
-        mChannel.notifyOutOfBandAccepted();
-        sendDeviceId();
-        assertThat(semaphore.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
-        verify(callbackSpy).onDeviceIdReceived(deviceIdCaptor.capture());
-        verify(mStreamMock, times(2)).writeMessage(messageCaptor.capture(), any());
-        byte[] deviceIdMessage = messageCaptor.getValue().getMessage();
-        assertThat(deviceIdMessage).isEqualTo(ByteUtils.uuidToBytes(SERVER_DEVICE_ID));
-        assertThat(deviceIdCaptor.getValue()).isEqualTo(CLIENT_DEVICE_ID.toString());
-        verify(mStorageMock).saveEncryptionKey(eq(CLIENT_DEVICE_ID.toString()), any());
-        verify(mStorageMock).saveChallengeSecret(CLIENT_DEVICE_ID.toString(), CLIENT_SECRET);
-
-        assertThat(semaphore.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
-        verify(callbackSpy).onSecureChannelEstablished();
-    }
-
-    @Test
     public void testEncryptionHandshake_Association_wrongInitHandshakeMessage()
             throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
