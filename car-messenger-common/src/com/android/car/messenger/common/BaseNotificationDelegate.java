@@ -31,6 +31,8 @@ import androidx.core.app.NotificationCompat.Action;
 import androidx.core.app.Person;
 import androidx.core.graphics.drawable.IconCompat;
 
+import com.android.car.telephony.common.TelecomUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -200,9 +202,9 @@ public class BaseNotificationDelegate {
         if (avatarIcon != null) {
             builder.setLargeIcon(avatarIcon);
         } else if (mUseLetterTile) {
-            builder.setLargeIcon(Utils.createLetterTile(mContext,
+            builder.setLargeIcon(TelecomUtils.createLetterTile(mContext,
                     Utils.getInitials(lastMessage.getSenderName(), ""),
-                    lastMessage.getSenderName(), mBitmapSize, mCornerRadiusPercent));
+                    lastMessage.getSenderName(), mBitmapSize, mCornerRadiusPercent).getBitmap());
         }
         // Else, no avatar icon will be shown.
 
