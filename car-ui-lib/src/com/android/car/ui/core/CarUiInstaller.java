@@ -66,6 +66,9 @@ public class CarUiInstaller extends ContentProvider {
         Application application = (Application) context.getApplicationContext();
         application.registerActivityLifecycleCallbacks(
                 new Application.ActivityLifecycleCallbacks() {
+                    private Insets mInsets = null;
+                    private boolean mIsActivityStartedForFirstTime = false;
+
                     @Override
                     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
                         if (activity.getClassLoader()
@@ -74,20 +77,25 @@ public class CarUiInstaller extends ContentProvider {
                         } else {
                             callBaseLayoutControllerMethod("build", activity);
                         }
-                    }
 
-                    @Override
-                    public void onActivityPostCreated(Activity activity,
-                            Bundle savedInstanceState) {
-                        BaseLayoutController controller = getBaseLayoutController(activity);
-                        if (savedInstanceState != null && controller != null) {
+                        if (savedInstanceState != null) {
                             int inset_left = savedInstanceState.getInt(CAR_UI_INSET_LEFT);
                             int inset_top = savedInstanceState.getInt(CAR_UI_INSET_TOP);
                             int inset_right = savedInstanceState.getInt(CAR_UI_INSET_RIGHT);
                             int inset_bottom = savedInstanceState.getInt(CAR_UI_INSET_BOTTOM);
-                            Insets insets = new Insets(inset_left, inset_top, inset_right,
-                                    inset_bottom);
-                            controller.dispatchNewInsets(insets);
+                            mInsets = new Insets(inset_left, inset_top, inset_right, inset_bottom);
+                        }
+
+                        mIsActivityStartedForFirstTime = true;
+                    }
+
+                    @Override
+                    public void onActivityPostStarted(Activity activity) {
+                        BaseLayoutController controller = getBaseLayoutController(activity);
+                        if (mInsets != null && controller != null
+                                && mIsActivityStartedForFirstTime) {
+                            controller.dispatchNewInsets(mInsets);
+                            mIsActivityStartedForFirstTime = false;
                         }
                     }
 
