@@ -29,12 +29,10 @@ public class EncryptionRunnerFactory {
         // prevent instantiation.
     }
 
-    @IntDef({EncryptionRunnerType.UKEY2, EncryptionRunnerType.OOB_UKEY2})
+    @IntDef({EncryptionRunnerType.UKEY2})
     public @interface EncryptionRunnerType {
         /** Use Ukey2 as underlying key exchange. */
         int UKEY2 = 0;
-        /** Use Ukey2 and an out of band channel as underlying key exchange. */
-        int OOB_UKEY2 = 1;
     }
 
     /**
@@ -44,8 +42,6 @@ public class EncryptionRunnerFactory {
         switch (type) {
             case EncryptionRunnerType.UKEY2:
                 return new Ukey2EncryptionRunner();
-            case EncryptionRunnerType.OOB_UKEY2:
-                return new OobUkey2EncryptionRunner();
             default:
                 throw new IllegalArgumentException("Unknown EncryptionRunnerType: " + type);
         }
@@ -68,14 +64,5 @@ public class EncryptionRunnerFactory {
     @VisibleForTesting
     public static EncryptionRunner newDummyRunner() {
         return new DummyEncryptionRunner();
-    }
-
-    /**
-     * Creates a new {@link EncryptionRunner} that doesn't actually do encryption but is useful
-     * for out of band association testing.
-     */
-    @VisibleForTesting
-    public static EncryptionRunner newOobDummyRunner() {
-        return new OobDummyEncryptionRunner();
     }
 }

@@ -99,40 +99,23 @@ class AssociationSecureChannel extends SecureBleChannel {
         HandshakeMessage handshakeMessage = getEncryptionRunner().continueHandshake(message);
         mState = handshakeMessage.getHandshakeState();
 
-        switch (mState) {
-            case HandshakeState.VERIFICATION_NEEDED:
-                String code = handshakeMessage.getVerificationCode();
-                if (code == null) {
-                    loge(TAG, "Unable to get verification code.");
-                    notifySecureChannelFailure(CHANNEL_ERROR_INVALID_VERIFICATION);
-                    return;
-                }
-                processVerificationCode(code);
-                return;
-            case HandshakeState.OOB_VERIFICATION_NEEDED:
-                byte[] oobCode = handshakeMessage.getOobVerificationCode();
-                if (oobCode == null) {
-                    loge(TAG, "Unable to get out of band verification code.");
-                    notifySecureChannelFailure(CHANNEL_ERROR_INVALID_VERIFICATION);
-                    return;
-                }
-                processVerificationCode(new String(oobCode));
-                return;
-            default:
-                loge(TAG, "processHandshakeInProgress: Encountered unexpected handshake state: "
-                        + mState + ".");
-                notifySecureChannelFailure(CHANNEL_ERROR_INVALID_STATE);
+        if (mState != HandshakeState.VERIFICATION_NEEDED) {
+            loge(TAG, "processHandshakeInProgress: Encountered unexpected handshake state: "
+                    + mState + ".");
+            notifySecureChannelFailure(CHANNEL_ERROR_INVALID_STATE);
+            return;
         }
 
+        String code = handshakeMessage.getVerificationCode();
+        if (code == null) {
+            loge(TAG, "Unable to get verification code.");
+            notifySecureChannelFailure(CHANNEL_ERROR_INVALID_VERIFICATION);
+            return;
+        }
 
-    }
-
-    private void processVerificationCode(@NonNull String code) {
         if (mShowVerificationCodeListener == null) {
-            loge(TAG,
-                    "No verification code listener has been set. Unable to display "
-                            + "verification "
-                            + "code to user.");
+            loge(TAG, "No verification code listener has been set. Unable to display verification "
+                    + "code to user.");
             notifySecureChannelFailure(CHANNEL_ERROR_INVALID_STATE);
             return;
         }
