@@ -22,6 +22,8 @@ import android.security.keystore.KeyProperties;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.android.car.connecteddevice.model.AssociatedDevice;
+
 import com.google.common.primitives.Bytes;
 
 import org.junit.Before;
@@ -58,31 +60,19 @@ public class OobConnectionManagerTest {
     }
 
     @Test
-    public void testInitAsServer_listenerIsNotNull() {
-        OobConnectionManager.forServer(mTestChannel);
-        assertThat(mTestChannel.mOobDataReceivedListener).isNotNull();
-    }
-
-    @Test
     public void testInitAsServer_keyIsNull() {
         OobConnectionManager oobConnectionManager = OobConnectionManager.forServer(mTestChannel);
         assertThat(oobConnectionManager.mEncryptionKey).isNull();
     }
 
     @Test
-    public void testServer_onOobDataReceived_setsKeyAndNonce() {
+    public void testServer_onSetOobData_setsKeyAndNonce() {
         OobConnectionManager oobConnectionManager = OobConnectionManager.forServer(mTestChannel);
-        mTestChannel.onOobDataReceived(mTestOobData);
+        oobConnectionManager.setOobData(mTestOobData);
         assertThat(oobConnectionManager.mEncryptionKey).isEqualTo(mTestKey);
         // The decryption IV for the server is the encryption IV for the client and vice versa
         assertThat(oobConnectionManager.mDecryptionIv).isEqualTo(mTestEncryptionIv);
         assertThat(oobConnectionManager.mEncryptionIv).isEqualTo(mTestDecryptionIv);
-    }
-
-    @Test
-    public void testInitAsClient_listenerIsNull() {
-        OobConnectionManager.forClient(mTestChannel);
-        assertThat(mTestChannel.mOobDataReceivedListener).isNull();
     }
 
     @Test
@@ -104,7 +94,7 @@ public class OobConnectionManagerTest {
                 mTestChannel);
         OobConnectionManager serverOobConnectionManager = OobConnectionManager.forServer(
                 mTestChannel);
-        mTestChannel.mOobDataReceivedListener.accept(mTestChannel.mSentOobData);
+        serverOobConnectionManager.setOobData(mTestChannel.mSentOobData);
 
         byte[] encryptedTestMessage = clientOobConnectionManager.encryptVerificationCode(
                 TEST_MESSAGE);
@@ -120,7 +110,7 @@ public class OobConnectionManagerTest {
                 mTestChannel);
         OobConnectionManager serverOobConnectionManager = OobConnectionManager.forServer(
                 mTestChannel);
-        mTestChannel.mOobDataReceivedListener.accept(mTestChannel.mSentOobData);
+        serverOobConnectionManager.setOobData(mTestChannel.mSentOobData);
 
         byte[] encryptedTestMessage = serverOobConnectionManager.encryptVerificationCode(
                 TEST_MESSAGE);
@@ -163,8 +153,13 @@ public class OobConnectionManagerTest {
                 () -> oobConnectionManager.decryptVerificationCode(TEST_MESSAGE));
     }
 
-    private static class TestChannel extends OobConnectionManager.Channel {
+    private static class TestChannel implements OobChannel {
         byte[] mSentOobData = null;
+
+        @Override
+        public void completeOobDataExchange(AssociatedDevice device, Callback callback) {
+
+        }
 
         @Override
         public void sendOobData(byte[] oobData) {
