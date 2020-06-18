@@ -18,8 +18,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <!-- In some cases Android will focus the first focusable view automatically. To prevent the
+         FocusParkingView getting focused unintentionally, we put a focusable Button above the
+         FocusParkingView. -->
+    <Button
+        android:layout_width="100dp"
+        android:layout_height="40dp"/>
     <com.android.car.ui.FocusParkingView
         android:id="@+id/focus_parking"
-        android:layout_width="1dp"
-        android:layout_height="1dp"/>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 </FrameLayout>
