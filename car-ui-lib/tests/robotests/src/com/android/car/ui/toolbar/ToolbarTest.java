@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 
 import com.android.car.ui.R;
 
@@ -114,8 +115,8 @@ public class ToolbarTest {
         toolbar.setState(Toolbar.State.HOME);
         toolbar.setLogo(R.drawable.test_ic_launcher);
 
-        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_logo).isShown()).isFalse();
-        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_title_logo).isShown()).isFalse();
+        assertThat(isViewInToolbarShown(toolbar, R.id.car_ui_toolbar_logo)).isFalse();
+        assertThat(isViewInToolbarShown(toolbar, R.id.car_ui_toolbar_title_logo)).isFalse();
     }
 
     @Test
@@ -187,10 +188,8 @@ public class ToolbarTest {
         toolbar.addTab(new TabLayout.Tab(mContext.getDrawable(R.drawable.test_ic_launcher), "Foo"));
 
         // Toolbar should display two rows, showing both title and tabs.
-        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_tabs).getVisibility()).isEqualTo(
-                View.VISIBLE);
-        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_title).getVisibility()).isEqualTo(
-                View.VISIBLE);
+        assertThat(isViewInToolbarShown(toolbar, R.id.car_ui_toolbar_tabs)).isTrue();
+        assertThat(isViewInToolbarShown(toolbar, R.id.car_ui_toolbar_title)).isTrue();
     }
 
     @Test
@@ -204,10 +203,8 @@ public class ToolbarTest {
         toolbar.setTitle("Test title");
 
         // Toolbar should display two rows, but no tabs are set so they should not be visible.
-        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_title).getVisibility()).isEqualTo(
-                View.VISIBLE);
-        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_tabs).getVisibility()).isNotEqualTo(
-                View.VISIBLE);
+        assertThat(isViewInToolbarShown(toolbar, R.id.car_ui_toolbar_title)).isTrue();
+        assertThat(isViewInToolbarShown(toolbar, R.id.car_ui_toolbar_tabs)).isFalse();
     }
 
     @Test
@@ -221,10 +218,8 @@ public class ToolbarTest {
         toolbar.addTab(new TabLayout.Tab(mContext.getDrawable(R.drawable.test_ic_launcher), "Foo"));
 
         // Toolbar should display two rows with an empty title and tabs.
-        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_tabs).getVisibility()).isEqualTo(
-                View.VISIBLE);
-        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_title).getVisibility()).isEqualTo(
-                View.VISIBLE);
+        assertThat(isViewInToolbarShown(toolbar, R.id.car_ui_toolbar_tabs)).isTrue();
+        assertThat(isViewInToolbarShown(toolbar, R.id.car_ui_toolbar_title)).isTrue();
     }
 
     @Test
@@ -241,10 +236,8 @@ public class ToolbarTest {
         toolbar.addTab(new TabLayout.Tab(mContext.getDrawable(R.drawable.test_ic_launcher), "Foo"));
 
         // With only one row available, toolbar will only show tabs and not the title.
-        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_tabs).getVisibility()).isEqualTo(
-                View.VISIBLE);
-        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_title).getVisibility()).isNotEqualTo(
-                View.VISIBLE);
+        assertThat(isViewInToolbarShown(toolbar, R.id.car_ui_toolbar_tabs)).isTrue();
+        assertThat(isViewInToolbarShown(toolbar, R.id.car_ui_toolbar_title)).isFalse();
     }
 
     @Test
@@ -259,10 +252,8 @@ public class ToolbarTest {
         toolbar.setTitle("Test title");
 
         // Toolbar should display one row with the title and no tabs.
-        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_tabs).getVisibility()).isNotEqualTo(
-                View.VISIBLE);
-        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_title).getVisibility()).isEqualTo(
-                View.VISIBLE);
+        assertThat(isViewInToolbarShown(toolbar, R.id.car_ui_toolbar_tabs)).isFalse();
+        assertThat(isViewInToolbarShown(toolbar, R.id.car_ui_toolbar_title)).isTrue();
     }
 
     @Test
@@ -278,10 +269,8 @@ public class ToolbarTest {
         toolbar.addTab(new TabLayout.Tab(mContext.getDrawable(R.drawable.test_ic_launcher), "Foo"));
 
         // Toolbar should display one row with only tabs.
-        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_tabs).getVisibility()).isEqualTo(
-                View.VISIBLE);
-        assertThat(toolbar.findViewById(R.id.car_ui_toolbar_title).getVisibility()).isNotEqualTo(
-                View.VISIBLE);
+        assertThat(isViewInToolbarShown(toolbar, R.id.car_ui_toolbar_tabs)).isTrue();
+        assertThat(isViewInToolbarShown(toolbar, R.id.car_ui_toolbar_title)).isFalse();
     }
 
     @Test
@@ -464,6 +453,32 @@ public class ToolbarTest {
 
     private int getMenuItemCount() {
         return mToolbar.getMenuItems().size();
+    }
+
+    /**
+     * IsShown() will return false for views that are not attached to an activity.
+     * This altered version will return true for that case.
+     */
+    private boolean isViewInToolbarShown(Toolbar toolbar, int id) {
+        View current = toolbar.findViewById(id);
+        //noinspection ConstantConditions
+        do {
+            if (current.getVisibility() != View.VISIBLE) {
+                return false;
+            }
+            ViewParent parent = current.getParent();
+            if (parent == null) {
+                return false; // We are not attached to the view root
+            }
+            if (parent == toolbar || !(parent instanceof View)) {
+                // Return true if we hit the toolbar, or this parent isn't a view.
+                // The parent wouldn't be a view if it was a ViewRootImpl, the parent
+                // of a whole view hierarchy
+                return true;
+            }
+            current = (View) parent;
+        } while (current != null);
+        return false;
     }
 
     private View getMenuItemView(int index) {
