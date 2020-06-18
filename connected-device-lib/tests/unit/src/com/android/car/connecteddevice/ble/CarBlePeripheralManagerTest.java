@@ -110,6 +110,7 @@ public class CarBlePeripheralManagerTest {
         when(mMockOobConnectionManager.decryptVerificationCode(
                 TEST_ENCRYPTED_VERIFICATION_CODE.getBytes())).thenReturn(
                 TEST_VERIFICATION_CODE.getBytes());
+        mCarBlePeripheralManager.start();
     }
 
     @After

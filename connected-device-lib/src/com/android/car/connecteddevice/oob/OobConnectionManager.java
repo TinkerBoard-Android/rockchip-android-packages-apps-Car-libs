@@ -17,10 +17,8 @@
 package com.android.car.connecteddevice.oob;
 
 import static com.android.car.connecteddevice.util.SafeLog.loge;
-import static com.android.car.connecteddevice.util.SafeLog.logw;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.security.keystore.KeyProperties;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -46,10 +44,11 @@ import javax.crypto.spec.SecretKeySpec;
  * This is a class that manages a token--{@link OobConnectionManager#mEncryptionKey}-- passed via
  * an out of band {@link OobChannel} that is distinct from the channel that is currently being
  * secured.
- *
- * <p>Intended usage as client:
- * {@link OobConnectionManager#forClient(OobChannel)}
- *
+ * <p>Intended usage:
+*  <pre>{@code
+ *  OobConnectionManager oobConncetionManager = new OobConnectionManager();
+ *  oobConnectionManager.startOobExchange(channel);
+ *  }</pre>
  * <pre>{@code When a message is received:
  *   verificationCode = OobConnectionManager#decryptVerificationCode(byte[])
  *   check that verification code is valid
@@ -60,9 +59,6 @@ import javax.crypto.spec.SecretKeySpec;
  *   otherwise:
  *     fail handshake
  * }</pre>
- *
- * <p>Intended usage as server:
- * {@link OobConnectionManager#forServer(OobChannel)}
  *
  * <pre>{@code
  * when oobData is received via the out of band channel:
@@ -95,42 +91,12 @@ public class OobConnectionManager {
     @VisibleForTesting
     SecretKey mEncryptionKey;
 
-    /**
-     * Static initializer for client device.
-     *
-     * @param oobChannel to send out of band data to server
-     */
-    @Nullable
-    static OobConnectionManager forClient(@NonNull OobChannel oobChannel) {
+    public OobConnectionManager() {
         try {
-            return new OobConnectionManager(oobChannel, /* isClient= */ true);
+            mCipher = Cipher.getInstance(ALGORITHM);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            loge(TAG, "Creation of OobConnectionManager failed, returning null", e);
-        }
-        return null;
-    }
-
-    /**
-     * Static initializer for server device
-     *
-     * @param oobChannel to listen for out of band data to be sent from client
-     */
-    @Nullable
-    static OobConnectionManager forServer(@NonNull OobChannel oobChannel) {
-        try {
-            return new OobConnectionManager(oobChannel, /* isClient= */ false);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            loge(TAG, "Creation of OobConnectionManager failed, returning null", e);
-        }
-        return null;
-    }
-
-    private OobConnectionManager(OobChannel oobChannel, boolean isClient)
-            throws NoSuchAlgorithmException, NoSuchPaddingException {
-        mCipher = Cipher.getInstance(ALGORITHM);
-
-        if (isClient) {
-            initAsClient(oobChannel);
+            loge(TAG, "Unable to create cipher with " + ALGORITHM + ".", e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -165,13 +131,20 @@ public class OobConnectionManager {
                 KeyProperties.KEY_ALGORITHM_AES);
     }
 
-
-    private void initAsClient(@NonNull OobChannel oobChannel) throws NoSuchAlgorithmException {
-        if (oobChannel == null) {
-            logw(TAG, "OOB channel is null, cannot send data.");
-            return;
+    /**
+     * Start the out of band exchange with a given {@link OobChannel}.
+     *
+     * @param oobChannel Channel to be used for exchange.
+     * @return {@code true} if exchange started successfully. {@code false} if an error occurred.
+     */
+    public boolean startOobExchange(@NonNull OobChannel oobChannel) {
+        KeyGenerator keyGenerator = null;
+        try {
+            keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES);
+        } catch (NoSuchAlgorithmException e) {
+            loge(TAG, "Unable to get AES key generator.", e);
+            return false;
         }
-        KeyGenerator keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES);
         mEncryptionKey = keyGenerator.generateKey();
 
         SecureRandom secureRandom = new SecureRandom();
@@ -180,5 +153,6 @@ public class OobConnectionManager {
 
         oobChannel.sendOobData(
                 Bytes.concat(mDecryptionIv, mEncryptionIv, mEncryptionKey.getEncoded()));
+        return true;
     }
 }
