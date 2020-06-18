@@ -96,6 +96,11 @@
 
     <color name="car_dark_blue_grey_700">#ff172026</color>
 
+    <color name="car_green_700">#ff218c48</color>
+    <color name="car_green_500">#ff41af6a</color>
+
+    <color name="car_red_500a">#ffd50000</color>
+
     <!-- End color palette -->
 
 </resources>
