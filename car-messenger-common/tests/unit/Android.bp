@@ -14,28 +14,25 @@
 // limitations under the License.
 //
 
-android_library {
-    name: "car-messenger-common",
+android_test {
+    name: "car-messenger-common-lib-unit-tests",
 
     srcs: ["src/**/*.java"],
 
-    manifest: "AndroidManifest.xml",
-
-    optimize: {
-        enabled: false,
-    },
-
-    libs: ["android.car"],
-
-    resource_dirs: ["res"],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+        "android.test.mock",
+    ],
 
     static_libs: [
-        "android.car.userlib",
-        "androidx.legacy_legacy-support-v4",
-        "car-apps-common-bp",
-        "car-messenger-protos",
-        "connected-device-protos",
-        "libphonenumber",
+        "android.car",
+        "androidx.test.core",
+        "androidx.test.ext.junit",
+        "androidx.test.rules",
+        "car-messenger-common",
+        "mockito-target-extended-minus-junit4",
+        "truth-prebuilt",
     ],
 
     platform_apis: true,
