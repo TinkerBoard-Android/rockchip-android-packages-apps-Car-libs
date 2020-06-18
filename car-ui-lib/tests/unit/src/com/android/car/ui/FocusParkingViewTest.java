@@ -26,8 +26,13 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 /** Unit test for {@link FocusParkingView}. */
 public class FocusParkingViewTest {
+
+    private static final long WAIT_TIME_MS = 3000;
 
     @Rule
     public ActivityTestRule<FocusParkingViewTestActivity> mActivityRule =
@@ -41,9 +46,34 @@ public class FocusParkingViewTest {
     }
 
     @Test
-    public void testFocusParkingViewCanTakeFocus() {
+    public void testFocusParkingViewCanTakeFocus() throws Exception {
         FocusParkingView focusParkingView = mActivity.findViewById(R.id.focus_parking);
-        focusParkingView.requestFocus();
+
+        CountDownLatch latch = new CountDownLatch(1);
+        focusParkingView.post(() -> {
+            focusParkingView.requestFocus();
+            focusParkingView.post(() -> {
+                latch.countDown();
+            });
+        });
+        latch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+
+        assertThat(focusParkingView.isFocused()).isTrue();
+    }
+    @Test
+    public void testFocusParkingViewFocusedWhenWindowLostFocus() throws Exception {
+        FocusParkingView focusParkingView = mActivity.findViewById(R.id.focus_parking);
+        assertThat(focusParkingView.isFocused()).isFalse();
+
+        CountDownLatch latch = new CountDownLatch(1);
+        focusParkingView.post(() -> {
+            focusParkingView.onWindowFocusChanged(false);
+            focusParkingView.post(() -> {
+                latch.countDown();
+            });
+        });
+        latch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+
         assertThat(focusParkingView.isFocused()).isTrue();
     }
 }
