@@ -66,6 +66,7 @@ public class CarUiSnapHelperTest {
     @Test
     public void calculateDistanceToFinalSnap_shouldReturnTopMarginDifference() {
         when(mRecyclerView.getLayoutManager()).thenReturn(mLayoutManager);
+        when(mRecyclerView.isInTouchMode()).thenReturn(true);
         when(mLayoutManager.getItemCount()).thenReturn(1);
         when(mLayoutManager.canScrollVertically()).thenReturn(true);
         when(mLayoutManager.getChildCount()).thenReturn(1);
