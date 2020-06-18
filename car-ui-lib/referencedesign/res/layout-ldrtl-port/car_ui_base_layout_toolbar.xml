@@ -36,14 +36,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.android.car.ui.FocusArea
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/car_ui_toolbar_background"
-            style="@style/Widget.CarUi.Toolbar.Container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:tag="car_ui_top_inset"
@@ -51,8 +50,8 @@
             <com.android.car.ui.baselayout.ClickBlockingView
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"/>
 
@@ -61,109 +60,109 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:orientation="horizontal"
-                app:layout_constraintGuide_begin="@dimen/car_ui_toolbar_first_row_height"/>
+                app:layout_constraintGuide_begin="96dp"/>
 
             <FrameLayout
                 android:id="@+id/car_ui_toolbar_nav_icon_container"
-                style="@style/Widget.CarUi.Toolbar.NavIconContainer"
-                android:layout_width="@dimen/car_ui_toolbar_margin"
+                android:layout_width="112dp"
                 android:layout_height="0dp"
                 app:layout_constraintBottom_toTopOf="@id/car_ui_toolbar_row_separator_guideline"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <ImageView
                     android:id="@+id/car_ui_toolbar_nav_icon"
-                    style="@style/Widget.CarUi.Toolbar.NavIcon"
                     android:layout_width="@dimen/car_ui_toolbar_nav_icon_size"
                     android:layout_height="@dimen/car_ui_toolbar_nav_icon_size"
                     android:layout_gravity="center"
-                    android:scaleType="fitXY"/>
+                    android:scaleType="fitXY"
+                    android:background="@drawable/car_ui_toolbar_menu_item_icon_ripple"
+                    android:tint="@color/car_ui_text_color_primary"/>
 
                 <ImageView
                     android:id="@+id/car_ui_toolbar_logo"
                     android:layout_width="@dimen/car_ui_toolbar_logo_size"
                     android:layout_height="@dimen/car_ui_toolbar_logo_size"
                     android:layout_gravity="center"
-                    android:scaleType="fitXY"/>
+                    android:scaleType="fitXY" />
             </FrameLayout>
 
             <FrameLayout
                 android:id="@+id/car_ui_toolbar_title_logo_container"
-                style="@style/Widget.CarUi.Toolbar.LogoContainer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="112dp"
+                android:layout_height="0dp"
                 app:layout_constraintBottom_toTopOf="@id/car_ui_toolbar_row_separator_guideline"
-                app:layout_constraintStart_toEndOf="@id/car_ui_toolbar_nav_icon_container"
+                app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <ImageView
                     android:id="@+id/car_ui_toolbar_title_logo"
-                    style="@style/Widget.CarUi.Toolbar.Logo"
                     android:layout_width="@dimen/car_ui_toolbar_logo_size"
                     android:layout_height="@dimen/car_ui_toolbar_logo_size"
                     android:layout_gravity="center"
-                    android:scaleType="fitXY"/>
+                    android:scaleType="fitXY" />
             </FrameLayout>
 
             <LinearLayout android:layout_height="wrap_content"
                           android:layout_width="0dp"
                           android:id="@+id/car_ui_toolbar_title_container"
                           android:orientation="vertical"
-                          android:layout_marginStart="@dimen/car_ui_toolbar_title_margin_start"
-                          app:layout_goneMarginStart="@dimen/car_ui_toolbar_title_no_logo_margin_start"
+                          android:layout_marginRight="112dp"
                           app:layout_constraintBottom_toTopOf="@id/car_ui_toolbar_row_separator_guideline"
-                          app:layout_constraintEnd_toStartOf="@id/car_ui_toolbar_menu_items_container"
-                          app:layout_constraintStart_toEndOf="@id/car_ui_toolbar_title_logo_container"
-                          app:layout_constraintTop_toTopOf="parent">
+                          app:layout_constraintLeft_toRightOf="@id/car_ui_toolbar_menu_items_container"
+                          app:layout_constraintRight_toRightOf="parent"
+                          app:layout_constraintTop_toTopOf="parent" >
                 <TextView android:id="@+id/car_ui_toolbar_title"
                           android:layout_width="wrap_content"
                           android:layout_height="wrap_content"
                           android:singleLine="true"
-                          style="@style/Widget.CarUi.Toolbar.Title"/>
+                          android:textAlignment="viewStart"
+                          android:textAppearance="@style/TextAppearance.CarUi.Widget.Toolbar.Title"/>
                 <TextView android:id="@+id/car_ui_toolbar_subtitle"
                           android:layout_width="wrap_content"
                           android:layout_height="wrap_content"
                           android:visibility="gone"
-                          style="@style/Widget.CarUi.Toolbar.Subtitle"/>
+                          android:textAlignment="viewStart"
+                          android:textAppearance="?android:attr/textAppearanceSmall"/>
             </LinearLayout>
 
             <FrameLayout
                 android:id="@+id/car_ui_toolbar_search_view_container"
                 android:layout_width="0dp"
-                android:layout_height="@dimen/car_ui_toolbar_search_height"
+                android:layout_height="0dp"
                 app:layout_constraintBottom_toTopOf="@id/car_ui_toolbar_row_separator_guideline"
-                app:layout_constraintEnd_toStartOf="@+id/car_ui_toolbar_menu_items_container"
-                app:layout_constraintStart_toEndOf="@+id/car_ui_toolbar_nav_icon_container"
-                app:layout_constraintTop_toTopOf="parent"/>
+                app:layout_constraintLeft_toRightOf="@+id/car_ui_toolbar_menu_items_container"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <LinearLayout
                 android:id="@+id/car_ui_toolbar_menu_items_container"
-                style="@style/Widget.CarUi.Toolbar.MenuItem.Container"
+                android:divider="@drawable/car_ui_toolbar_menu_item_divider"
+                android:showDividers="beginning|middle|end"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:orientation="horizontal"
                 app:layout_constraintBottom_toTopOf="@id/car_ui_toolbar_row_separator_guideline"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
+                app:layout_constraintLeft_toRightOf="@id/car_ui_toolbar_nav_icon_container"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <com.android.car.ui.toolbar.TabLayout
                 android:id="@+id/car_ui_toolbar_tabs"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/car_ui_toolbar_second_row_height"
+                android:layout_height="96dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/car_ui_toolbar_row_separator_guideline"/>
+                app:layout_constraintTop_toBottomOf="@id/car_ui_toolbar_row_separator_guideline" />
 
             <ProgressBar
                 android:id="@+id/car_ui_toolbar_progress_bar"
-                style="@style/Widget.CarUi.Toolbar.ProgressBar"
+                style="@android:style/Widget.DeviceDefault.ProgressBar.Horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:indeterminate="true"
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"/>
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.android.car.ui.FocusArea>
