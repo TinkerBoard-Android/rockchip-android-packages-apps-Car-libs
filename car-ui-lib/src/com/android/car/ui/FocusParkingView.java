@@ -23,9 +23,10 @@ import androidx.annotation.Nullable;
 
 /**
  * A transparent {@link View} that can take focus. It's used by {@link
- * com.android.car.rotary.RotaryService} to support rotary controller navigation. A {@link
- * FocusParkingView} must be placed outside of all {@link FocusArea}s and its width and height must
- * not be zero. Each {@link android.view.Window} must have at least one FocusParkingView.
+ * com.android.car.rotary.RotaryService} to support rotary controller navigation. Each {@link
+ * android.view.Window} must have at least one FocusParkingView. The {@link FocusParkingView} must
+ * be the first in Tab order, and outside of all {@link FocusArea}s.
+ *
  * <p>
  * Android doesn't clear focus automatically when focus is set in another window. If we try to clear
  * focus in the previous window, Android will re-focus a view in that window, resulting in two
@@ -33,6 +34,10 @@ import androidx.annotation.Nullable;
  * view is transparent and its default focus highlight is disabled, so it's invisible to the user no
  * matter whether it's focused or not. It can take focus so that RotaryService can "park" the focus
  * on it to remove the focus highlight.
+ * <p>
+ * If the focused view is scrolled off the screen, Android will refocus the first focusable view in
+ * the window. The FocusParkingView should be the first view so that it gets focus. The
+ * RotaryService detects this and moves focus to the scrolling container.
  * <p>
  * If there is only one focus area in the current window, rotating the controller within the focus
  * area will cause RotaryService to move the focus around from the view on the right to the view on
@@ -86,6 +91,19 @@ public class FocusParkingView extends View {
         // file (match_parent, wrap_content, 100dp, 0dp, etc). Small size is to ensure it has little
         // impact on the layout, non-zero size is to ensure it can take focus.
         setMeasuredDimension(1, 1);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        if (!hasWindowFocus) {
+            // We need to clear the focus (by parking the focus on the FocusParkingView) once the
+            // current window goes to background. This can't be done by RotaryService because
+            // RotaryService sees the window as removed, thus can't perform any action (such as
+            // focus, clear focus) on the nodes in the window. So FocusParkingView has to grab the
+            // focus proactively.
+            requestFocus();
+        }
+        super.onWindowFocusChanged(hasWindowFocus);
     }
 
     @Override
