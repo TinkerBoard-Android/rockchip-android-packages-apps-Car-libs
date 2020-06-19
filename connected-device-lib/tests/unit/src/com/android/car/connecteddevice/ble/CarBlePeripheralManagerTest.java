@@ -16,8 +16,6 @@
 
 package com.android.car.connecteddevice.ble;
 
-import static com.android.car.connecteddevice.ble.SecureBleChannel.CHANNEL_ERROR_INVALID_HANDSHAKE;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -41,7 +39,6 @@ import android.os.ParcelUuid;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.car.connecteddevice.AssociationCallback;
-import com.android.car.connecteddevice.BleStreamProtos.BleOperationProto;
 import com.android.car.connecteddevice.model.AssociatedDevice;
 import com.android.car.connecteddevice.oob.OobConnectionManager;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
@@ -234,105 +231,6 @@ public class CarBlePeripheralManagerTest {
         verify(mMockPeripheralManager,
                 timeout(RECONNECT_ADVERTISEMENT_DURATION.plusSeconds(1).toMillis()))
                 .stopAdvertising(any(AdvertiseCallback.class));
-    }
-
-    @Test
-    public void startOutOfBandAssociation_success() throws Exception {
-        BluetoothDevice bluetoothDevice = BluetoothAdapter.getDefaultAdapter()
-                .getRemoteDevice(TEST_REMOTE_DEVICE_ADDRESS);
-
-        Semaphore semaphore = new Semaphore(0);
-        AssociationCallback callback = createAssociationCallback(semaphore);
-        mCarBlePeripheralManager.startOutOfBandAssociation(bluetoothDevice,
-                mMockOobConnectionManager, callback);
-
-        AssociationSecureChannel associationSecureChannel =
-                (AssociationSecureChannel) mCarBlePeripheralManager.getConnectedDeviceChannel();
-        associationSecureChannel.getShowVerificationCodeListener().showVerificationCode(
-                TEST_VERIFICATION_CODE);
-
-        ArgumentCaptor<byte[]> codeArgumentCaptor = ArgumentCaptor.forClass(byte[].class);
-        verify(mMockOobConnectionManager).encryptVerificationCode(codeArgumentCaptor.capture());
-        assertThat(codeArgumentCaptor.getValue()).isEqualTo(TEST_VERIFICATION_CODE.getBytes());
-
-        associationSecureChannel.onMessageReceived(
-                new DeviceMessage(null, false, TEST_ENCRYPTED_VERIFICATION_CODE.getBytes()),
-                BleOperationProto.OperationType.CLIENT_MESSAGE);
-
-        verify(mMockOobConnectionManager, timeout(100)).decryptVerificationCode(
-                codeArgumentCaptor.capture());
-        assertThat(codeArgumentCaptor.getValue()).isEqualTo(
-                TEST_ENCRYPTED_VERIFICATION_CODE.getBytes());
-
-        SecureBleChannel.Callback channelCallback = associationSecureChannel.getCallback();
-        assertThat(channelCallback).isNotNull();
-        channelCallback.onDeviceIdReceived(TEST_REMOTE_DEVICE_ID.toString());
-        channelCallback.onSecureChannelEstablished();
-        ArgumentCaptor<AssociatedDevice> deviceCaptor =
-                ArgumentCaptor.forClass(AssociatedDevice.class);
-        verify(mMockStorage).addAssociatedDeviceForActiveUser(deviceCaptor.capture());
-        AssociatedDevice device = deviceCaptor.getValue();
-        assertThat(device.getDeviceId()).isEqualTo(TEST_REMOTE_DEVICE_ID.toString());
-        assertThat(tryAcquire(semaphore)).isTrue();
-        verify(callback).onAssociationCompleted(eq(TEST_REMOTE_DEVICE_ID.toString()));
-    }
-
-    @Test
-    public void startOutOfBandAssociation_onInvalidAuthTokenReceived_secureChannelFailure()
-            throws Exception {
-        when(mMockOobConnectionManager.decryptVerificationCode(
-                TEST_ENCRYPTED_VERIFICATION_CODE.getBytes())).thenReturn("invalidCode".getBytes());
-        BluetoothDevice bluetoothDevice = BluetoothAdapter.getDefaultAdapter()
-                .getRemoteDevice(TEST_REMOTE_DEVICE_ADDRESS);
-
-        Semaphore semaphore = new Semaphore(0);
-        AssociationCallback callback = createAssociationCallback(semaphore);
-        mCarBlePeripheralManager.startOutOfBandAssociation(bluetoothDevice,
-                mMockOobConnectionManager, callback);
-
-        AssociationSecureChannel associationSecureChannel =
-                (AssociationSecureChannel) mCarBlePeripheralManager.getConnectedDeviceChannel();
-        associationSecureChannel.getShowVerificationCodeListener().showVerificationCode(
-                TEST_VERIFICATION_CODE);
-
-        ArgumentCaptor<byte[]> codeArgumentCaptor = ArgumentCaptor.forClass(byte[].class);
-        verify(mMockOobConnectionManager).encryptVerificationCode(codeArgumentCaptor.capture());
-        assertThat(codeArgumentCaptor.getValue()).isEqualTo(TEST_VERIFICATION_CODE.getBytes());
-
-        associationSecureChannel.onMessageReceived(
-                new DeviceMessage(null, false, TEST_ENCRYPTED_VERIFICATION_CODE.getBytes()),
-                BleOperationProto.OperationType.CLIENT_MESSAGE);
-
-        verify(mMockOobConnectionManager, timeout(100)).decryptVerificationCode(
-                codeArgumentCaptor.capture());
-        assertThat(codeArgumentCaptor.getValue()).isEqualTo(
-                TEST_ENCRYPTED_VERIFICATION_CODE.getBytes());
-
-        assertThat(tryAcquire(semaphore)).isTrue();
-        verify(callback).onAssociationError(CHANNEL_ERROR_INVALID_HANDSHAKE);
-    }
-
-    @Test
-    public void startOutOfBandAssociation_onTimeout_secureChannelFailure() throws Exception {
-        BluetoothDevice bluetoothDevice = BluetoothAdapter.getDefaultAdapter()
-                .getRemoteDevice(TEST_REMOTE_DEVICE_ADDRESS);
-
-        Semaphore semaphore = new Semaphore(0);
-        AssociationCallback callback = createAssociationCallback(semaphore);
-        mCarBlePeripheralManager.startOutOfBandAssociation(bluetoothDevice,
-                mMockOobConnectionManager, callback);
-
-        AssociationSecureChannel associationSecureChannel =
-                (AssociationSecureChannel) mCarBlePeripheralManager.getConnectedDeviceChannel();
-        associationSecureChannel.getShowVerificationCodeListener().showVerificationCode(
-                TEST_VERIFICATION_CODE);
-
-        ArgumentCaptor<byte[]> codeArgumentCaptor = ArgumentCaptor.forClass(byte[].class);
-        verify(mMockOobConnectionManager).encryptVerificationCode(codeArgumentCaptor.capture());
-        assertThat(codeArgumentCaptor.getValue()).isEqualTo(TEST_VERIFICATION_CODE.getBytes());
-
-        assertThat(semaphore.tryAcquire(5100, TimeUnit.MILLISECONDS)).isTrue();
-        verify(callback).onAssociationError(CHANNEL_ERROR_INVALID_HANDSHAKE);
     }
 
     private BlePeripheralManager.Callback startAssociation(AssociationCallback callback,

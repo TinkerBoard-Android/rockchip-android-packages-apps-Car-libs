@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,59 +16,66 @@
 
 package com.android.car.connecteddevice.ble;
 
+import static com.android.car.connecteddevice.BleStreamProtos.BleOperationProto.OperationType;
+
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mockitoSession;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.car.encryptionrunner.DummyEncryptionRunner;
-import android.car.encryptionrunner.EncryptionRunner;
 import android.car.encryptionrunner.EncryptionRunnerFactory;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
-
-import com.android.car.connecteddevice.BleStreamProtos.BleOperationProto.OperationType;
-import com.android.car.connecteddevice.ble.BleDeviceMessageStream.MessageReceivedListener;
+import com.android.car.connecteddevice.oob.OobConnectionManager;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
 import com.android.car.connecteddevice.util.ByteUtils;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-@RunWith(AndroidJUnit4.class)
-public final class AssociationSecureChannelTest {
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+
+public class OobAssociationSecureChannelTest {
     private static final UUID CLIENT_DEVICE_ID =
             UUID.fromString("a5645523-3280-410a-90c1-582a6c6f4969");
+
     private static final UUID SERVER_DEVICE_ID =
             UUID.fromString("a29f0c74-2014-4b14-ac02-be6ed15b545a");
+
     private static final byte[] CLIENT_SECRET = ByteUtils.randomBytes(32);
 
     @Mock
     private BleDeviceMessageStream mStreamMock;
+
     @Mock
     private ConnectedDeviceStorage mStorageMock;
-    @Mock
-    private AssociationSecureChannel.ShowVerificationCodeListener mShowVerificationCodeListenerMock;
-    private MockitoSession mMockitoSession;
 
-    private AssociationSecureChannel mChannel;
-    private MessageReceivedListener mMessageReceivedListener;
+    @Mock
+    private OobConnectionManager mOobConnectionManagerMock;
+
+    private OobAssociationSecureChannel mChannel;
+
+    private BleDeviceMessageStream.MessageReceivedListener mMessageReceivedListener;
+
+    private MockitoSession mMockitoSession;
 
     @Before
     public void setUp() {
@@ -87,10 +94,11 @@ public final class AssociationSecureChannelTest {
     }
 
     @Test
-    public void testEncryptionHandshake_Association() throws InterruptedException {
+    public void testEncryptionHandshake_oobAssociation() throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
-        ChannelCallback callbackSpy = spy(new ChannelCallback(semaphore));
-        setupAssociationSecureChannel(callbackSpy, EncryptionRunnerFactory::newDummyRunner);
+        ChannelCallback
+                callbackSpy = spy(new ChannelCallback(semaphore));
+        setupOobAssociationSecureChannel(callbackSpy);
         ArgumentCaptor<String> deviceIdCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<DeviceMessage> messageCaptor =
                 ArgumentCaptor.forClass(DeviceMessage.class);
@@ -99,11 +107,12 @@ public final class AssociationSecureChannelTest {
         verify(mStreamMock).writeMessage(messageCaptor.capture(), any());
         byte[] response = messageCaptor.getValue().getMessage();
         assertThat(response).isEqualTo(DummyEncryptionRunner.INIT_RESPONSE.getBytes());
-
+        reset(mStreamMock);
         respondToContinueMessage();
-        verify(mShowVerificationCodeListenerMock).showVerificationCode(anyString());
-
-        mChannel.notifyOutOfBandAccepted();
+        verify(mStreamMock).writeMessage(messageCaptor.capture(), any());
+        byte[] oobCodeResponse = messageCaptor.getValue().getMessage();
+        assertThat(oobCodeResponse).isEqualTo(DummyEncryptionRunner.VERIFICATION_CODE.getBytes());
+        respondToOobCode();
         sendDeviceId();
         assertThat(semaphore.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
         verify(callbackSpy).onDeviceIdReceived(deviceIdCaptor.capture());
@@ -118,48 +127,26 @@ public final class AssociationSecureChannelTest {
         verify(callbackSpy).onSecureChannelEstablished();
     }
 
-    @Test
-    public void testEncryptionHandshake_Association_wrongInitHandshakeMessage()
-            throws InterruptedException {
-        Semaphore semaphore = new Semaphore(0);
-        ChannelCallback callbackSpy = spy(new ChannelCallback(semaphore));
-        setupAssociationSecureChannel(callbackSpy, EncryptionRunnerFactory::newDummyRunner);
-
-        // Wrong init handshake message
-        respondToContinueMessage();
-        assertThat(semaphore.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
-        verify(callbackSpy).onEstablishSecureChannelFailure(
-                eq(SecureBleChannel.CHANNEL_ERROR_INVALID_HANDSHAKE)
-        );
-    }
-
-    @Test
-    public void testEncryptionHandshake_Association_wrongRespondToContinueMessage()
-            throws InterruptedException {
-        Semaphore semaphore = new Semaphore(0);
-        ChannelCallback callbackSpy = spy(new ChannelCallback(semaphore));
-        setupAssociationSecureChannel(callbackSpy, EncryptionRunnerFactory::newDummyRunner);
-
-        initHandshakeMessage();
-
-        // Wrong respond to continue message
-        initHandshakeMessage();
-        assertThat(semaphore.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
-        verify(callbackSpy).onEstablishSecureChannelFailure(
-                eq(SecureBleChannel.CHANNEL_ERROR_INVALID_HANDSHAKE)
-        );
-    }
-
-    private void setupAssociationSecureChannel(ChannelCallback callback,
-            EncryptionRunnerProvider encryptionRunnerProvider) {
-        mChannel = new AssociationSecureChannel(mStreamMock, mStorageMock,
-                encryptionRunnerProvider.getEncryptionRunner());
+    private void setupOobAssociationSecureChannel(ChannelCallback callback) {
+        mChannel = new OobAssociationSecureChannel(mStreamMock, mStorageMock,
+                mOobConnectionManagerMock, EncryptionRunnerFactory.newOobDummyRunner());
         mChannel.registerCallback(callback);
-        mChannel.setShowVerificationCodeListener(mShowVerificationCodeListenerMock);
-        ArgumentCaptor<MessageReceivedListener> listenerCaptor =
-                ArgumentCaptor.forClass(MessageReceivedListener.class);
+        ArgumentCaptor<BleDeviceMessageStream.MessageReceivedListener> listenerCaptor =
+                ArgumentCaptor.forClass(BleDeviceMessageStream.MessageReceivedListener.class);
         verify(mStreamMock).setMessageReceivedListener(listenerCaptor.capture());
         mMessageReceivedListener = listenerCaptor.getValue();
+        try {
+            when(mOobConnectionManagerMock.encryptVerificationCode(any()))
+                    .thenReturn(DummyEncryptionRunner.VERIFICATION_CODE.getBytes());
+        } catch (InvalidAlgorithmParameterException | BadPaddingException | InvalidKeyException
+                | IllegalBlockSizeException e) {
+        }
+        try {
+            when(mOobConnectionManagerMock.decryptVerificationCode(any()))
+                    .thenReturn(DummyEncryptionRunner.VERIFICATION_CODE.getBytes());
+        } catch (InvalidAlgorithmParameterException | BadPaddingException | InvalidKeyException
+                | IllegalBlockSizeException e) {
+        }
     }
 
     private void sendDeviceId() {
@@ -185,6 +172,15 @@ public final class AssociationSecureChannelTest {
                 /* recipient= */ null,
                 /* isMessageEncrypted= */ false,
                 DummyEncryptionRunner.CLIENT_RESPONSE.getBytes()
+        );
+        mMessageReceivedListener.onMessageReceived(message, OperationType.ENCRYPTION_HANDSHAKE);
+    }
+
+    private void respondToOobCode() {
+        DeviceMessage message = new DeviceMessage(
+                /* recipient= */ null,
+                /* isMessageEncrypted= */ false,
+                DummyEncryptionRunner.VERIFICATION_CODE.getBytes()
         );
         mMessageReceivedListener.onMessageReceived(message, OperationType.ENCRYPTION_HANDSHAKE);
     }
@@ -228,9 +224,5 @@ public final class AssociationSecureChannelTest {
         public void onDeviceIdReceived(String deviceId) {
             mSemaphore.release();
         }
-    }
-
-    interface EncryptionRunnerProvider {
-        EncryptionRunner getEncryptionRunner();
     }
 }
