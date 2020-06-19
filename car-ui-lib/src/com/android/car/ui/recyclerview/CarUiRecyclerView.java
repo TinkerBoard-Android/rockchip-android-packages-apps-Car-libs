@@ -16,6 +16,8 @@
 package com.android.car.ui.recyclerview;
 
 import static com.android.car.ui.utils.CarUiUtils.findViewByRefId;
+import static com.android.car.ui.utils.RotaryConstants.ROTARY_HORIZONTALLY_SCROLLABLE;
+import static com.android.car.ui.utils.RotaryConstants.ROTARY_VERTICALLY_SCROLLABLE;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -29,7 +31,9 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.InputDevice;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -42,7 +46,6 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.car.ui.FocusArea;
 import com.android.car.ui.R;
 import com.android.car.ui.recyclerview.decorations.grid.GridDividerItemDecoration;
 import com.android.car.ui.recyclerview.decorations.grid.GridOffsetItemDecoration;
@@ -95,7 +98,7 @@ public final class CarUiRecyclerView extends RecyclerView implements
     @Nullable
     private Rect mContainerPaddingRelative;
     @Nullable
-    private FocusArea mContainer;
+    private LinearLayout mContainer;
 
 
     /**
@@ -164,6 +167,7 @@ public final class CarUiRecyclerView extends RecyclerView implements
     }
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr) {
+        initRotaryScroll(context, attrs, defStyleAttr);
         setClipToPadding(false);
         TypedArray a = context.obtainStyledAttributes(
                 attrs,
@@ -256,6 +260,53 @@ public final class CarUiRecyclerView extends RecyclerView implements
                 });
     }
 
+    /**
+     * If this view's content description isn't set to opt out of scrolling via the rotary
+     * controller, initialize it accordingly.
+     */
+    private void initRotaryScroll(Context context, AttributeSet attrs, int defStyleAttr) {
+        CharSequence contentDescription = getContentDescription();
+        if (contentDescription == null) {
+            TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.RecyclerView,
+                    defStyleAttr, /* defStyleRes= */ 0);
+            int orientation = a.getInt(R.styleable.RecyclerView_android_orientation,
+                    LinearLayout.VERTICAL);
+            setContentDescription(
+                    orientation == LinearLayout.HORIZONTAL
+                            ? ROTARY_HORIZONTALLY_SCROLLABLE
+                            : ROTARY_VERTICALLY_SCROLLABLE);
+        } else if (!ROTARY_HORIZONTALLY_SCROLLABLE.contentEquals(contentDescription)
+                && !ROTARY_VERTICALLY_SCROLLABLE.contentEquals(contentDescription)) {
+            return;
+        }
+
+        // Convert SOURCE_ROTARY_ENCODER scroll events into SOURCE_MOUSE scroll events that
+        // RecyclerView knows how to handle.
+        setOnGenericMotionListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_SCROLL) {
+                if (event.getSource() == InputDevice.SOURCE_ROTARY_ENCODER) {
+                    MotionEvent mouseEvent = MotionEvent.obtain(event);
+                    mouseEvent.setSource(InputDevice.SOURCE_MOUSE);
+                    CarUiRecyclerView.super.onGenericMotionEvent(mouseEvent);
+                    return true;
+                }
+            }
+            return false;
+        });
+
+        // Mark this view as focusable. This view will be focused when no focusable elements are
+        // visible.
+        setFocusable(true);
+
+        // Focus this view before descendants so that the RotaryService can focus this view when it
+        // wants to.
+        setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
+
+        // Disable the default focus highlight. No highlight should appear when this view is
+        // focused.
+        setDefaultFocusHighlightEnabled(false);
+    }
+
     @Override
     protected void onRestoreInstanceState(Parcelable state) {
         super.onRestoreInstanceState(state);
@@ -320,15 +371,14 @@ public final class CarUiRecyclerView extends RecyclerView implements
 
     /**
      * This method will detach the current recycler view from its parent and attach it to the
-     * container which is a FocusArea. Later the entire container is attached to the
+     * container which is a LinearLayout. Later the entire container is attached to the
      * parent where the recycler view was set with the same layout params.
      */
     private void installExternalScrollBar() {
-        mContainer = new FocusArea(getContext());
+        mContainer = new LinearLayout(getContext());
         LayoutInflater inflater = LayoutInflater.from(getContext());
         inflater.inflate(R.layout.car_ui_recycler_view, mContainer, true);
         mContainer.setVisibility(mContainerVisibility);
-        mContainer.setId(R.id.car_ui_recycler_view_container);
 
         if (mContainerPadding != null) {
             mContainer.setPadding(mContainerPadding.left, mContainerPadding.top,
