@@ -178,6 +178,12 @@ public class MediaSourceViewModel extends AndroidViewModel {
         }
     }
 
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        mCar.disconnect();
+    }
+
     @VisibleForTesting
     MediaBrowserConnector.Callback getConnectedBrowserCallback() {
         return mConnectedBrowserCallback;
