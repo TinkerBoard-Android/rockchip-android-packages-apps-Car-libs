@@ -98,33 +98,20 @@ class AssociationSecureChannel extends SecureBleChannel {
         logd(TAG, "Continuing handshake.");
         HandshakeMessage handshakeMessage = getEncryptionRunner().continueHandshake(message);
         mState = handshakeMessage.getHandshakeState();
-
-        switch (mState) {
-            case HandshakeState.VERIFICATION_NEEDED:
-                String code = handshakeMessage.getVerificationCode();
-                if (code == null) {
-                    loge(TAG, "Unable to get verification code.");
-                    notifySecureChannelFailure(CHANNEL_ERROR_INVALID_VERIFICATION);
-                    return;
-                }
-                processVerificationCode(code);
-                return;
-            case HandshakeState.OOB_VERIFICATION_NEEDED:
-                byte[] oobCode = handshakeMessage.getOobVerificationCode();
-                if (oobCode == null) {
-                    loge(TAG, "Unable to get out of band verification code.");
-                    notifySecureChannelFailure(CHANNEL_ERROR_INVALID_VERIFICATION);
-                    return;
-                }
-                processVerificationCode(new String(oobCode));
-                return;
-            default:
-                loge(TAG, "processHandshakeInProgress: Encountered unexpected handshake state: "
-                        + mState + ".");
-                notifySecureChannelFailure(CHANNEL_ERROR_INVALID_STATE);
+        if (mState != HandshakeState.VERIFICATION_NEEDED) {
+            loge(TAG, "processHandshakeInProgress: Encountered unexpected handshake state: "
+                    + mState + ".");
+            notifySecureChannelFailure(CHANNEL_ERROR_INVALID_STATE);
+            return;
         }
 
-
+        String code = handshakeMessage.getVerificationCode();
+        if (code == null) {
+            loge(TAG, "Unable to get verification code.");
+            notifySecureChannelFailure(CHANNEL_ERROR_INVALID_VERIFICATION);
+            return;
+        }
+        processVerificationCode(code);
     }
 
     private void processVerificationCode(@NonNull String code) {
@@ -215,6 +202,15 @@ class AssociationSecureChannel extends SecureBleChannel {
                 /* isMessageEncrypted= */ true, ByteUtils.uuidToBytes(uniqueId));
         logd(TAG, "Sending car's device id of " + uniqueId + " to device.");
         sendHandshakeMessage(ByteUtils.uuidToBytes(uniqueId), /* isEncrypted= */ true);
+    }
+
+    @HandshakeState
+    int getState() {
+        return mState;
+    }
+
+    void setState(@HandshakeState int state) {
+        mState = state;
     }
 
     /** Listener that will be invoked to display verification code. */
