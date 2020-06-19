@@ -16,7 +16,4 @@
 <resources>
     <!-- Id used for the search button when using Toolbar.createSearch() method -->
     <item name="search" type="id"/>
-
-    <!-- ID used for the recycler view container. -->
-    <item name="car_ui_recycler_view_container" type="id"/>
 </resources>
