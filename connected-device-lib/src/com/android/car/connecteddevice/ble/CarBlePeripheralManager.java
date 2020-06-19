@@ -33,6 +33,7 @@ import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.ParcelUuid;
 
@@ -76,6 +77,8 @@ public class CarBlePeripheralManager extends CarBleManager {
 
     private static final int TRUNCATED_BYTES = 3;
 
+    private static final String TIMEOUT_HANDLER_THREAD_NAME = "peripheralThread";
+
     private final BluetoothGattDescriptor mDescriptor =
             new BluetoothGattDescriptor(CLIENT_CHARACTERISTIC_CONFIG,
                     BluetoothGattDescriptor.PERMISSION_READ
@@ -96,7 +99,9 @@ public class CarBlePeripheralManager extends CarBleManager {
 
     private final BluetoothGattCharacteristic mReadCharacteristic;
 
-    private final Handler mTimeoutHandler;
+    private HandlerThread mTimeoutHandlerThread;
+
+    private Handler mTimeoutHandler;
 
     private final Duration mMaxReconnectAdvertisementDuration;
 
@@ -155,7 +160,6 @@ public class CarBlePeripheralManager extends CarBleManager {
                         | BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE,
                 BluetoothGattCharacteristic.PERMISSION_WRITE);
         mReadCharacteristic.addDescriptor(mDescriptor);
-        mTimeoutHandler = new Handler(Looper.getMainLooper());
         mMaxReconnectAdvertisementDuration = maxReconnectAdvertisementDuration;
         mDefaultMtuSize = defaultMtuSize;
     }
@@ -163,6 +167,9 @@ public class CarBlePeripheralManager extends CarBleManager {
     @Override
     public void start() {
         super.start();
+        mTimeoutHandlerThread = new HandlerThread(TIMEOUT_HANDLER_THREAD_NAME);
+        mTimeoutHandlerThread.start();
+        mTimeoutHandler = new Handler(mTimeoutHandlerThread.getLooper());
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (adapter == null) {
             return;
@@ -187,6 +194,7 @@ public class CarBlePeripheralManager extends CarBleManager {
     @Override
     public void stop() {
         super.stop();
+        mTimeoutHandlerThread.quit();
         reset();
     }
 
