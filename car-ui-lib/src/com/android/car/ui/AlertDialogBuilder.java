@@ -26,6 +26,7 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -674,21 +675,26 @@ public class AlertDialogBuilder {
      */
     public AlertDialog create() {
         prepareDialog();
-        return mBuilder.create();
+        AlertDialog alertDialog = mBuilder.create();
+
+        // Put a FocusParkingView at the end of dialog window to prevent rotary controller
+        // wrap-around. Android will focus on the first view automatically when the dialog is shown,
+        // and we want it to focus on the title instead of the FocusParkingView, so we put the
+        // FocusParkingView at the end of dialog window.
+        ViewGroup root = (ViewGroup) alertDialog.getWindow().getDecorView().getRootView();
+        FocusParkingView fpv = new FocusParkingView(mContext);
+        root.addView(fpv);
+
+        return alertDialog;
     }
 
     /**
      * Creates an {@link AlertDialog} with the arguments supplied to this
      * builder and immediately displays the dialog.
-     * <p>
-     * Calling this method is functionally identical to:
-     * <pre>
-     *     AlertDialog dialog = builder.create();
-     *     dialog.show();
-     * </pre>
      */
     public AlertDialog show() {
-        prepareDialog();
-        return mBuilder.show();
+        AlertDialog alertDialog = create();
+        alertDialog.show();
+        return alertDialog;
     }
 }
