@@ -24,6 +24,7 @@ import android.graphics.drawable.Drawable;
 import android.text.InputFilter;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -643,6 +644,7 @@ public class AlertDialogBuilder {
         TextView mTitleView = CarUiUtils.requireViewByRefId(customTitle, R.id.car_ui_alert_title);
         TextView mSubtitleView =
                 CarUiUtils.requireViewByRefId(customTitle, R.id.car_ui_alert_subtitle);
+        mSubtitleView.setMovementMethod(LinkMovementMethod.getInstance());
         ImageView mIconView = CarUiUtils.requireViewByRefId(customTitle, R.id.car_ui_alert_icon);
 
         mTitleView.setText(mTitle);
