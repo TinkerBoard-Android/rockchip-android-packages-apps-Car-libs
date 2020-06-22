@@ -87,6 +87,10 @@ public class DialogsActivity extends Activity implements InsetsChangedListener {
                 v -> showPermissionDialog()));
         mButtons.add(Pair.create(R.string.dialog_show_multi_permission_dialog,
                 v -> showMultiPermissionDialog()));
+        mButtons.add(Pair.create(R.string.dialog_show_foreground_permission_dialog,
+                v -> showForegroundPermissionDialog()));
+        mButtons.add(Pair.create(R.string.dialog_show_background_permission_dialog,
+                v -> showBackgroundPermissionDialog()));
 
         CarUiRecyclerView recyclerView = requireViewById(R.id.list);
         recyclerView.setAdapter(mAdapter);
@@ -237,6 +241,14 @@ public class DialogsActivity extends Activity implements InsetsChangedListener {
         }
         requestPermissions(new String[]{Manifest.permission.CAMERA,
                 Manifest.permission.READ_CONTACTS, Manifest.permission.SEND_SMS}, 1);
+    }
+
+    private void showForegroundPermissionDialog() {
+        requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+    }
+
+    private void showBackgroundPermissionDialog() {
+        requestPermissions(new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION}, 1);
     }
 
     @Override
