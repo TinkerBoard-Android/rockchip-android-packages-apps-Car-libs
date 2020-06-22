@@ -276,6 +276,12 @@
   <!-- Text to show a permission Dialog for multiple permissions [CHAR_LIMIT=50] -->
   <string name="dialog_show_multi_permission_dialog">Show multiple permissions dialog</string>
 
+  <!-- Text on button to show a permission dialog asking for the users location. [CHAR_LIMIT=100] -->
+  <string name="dialog_show_foreground_permission_dialog">Show foreground permission dialog</string>
+
+  <!-- Text on button to show a permission dialog asking for the users location in the background [CHAR_LIMIT=100] -->
+  <string name="dialog_show_background_permission_dialog">Show background permission dialog</string>
+
   <!--This section is for widget attributes -->
   <eat-comment/>
   <!-- Text for checkbox [CHAR_LIMIT=16]-->
