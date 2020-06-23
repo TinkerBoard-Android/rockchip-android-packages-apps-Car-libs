@@ -17,11 +17,15 @@
 package com.android.car.connecteddevice.oob;
 
 
+import static com.android.car.connecteddevice.model.OobEligibleDevice.OOB_TYPE_BLUETOOTH;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mockitoSession;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,7 +35,8 @@ import android.bluetooth.BluetoothSocket;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.android.car.connecteddevice.model.AssociatedDevice;
+import com.android.car.connecteddevice.model.OobEligibleDevice;
+import com.android.car.connecteddevice.util.ByteUtils;
 
 import com.google.common.primitives.Bytes;
 
@@ -51,7 +56,7 @@ import java.util.UUID;
 @RunWith(AndroidJUnit4.class)
 public class BluetoothRfcommChannelTest {
     private BluetoothRfcommChannel mBluetoothRfcommChannel;
-    private AssociatedDevice mAssociatedDevice;
+    private OobEligibleDevice mOobEligibleDevice;
     @Mock
     private OobChannel.Callback mMockCallback;
     @Mock
@@ -75,11 +80,10 @@ public class BluetoothRfcommChannelTest {
 
         mBluetoothRfcommChannel = new BluetoothRfcommChannel();
 
-        mAssociatedDevice = new AssociatedDevice("deviceId", "00:11:22:33:44:55",
-                "deviceName", false);
+        mOobEligibleDevice = new OobEligibleDevice("00:11:22:33:44:55", OOB_TYPE_BLUETOOTH);
 
         when(mMockBluetoothAdapter.getRemoteDevice(
-                mAssociatedDevice.getDeviceAddress())).thenReturn(mMockBluetoothDevice);
+                mOobEligibleDevice.getDeviceAddress())).thenReturn(mMockBluetoothDevice);
     }
 
     @After
@@ -94,17 +98,15 @@ public class BluetoothRfcommChannelTest {
         when(mMockBluetoothSocket.getOutputStream()).thenReturn(mMockOutputStream);
         when(mMockBluetoothDevice.createRfcommSocketToServiceRecord(any(UUID.class))).thenReturn(
                 mMockBluetoothSocket);
-        mBluetoothRfcommChannel.completeOobDataExchange(mAssociatedDevice, mMockCallback,
+        mBluetoothRfcommChannel.completeOobDataExchange(mOobEligibleDevice, mMockCallback,
                 mMockBluetoothAdapter);
 
-        ArgumentCaptor<OobConnectionManager> oobConnectionManagerCaptor = ArgumentCaptor.forClass(
-                OobConnectionManager.class);
-        verify(mMockCallback).onOobExchangeSuccess(oobConnectionManagerCaptor.capture());
+        verify(mMockCallback).onOobExchangeSuccess();
+        OobConnectionManager oobConnectionManager = new OobConnectionManager();
+        oobConnectionManager.startOobExchange(mBluetoothRfcommChannel);
 
         ArgumentCaptor<byte[]> oobDataCaptor = ArgumentCaptor.forClass(byte[].class);
         verify(mMockOutputStream).write(oobDataCaptor.capture());
-
-        OobConnectionManager oobConnectionManager = oobConnectionManagerCaptor.getValue();
         byte[] oobData = oobDataCaptor.getValue();
 
         assertThat(oobData).isEqualTo(Bytes.concat(oobConnectionManager.mDecryptionIv,
@@ -117,7 +119,7 @@ public class BluetoothRfcommChannelTest {
         when(mMockBluetoothDevice.createRfcommSocketToServiceRecord(any(UUID.class))).thenThrow(
                 IOException.class);
 
-        mBluetoothRfcommChannel.completeOobDataExchange(mAssociatedDevice, mMockCallback,
+        mBluetoothRfcommChannel.completeOobDataExchange(mOobEligibleDevice, mMockCallback,
                 mMockBluetoothAdapter);
         verify(mMockCallback).onOobExchangeFailure();
     }
@@ -127,7 +129,7 @@ public class BluetoothRfcommChannelTest {
         doThrow(IOException.class).when(mMockBluetoothSocket).connect();
         when(mMockBluetoothDevice.createRfcommSocketToServiceRecord(any(UUID.class))).thenReturn(
                 mMockBluetoothSocket);
-        mBluetoothRfcommChannel.completeOobDataExchange(mAssociatedDevice, mMockCallback,
+        mBluetoothRfcommChannel.completeOobDataExchange(mOobEligibleDevice, mMockCallback,
                 mMockBluetoothAdapter);
         verify(mMockCallback).onOobExchangeFailure();
     }
@@ -148,5 +150,34 @@ public class BluetoothRfcommChannelTest {
 
         mBluetoothRfcommChannel.sendOobData(testMessage);
         verify(mMockCallback).onOobExchangeFailure();
+    }
+
+    @Test
+    public void interrupt_closesSocket() throws Exception {
+        when(mMockBluetoothSocket.getOutputStream()).thenReturn(mMockOutputStream);
+        when(mMockBluetoothDevice.createRfcommSocketToServiceRecord(any(UUID.class))).thenReturn(
+                mMockBluetoothSocket);
+        mBluetoothRfcommChannel.completeOobDataExchange(mOobEligibleDevice, mMockCallback,
+                mMockBluetoothAdapter);
+        mBluetoothRfcommChannel.interrupt();
+        mBluetoothRfcommChannel.sendOobData(ByteUtils.randomBytes(10));
+        verify(mMockOutputStream, times(0)).write(any());
+        verify(mMockOutputStream).flush();
+        verify(mMockOutputStream).close();
+    }
+
+    @Test
+    public void interrupt_preventsCallbacks() throws Exception {
+        when(mMockBluetoothSocket.getOutputStream()).thenReturn(mMockOutputStream);
+        when(mMockBluetoothDevice.createRfcommSocketToServiceRecord(any(UUID.class))).thenReturn(
+                mMockBluetoothSocket);
+        doAnswer(invocation -> {
+            mBluetoothRfcommChannel.interrupt();
+            return invocation.callRealMethod();
+        }).when(mMockBluetoothSocket).connect();
+        mBluetoothRfcommChannel.completeOobDataExchange(mOobEligibleDevice, mMockCallback,
+                mMockBluetoothAdapter);
+        verify(mMockCallback, times(0)).onOobExchangeSuccess();
+        verify(mMockCallback, times(0)).onOobExchangeFailure();
     }
 }

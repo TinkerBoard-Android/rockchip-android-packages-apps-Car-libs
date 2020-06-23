@@ -18,7 +18,7 @@ package com.android.car.connecteddevice.oob;
 
 import android.annotation.NonNull;
 
-import com.android.car.connecteddevice.model.AssociatedDevice;
+import com.android.car.connecteddevice.model.OobEligibleDevice;
 
 /**
  * An interface for handling out of band data exchange. This interface should be implemented for
@@ -27,7 +27,7 @@ import com.android.car.connecteddevice.model.AssociatedDevice;
  * Usage is:
  * <pre>
  *     1. Define success and failure responses in {@link Callback}
- *     2. Call {@link OobChannel#completeOobDataExchange(AssociatedDevice, Callback)}
+ *     2. Call {@link OobChannel#completeOobDataExchange(OobEligibleDevice, Callback)}
  * </pre>
  */
 public interface OobChannel {
@@ -37,8 +37,7 @@ public interface OobChannel {
      *
      * @param device The remote device to exchange out of band data with
      */
-    // TODO(b/158039867): This method should take an OobEligibleDevice
-    void completeOobDataExchange(@NonNull AssociatedDevice device, @NonNull Callback callback);
+    void completeOobDataExchange(@NonNull OobEligibleDevice device, @NonNull Callback callback);
 
     /**
      * Send raw data over the out of band channel
@@ -47,21 +46,22 @@ public interface OobChannel {
      */
     void sendOobData(@NonNull byte[] oobData);
 
+    /** Interrupt the current data exchange and prevent callbacks from being issued. */
+    void interrupt();
+
     /**
-     * Callbacks for {@link OobChannel#completeOobDataExchange(AssociatedDevice, Callback)}
+     * Callbacks for {@link OobChannel#completeOobDataExchange(OobEligibleDevice, Callback)}
      */
     interface Callback {
         /**
-         * Called when {@link OobChannel#completeOobDataExchange(AssociatedDevice, Callback)}
+         * Called when {@link OobChannel#completeOobDataExchange(OobEligibleDevice, Callback)}
          * finishes successfully.
-         *
-         * @param oobConnectionManager Contains the out of band data used to complete device
-         *                             association.
          */
-        void onOobExchangeSuccess(OobConnectionManager oobConnectionManager);
+        void onOobExchangeSuccess();
 
         /**
-         * Called when {@link OobChannel#completeOobDataExchange(AssociatedDevice, Callback)} fails.
+         * Called when {@link OobChannel#completeOobDataExchange(OobEligibleDevice, Callback)}
+         * fails.
          */
         void onOobExchangeFailure();
     }
