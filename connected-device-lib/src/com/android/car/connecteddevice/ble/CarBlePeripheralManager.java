@@ -34,11 +34,11 @@ import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Looper;
 import android.os.ParcelUuid;
 
 import com.android.car.connecteddevice.AssociationCallback;
 import com.android.car.connecteddevice.model.AssociatedDevice;
+import com.android.car.connecteddevice.oob.OobChannel;
 import com.android.car.connecteddevice.oob.OobConnectionManager;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
 import com.android.car.connecteddevice.util.ByteUtils;
@@ -194,7 +194,9 @@ public class CarBlePeripheralManager extends CarBleManager {
     @Override
     public void stop() {
         super.stop();
-        mTimeoutHandlerThread.quit();
+        if (mTimeoutHandlerThread != null) {
+            mTimeoutHandlerThread.quit();
+        }
         reset();
     }
 
@@ -333,19 +335,30 @@ public class CarBlePeripheralManager extends CarBleManager {
     }
 
     /** Start the association with a new device using out of band verification code exchange */
-    public void startOutOfBandAssociation(@NonNull BluetoothDevice bluetoothDevice,
-            @NonNull OobConnectionManager oobConnectionManager,
+    public void startOutOfBandAssociation(
+            @NonNull String nameForAssociation,
+            @NonNull OobChannel oobChannel,
             @NonNull AssociationCallback callback) {
 
         logd(TAG, "Starting out of band association.");
-        reset();
-        mAssociationCallback = callback;
-        mOobConnectionManager = oobConnectionManager;
-        addConnectedDevice(bluetoothDevice, /* isReconnect= */ false, /* isOob= */ true);
-        BleDevice connectedDevice = getConnectedDevice();
-        if (connectedDevice == null || connectedDevice.mSecureChannel == null) {
-            loge(TAG, "Connected device or secure channel are null");
-        }
+        startAssociation(nameForAssociation, new AssociationCallback() {
+            @Override
+            public void onAssociationStartSuccess(String deviceName) {
+                mAssociationCallback = callback;
+                boolean success = mOobConnectionManager.startOobExchange(oobChannel);
+                if (!success) {
+                    callback.onAssociationStartFailure();
+                    return;
+                }
+                callback.onAssociationStartSuccess(deviceName);
+            }
+
+            @Override
+            public void onAssociationStartFailure() {
+                callback.onAssociationStartFailure();
+            }
+        });
+        mOobConnectionManager = new OobConnectionManager();
     }
 
     private void attemptAssociationAdvertising(@NonNull String adapterName,
@@ -468,13 +481,16 @@ public class CarBlePeripheralManager extends CarBleManager {
     }
 
     private void addConnectedDevice(BluetoothDevice device, boolean isReconnect) {
-        addConnectedDevice(device, isReconnect, /* isOob= */ false);
+        addConnectedDevice(device, isReconnect, /* oobConnectionManager= */ null);
     }
 
-    private void addConnectedDevice(BluetoothDevice device, boolean isReconnect, boolean isOob) {
+    private void addConnectedDevice(@NonNull BluetoothDevice device, boolean isReconnect,
+            @Nullable OobConnectionManager oobConnectionManager) {
         EventLog.onDeviceConnected();
         mBlePeripheralManager.stopAdvertising(mAdvertiseCallback);
-        mTimeoutHandler.removeCallbacks(mTimeoutRunnable);
+        if (mTimeoutHandler != null) {
+            mTimeoutHandler.removeCallbacks(mTimeoutRunnable);
+        }
         mClientDeviceAddress = device.getAddress();
         mClientDeviceName = device.getName();
         if (mClientDeviceName == null) {
@@ -494,9 +510,9 @@ public class CarBlePeripheralManager extends CarBleManager {
         if (isReconnect) {
             secureChannel = new ReconnectSecureChannel(secureStream, mStorage, mReconnectDeviceId,
                     mReconnectChallenge);
-        } else if (isOob) {
+        } else if (oobConnectionManager != null) {
             secureChannel = new OobAssociationSecureChannel(secureStream, mStorage,
-                    mOobConnectionManager);
+                    oobConnectionManager);
         } else {
             secureChannel = new AssociationSecureChannel(secureStream, mStorage);
         }
@@ -584,7 +600,7 @@ public class CarBlePeripheralManager extends CarBleManager {
                 @Override
                 public void onRemoteDeviceConnected(BluetoothDevice device) {
                     resetBluetoothAdapterName();
-                    addConnectedDevice(device, /* isReconnect= */ false);
+                    addConnectedDevice(device, /* isReconnect= */ false, mOobConnectionManager);
                     BleDevice connectedDevice = getConnectedDevice();
                     if (connectedDevice == null || connectedDevice.mSecureChannel == null) {
                         return;

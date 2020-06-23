@@ -16,38 +16,44 @@
 
 package com.android.car.connecteddevice.oob;
 
+import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 
-import com.android.car.connecteddevice.model.AssociatedDevice;
+import com.android.car.connecteddevice.model.OobEligibleDevice;
 
 import com.google.common.annotations.VisibleForTesting;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Handles out of band data exchange over a secure RFCOMM channel.
  */
 public class BluetoothRfcommChannel implements OobChannel {
     private static final String TAG = "BluetoothRfcommChannel";
+    // TODO (b/159500330) Generate random UUID.
     private static final UUID RFCOMM_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private BluetoothSocket mBluetoothSocket;
+    private AtomicBoolean mIsInterrupted = new AtomicBoolean();
     @VisibleForTesting
     Callback mCallback;
 
     @Override
-    public void completeOobDataExchange(@NonNull AssociatedDevice device,
+    public void completeOobDataExchange(@NonNull OobEligibleDevice device,
             @NonNull Callback callback) {
         completeOobDataExchange(device, callback, BluetoothAdapter.getDefaultAdapter());
     }
 
     @VisibleForTesting
-    void completeOobDataExchange(AssociatedDevice device, Callback callback,
+    void completeOobDataExchange(OobEligibleDevice device, Callback callback,
             BluetoothAdapter bluetoothAdapter) {
         mCallback = callback;
 
@@ -56,38 +62,85 @@ public class BluetoothRfcommChannel implements OobChannel {
         try {
             mBluetoothSocket = remoteDevice.createRfcommSocketToServiceRecord(RFCOMM_UUID);
         } catch (IOException e) {
-            loge(TAG, "Rfcomm socket creation with " + remoteDevice.getName() + " failed", e);
-            mCallback.onOobExchangeFailure();
+            notifyFailure("Rfcomm socket creation with " + remoteDevice.getName() + " failed.", e);
             return;
         }
 
         bluetoothAdapter.cancelDiscovery();
 
-        try {
-            mBluetoothSocket.connect();
-        } catch (IOException e) {
-            loge(TAG, "Socket connection failed", e);
-            mCallback.onOobExchangeFailure();
+        if (isInterrupted()) {
+            // Process was interrupted. Stop execution.
             return;
         }
 
-        callback.onOobExchangeSuccess(OobConnectionManager.forClient(this));
+        try {
+            mBluetoothSocket.connect();
+        } catch (IOException e) {
+            notifyFailure("Socket connection failed", e);
+            return;
+        }
+
+        notifySuccess();
     }
 
     @Override
     public void sendOobData(byte[] oobData) {
+        if (isInterrupted()) {
+            return;
+        }
         if (mBluetoothSocket == null) {
-            loge(TAG, "Bluetooth socket is null, oob data cannot be sent");
-            mCallback.onOobExchangeFailure();
+            notifyFailure("Bluetooth socket is null, oob data cannot be sent",
+                    /* exception= */ null);
             return;
         }
         try {
-            mBluetoothSocket.getOutputStream().write(oobData);
+            OutputStream stream = mBluetoothSocket.getOutputStream();
+            stream.write(oobData);
+            stream.flush();
+            stream.close();
         } catch (IOException e) {
-            loge(TAG, "Sending oob data failed", e);
-            if (mCallback != null) {
-                mCallback.onOobExchangeFailure();
-            }
+            notifyFailure("Sending oob data failed", e);
+        }
+    }
+
+    @Override
+    public void interrupt() {
+        logd(TAG, "Interrupt received.");
+        mIsInterrupted.set(true);
+    }
+
+    @VisibleForTesting
+    boolean isInterrupted() {
+        if (!mIsInterrupted.get()) {
+            return false;
+        }
+
+        if (mBluetoothSocket == null) {
+            return true;
+        }
+
+        try {
+            OutputStream stream = mBluetoothSocket.getOutputStream();
+            stream.flush();
+            stream.close();
+        } catch (IOException e) {
+            loge(TAG, "Unable to clean up bluetooth socket on interrupt.", e);
+        }
+
+        mBluetoothSocket = null;
+        return true;
+    }
+
+    private void notifyFailure(@NonNull String message, @Nullable Exception exception) {
+        loge(TAG, message, exception);
+        if (mCallback != null && !isInterrupted()) {
+            mCallback.onOobExchangeFailure();
+        }
+    }
+
+    private void notifySuccess() {
+        if (mCallback != null && !isInterrupted()) {
+            mCallback.onOobExchangeSuccess();
         }
     }
 }

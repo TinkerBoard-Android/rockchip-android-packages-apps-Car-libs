@@ -18,18 +18,19 @@ package com.android.car.connecteddevice.oob;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.testng.Assert.assertThrows;
+
 import android.security.keystore.KeyProperties;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.android.car.connecteddevice.model.AssociatedDevice;
+import com.android.car.connecteddevice.model.OobEligibleDevice;
 
 import com.google.common.primitives.Bytes;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.testng.Assert;
 
 import java.security.InvalidKeyException;
 import java.security.SecureRandom;
@@ -61,13 +62,13 @@ public class OobConnectionManagerTest {
 
     @Test
     public void testInitAsServer_keyIsNull() {
-        OobConnectionManager oobConnectionManager = OobConnectionManager.forServer(mTestChannel);
+        OobConnectionManager oobConnectionManager = new OobConnectionManager();
         assertThat(oobConnectionManager.mEncryptionKey).isNull();
     }
 
     @Test
     public void testServer_onSetOobData_setsKeyAndNonce() {
-        OobConnectionManager oobConnectionManager = OobConnectionManager.forServer(mTestChannel);
+        OobConnectionManager oobConnectionManager = new OobConnectionManager();
         oobConnectionManager.setOobData(mTestOobData);
         assertThat(oobConnectionManager.mEncryptionKey).isEqualTo(mTestKey);
         // The decryption IV for the server is the encryption IV for the client and vice versa
@@ -77,7 +78,8 @@ public class OobConnectionManagerTest {
 
     @Test
     public void testInitAsClient_keyAndNoncesAreNonNullAndSent() {
-        OobConnectionManager oobConnectionManager = OobConnectionManager.forClient(mTestChannel);
+        OobConnectionManager oobConnectionManager = new OobConnectionManager();
+        oobConnectionManager.startOobExchange(mTestChannel);
         assertThat(oobConnectionManager.mEncryptionKey).isNotNull();
         assertThat(oobConnectionManager.mEncryptionIv).isNotNull();
         assertThat(oobConnectionManager.mDecryptionIv).isNotNull();
@@ -90,10 +92,9 @@ public class OobConnectionManagerTest {
 
     @Test
     public void testServerEncryptAndClientDecrypt() throws Exception {
-        OobConnectionManager clientOobConnectionManager = OobConnectionManager.forClient(
-                mTestChannel);
-        OobConnectionManager serverOobConnectionManager = OobConnectionManager.forServer(
-                mTestChannel);
+        OobConnectionManager clientOobConnectionManager = new OobConnectionManager();
+        clientOobConnectionManager.startOobExchange(mTestChannel);
+        OobConnectionManager serverOobConnectionManager = new OobConnectionManager();
         serverOobConnectionManager.setOobData(mTestChannel.mSentOobData);
 
         byte[] encryptedTestMessage = clientOobConnectionManager.encryptVerificationCode(
@@ -106,10 +107,9 @@ public class OobConnectionManagerTest {
 
     @Test
     public void testClientEncryptAndServerDecrypt() throws Exception {
-        OobConnectionManager clientOobConnectionManager = OobConnectionManager.forClient(
-                mTestChannel);
-        OobConnectionManager serverOobConnectionManager = OobConnectionManager.forServer(
-                mTestChannel);
+        OobConnectionManager clientOobConnectionManager = new OobConnectionManager();
+        clientOobConnectionManager.startOobExchange(mTestChannel);
+        OobConnectionManager serverOobConnectionManager = new OobConnectionManager();
         serverOobConnectionManager.setOobData(mTestChannel.mSentOobData);
 
         byte[] encryptedTestMessage = serverOobConnectionManager.encryptVerificationCode(
@@ -126,30 +126,32 @@ public class OobConnectionManagerTest {
         // The OobConnectionManager stores a different nonce for encryption and decryption, so it
         // can't decrypt messages that it encrypted itself. It can only send encrypted messages to
         // an OobConnectionManager on another device that share its nonces and encryption key.
-        OobConnectionManager oobConnectionManager = OobConnectionManager.forClient(mTestChannel);
+        OobConnectionManager oobConnectionManager = new OobConnectionManager();
+        oobConnectionManager.startOobExchange(mTestChannel);
         byte[] encryptedMessage = oobConnectionManager.encryptVerificationCode(TEST_MESSAGE);
-        Assert.assertThrows(AEADBadTagException.class,
+        assertThrows(AEADBadTagException.class,
                 () -> oobConnectionManager.decryptVerificationCode(encryptedMessage));
     }
 
     @Test
     public void testDecryptWithShortMessage_throwsAEADBadTagException() {
-        OobConnectionManager oobConnectionManager = OobConnectionManager.forClient(mTestChannel);
-        Assert.assertThrows(AEADBadTagException.class,
+        OobConnectionManager oobConnectionManager = new OobConnectionManager();
+        oobConnectionManager.startOobExchange(mTestChannel);
+        assertThrows(AEADBadTagException.class,
                 () -> oobConnectionManager.decryptVerificationCode("short".getBytes()));
     }
 
     @Test
     public void testEncryptWithNullKey_throwsInvalidKeyException() {
-        OobConnectionManager oobConnectionManager = OobConnectionManager.forServer(mTestChannel);
-        Assert.assertThrows(InvalidKeyException.class,
+        OobConnectionManager oobConnectionManager = new OobConnectionManager();
+        assertThrows(InvalidKeyException.class,
                 () -> oobConnectionManager.encryptVerificationCode(TEST_MESSAGE));
     }
 
     @Test
     public void testDecryptWithNullKey_throwsInvalidKeyException() {
-        OobConnectionManager oobConnectionManager = OobConnectionManager.forServer(mTestChannel);
-        Assert.assertThrows(InvalidKeyException.class,
+        OobConnectionManager oobConnectionManager = new OobConnectionManager();
+        assertThrows(InvalidKeyException.class,
                 () -> oobConnectionManager.decryptVerificationCode(TEST_MESSAGE));
     }
 
@@ -157,13 +159,18 @@ public class OobConnectionManagerTest {
         byte[] mSentOobData = null;
 
         @Override
-        public void completeOobDataExchange(AssociatedDevice device, Callback callback) {
+        public void completeOobDataExchange(OobEligibleDevice device, Callback callback) {
 
         }
 
         @Override
         public void sendOobData(byte[] oobData) {
             mSentOobData = oobData;
+        }
+
+        @Override
+        public void interrupt() {
+
         }
     }
 }

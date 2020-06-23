@@ -36,6 +36,9 @@ import com.android.car.connecteddevice.ble.CarBlePeripheralManager;
 import com.android.car.connecteddevice.ble.DeviceMessage;
 import com.android.car.connecteddevice.model.AssociatedDevice;
 import com.android.car.connecteddevice.model.ConnectedDevice;
+import com.android.car.connecteddevice.model.OobEligibleDevice;
+import com.android.car.connecteddevice.oob.BluetoothRfcommChannel;
+import com.android.car.connecteddevice.oob.OobChannel;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage.AssociatedDeviceCallback;
 import com.android.car.connecteddevice.util.ByteUtils;
@@ -119,6 +122,8 @@ public class ConnectedDeviceManager {
     private AssociationCallback mAssociationCallback;
 
     private MessageDeliveryDelegate mMessageDeliveryDelegate;
+
+    private OobChannel mOobChannel;
 
     @Retention(SOURCE)
     @IntDef(prefix = { "DEVICE_ERROR_" },
@@ -221,6 +226,11 @@ public class ConnectedDeviceManager {
         mPeripheralManager.stop();
         // TODO (b/141312136) Stop central manager
         mIsConnectingToUserDevice.set(false);
+        if (mOobChannel != null) {
+            mOobChannel.interrupt();
+            mOobChannel = null;
+        }
+        mAssociationCallback = null;
     }
 
     /** Returns {@link List<ConnectedDevice>} of devices currently connected. */
@@ -334,6 +344,38 @@ public class ConnectedDeviceManager {
         }).start();
     }
 
+    /**
+     * Start association with an out of band device.
+     *
+     * @param device The out of band eligible device.
+     * @param callback Callback for association events.
+     */
+    public void startOutOfBandAssociation(@NonNull OobEligibleDevice device,
+            @NonNull AssociationCallback callback) {
+        logd(TAG, "Received request to start out of band association.");
+        mAssociationCallback = callback;
+        mOobChannel = new BluetoothRfcommChannel();
+        mOobChannel.completeOobDataExchange(device, new OobChannel.Callback() {
+            @Override
+            public void onOobExchangeSuccess() {
+                logd(TAG, "Out of band exchange succeeded. Proceeding to association with device.");
+                Executors.defaultThreadFactory().newThread(() -> {
+                    mPeripheralManager.startOutOfBandAssociation(getNameForAssociation(),
+                            mOobChannel, mInternalAssociationCallback);
+                }).start();
+            }
+
+            @Override
+            public void onOobExchangeFailure() {
+                loge(TAG, "Out of band exchange failed.");
+                mInternalAssociationCallback.onAssociationError(
+                        DEVICE_ERROR_INVALID_ENCRYPTION_KEY);
+                mOobChannel = null;
+                mAssociationCallback = null;
+            }
+        });
+    }
+
     /** Stop the association with any device. */
     public void stopAssociation(@NonNull AssociationCallback callback) {
         if (mAssociationCallback != callback) {
@@ -342,6 +384,10 @@ public class ConnectedDeviceManager {
         }
         mAssociationCallback = null;
         mPeripheralManager.stopAssociation(mInternalAssociationCallback);
+        if (mOobChannel != null) {
+            mOobChannel.interrupt();
+        }
+        mOobChannel = null;
     }
 
     /**
