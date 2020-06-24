@@ -15,7 +15,10 @@
  */
 package com.android.car.ui;
 
+import static android.view.accessibility.AccessibilityNodeInfo.ACTION_DISMISS;
+
 import android.content.Context;
+import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -109,5 +112,16 @@ public class FocusParkingView extends View {
     @Override
     public CharSequence getAccessibilityClassName() {
         return FocusParkingView.class.getName();
+    }
+
+    @Override
+    public boolean performAccessibilityAction(int action, Bundle arguments) {
+        if (action == ACTION_DISMISS) {
+            // Try to move focus to the default focus.
+            getRootView().restoreDefaultFocus();
+            // The action failed if the FocusParkingView is still focused.
+            return !isFocused();
+        }
+        return super.performAccessibilityAction(action, arguments);
     }
 }

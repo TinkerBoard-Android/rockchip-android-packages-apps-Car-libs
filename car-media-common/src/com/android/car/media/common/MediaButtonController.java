@@ -80,6 +80,7 @@ public class MediaButtonController {
         mPlayPauseStopImageContainer.setOnClickListener(this::onPlayPauseStopClicked);
         mPlayPauseStopImageView = mPlayPauseStopImageContainer.findViewById(R.id.play_pause_stop);
         mPlayPauseStopImageView.setVisibility(View.INVISIBLE);
+        mPlayPauseStopImageView.setFocusedByDefault(true);
         mCircularProgressBar = mPlayPauseStopImageContainer.findViewById(
                 R.id.circular_progress_bar);
         mPlayPauseStopImageView.setAction(PlayPauseStopImageView.ACTION_DISABLED);
