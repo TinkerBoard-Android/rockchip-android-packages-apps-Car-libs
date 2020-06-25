@@ -267,9 +267,9 @@ public final class CarUiRecyclerView extends RecyclerView implements
     private void initRotaryScroll(Context context, AttributeSet attrs, int defStyleAttr) {
         CharSequence contentDescription = getContentDescription();
         if (contentDescription == null) {
-            TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.RecyclerView,
+            TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CarUiRecyclerView,
                     defStyleAttr, /* defStyleRes= */ 0);
-            int orientation = a.getInt(R.styleable.RecyclerView_android_orientation,
+            int orientation = a.getInt(R.styleable.CarUiRecyclerView_android_orientation,
                     LinearLayout.VERTICAL);
             setContentDescription(
                     orientation == LinearLayout.HORIZONTAL
