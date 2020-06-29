@@ -210,6 +210,7 @@ public class CarBlePeripheralManager extends CarBleManager {
     }
 
     private void reset() {
+        logd(TAG, "Resetting state.");
         resetBluetoothAdapterName();
         mClientDeviceAddress = null;
         mClientDeviceName = null;

@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mockitoSession;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -101,7 +102,7 @@ public class BluetoothRfcommChannelTest {
         mBluetoothRfcommChannel.completeOobDataExchange(mOobEligibleDevice, mMockCallback,
                 mMockBluetoothAdapter);
 
-        verify(mMockCallback).onOobExchangeSuccess();
+        verify(mMockCallback, timeout(1000)).onOobExchangeSuccess();
         OobConnectionManager oobConnectionManager = new OobConnectionManager();
         oobConnectionManager.startOobExchange(mBluetoothRfcommChannel);
 
@@ -115,20 +116,21 @@ public class BluetoothRfcommChannelTest {
     }
 
     @Test
+    public void completeOobExchange_ioExceptionCausesRetry() throws Exception {
+        doThrow(IOException.class).doAnswer(invocation -> null)
+                .when(mMockBluetoothSocket).connect();
+        when(mMockBluetoothDevice.createRfcommSocketToServiceRecord(any(UUID.class))).thenReturn(
+                mMockBluetoothSocket);
+        mBluetoothRfcommChannel.completeOobDataExchange(mOobEligibleDevice, mMockCallback,
+                mMockBluetoothAdapter);
+        verify(mMockBluetoothSocket, timeout(3000).times(2)).connect();
+    }
+
+    @Test
     public void completeOobExchange_createRfcommSocketFails_callOnFailed() throws Exception {
         when(mMockBluetoothDevice.createRfcommSocketToServiceRecord(any(UUID.class))).thenThrow(
                 IOException.class);
 
-        mBluetoothRfcommChannel.completeOobDataExchange(mOobEligibleDevice, mMockCallback,
-                mMockBluetoothAdapter);
-        verify(mMockCallback).onOobExchangeFailure();
-    }
-
-    @Test
-    public void completeOobExchange_connectSocketFails_callOnFailed() throws Exception {
-        doThrow(IOException.class).when(mMockBluetoothSocket).connect();
-        when(mMockBluetoothDevice.createRfcommSocketToServiceRecord(any(UUID.class))).thenReturn(
-                mMockBluetoothSocket);
         mBluetoothRfcommChannel.completeOobDataExchange(mOobEligibleDevice, mMockCallback,
                 mMockBluetoothAdapter);
         verify(mMockCallback).onOobExchangeFailure();

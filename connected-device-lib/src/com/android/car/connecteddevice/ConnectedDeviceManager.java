@@ -382,6 +382,7 @@ public class ConnectedDeviceManager {
             logd(TAG, "Stop association called with unrecognized callback. Ignoring.");
             return;
         }
+        logd(TAG, "Stopping association.");
         mAssociationCallback = null;
         mPeripheralManager.stopAssociation(mInternalAssociationCallback);
         if (mOobChannel != null) {
