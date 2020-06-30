@@ -15,12 +15,14 @@
  */
 package com.android.car.ui;
 
+import static android.view.accessibility.AccessibilityNodeInfo.ACTION_COLLAPSE;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_DISMISS;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.Nullable;
 
@@ -116,11 +118,18 @@ public class FocusParkingView extends View {
 
     @Override
     public boolean performAccessibilityAction(int action, Bundle arguments) {
-        if (action == ACTION_DISMISS) {
-            // Try to move focus to the default focus.
-            getRootView().restoreDefaultFocus();
-            // The action failed if the FocusParkingView is still focused.
-            return !isFocused();
+        switch (action) {
+            case ACTION_DISMISS:
+                // Try to move focus to the default focus.
+                getRootView().restoreDefaultFocus();
+                // The action failed if the FocusParkingView is still focused.
+                return !isFocused();
+            case ACTION_COLLAPSE:
+                // Hide the IME.
+                InputMethodManager inputMethodManager =
+                        getContext().getSystemService(InputMethodManager.class);
+                return inputMethodManager.hideSoftInputFromWindow(getWindowToken(),
+                        /* flags= */ 0);
         }
         return super.performAccessibilityAction(action, arguments);
     }
