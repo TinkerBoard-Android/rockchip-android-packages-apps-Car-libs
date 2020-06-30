@@ -110,7 +110,7 @@ public class CarBleCentralManager extends CarBleManager {
     @Override
     public void start() {
         super.start();
-        mBleCentralManager.startScanning(/* filters = */ null, mScanSettings, mScanCallback);
+        mBleCentralManager.startScanning(/* filters= */ null, mScanSettings, mScanCallback);
     }
 
     @Override
@@ -199,7 +199,7 @@ public class CarBleCentralManager extends CarBleManager {
     }
 
     private void startDeviceConnection(@NonNull BluetoothDevice device) {
-        BluetoothGatt gatt = device.connectGatt(mContext, /* autoConnect = */ false,
+        BluetoothGatt gatt = device.connectGatt(mContext, /* autoConnect= */ false,
                 mConnectionCallback, BluetoothDevice.TRANSPORT_LE);
         if (gatt == null) {
             return;
@@ -322,7 +322,7 @@ public class CarBleCentralManager extends CarBleManager {
                 return;
             }
 
-            if (!gatt.setCharacteristicNotification(readCharacteristic, /* enable = */ true)) {
+            if (!gatt.setCharacteristicNotification(readCharacteristic, /* enable= */ true)) {
                 loge(TAG, "Set notifications to read characteristic failed.");
                 gatt.disconnect();
                 return;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package android.car.encryptionrunner;
 
+import android.annotation.IntDef;
+
 import com.android.internal.annotations.VisibleForTesting;
 
 /**
@@ -27,15 +29,36 @@ public class EncryptionRunnerFactory {
         // prevent instantiation.
     }
 
-    /**
-     * Creates a new {@link EncryptionRunner}.
-     */
-    public static EncryptionRunner newRunner() {
-        return new Ukey2EncryptionRunner();
+    @IntDef({EncryptionRunnerType.UKEY2})
+    public @interface EncryptionRunnerType {
+        /** Use Ukey2 as underlying key exchange. */
+        int UKEY2 = 0;
     }
 
     /**
-     * Creates a new {@link EncryptionRunner} one that doesn't actually do encryption but is useful
+     * Creates a new {@link EncryptionRunner} based on {@param type}.
+     */
+    public static EncryptionRunner newRunner(@EncryptionRunnerType int type) {
+        switch (type) {
+            case EncryptionRunnerType.UKEY2:
+                return new Ukey2EncryptionRunner();
+            default:
+                throw new IllegalArgumentException("Unknown EncryptionRunnerType: " + type);
+        }
+    }
+
+    /**
+     * Creates a new {@link EncryptionRunner}.
+     *
+     * @deprecated Use {@link #newRunner(int)} instead.
+     */
+    @Deprecated
+    public static EncryptionRunner newRunner() {
+        return newRunner(EncryptionRunnerType.UKEY2);
+    }
+
+    /**
+     * Creates a new {@link EncryptionRunner} that doesn't actually do encryption but is useful
      * for testing.
      */
     @VisibleForTesting
