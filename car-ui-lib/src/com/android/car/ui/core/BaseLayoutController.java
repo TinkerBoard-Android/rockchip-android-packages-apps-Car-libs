@@ -45,7 +45,7 @@ import java.util.WeakHashMap;
  * It also exposes a {@link ToolbarController} to access the toolbar. This may be null if
  * used with a base layout without a Toolbar.
  */
-class BaseLayoutController {
+public class BaseLayoutController {
 
     private static final Map<Activity, BaseLayoutController> sBaseLayoutMap = new WeakHashMap<>();
 
@@ -180,7 +180,7 @@ class BaseLayoutController {
      * none of the Activity/Fragments implement {@link InsetsChangedListener}, it will set
      * padding on the content view equal to the insets.
      */
-    private static class InsetsUpdater implements ViewTreeObserver.OnGlobalLayoutListener {
+    public static class InsetsUpdater implements ViewTreeObserver.OnGlobalLayoutListener {
         // These tags mark views that should overlay the content view in the base layout.
         // OEMs should add them to views in their base layout, ie: android:tag="car_ui_left_inset"
         // Apps will then be able to draw under these views, but will be encouraged to not put
@@ -208,7 +208,7 @@ class BaseLayoutController {
          * @param baseLayout  The root view of the base layout
          * @param contentView The android.R.id.content View
          */
-        InsetsUpdater(Activity activity, View baseLayout, View contentView) {
+        protected InsetsUpdater(Activity activity, View baseLayout, View contentView) {
             mActivity = activity;
 
             mLeftInsetView = baseLayout.findViewWithTag(LEFT_INSET_TAG);
@@ -244,7 +244,7 @@ class BaseLayoutController {
          * Install a global layout listener, during which the insets will be recalculated and
          * dispatched.
          */
-        void installListeners() {
+        protected void installListeners() {
             // The global layout listener will run after all the individual layout change listeners
             // so that we only updateInsets once per layout, even if multiple inset views changed
             mActivity.getWindow().getDecorView().getViewTreeObserver()
@@ -260,6 +260,12 @@ class BaseLayoutController {
             mInsetsChangedListenerDelegate = listener;
         }
 
+        /** Returns the content view (android.R.id.content by default). */
+        protected View getContentView() {
+            return CarUiUtils.requireViewByRefId(mActivity.getWindow().getDecorView(),
+                    android.R.id.content);
+        }
+
         /**
          * onGlobalLayout() should recalculate the amount of insets we need, and then dispatch them.
          */
@@ -269,14 +275,13 @@ class BaseLayoutController {
                 return;
             }
 
-            View content = CarUiUtils.requireViewByRefId(mActivity.getWindow().getDecorView(),
-                    android.R.id.content);
+            View content = getContentView();
 
             // Calculate how much each inset view overlays the content view
-            int top = 0;
-            int left = 0;
-            int right = 0;
-            int bottom = 0;
+            int top = getTopOfView(content);
+            int left = getLeftOfView(content);
+            int right = Math.max(0, content.getWidth() - getRightOfView(content));
+            int bottom = Math.max(0, content.getHeight() - getBottomOfView(content));
             if (mTopInsetView != null) {
                 top = Math.max(0, getBottomOfView(mTopInsetView) - getTopOfView(content));
             }
@@ -299,7 +304,8 @@ class BaseLayoutController {
         }
 
         /**
-         * Dispatch the new {@link Insets} to the {@link Activity} and all of its
+         * Dispatch the new {@link Insets} to the {@link InsetsChangedListener} IIF there is one,
+         * otherwise dispatch the new {@link Insets} to the {@link Activity} and all of its
          * {@link Fragment Fragments}. If none of those implement {@link InsetsChangedListener},
          * we will set the value of the insets as padding on the content view.
          *
