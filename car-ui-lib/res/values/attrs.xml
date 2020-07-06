@@ -147,4 +147,11 @@
     <attr name="carUiRecyclerViewStyle" format="reference" />
 
     <attr name="state_ux_restricted" format="boolean" />
+
+    <!-- Attributes for FocusArea. -->
+    <declare-styleable name="FocusArea">
+        <!-- The ID of a focusable descendant view which should be focused when the user nudges to
+             this FocusArea. -->
+        <attr name="defaultFocus" format="reference"/>
+    </declare-styleable>
 </resources>

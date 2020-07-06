@@ -16,8 +16,15 @@
 
 package com.android.car.ui;
 
-import static org.junit.Assert.assertTrue;
+import static android.view.accessibility.AccessibilityNodeInfo.ACTION_FOCUS;
 
+import static com.android.car.ui.utils.RotaryConstants.FOCUS_ACTION_TYPE;
+import static com.android.car.ui.utils.RotaryConstants.FOCUS_DEFAULT;
+import static com.android.car.ui.utils.RotaryConstants.FOCUS_FIRST;
+
+import static com.google.common.truth.Truth.assertThat;
+
+import android.os.Bundle;
 import android.view.View;
 
 import androidx.test.rule.ActivityTestRule;
@@ -42,6 +49,7 @@ public class FocusAreaTest {
     private FocusAreaTestActivity mActivity;
     private TestFocusArea mFocusArea;
     private View mChild;
+    private View mDefaultFocus;
     private View mNonChild;
 
     @Before
@@ -49,6 +57,7 @@ public class FocusAreaTest {
         mActivity = mActivityRule.getActivity();
         mFocusArea = mActivity.findViewById(R.id.focus_area);
         mChild = mActivity.findViewById(R.id.child);
+        mDefaultFocus = mActivity.findViewById(R.id.default_focus);
         mNonChild = mActivity.findViewById(R.id.non_child);
     }
 
@@ -90,9 +99,39 @@ public class FocusAreaTest {
         assertDrawMethodsCalled(latch);
     }
 
+    @Test
+    public void testFocusOnDefaultFocus() throws Exception {
+        assertThat(mDefaultFocus.isFocused()).isFalse();
+
+        Bundle bundle = new Bundle();
+        bundle.putInt(FOCUS_ACTION_TYPE, FOCUS_DEFAULT);
+        CountDownLatch latch = new CountDownLatch(1);
+        mFocusArea.post(() -> {
+            mFocusArea.performAccessibilityAction(ACTION_FOCUS, bundle);
+            latch.countDown();
+        });
+        latch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mDefaultFocus.isFocused()).isTrue();
+    }
+
+    @Test
+    public void testFocusOnFirstFocusable() throws Exception {
+        assertThat(mChild.isFocused()).isFalse();
+
+        Bundle bundle = new Bundle();
+        bundle.putInt(FOCUS_ACTION_TYPE, FOCUS_FIRST);
+        CountDownLatch latch = new CountDownLatch(1);
+        mFocusArea.post(() -> {
+            mFocusArea.performAccessibilityAction(ACTION_FOCUS, bundle);
+            latch.countDown();
+        });
+        latch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mChild.isFocused()).isTrue();
+    }
+
     private void assertDrawMethodsCalled(CountDownLatch latch) throws Exception {
         latch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
-        assertTrue(mFocusArea.onDrawCalled());
-        assertTrue(mFocusArea.drawCalled());
+        assertThat(mFocusArea.onDrawCalled()).isTrue();
+        assertThat(mFocusArea.drawCalled()).isTrue();
     }
 }
