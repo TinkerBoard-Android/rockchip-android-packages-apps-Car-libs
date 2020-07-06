@@ -16,6 +16,11 @@
 
 package com.android.car.ui.utils;
 
+import androidx.annotation.IntDef;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /** Constants for the rotary controller. */
 public final class RotaryConstants {
     /**
@@ -23,14 +28,37 @@ public final class RotaryConstants {
      * horizontally.
      */
     public static final String ROTARY_HORIZONTALLY_SCROLLABLE =
-            "android.rotary.HORIZONTALLY_SCROLLABLE";
+            "com.android.car.ui.utils.HORIZONTALLY_SCROLLABLE";
 
     /**
      * Content description indicating that the rotary controller should scroll this view
      * vertically.
      */
     public static final String ROTARY_VERTICALLY_SCROLLABLE =
-            "android.rotary.VERTICALLY_SCROLLABLE";
+            "com.android.car.ui.utils.VERTICALLY_SCROLLABLE";
+
+    /** The key to store a FocusActionType in the Bundle. */
+    public static final String FOCUS_ACTION_TYPE = "com.android.car.ui.utils.FOCUS_ACTION_TYPE";
+
+    /** Value indicating that the ACTION_FOCUS hasn't specified what to focus. */
+    public static final int FOCUS_INVALID = 0;
+
+    /**
+     * Value indicating that the ACTION_FOCUS is meant to focus on the default focus in the
+     * FocusArea.
+     */
+    public static final int FOCUS_DEFAULT = 1;
+
+    /**
+     * Value indicating that the ACTION_FOCUS is meant to focus on the first focusable view in the
+     * FocusArea.
+     */
+    public static final int FOCUS_FIRST = 2;
+
+    @IntDef(flag = true, value = {FOCUS_DEFAULT, FOCUS_FIRST})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FocusActionType {
+    }
 
     /** Prevent instantiation. */
     private RotaryConstants() {}
