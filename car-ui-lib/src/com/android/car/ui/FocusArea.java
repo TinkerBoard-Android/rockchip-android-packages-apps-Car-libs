@@ -16,15 +16,28 @@
 
 package com.android.car.ui;
 
+import static android.view.accessibility.AccessibilityNodeInfo.ACTION_FOCUS;
+
+import static com.android.car.ui.utils.RotaryConstants.FOCUS_ACTION_TYPE;
+import static com.android.car.ui.utils.RotaryConstants.FOCUS_DEFAULT;
+import static com.android.car.ui.utils.RotaryConstants.FOCUS_FIRST;
+import static com.android.car.ui.utils.RotaryConstants.FOCUS_INVALID;
+
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
+
+import com.android.car.ui.utils.CarUiUtils;
+import com.android.car.ui.utils.RotaryConstants;
 
 /**
  * A {@link LinearLayout} used as a navigation block for the rotary controller.
@@ -47,6 +60,8 @@ import androidx.annotation.Nullable;
  * behavior.
  */
 public class FocusArea extends LinearLayout {
+
+    private static final String TAG = "FocusArea";
 
     /** Whether the FocusArea's descendant has focus (the FocusArea itself is not focusable). */
     private boolean mHasFocus;
@@ -81,28 +96,34 @@ public class FocusArea extends LinearLayout {
     private int mPaddingTop;
     private int mPaddingBottom;
 
+    /** The ID of the view specified in {@code app:defaultFocus}. */
+    private int mDefaultFocusId = View.NO_ID;
+    /** The view specified in {@code app:defaultFocus}. */
+    @Nullable
+    private View mDefaultFocusView;
+
     public FocusArea(Context context) {
         super(context);
-        init();
+        init(context, null);
     }
 
     public FocusArea(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init();
+        init(context, attrs);
     }
 
     public FocusArea(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+        init(context, attrs);
     }
 
     public FocusArea(Context context, @Nullable AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init();
+        init(context, attrs);
     }
 
-    private void init() {
+    private void init(Context context, @Nullable AttributeSet attrs) {
         mEnableForegroundHighlight = getContext().getResources().getBoolean(
                 R.bool.car_ui_enable_focus_area_foreground_highlight);
         mEnableBackgroundHighlight = getContext().getResources().getBoolean(
@@ -128,6 +149,59 @@ public class FocusArea extends LinearLayout {
                         invalidate();
                     }
                 });
+
+        initAttrs(context, attrs);
+    }
+
+    private void initAttrs(Context context, @Nullable AttributeSet attrs) {
+        if (attrs == null) {
+            return;
+        }
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.FocusArea);
+        try {
+            mDefaultFocusId = a.getResourceId(R.styleable.FocusArea_defaultFocus, View.NO_ID);
+        } finally {
+            a.recycle();
+        }
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        if (mDefaultFocusId != View.NO_ID) {
+            mDefaultFocusView = CarUiUtils.requireViewByRefId(this, mDefaultFocusId);
+        }
+    }
+
+    @Override
+    public boolean performAccessibilityAction(int action, Bundle arguments) {
+        // FocusArea is not focusable, so we focus on its descendant when handling ACTION_FOCUS.
+        if (action == ACTION_FOCUS) {
+            if (arguments == null) {
+                Log.e(TAG, "Must specify action type when performing ACTION_FOCUS on FocusArea");
+                return false;
+            }
+            @RotaryConstants.FocusActionType
+            int type = arguments.getInt(FOCUS_ACTION_TYPE, FOCUS_INVALID);
+            switch (type) {
+                case FOCUS_DEFAULT:
+                    // Move focus to the default focus (mDefaultFocusView), if any.
+                    if (mDefaultFocusView != null) {
+                        if (mDefaultFocusView.requestFocus()) {
+                            return true;
+                        }
+                        Log.e(TAG, "The default focus of the FocusArea can't take focus");
+                    }
+                    return false;
+                case FOCUS_FIRST:
+                    // Focus on the first focusable view in the FocusArea.
+                    return requestFocus();
+                default:
+                    Log.e(TAG, "Invalid action type " + type);
+                    return false;
+            }
+        }
+        return super.performAccessibilityAction(action, arguments);
     }
 
     @Override
