@@ -325,7 +325,8 @@ class DefaultScrollBar implements ScrollBar {
         View lastChild = getRecyclerView().getChildAt(getRecyclerView().getChildCount() - 1);
         if (getRecyclerView().getLayoutManager().isViewPartiallyVisible(lastChild,
                 /* completelyVisible= */ false, /* acceptEndPointInclusion= */ false)) {
-            scrollDistance = orientationHelper.getDecoratedStart(lastChild);
+            scrollDistance = orientationHelper.getDecoratedStart(lastChild)
+                    - orientationHelper.getStartAfterPadding();
             if (scrollDistance <= 0) {
                 // - Scroll value is zero if the top of last item is aligned with top of the screen;
                 // - Scroll value can be negative if the child is longer than the screen size and
