@@ -18,5 +18,5 @@
     <item type="id" name="car_ui_toolbar_search_view_container">@*android:id/car_ui_toolbar_search_view_container</item>
     <item type="id" name="car_ui_toolbar_progress_bar">@*android:id/car_ui_toolbar_progress_bar</item>
     <item type="id" name="car_ui_toolbar_title_logo_container">@*android:id/car_ui_toolbar_title_logo_container</item>
-    <item type="id" name="content">@*android:id/car_ui_content</item>
+    <item type="id" name="car_ui_base_layout_content_container">@*android:id/car_ui_base_layout_content_container</item>
 </resources>
