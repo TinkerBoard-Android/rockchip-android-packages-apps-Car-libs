@@ -190,6 +190,7 @@
   <public type="id" name="car_ui_alert_icon"/>
   <public type="id" name="car_ui_alert_subtitle"/>
   <public type="id" name="car_ui_alert_title"/>
+  <public type="id" name="car_ui_base_layout_content_container"/>
   <public type="id" name="car_ui_check_box_end_guideline"/>
   <public type="id" name="car_ui_check_box_start_guideline"/>
   <public type="id" name="car_ui_list_item_end_guideline"/>
@@ -236,7 +237,6 @@
   <public type="id" name="checkbox"/>
   <public type="id" name="checkbox_widget"/>
   <public type="id" name="container"/>
-  <public type="id" name="content"/>
   <public type="id" name="content_icon"/>
   <public type="id" name="icon"/>
   <public type="id" name="icon_container"/>
