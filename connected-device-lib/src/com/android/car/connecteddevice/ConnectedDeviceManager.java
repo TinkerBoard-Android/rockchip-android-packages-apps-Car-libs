@@ -465,7 +465,7 @@ public class ConnectedDeviceManager {
                 + recipientId);
         String deviceId = device.getDeviceId();
         Map<UUID, ThreadSafeCallbacks<DeviceCallback>> recipientCallbacks =
-                mDeviceCallbacks.computeIfAbsent(deviceId, key -> new HashMap<>());
+                mDeviceCallbacks.computeIfAbsent(deviceId, key -> new ConcurrentHashMap<>());
 
         // Device already has a callback registered with this recipient UUID. For the
         // protection of the user, this UUID is now blacklisted from future subscriptions
