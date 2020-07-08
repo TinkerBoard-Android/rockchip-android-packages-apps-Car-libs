@@ -31,6 +31,7 @@ import com.google.common.annotations.VisibleForTesting;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -41,6 +42,7 @@ public class BluetoothRfcommChannel implements OobChannel {
     private static final String TAG = "BluetoothRfcommChannel";
     // TODO (b/159500330) Generate random UUID.
     private static final UUID RFCOMM_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+    private static final Duration CONNECT_RETRY_WAIT = Duration.ofSeconds(1);
     private BluetoothSocket mBluetoothSocket;
     private AtomicBoolean mIsInterrupted = new AtomicBoolean();
     @VisibleForTesting
@@ -68,19 +70,29 @@ public class BluetoothRfcommChannel implements OobChannel {
 
         bluetoothAdapter.cancelDiscovery();
 
-        if (isInterrupted()) {
-            // Process was interrupted. Stop execution.
-            return;
-        }
+        new Thread() {
+            @Override
+            public void run() {
+                while (!isInterrupted()) {
+                    try {
+                        mBluetoothSocket.connect();
+                        break;
+                    } catch (IOException e) {
+                        logd(TAG, "Unable to connect, trying again in "
+                                + CONNECT_RETRY_WAIT.toMillis() + " ms.");
+                    }
+                    try {
+                        Thread.sleep(CONNECT_RETRY_WAIT.toMillis());
+                    } catch (InterruptedException e) {
+                        loge(TAG, "Thread was interrupted before connection could be made.", e);
+                        Thread.currentThread().interrupt();
+                        return;
+                    }
+                }
 
-        try {
-            mBluetoothSocket.connect();
-        } catch (IOException e) {
-            notifyFailure("Socket connection failed", e);
-            return;
-        }
-
-        notifySuccess();
+                notifySuccess();
+            }
+        }.start();
     }
 
     @Override
