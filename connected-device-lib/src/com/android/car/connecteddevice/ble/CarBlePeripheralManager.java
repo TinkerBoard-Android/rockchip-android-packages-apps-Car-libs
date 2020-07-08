@@ -49,8 +49,8 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -122,6 +122,8 @@ public class CarBlePeripheralManager extends CarBleManager {
     private AdvertiseCallback mAdvertiseCallback;
 
     private OobConnectionManager mOobConnectionManager;
+
+    private Future mBluetoothNameTask;
 
     /**
      * Initialize a new instance of manager.
@@ -219,6 +221,10 @@ public class CarBlePeripheralManager extends CarBleManager {
         mReconnectDeviceId = null;
         mReconnectChallenge = null;
         mOobConnectionManager = null;
+        if (mBluetoothNameTask != null) {
+            mBluetoothNameTask.cancel(true);
+        }
+        mBluetoothNameTask = null;
     }
 
     /** Attempt to connect to device with provided id. */
@@ -371,10 +377,13 @@ public class CarBlePeripheralManager extends CarBleManager {
             return;
         }
 
-        ScheduledFuture future = mScheduler.schedule(
+        if (mBluetoothNameTask != null) {
+            mBluetoothNameTask.cancel(true);
+        }
+        mBluetoothNameTask = mScheduler.schedule(
                 () -> attemptAssociationAdvertising(adapterName, callback),
                 ASSOCIATE_ADVERTISING_DELAY_MS, TimeUnit.MILLISECONDS);
-        if (future.isCancelled()) {
+        if (mBluetoothNameTask.isCancelled()) {
             // Association failed to start.
             callback.onAssociationStartFailure();
             return;
@@ -475,7 +484,10 @@ public class CarBlePeripheralManager extends CarBleManager {
         }
         logd(TAG, "Bluetooth adapter name restoration has not taken affect yet. Checking again in "
                 + ASSOCIATE_ADVERTISING_DELAY_MS + " milliseconds.");
-        mScheduler.schedule(
+        if (mBluetoothNameTask != null) {
+            mBluetoothNameTask.cancel(true);
+        }
+        mBluetoothNameTask = mScheduler.schedule(
                 () -> verifyBluetoothNameRestored(expectedName),
                 ASSOCIATE_ADVERTISING_DELAY_MS, TimeUnit.MILLISECONDS);
     }
