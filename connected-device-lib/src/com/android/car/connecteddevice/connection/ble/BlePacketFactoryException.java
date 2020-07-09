@@ -13,24 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.car.connecteddevice.connection.ble;
 
-syntax = "proto3";
-
-package com.android.car.connecteddevice.proto;
-
-option java_package = "com.android.car.connecteddevice.StreamProtos";
-option java_outer_classname = "VersionExchangeProto";
-
-message BleVersionExchange {
-  // Minimum supported protobuf version.
-  int32 minSupportedMessagingVersion = 1;
-
-  // Maximum supported protobuf version.
-  int32 maxSupportedMessagingVersion = 2;
-
-  // Minimum supported version of the encryption engine.
-  int32 minSupportedSecurityVersion = 3;
-
-  // Maximum supported version of the encryption engine.
-  int32 maxSupportedSecurityVersion = 4;
+/**
+ * Exception for signaling {@link BlePacketFactory} errors.
+ */
+class BlePacketFactoryException extends Exception {
+    BlePacketFactoryException(String message) {
+        super(message);
+    }
 }
