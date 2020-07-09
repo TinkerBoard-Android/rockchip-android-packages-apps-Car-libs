@@ -53,11 +53,15 @@ public class ConnectedTask implements Runnable {
         // Keep listening to the InputStream when task started.
         while (true) {
             try {
-                byte[] buffer = new byte[mInputStream.available()];
+                int dataLength = mInputStream.available();
+                if (dataLength == 0) {
+                    continue;
+                }
+                byte[] buffer = new byte[dataLength];
                 // Read from the InputStream
                 mInputStream.read(buffer);
                 mCallback.onMessageReceived(buffer);
-                logd(TAG, "received raw bytes from remote device with length: " + buffer.length);
+                logd(TAG, "received raw bytes from remote device with length: " + dataLength);
             } catch (IOException e) {
                 loge(TAG,
                         "Encountered an exception when listening for incoming message, "
@@ -83,10 +87,11 @@ public class ConnectedTask implements Runnable {
     }
 
     void cancel() {
+        logd(TAG, "cancel connected task: close connected socket.");
         try {
             mSocket.close();
         } catch (IOException e) {
-            loge(TAG, "close() of connect socket failed", e);
+            loge(TAG, "close() of connected socket failed", e);
         }
     }
 
