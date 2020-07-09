@@ -303,7 +303,8 @@ public class PlaybackViewModel extends AndroidViewModel {
         public void onQueueChanged(@Nullable List<MediaSessionCompat.QueueItem> queue) {
             List<MediaItemMetadata> filtered = queue == null ? Collections.emptyList()
                     : queue.stream()
-                            .filter(item -> item.getDescription() != null
+                            .filter(item -> item != null
+                                    && item.getDescription() != null
                                     && item.getDescription().getTitle() != null)
                             .map(MediaItemMetadata::new)
                             .collect(Collectors.toList());
