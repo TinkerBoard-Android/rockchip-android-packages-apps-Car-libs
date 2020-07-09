@@ -26,6 +26,7 @@ import androidx.lifecycle.LiveData;
 import com.android.car.media.common.MediaItemMetadata;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -146,6 +147,7 @@ class BrowsedMediaItems extends LiveData<List<MediaItemMetadata>> {
             mHandler.removeCallbacks(mRetryRunnable);
             mIsDataLoaded = true;
             setValue(children.stream()
+                    .filter(Objects::nonNull)
                     .map(MediaItemMetadata::new)
                     .collect(Collectors.toList()));
         }
