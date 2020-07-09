@@ -51,6 +51,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -173,7 +174,7 @@ public class PlaybackViewModelTest {
     @Test
     public void testGetHasQueue_true() {
         List<MediaSessionCompat.QueueItem> queue =
-                Collections.singletonList(createQueueItem("title", 1));
+                Arrays.asList(createQueueItem("title1", 1), createQueueItem("title2", 2));
         CaptureObserver<Boolean> observer = new CaptureObserver<>();
         mPlaybackViewModel.hasQueue().observe(mLifecycleOwner, observer);
         observer.reset();
