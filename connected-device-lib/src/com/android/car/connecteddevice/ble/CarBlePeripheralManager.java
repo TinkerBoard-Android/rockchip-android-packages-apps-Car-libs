@@ -172,20 +172,19 @@ public class CarBlePeripheralManager extends CarBleManager {
         if (adapter == null) {
             return;
         }
-        String originalBluetoothName = mStorage.getStoredBluetoothName();
-        if (originalBluetoothName == null) {
+        mOriginalBluetoothName = mStorage.getStoredBluetoothName();
+        if (mOriginalBluetoothName == null) {
             return;
         }
-        if (originalBluetoothName.equals(adapter.getName())) {
+        if (mOriginalBluetoothName.equals(adapter.getName())) {
             mStorage.removeStoredBluetoothName();
             return;
         }
 
         logw(TAG, "Discovered mismatch in bluetooth adapter name. Resetting back to "
-                + originalBluetoothName + ".");
-        adapter.setName(originalBluetoothName);
+                + mOriginalBluetoothName + ".");
         mScheduler.schedule(
-                () -> verifyBluetoothNameRestored(originalBluetoothName),
+                () -> verifyBluetoothNameRestored(mOriginalBluetoothName),
                 ASSOCIATE_ADVERTISING_DELAY_MS, TimeUnit.MILLISECONDS);
     }
 
@@ -198,6 +197,11 @@ public class CarBlePeripheralManager extends CarBleManager {
 
     @Override
     public void disconnectDevice(@NonNull String deviceId) {
+        if (deviceId.equals(mReconnectDeviceId)) {
+            logd(TAG, "Reconnection canceled for device " + deviceId + ".");
+            reset();
+            return;
+        }
         BleDevice connectedDevice = getConnectedDevice();
         if (connectedDevice == null || !deviceId.equals(connectedDevice.mDeviceId)) {
             return;
@@ -297,8 +301,8 @@ public class CarBlePeripheralManager extends CarBleManager {
         mAssociationCallback = callback;
         if (mOriginalBluetoothName == null) {
             mOriginalBluetoothName = adapter.getName();
-            mStorage.storeBluetoothName(mOriginalBluetoothName);
         }
+        mStorage.storeBluetoothName(mOriginalBluetoothName);
         adapter.setName(nameForAssociation);
         logd(TAG, "Changing bluetooth adapter name from " + mOriginalBluetoothName + " to "
                 + nameForAssociation + ".");
@@ -434,7 +438,6 @@ public class CarBlePeripheralManager extends CarBleManager {
         }
         logd(TAG, "Changing bluetooth adapter name back to " + mOriginalBluetoothName + ".");
         BluetoothAdapter.getDefaultAdapter().setName(mOriginalBluetoothName);
-        mOriginalBluetoothName = null;
     }
 
     private void verifyBluetoothNameRestored(@NonNull String expectedName) {
@@ -444,6 +447,11 @@ public class CarBlePeripheralManager extends CarBleManager {
                     + "adapter name.");
             mStorage.removeStoredBluetoothName();
             return;
+        }
+        // Attempting to set the name on the adapter before it is in state BT_ON will result in
+        // repeated failures until a new name is attempted.
+        if (BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+            BluetoothAdapter.getDefaultAdapter().setName(expectedName);
         }
         logd(TAG, "Bluetooth adapter name restoration has not taken affect yet. Checking again in "
                 + ASSOCIATE_ADVERTISING_DELAY_MS + " milliseconds.");
@@ -535,10 +543,13 @@ public class CarBlePeripheralManager extends CarBleManager {
                         deviceId = connectedDevice.mDeviceId;
                     }
                     final String finalDeviceId = deviceId;
-                    if (finalDeviceId != null) {
-                        logd(TAG, "Connected device " + finalDeviceId + " disconnected.");
-                        mCallbacks.invoke(callback -> callback.onDeviceDisconnected(finalDeviceId));
+                    if (finalDeviceId == null) {
+                        logw(TAG, "Callbacks were not issued for disconnect because the device id "
+                                + "was null.");
+                        return;
                     }
+                    logd(TAG, "Connected device " + finalDeviceId + " disconnected.");
+                    mCallbacks.invoke(callback -> callback.onDeviceDisconnected(finalDeviceId));
                 }
             };
 
@@ -583,6 +594,7 @@ public class CarBlePeripheralManager extends CarBleManager {
 
                 @Override
                 public void onRemoteDeviceDisconnected(BluetoothDevice device) {
+                    logd(TAG, "Remote device disconnected.");
                     BleDevice connectedDevice = getConnectedDevice(device);
                     if (isAssociating()) {
                         mAssociationCallback.onAssociationError(
@@ -591,10 +603,12 @@ public class CarBlePeripheralManager extends CarBleManager {
                     // Reset before invoking callbacks to avoid a race condition with reconnect
                     // logic.
                     reset();
-                    if (connectedDevice != null && connectedDevice.mDeviceId != null) {
-                        mCallbacks.invoke(callback -> callback.onDeviceDisconnected(
-                                connectedDevice.mDeviceId));
+                    if (connectedDevice == null || connectedDevice.mDeviceId == null) {
+                        logw(TAG, "Callbacks were not issued for disconnect.");
+                        return;
                     }
+                    mCallbacks.invoke(callback -> callback.onDeviceDisconnected(
+                            connectedDevice.mDeviceId));
                 }
             };
 
@@ -671,6 +685,10 @@ public class CarBlePeripheralManager extends CarBleManager {
 
                 @Override
                 public void onDeviceIdReceived(String deviceId) {
+                    if (deviceId == null) {
+                        loge(TAG, "Received a null device id. Ignoring.");
+                        return;
+                    }
                     setDeviceId(deviceId);
                 }
             };
