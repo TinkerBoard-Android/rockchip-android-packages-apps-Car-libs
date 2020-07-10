@@ -320,7 +320,7 @@ public class ToolbarActivity extends AppCompatActivity implements InsetsChangedL
         Mutable<Boolean> showingLauncherIcon = new Mutable<>(false);
         mButtons.add(Pair.create(getString(R.string.toolbar_toggle_search_icon), v -> {
             if (showingLauncherIcon.value) {
-                toolbar.setSearchIcon(0);
+                toolbar.setSearchIcon(null);
             } else {
                 toolbar.setSearchIcon(R.drawable.ic_launcher);
             }
