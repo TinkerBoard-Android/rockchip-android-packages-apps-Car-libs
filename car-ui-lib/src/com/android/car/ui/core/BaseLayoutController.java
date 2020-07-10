@@ -140,7 +140,8 @@ public class BaseLayoutController {
         contentViewParent.addView(baseLayout, contentIndex, windowContentView.getLayoutParams());
 
         // Add windowContentView to the baseLayout's content view
-        FrameLayout contentView = CarUiUtils.requireViewByRefId(baseLayout, R.id.content);
+        FrameLayout contentView = CarUiUtils.requireViewByRefId(baseLayout,
+                R.id.car_ui_base_layout_content_container);
         contentView.addView(windowContentView, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));

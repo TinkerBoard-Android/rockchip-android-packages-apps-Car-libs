@@ -31,7 +31,7 @@
         android:layout_height="wrap_content"/>
 
     <FrameLayout
-        android:id="@+id/content"
+        android:id="@+id/car_ui_base_layout_content_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
