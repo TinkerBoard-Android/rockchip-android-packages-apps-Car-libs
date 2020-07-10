@@ -21,6 +21,7 @@ import android.content.ContextWrapper;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -152,7 +153,10 @@ public final class CarUiUtils {
     }
 
     /**
-     * It behaves similar to @see View#findViewById, except it resolves the ID reference first.
+     * It behaves similarly to {@link View#findViewById(int)}, except that on Q and below,
+     * it will first resolve the id to whatever it references.
+     *
+     * This is to support layout RROs before the new RRO features in R.
      *
      * @param id the ID to search for
      * @return a view with given ID if found, or {@code null} otherwise
@@ -161,6 +165,10 @@ public final class CarUiUtils {
     @Nullable
     @UiThread
     public static <T extends View> T findViewByRefId(@NonNull View root, @IdRes int id) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            return root.findViewById(id);
+        }
+
         if (id == View.NO_ID) {
             return null;
         }
@@ -171,7 +179,10 @@ public final class CarUiUtils {
     }
 
     /**
-     * It behaves similar to @see View#requireViewById, except it resolves the ID reference first.
+     * It behaves similarly to {@link View#requireViewById(int)}, except that on Q and below,
+     * it will first resolve the id to whatever it references.
+     *
+     * This is to support layout RROs before the new RRO features in R.
      *
      * @param id the ID to search for
      * @return a view with given ID
