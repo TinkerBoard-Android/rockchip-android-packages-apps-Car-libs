@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mockitoSession;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -234,6 +235,17 @@ public class CarBlePeripheralManagerTest {
         verify(mMockPeripheralManager,
                 timeout(RECONNECT_ADVERTISEMENT_DURATION.plusSeconds(1).toMillis()))
                 .stopAdvertising(any(AdvertiseCallback.class));
+    }
+
+    @Test
+    public void disconnectDevice_stopsAdvertisingForPendingReconnect() {
+        when(mMockStorage.hashWithChallengeSecret(any(), any()))
+                .thenReturn(ByteUtils.randomBytes(32));
+        UUID deviceId = UUID.randomUUID();
+        mCarBlePeripheralManager.connectToDevice(deviceId);
+        reset(mMockPeripheralManager);
+        mCarBlePeripheralManager.disconnectDevice(deviceId.toString());
+        verify(mMockPeripheralManager).cleanup();
     }
 
     private BlePeripheralManager.Callback startAssociation(AssociationCallback callback,
