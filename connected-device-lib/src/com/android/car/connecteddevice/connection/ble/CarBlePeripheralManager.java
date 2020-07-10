@@ -209,6 +209,11 @@ public class CarBlePeripheralManager extends CarBleManager {
 
     @Override
     public void disconnectDevice(@NonNull String deviceId) {
+        if (deviceId.equals(mReconnectDeviceId)) {
+            logd(TAG, "Reconnection canceled for device " + deviceId + ".");
+            reset();
+            return;
+        }
         BleDevice connectedDevice = getConnectedDevice();
         if (connectedDevice == null || !deviceId.equals(connectedDevice.mDeviceId)) {
             return;
@@ -588,10 +593,13 @@ public class CarBlePeripheralManager extends CarBleManager {
                         deviceId = connectedDevice.mDeviceId;
                     }
                     final String finalDeviceId = deviceId;
-                    if (finalDeviceId != null) {
-                        logd(TAG, "Connected device " + finalDeviceId + " disconnected.");
-                        mCallbacks.invoke(callback -> callback.onDeviceDisconnected(finalDeviceId));
+                    if (finalDeviceId == null) {
+                        logw(TAG, "Callbacks were not issued for disconnect because the device id "
+                                + "was null.");
+                        return;
                     }
+                    logd(TAG, "Connected device " + finalDeviceId + " disconnected.");
+                    mCallbacks.invoke(callback -> callback.onDeviceDisconnected(finalDeviceId));
                 }
             };
 
@@ -636,6 +644,7 @@ public class CarBlePeripheralManager extends CarBleManager {
 
                 @Override
                 public void onRemoteDeviceDisconnected(BluetoothDevice device) {
+                    logd(TAG, "Remote device disconnected.");
                     BleDevice connectedDevice = getConnectedDevice(device);
                     if (isAssociating()) {
                         mAssociationCallback.onAssociationError(
@@ -644,10 +653,12 @@ public class CarBlePeripheralManager extends CarBleManager {
                     // Reset before invoking callbacks to avoid a race condition with reconnect
                     // logic.
                     reset();
-                    if (connectedDevice != null && connectedDevice.mDeviceId != null) {
-                        mCallbacks.invoke(callback -> callback.onDeviceDisconnected(
-                                connectedDevice.mDeviceId));
+                    if (connectedDevice == null || connectedDevice.mDeviceId == null) {
+                        logw(TAG, "Callbacks were not issued for disconnect.");
+                        return;
                     }
+                    mCallbacks.invoke(callback -> callback.onDeviceDisconnected(
+                            connectedDevice.mDeviceId));
                 }
             };
 
