@@ -23,8 +23,6 @@ import android.annotation.NonNull;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
-import android.util.Log;
 
 import com.android.car.connecteddevice.util.ThreadSafeCallbacks;
 import com.android.internal.annotations.GuardedBy;
@@ -33,6 +31,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -50,6 +49,8 @@ public class SppManager {
     // Service names and UUIDs of SDP(Service Discovery Protocol) record, need to keep it consistent
     // among client and server.
     private final BluetoothAdapter mAdapter = BluetoothAdapter.getDefaultAdapter();
+    private final UUID mServiceUuid;
+    private final boolean mIsSecure;
     private Object mLock = new Object();
     /**
      * Task to listen to secure RFCOMM channel.
@@ -64,7 +65,6 @@ public class SppManager {
     @VisibleForTesting
     ExecutorService mConnectionExecutor = Executors.newSingleThreadExecutor();
     private BluetoothDevice mDevice;
-    private final Context mContext;
     @GuardedBy("mLock")
     private final SppPayloadStream mPayloadStream = new SppPayloadStream();
     @GuardedBy("mLock")
@@ -74,9 +74,10 @@ public class SppManager {
     private final ThreadSafeCallbacks<OnMessageReceivedListener> mReceivedListeners =
             new ThreadSafeCallbacks<>();
 
-    public SppManager(@NonNull Context context) {
-        mContext = context;
+    public SppManager(@NonNull UUID serviceUuid, @NonNull boolean isSecure) {
         mPayloadStream.setMessageCompletedListener(this::onMessageCompleted);
+        mServiceUuid = serviceUuid;
+        mIsSecure = isSecure;
     }
 
     @VisibleForTesting
@@ -143,7 +144,7 @@ public class SppManager {
             logd(TAG, "Already started listening, ignore.");
             return false;
         }
-        mSecureAcceptTask = new AcceptTask(mContext, mAdapter, false, mAcceptTaskListener);
+        mSecureAcceptTask = new AcceptTask(mAdapter, mIsSecure, mServiceUuid, mAcceptTaskListener);
         if (!mSecureAcceptTask.startListening()) {
             // TODO(b/159376003): Handle listening error.
             mSecureAcceptTask.cancel();
@@ -263,7 +264,7 @@ public class SppManager {
                                 try {
                                     socket.close();
                                 } catch (IOException e) {
-                                    Log.e(TAG, "Could not close unwanted socket", e);
+                                    loge(TAG, "Could not close unwanted socket", e);
                                 }
                                 break;
                             case DISCONNECTED:

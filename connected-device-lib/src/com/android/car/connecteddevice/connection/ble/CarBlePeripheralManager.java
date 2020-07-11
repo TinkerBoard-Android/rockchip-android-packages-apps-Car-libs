@@ -16,7 +16,6 @@
 
 package com.android.car.connecteddevice.connection.ble;
 
-import static com.android.car.connecteddevice.ConnectedDeviceManager.DEVICE_ERROR_INVALID_HANDSHAKE;
 import static com.android.car.connecteddevice.ConnectedDeviceManager.DEVICE_ERROR_UNEXPECTED_DISCONNECTION;
 import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
@@ -39,17 +38,14 @@ import android.os.ParcelUuid;
 import com.android.car.connecteddevice.AssociationCallback;
 import com.android.car.connecteddevice.connection.AssociationSecureChannel;
 import com.android.car.connecteddevice.connection.CarBluetoothManager;
-import com.android.car.connecteddevice.connection.DeviceMessage;
 import com.android.car.connecteddevice.connection.OobAssociationSecureChannel;
 import com.android.car.connecteddevice.connection.ReconnectSecureChannel;
 import com.android.car.connecteddevice.connection.SecureChannel;
-import com.android.car.connecteddevice.model.AssociatedDevice;
 import com.android.car.connecteddevice.oob.OobChannel;
 import com.android.car.connecteddevice.oob.OobConnectionManager;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
 import com.android.car.connecteddevice.util.ByteUtils;
 import com.android.car.connecteddevice.util.EventLog;
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -115,21 +111,17 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
 
     private String mOriginalBluetoothName;
 
-    private String mClientDeviceName;
-
-    private String mClientDeviceAddress;
-
     private String mReconnectDeviceId;
 
     private byte[] mReconnectChallenge;
-
-    private AssociationCallback mAssociationCallback;
 
     private AdvertiseCallback mAdvertiseCallback;
 
     private OobConnectionManager mOobConnectionManager;
 
     private Future mBluetoothNameTask;
+
+    private AssociationCallback mAssociationCallback;
 
     /**
      * Initialize a new instance of manager.
@@ -221,24 +213,33 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
         reset();
     }
 
-    private void reset() {
+    @Override
+    public AssociationCallback getAssociationCallback() {
+        return mAssociationCallback;
+    }
+
+    @Override
+    public void setAssociationCallback(AssociationCallback callback) {
+        mAssociationCallback = callback;
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
         logd(TAG, "Resetting state.");
         resetBluetoothAdapterName();
-        mClientDeviceAddress = null;
-        mClientDeviceName = null;
-        mAssociationCallback = null;
         mBlePeripheralManager.cleanup();
-        mConnectedDevices.clear();
         mReconnectDeviceId = null;
         mReconnectChallenge = null;
         mOobConnectionManager = null;
+        mAssociationCallback = null;
         if (mBluetoothNameTask != null) {
             mBluetoothNameTask.cancel(true);
         }
         mBluetoothNameTask = null;
     }
 
-    /** Attempt to connect to device with provided id. */
+    @Override
     public void connectToDevice(@NonNull UUID deviceId) {
         for (ConnectedRemoteDevice device : mConnectedDevices) {
             if (UUID.fromString(device.mDeviceId).equals(deviceId)) {
@@ -297,15 +298,7 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
 
     }
 
-    @Nullable
-    private ConnectedRemoteDevice getConnectedDevice() {
-        if (mConnectedDevices.isEmpty()) {
-            return null;
-        }
-        return mConnectedDevices.iterator().next();
-    }
-
-    /** Start the association with a new device */
+    @Override
     public void startAssociation(@NonNull String nameForAssociation,
             @NonNull AssociationCallback callback) {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
@@ -343,15 +336,8 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
         attemptAssociationAdvertising(nameForAssociation, callback);
     }
 
-    /** Stop the association with any device. */
-    public void stopAssociation(@NonNull AssociationCallback callback) {
-        if (!isAssociating() || callback != mAssociationCallback) {
-            return;
-        }
-        reset();
-    }
-
     /** Start the association with a new device using out of band verification code exchange */
+    @Override
     public void startOutOfBandAssociation(
             @NonNull String nameForAssociation,
             @NonNull OobChannel oobChannel,
@@ -426,56 +412,6 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
         mBlePeripheralManager.startAdvertising(gattService, builder.build(), callback);
     }
 
-    /** Notify that the user has accepted a pairing code or other out-of-band confirmation. */
-    public void notifyOutOfBandAccepted() {
-        if (getConnectedDevice() == null) {
-            disconnectWithError("Null connected device found when out-of-band confirmation "
-                    + "received.");
-            return;
-        }
-
-        AssociationSecureChannel secureChannel =
-                (AssociationSecureChannel) getConnectedDevice().mSecureChannel;
-        if (secureChannel == null) {
-            disconnectWithError("Null SecureBleChannel found for the current connected device "
-                    + "when out-of-band confirmation received.");
-            return;
-        }
-
-        secureChannel.notifyOutOfBandAccepted();
-    }
-
-    @VisibleForTesting
-    @Nullable
-    SecureChannel getConnectedDeviceChannel() {
-        ConnectedRemoteDevice connectedDevice = getConnectedDevice();
-        if (connectedDevice == null) {
-            return null;
-        }
-
-        return connectedDevice.mSecureChannel;
-    }
-
-    private void setDeviceId(@NonNull String deviceId) {
-        logd(TAG, "Setting device id: " + deviceId);
-        ConnectedRemoteDevice connectedDevice = getConnectedDevice();
-        if (connectedDevice == null) {
-            disconnectWithError("Null connected device found when device id received.");
-            return;
-        }
-
-        connectedDevice.mDeviceId = deviceId;
-        mCallbacks.invoke(callback -> callback.onDeviceConnected(deviceId));
-    }
-
-    private void disconnectWithError(@NonNull String errorMessage) {
-        loge(TAG, errorMessage);
-        if (isAssociating()) {
-            mAssociationCallback.onAssociationError(DEVICE_ERROR_INVALID_HANDSHAKE);
-        }
-        reset();
-    }
-
     private void resetBluetoothAdapterName() {
         if (mOriginalBluetoothName == null) {
             return;
@@ -518,13 +454,15 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
         if (mTimeoutHandler != null) {
             mTimeoutHandler.removeCallbacks(mTimeoutRunnable);
         }
-        mClientDeviceAddress = device.getAddress();
-        mClientDeviceName = device.getName();
-        if (mClientDeviceName == null) {
+
+        if (device.getName() == null) {
             logd(TAG, "Device connected, but name is null; issuing request to retrieve device "
                     + "name.");
             mBlePeripheralManager.retrieveDeviceName(device);
+        } else {
+            setClientDeviceName(device.getName());
         }
+        setClientDeviceAddress(device.getAddress());
 
         BleDeviceMessageStream secureStream = new BleDeviceMessageStream(mBlePeripheralManager,
                 device, mWriteCharacteristic, mReadCharacteristic,
@@ -548,7 +486,7 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
         connectedDevice.mSecureChannel = secureChannel;
         addConnectedDevice(connectedDevice);
         if (isReconnect) {
-            setDeviceId(mReconnectDeviceId);
+            setDeviceIdAndNotifyCallbacks(mReconnectDeviceId);
             mReconnectDeviceId = null;
             mReconnectChallenge = null;
         }
@@ -562,10 +500,6 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
             ((BleDeviceMessageStream) connectedDevice.mSecureChannel.getStream())
                     .setMaxWriteSize(mtuSize - ATT_PROTOCOL_BYTES);
         }
-    }
-
-    private boolean isAssociating() {
-        return mAssociationCallback != null;
     }
 
     private final BlePeripheralManager.Callback mReconnectPeripheralCallback =
@@ -614,7 +548,7 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
                     if (deviceName == null) {
                         return;
                     }
-                    mClientDeviceName = deviceName;
+                    setClientDeviceName(deviceName);
                     ConnectedRemoteDevice connectedDevice = getConnectedDevice();
                     if (connectedDevice == null || connectedDevice.mDeviceId == null) {
                         return;
@@ -663,87 +597,6 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
                     }
                     mCallbacks.invoke(callback -> callback.onDeviceDisconnected(
                             connectedDevice.mDeviceId));
-                }
-            };
-
-    private final SecureChannel.Callback mSecureChannelCallback =
-            new SecureChannel.Callback() {
-                @Override
-                public void onSecureChannelEstablished() {
-                    ConnectedRemoteDevice connectedDevice = getConnectedDevice();
-                    if (connectedDevice == null || connectedDevice.mDeviceId == null) {
-                        disconnectWithError("Null device id found when secure channel "
-                                + "established.");
-                        return;
-                    }
-                    String deviceId = connectedDevice.mDeviceId;
-                    if (mClientDeviceAddress == null) {
-                        disconnectWithError("Null device address found when secure channel "
-                                + "established.");
-                        return;
-                    }
-                    if (isAssociating()) {
-                        logd(TAG, "Secure channel established for un-associated device. Saving "
-                                + "association of that device for current user.");
-                        mStorage.addAssociatedDeviceForActiveUser(
-                                new AssociatedDevice(deviceId, mClientDeviceAddress,
-                                        mClientDeviceName, /* isConnectionEnabled= */ true));
-                        if (mAssociationCallback != null) {
-                            mAssociationCallback.onAssociationCompleted(deviceId);
-                            mAssociationCallback = null;
-                        }
-                    }
-                    mCallbacks.invoke(callback -> callback.onSecureChannelEstablished(deviceId));
-                }
-
-                @Override
-                public void onEstablishSecureChannelFailure(int error) {
-                    ConnectedRemoteDevice connectedDevice = getConnectedDevice();
-                    if (connectedDevice == null || connectedDevice.mDeviceId == null) {
-                        disconnectWithError("Null device id found when secure channel failed to "
-                                + "establish.");
-                        return;
-                    }
-                    String deviceId = connectedDevice.mDeviceId;
-                    mCallbacks.invoke(callback -> callback.onSecureChannelError(deviceId));
-
-                    if (isAssociating()) {
-                        mAssociationCallback.onAssociationError(error);
-                    }
-
-                    disconnectWithError("Error while establishing secure connection.");
-                }
-
-                @Override
-                public void onMessageReceived(DeviceMessage deviceMessage) {
-                    ConnectedRemoteDevice connectedDevice = getConnectedDevice();
-                    if (connectedDevice == null || connectedDevice.mDeviceId == null) {
-                        disconnectWithError("Null device id found when message received.");
-                        return;
-                    }
-
-                    logd(TAG, "Received new message from " + connectedDevice.mDeviceId
-                            + " with " + deviceMessage.getMessage().length + " bytes in its "
-                            + "payload. Notifying " + mCallbacks.size() + " callbacks.");
-                    mCallbacks.invoke(
-                            callback -> callback.onMessageReceived(connectedDevice.mDeviceId,
-                                    deviceMessage));
-                }
-
-                @Override
-                public void onMessageReceivedError(Exception exception) {
-                    // TODO(b/143879960) Extend the message error from here to continue up the
-                    // chain.
-                    disconnectWithError("Error while receiving message.");
-                }
-
-                @Override
-                public void onDeviceIdReceived(String deviceId) {
-                    if (deviceId == null) {
-                        loge(TAG, "Received a null device id. Ignoring.");
-                        return;
-                    }
-                    setDeviceId(deviceId);
                 }
             };
 
