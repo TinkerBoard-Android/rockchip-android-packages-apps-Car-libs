@@ -235,9 +235,10 @@ public class BaseNotificationDelegate {
             }
         });
         if (notificationInfo.isGroupConvo()) {
-            messagingStyle.setConversationTitle(
-                    mContext.getString(R.string.group_conversation_title_separator,
-                            lastMessage.getSenderName(), notificationInfo.getConvoTitle()));
+            messagingStyle.setConversationTitle(Utils.constructGroupConversationHeader(
+                    lastMessage.getSenderName(), notificationInfo.getConvoTitle(),
+                    mContext.getString(R.string.group_conversation_title_separator)
+            ));
         }
 
         // We are creating this notification for the first time.
