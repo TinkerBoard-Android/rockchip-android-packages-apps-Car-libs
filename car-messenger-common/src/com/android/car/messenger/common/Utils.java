@@ -23,6 +23,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.text.BidiFormatter;
+import android.text.TextDirectionHeuristics;
 import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
@@ -46,6 +48,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /** Utils methods for the car-messenger-common lib. **/
 public class Utils {
@@ -336,6 +339,89 @@ public class Utils {
         }
 
         return senderContactUri.substring(MAP_CLIENT_URI_PHONE_NUMBER_SUBSTRING_INDEX);
+    }
+
+    /**
+     * Creates a Header for a group conversation, where the senderName and groupName are both shown,
+     * separated by a delimiter.
+     *
+     * @param senderName Sender's name.
+     * @param groupName  Group conversation's name.
+     * @param delimiter  delimiter that separates each element.
+     */
+    public static String constructGroupConversationHeader(String senderName, String groupName,
+            String delimiter) {
+        return constructGroupConversationHeader(senderName, groupName, delimiter,
+                BidiFormatter.getInstance());
+    }
+
+    /**
+     * Creates a Header for a group conversation, where the senderName and groupName are both shown,
+     * separated by a delimiter.
+     *
+     * @param senderName Sender's name.
+     * @param groupName  Group conversation's name.
+     * @param delimiter  delimiter that separates each element.
+     * @param bidiFormatter  formatter for the context's locale.
+     */
+    public static String constructGroupConversationHeader(String senderName, String groupName,
+            String delimiter, BidiFormatter bidiFormatter) {
+        String formattedSenderName = bidiFormatter.unicodeWrap(senderName,
+                TextDirectionHeuristics.FIRSTSTRONG_LTR);
+        String formattedGroupName = bidiFormatter.unicodeWrap(groupName,
+                TextDirectionHeuristics.LOCALE);
+        String title = String.join(delimiter, formattedSenderName, formattedGroupName);
+        return bidiFormatter.unicodeWrap(title, TextDirectionHeuristics.LOCALE);
+    }
+
+    /**
+     * Given a name of all the participants in a group conversation (some names might be phone
+     * numbers), this function creates the conversation title by putting the names in alphabetical
+     * order first, then adding any phone numbers. This title should not exceed the
+     * conversationTitleLength, so not all participants' names are guaranteed to be
+     * in the conversation title.
+     */
+    public static String constructGroupConversationTitle(List<String> names, String delimiter,
+            int conversationTitleLength) {
+        return constructGroupConversationTitle(names, delimiter, conversationTitleLength,
+                BidiFormatter.getInstance());
+    }
+
+    /**
+     * Given a name of all the participants in a group conversation (some names might be phone
+     * numbers), this function creates the conversation title by putting the names in alphabetical
+     * order first, then adding any phone numbers. This title should not exceed the
+     * conversationTitleLength, so not all participants' names are guaranteed to be
+     * in the conversation title.
+     */
+    public static String constructGroupConversationTitle(List<String> names, String delimiter,
+            int conversationTitleLength, BidiFormatter bidiFormatter) {
+        List<String> sortedNames = getSortedSubsetNames(names, conversationTitleLength,
+                delimiter.length());
+        String formattedDelimiter = bidiFormatter.unicodeWrap(delimiter,
+                TextDirectionHeuristics.LOCALE);
+
+        String conversationName = sortedNames.stream().map(name -> bidiFormatter.unicodeWrap(name,
+                TextDirectionHeuristics.FIRSTSTRONG_LTR))
+                .collect(Collectors.joining(formattedDelimiter));
+        return bidiFormatter.unicodeWrap(conversationName, TextDirectionHeuristics.LOCALE);
+    }
+
+    /**
+     * Sorts the list, and returns the first elements whose total length is less than the given
+     * conversationTitleLength.
+     */
+    private static List<String> getSortedSubsetNames(List<String> names,
+            int conversationTitleLength,
+            int delimiterLength) {
+        Collections.sort(names, Utils.ALPHA_THEN_NUMERIC_COMPARATOR);
+        int namesCounter = 0;
+        int indexCounter = 0;
+        while (namesCounter < conversationTitleLength && indexCounter < names.size()) {
+            namesCounter = namesCounter + names.get(indexCounter).length() + delimiterLength;
+            indexCounter = indexCounter + 1;
+        }
+        return names.subList(0, indexCounter);
     }
 
     /** Comparator that sorts names alphabetically first, then phone numbers numerically. **/
