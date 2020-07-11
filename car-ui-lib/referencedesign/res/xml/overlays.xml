@@ -19,7 +19,7 @@
     <item target="id/car_ui_toolbar_menu_items_container" value="@id/car_ui_toolbar_menu_items_container" />
     <item target="id/car_ui_toolbar_search_view_container" value="@id/car_ui_toolbar_search_view_container" />
     <item target="id/car_ui_toolbar_progress_bar" value="@id/car_ui_toolbar_progress_bar" />
-    <item target="id/content" value="@id/content" />
+    <item target="id/car_ui_base_layout_content_container" value="@id/car_ui_base_layout_content_container" />
 
     <item target="attr/layout_constraintGuide_begin" value="@attr/layout_constraintGuide_begin"/>
     <item target="attr/layout_constraintGuide_end" value="@attr/layout_constraintGuide_end"/>
