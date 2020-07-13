@@ -50,7 +50,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RunWith(RobolectricTestRunner.class)
-public class MediaSourcesLiveDataTest {
+public class MediaSourcesProviderTest {
 
     @Rule
     public final MockitoRule mMockitoRule = MockitoJUnit.rule();
@@ -65,13 +65,13 @@ public class MediaSourcesLiveDataTest {
     private static final String TEST_SERVICE_PACKAGE_2 = "service_package2";
     private static final String TEST_SERVICE_PACKAGE_WITH_METADATA = "service_package3";
 
-    private MediaSourcesLiveData mMediaSources;
+    private MediaSourcesProvider mMediaSources;
     private Intent mActivityIntent;
     private Intent mServiceIntent;
 
     @Before
     public void setUp() {
-        mMediaSources = MediaSourcesLiveData.createForTesting(application);
+        mMediaSources = MediaSourcesProvider.createForTesting(application);
 
         mActivityIntent = new Intent(Intent.ACTION_MAIN, null);
         mActivityIntent.addCategory(Intent.CATEGORY_APP_MUSIC);
