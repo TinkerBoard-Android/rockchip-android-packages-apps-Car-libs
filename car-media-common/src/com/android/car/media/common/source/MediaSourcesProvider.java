@@ -46,12 +46,11 @@ import java.util.stream.Collectors;
  * Singleton that provides access to the list of all possible media sources that can be selected
  * to be played.
  */
-// TODO(arnaudberry) rename to MediaSourcesProvider
-public class MediaSourcesLiveData {
+public class MediaSourcesProvider {
 
     private static final String TAG = "MediaSources";
 
-    private static MediaSourcesLiveData sInstance;
+    private static MediaSourcesProvider sInstance;
     private final Context mAppContext;
     @Nullable
     private List<MediaSource> mMediaSources;
@@ -64,17 +63,17 @@ public class MediaSourcesLiveData {
     };
 
     /** Returns the singleton instance. */
-    public static MediaSourcesLiveData getInstance(@NonNull Context context) {
+    public static MediaSourcesProvider getInstance(@NonNull Context context) {
         if (sInstance == null) {
-            sInstance = new MediaSourcesLiveData(context);
+            sInstance = new MediaSourcesProvider(context);
         }
         return sInstance;
     }
 
     /** Returns a different instance every time (tests don't like statics) */
     @VisibleForTesting
-    public static MediaSourcesLiveData createForTesting(@NonNull Context context) {
-        return new MediaSourcesLiveData(context);
+    public static MediaSourcesProvider createForTesting(@NonNull Context context) {
+        return new MediaSourcesProvider(context);
     }
 
     @VisibleForTesting
@@ -82,7 +81,7 @@ public class MediaSourcesLiveData {
         mMediaSources = null;
     }
 
-    private MediaSourcesLiveData(@NonNull Context context) {
+    private MediaSourcesProvider(@NonNull Context context) {
         mAppContext = context.getApplicationContext();
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_ADDED);
