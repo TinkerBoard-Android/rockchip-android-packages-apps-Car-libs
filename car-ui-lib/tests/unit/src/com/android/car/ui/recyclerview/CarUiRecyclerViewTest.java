@@ -306,10 +306,8 @@ public class CarUiRecyclerViewTest {
         onView(withId(R.id.list)).check(matches(isDisplayed()));
 
         CarUiRecyclerView carUiRecyclerView = mActivity.requireViewById(R.id.list);
-        TestAdapter adapter = new TestAdapter(50);
-        mActivity.runOnUiThread(() -> {
-            carUiRecyclerView.setAdapter(adapter);
-        });
+        FixedSizeTestAdapter adapter = new FixedSizeTestAdapter(50, carUiRecyclerView.getHeight());
+        mActivity.runOnUiThread(() -> carUiRecyclerView.setAdapter(adapter));
 
         IdlingRegistry.getInstance().register(new ScrollIdlingResource(carUiRecyclerView));
         onView(withText(adapter.getItemText(0))).check(matches(isDisplayed()));
@@ -792,6 +790,44 @@ public class CarUiRecyclerViewTest {
                     throw new IllegalStateException("Unexpected value: " + height);
             }
 
+            holder.bind(mData.get(position));
+        }
+
+        @Override
+        public int getItemCount() {
+            return mData.size();
+        }
+    }
+
+    private static class FixedSizeTestAdapter extends RecyclerView.Adapter<TestViewHolder> {
+
+        private static final int ITEMS_PER_PAGE = 5;
+        private final List<String> mData;
+        private final int mItemHeight;
+
+        FixedSizeTestAdapter(int itemCount, int recyclerViewHeight) {
+            mData = new ArrayList<>(itemCount);
+            mItemHeight = recyclerViewHeight / ITEMS_PER_PAGE;
+
+            for (int i = 0; i < itemCount; i++) {
+                mData.add(getItemText(i));
+            }
+        }
+
+        String getItemText(int position) {
+            return String.format("Sample item #%d", position);
+        }
+
+        @NonNull
+        @Override
+        public TestViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+            return new TestViewHolder(inflater, parent);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull TestViewHolder holder, int position) {
+            holder.itemView.setMinimumHeight(mItemHeight);
             holder.bind(mData.get(position));
         }
 
