@@ -84,7 +84,7 @@ public class BlePeripheralManager {
     private int mMtuSize = 20;
 
     private BluetoothManager mBluetoothManager;
-    private BluetoothLeAdvertiser mAdvertiser;
+    private AtomicReference<BluetoothLeAdvertiser> mAdvertiser = new AtomicReference<>();
     private int mAdvertiserStartCount;
     private int mGattServerRetryStartCount;
     private BluetoothGattService mBluetoothGattService;
@@ -172,7 +172,7 @@ public class BlePeripheralManager {
      */
     void startAdvertising(
             BluetoothGattService service, AdvertiseData data, AdvertiseCallback advertiseCallback) {
-        logd(TAG, "startAdvertising: " + service.getUuid());
+        logd(TAG, "Request to start advertising with service " + service.getUuid() + ".");
         if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             loge(TAG, "Attempted start advertising, but system does not support BLE. Ignoring.");
             return;
@@ -194,9 +194,10 @@ public class BlePeripheralManager {
      * @param advertiseCallback The callback that is associated with the advertisement.
      */
     void stopAdvertising(AdvertiseCallback advertiseCallback) {
-        if (mAdvertiser != null) {
-            logd(TAG, "Stop advertising.");
-            mAdvertiser.stopAdvertising(advertiseCallback);
+        BluetoothLeAdvertiser advertiser = mAdvertiser.getAndSet(null);
+        if (advertiser != null) {
+            advertiser.stopAdvertising(advertiseCallback);
+            logd(TAG, "Advertising stopped.");
         }
     }
 
@@ -228,14 +229,12 @@ public class BlePeripheralManager {
      * Cleans up the BLE GATT server state.
      */
     void cleanup() {
+        logd(TAG, "Cleaning up manager.");
         // Stops the advertiser, scanner and GATT server. This needs to be done to avoid leaks.
-        if (mAdvertiser != null) {
-            mAdvertiser.stopAdvertising(mAdvertiseCallback);
-        }
+        stopAdvertising(mAdvertiseCallback);
         // Clears all registered listeners. IHU only supports single connection in peripheral role.
         mReadListeners.clear();
         mWriteListeners.clear();
-        mAdvertiser = null;
 
         BluetoothGattServer gattServer = mGattServer.getAndSet(null);
         if (gattServer == null) {
@@ -282,12 +281,13 @@ public class BlePeripheralManager {
     private void startAdvertisingInternally(
             AdvertiseSettings settings, AdvertiseData data, AdvertiseCallback advertiseCallback) {
         if (BluetoothAdapter.getDefaultAdapter() != null) {
-            mAdvertiser = BluetoothAdapter.getDefaultAdapter().getBluetoothLeAdvertiser();
+            mAdvertiser.compareAndSet(null,
+                    BluetoothAdapter.getDefaultAdapter().getBluetoothLeAdvertiser());
         }
-
-        if (mAdvertiser != null) {
+        BluetoothLeAdvertiser advertiser = mAdvertiser.get();
+        if (advertiser != null) {
             logd(TAG, "Advertiser created, retry count: " + mAdvertiserStartCount);
-            mAdvertiser.startAdvertising(settings, data, advertiseCallback);
+            advertiser.startAdvertising(settings, data, advertiseCallback);
             mAdvertiserStartCount = 0;
         } else if (mAdvertiserStartCount < BLE_RETRY_LIMIT) {
             mHandler.postDelayed(
@@ -305,9 +305,9 @@ public class BlePeripheralManager {
                 @Override
                 public void onConnectionStateChange(BluetoothDevice device, int status,
                                                     int newState) {
-                    logd(TAG, "BLE Connection State Change: " + newState);
                     switch (newState) {
                         case BluetoothProfile.STATE_CONNECTED:
+                            logd(TAG, "BLE Connection State Change: CONNECTED");
                             BluetoothGattServer gattServer = mGattServer.get();
                             if (gattServer == null) {
                                 return;
@@ -318,6 +318,7 @@ public class BlePeripheralManager {
                             }
                             break;
                         case BluetoothProfile.STATE_DISCONNECTED:
+                            logd(TAG, "BLE Connection State Change: DISCONNECTED");
                             for (Callback callback : mCallbacks) {
                                 callback.onRemoteDeviceDisconnected(device);
                             }

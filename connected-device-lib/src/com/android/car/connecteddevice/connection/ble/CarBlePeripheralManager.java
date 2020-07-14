@@ -735,6 +735,10 @@ public class CarBlePeripheralManager extends CarBleManager {
 
                 @Override
                 public void onDeviceIdReceived(String deviceId) {
+                    if (deviceId == null) {
+                        loge(TAG, "Received a null device id. Ignoring.");
+                        return;
+                    }
                     setDeviceId(deviceId);
                 }
             };
