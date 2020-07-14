@@ -63,4 +63,21 @@ public interface AssociatedDeviceDao {
     /** Remove a {@link AssociatedDeviceKeyEntity}. */
     @Delete
     void removeAssociatedDeviceKey(AssociatedDeviceKeyEntity keyEntity);
+
+    /** Get the challenge secret associated with a device id. */
+    @Query("SELECT * FROM associated_devices_challenge_secrets WHERE id LIKE :deviceId LIMIT 1")
+    AssociatedDeviceChallengeSecretEntity getAssociatedDeviceChallengeSecret(String deviceId);
+
+    /**
+     * Add a {@link AssociatedDeviceChallengeSecretEntity}. Replace if a secret already exists with
+     * the same device id.
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void addOrReplaceAssociatedDeviceChallengeSecret(
+            AssociatedDeviceChallengeSecretEntity challengeSecretEntity);
+
+    /** Remove a {@link AssociatedDeviceChallengeSecretEntity}. */
+    @Delete
+    void removeAssociatedDeviceChallengeSecret(
+            AssociatedDeviceChallengeSecretEntity challengeSecretEntity);
 }

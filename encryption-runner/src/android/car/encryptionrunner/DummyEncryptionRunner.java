@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -173,6 +173,11 @@ public class DummyEncryptionRunner implements EncryptionRunner {
     @Override
     public void setIsReconnect(boolean isReconnect) {
         mIsReconnect = isReconnect;
+    }
+
+    /** Method to throw a HandshakeException for testing. */
+    public static void throwHandshakeException(String message) throws HandshakeException {
+        throw new HandshakeException(message);
     }
 
     private class DummyKey implements Key {

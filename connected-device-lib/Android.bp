@@ -30,9 +30,10 @@ android_library {
     libs: ["android.car"],
 
     static_libs: [
-        "EncryptionRunner-lib",
         "androidx.room_room-runtime",
         "connected-device-protos",
+        "encryption-runner",
+        "guava",
     ],
 
     plugins: [
