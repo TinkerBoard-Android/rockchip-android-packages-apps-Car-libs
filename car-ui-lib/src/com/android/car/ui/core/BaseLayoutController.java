@@ -131,18 +131,18 @@ public class BaseLayoutController {
         View baseLayout = LayoutInflater.from(activity)
                 .inflate(baseLayoutRes, null, false);
 
-        // Replace windowContentView with baseLayout
-        ViewGroup windowContentView = CarUiUtils.findViewByRefId(
+        // Replace the app's content view with a base layout
+        ViewGroup contentView = CarUiUtils.requireViewByRefId(
                 activity.getWindow().getDecorView(), android.R.id.content);
-        ViewGroup contentViewParent = (ViewGroup) windowContentView.getParent();
-        int contentIndex = contentViewParent.indexOfChild(windowContentView);
-        contentViewParent.removeView(windowContentView);
-        contentViewParent.addView(baseLayout, contentIndex, windowContentView.getLayoutParams());
+        ViewGroup contentViewParent = (ViewGroup) contentView.getParent();
+        int contentIndex = contentViewParent.indexOfChild(contentView);
+        contentViewParent.removeView(contentView);
+        contentViewParent.addView(baseLayout, contentIndex, contentView.getLayoutParams());
 
-        // Add windowContentView to the baseLayout's content view
-        FrameLayout contentView = CarUiUtils.requireViewByRefId(baseLayout,
+        // Add the app's content view to the baseLayout's content view container
+        FrameLayout contentViewContainer = CarUiUtils.requireViewByRefId(baseLayout,
                 R.id.car_ui_base_layout_content_container);
-        contentView.addView(windowContentView, new FrameLayout.LayoutParams(
+        contentViewContainer.addView(contentView, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
 
@@ -154,7 +154,7 @@ public class BaseLayoutController {
             }
         }
 
-        mInsetsUpdater = new InsetsUpdater(activity, baseLayout, windowContentView);
+        mInsetsUpdater = new InsetsUpdater(activity, baseLayout, contentView);
         mInsetsUpdater.installListeners();
     }
 
@@ -181,7 +181,7 @@ public class BaseLayoutController {
      * none of the Activity/Fragments implement {@link InsetsChangedListener}, it will set
      * padding on the content view equal to the insets.
      */
-    public static class InsetsUpdater implements ViewTreeObserver.OnGlobalLayoutListener {
+    public static final class InsetsUpdater implements ViewTreeObserver.OnGlobalLayoutListener {
         // These tags mark views that should overlay the content view in the base layout.
         // OEMs should add them to views in their base layout, ie: android:tag="car_ui_left_inset"
         // Apps will then be able to draw under these views, but will be encouraged to not put
@@ -192,6 +192,8 @@ public class BaseLayoutController {
         private static final String BOTTOM_INSET_TAG = "car_ui_bottom_inset";
 
         private final Activity mActivity;
+        private final View mContentView;
+        private final View mContentViewContainer; // Equivalent to mContentView except in Media
         private final View mLeftInsetView;
         private final View mRightInsetView;
         private final View mTopInsetView;
@@ -209,8 +211,11 @@ public class BaseLayoutController {
          * @param baseLayout  The root view of the base layout
          * @param contentView The android.R.id.content View
          */
-        protected InsetsUpdater(Activity activity, View baseLayout, View contentView) {
+        public InsetsUpdater(Activity activity, View baseLayout, View contentView) {
             mActivity = activity;
+            mContentView = contentView;
+            mContentViewContainer = CarUiUtils.requireViewByRefId(baseLayout,
+                    R.id.car_ui_base_layout_content_container);
 
             mLeftInsetView = baseLayout.findViewWithTag(LEFT_INSET_TAG);
             mRightInsetView = baseLayout.findViewWithTag(RIGHT_INSET_TAG);
@@ -239,13 +244,14 @@ public class BaseLayoutController {
                 mBottomInsetView.addOnLayoutChangeListener(layoutChangeListener);
             }
             contentView.addOnLayoutChangeListener(layoutChangeListener);
+            mContentViewContainer.addOnLayoutChangeListener(layoutChangeListener);
         }
 
         /**
          * Install a global layout listener, during which the insets will be recalculated and
          * dispatched.
          */
-        protected void installListeners() {
+        public void installListeners() {
             // The global layout listener will run after all the individual layout change listeners
             // so that we only updateInsets once per layout, even if multiple inset views changed
             mActivity.getWindow().getDecorView().getViewTreeObserver()
@@ -261,12 +267,6 @@ public class BaseLayoutController {
             mInsetsChangedListenerDelegate = listener;
         }
 
-        /** Returns the content view (android.R.id.content by default). */
-        protected View getContentView() {
-            return CarUiUtils.requireViewByRefId(mActivity.getWindow().getDecorView(),
-                    android.R.id.content);
-        }
-
         /**
          * onGlobalLayout() should recalculate the amount of insets we need, and then dispatch them.
          */
@@ -276,24 +276,34 @@ public class BaseLayoutController {
                 return;
             }
 
-            View content = getContentView();
-
             // Calculate how much each inset view overlays the content view
-            int top = getTopOfView(content);
-            int left = getLeftOfView(content);
-            int right = Math.max(0, content.getWidth() - getRightOfView(content));
-            int bottom = Math.max(0, content.getHeight() - getBottomOfView(content));
+
+            // These initial values are for Media Center's implementation of base layouts.
+            // They should evaluate to 0 in all other apps, because the content view and content
+            // view container have the same size and position there.
+            int top = Math.max(0,
+                    getTopOfView(mContentViewContainer) - getTopOfView(mContentView));
+            int left = Math.max(0,
+                    getLeftOfView(mContentViewContainer) - getLeftOfView(mContentView));
+            int right = Math.max(0,
+                    getRightOfView(mContentView) - getRightOfView(mContentViewContainer));
+            int bottom = Math.max(0,
+                    getBottomOfView(mContentView) - getBottomOfView(mContentViewContainer));
             if (mTopInsetView != null) {
-                top = Math.max(0, getBottomOfView(mTopInsetView) - getTopOfView(content));
+                top += Math.max(0,
+                        getBottomOfView(mTopInsetView) - getTopOfView(mContentViewContainer));
             }
             if (mBottomInsetView != null) {
-                bottom = Math.max(0, getBottomOfView(content) - getTopOfView(mBottomInsetView));
+                bottom += Math.max(0,
+                        getBottomOfView(mContentViewContainer) - getTopOfView(mBottomInsetView));
             }
             if (mLeftInsetView != null) {
-                left = Math.max(0, getRightOfView(mLeftInsetView) - getLeftOfView(content));
+                left += Math.max(0,
+                        getRightOfView(mLeftInsetView) - getLeftOfView(mContentViewContainer));
             }
             if (mRightInsetView != null) {
-                right = Math.max(0, getRightOfView(content) - getLeftOfView(mRightInsetView));
+                right += Math.max(0,
+                        getRightOfView(mContentViewContainer) - getLeftOfView(mRightInsetView));
             }
             Insets insets = new Insets(left, top, right, bottom);
 
