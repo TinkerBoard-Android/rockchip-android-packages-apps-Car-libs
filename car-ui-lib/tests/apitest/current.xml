@@ -167,6 +167,7 @@
   <public type="drawable" name="car_ui_list_item_avatar_icon_outline"/>
   <public type="drawable" name="car_ui_list_item_background"/>
   <public type="drawable" name="car_ui_list_item_divider"/>
+  <public type="drawable" name="car_ui_list_limiting_message_background"/>
   <public type="drawable" name="car_ui_preference_icon_chevron"/>
   <public type="drawable" name="car_ui_preference_icon_chevron_disabled"/>
   <public type="drawable" name="car_ui_preference_icon_chevron_enabled"/>
@@ -311,6 +312,7 @@
   <public type="string" name="car_ui_scrollbar_component"/>
   <public type="string" name="car_ui_scrollbar_page_down_button"/>
   <public type="string" name="car_ui_scrollbar_page_up_button"/>
+  <public type="string" name="car_ui_scrolling_limited_message"/>
   <public type="string" name="car_ui_toolbar_default_search_hint"/>
   <public type="string" name="car_ui_toolbar_menu_item_overflow_title"/>
   <public type="string" name="car_ui_toolbar_menu_item_search_title"/>
