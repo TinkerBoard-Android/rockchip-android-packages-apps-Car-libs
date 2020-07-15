@@ -24,7 +24,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
-import android.util.Log;
 
 import com.android.car.connecteddevice.R;
 
@@ -91,7 +90,10 @@ public class AcceptTask implements Runnable {
             try {
                 socket = mServerSocket.accept();
             } catch (IOException e) {
-                Log.e(TAG, "accept() failed", e);
+                loge(TAG, "accept() failed", e);
+                break;
+            }
+            if (socket != null) {
                 break;
             }
         }

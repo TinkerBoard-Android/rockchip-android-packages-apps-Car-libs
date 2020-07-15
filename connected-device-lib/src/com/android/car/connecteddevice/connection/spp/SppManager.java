@@ -127,10 +127,11 @@ public class SppManager {
 
     /**
      * Start listening to connection request from the client.
+     *
+     * @return {@code true} if listening is started successfully
      */
-    void startListening() {
+    boolean startListening() {
         logd(TAG, "Start socket to listening to incoming connection request.");
-        cleanup();
         if (mConnectedTask != null) {
             mConnectedTask.cancel();
             mConnectedTask = null;
@@ -140,18 +141,20 @@ public class SppManager {
         // TODO(b/158475715): Need to get the config from the configuration file.
         if (mSecureAcceptTask != null) {
             logd(TAG, "Already started listening, ignore.");
-            return;
+            return false;
         }
         mSecureAcceptTask = new AcceptTask(mContext, mAdapter, false, mAcceptTaskListener);
         if (!mSecureAcceptTask.startListening()) {
             // TODO(b/159376003): Handle listening error.
-            loge(TAG, "AcceptTask listening failed.");
-            return;
+            mSecureAcceptTask.cancel();
+            mSecureAcceptTask = null;
+            return false;
         }
         synchronized (mLock) {
             mState = ConnectionState.LISTEN;
         }
         mConnectionExecutor.execute(mSecureAcceptTask);
+        return true;
     }
 
     /**
@@ -180,12 +183,11 @@ public class SppManager {
     }
 
     /**
-     * Cleans up the registered callbacks.
+     * Cleans up the registered listeners.
      */
     void cleanup() {
         // Clears all registered listeners. IHU only supports single connection.
         mReceivedListeners.clear();
-        mCallbacks.clear();
     }
 
     /**
@@ -254,7 +256,7 @@ public class SppManager {
                                 startConnectionLocked(socket, socket.getRemoteDevice(), isSecure);
                                 break;
                             case NONE:
-                                Log.e(TAG, "AcceptTask is done while in NONE state.");
+                                loge(TAG, "AcceptTask is done while in NONE state.");
                                 break;
                             case CONNECTED:
                                 // Already connected. Terminate new socket.
@@ -265,7 +267,7 @@ public class SppManager {
                                 }
                                 break;
                             case DISCONNECTED:
-                                Log.e(TAG, "AcceptTask is done while in DISCONNECTED state.");
+                                loge(TAG, "AcceptTask is done while in DISCONNECTED state.");
                                 break;
                         }
                     }

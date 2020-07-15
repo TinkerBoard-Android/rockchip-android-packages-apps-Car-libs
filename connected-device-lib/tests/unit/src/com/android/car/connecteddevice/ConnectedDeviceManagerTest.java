@@ -39,9 +39,9 @@ import com.android.car.connecteddevice.ConnectedDeviceManager.ConnectionCallback
 import com.android.car.connecteddevice.ConnectedDeviceManager.DeviceAssociationCallback;
 import com.android.car.connecteddevice.ConnectedDeviceManager.DeviceCallback;
 import com.android.car.connecteddevice.ConnectedDeviceManager.MessageDeliveryDelegate;
+import com.android.car.connecteddevice.connection.CarBluetoothManager;
 import com.android.car.connecteddevice.connection.DeviceMessage;
 import com.android.car.connecteddevice.connection.ble.CarBleCentralManager;
-import com.android.car.connecteddevice.connection.ble.CarBleManager;
 import com.android.car.connecteddevice.connection.ble.CarBlePeripheralManager;
 import com.android.car.connecteddevice.model.AssociatedDevice;
 import com.android.car.connecteddevice.model.ConnectedDevice;
@@ -705,13 +705,13 @@ public class ConnectedDeviceManagerTest {
     }
 
     @NonNull
-    private String connectNewDevice(@NonNull CarBleManager carBleManager) {
+    private String connectNewDevice(@NonNull CarBluetoothManager carBluetoothManager) {
         String deviceId = UUID.randomUUID().toString();
         AssociatedDevice device = new AssociatedDevice(deviceId, TEST_DEVICE_ADDRESS,
                 TEST_DEVICE_NAME, /* isConnectionEnabled= */ true);
         mUserDeviceIds.add(deviceId);
         mUserDevices.add(device);
-        mConnectedDeviceManager.addConnectedDevice(deviceId, carBleManager);
+        mConnectedDeviceManager.addConnectedDevice(deviceId, carBluetoothManager);
         return deviceId;
     }
 
