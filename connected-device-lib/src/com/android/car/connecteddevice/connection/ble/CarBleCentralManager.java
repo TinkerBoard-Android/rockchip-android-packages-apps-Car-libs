@@ -36,6 +36,7 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.os.ParcelUuid;
 
+import com.android.car.connecteddevice.connection.CarBluetoothManager;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
 
 import java.math.BigInteger;
@@ -47,7 +48,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * Communication manager for a car that maintains continuous connections with all devices in the car
  * for the duration of a drive.
  */
-public class CarBleCentralManager extends CarBleManager {
+public class CarBleCentralManager extends CarBluetoothManager {
 
     private static final String TAG = "CarBleCentralManager";
 
@@ -65,7 +66,8 @@ public class CarBleCentralManager extends CarBleManager {
             .setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE)
             .build();
 
-    private final CopyOnWriteArraySet<BleDevice> mIgnoredDevices = new CopyOnWriteArraySet<>();
+    private final CopyOnWriteArraySet<ConnectedRemoteDevice> mIgnoredDevices =
+            new CopyOnWriteArraySet<>();
 
     private final Context mContext;
 
@@ -122,7 +124,7 @@ public class CarBleCentralManager extends CarBleManager {
     @Override
     public void disconnectDevice(String deviceId) {
         logd(TAG, "Request to disconnect from device " + deviceId + ".");
-        BleDevice device = getConnectedDevice(deviceId);
+        ConnectedRemoteDevice device = getConnectedDevice(deviceId);
         if (device == null) {
             return;
         }
@@ -130,13 +132,13 @@ public class CarBleCentralManager extends CarBleManager {
         deviceDisconnected(device, STATUS_FORCED_DISCONNECT);
     }
 
-    private void ignoreDevice(@NonNull BleDevice device) {
+    private void ignoreDevice(@NonNull ConnectedRemoteDevice device) {
         mIgnoredDevices.add(device);
     }
 
     private boolean isDeviceIgnored(@NonNull BluetoothDevice device) {
-        for (BleDevice bleDevice : mIgnoredDevices) {
-            if (device.equals(bleDevice.mDevice)) {
+        for (ConnectedRemoteDevice connectedDevice : mIgnoredDevices) {
+            if (device.equals(connectedDevice.mDevice)) {
                 return true;
             }
         }
@@ -205,8 +207,8 @@ public class CarBleCentralManager extends CarBleManager {
             return;
         }
 
-        BleDevice bleDevice = new BleDevice(device, gatt);
-        bleDevice.mState = BleDeviceState.CONNECTING;
+        ConnectedRemoteDevice bleDevice = new ConnectedRemoteDevice(device, gatt);
+        bleDevice.mState = ConnectedDeviceState.CONNECTING;
         addConnectedDevice(bleDevice);
 
         // Stop scanning if we have reached the maximum number of connections.
@@ -215,19 +217,19 @@ public class CarBleCentralManager extends CarBleManager {
         }
     }
 
-    private void deviceConnected(@NonNull BleDevice device) {
+    private void deviceConnected(@NonNull ConnectedRemoteDevice device) {
         if (device.mGatt == null) {
             loge(TAG, "Device connected with null gatt. Disconnecting.");
             deviceDisconnected(device, BluetoothProfile.STATE_DISCONNECTED);
             return;
         }
-        device.mState = BleDeviceState.PENDING_VERIFICATION;
+        device.mState = ConnectedDeviceState.PENDING_VERIFICATION;
         device.mGatt.discoverServices();
         logd(TAG, "New device connected: " + device.mGatt.getDevice().getAddress()
                 + ". Active connections: " + getConnectedDevicesCount() + ".");
     }
 
-    private void deviceDisconnected(@NonNull BleDevice device, int status) {
+    private void deviceDisconnected(@NonNull ConnectedRemoteDevice device, int status) {
         removeConnectedDevice(device);
         if (device.mGatt != null) {
             device.mGatt.close();
@@ -264,7 +266,7 @@ public class CarBleCentralManager extends CarBleManager {
                 return;
             }
 
-            BleDevice connectedDevice = getConnectedDevice(gatt);
+            ConnectedRemoteDevice connectedDevice = getConnectedDevice(gatt);
             if (connectedDevice == null) {
                 return;
             }
@@ -290,7 +292,7 @@ public class CarBleCentralManager extends CarBleManager {
                 return;
             }
 
-            BleDevice connectedDevice = getConnectedDevice(gatt);
+            ConnectedRemoteDevice connectedDevice = getConnectedDevice(gatt);
             if (connectedDevice == null) {
                 return;
             }
@@ -301,7 +303,7 @@ public class CarBleCentralManager extends CarBleManager {
                 return;
             }
 
-            connectedDevice.mState = BleDeviceState.CONNECTED;
+            connectedDevice.mState = ConnectedDeviceState.CONNECTED;
             BluetoothGattCharacteristic writeCharacteristic =
                     service.getCharacteristic(mWriteCharacteristicUuid);
             BluetoothGattCharacteristic readCharacteristic =

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.car.connecteddevice.connection.ble;
+package com.android.car.connecteddevice.connection;
 
 import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.logw;
@@ -24,8 +24,6 @@ import android.annotation.Nullable;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 
-import com.android.car.connecteddevice.connection.DeviceMessage;
-import com.android.car.connecteddevice.connection.SecureChannel;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
 import com.android.car.connecteddevice.util.ThreadSafeCallbacks;
 
@@ -36,17 +34,18 @@ import java.util.concurrent.Executor;
  * Generic BLE manager for a car that keeps track of connected devices and their associated
  * callbacks.
  */
-public abstract class CarBleManager {
+public abstract class CarBluetoothManager {
 
-    private static final String TAG = "CarBleManager";
+    private static final String TAG = "CarConnectionManager";
 
-    final ConnectedDeviceStorage mStorage;
+    protected final ConnectedDeviceStorage mStorage;
 
-    final CopyOnWriteArraySet<BleDevice> mConnectedDevices = new CopyOnWriteArraySet<>();
+    protected final CopyOnWriteArraySet<ConnectedRemoteDevice> mConnectedDevices =
+            new CopyOnWriteArraySet<>();
 
-    final ThreadSafeCallbacks<Callback> mCallbacks = new ThreadSafeCallbacks<>();
+    protected final ThreadSafeCallbacks<Callback> mCallbacks = new ThreadSafeCallbacks<>();
 
-    protected CarBleManager(@NonNull ConnectedDeviceStorage connectedDeviceStorage) {
+    protected CarBluetoothManager(@NonNull ConnectedDeviceStorage connectedDeviceStorage) {
         mStorage = connectedDeviceStorage;
     }
 
@@ -60,7 +59,7 @@ public abstract class CarBleManager {
      * Stop the manager and clean up.
      */
     public void stop() {
-        for (BleDevice device : mConnectedDevices) {
+        for (ConnectedRemoteDevice device : mConnectedDevices) {
             if (device.mGatt != null) {
                 device.mGatt.close();
             }
@@ -91,7 +90,7 @@ public abstract class CarBleManager {
      * @param message  {@link DeviceMessage} to send.
      */
     public void sendMessage(@NonNull String deviceId, @NonNull DeviceMessage message) {
-        BleDevice device = getConnectedDevice(deviceId);
+        ConnectedRemoteDevice device = getConnectedDevice(deviceId);
         if (device == null) {
             logw(TAG, "Attempted to send message to unknown device $deviceId. Ignored.");
             return;
@@ -103,10 +102,10 @@ public abstract class CarBleManager {
     /**
      * Send a message to a connected device.
      *
-     * @param device  The connected {@link BleDevice}.
+     * @param device  The connected {@link ConnectedRemoteDevice}.
      * @param message {@link DeviceMessage} to send.
      */
-    public void sendMessage(@NonNull BleDevice device, @NonNull DeviceMessage message) {
+    public void sendMessage(@NonNull ConnectedRemoteDevice device, @NonNull DeviceMessage message) {
         String deviceId = device.mDeviceId;
         if (deviceId == null) {
             deviceId = "Unidentified device";
@@ -117,12 +116,13 @@ public abstract class CarBleManager {
     }
 
     /**
-     * Get the {@link BleDevice} with matching {@link BluetoothGatt} if available. Returns
+     * Get the {@link ConnectedRemoteDevice} with matching {@link BluetoothGatt} if available.
+     * Returns
      * {@code null} if no matches are found.
      */
     @Nullable
-    BleDevice getConnectedDevice(@NonNull BluetoothGatt gatt) {
-        for (BleDevice device : mConnectedDevices) {
+    protected ConnectedRemoteDevice getConnectedDevice(@NonNull BluetoothGatt gatt) {
+        for (ConnectedRemoteDevice device : mConnectedDevices) {
             if (device.mGatt == gatt) {
                 return device;
             }
@@ -132,12 +132,13 @@ public abstract class CarBleManager {
     }
 
     /**
-     * Get the {@link BleDevice} with matching {@link BluetoothDevice} if available. Returns
+     * Get the {@link ConnectedRemoteDevice} with matching {@link BluetoothDevice} if available.
+     * Returns
      * {@code null} if no matches are found.
      */
     @Nullable
-    BleDevice getConnectedDevice(@NonNull BluetoothDevice device) {
-        for (BleDevice connectedDevice : mConnectedDevices) {
+    protected ConnectedRemoteDevice getConnectedDevice(@NonNull BluetoothDevice device) {
+        for (ConnectedRemoteDevice connectedDevice : mConnectedDevices) {
             if (device.equals(connectedDevice.mDevice)) {
                 return connectedDevice;
             }
@@ -147,12 +148,13 @@ public abstract class CarBleManager {
     }
 
     /**
-     * Get the {@link BleDevice} with matching device id if available. Returns {@code null} if
+     * Get the {@link ConnectedRemoteDevice} with matching device id if available. Returns {@code
+     * null} if
      * no matches are found.
      */
     @Nullable
-    BleDevice getConnectedDevice(@NonNull String deviceId) {
-        for (BleDevice device : mConnectedDevices) {
+    protected ConnectedRemoteDevice getConnectedDevice(@NonNull String deviceId) {
+        for (ConnectedRemoteDevice device : mConnectedDevices) {
             if (deviceId.equals(device.mDeviceId)) {
                 return device;
             }
@@ -161,18 +163,18 @@ public abstract class CarBleManager {
         return null;
     }
 
-    /** Add the {@link BleDevice} that has connected. */
-    void addConnectedDevice(@NonNull BleDevice device) {
+    /** Add the {@link ConnectedRemoteDevice} that has connected. */
+    protected void addConnectedDevice(@NonNull ConnectedRemoteDevice device) {
         mConnectedDevices.add(device);
     }
 
     /** Return the number of devices currently connected. */
-    int getConnectedDevicesCount() {
+    protected int getConnectedDevicesCount() {
         return mConnectedDevices.size();
     }
 
     /** Remove [@link BleDevice} that has been disconnected. */
-    void removeConnectedDevice(@NonNull BleDevice device) {
+    protected void removeConnectedDevice(@NonNull ConnectedRemoteDevice device) {
         mConnectedDevices.remove(device);
     }
 
@@ -180,7 +182,7 @@ public abstract class CarBleManager {
     public abstract void disconnectDevice(@NonNull String deviceId);
 
     /** State for a connected device. */
-    enum BleDeviceState {
+    public enum ConnectedDeviceState {
         CONNECTING,
         PENDING_VERIFICATION,
         CONNECTED,
@@ -190,23 +192,28 @@ public abstract class CarBleManager {
     /**
      * Container class to hold information about a connected device.
      */
-    static class BleDevice {
+    public static class ConnectedRemoteDevice {
+        @NonNull
+        public BluetoothDevice mDevice;
+        @Nullable
+        public BluetoothGatt mGatt;
+        @NonNull
+        public ConnectedDeviceState mState;
+        @Nullable
+        public String mDeviceId;
+        @Nullable
+        public SecureChannel mSecureChannel;
 
-        BluetoothDevice mDevice;
-        BluetoothGatt mGatt;
-        BleDeviceState mState;
-        String mDeviceId;
-        SecureChannel mSecureChannel;
-
-        BleDevice(@NonNull BluetoothDevice device, @Nullable BluetoothGatt gatt) {
+        public ConnectedRemoteDevice(@NonNull BluetoothDevice device,
+                @Nullable BluetoothGatt gatt) {
             mDevice = device;
             mGatt = gatt;
-            mState = BleDeviceState.UNKNOWN;
+            mState = ConnectedDeviceState.UNKNOWN;
         }
     }
 
     /**
-     * Callback for triggered events from {@link CarBleManager}.
+     * Callback for triggered events from {@link CarBluetoothManager}.
      */
     public interface Callback {
         /**
