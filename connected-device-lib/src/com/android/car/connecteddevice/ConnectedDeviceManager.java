@@ -299,7 +299,8 @@ public class ConnectedDeviceManager {
 
     private void connectToActiveUserDeviceInternal() {
         try {
-            if (mIsConnectingToUserDevice.get()) {
+            boolean isLockAcquired = mIsConnectingToUserDevice.compareAndSet(false, true);
+            if (!isLockAcquired) {
                 logd(TAG, "A request has already been made to connect to this user's device. "
                         + "Ignoring redundant request.");
                 return;
@@ -307,6 +308,7 @@ public class ConnectedDeviceManager {
             List<AssociatedDevice> userDevices = mStorage.getActiveUserAssociatedDevices();
             if (userDevices.isEmpty()) {
                 logw(TAG, "No devices associated with active user. Ignoring.");
+                mIsConnectingToUserDevice.set(false);
                 return;
             }
 
@@ -315,15 +317,16 @@ public class ConnectedDeviceManager {
             AssociatedDevice userDevice = userDevices.get(0);
             if (!userDevice.isConnectionEnabled()) {
                 logd(TAG, "Connection is disabled on device " + userDevice + ".");
+                mIsConnectingToUserDevice.set(false);
                 return;
             }
             if (mConnectedDevices.containsKey(userDevice.getDeviceId())) {
                 logd(TAG, "Device has already been connected. No need to attempt connection "
                         + "again.");
+                mIsConnectingToUserDevice.set(false);
                 return;
             }
             EventLog.onStartDeviceSearchStarted();
-            mIsConnectingToUserDevice.set(true);
             mPeripheralManager.connectToDevice(UUID.fromString(userDevice.getDeviceId()));
         } catch (Exception e) {
             loge(TAG, "Exception while attempting connection with active user's device.", e);

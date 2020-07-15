@@ -163,12 +163,12 @@ public class BleDeviceMessageStream extends DeviceMessageStream {
                 logd(TAG, "No more packets to send.");
                 return;
             }
-            if (mIsSendingInProgress.get()) {
+            boolean isLockAcquired = mIsSendingInProgress.compareAndSet(false, true);
+            if (!isLockAcquired) {
                 logd(TAG, "Unable to send packet at this time.");
                 return;
             }
 
-            mIsSendingInProgress.set(true);
             BlePacket packet = mPacketQueue.remove();
             logd(TAG, "Writing packet " + packet.getPacketNumber() + " of "
                     + packet.getTotalPackets() + " for " + packet.getMessageId() + ".");
