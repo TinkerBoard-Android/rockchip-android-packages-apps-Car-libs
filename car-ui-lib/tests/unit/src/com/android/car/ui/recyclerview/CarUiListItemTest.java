@@ -26,6 +26,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
 import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -284,8 +285,9 @@ public class CarUiListItemTest {
         itemThree.setTitle(itemThreeTitle);
         items.add(itemThree);
 
+        CarUiRadioButtonListItemAdapter adapter = new CarUiRadioButtonListItemAdapter(items);
         mCarUiRecyclerView.post(
-                () -> mCarUiRecyclerView.setAdapter(new CarUiRadioButtonListItemAdapter(items)));
+                () -> mCarUiRecyclerView.setAdapter(adapter));
 
         onView(withText(itemOneTitle)).check(matches(isDisplayed()));
         onView(withText(itemTwoTitle)).check(matches(isDisplayed()));
@@ -295,23 +297,27 @@ public class CarUiListItemTest {
         assertFalse(itemOne.isChecked());
         assertFalse(itemTwo.isChecked());
         assertFalse(itemThree.isChecked());
+        assertEquals(adapter.getSelectedItemPosition(), -1);
 
         // Select first item.
         onView(withText(itemOneTitle)).perform(click());
         assertTrue(itemOne.isChecked());
         assertFalse(itemTwo.isChecked());
         assertFalse(itemThree.isChecked());
+        assertEquals(adapter.getSelectedItemPosition(), 0);
 
         // Select second item.
         onView(withText(itemTwoTitle)).perform(click());
         assertFalse(itemOne.isChecked());
         assertTrue(itemTwo.isChecked());
         assertFalse(itemThree.isChecked());
+        assertEquals(adapter.getSelectedItemPosition(), 1);
 
         // Select third item.
         onView(withText(itemThreeTitle)).perform(click());
         assertFalse(itemOne.isChecked());
         assertFalse(itemTwo.isChecked());
         assertTrue(itemThree.isChecked());
+        assertEquals(adapter.getSelectedItemPosition(), 2);
     }
 }

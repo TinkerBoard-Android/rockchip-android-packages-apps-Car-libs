@@ -106,6 +106,13 @@ public class CarUiRadioButtonListItemAdapter extends CarUiListItemAdapter {
         }
     }
 
+    /*
+     * @return the position of the currently selected item, -1 if no item is selected.
+     */
+    public int getSelectedItemPosition() {
+        return mSelectedIndex;
+    }
+
     static class RadioButtonListItemViewHolder extends ListItemViewHolder {
         /**
          * Callback to be invoked when the checked state of a {@link RadioButtonListItemViewHolder}
