@@ -28,4 +28,8 @@ public class ViewMatchers {
     public static Matcher<View> nthChildOfView(Matcher<View> parentMatcher, int n) {
         return new NthChildMatcher(parentMatcher, n);
     }
+
+    public static Matcher<View> withIndex(Matcher<View> matcher, int index) {
+        return new IndexMatcher(matcher, index);
+    }
 }
