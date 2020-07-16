@@ -630,6 +630,30 @@ public class CarUiRecyclerViewTest {
                 not(equalTo(carUiRecyclerView.getHeight())));
     }
 
+    @Test
+    public void testPageDownMaintainsMinimumScrollThumbTrackHeight() {
+        mActivity.runOnUiThread(
+                () -> mActivity.setContentView(R.layout.car_ui_recycler_view_test_activity));
+
+        onView(withId(R.id.list)).check(matches(isDisplayed()));
+
+        int itemCount = 25000;
+        TestAdapter adapter = new TestAdapter(itemCount);
+
+        CarUiRecyclerView carUiRecyclerView = mActivity.requireViewById(R.id.list);
+        mActivity.runOnUiThread(() -> {
+            carUiRecyclerView.setAdapter(adapter);
+        });
+        IdlingRegistry.getInstance().register(new ScrollIdlingResource(carUiRecyclerView));
+        mActivity.runOnUiThread(() -> carUiRecyclerView.requestLayout());
+
+        onView(withId(R.id.car_ui_scrollbar_page_down)).perform(click());
+
+        // Check that thumb track maintains minimum height
+        int minThumbViewHeight = 1;
+        View thumbView = mActivity.requireViewById(R.id.car_ui_scrollbar_thumb);
+        assertThat(thumbView.getHeight(), is(equalTo(minThumbViewHeight)));
+    }
 
     @Test
     public void testSetPaddingToRecyclerViewContainerWithScrollbar() {

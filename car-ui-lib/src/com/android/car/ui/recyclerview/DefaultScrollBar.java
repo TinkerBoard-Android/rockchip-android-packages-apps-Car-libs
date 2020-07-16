@@ -201,7 +201,8 @@ class DefaultScrollBar implements ScrollBar {
      */
     private int calculateScrollThumbLength(int range, int extent) {
         // Scale the length by the available space that the thumb can fill.
-        return Math.round(((float) extent / range) * mScrollTrack.getHeight());
+        // Use max to have a lower bound of 1 unit in length.
+        return Math.max(Math.round(((float) extent / range) * mScrollTrack.getHeight()), 1);
     }
 
     /**
