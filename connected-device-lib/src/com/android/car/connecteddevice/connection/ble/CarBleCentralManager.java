@@ -151,6 +151,11 @@ public class CarBleCentralManager extends CarBluetoothManager {
     }
 
     @Override
+    public void initiateConnectionToDevice(UUID deviceId) {
+
+    }
+
+    @Override
     public void startAssociation(String nameForAssociation, AssociationCallback callback) {
 
     }

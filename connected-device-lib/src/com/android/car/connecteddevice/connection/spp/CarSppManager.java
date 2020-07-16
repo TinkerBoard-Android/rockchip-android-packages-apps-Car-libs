@@ -28,6 +28,7 @@ import com.android.car.connecteddevice.AssociationCallback;
 import com.android.car.connecteddevice.connection.AssociationSecureChannel;
 import com.android.car.connecteddevice.connection.CarBluetoothManager;
 import com.android.car.connecteddevice.connection.DeviceMessageStream;
+import com.android.car.connecteddevice.connection.ReconnectSecureChannel;
 import com.android.car.connecteddevice.connection.SecureChannel;
 import com.android.car.connecteddevice.oob.OobChannel;
 import com.android.car.connecteddevice.oob.OobConnectionManager;
@@ -49,6 +50,8 @@ public class CarSppManager extends CarBluetoothManager {
 
     private final SppManager mSppManager;
 
+    private final UUID mAssociationServiceUuid;
+
     private String mReconnectDeviceId;
 
     private OobConnectionManager mOobConnectionManager;
@@ -63,10 +66,12 @@ public class CarSppManager extends CarBluetoothManager {
      * @param connectedDeviceStorage Shared {@link ConnectedDeviceStorage} for companion features.
      */
     public CarSppManager(@NonNull SppManager sppManager,
-            @NonNull ConnectedDeviceStorage connectedDeviceStorage) {
+            @NonNull ConnectedDeviceStorage connectedDeviceStorage,
+            @NonNull UUID associationServiceUuid) {
         super(connectedDeviceStorage);
         mSppManager = sppManager;
         mCallbackExecutor = Executors.newSingleThreadExecutor();
+        mAssociationServiceUuid = associationServiceUuid;
     }
 
     @Override
@@ -95,8 +100,12 @@ public class CarSppManager extends CarBluetoothManager {
     }
 
     @Override
-    public void connectToDevice(@NonNull UUID deviceId) {
-        // TODO(b/160813572): Define a spp version of ReconnectSecureChannel
+    public void initiateConnectionToDevice(@NonNull UUID deviceId) {
+        logd(TAG, "Start spp reconnection listening for device with id: " + deviceId.toString());
+        mReconnectDeviceId = deviceId.toString();
+        mSppManager.unregisterCallback(mAssociationSppCallback);
+        mSppManager.registerCallback(mReconnectSppCallback, mCallbackExecutor);
+        mSppManager.startListening(deviceId);
     }
 
     @Override
@@ -123,7 +132,7 @@ public class CarSppManager extends CarBluetoothManager {
         mAssociationCallback = callback;
         mSppManager.unregisterCallback(mReconnectSppCallback);
         mSppManager.registerCallback(mAssociationSppCallback, mCallbackExecutor);
-        if (mSppManager.startListening()) {
+        if (mSppManager.startListening(mAssociationServiceUuid)) {
             callback.onAssociationStartSuccess(adapter.getName());
         } else {
             callback.onAssociationStartFailure();
@@ -176,9 +185,8 @@ public class CarSppManager extends CarBluetoothManager {
         SecureChannel secureChannel;
         // TODO(b/157492943): Define an out of band version of ReconnectSecureChannel
         if (isReconnect) {
-            // TODO(b/160813572): Define a spp version of ReconnectSecureChannel
-            loge(TAG, "Reconnect is currently not available for Spp");
-            return;
+            secureChannel = new ReconnectSecureChannel(secureStream, mStorage, mReconnectDeviceId,
+                    /* expectedChallengeResponse= */ null);
         } else if (isOob) {
             // TODO(b/160901821): Integrate Oob with Spp channel
             loge(TAG, "Oob verification is currently not available for Spp");

@@ -50,6 +50,7 @@ import java.util.concurrent.TimeUnit;
 public class CarSppManagerTest {
     private static final String TEST_REMOTE_DEVICE_ADDRESS = "00:11:22:33:AA:BB";
     private static final UUID TEST_REMOTE_DEVICE_ID = UUID.randomUUID();
+    private static final UUID TEST_SERVICE_UUID = UUID.randomUUID();
     private static final String TEST_VERIFICATION_CODE = "000000";
     @Mock
     private SppManager mMockSppManager;
@@ -66,7 +67,7 @@ public class CarSppManagerTest {
                 .initMocks(this)
                 .strictness(Strictness.WARN)
                 .startMocking();
-        mCarSppManager = new CarSppManager(mMockSppManager, mMockStorage);
+        mCarSppManager = new CarSppManager(mMockSppManager, mMockStorage, TEST_SERVICE_UUID);
     }
 
     @After
@@ -83,11 +84,11 @@ public class CarSppManagerTest {
     public void testStartAssociationSuccess() throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
         AssociationCallback callback = createAssociationCallback(semaphore);
-        when(mMockSppManager.startListening()).thenReturn(true);
+        when(mMockSppManager.startListening(TEST_SERVICE_UUID)).thenReturn(true);
 
         mCarSppManager.startAssociation(null, callback);
 
-        verify(mMockSppManager).startListening();
+        verify(mMockSppManager).startListening(TEST_SERVICE_UUID);
         assertThat(tryAcquire(semaphore)).isTrue();
         verify(callback).onAssociationStartSuccess(BluetoothAdapter.getDefaultAdapter().getName());
     }
@@ -96,7 +97,7 @@ public class CarSppManagerTest {
     public void testStartAssociationFailure() throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
         AssociationCallback callback = createAssociationCallback(semaphore);
-        when(mMockSppManager.startListening()).thenReturn(false);
+        when(mMockSppManager.startListening(TEST_SERVICE_UUID)).thenReturn(false);
 
         mCarSppManager.startAssociation(null, callback);
 
