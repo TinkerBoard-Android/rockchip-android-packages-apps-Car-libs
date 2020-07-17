@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.car.connecteddevice.ble;
+package com.android.car.connecteddevice.connection.ble;
 
 import static com.android.car.connecteddevice.util.SafeLog.loge;
 

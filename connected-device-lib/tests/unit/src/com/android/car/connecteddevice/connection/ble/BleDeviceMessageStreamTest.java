@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.car.connecteddevice.ble;
+package com.android.car.connecteddevice.connection.ble;
 
-import static com.android.car.connecteddevice.BleStreamProtos.BleDeviceMessageProto.BleDeviceMessage;
-import static com.android.car.connecteddevice.BleStreamProtos.BleOperationProto.OperationType;
 import static com.android.car.connecteddevice.BleStreamProtos.BlePacketProto.BlePacket;
-import static com.android.car.connecteddevice.ble.BleDeviceMessageStream.MessageReceivedErrorListener;
-import static com.android.car.connecteddevice.ble.BleDeviceMessageStream.MessageReceivedListener;
+import static com.android.car.connecteddevice.StreamProtos.DeviceMessageProto.BleDeviceMessage;
+import static com.android.car.connecteddevice.StreamProtos.OperationProto.OperationType;
+import static com.android.car.connecteddevice.connection.DeviceMessageStream.MessageReceivedErrorListener;
+import static com.android.car.connecteddevice.connection.DeviceMessageStream.MessageReceivedListener;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -36,6 +36,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.android.car.connecteddevice.connection.DeviceMessage;
 import com.android.car.connecteddevice.util.ByteUtils;
 import com.android.car.protobuf.ByteString;
 

@@ -64,7 +64,14 @@ public class RemoteCallbackBinder implements IBinder.DeathRecipient {
 
     @Override
     public boolean equals(Object obj) {
-        return mCallbackBinder.equals(obj);
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof RemoteCallbackBinder)) {
+            return false;
+        }
+        RemoteCallbackBinder remoteCallbackBinder = (RemoteCallbackBinder) obj;
+        return mCallbackBinder.equals(remoteCallbackBinder.mCallbackBinder);
     }
 
     @Override

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.car.connecteddevice.ble;
+package com.android.car.connecteddevice.connection;
 
 import static android.car.encryptionrunner.EncryptionRunnerFactory.EncryptionRunnerType;
 import static android.car.encryptionrunner.EncryptionRunnerFactory.newRunner;
@@ -41,7 +41,7 @@ import java.util.UUID;
 /**
  * A secure channel established with the association flow.
  */
-class AssociationSecureChannel extends SecureBleChannel {
+public class AssociationSecureChannel extends SecureChannel {
 
     private static final String TAG = "AssociationSecureChannel";
 
@@ -58,11 +58,11 @@ class AssociationSecureChannel extends SecureBleChannel {
 
     private String mDeviceId;
 
-    AssociationSecureChannel(BleDeviceMessageStream stream, ConnectedDeviceStorage storage) {
+    public AssociationSecureChannel(DeviceMessageStream stream, ConnectedDeviceStorage storage) {
         this(stream, storage, newRunner(EncryptionRunnerType.UKEY2));
     }
 
-    AssociationSecureChannel(BleDeviceMessageStream stream, ConnectedDeviceStorage storage,
+    AssociationSecureChannel(DeviceMessageStream stream, ConnectedDeviceStorage storage,
             EncryptionRunner encryptionRunner) {
         super(stream, encryptionRunner);
         encryptionRunner.setIsReconnect(false);
@@ -98,7 +98,6 @@ class AssociationSecureChannel extends SecureBleChannel {
         logd(TAG, "Continuing handshake.");
         HandshakeMessage handshakeMessage = getEncryptionRunner().continueHandshake(message);
         mState = handshakeMessage.getHandshakeState();
-
         if (mState != HandshakeState.VERIFICATION_NEEDED) {
             loge(TAG, "processHandshakeInProgress: Encountered unexpected handshake state: "
                     + mState + ".");
@@ -112,10 +111,15 @@ class AssociationSecureChannel extends SecureBleChannel {
             notifySecureChannelFailure(CHANNEL_ERROR_INVALID_VERIFICATION);
             return;
         }
+        processVerificationCode(code);
+    }
 
+    private void processVerificationCode(@NonNull String code) {
         if (mShowVerificationCodeListener == null) {
-            loge(TAG, "No verification code listener has been set. Unable to display verification "
-                    + "code to user.");
+            loge(TAG,
+                    "No verification code listener has been set. Unable to display "
+                            + "verification "
+                            + "code to user.");
             notifySecureChannelFailure(CHANNEL_ERROR_INVALID_STATE);
             return;
         }
@@ -149,13 +153,13 @@ class AssociationSecureChannel extends SecureBleChannel {
     }
 
     /** Set the listener that notifies to show verification code. {@code null} to clear. */
-    void setShowVerificationCodeListener(@Nullable ShowVerificationCodeListener listener) {
+    public void setShowVerificationCodeListener(@Nullable ShowVerificationCodeListener listener) {
         mShowVerificationCodeListener = listener;
     }
 
     @VisibleForTesting
     @Nullable
-    ShowVerificationCodeListener getShowVerificationCodeListener() {
+    public ShowVerificationCodeListener getShowVerificationCodeListener() {
         return mShowVerificationCodeListener;
     }
 
@@ -163,7 +167,7 @@ class AssociationSecureChannel extends SecureBleChannel {
      * Called by the client to notify that the user has accepted a pairing code or any out-of-band
      * confirmation, and send confirmation signals to remote bluetooth device.
      */
-    void notifyOutOfBandAccepted() {
+    public void notifyOutOfBandAccepted() {
         HandshakeMessage message;
         try {
             message = getEncryptionRunner().verifyPin();
@@ -200,8 +204,17 @@ class AssociationSecureChannel extends SecureBleChannel {
         sendHandshakeMessage(ByteUtils.uuidToBytes(uniqueId), /* isEncrypted= */ true);
     }
 
+    @HandshakeState
+    int getState() {
+        return mState;
+    }
+
+    void setState(@HandshakeState int state) {
+        mState = state;
+    }
+
     /** Listener that will be invoked to display verification code. */
-    interface ShowVerificationCodeListener {
+    public interface ShowVerificationCodeListener {
         /**
          * Invoke when a verification need to be displayed during device association.
          *
