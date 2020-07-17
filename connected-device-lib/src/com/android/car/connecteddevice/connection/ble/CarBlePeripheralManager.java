@@ -182,20 +182,19 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
         if (adapter == null) {
             return;
         }
-        String originalBluetoothName = mStorage.getStoredBluetoothName();
-        if (originalBluetoothName == null) {
+        mOriginalBluetoothName = mStorage.getStoredBluetoothName();
+        if (mOriginalBluetoothName == null) {
             return;
         }
-        if (originalBluetoothName.equals(adapter.getName())) {
+        if (mOriginalBluetoothName.equals(adapter.getName())) {
             mStorage.removeStoredBluetoothName();
             return;
         }
 
         logw(TAG, "Discovered mismatch in bluetooth adapter name. Resetting back to "
-                + originalBluetoothName + ".");
-        adapter.setName(originalBluetoothName);
+                + mOriginalBluetoothName + ".");
         mScheduler.schedule(
-                () -> verifyBluetoothNameRestored(originalBluetoothName),
+                () -> verifyBluetoothNameRestored(mOriginalBluetoothName),
                 ASSOCIATE_ADVERTISING_DELAY_MS, TimeUnit.MILLISECONDS);
     }
 
@@ -319,8 +318,8 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
         mAssociationCallback = callback;
         if (mOriginalBluetoothName == null) {
             mOriginalBluetoothName = adapter.getName();
-            mStorage.storeBluetoothName(mOriginalBluetoothName);
         }
+        mStorage.storeBluetoothName(mOriginalBluetoothName);
         adapter.setName(nameForAssociation);
         logd(TAG, "Changing bluetooth adapter name from " + mOriginalBluetoothName + " to "
                 + nameForAssociation + ".");
@@ -483,7 +482,6 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
         }
         logd(TAG, "Changing bluetooth adapter name back to " + mOriginalBluetoothName + ".");
         BluetoothAdapter.getDefaultAdapter().setName(mOriginalBluetoothName);
-        mOriginalBluetoothName = null;
     }
 
     private void verifyBluetoothNameRestored(@NonNull String expectedName) {
@@ -493,6 +491,11 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
                     + "adapter name.");
             mStorage.removeStoredBluetoothName();
             return;
+        }
+        // Attempting to set the name on the adapter before it is in state BT_ON will result in
+        // repeated failures until a new name is attempted.
+        if (BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+            BluetoothAdapter.getDefaultAdapter().setName(expectedName);
         }
         logd(TAG, "Bluetooth adapter name restoration has not taken affect yet. Checking again in "
                 + ASSOCIATE_ADVERTISING_DELAY_MS + " milliseconds.");
