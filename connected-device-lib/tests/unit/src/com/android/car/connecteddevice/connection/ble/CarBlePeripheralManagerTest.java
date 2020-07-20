@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.car.connecteddevice.ble;
+package com.android.car.connecteddevice.connection.ble;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mockitoSession;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -39,7 +40,10 @@ import android.os.ParcelUuid;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.car.connecteddevice.AssociationCallback;
+import com.android.car.connecteddevice.connection.AssociationSecureChannel;
+import com.android.car.connecteddevice.connection.SecureChannel;
 import com.android.car.connecteddevice.model.AssociatedDevice;
+import com.android.car.connecteddevice.oob.OobConnectionManager;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
 import com.android.car.connecteddevice.util.ByteUtils;
 
@@ -70,6 +74,7 @@ public class CarBlePeripheralManagerTest {
     private static final String TEST_REMOTE_DEVICE_ADDRESS = "00:11:22:33:AA:BB";
     private static final UUID TEST_REMOTE_DEVICE_ID = UUID.randomUUID();
     private static final String TEST_VERIFICATION_CODE = "000000";
+    private static final String TEST_ENCRYPTED_VERIFICATION_CODE = "12345";
     private static final byte[] TEST_KEY = "Key".getBytes();
     private static final Duration RECONNECT_ADVERTISEMENT_DURATION = Duration.ofSeconds(2);
     private static final int DEFAULT_MTU_SIZE = 23;
@@ -80,6 +85,8 @@ public class CarBlePeripheralManagerTest {
     private BlePeripheralManager mMockPeripheralManager;
     @Mock
     private ConnectedDeviceStorage mMockStorage;
+    @Mock
+    private OobConnectionManager mMockOobConnectionManager;
 
     private CarBlePeripheralManager mCarBlePeripheralManager;
 
@@ -99,6 +106,14 @@ public class CarBlePeripheralManagerTest {
         mCarBlePeripheralManager = new CarBlePeripheralManager(mMockPeripheralManager, mMockStorage,
                 ASSOCIATION_SERVICE_UUID, RECONNECT_SERVICE_UUID, RECONNECT_DATA_UUID,
                 WRITE_UUID, READ_UUID, RECONNECT_ADVERTISEMENT_DURATION, DEFAULT_MTU_SIZE);
+
+        when(mMockOobConnectionManager.encryptVerificationCode(
+                TEST_VERIFICATION_CODE.getBytes())).thenReturn(
+                TEST_ENCRYPTED_VERIFICATION_CODE.getBytes());
+        when(mMockOobConnectionManager.decryptVerificationCode(
+                TEST_ENCRYPTED_VERIFICATION_CODE.getBytes())).thenReturn(
+                TEST_VERIFICATION_CODE.getBytes());
+        mCarBlePeripheralManager.start();
     }
 
     @After
@@ -179,8 +194,8 @@ public class CarBlePeripheralManagerTest {
     public void testAssociationSuccess() throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
         AssociationCallback callback = createAssociationCallback(semaphore);
-        SecureBleChannel channel = getChannelForAssociation(callback);
-        SecureBleChannel.Callback channelCallback = channel.getCallback();
+        SecureChannel channel = getChannelForAssociation(callback);
+        SecureChannel.Callback channelCallback = channel.getCallback();
         assertThat(channelCallback).isNotNull();
         channelCallback.onDeviceIdReceived(TEST_REMOTE_DEVICE_ID.toString());
         Key key = EncryptionRunnerFactory.newDummyRunner().keyOf(TEST_KEY);
@@ -198,8 +213,8 @@ public class CarBlePeripheralManagerTest {
     public void testAssociationFailure_channelError() throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
         AssociationCallback callback = createAssociationCallback(semaphore);
-        SecureBleChannel channel = getChannelForAssociation(callback);
-        SecureBleChannel.Callback channelCallback = channel.getCallback();
+        SecureChannel channel = getChannelForAssociation(callback);
+        SecureChannel.Callback channelCallback = channel.getCallback();
         int testErrorCode = 1;
         assertThat(channelCallback).isNotNull();
         channelCallback.onDeviceIdReceived(TEST_REMOTE_DEVICE_ID.toString());
@@ -220,6 +235,17 @@ public class CarBlePeripheralManagerTest {
         verify(mMockPeripheralManager,
                 timeout(RECONNECT_ADVERTISEMENT_DURATION.plusSeconds(1).toMillis()))
                 .stopAdvertising(any(AdvertiseCallback.class));
+    }
+
+    @Test
+    public void disconnectDevice_stopsAdvertisingForPendingReconnect() {
+        when(mMockStorage.hashWithChallengeSecret(any(), any()))
+                .thenReturn(ByteUtils.randomBytes(32));
+        UUID deviceId = UUID.randomUUID();
+        mCarBlePeripheralManager.connectToDevice(deviceId);
+        reset(mMockPeripheralManager);
+        mCarBlePeripheralManager.disconnectDevice(deviceId.toString());
+        verify(mMockPeripheralManager).cleanup();
     }
 
     private BlePeripheralManager.Callback startAssociation(AssociationCallback callback,

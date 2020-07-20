@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.car.connecteddevice.ble;
+package com.android.car.connecteddevice.connection;
 
 import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * A secure channel established with the reconnection flow.
  */
-class ReconnectSecureChannel extends SecureBleChannel {
+public class ReconnectSecureChannel extends SecureChannel {
 
     private static final String TAG = "ReconnectSecureChannel";
 
@@ -55,12 +55,12 @@ class ReconnectSecureChannel extends SecureBleChannel {
     /**
      * Create a new secure reconnection channel.
      *
-     * @param stream The {@link BleDeviceMessageStream} for communication with the device.
+     * @param stream The {@link DeviceMessageStream} for communication with the device.
      * @param storage {@link ConnectedDeviceStorage} for secure storage.
      * @param deviceId Id of the device being reconnected.
      * @param expectedChallengeResponse Expected response to challenge issued in reconnect.
      */
-    ReconnectSecureChannel(@NonNull BleDeviceMessageStream stream,
+    public ReconnectSecureChannel(@NonNull DeviceMessageStream stream,
             @NonNull ConnectedDeviceStorage storage, @NonNull String deviceId,
             @NonNull byte[] expectedChallengeResponse) {
         super(stream, newReconnectRunner());

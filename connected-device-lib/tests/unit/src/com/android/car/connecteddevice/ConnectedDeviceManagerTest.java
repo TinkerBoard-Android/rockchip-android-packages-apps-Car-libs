@@ -39,10 +39,10 @@ import com.android.car.connecteddevice.ConnectedDeviceManager.ConnectionCallback
 import com.android.car.connecteddevice.ConnectedDeviceManager.DeviceAssociationCallback;
 import com.android.car.connecteddevice.ConnectedDeviceManager.DeviceCallback;
 import com.android.car.connecteddevice.ConnectedDeviceManager.MessageDeliveryDelegate;
-import com.android.car.connecteddevice.ble.CarBleCentralManager;
-import com.android.car.connecteddevice.ble.CarBleManager;
-import com.android.car.connecteddevice.ble.CarBlePeripheralManager;
-import com.android.car.connecteddevice.ble.DeviceMessage;
+import com.android.car.connecteddevice.connection.CarBluetoothManager;
+import com.android.car.connecteddevice.connection.DeviceMessage;
+import com.android.car.connecteddevice.connection.ble.CarBleCentralManager;
+import com.android.car.connecteddevice.connection.ble.CarBlePeripheralManager;
 import com.android.car.connecteddevice.model.AssociatedDevice;
 import com.android.car.connecteddevice.model.ConnectedDevice;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
@@ -604,7 +604,7 @@ public class ConnectedDeviceManagerTest {
     }
 
     @Test
-    public void removeConnectedDevice__doesNotAdvertiseForNonActiveUserDeviceNotLastDevice() {
+    public void removeConnectedDevice_doesNotAdvertiseForNonActiveUserDeviceNotLastDevice() {
         String deviceId = UUID.randomUUID().toString();
         String userDeviceId = UUID.randomUUID().toString();
         when(mMockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(
@@ -613,9 +613,9 @@ public class ConnectedDeviceManagerTest {
                 TEST_DEVICE_NAME, /* isConnectionEnabled= */ true);
         when(mMockStorage.getActiveUserAssociatedDevices()).thenReturn(
                 Collections.singletonList(userDevice));
-        clearInvocations(mMockPeripheralManager);
         mConnectedDeviceManager.addConnectedDevice(deviceId, mMockPeripheralManager);
         mConnectedDeviceManager.addConnectedDevice(userDeviceId, mMockCentralManager);
+        clearInvocations(mMockPeripheralManager);
         mConnectedDeviceManager.removeConnectedDevice(deviceId, mMockPeripheralManager);
         verify(mMockPeripheralManager, timeout(1000).times(0))
                 .connectToDevice(any());
@@ -705,13 +705,13 @@ public class ConnectedDeviceManagerTest {
     }
 
     @NonNull
-    private String connectNewDevice(@NonNull CarBleManager carBleManager) {
+    private String connectNewDevice(@NonNull CarBluetoothManager carBluetoothManager) {
         String deviceId = UUID.randomUUID().toString();
         AssociatedDevice device = new AssociatedDevice(deviceId, TEST_DEVICE_ADDRESS,
                 TEST_DEVICE_NAME, /* isConnectionEnabled= */ true);
         mUserDeviceIds.add(deviceId);
         mUserDevices.add(device);
-        mConnectedDeviceManager.addConnectedDevice(deviceId, carBleManager);
+        mConnectedDeviceManager.addConnectedDevice(deviceId, carBluetoothManager);
         return deviceId;
     }
 

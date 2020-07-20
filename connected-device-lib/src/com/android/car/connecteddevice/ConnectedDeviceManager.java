@@ -28,14 +28,17 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 
-import com.android.car.connecteddevice.ble.BleCentralManager;
-import com.android.car.connecteddevice.ble.BlePeripheralManager;
-import com.android.car.connecteddevice.ble.CarBleCentralManager;
-import com.android.car.connecteddevice.ble.CarBleManager;
-import com.android.car.connecteddevice.ble.CarBlePeripheralManager;
-import com.android.car.connecteddevice.ble.DeviceMessage;
+import com.android.car.connecteddevice.connection.CarBluetoothManager;
+import com.android.car.connecteddevice.connection.DeviceMessage;
+import com.android.car.connecteddevice.connection.ble.BleCentralManager;
+import com.android.car.connecteddevice.connection.ble.BlePeripheralManager;
+import com.android.car.connecteddevice.connection.ble.CarBleCentralManager;
+import com.android.car.connecteddevice.connection.ble.CarBlePeripheralManager;
 import com.android.car.connecteddevice.model.AssociatedDevice;
 import com.android.car.connecteddevice.model.ConnectedDevice;
+import com.android.car.connecteddevice.model.OobEligibleDevice;
+import com.android.car.connecteddevice.oob.BluetoothRfcommChannel;
+import com.android.car.connecteddevice.oob.OobChannel;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage.AssociatedDeviceCallback;
 import com.android.car.connecteddevice.util.ByteUtils;
@@ -120,6 +123,8 @@ public class ConnectedDeviceManager {
 
     private MessageDeliveryDelegate mMessageDeliveryDelegate;
 
+    private OobChannel mOobChannel;
+
     @Retention(SOURCE)
     @IntDef(prefix = { "DEVICE_ERROR_" },
             value = {
@@ -136,6 +141,7 @@ public class ConnectedDeviceManager {
             }
     )
     public @interface DeviceError {}
+
     public static final int DEVICE_ERROR_INVALID_HANDSHAKE = 0;
     public static final int DEVICE_ERROR_INVALID_MSG = 1;
     public static final int DEVICE_ERROR_INVALID_DEVICE_ID = 2;
@@ -216,11 +222,17 @@ public class ConnectedDeviceManager {
     public void reset() {
         logd(TAG, "Resetting ConnectedDeviceManager.");
         for (InternalConnectedDevice device : mConnectedDevices.values()) {
-            removeConnectedDevice(device.mConnectedDevice.getDeviceId(), device.mCarBleManager);
+            removeConnectedDevice(device.mConnectedDevice.getDeviceId(),
+                    device.mCarBluetoothManager);
         }
         mPeripheralManager.stop();
         // TODO (b/141312136) Stop central manager
         mIsConnectingToUserDevice.set(false);
+        if (mOobChannel != null) {
+            mOobChannel.interrupt();
+            mOobChannel = null;
+        }
+        mAssociationCallback = null;
     }
 
     /** Returns {@link List<ConnectedDevice>} of devices currently connected. */
@@ -289,7 +301,8 @@ public class ConnectedDeviceManager {
 
     private void connectToActiveUserDeviceInternal() {
         try {
-            if (mIsConnectingToUserDevice.get()) {
+            boolean isLockAcquired = mIsConnectingToUserDevice.compareAndSet(false, true);
+            if (!isLockAcquired) {
                 logd(TAG, "A request has already been made to connect to this user's device. "
                         + "Ignoring redundant request.");
                 return;
@@ -297,6 +310,7 @@ public class ConnectedDeviceManager {
             List<AssociatedDevice> userDevices = mStorage.getActiveUserAssociatedDevices();
             if (userDevices.isEmpty()) {
                 logw(TAG, "No devices associated with active user. Ignoring.");
+                mIsConnectingToUserDevice.set(false);
                 return;
             }
 
@@ -305,15 +319,16 @@ public class ConnectedDeviceManager {
             AssociatedDevice userDevice = userDevices.get(0);
             if (!userDevice.isConnectionEnabled()) {
                 logd(TAG, "Connection is disabled on device " + userDevice + ".");
+                mIsConnectingToUserDevice.set(false);
                 return;
             }
             if (mConnectedDevices.containsKey(userDevice.getDeviceId())) {
                 logd(TAG, "Device has already been connected. No need to attempt connection "
                         + "again.");
+                mIsConnectingToUserDevice.set(false);
                 return;
             }
             EventLog.onStartDeviceSearchStarted();
-            mIsConnectingToUserDevice.set(true);
             mPeripheralManager.connectToDevice(UUID.fromString(userDevice.getDeviceId()));
         } catch (Exception e) {
             loge(TAG, "Exception while attempting connection with active user's device.", e);
@@ -334,14 +349,51 @@ public class ConnectedDeviceManager {
         }).start();
     }
 
+    /**
+     * Start association with an out of band device.
+     *
+     * @param device   The out of band eligible device.
+     * @param callback Callback for association events.
+     */
+    public void startOutOfBandAssociation(@NonNull OobEligibleDevice device,
+            @NonNull AssociationCallback callback) {
+        logd(TAG, "Received request to start out of band association.");
+        mAssociationCallback = callback;
+        mOobChannel = new BluetoothRfcommChannel();
+        mOobChannel.completeOobDataExchange(device, new OobChannel.Callback() {
+            @Override
+            public void onOobExchangeSuccess() {
+                logd(TAG, "Out of band exchange succeeded. Proceeding to association with device.");
+                Executors.defaultThreadFactory().newThread(() -> {
+                    mPeripheralManager.startOutOfBandAssociation(getNameForAssociation(),
+                            mOobChannel, mInternalAssociationCallback);
+                }).start();
+            }
+
+            @Override
+            public void onOobExchangeFailure() {
+                loge(TAG, "Out of band exchange failed.");
+                mInternalAssociationCallback.onAssociationError(
+                        DEVICE_ERROR_INVALID_ENCRYPTION_KEY);
+                mOobChannel = null;
+                mAssociationCallback = null;
+            }
+        });
+    }
+
     /** Stop the association with any device. */
     public void stopAssociation(@NonNull AssociationCallback callback) {
         if (mAssociationCallback != callback) {
             logd(TAG, "Stop association called with unrecognized callback. Ignoring.");
             return;
         }
+        logd(TAG, "Stopping association.");
         mAssociationCallback = null;
         mPeripheralManager.stopAssociation(mInternalAssociationCallback);
+        if (mOobChannel != null) {
+            mOobChannel.interrupt();
+        }
+        mOobChannel = null;
     }
 
     /**
@@ -396,18 +448,18 @@ public class ConnectedDeviceManager {
     private void disconnectDevice(String deviceId) {
         InternalConnectedDevice device = mConnectedDevices.get(deviceId);
         if (device != null) {
-            device.mCarBleManager.disconnectDevice(deviceId);
-            removeConnectedDevice(deviceId, device.mCarBleManager);
+            device.mCarBluetoothManager.disconnectDevice(deviceId);
+            removeConnectedDevice(deviceId, device.mCarBluetoothManager);
         }
     }
 
     /**
      * Register a callback for a specific device and recipient.
      *
-     * @param device {@link ConnectedDevice} to register triggers on.
+     * @param device      {@link ConnectedDevice} to register triggers on.
      * @param recipientId {@link UUID} to register as recipient of.
-     * @param callback {@link DeviceCallback} to register.
-     * @param executor {@link Executor} on which to execute callback.
+     * @param callback    {@link DeviceCallback} to register.
+     * @param executor    {@link Executor} on which to execute callback.
      */
     public void registerDeviceCallback(@NonNull ConnectedDevice device, @NonNull UUID recipientId,
             @NonNull DeviceCallback callback, @NonNull @CallbackExecutor Executor executor) {
@@ -419,7 +471,7 @@ public class ConnectedDeviceManager {
                 + recipientId);
         String deviceId = device.getDeviceId();
         Map<UUID, ThreadSafeCallbacks<DeviceCallback>> recipientCallbacks =
-                mDeviceCallbacks.computeIfAbsent(deviceId, key -> new HashMap<>());
+                mDeviceCallbacks.computeIfAbsent(deviceId, key -> new ConcurrentHashMap<>());
 
         // Device already has a callback registered with this recipient UUID. For the
         // protection of the user, this UUID is now blacklisted from future subscriptions
@@ -474,9 +526,9 @@ public class ConnectedDeviceManager {
      * registered.
      *
      * @param recipientId Recipient's id
-     * @param deviceId Device id
+     * @param deviceId    Device id
      * @return The missed {@code byte[]} messages, or {@code null} if no messages were
-     *         missed.
+     * missed.
      */
     @Nullable
     private List<byte[]> popMissedMessages(@NonNull UUID recipientId, @NonNull String deviceId) {
@@ -491,9 +543,9 @@ public class ConnectedDeviceManager {
     /**
      * Unregister callback from device events.
      *
-     * @param device {@link ConnectedDevice} callback was registered on.
+     * @param device      {@link ConnectedDevice} callback was registered on.
      * @param recipientId {@link UUID} callback was registered under.
-     * @param callback {@link DeviceCallback} to unregister.
+     * @param callback    {@link DeviceCallback} to unregister.
      */
     public void unregisterDeviceCallback(@NonNull ConnectedDevice device,
             @NonNull UUID recipientId, @NonNull DeviceCallback callback) {
@@ -519,9 +571,9 @@ public class ConnectedDeviceManager {
     /**
      * Securely send message to a device.
      *
-     * @param device {@link ConnectedDevice} to send the message to.
+     * @param device      {@link ConnectedDevice} to send the message to.
      * @param recipientId Recipient {@link UUID}.
-     * @param message Message to send.
+     * @param message     Message to send.
      * @throws IllegalStateException Secure channel has not been established.
      */
     public void sendMessageSecurely(@NonNull ConnectedDevice device, @NonNull UUID recipientId,
@@ -532,9 +584,9 @@ public class ConnectedDeviceManager {
     /**
      * Send an unencrypted message to a device.
      *
-     * @param device {@link ConnectedDevice} to send the message to.
+     * @param device      {@link ConnectedDevice} to send the message to.
      * @param recipientId Recipient {@link UUID}.
-     * @param message Message to send.
+     * @param message     Message to send.
      */
     public void sendMessageUnsecurely(@NonNull ConnectedDevice device, @NonNull UUID recipientId,
             @NonNull byte[] message) {
@@ -559,7 +611,7 @@ public class ConnectedDeviceManager {
                     + "established a secure channel.");
         }
 
-        connectedDevice.mCarBleManager.sendMessage(deviceId,
+        connectedDevice.mCarBluetoothManager.sendMessage(deviceId,
                 new DeviceMessage(recipientId, isEncrypted, message));
     }
 
@@ -595,7 +647,7 @@ public class ConnectedDeviceManager {
     }
 
     @VisibleForTesting
-    void addConnectedDevice(@NonNull String deviceId, @NonNull CarBleManager bleManager) {
+    void addConnectedDevice(@NonNull String deviceId, @NonNull CarBluetoothManager bleManager) {
         if (mConnectedDevices.containsKey(deviceId)) {
             // Device already connected. No-op until secure channel established.
             return;
@@ -614,7 +666,7 @@ public class ConnectedDeviceManager {
     }
 
     @VisibleForTesting
-    void removeConnectedDevice(@NonNull String deviceId, @NonNull CarBleManager bleManager) {
+    void removeConnectedDevice(@NonNull String deviceId, @NonNull CarBluetoothManager bleManager) {
         logd(TAG, "Device " + deviceId + " disconnected from manager " + bleManager);
         InternalConnectedDevice connectedDevice = getConnectedDeviceForManager(deviceId,
                 bleManager);
@@ -641,7 +693,7 @@ public class ConnectedDeviceManager {
 
     @VisibleForTesting
     void onSecureChannelEstablished(@NonNull String deviceId,
-            @NonNull CarBleManager bleManager) {
+            @NonNull CarBluetoothManager bleManager) {
         if (mConnectedDevices.get(deviceId) == null) {
             loge(TAG, "Secure channel established on unknown device " + deviceId + ".");
             return;
@@ -682,7 +734,7 @@ public class ConnectedDeviceManager {
 
         if (mMessageDeliveryDelegate != null
                 && !mMessageDeliveryDelegate.shouldDeliverMessageForDevice(
-                        connectedDevice.mConnectedDevice)) {
+                connectedDevice.mConnectedDevice)) {
             logw(TAG, "The message delegate has rejected this message. It will not be "
                     + "delivered to the intended recipient.");
             return;
@@ -745,9 +797,9 @@ public class ConnectedDeviceManager {
 
     @Nullable
     private InternalConnectedDevice getConnectedDeviceForManager(@NonNull String deviceId,
-            @NonNull CarBleManager bleManager) {
+            @NonNull CarBluetoothManager bleManager) {
         InternalConnectedDevice connectedDevice = mConnectedDevices.get(deviceId);
-        if (connectedDevice != null && connectedDevice.mCarBleManager == bleManager) {
+        if (connectedDevice != null && connectedDevice.mCarBluetoothManager == bleManager) {
             return connectedDevice;
         }
 
@@ -792,23 +844,25 @@ public class ConnectedDeviceManager {
     }
 
     @NonNull
-    private CarBleManager.Callback generateCarBleCallback(@NonNull CarBleManager carBleManager) {
-        return new CarBleManager.Callback() {
+    private CarBluetoothManager.Callback generateCarBleCallback(
+            @NonNull CarBluetoothManager carBluetoothManager) {
+        return new CarBluetoothManager.Callback() {
             @Override
             public void onDeviceConnected(String deviceId) {
                 EventLog.onDeviceIdReceived();
-                addConnectedDevice(deviceId, carBleManager);
+                addConnectedDevice(deviceId, carBluetoothManager);
             }
 
             @Override
             public void onDeviceDisconnected(String deviceId) {
-                removeConnectedDevice(deviceId, carBleManager);
+                removeConnectedDevice(deviceId, carBluetoothManager);
             }
 
             @Override
             public void onSecureChannelEstablished(String deviceId) {
                 EventLog.onSecureChannelEstablished();
-                ConnectedDeviceManager.this.onSecureChannelEstablished(deviceId, carBleManager);
+                ConnectedDeviceManager.this.onSecureChannelEstablished(deviceId,
+                        carBluetoothManager);
             }
 
             @Override
@@ -863,26 +917,25 @@ public class ConnectedDeviceManager {
 
     private final AssociatedDeviceCallback mAssociatedDeviceCallback =
             new AssociatedDeviceCallback() {
-        @Override
-        public void onAssociatedDeviceAdded(
-                AssociatedDevice device) {
-            mDeviceAssociationCallbacks.invoke(callback ->
-                    callback.onAssociatedDeviceAdded(device));
-        }
+                @Override
+                public void onAssociatedDeviceAdded(AssociatedDevice device) {
+                    mDeviceAssociationCallbacks.invoke(callback ->
+                            callback.onAssociatedDeviceAdded(device));
+                }
 
-        @Override
-        public void onAssociatedDeviceRemoved(AssociatedDevice device) {
-            mDeviceAssociationCallbacks.invoke(callback ->
-                    callback.onAssociatedDeviceRemoved(device));
-            logd(TAG, "Successfully removed associated device " + device + ".");
-        }
+                @Override
+                public void onAssociatedDeviceRemoved(AssociatedDevice device) {
+                    mDeviceAssociationCallbacks.invoke(callback ->
+                            callback.onAssociatedDeviceRemoved(device));
+                    logd(TAG, "Successfully removed associated device " + device + ".");
+                }
 
-        @Override
-        public void onAssociatedDeviceUpdated(AssociatedDevice device) {
-            mDeviceAssociationCallbacks.invoke(callback ->
-                    callback.onAssociatedDeviceUpdated(device));
-        }
-    };
+                @Override
+                public void onAssociatedDeviceUpdated(AssociatedDevice device) {
+                    mDeviceAssociationCallbacks.invoke(callback ->
+                            callback.onAssociatedDeviceUpdated(device));
+                }
+            };
 
     /** Callback for triggered connection events from {@link ConnectedDeviceManager}. */
     public interface ConnectionCallback {
@@ -930,12 +983,12 @@ public class ConnectedDeviceManager {
 
     private static class InternalConnectedDevice {
         private final ConnectedDevice mConnectedDevice;
-        private final CarBleManager mCarBleManager;
+        private final CarBluetoothManager mCarBluetoothManager;
 
         InternalConnectedDevice(@NonNull ConnectedDevice connectedDevice,
-                @NonNull CarBleManager carBleManager) {
+                @NonNull CarBluetoothManager carBluetoothManager) {
             mConnectedDevice = connectedDevice;
-            mCarBleManager = carBleManager;
+            mCarBluetoothManager = carBluetoothManager;
         }
     }
 }

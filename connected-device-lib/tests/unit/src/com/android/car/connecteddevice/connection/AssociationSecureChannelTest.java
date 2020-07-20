@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.car.connecteddevice.ble;
+package com.android.car.connecteddevice.connection;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -33,8 +33,8 @@ import android.car.encryptionrunner.EncryptionRunnerFactory;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.android.car.connecteddevice.BleStreamProtos.BleOperationProto.OperationType;
-import com.android.car.connecteddevice.ble.BleDeviceMessageStream.MessageReceivedListener;
+import com.android.car.connecteddevice.StreamProtos.OperationProto.OperationType;
+import com.android.car.connecteddevice.connection.ble.BleDeviceMessageStream;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
 import com.android.car.connecteddevice.util.ByteUtils;
 
@@ -68,7 +68,7 @@ public final class AssociationSecureChannelTest {
     private MockitoSession mMockitoSession;
 
     private AssociationSecureChannel mChannel;
-    private MessageReceivedListener mMessageReceivedListener;
+    private DeviceMessageStream.MessageReceivedListener mMessageReceivedListener;
 
     @Before
     public void setUp() {
@@ -129,7 +129,7 @@ public final class AssociationSecureChannelTest {
         respondToContinueMessage();
         assertThat(semaphore.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
         verify(callbackSpy).onEstablishSecureChannelFailure(
-                eq(SecureBleChannel.CHANNEL_ERROR_INVALID_HANDSHAKE)
+                eq(SecureChannel.CHANNEL_ERROR_INVALID_HANDSHAKE)
         );
     }
 
@@ -146,7 +146,7 @@ public final class AssociationSecureChannelTest {
         initHandshakeMessage();
         assertThat(semaphore.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
         verify(callbackSpy).onEstablishSecureChannelFailure(
-                eq(SecureBleChannel.CHANNEL_ERROR_INVALID_HANDSHAKE)
+                eq(SecureChannel.CHANNEL_ERROR_INVALID_HANDSHAKE)
         );
     }
 
@@ -156,8 +156,8 @@ public final class AssociationSecureChannelTest {
                 encryptionRunnerProvider.getEncryptionRunner());
         mChannel.registerCallback(callback);
         mChannel.setShowVerificationCodeListener(mShowVerificationCodeListenerMock);
-        ArgumentCaptor<MessageReceivedListener> listenerCaptor =
-                ArgumentCaptor.forClass(MessageReceivedListener.class);
+        ArgumentCaptor<DeviceMessageStream.MessageReceivedListener> listenerCaptor =
+                ArgumentCaptor.forClass(DeviceMessageStream.MessageReceivedListener.class);
         verify(mStreamMock).setMessageReceivedListener(listenerCaptor.capture());
         mMessageReceivedListener = listenerCaptor.getValue();
     }
@@ -190,14 +190,14 @@ public final class AssociationSecureChannelTest {
     }
 
     /**
-     * Add the thread control logic into {@link SecureBleChannel.Callback} only for spy purpose.
+     * Add the thread control logic into {@link SecureChannel.Callback} only for spy purpose.
      *
      * <p>The callback will release the semaphore which hold by one test when this callback
      * is called, telling the test that it can verify certain behaviors which will only occurred
      * after the callback is notified. This is needed mainly because of the callback is notified
      * in a different thread.
      */
-    private static class ChannelCallback implements SecureBleChannel.Callback {
+    private static class ChannelCallback implements SecureChannel.Callback {
         private final Semaphore mSemaphore;
 
         ChannelCallback(Semaphore semaphore) {

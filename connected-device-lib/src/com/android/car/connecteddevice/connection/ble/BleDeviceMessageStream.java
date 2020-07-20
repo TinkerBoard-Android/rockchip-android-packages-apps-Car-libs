@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-package com.android.car.connecteddevice.ble;
+package com.android.car.connecteddevice.connection.ble;
 
-import static com.android.car.connecteddevice.BleStreamProtos.BleOperationProto.OperationType;
 import static com.android.car.connecteddevice.BleStreamProtos.BlePacketProto.BlePacket;
-import static com.android.car.connecteddevice.BleStreamProtos.VersionExchangeProto.BleVersionExchange;
+import static com.android.car.connecteddevice.StreamProtos.OperationProto.OperationType;
+import static com.android.car.connecteddevice.StreamProtos.VersionExchangeProto.BleVersionExchange;
 import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
 import static com.android.car.connecteddevice.util.SafeLog.logw;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.android.car.connecteddevice.BleStreamProtos.BleDeviceMessageProto.BleDeviceMessage;
+import com.android.car.connecteddevice.StreamProtos.DeviceMessageProto.BleDeviceMessage;
+import com.android.car.connecteddevice.connection.DeviceMessage;
+import com.android.car.connecteddevice.connection.DeviceMessageStream;
 import com.android.car.connecteddevice.util.ByteUtils;
 import com.android.car.protobuf.ByteString;
 import com.android.car.protobuf.InvalidProtocolBufferException;
@@ -48,7 +49,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /** BLE message stream to a device. */
-class BleDeviceMessageStream {
+public class BleDeviceMessageStream extends DeviceMessageStream {
 
     private static final String TAG = "BleDeviceMessageStream";
 
@@ -90,10 +91,6 @@ class BleDeviceMessageStream {
 
     private final BluetoothGattCharacteristic mReadCharacteristic;
 
-    private MessageReceivedListener mMessageReceivedListener;
-
-    private MessageReceivedErrorListener mMessageReceivedErrorListener;
-
     private int mMaxWriteSize;
 
     BleDeviceMessageStream(@NonNull BlePeripheralManager blePeripheralManager,
@@ -132,7 +129,8 @@ class BleDeviceMessageStream {
      * @param deviceMessage The data object contains recipient, isPayloadEncrypted and message.
      * @param operationType The {@link OperationType} of this message.
      */
-    void writeMessage(@NonNull DeviceMessage deviceMessage, OperationType operationType) {
+    @Override
+    public void writeMessage(@NonNull DeviceMessage deviceMessage, OperationType operationType) {
         logd(TAG, "Writing message with " + deviceMessage.getMessage().length + " bytes to device: "
                 + mDevice.getAddress() + ".");
         BleDeviceMessage.Builder builder = BleDeviceMessage.newBuilder()
@@ -165,12 +163,12 @@ class BleDeviceMessageStream {
                 logd(TAG, "No more packets to send.");
                 return;
             }
-            if (mIsSendingInProgress.get()) {
+            boolean isLockAcquired = mIsSendingInProgress.compareAndSet(false, true);
+            if (!isLockAcquired) {
                 logd(TAG, "Unable to send packet at this time.");
                 return;
             }
 
-            mIsSendingInProgress.set(true);
             BlePacket packet = mPacketQueue.remove();
             logd(TAG, "Writing packet " + packet.getPacketNumber() + " of "
                     + packet.getTotalPackets() + " for " + packet.getMessageId() + ".");
@@ -220,9 +218,7 @@ class BleDeviceMessageStream {
             packet = BlePacket.parseFrom(value);
         } catch (InvalidProtocolBufferException e) {
             loge(TAG, "Can not parse Ble packet from client.", e);
-            if (mMessageReceivedErrorListener != null) {
-                mMessageReceivedErrorListener.onMessageReceivedError(e);
-            }
+            notifyMessageReceivedErrorListener(e);
             return;
         }
         processPacket(packet);
@@ -234,9 +230,8 @@ class BleDeviceMessageStream {
             versionExchange = BleVersionExchange.parseFrom(value);
         } catch (InvalidProtocolBufferException e) {
             loge(TAG, "Could not parse version exchange message", e);
-            if (mMessageReceivedErrorListener != null) {
-                mMessageReceivedErrorListener.onMessageReceivedError(e);
-            }
+            notifyMessageReceivedErrorListener(e);
+
             return;
         }
         int minMessagingVersion = versionExchange.getMinSupportedMessagingVersion();
@@ -248,10 +243,7 @@ class BleDeviceMessageStream {
             loge(TAG, "Unsupported message version for min " + minMessagingVersion + " and max "
                     + maxMessagingVersion + " or security version for " + minSecurityVersion
                     + " and max " + maxSecurityVersion + ".");
-            if (mMessageReceivedErrorListener != null) {
-                mMessageReceivedErrorListener.onMessageReceivedError(
-                        new IllegalStateException("Unsupported version."));
-            }
+            notifyMessageReceivedErrorListener(new IllegalStateException("Unsupported version."));
             return;
         }
 
@@ -285,10 +277,8 @@ class BleDeviceMessageStream {
         if (packetNumber != expectedPacket) {
             loge(TAG, "Received unexpected packet " + packetNumber + " for message "
                     + messageId + ".");
-            if (mMessageReceivedErrorListener != null) {
-                mMessageReceivedErrorListener.onMessageReceivedError(
-                        new IllegalStateException("Packet received out of order."));
-            }
+            notifyMessageReceivedErrorListener(
+                    new IllegalStateException("Packet received out of order."));
             return;
         }
         mPendingPacketNumber.put(messageId, packetNumber + 1);
@@ -302,9 +292,7 @@ class BleDeviceMessageStream {
             currentPayloadStream.write(payload);
         } catch (IOException e) {
             loge(TAG, "Error writing packet to stream.", e);
-            if (mMessageReceivedErrorListener != null) {
-                mMessageReceivedErrorListener.onMessageReceivedError(e);
-            }
+            notifyMessageReceivedErrorListener(e);
             return;
         }
         logd(TAG, "Parsed packet " + packet.getPacketNumber() + " of "
@@ -329,18 +317,14 @@ class BleDeviceMessageStream {
             message = BleDeviceMessage.parseFrom(messageBytes);
         } catch (InvalidProtocolBufferException e) {
             loge(TAG, "Cannot parse device message from client.", e);
-            if (mMessageReceivedErrorListener != null) {
-                mMessageReceivedErrorListener.onMessageReceivedError(e);
-            }
+            notifyMessageReceivedErrorListener(e);
             return;
         }
 
         DeviceMessage deviceMessage = new DeviceMessage(
                 ByteUtils.bytesToUUID(message.getRecipient().toByteArray()),
                 message.getIsPayloadEncrypted(), message.getPayload().toByteArray());
-        if (mMessageReceivedListener != null) {
-            mMessageReceivedListener.onMessageReceived(deviceMessage, message.getOperation());
-        }
+        notifyMessageReceivedListener(deviceMessage, message.getOperation());
     }
 
     /** The maximum amount of bytes that can be written over BLE. */
@@ -349,49 +333,6 @@ class BleDeviceMessageStream {
             return;
         }
         mMaxWriteSize = maxWriteSize;
-    }
-
-    /**
-     * Set the given listener to be notified when a new message was received from the
-     * client. If listener is {@code null}, clear.
-     */
-    void setMessageReceivedListener(@Nullable MessageReceivedListener listener) {
-        mMessageReceivedListener = listener;
-    }
-
-    /**
-     * Set the given listener to be notified when there was an error during receiving
-     * message from the client. If listener is {@code null}, clear.
-     */
-    void setMessageReceivedErrorListener(
-            @Nullable MessageReceivedErrorListener listener) {
-        mMessageReceivedErrorListener = listener;
-    }
-
-    /**
-     * Listener to be invoked when a complete message is received from the client.
-     */
-    interface MessageReceivedListener {
-
-        /**
-         * Called when a complete message is received from the client.
-         *
-         * @param deviceMessage The message received from the client.
-         * @param operationType The {@link OperationType} of the received message.
-         */
-        void onMessageReceived(@NonNull DeviceMessage deviceMessage, OperationType operationType);
-    }
-
-    /**
-     * Listener to be invoked when there was an error during receiving message from the client.
-     */
-    interface MessageReceivedErrorListener {
-        /**
-         * Called when there was an error during receiving message from the client.
-         *
-         * @param exception The error.
-         */
-        void onMessageReceivedError(@NonNull Exception exception);
     }
 
     /** A generator of unique IDs for messages. */

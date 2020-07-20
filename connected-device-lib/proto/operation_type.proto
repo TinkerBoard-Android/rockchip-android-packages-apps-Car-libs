@@ -18,8 +18,8 @@ syntax = "proto3";
 
 package com.android.car.connecteddevice.proto;
 
-option java_package = "com.android.car.connecteddevice.BleStreamProtos";
-option java_outer_classname = "BleOperationProto";
+option java_package = "com.android.car.connecteddevice.StreamProtos";
+option java_outer_classname = "OperationProto";
 
 // The different message types that indicate the content of the payload.
 //
