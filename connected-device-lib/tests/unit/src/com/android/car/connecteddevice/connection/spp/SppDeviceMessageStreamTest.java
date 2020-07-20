@@ -16,7 +16,6 @@
 
 package com.android.car.connecteddevice.connection.spp;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mockitoSession;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -26,13 +25,7 @@ import android.bluetooth.BluetoothDevice;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.android.car.connecteddevice.StreamProtos.DeviceMessageProto.BleDeviceMessage;
-import com.android.car.connecteddevice.StreamProtos.OperationProto;
-import com.android.car.connecteddevice.StreamProtos.VersionExchangeProto;
-import com.android.car.connecteddevice.connection.DeviceMessage;
-import com.android.car.connecteddevice.connection.DeviceMessageStream;
 import com.android.car.connecteddevice.util.ByteUtils;
-import com.android.car.protobuf.ByteString;
 
 import org.junit.After;
 import org.junit.Before;
@@ -42,41 +35,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
-import java.util.UUID;
-
 @RunWith(AndroidJUnit4.class)
 public class SppDeviceMessageStreamTest {
-    private final byte[] mTestData = "testData".getBytes();
-    private final UUID mTestUuid = UUID.randomUUID();
-    private final OperationProto.OperationType mTestOperationType =
-            OperationProto.OperationType.CLIENT_MESSAGE;
-    private final boolean mIsEncrypted = false;
-    private final DeviceMessage mTestDeviceMessage = new DeviceMessage(mTestUuid, mIsEncrypted,
-            mTestData);
-    private final BleDeviceMessage mBleDeviceMessage = BleDeviceMessage.newBuilder()
-            .setOperation(mTestOperationType)
-            .setIsPayloadEncrypted(mIsEncrypted)
-            .setPayload(ByteString.copyFrom(mTestData))
-            .setRecipient(ByteString.copyFrom(ByteUtils.uuidToBytes(mTestUuid)))
-            .build();
+    private static final int MAX_WRITE_SIZE = 700;
 
-    private final byte[] mVersionExchangeMessage =
-            VersionExchangeProto.BleVersionExchange.newBuilder()
-                    .setMinSupportedMessagingVersion(SppDeviceMessageStream.MESSAGING_VERSION)
-                    .setMaxSupportedMessagingVersion(SppDeviceMessageStream.MESSAGING_VERSION)
-                    .setMinSupportedSecurityVersion(SppDeviceMessageStream.SECURITY_VERSION)
-                    .setMaxSupportedSecurityVersion(SppDeviceMessageStream.SECURITY_VERSION)
-                    .build()
-                    .toByteArray();
     @Mock
     private SppManager mMockSppManager;
-    private DeviceMessageStream.MessageReceivedListener mMessageReceivedListener = spy(
-            (deviceMessage, operationType) -> {
-            });
-    private DeviceMessageStream.MessageReceivedErrorListener mMessageReceivedErrorListener = spy(
-            exception -> {
-            }
-    );
     private BluetoothDevice mBluetoothDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(
             "00:11:22:33:44:55");
     private MockitoSession mMockingSession;
@@ -88,7 +52,8 @@ public class SppDeviceMessageStreamTest {
                 .initMocks(this)
                 .strictness(Strictness.WARN)
                 .startMocking();
-        mSppDeviceMessageStream = new SppDeviceMessageStream(mMockSppManager, mBluetoothDevice);
+        mSppDeviceMessageStream = spy(
+                new SppDeviceMessageStream(mMockSppManager, mBluetoothDevice, MAX_WRITE_SIZE));
     }
 
     @After
@@ -99,26 +64,10 @@ public class SppDeviceMessageStreamTest {
     }
 
     @Test
-    public void testWriteMessage_CallSppManagerWriteMethod() {
-        mSppDeviceMessageStream.writeMessage(mTestDeviceMessage, mTestOperationType);
-        verify(mMockSppManager).write(mBleDeviceMessage.toByteArray());
+    public void send_callsWriteAndSendCompleted() {
+        byte[] data = ByteUtils.randomBytes(10);
+        mSppDeviceMessageStream.send(data);
+        verify(mMockSppManager).write(data);
+        verify(mSppDeviceMessageStream).sendCompleted();
     }
-
-    @Test
-    public void testOnMessageReceived_InformMessageReceivedListener() {
-        mSppDeviceMessageStream.onMessageReceived(mBluetoothDevice, mVersionExchangeMessage);
-        mSppDeviceMessageStream.setMessageReceivedListener(mMessageReceivedListener);
-        mSppDeviceMessageStream.onMessageReceived(mBluetoothDevice,
-                mBleDeviceMessage.toByteArray());
-        verify(mMessageReceivedListener).onMessageReceived(mTestDeviceMessage, mTestOperationType);
-    }
-
-    @Test
-    public void testOnMessageReceived_InformOnMessageReceivedErrorListener() {
-        mSppDeviceMessageStream.onMessageReceived(mBluetoothDevice, mVersionExchangeMessage);
-        mSppDeviceMessageStream.setMessageReceivedErrorListener(mMessageReceivedErrorListener);
-        mSppDeviceMessageStream.onMessageReceived(mBluetoothDevice, mTestData);
-        verify(mMessageReceivedErrorListener).onMessageReceivedError(any());
-    }
-
 }
