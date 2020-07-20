@@ -20,10 +20,11 @@ package com.android.car.connecteddevice.proto;
 
 import "packages/apps/Car/libs/connected-device-lib/proto/operation_type.proto";
 
-option java_package = "com.android.car.connecteddevice.BleStreamProtos";
-option java_outer_classname = "BleDeviceMessageProto";
+option java_package = "com.android.car.connecteddevice.StreamProtos";
+option java_outer_classname = "DeviceMessageProto";
 
 // A message between devices.
+// TODO(b/160163265): Rename the proto to a more generic name.
 message BleDeviceMessage {
   // The operation that this message represents.
   OperationType operation = 1;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.car.connecteddevice.ble;
+package com.android.car.connecteddevice.connection;
 
-import static com.android.car.connecteddevice.BleStreamProtos.BleOperationProto.OperationType.CLIENT_MESSAGE;
-import static com.android.car.connecteddevice.BleStreamProtos.BleOperationProto.OperationType.ENCRYPTION_HANDSHAKE;
-import static com.android.car.connecteddevice.ble.SecureBleChannel.CHANNEL_ERROR_INVALID_HANDSHAKE;
-import static com.android.car.connecteddevice.ble.SecureBleChannel.Callback;
+import static com.android.car.connecteddevice.StreamProtos.OperationProto.OperationType.CLIENT_MESSAGE;
+import static com.android.car.connecteddevice.StreamProtos.OperationProto.OperationType.ENCRYPTION_HANDSHAKE;
+import static com.android.car.connecteddevice.connection.SecureChannel.CHANNEL_ERROR_INVALID_HANDSHAKE;
+import static com.android.car.connecteddevice.connection.SecureChannel.Callback;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -36,6 +36,7 @@ import android.car.encryptionrunner.Key;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.android.car.connecteddevice.connection.ble.BleDeviceMessageStream;
 import com.android.car.connecteddevice.util.ByteUtils;
 
 import org.junit.After;
@@ -53,7 +54,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
-public class SecureBleChannelTest {
+public class SecureChannelTest {
 
     @Mock private BleDeviceMessageStream mMockStream;
 
@@ -81,7 +82,7 @@ public class SecureBleChannelTest {
 
     private MockitoSession mMockitoSession;
 
-    private SecureBleChannel mSecureBleChannel;
+    private SecureChannel mSecureChannel;
 
     @Before
     public void setUp() throws SignatureException {
@@ -90,12 +91,12 @@ public class SecureBleChannelTest {
                 .strictness(Strictness.WARN)
                 .startMocking();
 
-        mSecureBleChannel = new SecureBleChannel(mMockStream,
+        mSecureChannel = new SecureChannel(mMockStream,
                 EncryptionRunnerFactory.newDummyRunner()) {
             @Override
             void processHandshake(byte[] message) { }
         };
-        mSecureBleChannel.setEncryptionKey(mKey);
+        mSecureChannel.setEncryptionKey(mKey);
     }
 
     @After
@@ -110,7 +111,7 @@ public class SecureBleChannelTest {
         byte[] payload = ByteUtils.randomBytes(10);
         DeviceMessage message = new DeviceMessage(UUID.randomUUID(), /* isEncrypted= */ false,
                 payload);
-        mSecureBleChannel.processMessage(message);
+        mSecureChannel.processMessage(message);
         assertThat(message.getMessage()).isEqualTo(payload);
         verify(mKey, times(0)).decryptData(any());
     }
@@ -120,7 +121,7 @@ public class SecureBleChannelTest {
         byte[] payload = ByteUtils.randomBytes(10);
         DeviceMessage message = new DeviceMessage(UUID.randomUUID(), /* isEncrypted= */ true,
                 payload);
-        mSecureBleChannel.processMessage(message);
+        mSecureChannel.processMessage(message);
         verify(mKey).decryptData(any());
     }
 
@@ -131,14 +132,14 @@ public class SecureBleChannelTest {
         DeviceMessage message = new DeviceMessage(UUID.randomUUID(), /* isEncrypted= */ true,
                 ByteUtils.randomBytes(10));
 
-        mSecureBleChannel.setEncryptionKey(null);
-        mSecureBleChannel.registerCallback(new Callback() {
+        mSecureChannel.setEncryptionKey(null);
+        mSecureChannel.registerCallback(new Callback() {
             @Override
             public void onMessageReceivedError(Exception exception) {
                 semaphore.release();
             }
         });
-        mSecureBleChannel.processMessage(message);
+        mSecureChannel.processMessage(message);
         assertThat(tryAcquire(semaphore)).isTrue();
         assertThat(message.getMessage()).isNull();
     }
@@ -150,15 +151,15 @@ public class SecureBleChannelTest {
         DeviceMessage message = new DeviceMessage(UUID.randomUUID(), /* isEncrypted= */ true,
                 ByteUtils.randomBytes(10));
 
-        mSecureBleChannel.setEncryptionKey(null);
-        mSecureBleChannel.registerCallback(new Callback() {
+        mSecureChannel.setEncryptionKey(null);
+        mSecureChannel.registerCallback(new Callback() {
             @Override
             public void onEstablishSecureChannelFailure(int error) {
                 assertThat(error).isEqualTo(CHANNEL_ERROR_INVALID_HANDSHAKE);
                 semaphore.release();
             }
         });
-        mSecureBleChannel.onMessageReceived(message, ENCRYPTION_HANDSHAKE);
+        mSecureChannel.onMessageReceived(message, ENCRYPTION_HANDSHAKE);
         assertThat(tryAcquire(semaphore)).isTrue();
     }
 
@@ -169,20 +170,20 @@ public class SecureBleChannelTest {
         DeviceMessage message = new DeviceMessage(UUID.randomUUID(), /* isEncrypted= */ false,
                 /* message= */ null);
 
-        mSecureBleChannel.registerCallback(new Callback() {
+        mSecureChannel.registerCallback(new Callback() {
             @Override
             public void onMessageReceived(DeviceMessage message) {
                 semaphore.release();
             }
         });
-        mSecureBleChannel.onMessageReceived(message, CLIENT_MESSAGE);
+        mSecureChannel.onMessageReceived(message, CLIENT_MESSAGE);
         assertThat(tryAcquire(semaphore)).isFalse();
     }
 
     @Test
     public void onMessageReceived_processHandshakeExceptionIssuesSecureChannelFailureCallback()
             throws InterruptedException {
-        SecureBleChannel secureChannel = new SecureBleChannel(mMockStream,
+        SecureChannel secureChannel = new SecureChannel(mMockStream,
                 EncryptionRunnerFactory.newDummyRunner()) {
             @Override
             void processHandshake(byte[] message) throws HandshakeException {
