@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.car.connecteddevice.ble;
+package com.android.car.connecteddevice.connection;
 
 import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
@@ -26,7 +26,7 @@ import android.car.encryptionrunner.EncryptionRunner;
 import android.car.encryptionrunner.HandshakeException;
 import android.car.encryptionrunner.Key;
 
-import com.android.car.connecteddevice.BleStreamProtos.BleOperationProto.OperationType;
+import com.android.car.connecteddevice.StreamProtos.OperationProto.OperationType;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
@@ -36,10 +36,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
- * Establishes a secure channel with {@link EncryptionRunner} over {@link BleDeviceMessageStream} as
+ * Establishes a secure channel with {@link EncryptionRunner} over {@link DeviceMessageStream} as
  * server side, sends and receives messages securely after the secure channel has been established.
  */
-abstract class SecureBleChannel {
+public abstract class SecureChannel {
 
     private static final String TAG = "SecureBleChannel";
 
@@ -73,7 +73,7 @@ abstract class SecureBleChannel {
     static final int CHANNEL_ERROR_STORAGE_ERROR = 6;
 
 
-    private final BleDeviceMessageStream mStream;
+    private final DeviceMessageStream mStream;
 
     private final EncryptionRunner mEncryptionRunner;
 
@@ -81,7 +81,7 @@ abstract class SecureBleChannel {
 
     private Callback mCallback;
 
-    SecureBleChannel(@NonNull BleDeviceMessageStream stream,
+    SecureChannel(@NonNull DeviceMessageStream stream,
             @NonNull EncryptionRunner encryptionRunner) {
         mStream = stream;
         mEncryptionRunner = encryptionRunner;
@@ -119,7 +119,7 @@ abstract class SecureBleChannel {
      *
      * @param deviceMessage The {@link DeviceMessage} to send.
      */
-    void sendClientMessage(@NonNull DeviceMessage deviceMessage)
+    public void sendClientMessage(@NonNull DeviceMessage deviceMessage)
             throws IllegalStateException {
         if (deviceMessage.isMessageEncrypted()) {
             encryptMessage(deviceMessage);
@@ -139,12 +139,12 @@ abstract class SecureBleChannel {
 
     /** Get the BLE stream backing this channel. */
     @NonNull
-    BleDeviceMessageStream getStream() {
+    public DeviceMessageStream getStream() {
         return mStream;
     }
 
     /** Register a callback that notifies secure channel events. */
-    void registerCallback(Callback callback) {
+    public void registerCallback(Callback callback) {
         mCallback = callback;
     }
 
@@ -157,7 +157,7 @@ abstract class SecureBleChannel {
 
     @VisibleForTesting
     @Nullable
-    Callback getCallback() {
+    public Callback getCallback() {
         return mCallback;
     }
 
@@ -252,7 +252,7 @@ abstract class SecureBleChannel {
      * Callbacks that will be invoked during establishing secure channel, sending and receiving
      * messages securely.
      */
-    interface Callback {
+    public interface Callback {
         /**
          * Invoked when secure channel has been established successfully.
          */
@@ -264,7 +264,7 @@ abstract class SecureBleChannel {
          *
          * @param error The failure indication.
          */
-        default void onEstablishSecureChannelFailure(@SecureBleChannel.ChannelError int error) { }
+        default void onEstablishSecureChannelFailure(@SecureChannel.ChannelError int error) { }
 
         /**
          * Invoked when a complete message is received securely from the client and decrypted.

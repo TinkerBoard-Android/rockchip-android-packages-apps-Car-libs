@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.car.connecteddevice.ble;
+package com.android.car.connecteddevice.connection.ble;
 
 import static com.google.common.truth.Truth.assertThat;
 

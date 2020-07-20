@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.car.connecteddevice.ble;
+package com.android.car.connecteddevice.connection;
 
-import static com.android.car.connecteddevice.BleStreamProtos.BleDeviceMessageProto.BleDeviceMessage;
+import static com.android.car.connecteddevice.StreamProtos.DeviceMessageProto.BleDeviceMessage;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
