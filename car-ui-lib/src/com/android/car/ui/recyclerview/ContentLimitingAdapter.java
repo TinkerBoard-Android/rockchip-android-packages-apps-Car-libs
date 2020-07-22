@@ -22,7 +22,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.recyclerview.widget.RecyclerView;
@@ -37,17 +36,12 @@ import com.android.car.ui.utils.CarUiUtils;
  * @param <T> type of the {@link RecyclerView.ViewHolder} objects used by base classes.
  */
 public abstract class ContentLimitingAdapter<T extends RecyclerView.ViewHolder>
-        extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+        extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements ContentLimiting {
     private static final String TAG = "ContentLimitingAdapter";
-
-    /**
-     * A value that indicates there should be no limit.
-     */
-    public static final int UNLIMITED = -1;
 
     private static final int SCROLLING_LIMITED_MESSAGE_VIEW_TYPE = Integer.MAX_VALUE;
 
-    private int mMaxItems = UNLIMITED;
+    private int mMaxItems = ContentLimiting.UNLIMITED;
     private Integer mScrollingLimitedMessageResId;
 
     /**
@@ -61,6 +55,7 @@ public abstract class ContentLimitingAdapter<T extends RecyclerView.ViewHolder>
     }
 
     @Override
+    @NonNull
     public final RecyclerView.ViewHolder onCreateViewHolder(
             @NonNull ViewGroup parent, int viewType) {
         if (viewType == getScrollingLimitedMessageViewType()) {
@@ -115,10 +110,14 @@ public abstract class ContentLimitingAdapter<T extends RecyclerView.ViewHolder>
     /**
      * Returns the view type of the item at {@code position}.
      *
+     * <p>Defaults to the implementation in {@link RecyclerView.Adapter#getItemViewType(int)}.
+     *
      * <p>It is delegated to by {@link #getItemViewType(int)} for all positions other than the
      * {@link #getScrollingLimitedMessagePosition()}.
      */
-    protected abstract int getItemViewTypeImpl(int position);
+    protected int getItemViewTypeImpl(int position) {
+        return super.getItemViewType(position);
+    }
 
     /**
      * Returns the position where the "scrolling is limited" message should be placed.
@@ -141,7 +140,7 @@ public abstract class ContentLimitingAdapter<T extends RecyclerView.ViewHolder>
     }
 
     private boolean isContentLimited() {
-        return mMaxItems > UNLIMITED && getUnrestrictedItemCount() > mMaxItems;
+        return mMaxItems > ContentLimiting.UNLIMITED && getUnrestrictedItemCount() > mMaxItems;
     }
 
     /**
@@ -166,7 +165,8 @@ public abstract class ContentLimitingAdapter<T extends RecyclerView.ViewHolder>
      * holders that are not of type {@link ScrollingLimitedViewHolder}.
      */
     @SuppressWarnings("unused")
-    protected void onViewRecycledImpl(@NonNull T holder) {}
+    protected void onViewRecycledImpl(@NonNull T holder) {
+    }
 
     @Override
     @SuppressWarnings("unchecked")
@@ -205,7 +205,8 @@ public abstract class ContentLimitingAdapter<T extends RecyclerView.ViewHolder>
      * holders that are not of type {@link ScrollingLimitedViewHolder}.
      */
     @SuppressWarnings("unused")
-    protected void onViewAttachedToWindowImpl(@NonNull T holder) {}
+    protected void onViewAttachedToWindowImpl(@NonNull T holder) {
+    }
 
     @Override
     @SuppressWarnings("unchecked")
@@ -224,12 +225,10 @@ public abstract class ContentLimitingAdapter<T extends RecyclerView.ViewHolder>
      * holders that are not of type {@link ScrollingLimitedViewHolder}.
      */
     @SuppressWarnings("unused")
-    protected void onViewDetachedFromWindowImpl(@NonNull T holder) {}
+    protected void onViewDetachedFromWindowImpl(@NonNull T holder) {
+    }
 
-    /**
-     * Sets the maximum number of items available in the adapter. Use {@link #UNLIMITED} if
-     * the list should not be capped.
-     */
+    @Override
     public void setMaxItems(int maxItems) {
         int originalCount = getItemCount();
         mMaxItems = maxItems;
@@ -253,21 +252,13 @@ public abstract class ContentLimitingAdapter<T extends RecyclerView.ViewHolder>
         }
     }
 
-    /**
-     * Sets the message to show in the UI when the list content length is capped.
-     */
+    @Override
     public void setScrollingLimitedMessageResId(@StringRes int resId) {
-        if (mScrollingLimitedMessageResId != resId) {
+        if (mScrollingLimitedMessageResId == null || mScrollingLimitedMessageResId != resId) {
             mScrollingLimitedMessageResId = resId;
             notifyItemChanged(getScrollingLimitedMessagePosition());
         }
     }
-
-    /**
-     * Returns the resource ID to identify the list with for the purposes of config lookups.
-     */
-    @IdRes
-    public abstract int getConfigurationId();
 
     /**
      * {@link RecyclerView.ViewHolder} for the last item in a scrolling limited list.
