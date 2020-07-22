@@ -116,12 +116,7 @@ class FastScroller implements View.OnTouchListener {
         float percentage = ((newDragPos - thumbCenter) / (float) scrollbarLength);
         int totalPossibleOffset =
                 mRecyclerView.computeVerticalScrollRange() - mRecyclerView.getHeight();
-        int scrollingBy = (int) (percentage * totalPossibleOffset);
-        int absoluteOffset = mRecyclerView.computeVerticalScrollOffset() + scrollingBy;
-        if (absoluteOffset < 0) {
-            return 0;
-        }
-        return scrollingBy;
+        return (int) (percentage * totalPossibleOffset);
     }
 
     /**

@@ -403,7 +403,7 @@ public class CarUiRecyclerViewTest {
 
         // scroll to the start
         onView(withId(R.id.car_ui_scrollbar_track)).perform(
-                touchDownAndUp(0f, (thumbView.getHeight() / 2f) + 1));
+                touchDownAndUp(0f, 1));
         onView(withText(adapter.getItemText(0))).check(matches(isDisplayed()));
     }
 
