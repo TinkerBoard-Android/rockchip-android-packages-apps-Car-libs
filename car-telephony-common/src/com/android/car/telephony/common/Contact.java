@@ -364,7 +364,7 @@ public class Contact implements Parcelable, Comparable<Contact> {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof Contact && mLookupKey.equals(((Contact) obj).mLookupKey)
-                && mAccountName.equals(((Contact) obj).mAccountName);
+                && TextUtils.equals(((Contact) obj).mAccountName, mAccountName);
     }
 
     @Override
