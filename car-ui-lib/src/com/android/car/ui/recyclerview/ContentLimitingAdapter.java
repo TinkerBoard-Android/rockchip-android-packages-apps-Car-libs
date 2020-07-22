@@ -110,10 +110,14 @@ public abstract class ContentLimitingAdapter<T extends RecyclerView.ViewHolder>
     /**
      * Returns the view type of the item at {@code position}.
      *
+     * <p>Defaults to the implementation in {@link RecyclerView.Adapter#getItemViewType(int)}.
+     *
      * <p>It is delegated to by {@link #getItemViewType(int)} for all positions other than the
      * {@link #getScrollingLimitedMessagePosition()}.
      */
-    protected abstract int getItemViewTypeImpl(int position);
+    protected int getItemViewTypeImpl(int position) {
+        return super.getItemViewType(position);
+    }
 
     /**
      * Returns the position where the "scrolling is limited" message should be placed.
