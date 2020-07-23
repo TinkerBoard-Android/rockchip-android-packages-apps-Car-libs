@@ -23,4 +23,12 @@
     <string name="title_multi_list_preference">Multi-select list preference</string>
     <string name="summary_multi_list_preference">Shows a dialog with multiple choice options</string>
     <string name="dialog_title_multi_list_preference">Choose some options!</string>
+    <string name="preference_widgets_category">Widgets</string>
+    <string name="title_checkbox_preference">Checkbox preference</string>
+    <string name="summary_checkbox_preference">Tap anywhere in this preference to toggle state</string>
+    <string name="title_switch_preference">Switch preference</string>
+    <string name="summary_switch_preference">Tap anywhere in this preference to toggle state</string>
+    <string name="title_dropdown_preference">Dropdown preference</string>
+    <string name="title_twoaction_preference">TwoAction preference</string>
+    <string name="summary_twoaction_preference">A widget should be visible on the right</string>
 </resources>

@@ -46,6 +46,10 @@ public class PreferenceTestFragment extends PreferenceFragment {
         findPreference(key).setOnPreferenceChangeListener(listener);
     }
 
+    public void addPreference(Preference preference) {
+        getPreferenceManager().getPreferenceScreen().addPreference(preference);
+    }
+
     /**
      * Custom data store to be used for testing as SharedPreferences for instrumentation tests
      * are not initialized as expected.
@@ -53,6 +57,7 @@ public class PreferenceTestFragment extends PreferenceFragment {
     public static class TestDataStore extends PreferenceDataStore {
 
         private Map<String, String> mStringStore = new HashMap<>();
+        private Map<String, Boolean> mBooleanStore = new HashMap<>();
         private Map<String, Set<String>> mStringSetStore = new HashMap<>();
 
         @Override
@@ -79,6 +84,16 @@ public class PreferenceTestFragment extends PreferenceFragment {
                 defValues = new HashSet<>();
             }
             return mStringSetStore.getOrDefault(key, defValues);
+        }
+
+        @Override
+        public void putBoolean(String key, boolean value) {
+            mBooleanStore.put(key, value);
+        }
+
+        @Override
+        public boolean getBoolean(String key, boolean defValue) {
+            return mBooleanStore.getOrDefault(key, defValue);
         }
     }
 }

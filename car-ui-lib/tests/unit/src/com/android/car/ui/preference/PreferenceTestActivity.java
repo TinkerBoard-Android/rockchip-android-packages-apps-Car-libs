@@ -44,4 +44,12 @@ public class PreferenceTestActivity extends AppCompatActivity {
             String key, Preference.OnPreferenceChangeListener listener) {
         mPreferenceFragment.setOnPreferenceChangeListener(key, listener);
     }
+
+    public void scrollToPreference(String key) {
+        mPreferenceFragment.scrollToPreference(key);
+    }
+
+    public void addPreference(Preference preference) {
+        mPreferenceFragment.addPreference(preference);
+    }
 }
