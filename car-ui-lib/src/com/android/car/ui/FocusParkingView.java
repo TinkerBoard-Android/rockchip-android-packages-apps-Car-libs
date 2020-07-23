@@ -17,6 +17,7 @@ package com.android.car.ui;
 
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_COLLAPSE;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_DISMISS;
+import static android.view.accessibility.AccessibilityNodeInfo.ACTION_FOCUS;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -130,6 +131,12 @@ public class FocusParkingView extends View {
                         getContext().getSystemService(InputMethodManager.class);
                 return inputMethodManager.hideSoftInputFromWindow(getWindowToken(),
                         /* flags= */ 0);
+            case ACTION_FOCUS:
+                // Don't leave this to View to handle as it will exit touch mode.
+                if (!hasFocus()) {
+                    return requestFocus();
+                }
+                break;
         }
         return super.performAccessibilityAction(action, arguments);
     }
