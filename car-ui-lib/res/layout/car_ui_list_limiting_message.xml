@@ -13,17 +13,27 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<TextView
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/car_ui_list_limiting_message"
-    android:layout_width="wrap_content"
-    android:layout_height="96dp"
-    android:layout_gravity="center_horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="144dp"
     android:gravity="center"
-    android:paddingStart="48dp"
-    android:paddingEnd="48dp"
-    android:textColor="?android:attr/textColorPrimary"
-    android:textAllCaps="false"
-    android:singleLine="true"
-    android:background="@drawable/car_ui_list_limiting_message_background"
-/>
+    android:paddingTop="16dp"
+    android:paddingBottom="32dp"
+>
+    <TextView
+        android:id="@+id/car_ui_list_limiting_message"
+        android:layout_width="wrap_content"
+        android:layout_height="96dp"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center"
+        android:paddingStart="48dp"
+        android:paddingEnd="48dp"
+        android:drawableStart="@drawable/car_ui_icon_lock"
+        android:drawablePadding="24dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textAllCaps="false"
+        android:singleLine="true"
+        android:background="@drawable/car_ui_list_limiting_message_background"
+    />
+</FrameLayout>
