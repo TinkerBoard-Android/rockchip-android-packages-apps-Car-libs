@@ -16,11 +16,11 @@
   -->
 
 <resources>
-   <!-- Toolbar -->
+    <!-- Toolbar -->
 
-   <!-- Normally no resources should live in any other resource folder than default configuration. -->
-   <!-- Because OEMs will have to always add them to their RROs. -->
-   <!-- But we can't remove this resource from -port folder, because it was used as part of an earlier release -->
-   <!-- Whether tabs should use flex layout or not -->
-   <bool name="car_ui_toolbar_tab_flexible_layout">true</bool>
+    <!-- Whether tabs should use flex layout or not -->
+    <bool name="car_ui_toolbar_tab_flexible_layout">true</bool>
+    <!-- Whether tabs should be displayed on a second row, or they should be placed in the first
+         row, replacing the title -->
+    <bool name="car_ui_toolbar_tabs_on_second_row">true</bool>
 </resources>
