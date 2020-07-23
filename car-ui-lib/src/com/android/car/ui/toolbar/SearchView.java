@@ -23,6 +23,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -116,13 +117,35 @@ public class SearchView extends ConstraintLayout {
         mSearchText.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE
                     || actionId == EditorInfo.IME_ACTION_SEARCH) {
-                mSearchText.clearFocus();
-                for (Toolbar.OnSearchCompletedListener listener : mSearchCompletedListeners) {
-                    listener.onSearchCompleted();
+                notifyQuerySubmit();
+            } else if (isEnter(event)) {
+                if (event.getAction() == KeyEvent.ACTION_UP) {
+                    // Note that we want to trigger search only on ACTION_UP, but want to return
+                    // true for all actions for the relevant key event.
+                    notifyQuerySubmit();
                 }
+                return true;
             }
             return false;
         });
+    }
+
+    private boolean isEnter(KeyEvent event) {
+        boolean result = false;
+        if (event != null) {
+            int keyCode = event.getKeyCode();
+            result = keyCode == KeyEvent.KEYCODE_ENTER
+                    || keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER
+                    || keyCode == KeyEvent.KEYCODE_SEARCH;
+        }
+        return result;
+    }
+
+    private void notifyQuerySubmit() {
+        mSearchText.clearFocus();
+        for (Toolbar.OnSearchCompletedListener listener : mSearchCompletedListeners) {
+            listener.onSearchCompleted();
+        }
     }
 
     private boolean mWasShown = false;
