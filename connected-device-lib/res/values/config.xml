@@ -31,6 +31,8 @@
     <string name="car_spp_service_uuid_secure" translatable="false">00000000-0000-0000-0000-000000000000</string>
     <string name="car_spp_service_uuid_insecure" translatable="false">00000000-0000-0000-0000-000000000000</string>
 
+    <bool name="enable_secure_rfcomm_channel">true</bool>
+    <bool name="enable_spp_support">false</bool>
     <!--
     This value must be between 23 and 185. 23 is the default MTU size for Android, and 185 is
     the max MTU size supported for iOS. Verify your device and target companion devices support a

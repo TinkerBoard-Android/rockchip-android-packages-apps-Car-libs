@@ -85,7 +85,7 @@ public class CarSppManagerTest {
         AssociationCallback callback = createAssociationCallback(semaphore);
         when(mMockSppManager.startListening()).thenReturn(true);
 
-        mCarSppManager.startAssociation(callback);
+        mCarSppManager.startAssociation(null, callback);
 
         verify(mMockSppManager).startListening();
         assertThat(tryAcquire(semaphore)).isTrue();
@@ -98,7 +98,7 @@ public class CarSppManagerTest {
         AssociationCallback callback = createAssociationCallback(semaphore);
         when(mMockSppManager.startListening()).thenReturn(false);
 
-        mCarSppManager.startAssociation(callback);
+        mCarSppManager.startAssociation(null, callback);
 
         assertThat(tryAcquire(semaphore)).isTrue();
         verify(callback).onAssociationStartFailure();
@@ -144,7 +144,7 @@ public class CarSppManagerTest {
     private AssociationSecureChannel getChannelForAssociation(AssociationCallback callback) {
         ArgumentCaptor<SppManager.ConnectionCallback> callbackCaptor =
                 ArgumentCaptor.forClass(SppManager.ConnectionCallback.class);
-        mCarSppManager.startAssociation(callback);
+        mCarSppManager.startAssociation(null, callback);
         verify(mMockSppManager).registerCallback(callbackCaptor.capture(), any());
         BluetoothDevice bluetoothDevice = BluetoothAdapter.getDefaultAdapter()
                 .getRemoteDevice(TEST_REMOTE_DEVICE_ADDRESS);
