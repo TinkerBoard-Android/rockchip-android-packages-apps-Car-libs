@@ -1,9 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="{{RRO_PACKAGE_NAME}}">
     <application android:hasCode="false"/>
+    <!-- IMPORTANT: Setting the category to "BypassIdMapV1" will cause these static RROs not to
+     have an IDMAP V1 generated within the PackageManager which improves boot performance.
+     IDMAP v1 allowed for overlays of values within an AndroidManifest file but that
+     functionality and IDMAP v1 has been removed in the next version of Android and is not used
+      here. -->
     <overlay android:priority="10"
         android:targetPackage="{{TARGET_PACKAGE_NAME}}"
         android:isStatic="true"
+        android:category="BypassIdMapV1"
         android:requiredSystemPropertyName="ro.build.characteristics"
         android:requiredSystemPropertyValue="automotive"/>
 </manifest>
