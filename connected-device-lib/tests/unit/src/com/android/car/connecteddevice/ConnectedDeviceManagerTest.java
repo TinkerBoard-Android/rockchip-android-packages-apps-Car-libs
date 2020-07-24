@@ -41,8 +41,6 @@ import com.android.car.connecteddevice.ConnectedDeviceManager.DeviceCallback;
 import com.android.car.connecteddevice.ConnectedDeviceManager.MessageDeliveryDelegate;
 import com.android.car.connecteddevice.connection.CarBluetoothManager;
 import com.android.car.connecteddevice.connection.DeviceMessage;
-import com.android.car.connecteddevice.connection.ble.CarBleCentralManager;
-import com.android.car.connecteddevice.connection.ble.CarBlePeripheralManager;
 import com.android.car.connecteddevice.model.AssociatedDevice;
 import com.android.car.connecteddevice.model.ConnectedDevice;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
@@ -87,10 +85,7 @@ public class ConnectedDeviceManagerTest {
     private ConnectedDeviceStorage mMockStorage;
 
     @Mock
-    private CarBlePeripheralManager mMockPeripheralManager;
-
-    @Mock
-    private CarBleCentralManager mMockCentralManager;
+    private CarBluetoothManager mMockCarBluetoothManager;
 
     private ConnectedDeviceManager mConnectedDeviceManager;
 
@@ -106,8 +101,8 @@ public class ConnectedDeviceManagerTest {
                 .startMocking();
         ArgumentCaptor<AssociatedDeviceCallback> callbackCaptor = ArgumentCaptor
                 .forClass(AssociatedDeviceCallback.class);
-        mConnectedDeviceManager = new ConnectedDeviceManager(mMockStorage, mMockCentralManager,
-            mMockPeripheralManager);
+        mConnectedDeviceManager = new ConnectedDeviceManager(mMockCarBluetoothManager,
+                mMockStorage);
         verify(mMockStorage).setAssociatedDeviceCallback(callbackCaptor.capture());
         when(mMockStorage.getActiveUserAssociatedDevices()).thenReturn(mUserDevices);
         when(mMockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(mUserDeviceIds);
@@ -129,7 +124,7 @@ public class ConnectedDeviceManagerTest {
 
     @Test
     public void getActiveUserConnectedDevices_includesNewlyConnectedDevice() {
-        String deviceId = connectNewDevice(mMockCentralManager);
+        String deviceId = connectNewDevice();
         List<ConnectedDevice> activeUserDevices =
                 mConnectedDeviceManager.getActiveUserConnectedDevices();
         ConnectedDevice expectedDevice = new ConnectedDevice(deviceId, /* deviceName= */ null,
@@ -143,14 +138,14 @@ public class ConnectedDeviceManagerTest {
         String otherUserDeviceId = UUID.randomUUID().toString();
         when(mMockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(
                 Collections.singletonList(otherUserDeviceId));
-        mConnectedDeviceManager.addConnectedDevice(deviceId, mMockCentralManager);
+        mConnectedDeviceManager.addConnectedDevice(deviceId);
         assertThat(mConnectedDeviceManager.getActiveUserConnectedDevices()).isEmpty();
     }
 
     @Test
     public void getActiveUserConnectedDevices_reflectsSecureChannelEstablished() {
-        String deviceId = connectNewDevice(mMockCentralManager);
-        mConnectedDeviceManager.onSecureChannelEstablished(deviceId, mMockCentralManager);
+        String deviceId = connectNewDevice();
+        mConnectedDeviceManager.onSecureChannelEstablished(deviceId);
         ConnectedDevice connectedDevice =
                 mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
         assertThat(connectedDevice.hasSecureChannel()).isTrue();
@@ -158,21 +153,14 @@ public class ConnectedDeviceManagerTest {
 
     @Test
     public void getActiveUserConnectedDevices_excludesDisconnectedDevice() {
-        String deviceId = connectNewDevice(mMockCentralManager);
-        mConnectedDeviceManager.removeConnectedDevice(deviceId, mMockCentralManager);
+        String deviceId = connectNewDevice();
+        mConnectedDeviceManager.removeConnectedDevice(deviceId);
         assertThat(mConnectedDeviceManager.getActiveUserConnectedDevices()).isEmpty();
-    }
-
-    @Test
-    public void getActiveUserConnectedDevices_unaffectedByOtherManagerDisconnect() {
-        String deviceId = connectNewDevice(mMockCentralManager);
-        mConnectedDeviceManager.removeConnectedDevice(deviceId, mMockPeripheralManager);
-        assertThat(mConnectedDeviceManager.getActiveUserConnectedDevices()).hasSize(1);
     }
 
     @Test(expected = IllegalStateException.class)
     public void sendMessageSecurely_throwsIllegalStateExceptionIfNoSecureChannel() {
-        connectNewDevice(mMockCentralManager);
+        connectNewDevice();
         ConnectedDevice device = mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
         UUID recipientId = UUID.randomUUID();
         byte[] message = ByteUtils.randomBytes(10);
@@ -181,37 +169,38 @@ public class ConnectedDeviceManagerTest {
 
     @Test
     public void sendMessageSecurely_sendsEncryptedMessage() {
-        String deviceId = connectNewDevice(mMockCentralManager);
-        mConnectedDeviceManager.onSecureChannelEstablished(deviceId, mMockCentralManager);
+        String deviceId = connectNewDevice();
+        mConnectedDeviceManager.onSecureChannelEstablished(deviceId);
         ConnectedDevice device = mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
         UUID recipientId = UUID.randomUUID();
         byte[] message = ByteUtils.randomBytes(10);
         mConnectedDeviceManager.sendMessageSecurely(device, recipientId, message);
         ArgumentCaptor<DeviceMessage> messageCaptor = ArgumentCaptor.forClass(DeviceMessage.class);
-        verify(mMockCentralManager).sendMessage(eq(deviceId), messageCaptor.capture());
+        verify(mMockCarBluetoothManager).sendMessage(eq(deviceId), messageCaptor.capture());
         assertThat(messageCaptor.getValue().isMessageEncrypted()).isTrue();
     }
 
     @Test
     public void sendMessageSecurely_doesNotSendIfDeviceDisconnected() {
-        String deviceId = connectNewDevice(mMockCentralManager);
+        String deviceId = connectNewDevice();
         ConnectedDevice device = mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
-        mConnectedDeviceManager.removeConnectedDevice(deviceId, mMockCentralManager);
+        mConnectedDeviceManager.removeConnectedDevice(deviceId);
         UUID recipientId = UUID.randomUUID();
         byte[] message = ByteUtils.randomBytes(10);
         mConnectedDeviceManager.sendMessageSecurely(device, recipientId, message);
-        verify(mMockCentralManager, times(0)).sendMessage(eq(deviceId), any(DeviceMessage.class));
+        verify(mMockCarBluetoothManager, times(0)).sendMessage(eq(deviceId),
+                any(DeviceMessage.class));
     }
 
     @Test
     public void sendMessageUnsecurely_sendsMessageWithoutEncryption() {
-        String deviceId = connectNewDevice(mMockCentralManager);
+        String deviceId = connectNewDevice();
         ConnectedDevice device = mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
         UUID recipientId = UUID.randomUUID();
         byte[] message = ByteUtils.randomBytes(10);
         mConnectedDeviceManager.sendMessageUnsecurely(device, recipientId, message);
         ArgumentCaptor<DeviceMessage> messageCaptor = ArgumentCaptor.forClass(DeviceMessage.class);
-        verify(mMockCentralManager).sendMessage(eq(deviceId), messageCaptor.capture());
+        verify(mMockCarBluetoothManager).sendMessage(eq(deviceId), messageCaptor.capture());
         assertThat(messageCaptor.getValue().isMessageEncrypted()).isFalse();
     }
 
@@ -222,7 +211,7 @@ public class ConnectedDeviceManagerTest {
         ConnectionCallback connectionCallback = createConnectionCallback(semaphore);
         mConnectedDeviceManager.registerActiveUserConnectionCallback(connectionCallback,
                 mCallbackExecutor);
-        String deviceId = connectNewDevice(mMockCentralManager);
+        String deviceId = connectNewDevice();
         assertThat(tryAcquire(semaphore)).isTrue();
         ArgumentCaptor<ConnectedDevice> deviceCaptor =
                 ArgumentCaptor.forClass(ConnectedDevice.class);
@@ -243,7 +232,7 @@ public class ConnectedDeviceManagerTest {
         String otherUserDeviceId = UUID.randomUUID().toString();
         when(mMockStorage.getActiveUserAssociatedDeviceIds()).thenReturn(
                 Collections.singletonList(otherUserDeviceId));
-        mConnectedDeviceManager.addConnectedDevice(deviceId, mMockCentralManager);
+        mConnectedDeviceManager.addConnectedDevice(deviceId);
         assertThat(tryAcquire(semaphore)).isFalse();
     }
 
@@ -251,11 +240,11 @@ public class ConnectedDeviceManagerTest {
     public void connectionCallback_onDeviceConnectedNotInvokedForDifferentBleManager()
             throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
-        String deviceId = connectNewDevice(mMockPeripheralManager);
+        String deviceId = connectNewDevice();
         ConnectionCallback connectionCallback = createConnectionCallback(semaphore);
         mConnectedDeviceManager.registerActiveUserConnectionCallback(connectionCallback,
                 mCallbackExecutor);
-        mConnectedDeviceManager.addConnectedDevice(deviceId, mMockCentralManager);
+        mConnectedDeviceManager.addConnectedDevice(deviceId);
         assertThat(tryAcquire(semaphore)).isFalse();
     }
 
@@ -263,11 +252,11 @@ public class ConnectedDeviceManagerTest {
     public void connectionCallback_onDeviceDisconnectedInvokedForActiveUserDevice()
             throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
-        String deviceId = connectNewDevice(mMockCentralManager);
+        String deviceId = connectNewDevice();
         ConnectionCallback connectionCallback = createConnectionCallback(semaphore);
         mConnectedDeviceManager.registerActiveUserConnectionCallback(connectionCallback,
                 mCallbackExecutor);
-        mConnectedDeviceManager.removeConnectedDevice(deviceId, mMockCentralManager);
+        mConnectedDeviceManager.removeConnectedDevice(deviceId);
         assertThat(tryAcquire(semaphore)).isTrue();
         ArgumentCaptor<ConnectedDevice> deviceCaptor =
                 ArgumentCaptor.forClass(ConnectedDevice.class);
@@ -280,11 +269,11 @@ public class ConnectedDeviceManagerTest {
             throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
         String deviceId = UUID.randomUUID().toString();
-        mConnectedDeviceManager.addConnectedDevice(deviceId, mMockCentralManager);
+        mConnectedDeviceManager.addConnectedDevice(deviceId);
         ConnectionCallback connectionCallback = createConnectionCallback(semaphore);
         mConnectedDeviceManager.registerActiveUserConnectionCallback(connectionCallback,
                 mCallbackExecutor);
-        mConnectedDeviceManager.removeConnectedDevice(deviceId, mMockCentralManager);
+        mConnectedDeviceManager.removeConnectedDevice(deviceId);
         assertThat(tryAcquire(semaphore)).isFalse();
     }
 
@@ -296,14 +285,14 @@ public class ConnectedDeviceManagerTest {
         mConnectedDeviceManager.registerActiveUserConnectionCallback(connectionCallback,
                 mCallbackExecutor);
         mConnectedDeviceManager.unregisterConnectionCallback(connectionCallback);
-        connectNewDevice(mMockCentralManager);
+        connectNewDevice();
         assertThat(tryAcquire(semaphore)).isFalse();
     }
 
     @Test
     public void registerDeviceCallback_blacklistsDuplicateRecipientId()
             throws InterruptedException {
-        connectNewDevice(mMockCentralManager);
+        connectNewDevice();
         ConnectedDevice connectedDevice =
                 mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
         Semaphore firstSemaphore = new Semaphore(0);
@@ -344,14 +333,13 @@ public class ConnectedDeviceManagerTest {
     @Test
     public void deviceCallback_onSecureChannelEstablishedInvoked() throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
-        connectNewDevice(mMockCentralManager);
+        connectNewDevice();
         ConnectedDevice connectedDevice =
                 mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
         DeviceCallback deviceCallback = createDeviceCallback(semaphore);
         mConnectedDeviceManager.registerDeviceCallback(connectedDevice, mRecipientId,
                 deviceCallback, mCallbackExecutor);
-        mConnectedDeviceManager.onSecureChannelEstablished(connectedDevice.getDeviceId(),
-                mMockCentralManager);
+        mConnectedDeviceManager.onSecureChannelEstablished(connectedDevice.getDeviceId());
         connectedDevice =
                 mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
         assertThat(tryAcquire(semaphore)).isTrue();
@@ -359,27 +347,10 @@ public class ConnectedDeviceManagerTest {
     }
 
     @Test
-    public void deviceCallback_onSecureChannelEstablishedNotInvokedWithSecondBleManager()
-            throws InterruptedException {
-        Semaphore semaphore = new Semaphore(0);
-        connectNewDevice(mMockCentralManager);
-        ConnectedDevice connectedDevice =
-                mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
-        mConnectedDeviceManager.onSecureChannelEstablished(connectedDevice.getDeviceId(),
-                mMockCentralManager);
-        DeviceCallback deviceCallback = createDeviceCallback(semaphore);
-        mConnectedDeviceManager.registerDeviceCallback(connectedDevice, mRecipientId,
-                deviceCallback, mCallbackExecutor);
-        mConnectedDeviceManager.onSecureChannelEstablished(connectedDevice.getDeviceId(),
-                mMockPeripheralManager);
-        assertThat(tryAcquire(semaphore)).isFalse();
-    }
-
-    @Test
     public void deviceCallback_onMessageReceivedInvokedForSameRecipientId()
             throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
-        connectNewDevice(mMockCentralManager);
+        connectNewDevice();
         ConnectedDevice connectedDevice =
                 mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
         DeviceCallback deviceCallback = createDeviceCallback(semaphore);
@@ -396,7 +367,7 @@ public class ConnectedDeviceManagerTest {
     public void deviceCallback_onMessageReceivedNotInvokedForDifferentRecipientId()
             throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
-        connectNewDevice(mMockCentralManager);
+        connectNewDevice();
         ConnectedDevice connectedDevice =
                 mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
         DeviceCallback deviceCallback = createDeviceCallback(semaphore);
@@ -411,7 +382,7 @@ public class ConnectedDeviceManagerTest {
     @Test
     public void deviceCallback_onDeviceErrorInvokedOnChannelError() throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
-        connectNewDevice(mMockCentralManager);
+        connectNewDevice();
         ConnectedDevice connectedDevice =
                 mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
         DeviceCallback deviceCallback = createDeviceCallback(semaphore);
@@ -426,7 +397,7 @@ public class ConnectedDeviceManagerTest {
     public void unregisterDeviceCallback_removesCallbackAndNotInvoked()
             throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
-        connectNewDevice(mMockCentralManager);
+        connectNewDevice();
         ConnectedDevice connectedDevice =
                 mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
         DeviceCallback deviceCallback = createDeviceCallback(semaphore);
@@ -434,8 +405,7 @@ public class ConnectedDeviceManagerTest {
                 deviceCallback, mCallbackExecutor);
         mConnectedDeviceManager.unregisterDeviceCallback(connectedDevice, mRecipientId,
                 deviceCallback);
-        mConnectedDeviceManager.onSecureChannelEstablished(connectedDevice.getDeviceId(),
-                mMockPeripheralManager);
+        mConnectedDeviceManager.onSecureChannelEstablished(connectedDevice.getDeviceId());
         assertThat(tryAcquire(semaphore)).isFalse();
     }
 
@@ -443,7 +413,7 @@ public class ConnectedDeviceManagerTest {
     public void registerDeviceCallback_sendsMissedMessageAfterRegistration()
             throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
-        connectNewDevice(mMockCentralManager);
+        connectNewDevice();
         ConnectedDevice connectedDevice =
                 mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
         byte[] payload = ByteUtils.randomBytes(10);
@@ -460,7 +430,7 @@ public class ConnectedDeviceManagerTest {
     public void registerDeviceCallback_sendsMultipleMissedMessagesAfterRegistration()
             throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
-        connectNewDevice(mMockCentralManager);
+        connectNewDevice();
         ConnectedDevice connectedDevice =
                 mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
         byte[] payload1 = ByteUtils.randomBytes(10);
@@ -481,7 +451,7 @@ public class ConnectedDeviceManagerTest {
     public void registerDeviceCallback_doesNotSendMissedMessageForDifferentRecipient()
             throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
-        connectNewDevice(mMockCentralManager);
+        connectNewDevice();
         ConnectedDevice connectedDevice =
                 mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
         byte[] payload = ByteUtils.randomBytes(10);
@@ -497,8 +467,8 @@ public class ConnectedDeviceManagerTest {
     public void registerDeviceCallback_doesNotSendMissedMessageForDifferentDevice()
             throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
-        connectNewDevice(mMockCentralManager);
-        connectNewDevice(mMockCentralManager);
+        connectNewDevice();
+        connectNewDevice();
         List<ConnectedDevice> connectedDevices =
                 mConnectedDeviceManager.getActiveUserConnectedDevices();
         ConnectedDevice connectedDevice = connectedDevices.get(0);
@@ -516,7 +486,7 @@ public class ConnectedDeviceManagerTest {
     public void onAssociationCompleted_disconnectsOriginalDeviceAndReconnectsAsActiveUser()
             throws InterruptedException {
         String deviceId = UUID.randomUUID().toString();
-        mConnectedDeviceManager.addConnectedDevice(deviceId, mMockPeripheralManager);
+        mConnectedDeviceManager.addConnectedDevice(deviceId);
         Semaphore semaphore = new Semaphore(0);
         ConnectionCallback connectionCallback = createConnectionCallback(semaphore);
         mConnectedDeviceManager.registerActiveUserConnectionCallback(connectionCallback,
@@ -579,10 +549,10 @@ public class ConnectedDeviceManagerTest {
                 TEST_DEVICE_NAME, /* isConnectionEnabled= */ true);
         when(mMockStorage.getActiveUserAssociatedDevices()).thenReturn(
                 Collections.singletonList(device));
-        clearInvocations(mMockPeripheralManager);
-        mConnectedDeviceManager.addConnectedDevice(deviceId, mMockPeripheralManager);
-        mConnectedDeviceManager.removeConnectedDevice(deviceId, mMockPeripheralManager);
-        verify(mMockPeripheralManager, timeout(1000))
+        mConnectedDeviceManager.addConnectedDevice(deviceId);
+        clearInvocations(mMockCarBluetoothManager);
+        mConnectedDeviceManager.removeConnectedDevice(deviceId);
+        verify(mMockCarBluetoothManager, timeout(1000))
                 .connectToDevice(eq(UUID.fromString(deviceId)));
     }
 
@@ -596,11 +566,11 @@ public class ConnectedDeviceManagerTest {
                 TEST_DEVICE_NAME, /* isConnectionEnabled= */ true);
         when(mMockStorage.getActiveUserAssociatedDevices()).thenReturn(
                 Collections.singletonList(userDevice));
-        mConnectedDeviceManager.addConnectedDevice(deviceId, mMockPeripheralManager);
-        clearInvocations(mMockPeripheralManager);
-        mConnectedDeviceManager.removeConnectedDevice(deviceId, mMockPeripheralManager);
-        verify(mMockPeripheralManager, timeout(1000))
-                .connectToDevice(eq(UUID.fromString(userDeviceId)));
+        mConnectedDeviceManager.addConnectedDevice(deviceId);
+        clearInvocations(mMockCarBluetoothManager);
+        mConnectedDeviceManager.removeConnectedDevice(deviceId);
+        verify(mMockCarBluetoothManager, timeout(1000)).connectToDevice(
+                eq(UUID.fromString(userDeviceId)));
     }
 
     @Test
@@ -613,11 +583,11 @@ public class ConnectedDeviceManagerTest {
                 TEST_DEVICE_NAME, /* isConnectionEnabled= */ true);
         when(mMockStorage.getActiveUserAssociatedDevices()).thenReturn(
                 Collections.singletonList(userDevice));
-        mConnectedDeviceManager.addConnectedDevice(deviceId, mMockPeripheralManager);
-        mConnectedDeviceManager.addConnectedDevice(userDeviceId, mMockCentralManager);
-        clearInvocations(mMockPeripheralManager);
-        mConnectedDeviceManager.removeConnectedDevice(deviceId, mMockPeripheralManager);
-        verify(mMockPeripheralManager, timeout(1000).times(0))
+        mConnectedDeviceManager.addConnectedDevice(deviceId);
+        mConnectedDeviceManager.addConnectedDevice(userDeviceId);
+        clearInvocations(mMockCarBluetoothManager);
+        mConnectedDeviceManager.removeConnectedDevice(deviceId);
+        verify(mMockCarBluetoothManager, timeout(1000).times(0))
                 .connectToDevice(any());
     }
 
@@ -630,9 +600,9 @@ public class ConnectedDeviceManagerTest {
 
     @Test
     public void removeActiveUserAssociatedDevice_disconnectsIfConnected() {
-        String deviceId = connectNewDevice(mMockPeripheralManager);
+        String deviceId = connectNewDevice();
         mConnectedDeviceManager.removeActiveUserAssociatedDevice(deviceId);
-        verify(mMockPeripheralManager).disconnectDevice(deviceId);
+        verify(mMockCarBluetoothManager).disconnectDevice(deviceId);
     }
 
     @Test
@@ -651,14 +621,14 @@ public class ConnectedDeviceManagerTest {
 
     @Test
     public void disableAssociatedDeviceConnection_disconnectsIfConnected() {
-        String deviceId = connectNewDevice(mMockPeripheralManager);
+        String deviceId = connectNewDevice();
         mConnectedDeviceManager.disableAssociatedDeviceConnection(deviceId);
-        verify(mMockPeripheralManager).disconnectDevice(deviceId);
+        verify(mMockCarBluetoothManager).disconnectDevice(deviceId);
     }
 
     @Test
     public void onMessageReceived_deliversMessageIfDelegateIsNull() throws InterruptedException {
-        connectNewDevice(mMockCentralManager);
+        connectNewDevice();
         ConnectedDevice connectedDevice =
                 mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
         Semaphore semaphore = new Semaphore(0);
@@ -673,7 +643,7 @@ public class ConnectedDeviceManagerTest {
 
     @Test
     public void onMessageReceived_deliversMessageIfDelegateAccepts() throws InterruptedException {
-        connectNewDevice(mMockCentralManager);
+        connectNewDevice();
         ConnectedDevice connectedDevice =
                 mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
         Semaphore semaphore = new Semaphore(0);
@@ -690,7 +660,7 @@ public class ConnectedDeviceManagerTest {
     @Test
     public void onMessageReceived_doesNotDeliverMessageIfDelegateRejects()
             throws InterruptedException {
-        connectNewDevice(mMockCentralManager);
+        connectNewDevice();
         ConnectedDevice connectedDevice =
                 mConnectedDeviceManager.getActiveUserConnectedDevices().get(0);
         Semaphore semaphore = new Semaphore(0);
@@ -705,13 +675,13 @@ public class ConnectedDeviceManagerTest {
     }
 
     @NonNull
-    private String connectNewDevice(@NonNull CarBluetoothManager carBluetoothManager) {
+    private String connectNewDevice() {
         String deviceId = UUID.randomUUID().toString();
         AssociatedDevice device = new AssociatedDevice(deviceId, TEST_DEVICE_ADDRESS,
                 TEST_DEVICE_NAME, /* isConnectionEnabled= */ true);
         mUserDeviceIds.add(deviceId);
         mUserDevices.add(device);
-        mConnectedDeviceManager.addConnectedDevice(deviceId, carBluetoothManager);
+        mConnectedDeviceManager.addConnectedDevice(deviceId);
         return deviceId;
     }
 
