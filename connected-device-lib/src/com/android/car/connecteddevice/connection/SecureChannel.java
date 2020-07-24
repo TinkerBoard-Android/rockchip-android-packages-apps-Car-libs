@@ -41,7 +41,7 @@ import java.util.function.Consumer;
  */
 public abstract class SecureChannel {
 
-    private static final String TAG = "SecureBleChannel";
+    private static final String TAG = "SecureChannel";
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "CHANNEL_ERROR" },

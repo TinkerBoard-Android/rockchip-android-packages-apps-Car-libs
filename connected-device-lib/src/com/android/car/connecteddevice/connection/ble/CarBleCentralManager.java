@@ -36,7 +36,9 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.os.ParcelUuid;
 
+import com.android.car.connecteddevice.AssociationCallback;
 import com.android.car.connecteddevice.connection.CarBluetoothManager;
+import com.android.car.connecteddevice.oob.OobChannel;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
 
 import java.math.BigInteger;
@@ -130,6 +132,33 @@ public class CarBleCentralManager extends CarBluetoothManager {
         }
 
         deviceDisconnected(device, STATUS_FORCED_DISCONNECT);
+    }
+
+    //TODO(b/141312136): Support car central role
+    @Override
+    public AssociationCallback getAssociationCallback() {
+        return null;
+    }
+
+    @Override
+    public void setAssociationCallback(AssociationCallback callback) {
+
+    }
+
+    @Override
+    public void connectToDevice(UUID deviceId) {
+
+    }
+
+    @Override
+    public void startAssociation(String nameForAssociation, AssociationCallback callback) {
+
+    }
+
+    @Override
+    public void startOutOfBandAssociation(String nameForAssociation, OobChannel oobChannel,
+            AssociationCallback callback) {
+
     }
 
     private void ignoreDevice(@NonNull ConnectedRemoteDevice device) {
