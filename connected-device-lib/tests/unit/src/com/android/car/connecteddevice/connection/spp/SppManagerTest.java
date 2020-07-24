@@ -26,9 +26,7 @@ import static org.mockito.Mockito.verify;
 
 import android.annotation.NonNull;
 import android.bluetooth.BluetoothDevice;
-import android.content.Context;
 
-import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.After;
@@ -40,6 +38,7 @@ import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
 import java.io.IOException;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -48,7 +47,8 @@ import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
 public class SppManagerTest {
-    private final Context mContext = ApplicationProvider.getApplicationContext();
+    private static final UUID TEST_SERVICE_UUID = UUID.randomUUID();
+    private final boolean mIsSecureRfcommChannel = true;
     private final byte[] mTestData = "testData".getBytes();
     private SppManager mSppManager;
     private Executor mCallbackExecutor = Executors.newSingleThreadExecutor();
@@ -63,7 +63,7 @@ public class SppManagerTest {
 
     @Before
     public void setUp() throws IOException {
-        mSppManager = new SppManager(mContext);
+        mSppManager = new SppManager(TEST_SERVICE_UUID, mIsSecureRfcommChannel);
         mMockitoSession = mockitoSession()
                 .initMocks(this)
                 .strictness(Strictness.WARN)

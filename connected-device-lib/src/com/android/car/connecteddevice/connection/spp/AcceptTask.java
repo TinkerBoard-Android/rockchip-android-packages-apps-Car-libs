@@ -23,39 +23,30 @@ import android.annotation.Nullable;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
-
-import com.android.car.connecteddevice.R;
 
 import java.io.IOException;
 import java.util.UUID;
 
 /**
- * This task runs while listening for incoming connections. It behaves like a server-side client. It
- * runs until a connection is accepted (or until cancelled).
+ * This task runs while listening for incoming connections. It behaves like a server. It runs until
+ * a connection is accepted (or until cancelled).
  */
 public class AcceptTask implements Runnable {
     private static final String TAG = "AcceptTask";
-    // Service names and UUIDs of SDP(Service Discovery Protocol) record, need to keep it consistent
-    // among client and server.
     private static final String SERVICE_NAME_SECURE = "NAME_SECURE";
     private static final String SERVICE_NAME_INSECURE = "NAME_INSECURE";
-    private final UUID mServiceUuidSecure;
-    private final UUID mServiceUuidInsecure;
+    private final UUID mServiceUuid;
     private final boolean mIsSecure;
     private final OnTaskCompletedListener mListener;
     private final BluetoothAdapter mAdapter;
     private BluetoothServerSocket mServerSocket;
 
-    AcceptTask(Context context, BluetoothAdapter adapter, boolean isSecure,
+    AcceptTask(BluetoothAdapter adapter, boolean isSecure, UUID serviceUuid,
             OnTaskCompletedListener listener) {
-        mIsSecure = isSecure;
         mListener = listener;
         mAdapter = adapter;
-        mServiceUuidSecure = UUID.fromString(
-                context.getString(R.string.car_spp_service_uuid_secure));
-        mServiceUuidInsecure = UUID.fromString(
-                context.getString(R.string.car_spp_service_uuid_insecure));
+        mServiceUuid = serviceUuid;
+        mIsSecure = isSecure;
     }
 
     /**
@@ -68,10 +59,10 @@ public class AcceptTask implements Runnable {
         try {
             if (mIsSecure) {
                 mServerSocket = mAdapter.listenUsingRfcommWithServiceRecord(SERVICE_NAME_SECURE,
-                        mServiceUuidSecure);
+                        mServiceUuid);
             } else {
                 mServerSocket = mAdapter.listenUsingInsecureRfcommWithServiceRecord(
-                        SERVICE_NAME_INSECURE, mServiceUuidInsecure);
+                        SERVICE_NAME_INSECURE, mServiceUuid);
             }
         } catch (IOException e) {
             loge(TAG, "Socket listen() failed", e);
