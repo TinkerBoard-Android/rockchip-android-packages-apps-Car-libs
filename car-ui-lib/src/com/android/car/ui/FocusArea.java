@@ -51,7 +51,8 @@ import com.android.car.ui.utils.RotaryConstants;
  * RotaryService will move the focus to another view that can take focus in another (typically
  * adjacent) FocusArea.
  * <p>
- * If enabled, FocusArea can draw highlights when one of its descendants has focus.
+ * If enabled, FocusArea can draw highlights when one of its descendants has focus and it's not in
+ * touch mode.
  * <p>
  * When creating a navigation block in the layout file, if you intend to use a LinearLayout as a
  * container for that block, just use a FocusArea instead; otherwise wrap the block in a FocusArea.
@@ -68,13 +69,13 @@ public class FocusArea extends LinearLayout {
 
     /**
      * Whether to draw {@link #mForegroundHighlight} when one of the FocusArea's descendants has
-     * focus.
+     * focus and it's not in touch mode.
      */
     private boolean mEnableForegroundHighlight;
 
     /**
      * Whether to draw {@link #mBackgroundHighlight} when one of the FocusArea's descendants has
-     * focus.
+     * focus and it's not in touch mode.
      */
     private boolean mEnableBackgroundHighlight;
 
@@ -132,9 +133,6 @@ public class FocusArea extends LinearLayout {
                 R.drawable.car_ui_focus_area_foreground_highlight, getContext().getTheme());
         mBackgroundHighlight = getContext().getResources().getDrawable(
                 R.drawable.car_ui_focus_area_background_highlight, getContext().getTheme());
-
-        // Ensure that an AccessibilityNodeInfo is created for this view.
-        setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
 
         // By default all ViewGroup subclasses do not call their draw() and onDraw() methods. We
         // should enable it since we override these methods.
@@ -210,7 +208,7 @@ public class FocusArea extends LinearLayout {
 
         // Draw highlight on top of this FocusArea (including its background and content) but
         // behind its children.
-        if (mEnableBackgroundHighlight && mHasFocus) {
+        if (mEnableBackgroundHighlight && mHasFocus && !isInTouchMode()) {
             mBackgroundHighlight.setBounds(
                     mPaddingLeft + getScrollX(),
                     mPaddingTop + getScrollY(),
@@ -226,7 +224,7 @@ public class FocusArea extends LinearLayout {
 
         // Draw highlight on top of this FocusArea (including its background and content) and its
         // children (including background, content, focus highlight, etc).
-        if (mEnableForegroundHighlight && mHasFocus) {
+        if (mEnableForegroundHighlight && mHasFocus && !isInTouchMode()) {
             mForegroundHighlight.setBounds(
                     mPaddingLeft + getScrollX(),
                     mPaddingTop + getScrollY(),
