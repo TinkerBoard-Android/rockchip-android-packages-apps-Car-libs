@@ -194,8 +194,10 @@
   <public type="id" name="car_ui_base_layout_content_container"/>
   <public type="id" name="car_ui_check_box_end_guideline"/>
   <public type="id" name="car_ui_check_box_start_guideline"/>
+  <public type="id" name="car_ui_focus_area"/>
   <public type="id" name="car_ui_list_item_end_guideline"/>
   <public type="id" name="car_ui_list_item_start_guideline"/>
+  <public type="id" name="car_ui_list_limiting_message"/>
   <public type="id" name="car_ui_preference_fragment_container"/>
   <public type="id" name="car_ui_recycler_view"/>
   <public type="id" name="car_ui_scroll_bar"/>
@@ -275,6 +277,7 @@
   <public type="layout" name="car_ui_check_box_list_item"/>
   <public type="layout" name="car_ui_header_list_item"/>
   <public type="layout" name="car_ui_list_item"/>
+  <public type="layout" name="car_ui_list_limiting_message"/>
   <public type="layout" name="car_ui_list_preference"/>
   <public type="layout" name="car_ui_list_preference_with_toolbar"/>
   <public type="layout" name="car_ui_preference"/>
