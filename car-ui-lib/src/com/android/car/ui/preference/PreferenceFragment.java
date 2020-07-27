@@ -39,6 +39,7 @@ import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreference;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.car.ui.FocusArea;
 import com.android.car.ui.R;
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
@@ -98,6 +99,9 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
             int oldHeight = recyclerView.getPaddingTop();
             recyclerView.setPadding(0, newHeight, 0, 0);
             recyclerView.scrollBy(0, oldHeight - newHeight);
+
+            FocusArea focusArea = CarUiUtils.requireViewByRefId(view, R.id.car_ui_focus_area);
+            focusArea.setHighlightPadding(0, newHeight, 0, 0);
         });
 
         recyclerView.setClipToPadding(false);
@@ -118,6 +122,8 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
     @Override
     public void onCarUiInsetsChanged(@NonNull Insets insets) {
         View view = requireView();
+        FocusArea focusArea = CarUiUtils.requireViewByRefId(view, R.id.car_ui_focus_area);
+        focusArea.setHighlightPadding(0, insets.getTop(), 0, insets.getBottom());
         CarUiUtils.requireViewByRefId(view, R.id.recycler_view)
                 .setPadding(0, insets.getTop(), 0, insets.getBottom());
         view.setPadding(insets.getLeft(), 0, insets.getRight(), 0);
