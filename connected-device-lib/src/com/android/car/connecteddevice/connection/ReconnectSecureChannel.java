@@ -58,14 +58,20 @@ public class ReconnectSecureChannel extends SecureChannel {
      * @param stream The {@link DeviceMessageStream} for communication with the device.
      * @param storage {@link ConnectedDeviceStorage} for secure storage.
      * @param deviceId Id of the device being reconnected.
-     * @param expectedChallengeResponse Expected response to challenge issued in reconnect.
+     * @param expectedChallengeResponse Expected response to challenge issued in reconnect. Should
+     *                                  pass {@code null} when device verification is not needed
+     *                                  during the reconnection process.
      */
     public ReconnectSecureChannel(@NonNull DeviceMessageStream stream,
             @NonNull ConnectedDeviceStorage storage, @NonNull String deviceId,
-            @NonNull byte[] expectedChallengeResponse) {
+            @Nullable byte[] expectedChallengeResponse) {
         super(stream, newReconnectRunner());
         mStorage = storage;
         mDeviceId = deviceId;
+        if (expectedChallengeResponse == null) {
+            // Skip the device verification step for spp reconnection
+            mHasVerifiedDevice.set(true);
+        }
         mExpectedChallengeResponse = expectedChallengeResponse;
     }
 

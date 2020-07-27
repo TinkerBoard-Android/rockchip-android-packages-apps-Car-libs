@@ -27,12 +27,17 @@
         android:id="@android:id/list_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <com.android.car.ui.recyclerview.CarUiRecyclerView
-            android:id="@+id/recycler_view"
+        <com.android.car.ui.FocusArea
+            android:id="@+id/car_ui_focus_area"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:tag="carUiPreferenceRecyclerView"
-            app:enableDivider="true"/>
+            android:layout_height="match_parent">
+            <com.android.car.ui.recyclerview.CarUiRecyclerView
+                android:id="@+id/recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:tag="carUiPreferenceRecyclerView"
+                app:enableDivider="true"/>
+        </com.android.car.ui.FocusArea>
     </FrameLayout>
 
     <com.android.car.ui.toolbar.Toolbar
