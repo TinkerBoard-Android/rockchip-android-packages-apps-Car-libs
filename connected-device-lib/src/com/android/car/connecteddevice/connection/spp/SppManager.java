@@ -49,14 +49,13 @@ public class SppManager {
     // Service names and UUIDs of SDP(Service Discovery Protocol) record, need to keep it consistent
     // among client and server.
     private final BluetoothAdapter mAdapter = BluetoothAdapter.getDefaultAdapter();
-    private final UUID mServiceUuid;
     private final boolean mIsSecure;
     private Object mLock = new Object();
     /**
      * Task to listen to secure RFCOMM channel.
      */
     @VisibleForTesting
-    AcceptTask mSecureAcceptTask;
+    AcceptTask mAcceptTask;
     /**
      * Task to start and maintain a connection.
      */
@@ -74,9 +73,8 @@ public class SppManager {
     private final ThreadSafeCallbacks<OnMessageReceivedListener> mReceivedListeners =
             new ThreadSafeCallbacks<>();
 
-    public SppManager(@NonNull UUID serviceUuid, @NonNull boolean isSecure) {
+    public SppManager(@NonNull boolean isSecure) {
         mPayloadStream.setMessageCompletedListener(this::onMessageCompleted);
-        mServiceUuid = serviceUuid;
         mIsSecure = isSecure;
     }
 
@@ -129,9 +127,10 @@ public class SppManager {
     /**
      * Start listening to connection request from the client.
      *
+     * @param serviceUuid The Uuid which the accept task is listening on.
      * @return {@code true} if listening is started successfully
      */
-    boolean startListening() {
+    boolean startListening(@NonNull UUID serviceUuid) {
         logd(TAG, "Start socket to listening to incoming connection request.");
         if (mConnectedTask != null) {
             mConnectedTask.cancel();
@@ -139,22 +138,20 @@ public class SppManager {
         }
 
         // Start the task to listen on a BluetoothServerSocket
-        // TODO(b/158475715): Need to get the config from the configuration file.
-        if (mSecureAcceptTask != null) {
-            logd(TAG, "Already started listening, ignore.");
-            return false;
+        if (mAcceptTask != null) {
+            mAcceptTask.cancel();
         }
-        mSecureAcceptTask = new AcceptTask(mAdapter, mIsSecure, mServiceUuid, mAcceptTaskListener);
-        if (!mSecureAcceptTask.startListening()) {
+        mAcceptTask = new AcceptTask(mAdapter, mIsSecure, serviceUuid, mAcceptTaskListener);
+        if (!mAcceptTask.startListening()) {
             // TODO(b/159376003): Handle listening error.
-            mSecureAcceptTask.cancel();
-            mSecureAcceptTask = null;
+            mAcceptTask.cancel();
+            mAcceptTask = null;
             return false;
         }
         synchronized (mLock) {
             mState = ConnectionState.LISTEN;
         }
-        mConnectionExecutor.execute(mSecureAcceptTask);
+        mConnectionExecutor.execute(mAcceptTask);
         return true;
     }
 
@@ -210,9 +207,9 @@ public class SppManager {
         }
 
         // Cancel the accept task because we only want to connect to one device
-        if (mSecureAcceptTask != null) {
-            mSecureAcceptTask.cancel();
-            mSecureAcceptTask = null;
+        if (mAcceptTask != null) {
+            mAcceptTask.cancel();
+            mAcceptTask = null;
         }
         logd(TAG, "Create ConnectedTask: is secure? " + isSecure);
         InputStream inputStream;
