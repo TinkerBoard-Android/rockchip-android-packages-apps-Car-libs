@@ -20,7 +20,8 @@
     app:title="@string/preferences_screen_title">
 
     <PreferenceCategory
-        android:title="@string/preference_dialog_category">
+        android:title="@string/preference_dialog_category"
+        android:order="1">
 
         <ListPreference
             android:dialogTitle="@string/dialog_title_list_preference"
