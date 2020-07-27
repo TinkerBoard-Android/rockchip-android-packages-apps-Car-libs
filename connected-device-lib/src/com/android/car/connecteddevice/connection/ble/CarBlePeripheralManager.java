@@ -240,17 +240,7 @@ public class CarBlePeripheralManager extends CarBluetoothManager {
     }
 
     @Override
-    public void connectToDevice(@NonNull UUID deviceId) {
-        for (ConnectedRemoteDevice device : mConnectedDevices) {
-            if (UUID.fromString(device.mDeviceId).equals(deviceId)) {
-                logd(TAG, "Already connected to device " + deviceId + ".");
-                // Already connected to this device. Ignore requests to connect again.
-                return;
-            }
-        }
-
-        // Clear any previous session before starting a new one.
-        reset();
+    public void initiateConnectionToDevice(@NonNull UUID deviceId) {
         mReconnectDeviceId = deviceId.toString();
         mAdvertiseCallback = new AdvertiseCallback() {
             @Override

@@ -61,7 +61,21 @@ public abstract class CarBluetoothManager {
     }
 
     /** Attempt to connect to device with provided id. */
-    public abstract void connectToDevice(@NonNull UUID deviceId);
+    public void connectToDevice(@NonNull UUID deviceId) {
+        for (ConnectedRemoteDevice device : mConnectedDevices) {
+            if (UUID.fromString(device.mDeviceId).equals(deviceId)) {
+                logd(TAG, "Already connected to device " + deviceId + ".");
+                // Already connected to this device. Ignore requests to connect again.
+                return;
+            }
+        }
+        // Clear any previous session before starting a new one.
+        reset();
+        initiateConnectionToDevice(deviceId);
+    }
+
+    /** Start to connect to associated devices */
+    public abstract void initiateConnectionToDevice(@NonNull UUID deviceId);
 
     /** Start the association with a new device */
     public abstract void startAssociation(@NonNull String nameForAssociation,
