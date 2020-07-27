@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2020 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<!-- This is for the two-row version of the toolbar -->
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- When the user finishes searching, we call clearFocus() on the editText in the search bar.
+     clearFocus() will actually send the focus to the first focusable thing in the layout.
+     If that focusable thing is still the search bar it will just reselect it, and the user won't
+     be able to deselect. So make a focusable view here to guarantee that we can clear the focus -->
+    <View
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true" />
+
+    <FrameLayout
+        android:id="@+id/car_ui_base_layout_content_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentTop="true" />
+
+    <com.android.car.ui.baselayout.ClickBlockingView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_alignBottom="@+id/car_ui_toolbar_background"
+        android:layout_alignEnd="@+id/car_ui_toolbar_background"
+        android:layout_alignTop="@+id/car_ui_toolbar_background"
+        android:layout_alignStart="@+id/car_ui_toolbar_background"/>
+
+    <RelativeLayout
+        android:id="@+id/car_ui_toolbar_background"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:tag="car_ui_top_inset"
+        android:layout_alignParentTop="true">
+
+        <View
+            android:id="@+id/car_ui_toolbar_row_separator_guideline2"
+            android:layout_width="match_parent"
+            android:layout_height="96dp" />
+
+        <View
+            android:id="@+id/car_ui_toolbar_row_separator_guideline"
+            android:layout_width="match_parent"
+            android:layout_below="@+id/car_ui_toolbar_row_separator_guideline2"
+            android:layout_height="0dp" />
+
+        <FrameLayout
+            android:id="@+id/car_ui_toolbar_nav_icon_container"
+            android:layout_width="112dp"
+            android:layout_height="0dp"
+            android:layout_above="@+id/car_ui_toolbar_row_separator_guideline"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true">
+
+            <ImageView
+                android:id="@+id/car_ui_toolbar_nav_icon"
+                android:tint="@color/car_ui_toolbar_nav_icon_color"
+                android:src="@drawable/car_ui_icon_arrow_back"
+                android:background="@drawable/car_ui_toolbar_menu_item_icon_ripple"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_gravity="center"
+                android:scaleType="fitXY" />
+
+            <ImageView
+                android:id="@+id/car_ui_toolbar_logo"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_gravity="center"
+                android:scaleType="fitXY" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/car_ui_toolbar_title_logo_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/car_ui_toolbar_row_separator_guideline"
+            android:layout_toEndOf="@+id/car_ui_toolbar_nav_icon_container"
+            android:layout_alignParentTop="true">
+
+            <ImageView
+                android:id="@+id/car_ui_toolbar_title_logo"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_gravity="center"
+                android:scaleType="fitXY" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="16dp"
+            android:layout_above="@+id/car_ui_toolbar_row_separator_guideline"
+            android:layout_toStartOf="@+id/car_ui_toolbar_menu_items_container"
+            android:layout_toEndOf="@+id/car_ui_toolbar_title_logo_container"
+            android:layout_alignParentTop="true" >
+            <LinearLayout
+                android:layout_gravity="center_vertical"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:id="@+id/car_ui_toolbar_title_container"
+                android:orientation="vertical" >
+                <TextView android:id="@+id/car_ui_toolbar_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:textSize="32sp"
+                    android:letterSpacing="0.0"
+                    android:textAlignment="viewStart" />
+                <TextView android:id="@+id/car_ui_toolbar_subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textAlignment="viewStart" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/car_ui_toolbar_search_view_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/car_ui_toolbar_row_separator_guideline"
+            android:layout_toStartOf="@+id/car_ui_toolbar_menu_items_container"
+            android:layout_toEndOf="@+id/car_ui_toolbar_nav_icon_container"
+            android:layout_alignWithParentIfMissing="true"
+            android:layout_alignParentTop="true" />
+
+        <LinearLayout
+            android:id="@+id/car_ui_toolbar_menu_items_container"
+            android:divider="@drawable/car_ui_toolbar_menu_item_divider"
+            android:showDividers="beginning|middle|end"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            android:orientation="horizontal"
+            android:layout_above="@+id/car_ui_toolbar_row_separator_guideline"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/car_ui_toolbar_row_separator_guideline">
+
+            <com.android.car.ui.toolbar.TabLayout
+                android:id="@+id/car_ui_toolbar_tabs"
+                android:layout_width="match_parent"
+                android:layout_height="96dp" />
+
+            <ProgressBar
+                android:id="@+id/car_ui_toolbar_progress_bar"
+                style="@android:style/Widget.DeviceDefault.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="gone"
+                android:layout_alignBottom="@id/car_ui_toolbar_tabs"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentStart="true" />
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+</RelativeLayout>

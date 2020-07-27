@@ -19,4 +19,12 @@
     <item type="id" name="car_ui_toolbar_progress_bar">@*android:id/car_ui_toolbar_progress_bar</item>
     <item type="id" name="car_ui_toolbar_title_logo_container">@*android:id/car_ui_toolbar_title_logo_container</item>
     <item type="id" name="car_ui_base_layout_content_container">@*android:id/car_ui_base_layout_content_container</item>
+
+     <item type="layout" name="car_ui_recycler_view">@*android:layout/car_ui_recycler_view</item>
+     <item type="id" name="car_ui_recycler_view">@*android:id/car_ui_recycler_view</item>
+     <item type="id" name="car_ui_scroll_bar">@*android:id/car_ui_scroll_bar</item>
+     <item type="id" name="car_ui_scrollbar_page_up">@*android:id/car_ui_scrollbar_page_up</item>
+     <item type="id" name="car_ui_scrollbar_thumb">@*android:id/car_ui_scrollbar_thumb</item>
+     <item type="id" name="car_ui_scrollbar_track">@*android:id/car_ui_scrollbar_track</item>
+     <item type="id" name="car_ui_scrollbar_page_down">@*android:id/car_ui_scrollbar_page_down</item>
 </resources>

@@ -16,8 +16,6 @@
 
 package com.android.car.ui.recyclerview;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -109,24 +107,6 @@ public class DefaultScrollBarTest {
         mScrollBar.initialize(mRecyclerView, scrollView);
 
         verify(mRecyclerView).setOnFlingListener(null);
-    }
-
-    @Test
-    public void setPadding_shouldSetStartAndEndPadding() {
-        when(mRecyclerView.getContext()).thenReturn(mContext);
-        when(mRecyclerView.getParent()).thenReturn(mParent);
-        when(mRecyclerView.getRecycledViewPool()).thenReturn(mRecycledViewPool);
-        when(mParent.generateLayoutParams(any())).thenReturn(mLayoutParams);
-
-        View scrollView = LayoutInflater.from(mContext).inflate(
-                R.layout.car_ui_recyclerview_scrollbar, null);
-        mScrollBar.initialize(mRecyclerView, scrollView);
-        mScrollBar.setPadding(10, 20);
-
-        DefaultScrollBar defaultScrollBar = (DefaultScrollBar) mScrollBar;
-
-        assertThat(defaultScrollBar.mPaddingStart).isEqualTo(10);
-        assertThat(defaultScrollBar.mPaddingEnd).isEqualTo(20);
     }
 
     @Test
