@@ -63,7 +63,7 @@ public class SppManagerTest {
 
     @Before
     public void setUp() throws IOException {
-        mSppManager = new SppManager(TEST_SERVICE_UUID, mIsSecureRfcommChannel);
+        mSppManager = new SppManager(mIsSecureRfcommChannel);
         mMockitoSession = mockitoSession()
                 .initMocks(this)
                 .strictness(Strictness.WARN)
@@ -80,9 +80,9 @@ public class SppManagerTest {
     @Test
     public void testStartListen_StartAcceptTask() {
         mSppManager.mConnectionExecutor = mMockExecutorService;
-        mSppManager.startListening();
-        assertThat(mSppManager.mSecureAcceptTask).isNotNull();
-        verify(mMockExecutorService).execute(mSppManager.mSecureAcceptTask);
+        mSppManager.startListening(TEST_SERVICE_UUID);
+        assertThat(mSppManager.mAcceptTask).isNotNull();
+        verify(mMockExecutorService).execute(mSppManager.mAcceptTask);
     }
 
     @Test
