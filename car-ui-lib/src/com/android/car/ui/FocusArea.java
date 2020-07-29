@@ -64,6 +64,8 @@ public class FocusArea extends LinearLayout {
 
     private static final String TAG = "FocusArea";
 
+    private static final int INVALID_PADDING = -1;
+
     /** Whether the FocusArea's descendant has focus (the FocusArea itself is not focusable). */
     private boolean mHasFocus;
 
@@ -158,6 +160,44 @@ public class FocusArea extends LinearLayout {
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.FocusArea);
         try {
             mDefaultFocusId = a.getResourceId(R.styleable.FocusArea_defaultFocus, View.NO_ID);
+
+            // Initialize the highlight padding. The padding, for example, left padding, is set in
+            // the following order:
+            // 1. if highlightPaddingStart (or highlightPaddingEnd in RTL layout) specified, use it
+            // 2. otherwise, if highlightPaddingHorizontal is specified, use it
+            // 3. otherwise use 0
+
+            int paddingStart = a.getDimensionPixelSize(
+                    R.styleable.FocusArea_highlightPaddingStart, INVALID_PADDING);
+            if (paddingStart == INVALID_PADDING) {
+                paddingStart = a.getDimensionPixelSize(
+                        R.styleable.FocusArea_highlightPaddingHorizontal, 0);
+            }
+
+            int paddingEnd = a.getDimensionPixelSize(
+                    R.styleable.FocusArea_highlightPaddingEnd, INVALID_PADDING);
+            if (paddingEnd == INVALID_PADDING) {
+                paddingEnd = a.getDimensionPixelSize(
+                        R.styleable.FocusArea_highlightPaddingHorizontal, 0);
+            }
+
+            boolean rtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
+            mPaddingLeft = rtl ? paddingEnd : paddingStart;
+            mPaddingRight = rtl ? paddingStart : paddingEnd;
+
+            mPaddingTop = a.getDimensionPixelSize(
+                    R.styleable.FocusArea_highlightPaddingTop, INVALID_PADDING);
+            if (mPaddingTop == INVALID_PADDING) {
+                mPaddingTop = a.getDimensionPixelSize(
+                        R.styleable.FocusArea_highlightPaddingVertical, 0);
+            }
+
+            mPaddingBottom = a.getDimensionPixelSize(
+                    R.styleable.FocusArea_highlightPaddingBottom, INVALID_PADDING);
+            if (mPaddingBottom == INVALID_PADDING) {
+                mPaddingBottom = a.getDimensionPixelSize(
+                        R.styleable.FocusArea_highlightPaddingVertical, 0);
+            }
         } finally {
             a.recycle();
         }

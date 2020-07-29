@@ -153,5 +153,21 @@
         <!-- The ID of a focusable descendant view which should be focused when the user nudges to
              this FocusArea. -->
         <attr name="defaultFocus" format="reference"/>
+        <!-- The paddings of FocusArea highlight. It does't impact the paddings on its child views,
+             or vice versa. -->
+        <!-- The start padding of the FocusArea highlight. -->
+        <attr name="highlightPaddingStart" format="dimension"/>
+        <!-- The end padding of the FocusArea highlight. -->
+        <attr name="highlightPaddingEnd" format="dimension"/>
+        <!-- The top padding of the FocusArea highlight. -->
+        <attr name="highlightPaddingTop" format="dimension"/>
+        <!-- The bottom padding of the FocusArea highlight. -->
+        <attr name="highlightPaddingBottom" format="dimension"/>
+        <!-- The horizontal padding of the FocusArea highlight. It can be overridden by
+             highlightPaddingStart or highlightPaddingEnd. -->
+        <attr name="highlightPaddingHorizontal" format="dimension"/>
+        <!-- The vertical padding of the FocusArea highlight.  It can be overridden by
+             highlightPaddingTop or highlightPaddingBottom. -->
+        <attr name="highlightPaddingVertical" format="dimension"/>
     </declare-styleable>
 </resources>
