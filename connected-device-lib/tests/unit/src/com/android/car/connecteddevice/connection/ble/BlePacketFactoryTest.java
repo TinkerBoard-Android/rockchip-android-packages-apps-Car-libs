@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.car.connecteddevice.connection;
+package com.android.car.connecteddevice.connection.ble;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.android.car.connecteddevice.StreamProtos.PacketProto.Packet;
+import com.android.car.connecteddevice.BleStreamProtos.BlePacketProto.BlePacket;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Random;
 
 @RunWith(AndroidJUnit4.class)
-public class PacketFactoryTest {
+public class BlePacketFactoryTest {
     @Test
     public void testGetHeaderSize() {
         // 1 byte to encode the ID, 1 byte for the field number.
@@ -51,13 +51,13 @@ public class PacketFactoryTest {
         int expectedHeaderSize = messageIdEncodingSize + payloadSizeEncodingSize
                 + totalPacketsEncodingSize + packetNumberEncodingSize;
 
-        assertThat(PacketFactory.getPacketHeaderSize(totalPackets, messageId, payloadSize))
+        assertThat(BlePacketFactory.getPacketHeaderSize(totalPackets, messageId, payloadSize))
                 .isEqualTo(expectedHeaderSize);
     }
 
     @Test
     public void testGetTotalPackets_withVarintSize1_returnsCorrectPackets()
-            throws PacketFactoryException {
+            throws BlePacketFactoryException {
         int messageId = 1;
         int maxSize = 49;
         int payloadSize = 100;
@@ -67,13 +67,13 @@ public class PacketFactoryTest {
         // payload. ceil(payloadSize/38) gives the total packets.
         int expectedTotalPackets = 3;
 
-        assertThat(PacketFactory.getTotalPacketNumber(messageId, payloadSize, maxSize))
+        assertThat(BlePacketFactory.getTotalPacketNumber(messageId, payloadSize, maxSize))
                 .isEqualTo(expectedTotalPackets);
     }
 
     @Test
     public void testGetTotalPackets_withVarintSize2_returnsCorrectPackets()
-            throws PacketFactoryException {
+            throws BlePacketFactoryException {
         int messageId = 1;
         int maxSize = 49;
         int payloadSize = 6000;
@@ -83,13 +83,13 @@ public class PacketFactoryTest {
         // payload. ceil(payloadSize/37) gives the total packets.
         int expectedTotalPackets = 163;
 
-        assertThat(PacketFactory.getTotalPacketNumber(messageId, payloadSize, maxSize))
+        assertThat(BlePacketFactory.getTotalPacketNumber(messageId, payloadSize, maxSize))
                 .isEqualTo(expectedTotalPackets);
     }
 
     @Test
     public void testGetTotalPackets_withVarintSize3_returnsCorrectPackets()
-            throws PacketFactoryException {
+            throws BlePacketFactoryException {
         int messageId = 1;
         int maxSize = 49;
         int payloadSize = 1000000;
@@ -99,13 +99,13 @@ public class PacketFactoryTest {
         // payload. ceil(payloadSize/36) gives the total packets.
         int expectedTotalPackets = 27778;
 
-        assertThat(PacketFactory.getTotalPacketNumber(messageId, payloadSize, maxSize))
+        assertThat(BlePacketFactory.getTotalPacketNumber(messageId, payloadSize, maxSize))
                 .isEqualTo(expectedTotalPackets);
     }
 
     @Test
     public void testGetTotalPackets_withVarintSize4_returnsCorrectPackets()
-            throws PacketFactoryException {
+            throws BlePacketFactoryException {
         int messageId = 1;
         int maxSize = 49;
         int payloadSize = 178400320;
@@ -115,7 +115,7 @@ public class PacketFactoryTest {
         // payload. ceil(payloadSize/35) gives the total packets.
         int expectedTotalPackets = 5097152;
 
-        assertThat(PacketFactory.getTotalPacketNumber(messageId, payloadSize, maxSize))
+        assertThat(BlePacketFactory.getTotalPacketNumber(messageId, payloadSize, maxSize))
                 .isEqualTo(expectedTotalPackets);
     }
 
@@ -125,15 +125,15 @@ public class PacketFactoryTest {
         byte[] payload = makePayload(/* length= */ 100);
         int maxSize = 1000;
 
-        List<Packet> packets =
-                PacketFactory.makePackets(payload, /* messageId= */ 1, maxSize);
+        List<BlePacket> packets =
+                BlePacketFactory.makeBlePackets(payload, /* mesageId= */ 1, maxSize);
 
         assertThat(packets).hasSize(1);
 
         ByteArrayOutputStream reconstructedPayload = new ByteArrayOutputStream();
 
         // Combine together all the payloads within the BlePackets.
-        for (Packet packet : packets) {
+        for (BlePacket packet : packets) {
             reconstructedPayload.write(packet.getPayload().toByteArray());
         }
 
@@ -146,15 +146,15 @@ public class PacketFactoryTest {
         byte[] payload = makePayload(/* length= */ 10000);
         int maxSize = 50;
 
-        List<Packet> packets =
-                PacketFactory.makePackets(payload, /* messageId= */ 1, maxSize);
+        List<BlePacket> packets =
+                BlePacketFactory.makeBlePackets(payload, /* mesageId= */ 1, maxSize);
 
         assertThat(packets.size()).isGreaterThan(1);
 
         ByteArrayOutputStream reconstructedPayload = new ByteArrayOutputStream();
 
         // Combine together all the payloads within the BlePackets.
-        for (Packet packet : packets) {
+        for (BlePacket packet : packets) {
             reconstructedPayload.write(packet.getPayload().toByteArray());
         }
 

@@ -21,6 +21,8 @@ android_library {
 
     manifest: "AndroidManifest.xml",
 
+    resource_dirs: ["res"],
+
     optimize: {
         enabled: false,
     },
