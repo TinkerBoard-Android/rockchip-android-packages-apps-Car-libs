@@ -52,7 +52,6 @@ public class CarSppManagerTest {
     private static final UUID TEST_REMOTE_DEVICE_ID = UUID.randomUUID();
     private static final UUID TEST_SERVICE_UUID = UUID.randomUUID();
     private static final String TEST_VERIFICATION_CODE = "000000";
-    private static final int MAX_PACKET_SIZE = 700;
     @Mock
     private SppManager mMockSppManager;
     @Mock
@@ -68,8 +67,7 @@ public class CarSppManagerTest {
                 .initMocks(this)
                 .strictness(Strictness.WARN)
                 .startMocking();
-        mCarSppManager = new CarSppManager(mMockSppManager, mMockStorage, TEST_SERVICE_UUID,
-                MAX_PACKET_SIZE);
+        mCarSppManager = new CarSppManager(mMockSppManager, mMockStorage, TEST_SERVICE_UUID);
     }
 
     @After
