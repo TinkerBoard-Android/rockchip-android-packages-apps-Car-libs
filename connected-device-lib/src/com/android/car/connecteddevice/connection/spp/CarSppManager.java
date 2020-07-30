@@ -52,11 +52,14 @@ public class CarSppManager extends CarBluetoothManager {
 
     private final UUID mAssociationServiceUuid;
 
+    private final int mPacketMaxBytes;
+
     private String mReconnectDeviceId;
 
     private OobConnectionManager mOobConnectionManager;
 
     private Executor mCallbackExecutor;
+
     private AssociationCallback mAssociationCallback;
 
     /**
@@ -64,14 +67,17 @@ public class CarSppManager extends CarBluetoothManager {
      *
      * @param sppManager             {@link SppManager} for establishing connection.
      * @param connectedDeviceStorage Shared {@link ConnectedDeviceStorage} for companion features.
+     * @param packetMaxBytes         Maximum size in bytes to write in one packet.
      */
     public CarSppManager(@NonNull SppManager sppManager,
             @NonNull ConnectedDeviceStorage connectedDeviceStorage,
-            @NonNull UUID associationServiceUuid) {
+            @NonNull UUID associationServiceUuid,
+            int packetMaxBytes) {
         super(connectedDeviceStorage);
         mSppManager = sppManager;
         mCallbackExecutor = Executors.newSingleThreadExecutor();
         mAssociationServiceUuid = associationServiceUuid;
+        mPacketMaxBytes = packetMaxBytes;
     }
 
     @Override
@@ -176,7 +182,8 @@ public class CarSppManager extends CarBluetoothManager {
         EventLog.onDeviceConnected();
         setClientDeviceAddress(device.getAddress());
         setClientDeviceName(device.getName());
-        DeviceMessageStream secureStream = new SppDeviceMessageStream(mSppManager, device);
+        DeviceMessageStream secureStream = new SppDeviceMessageStream(mSppManager, device,
+                mPacketMaxBytes);
         secureStream.setMessageReceivedErrorListener(
                 exception -> {
                     disconnectWithError("Error occurred in stream: " + exception.getMessage(),
