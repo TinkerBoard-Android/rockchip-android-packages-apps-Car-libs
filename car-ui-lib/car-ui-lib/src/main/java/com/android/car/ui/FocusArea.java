@@ -19,6 +19,10 @@ package com.android.car.ui;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_FOCUS;
 
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_ACTION_TYPE;
+import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_HIGHLIGHT_BOTTOM_PADDING;
+import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_HIGHLIGHT_LEFT_PADDING;
+import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_HIGHLIGHT_RIGHT_PADDING;
+import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_HIGHLIGHT_TOP_PADDING;
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_DEFAULT;
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_FIRST;
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_INVALID;
@@ -32,9 +36,11 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.car.ui.utils.CarUiUtils;
 import com.android.car.ui.utils.RotaryConstants;
@@ -99,6 +105,9 @@ public class FocusArea extends LinearLayout {
     private int mPaddingTop;
     private int mPaddingBottom;
 
+    /** Whether the layout direction is {@link View#LAYOUT_DIRECTION_RTL}. */
+    private boolean mRtl;
+
     /** The ID of the view specified in {@code app:defaultFocus}. */
     private int mDefaultFocusId = View.NO_ID;
     /** The view specified in {@code app:defaultFocus}. */
@@ -136,11 +145,23 @@ public class FocusArea extends LinearLayout {
         mBackgroundHighlight = getContext().getResources().getDrawable(
                 R.drawable.car_ui_focus_area_background_highlight, getContext().getTheme());
 
+        // Ensure that an AccessibilityNodeInfo is created for this view.
+        setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+
         // By default all ViewGroup subclasses do not call their draw() and onDraw() methods. We
         // should enable it since we override these methods.
         setWillNotDraw(false);
 
-        // Update highlight of the FocusArea when the focus of its descendants has changed.
+        if (mEnableBackgroundHighlight || mEnableForegroundHighlight) {
+            // Update highlight of the FocusArea when the focus of its descendants has changed.
+            registerFocusChangeListener();
+        }
+
+        initAttrs(context, attrs);
+    }
+
+    @VisibleForTesting
+    void registerFocusChangeListener() {
         getViewTreeObserver().addOnGlobalFocusChangeListener(
                 (oldFocus, newFocus) -> {
                     boolean hasFocus = hasFocus();
@@ -149,8 +170,6 @@ public class FocusArea extends LinearLayout {
                         invalidate();
                     }
                 });
-
-        initAttrs(context, attrs);
     }
 
     private void initAttrs(Context context, @Nullable AttributeSet attrs) {
@@ -181,9 +200,9 @@ public class FocusArea extends LinearLayout {
                         R.styleable.FocusArea_highlightPaddingHorizontal, 0);
             }
 
-            boolean rtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
-            mPaddingLeft = rtl ? paddingEnd : paddingStart;
-            mPaddingRight = rtl ? paddingStart : paddingEnd;
+            mRtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
+            mPaddingLeft = mRtl ? paddingEnd : paddingStart;
+            mPaddingRight = mRtl ? paddingStart : paddingEnd;
 
             mPaddingTop = a.getDimensionPixelSize(
                     R.styleable.FocusArea_highlightPaddingTop, INVALID_PADDING);
@@ -208,6 +227,18 @@ public class FocusArea extends LinearLayout {
         super.onFinishInflate();
         if (mDefaultFocusId != View.NO_ID) {
             mDefaultFocusView = CarUiUtils.requireViewByRefId(this, mDefaultFocusId);
+        }
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        boolean rtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
+        if (mRtl != rtl) {
+            mRtl = rtl;
+            int temp = mPaddingLeft;
+            mPaddingLeft = mPaddingRight;
+            mPaddingRight = temp;
         }
     }
 
@@ -277,6 +308,16 @@ public class FocusArea extends LinearLayout {
     @Override
     public CharSequence getAccessibilityClassName() {
         return FocusArea.class.getName();
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        Bundle bundle = info.getExtras();
+        bundle.putInt(FOCUS_AREA_HIGHLIGHT_LEFT_PADDING, mPaddingLeft);
+        bundle.putInt(FOCUS_AREA_HIGHLIGHT_RIGHT_PADDING, mPaddingRight);
+        bundle.putInt(FOCUS_AREA_HIGHLIGHT_TOP_PADDING, mPaddingTop);
+        bundle.putInt(FOCUS_AREA_HIGHLIGHT_BOTTOM_PADDING, mPaddingBottom);
     }
 
     /** Sets the padding (in pixels) of the FocusArea highlight. */
