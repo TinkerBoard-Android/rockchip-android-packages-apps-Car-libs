@@ -43,7 +43,7 @@ import java.util.concurrent.Executor;
  */
 public abstract class CarBluetoothManager {
 
-    private static final String TAG = "CarConnectionManager";
+    private static final String TAG = "CarBluetoothManager";
 
     protected final ConnectedDeviceStorage mStorage;
 
