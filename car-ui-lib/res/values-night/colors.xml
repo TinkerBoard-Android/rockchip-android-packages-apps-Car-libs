@@ -15,5 +15,7 @@
 -->
 <resources>
     <!-- Rotary focus -->
-    <color name="car_ui_rotary_focus_color">#2371cd</color>
+
+    <color name="car_ui_rotary_focus_stroke_color">#94CBFF</color>
+    <color name="car_ui_rotary_focus_fill_color">#3D94CBFF</color>
 </resources>

@@ -24,7 +24,10 @@
   <public type="color" name="car_ui_preference_two_action_divider_color"/>
   <public type="color" name="car_ui_recyclerview_divider_color"/>
   <public type="color" name="car_ui_ripple_color"/>
-  <public type="color" name="car_ui_rotary_focus_color"/>
+  <public type="color" name="car_ui_rotary_focus_fill_color"/>
+  <public type="color" name="car_ui_rotary_focus_fill_secondary_color"/>
+  <public type="color" name="car_ui_rotary_focus_stroke_color"/>
+  <public type="color" name="car_ui_rotary_focus_stroke_secondary_color"/>
   <public type="color" name="car_ui_scrollbar_thumb"/>
   <public type="color" name="car_ui_text_color_hint"/>
   <public type="color" name="car_ui_text_color_primary"/>
@@ -102,6 +105,7 @@
   <public type="dimen" name="car_ui_recyclerview_divider_height"/>
   <public type="dimen" name="car_ui_recyclerview_divider_start_margin"/>
   <public type="dimen" name="car_ui_recyclerview_divider_top_margin"/>
+  <public type="dimen" name="car_ui_rotary_focus_stroke_width"/>
   <public type="dimen" name="car_ui_scrollbar_button_size"/>
   <public type="dimen" name="car_ui_scrollbar_container_width"/>
   <public type="dimen" name="car_ui_scrollbar_decelerate_interpolator_factor"/>
