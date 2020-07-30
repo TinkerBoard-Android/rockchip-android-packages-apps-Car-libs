@@ -206,4 +206,8 @@
     <dimen name="car_ui_list_item_check_box_end_inset">@dimen/car_ui_list_item_end_inset</dimen>
     <dimen name="car_ui_list_item_check_box_icon_container_width">@dimen/car_ui_list_item_icon_container_width</dimen>
 
+    <!-- Rotary focus highlight  -->
+
+    <dimen name="car_ui_rotary_focus_stroke_width">8dp</dimen>
+
 </resources>
