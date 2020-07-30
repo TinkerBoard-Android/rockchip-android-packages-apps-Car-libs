@@ -45,5 +45,9 @@
     <color name="car_ui_preference_two_action_divider_color">#1fffffff</color>
 
     <!-- Rotary focus -->
-    <color name="car_ui_rotary_focus_color">#4b9eff</color>
+
+    <color name="car_ui_rotary_focus_stroke_color">#94CBFF</color>
+    <color name="car_ui_rotary_focus_fill_color">#3D94CBFF</color>
+    <color name="car_ui_rotary_focus_stroke_secondary_color">#0059B3</color>
+    <color name="car_ui_rotary_focus_fill_secondary_color">#3D0059B3</color>
 </resources>
