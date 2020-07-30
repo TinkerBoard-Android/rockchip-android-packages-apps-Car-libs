@@ -31,7 +31,7 @@ import com.android.car.ui.toolbar.ToolbarController;
 
 import java.util.ArrayList;
 
-/** Activity that shows GridCarUiRecyclerView example with dummy data. */
+/** Activity that shows GridCarUiRecyclerView example with sample data. */
 public class GridCarUiRecyclerViewActivity extends Activity implements
         InsetsChangedListener {
     private final ArrayList<String> mData = new ArrayList<>();
@@ -48,11 +48,11 @@ public class GridCarUiRecyclerViewActivity extends Activity implements
 
         CarUiRecyclerView recyclerView = findViewById(R.id.list);
 
-        RecyclerViewAdapter adapter = new RecyclerViewAdapter(generateDummyData());
+        RecyclerViewAdapter adapter = new RecyclerViewAdapter(generateSampleData());
         recyclerView.setAdapter(adapter);
     }
 
-    private ArrayList<String> generateDummyData() {
+    private ArrayList<String> generateSampleData() {
         for (int i = 1; i <= mDataToGenerate; i++) {
             mData.add("data" + i);
         }
