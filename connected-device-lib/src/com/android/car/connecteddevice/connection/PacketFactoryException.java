@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.car.connecteddevice.connection.ble;
+package com.android.car.connecteddevice.connection;
 
 /**
- * Exception for signaling {@link BlePacketFactory} errors.
+ * Exception for signaling {@link PacketFactory} errors.
  */
-class BlePacketFactoryException extends Exception {
-    BlePacketFactoryException(String message) {
+class PacketFactoryException extends Exception {
+    PacketFactoryException(String message) {
         super(message);
     }
 }

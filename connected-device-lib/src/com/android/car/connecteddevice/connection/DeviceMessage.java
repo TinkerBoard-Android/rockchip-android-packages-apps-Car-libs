@@ -16,7 +16,7 @@
 
 package com.android.car.connecteddevice.connection;
 
-import static com.android.car.connecteddevice.StreamProtos.DeviceMessageProto.BleDeviceMessage;
+import static com.android.car.connecteddevice.StreamProtos.DeviceMessageProto.Message;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -25,7 +25,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
-/** Holds the needed data from a {@link BleDeviceMessage}. */
+/** Holds the needed data from a {@link Message}. */
 public class DeviceMessage {
 
     private static final String TAG = "DeviceMessage";
