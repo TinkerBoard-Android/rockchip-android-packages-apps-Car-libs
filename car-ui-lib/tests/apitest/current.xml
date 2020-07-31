@@ -162,6 +162,7 @@
   <public type="drawable" name="car_ui_icon_delete"/>
   <public type="drawable" name="car_ui_icon_down"/>
   <public type="drawable" name="car_ui_icon_edit"/>
+  <public type="drawable" name="car_ui_icon_lock"/>
   <public type="drawable" name="car_ui_icon_overflow_menu"/>
   <public type="drawable" name="car_ui_icon_save"/>
   <public type="drawable" name="car_ui_icon_search"/>
