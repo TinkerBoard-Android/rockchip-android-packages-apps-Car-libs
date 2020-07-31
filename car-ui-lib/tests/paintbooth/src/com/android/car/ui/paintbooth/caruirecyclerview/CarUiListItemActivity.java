@@ -38,7 +38,7 @@ import com.android.car.ui.toolbar.ToolbarController;
 import java.util.ArrayList;
 
 /**
- * Activity that shows {@link CarUiRecyclerView} with dummy {@link CarUiContentListItem} entries
+ * Activity that shows {@link CarUiRecyclerView} with sample {@link CarUiContentListItem} entries
  */
 public class CarUiListItemActivity extends Activity implements InsetsChangedListener {
 
@@ -55,11 +55,11 @@ public class CarUiListItemActivity extends Activity implements InsetsChangedList
         toolbar.setState(Toolbar.State.SUBPAGE);
 
         CarUiRecyclerView recyclerView = findViewById(R.id.list);
-        mAdapter = new CarUiListItemAdapter(generateDummyData());
+        mAdapter = new CarUiListItemAdapter(generateSampleData());
         recyclerView.setAdapter(mAdapter);
     }
 
-    private ArrayList<CarUiListItem> generateDummyData() {
+    private ArrayList<CarUiListItem> generateSampleData() {
         Context context = this;
 
         CarUiHeaderListItem header = new CarUiHeaderListItem("First header");
