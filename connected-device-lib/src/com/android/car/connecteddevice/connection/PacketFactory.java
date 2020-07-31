@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.car.connecteddevice.connection.ble;
+package com.android.car.connecteddevice.connection;
 
 import static com.android.car.connecteddevice.util.SafeLog.loge;
 
-import com.android.car.connecteddevice.BleStreamProtos.BlePacketProto.BlePacket;
+import com.android.car.connecteddevice.StreamProtos.PacketProto.Packet;
 import com.android.car.protobuf.ByteString;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -26,10 +26,10 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Factory for creating {@link BlePacket} protos.
+ * Factory for creating {@link Packet} protos.
  */
-class BlePacketFactory {
-    private static final String TAG = "BlePacketFactory";
+class PacketFactory {
+    private static final String TAG = "PacketFactory";
 
     /**
      * The size in bytes of a {@code fixed32} field in the proto.
@@ -39,7 +39,7 @@ class BlePacketFactory {
     /**
      * The bytes needed to encode the field number in the proto.
      *
-     * <p>Since the {@link BlePacket} only has 4 fields, it will only take 1 additional byte to
+     * <p>Since the {@link Packet} only has 4 fields, it will only take 1 additional byte to
      * encode.
      */
     private static final int FIELD_NUMBER_ENCODING_SIZE = 1;
@@ -53,15 +53,15 @@ class BlePacketFactory {
     /**
      * Split given data if necessary to fit within the given {@code maxSize}.
      *
-     * @param payload The payload to potentially split across multiple {@link BlePacket}s.
+     * @param payload The payload to potentially split across multiple {@link Packet}s.
      * @param messageId The unique id for identifying message.
      * @param maxSize The maximum size of each chunk.
-     * @return A list of {@link BlePacket}s.
-     * @throws BlePacketFactoryException if an error occurred during the splitting of data.
+     * @return A list of {@link Packet}s.
+     * @throws PacketFactoryException if an error occurred during the splitting of data.
      */
-    static List<BlePacket> makeBlePackets(byte[] payload, int messageId, int maxSize)
-            throws BlePacketFactoryException {
-        List<BlePacket> blePackets = new ArrayList<>();
+    static List<Packet> makePackets(byte[] payload, int messageId, int maxSize)
+            throws PacketFactoryException {
+        List<Packet> blePackets = new ArrayList<>();
         int payloadSize = payload.length;
         int totalPackets = getTotalPacketNumber(messageId, payloadSize, maxSize);
         int maxPayloadSize = maxSize
@@ -70,7 +70,7 @@ class BlePacketFactory {
         int start = 0;
         int end = Math.min(payloadSize, maxPayloadSize);
         for (int packetNum = 1; packetNum <= totalPackets; packetNum++) {
-            blePackets.add(BlePacket.newBuilder()
+            blePackets.add(Packet.newBuilder()
                     .setPacketNumber(packetNum)
                     .setTotalPackets(totalPackets)
                     .setMessageId(messageId)
@@ -83,7 +83,7 @@ class BlePacketFactory {
     }
 
     /**
-     * Compute the header size for the {@link BlePacket} proto in bytes. This method assumes that
+     * Compute the header size for the {@link Packet} proto in bytes. This method assumes that
      * the proto contains a payload.
      */
     @VisibleForTesting
@@ -99,7 +99,7 @@ class BlePacketFactory {
      */
     @VisibleForTesting
     static int getTotalPacketNumber(int messageId, int payloadSize, int maxSize)
-            throws BlePacketFactoryException {
+            throws PacketFactoryException {
         int headerSizeWithoutTotalPackets = FIXED_32_SIZE + FIELD_NUMBER_ENCODING_SIZE
                 + getEncodedSize(messageId) + FIELD_NUMBER_ENCODING_SIZE
                 + getEncodedSize(Math.min(payloadSize, maxSize)) + FIELD_NUMBER_ENCODING_SIZE;
@@ -109,7 +109,7 @@ class BlePacketFactory {
                     + FIELD_NUMBER_ENCODING_SIZE;
             int maxPayloadSize = maxSize - packetHeaderSize;
             if (maxPayloadSize < 0) {
-                throw new BlePacketFactoryException("Packet header size too large.");
+                throw new PacketFactoryException("Packet header size too large.");
             }
             int totalPackets = (int) Math.ceil(payloadSize / (double) maxPayloadSize);
             if (getEncodedSize(totalPackets) == value) {
@@ -119,7 +119,7 @@ class BlePacketFactory {
 
         loge(TAG, "Cannot get valid total packet number for message: messageId: "
                 + messageId + ", payloadSize: " + payloadSize + ", maxSize: " + maxSize);
-        throw new BlePacketFactoryException("No valid total packet number.");
+        throw new PacketFactoryException("No valid total packet number.");
     }
 
     /**
@@ -151,5 +151,5 @@ class BlePacketFactory {
         return 5;
     }
 
-    private BlePacketFactory() {}
+    private PacketFactory() {}
 }
