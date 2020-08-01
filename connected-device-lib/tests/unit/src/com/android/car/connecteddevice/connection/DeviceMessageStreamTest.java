@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.car.connecteddevice.connection.ble;
+package com.android.car.connecteddevice.connection;
 
-import static com.android.car.connecteddevice.BleStreamProtos.BlePacketProto.BlePacket;
-import static com.android.car.connecteddevice.StreamProtos.DeviceMessageProto.BleDeviceMessage;
+import static com.android.car.connecteddevice.StreamProtos.DeviceMessageProto.Message;
 import static com.android.car.connecteddevice.StreamProtos.OperationProto.OperationType;
+import static com.android.car.connecteddevice.StreamProtos.PacketProto.Packet;
 import static com.android.car.connecteddevice.connection.DeviceMessageStream.MessageReceivedErrorListener;
 import static com.android.car.connecteddevice.connection.DeviceMessageStream.MessageReceivedListener;
 
@@ -26,28 +26,20 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mockitoSession;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.annotation.NonNull;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGattCharacteristic;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.android.car.connecteddevice.connection.DeviceMessage;
 import com.android.car.connecteddevice.util.ByteUtils;
 import com.android.car.protobuf.ByteString;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoSession;
-import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,42 +49,18 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
-public class BleDeviceMessageStreamTest {
+public class DeviceMessageStreamTest {
 
-    private static final int PACKET_SIZE = 500;
+    private static final int WRITE_SIZE = 500;
 
-    private BleDeviceMessageStream mStream;
-
-    @Mock
-    private BlePeripheralManager mMockBlePeripheralManager;
-
-    @Mock
-    private BluetoothDevice mMockBluetoothDevice;
-
-    @Mock
-    private BluetoothGattCharacteristic mMockWriteCharacteristic;
-
-    @Mock
-    private BluetoothGattCharacteristic mMockReadCharacteristic;
-
-    private MockitoSession mMockingSession;
+    private DeviceMessageStream mStream;
 
     @Before
     public void setup() {
-        mMockingSession = mockitoSession()
-                .initMocks(this)
-                .strictness(Strictness.LENIENT)
-                .startMocking();
-
-        mStream = new BleDeviceMessageStream(mMockBlePeripheralManager, mMockBluetoothDevice,
-                mMockWriteCharacteristic, mMockReadCharacteristic, PACKET_SIZE);
-    }
-
-    @After
-    public void cleanup() {
-        if (mMockingSession != null) {
-            mMockingSession.finishMocking();
-        }
+        mStream = spy(new DeviceMessageStream(WRITE_SIZE) {
+            @Override
+            protected void send(byte[] data) { }
+        });
     }
 
     @Test
@@ -128,9 +96,9 @@ public class BleDeviceMessageStreamTest {
         Semaphore semaphore = new Semaphore(0);
         MessageReceivedListener listener = createMessageReceivedListener(semaphore);
         mStream.setMessageReceivedListener(listener);
-        byte[] data = ByteUtils.randomBytes((int) (PACKET_SIZE * 1.5));
-        List<BlePacket> packets1 = createPackets(data);
-        List<BlePacket> packets2 = createPackets(data);
+        byte[] data = ByteUtils.randomBytes((int) (WRITE_SIZE * 1.5));
+        List<Packet> packets1 = createPackets(data);
+        List<Packet> packets2 = createPackets(data);
 
         for (int i = 0; i < packets1.size(); i++) {
             mStream.processPacket(packets1.get(i));
@@ -158,8 +126,8 @@ public class BleDeviceMessageStreamTest {
         Semaphore semaphore = new Semaphore(0);
         mStream.setMessageReceivedListener(createMessageReceivedListener(semaphore));
         mStream.setMessageReceivedErrorListener(createMessageReceivedErrorListener(semaphore));
-        byte[] data = ByteUtils.randomBytes((int) (PACKET_SIZE * 1.5));
-        List<BlePacket> packets = createPackets(data);
+        byte[] data = ByteUtils.randomBytes((int) (WRITE_SIZE * 1.5));
+        List<Packet> packets = createPackets(data);
         for (int i = 0; i < packets.size() - 1; i++) {
             mStream.processPacket(packets.get(i));
         }
@@ -169,11 +137,11 @@ public class BleDeviceMessageStreamTest {
     @Test
     public void processPacket_ignoresDuplicatePacket() {
         Semaphore semaphore = new Semaphore(0);
-        byte[] data = ByteUtils.randomBytes((int) (PACKET_SIZE * 2.5));
+        byte[] data = ByteUtils.randomBytes((int) (WRITE_SIZE * 2.5));
         MessageReceivedListener listener = createMessageReceivedListener(semaphore);
         mStream.setMessageReceivedListener(listener);
         ArgumentCaptor<DeviceMessage> messageCaptor = ArgumentCaptor.forClass(DeviceMessage.class);
-        List<BlePacket> packets = createPackets(data);
+        List<Packet> packets = createPackets(data);
         for (int i = 0; i < packets.size(); i++) {
             mStream.processPacket(packets.get(i));
             mStream.processPacket(packets.get(i)); // Process each packet twice.
@@ -187,7 +155,7 @@ public class BleDeviceMessageStreamTest {
             throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
         mStream.setMessageReceivedErrorListener(createMessageReceivedErrorListener(semaphore));
-        List<BlePacket> packets = createPackets(ByteUtils.randomBytes((int) (PACKET_SIZE * 2.5)));
+        List<Packet> packets = createPackets(ByteUtils.randomBytes((int) (WRITE_SIZE * 2.5)));
         mStream.processPacket(packets.get(0));
         mStream.processPacket(packets.get(1));
         mStream.processPacket(packets.get(0));
@@ -199,20 +167,20 @@ public class BleDeviceMessageStreamTest {
             throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
         mStream.setMessageReceivedErrorListener(createMessageReceivedErrorListener(semaphore));
-        List<BlePacket> packets = createPackets(ByteUtils.randomBytes((int) (PACKET_SIZE * 1.5)));
+        List<Packet> packets = createPackets(ByteUtils.randomBytes((int) (WRITE_SIZE * 1.5)));
         mStream.processPacket(packets.get(1));
         assertThat(tryAcquire(semaphore)).isTrue();
     }
 
     @NonNull
-    private List<BlePacket> createPackets(byte[] data) {
+    private List<Packet> createPackets(byte[] data) {
         try {
-            BleDeviceMessage message = BleDeviceMessage.newBuilder()
+            Message message = Message.newBuilder()
                     .setPayload(ByteString.copyFrom(data))
                     .setOperation(OperationType.CLIENT_MESSAGE)
                     .build();
-            return BlePacketFactory.makeBlePackets(message.toByteArray(),
-                    ThreadLocalRandom.current().nextInt(), PACKET_SIZE);
+            return PacketFactory.makePackets(message.toByteArray(),
+                    ThreadLocalRandom.current().nextInt(), WRITE_SIZE);
         } catch (Exception e) {
             assertWithMessage("Uncaught exception while making packets.").fail();
             return new ArrayList<>();
@@ -220,8 +188,8 @@ public class BleDeviceMessageStreamTest {
     }
 
     private void processMessage(byte[] data) {
-        List<BlePacket> packets = createPackets(data);
-        for (BlePacket packet : packets) {
+        List<Packet> packets = createPackets(data);
+        for (Packet packet : packets) {
             mStream.processPacket(packet);
         }
     }

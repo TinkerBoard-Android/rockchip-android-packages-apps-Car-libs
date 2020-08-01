@@ -24,8 +24,7 @@ option java_package = "com.android.car.connecteddevice.StreamProtos";
 option java_outer_classname = "DeviceMessageProto";
 
 // A message between devices.
-// TODO(b/160163265): Rename the proto to a more generic name.
-message BleDeviceMessage {
+message Message {
   // The operation that this message represents.
   OperationType operation = 1;
 
