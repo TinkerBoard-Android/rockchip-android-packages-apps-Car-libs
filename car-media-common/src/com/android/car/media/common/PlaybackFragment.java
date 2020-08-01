@@ -93,11 +93,12 @@ public class PlaybackFragment extends Fragment {
         ImageView appIcon = view.findViewById(R.id.app_icon);
         innerViewModel.getAppIcon().observe(getViewLifecycleOwner(), appIcon::setImageBitmap);
 
-        CrossfadeImageView albumBackground = view.findViewById(R.id.album_background);
-        albumBackground.setOnClickListener(
+        View playbackScrim = view.findViewById(R.id.playback_scrim);
+        playbackScrim.setOnClickListener(
                 // Let the Media center trampoline figure out what to open.
                 v -> startActivity(new Intent(Car.CAR_INTENT_ACTION_MEDIA_TEMPLATE)));
 
+        CrossfadeImageView albumBackground = view.findViewById(R.id.album_background);
         int max = activity.getResources().getInteger(R.integer.media_items_bitmap_max_size_px);
         Size maxArtSize = new Size(max, max);
         mAlbumArtBinder = new ImageBinder<>(PlaceholderType.FOREGROUND, maxArtSize,
