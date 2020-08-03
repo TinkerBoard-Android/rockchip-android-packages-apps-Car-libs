@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,21 @@
  * limitations under the License.
  */
 
-include ':car-ui-lib'
-project(':car-ui-lib').projectDir = new File('./car-ui-lib')
-include ':PaintBooth'
-project(':PaintBooth').projectDir = new File('./paintbooth')
+package com.android.car.ui;
 
-rootProject.name='Chassis'
+import android.app.Activity;
+import android.os.Bundle;
+
+import com.android.car.ui.test.R;
+
+/**
+ * An empty activity to be used for testing.
+ */
+public class TestActivity extends Activity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.empty_test_activity);
+    }
+}
