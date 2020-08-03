@@ -20,7 +20,7 @@ package android.car.encryptionrunner;
  * An encryption runner that doesn't actually do encryption. Useful for debugging out of band
  * association. Do not use in production environments.
  */
-public class OobDummyEncryptionRunner extends DummyEncryptionRunner {
+public class OobFakeEncryptionRunner extends FakeEncryptionRunner {
 
     @Override
     public HandshakeMessage continueHandshake(byte[] response) throws HandshakeException {
@@ -62,7 +62,7 @@ public class OobDummyEncryptionRunner extends DummyEncryptionRunner {
             throw new IllegalStateException("asking to verify pin, state = " + state);
         }
         state = HandshakeMessage.HandshakeState.FINISHED;
-        return HandshakeMessage.newBuilder().setKey(new DummyKey()).setHandshakeState(
+        return HandshakeMessage.newBuilder().setKey(new FakeKey()).setHandshakeState(
                 state).build();
     }
 }

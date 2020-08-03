@@ -29,8 +29,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.car.encryptionrunner.DummyEncryptionRunner;
 import android.car.encryptionrunner.EncryptionRunnerFactory;
+import android.car.encryptionrunner.FakeEncryptionRunner;
 
 import com.android.car.connecteddevice.connection.ble.BleDeviceMessageStream;
 import com.android.car.connecteddevice.oob.OobConnectionManager;
@@ -107,12 +107,12 @@ public class OobAssociationSecureChannelTest {
         initHandshakeMessage();
         verify(mStreamMock).writeMessage(messageCaptor.capture(), any());
         byte[] response = messageCaptor.getValue().getMessage();
-        assertThat(response).isEqualTo(DummyEncryptionRunner.INIT_RESPONSE.getBytes());
+        assertThat(response).isEqualTo(FakeEncryptionRunner.INIT_RESPONSE.getBytes());
         reset(mStreamMock);
         respondToContinueMessage();
         verify(mStreamMock).writeMessage(messageCaptor.capture(), any());
         byte[] oobCodeResponse = messageCaptor.getValue().getMessage();
-        assertThat(oobCodeResponse).isEqualTo(DummyEncryptionRunner.VERIFICATION_CODE.getBytes());
+        assertThat(oobCodeResponse).isEqualTo(FakeEncryptionRunner.VERIFICATION_CODE.getBytes());
         respondToOobCode();
         sendDeviceId();
         assertThat(semaphore.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
@@ -130,7 +130,7 @@ public class OobAssociationSecureChannelTest {
 
     private void setupOobAssociationSecureChannel(ChannelCallback callback) {
         mChannel = new OobAssociationSecureChannel(mStreamMock, mStorageMock,
-                mOobConnectionManagerMock, EncryptionRunnerFactory.newOobDummyRunner());
+                mOobConnectionManagerMock, EncryptionRunnerFactory.newOobFakeRunner());
         mChannel.registerCallback(callback);
         ArgumentCaptor<BleDeviceMessageStream.MessageReceivedListener> listenerCaptor =
                 ArgumentCaptor.forClass(BleDeviceMessageStream.MessageReceivedListener.class);
@@ -138,13 +138,13 @@ public class OobAssociationSecureChannelTest {
         mMessageReceivedListener = listenerCaptor.getValue();
         try {
             when(mOobConnectionManagerMock.encryptVerificationCode(any()))
-                    .thenReturn(DummyEncryptionRunner.VERIFICATION_CODE.getBytes());
+                    .thenReturn(FakeEncryptionRunner.VERIFICATION_CODE.getBytes());
         } catch (InvalidAlgorithmParameterException | BadPaddingException | InvalidKeyException
                 | IllegalBlockSizeException e) {
         }
         try {
             when(mOobConnectionManagerMock.decryptVerificationCode(any()))
-                    .thenReturn(DummyEncryptionRunner.VERIFICATION_CODE.getBytes());
+                    .thenReturn(FakeEncryptionRunner.VERIFICATION_CODE.getBytes());
         } catch (InvalidAlgorithmParameterException | BadPaddingException | InvalidKeyException
                 | IllegalBlockSizeException e) {
         }
@@ -163,7 +163,7 @@ public class OobAssociationSecureChannelTest {
         DeviceMessage message = new DeviceMessage(
                 /* recipient= */ null,
                 /* isMessageEncrypted= */ false,
-                DummyEncryptionRunner.INIT.getBytes()
+                FakeEncryptionRunner.INIT.getBytes()
         );
         mMessageReceivedListener.onMessageReceived(message, OperationType.ENCRYPTION_HANDSHAKE);
     }
@@ -172,7 +172,7 @@ public class OobAssociationSecureChannelTest {
         DeviceMessage message = new DeviceMessage(
                 /* recipient= */ null,
                 /* isMessageEncrypted= */ false,
-                DummyEncryptionRunner.CLIENT_RESPONSE.getBytes()
+                FakeEncryptionRunner.CLIENT_RESPONSE.getBytes()
         );
         mMessageReceivedListener.onMessageReceived(message, OperationType.ENCRYPTION_HANDSHAKE);
     }
@@ -181,7 +181,7 @@ public class OobAssociationSecureChannelTest {
         DeviceMessage message = new DeviceMessage(
                 /* recipient= */ null,
                 /* isMessageEncrypted= */ false,
-                DummyEncryptionRunner.VERIFICATION_CODE.getBytes()
+                FakeEncryptionRunner.VERIFICATION_CODE.getBytes()
         );
         mMessageReceivedListener.onMessageReceived(message, OperationType.ENCRYPTION_HANDSHAKE);
     }
