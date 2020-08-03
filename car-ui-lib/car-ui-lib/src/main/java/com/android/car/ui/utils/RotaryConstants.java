@@ -60,6 +60,22 @@ public final class RotaryConstants {
     public @interface FocusActionType {
     }
 
+    /** The key to store the left padding of the FocusArea highlight in the node's extras. */
+    public static final String FOCUS_AREA_HIGHLIGHT_LEFT_PADDING =
+            "com.android.car.ui.utils.FOCUS_AREA_HIGHLIGHT_LEFT_PADDING";
+
+    /** The key to store the right padding of the FocusArea highlight in the node's extras. */
+    public static final String FOCUS_AREA_HIGHLIGHT_RIGHT_PADDING =
+            "com.android.car.ui.utils.FOCUS_AREA_HIGHLIGHT_RIGHT_PADDING";
+
+    /** The key to store the top padding of the FocusArea highlight in the node's extras. */
+    public static final String FOCUS_AREA_HIGHLIGHT_TOP_PADDING =
+            "com.android.car.ui.utils.FOCUS_AREA_HIGHLIGHT_TOP_PADDING";
+
+    /** The key to store the bottom padding of the FocusArea highlight in the node's extras. */
+    public static final String FOCUS_AREA_HIGHLIGHT_BOTTOM_PADDING =
+            "com.android.car.ui.utils.FOCUS_AREA_HIGHLIGHT_BOTTOM_PADDING";
+
     /** Prevent instantiation. */
     private RotaryConstants() {}
 }
