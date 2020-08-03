@@ -45,7 +45,7 @@ def main():
 
     output_file = args.file or 'current.xml'
     if args.compare:
-        compare_resources(ROOT_FOLDER+'/res', OUTPUT_FILE_PATH + 'current.xml')
+        compare_resources(ROOT_FOLDER+'/car-ui-lib/src/main/res', OUTPUT_FILE_PATH + 'current.xml')
     else:
         generate_current_file(ROOT_FOLDER+'/res', output_file)
 
