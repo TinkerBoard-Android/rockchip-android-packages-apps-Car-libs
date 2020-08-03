@@ -27,9 +27,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.car.encryptionrunner.DummyEncryptionRunner;
 import android.car.encryptionrunner.EncryptionRunner;
 import android.car.encryptionrunner.EncryptionRunnerFactory;
+import android.car.encryptionrunner.FakeEncryptionRunner;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
@@ -90,7 +90,7 @@ public final class AssociationSecureChannelTest {
     public void testEncryptionHandshake_Association() throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
         ChannelCallback callbackSpy = spy(new ChannelCallback(semaphore));
-        setupAssociationSecureChannel(callbackSpy, EncryptionRunnerFactory::newDummyRunner);
+        setupAssociationSecureChannel(callbackSpy, EncryptionRunnerFactory::newFakeRunner);
         ArgumentCaptor<String> deviceIdCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<DeviceMessage> messageCaptor =
                 ArgumentCaptor.forClass(DeviceMessage.class);
@@ -98,7 +98,7 @@ public final class AssociationSecureChannelTest {
         initHandshakeMessage();
         verify(mStreamMock).writeMessage(messageCaptor.capture(), any());
         byte[] response = messageCaptor.getValue().getMessage();
-        assertThat(response).isEqualTo(DummyEncryptionRunner.INIT_RESPONSE.getBytes());
+        assertThat(response).isEqualTo(FakeEncryptionRunner.INIT_RESPONSE.getBytes());
 
         respondToContinueMessage();
         verify(mShowVerificationCodeListenerMock).showVerificationCode(anyString());
@@ -123,7 +123,7 @@ public final class AssociationSecureChannelTest {
             throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
         ChannelCallback callbackSpy = spy(new ChannelCallback(semaphore));
-        setupAssociationSecureChannel(callbackSpy, EncryptionRunnerFactory::newDummyRunner);
+        setupAssociationSecureChannel(callbackSpy, EncryptionRunnerFactory::newFakeRunner);
 
         // Wrong init handshake message
         respondToContinueMessage();
@@ -138,7 +138,7 @@ public final class AssociationSecureChannelTest {
             throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
         ChannelCallback callbackSpy = spy(new ChannelCallback(semaphore));
-        setupAssociationSecureChannel(callbackSpy, EncryptionRunnerFactory::newDummyRunner);
+        setupAssociationSecureChannel(callbackSpy, EncryptionRunnerFactory::newFakeRunner);
 
         initHandshakeMessage();
 
@@ -175,7 +175,7 @@ public final class AssociationSecureChannelTest {
         DeviceMessage message = new DeviceMessage(
                 /* recipient= */ null,
                 /* isMessageEncrypted= */ false,
-                DummyEncryptionRunner.INIT.getBytes()
+                FakeEncryptionRunner.INIT.getBytes()
         );
         mMessageReceivedListener.onMessageReceived(message, OperationType.ENCRYPTION_HANDSHAKE);
     }
@@ -184,7 +184,7 @@ public final class AssociationSecureChannelTest {
         DeviceMessage message = new DeviceMessage(
                 /* recipient= */ null,
                 /* isMessageEncrypted= */ false,
-                DummyEncryptionRunner.CLIENT_RESPONSE.getBytes()
+                FakeEncryptionRunner.CLIENT_RESPONSE.getBytes()
         );
         mMessageReceivedListener.onMessageReceived(message, OperationType.ENCRYPTION_HANDSHAKE);
     }

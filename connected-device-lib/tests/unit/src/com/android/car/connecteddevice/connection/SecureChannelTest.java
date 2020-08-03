@@ -29,8 +29,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import android.car.encryptionrunner.DummyEncryptionRunner;
 import android.car.encryptionrunner.EncryptionRunnerFactory;
+import android.car.encryptionrunner.FakeEncryptionRunner;
 import android.car.encryptionrunner.HandshakeException;
 import android.car.encryptionrunner.Key;
 
@@ -92,7 +92,7 @@ public class SecureChannelTest {
                 .startMocking();
 
         mSecureChannel = new SecureChannel(mMockStream,
-                EncryptionRunnerFactory.newDummyRunner()) {
+                EncryptionRunnerFactory.newFakeRunner()) {
             @Override
             void processHandshake(byte[] message) { }
         };
@@ -184,10 +184,10 @@ public class SecureChannelTest {
     public void onMessageReceived_processHandshakeExceptionIssuesSecureChannelFailureCallback()
             throws InterruptedException {
         SecureChannel secureChannel = new SecureChannel(mMockStream,
-                EncryptionRunnerFactory.newDummyRunner()) {
+                EncryptionRunnerFactory.newFakeRunner()) {
             @Override
             void processHandshake(byte[] message) throws HandshakeException {
-                DummyEncryptionRunner.throwHandshakeException("test");
+                FakeEncryptionRunner.throwHandshakeException("test");
             }
         };
         Semaphore semaphore = new Semaphore(0);
