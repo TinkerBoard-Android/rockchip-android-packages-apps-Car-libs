@@ -52,7 +52,6 @@ import com.android.car.ui.recyclerview.decorations.grid.GridOffsetItemDecoration
 import com.android.car.ui.recyclerview.decorations.linear.LinearDividerItemDecoration;
 import com.android.car.ui.recyclerview.decorations.linear.LinearOffsetItemDecoration;
 import com.android.car.ui.recyclerview.decorations.linear.LinearOffsetItemDecoration.OffsetPosition;
-import com.android.car.ui.toolbar.Toolbar;
 import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
 import java.lang.annotation.Retention;
@@ -63,8 +62,7 @@ import java.util.Objects;
  * could potentially include a scrollbar that has page up and down arrows. Interaction with this
  * view is similar to a {@code RecyclerView} as it takes the same adapter and the layout manager.
  */
-public final class CarUiRecyclerView extends RecyclerView implements
-        Toolbar.OnHeightChangedListener {
+public final class CarUiRecyclerView extends RecyclerView {
 
     private static final String TAG = "CarUiRecyclerView";
 
@@ -82,7 +80,6 @@ public final class CarUiRecyclerView extends RecyclerView implements
 
     @Nullable
     private ScrollBar mScrollBar;
-    private int mInitialTopPadding;
 
     @Nullable
     private GridOffsetItemDecoration mOffsetItemDecoration;
@@ -235,14 +232,7 @@ public final class CarUiRecyclerView extends RecyclerView implements
         }
 
         a.recycle();
-        if (!mScrollBarEnabled) {
-            return;
-        }
 
-        setVerticalScrollBarEnabled(false);
-        setHorizontalScrollBarEnabled(false);
-
-        mScrollBarClass = context.getResources().getString(R.string.car_ui_scrollbar_component);
         this.getViewTreeObserver()
                 .addOnGlobalLayoutListener(() -> {
                     if (!mHasScrolledToTop && getLayoutManager() != null) {
@@ -253,11 +243,16 @@ public final class CarUiRecyclerView extends RecyclerView implements
                                 getLayoutManager().scrollToPosition(0));
                         mHasScrolledToTop = true;
                     }
-
-                    if (mInitialTopPadding == 0) {
-                        mInitialTopPadding = getPaddingTop();
-                    }
                 });
+
+        if (!mScrollBarEnabled) {
+            return;
+        }
+
+        setVerticalScrollBarEnabled(false);
+        setHorizontalScrollBarEnabled(false);
+
+        mScrollBarClass = context.getResources().getString(R.string.car_ui_scrollbar_component);
     }
 
     /**
@@ -322,12 +317,6 @@ public final class CarUiRecyclerView extends RecyclerView implements
         if (mScrollBar != null) {
             mScrollBar.requestLayout();
         }
-    }
-
-    @Override
-    public void onHeightChanged(int height) {
-        setPaddingRelative(getPaddingStart(), mInitialTopPadding + height,
-                getPaddingEnd(), getPaddingBottom());
     }
 
     /**

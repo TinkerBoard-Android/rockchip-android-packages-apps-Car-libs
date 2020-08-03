@@ -214,29 +214,6 @@ public class CarUiRecyclerViewTest {
     }
 
     @Test
-    public void testOnHeightChanged_shouldAddTheValueToInitialTopValue() {
-        mActivity.runOnUiThread(
-                () -> mActivity.setContentView(R.layout.car_ui_recycler_view_test_activity));
-
-        onView(withId(R.id.list)).check(matches(isDisplayed()));
-
-        CarUiRecyclerView carUiRecyclerView = mActivity.findViewById(R.id.list);
-
-        assertEquals(carUiRecyclerView.getPaddingBottom(), 0);
-        assertEquals(carUiRecyclerView.getPaddingTop(), 0);
-        assertEquals(carUiRecyclerView.getPaddingStart(), 0);
-        assertEquals(carUiRecyclerView.getPaddingEnd(), 0);
-
-        mActivity.runOnUiThread(() -> carUiRecyclerView.onHeightChanged(10));
-        onView(withId(R.id.list)).check(matches(isDisplayed()));
-
-        assertEquals(carUiRecyclerView.getPaddingTop(), 10);
-        assertEquals(carUiRecyclerView.getPaddingBottom(), 0);
-        assertEquals(carUiRecyclerView.getPaddingStart(), 0);
-        assertEquals(carUiRecyclerView.getPaddingEnd(), 0);
-    }
-
-    @Test
     public void testVisibility_goneAtInflationWithChangeToVisible() {
         mActivity.runOnUiThread(
                 () -> mActivity.setContentView(
