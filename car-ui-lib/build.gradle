@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,43 +41,3 @@ allprojects {
     }
 }
 
-// Library-level build file
-
-apply plugin: 'com.android.library'
-
-android {
-    compileSdkVersion 29
-
-    defaultConfig {
-        minSdkVersion 28
-        targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    sourceSets {
-        main {
-            manifest.srcFile 'AndroidManifest-gradle.xml'
-            java.srcDirs = ['src']
-            res.srcDirs = ['res']
-        }
-    }
-}
-
-dependencies {
-    api 'androidx.annotation:annotation:1.1.0'
-    api 'androidx.appcompat:appcompat:1.1.0'
-    api 'androidx.constraintlayout:constraintlayout:1.1.3'
-    api 'androidx.preference:preference:1.1.0'
-    api 'androidx.recyclerview:recyclerview:1.0.0'
-    api 'androidx.core:core:1.2.0'
-    implementation 'com.android.support:support-annotations:28.0.0'
-
-    // This is the gradle equivalent of the libs: ["android.car"] in our Android.bp
-    implementation files('../../../../../out/target/common/obj/JAVA_LIBRARIES/android.car_intermediates/classes.jar')
-}
