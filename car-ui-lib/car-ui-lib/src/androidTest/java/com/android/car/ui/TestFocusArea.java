@@ -31,6 +31,9 @@ public class TestFocusArea extends FocusArea {
     /** Whether {@link #draw(Canvas)} was called. */
     private boolean mDrawCalled;
 
+    @LayoutDir
+    private int mLayoutDirection = LAYOUT_DIRECTION_LTR;
+
     public TestFocusArea(Context context) {
         super(context);
     }
@@ -74,5 +77,21 @@ public class TestFocusArea extends FocusArea {
 
     public void setDrawCalled(boolean drawCalled) {
         mDrawCalled = drawCalled;
+    }
+
+    @Override
+    public void setLayoutDirection(@LayoutDir int layoutDirection) {
+        // The real setLayoutDirection doesn't work in the test, so let's mock it.
+        if (mLayoutDirection != layoutDirection) {
+            mLayoutDirection = layoutDirection;
+            // To trigger the highlight padding update, we need to call onLayout. Note: the
+            // parameters don't matter.
+            onLayout(false, 0, 0, 0, 0);
+        }
+    }
+
+    @Override
+    public int getLayoutDirection() {
+        return mLayoutDirection;
     }
 }
