@@ -24,8 +24,9 @@ android_library {
     },
 
     libs: [
-        "android.car",
+        "android.car-system-stubs",
     ],
+    sdk_version: "system_current",
 
     static_libs: [
         "androidx.recyclerview_recyclerview",
