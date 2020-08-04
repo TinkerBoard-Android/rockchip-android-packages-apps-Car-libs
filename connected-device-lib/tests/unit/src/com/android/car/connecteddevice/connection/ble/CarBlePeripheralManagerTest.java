@@ -198,7 +198,7 @@ public class CarBlePeripheralManagerTest {
         SecureChannel.Callback channelCallback = channel.getCallback();
         assertThat(channelCallback).isNotNull();
         channelCallback.onDeviceIdReceived(TEST_REMOTE_DEVICE_ID.toString());
-        Key key = EncryptionRunnerFactory.newDummyRunner().keyOf(TEST_KEY);
+        Key key = EncryptionRunnerFactory.newFakeRunner().keyOf(TEST_KEY);
         channelCallback.onSecureChannelEstablished();
         ArgumentCaptor<AssociatedDevice> deviceCaptor =
                 ArgumentCaptor.forClass(AssociatedDevice.class);
