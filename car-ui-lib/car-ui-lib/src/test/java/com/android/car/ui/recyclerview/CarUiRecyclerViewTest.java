@@ -52,28 +52,6 @@ public class CarUiRecyclerViewTest {
     }
 
     @Test
-    public void onHeightChanged_shouldAddTheValueToInitialTopValue() {
-        mView = LayoutInflater.from(mContext)
-                .inflate(mResources.getIdentifier("test_linear_car_ui_recycler_view", "layout",
-                        mContext.getPackageName()), null);
-
-        mCarUiRecyclerView = mView.findViewById(
-                mResources.getIdentifier("test_prv", "id", mContext.getPackageName()));
-
-        assertThat(mCarUiRecyclerView.getPaddingBottom()).isEqualTo(0);
-        assertThat(mCarUiRecyclerView.getPaddingTop()).isEqualTo(0);
-        assertThat(mCarUiRecyclerView.getPaddingStart()).isEqualTo(0);
-        assertThat(mCarUiRecyclerView.getPaddingEnd()).isEqualTo(0);
-
-        mCarUiRecyclerView.onHeightChanged(10);
-
-        assertThat(mCarUiRecyclerView.getPaddingTop()).isEqualTo(10);
-        assertThat(mCarUiRecyclerView.getPaddingBottom()).isEqualTo(0);
-        assertThat(mCarUiRecyclerView.getPaddingStart()).isEqualTo(0);
-        assertThat(mCarUiRecyclerView.getPaddingEnd()).isEqualTo(0);
-    }
-
-    @Test
     public void setAdapter_shouldInitializeLinearLayoutManager() {
         mView = LayoutInflater.from(mContext)
                 .inflate(mResources.getIdentifier("test_linear_car_ui_recycler_view", "layout",
