@@ -21,27 +21,31 @@
     android:layout_height="match_parent">
     <View
         android:focusable="true"
-        android:layout_width="10dp"
-        android:layout_height="10dp"/>
+        android:layout_width="100dp"
+        android:layout_height="100dp"/>
     <com.android.car.ui.TestFocusArea
         android:id="@+id/focus_area"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:defaultFocus="@+id/default_focus">
+        app:defaultFocus="@+id/default_focus"
+        app:highlightPaddingStart="10dp"
+        app:highlightPaddingEnd="20dp"
+        app:highlightPaddingTop="30dp"
+        app:highlightPaddingBottom="40dp">
         <View
             android:id="@+id/child"
             android:focusable="true"
-            android:layout_width="10dp"
-            android:layout_height="10dp"/>
+            android:layout_width="100dp"
+            android:layout_height="100dp"/>
         <View
             android:id="@+id/default_focus"
             android:focusable="true"
-            android:layout_width="10dp"
-            android:layout_height="10dp"/>
+            android:layout_width="100dp"
+            android:layout_height="100dp"/>
     </com.android.car.ui.TestFocusArea>
     <View
         android:id="@+id/non_child"
         android:focusable="true"
-        android:layout_width="10dp"
-        android:layout_height="10dp"/>
+        android:layout_width="100dp"
+        android:layout_height="100dp"/>
 </LinearLayout>
