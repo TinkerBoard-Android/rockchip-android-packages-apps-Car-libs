@@ -16,11 +16,16 @@
 
 package com.android.car.apps.common.util;
 
+import static android.view.View.INVISIBLE;
+import static android.view.View.VISIBLE;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -100,7 +105,7 @@ public class ViewUtils {
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationStart(Animator animation) {
-                        view.setVisibility(View.VISIBLE);
+                        view.setVisibility(VISIBLE);
                     }
                 })
                 .alpha(1f);
@@ -123,7 +128,7 @@ public class ViewUtils {
     /** Sets the visibility of the (optional) view to {@link View#VISIBLE} or {@link View#GONE}. */
     public static void setVisible(@Nullable View view, boolean visible) {
         if (view != null) {
-            view.setVisibility(visible ? View.VISIBLE : View.GONE);
+            view.setVisibility(visible ? VISIBLE : View.GONE);
         }
     }
 
@@ -139,7 +144,7 @@ public class ViewUtils {
      */
     public static void setInvisible(@Nullable View view, boolean invisible) {
         if (view != null) {
-            view.setVisibility(invisible ? View.INVISIBLE : View.VISIBLE);
+            view.setVisibility(invisible ? INVISIBLE : VISIBLE);
         }
     }
 
@@ -200,5 +205,31 @@ public class ViewUtils {
         }
         viewIds.recycle();
         return views;
+    }
+
+    /** Adds the {@code view} into the {@code container}. */
+    public static void setView(@Nullable View view, FrameLayout container) {
+        if (view != null) {
+            // Don't set the view if it stays the same.
+            if (container.getChildCount() == 1 && container.getChildAt(0) == view) {
+                return;
+            }
+
+            ViewGroup parent = (ViewGroup) view.getParent();
+            // As we are removing views (on BT disconnect, for example), some items will be
+            // shifting from expanded to collapsed (like Queue item) - remove those from the
+            // group before adding to the new slot
+            if (view.getParent() != null) {
+                parent.removeView(view);
+            }
+            container.removeAllViews();
+            container.addView(view);
+            container.setVisibility(VISIBLE);
+        } else {
+            if (container.getChildCount() != 0) {
+                container.removeAllViews();
+            }
+            container.setVisibility(INVISIBLE);
+        }
     }
 }
