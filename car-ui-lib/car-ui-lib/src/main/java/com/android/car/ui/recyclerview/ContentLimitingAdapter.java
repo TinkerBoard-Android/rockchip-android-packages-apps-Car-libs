@@ -17,17 +17,11 @@
 package com.android.car.ui.recyclerview;
 
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.android.car.ui.R;
-import com.android.car.ui.utils.CarUiUtils;
 
 /**
  * A {@link RecyclerView.Adapter} that can limit its content based on a given length limit which
@@ -50,7 +44,7 @@ public abstract class ContentLimitingAdapter<T extends RecyclerView.ViewHolder>
      * Override this method to provide your own alternative value if {@link Integer#MAX_VALUE} is
      * a viewType value already in-use by your adapter.
      */
-    protected int getScrollingLimitedMessageViewType() {
+    public int getScrollingLimitedMessageViewType() {
         return SCROLLING_LIMITED_MESSAGE_VIEW_TYPE;
     }
 
@@ -59,9 +53,7 @@ public abstract class ContentLimitingAdapter<T extends RecyclerView.ViewHolder>
     public final RecyclerView.ViewHolder onCreateViewHolder(
             @NonNull ViewGroup parent, int viewType) {
         if (viewType == getScrollingLimitedMessageViewType()) {
-            View rootView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.car_ui_list_limiting_message, parent, false);
-            return new ScrollingLimitedViewHolder(rootView);
+            return ScrollingLimitedViewHolder.create(parent);
         }
 
         return onCreateViewHolderImpl(parent, viewType);
@@ -80,12 +72,7 @@ public abstract class ContentLimitingAdapter<T extends RecyclerView.ViewHolder>
     @SuppressWarnings("unchecked")
     public final void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (isContentLimited() && position == getScrollingLimitedMessagePosition()) {
-            String message = holder.itemView.getContext()
-                    .getString(R.string.car_ui_scrolling_limited_message);
-            if (mScrollingLimitedMessageResId != null) {
-                message = holder.itemView.getContext().getString(mScrollingLimitedMessageResId);
-            }
-            ((ScrollingLimitedViewHolder) holder).setMessage(message);
+            ((ScrollingLimitedViewHolder) holder).bind(mScrollingLimitedMessageResId);
             return;
         }
         onBindViewHolderImpl((T) holder, position);
@@ -257,26 +244,6 @@ public abstract class ContentLimitingAdapter<T extends RecyclerView.ViewHolder>
         if (mScrollingLimitedMessageResId == null || mScrollingLimitedMessageResId != resId) {
             mScrollingLimitedMessageResId = resId;
             notifyItemChanged(getScrollingLimitedMessagePosition());
-        }
-    }
-
-    /**
-     * {@link RecyclerView.ViewHolder} for the last item in a scrolling limited list.
-     */
-    public static class ScrollingLimitedViewHolder extends RecyclerView.ViewHolder {
-
-        private final TextView mMessage;
-
-        ScrollingLimitedViewHolder(@NonNull View itemView) {
-            super(itemView);
-            mMessage = CarUiUtils.findViewByRefId(itemView, R.id.car_ui_list_limiting_message);
-        }
-
-        /**
-         * Sets the display message.
-         */
-        public void setMessage(String message) {
-            mMessage.setText(message);
         }
     }
 }
