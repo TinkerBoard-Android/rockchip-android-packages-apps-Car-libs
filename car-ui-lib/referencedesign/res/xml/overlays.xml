@@ -3,6 +3,16 @@
     <item target="layout/car_ui_toolbar" value="@layout/car_ui_toolbar"/>
     <item target="layout/car_ui_toolbar_two_row" value="@layout/car_ui_toolbar_two_row"/>
 
+    <item target="drawable/car_ui_icon_arrow_back" value="@drawable/car_ui_icon_arrow_back"/>
+    <item target="drawable/car_ui_toolbar_menu_item_icon_ripple" value="@drawable/car_ui_toolbar_menu_item_icon_ripple"/>
+
+    <item target="style/Widget.CarUi" value="@style/Widget.CarUi"/>
+    <item target="style/Widget.CarUi.Toolbar" value="@style/Widget.CarUi.Toolbar"/>
+    <item target="style/Widget.CarUi.Toolbar.NavIconContainer" value="@style/Widget.CarUi.Toolbar.NavIconContainer"/>
+    <item target="style/Widget.CarUi.Toolbar.NavIcon" value="@style/Widget.CarUi.Toolbar.NavIcon"/>
+
+    <item target="dimen/car_ui_toolbar_margin" value="@dimen/car_ui_toolbar_margin"/>
+
     <item target="bool/car_ui_toolbar_nav_icon_reserve_space" value="@bool/car_ui_toolbar_nav_icon_reserve_space" />
     <item target="bool/car_ui_toolbar_logo_fills_nav_icon_space" value="@bool/car_ui_toolbar_logo_fills_nav_icon_space" />
 
