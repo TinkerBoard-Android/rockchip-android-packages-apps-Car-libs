@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   ~
-  ~ Copyright (C) 2019 Google Inc.
+  ~ Copyright (C) 2020 Google Inc.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
        android:shape="oval">
     <size
-        android:width="@dimen/car_ui_toolbar_menu_item_icon_background_size"
-        android:height="@dimen/car_ui_toolbar_menu_item_icon_background_size"/>
+        android:width="54dp"
+        android:height="54dp"/>
     <solid android:color="@color/car_ui_toolbar_menu_item_icon_background_color"/>
 </shape>
