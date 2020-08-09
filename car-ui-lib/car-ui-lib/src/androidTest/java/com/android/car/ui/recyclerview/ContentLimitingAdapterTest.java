@@ -18,24 +18,14 @@ package com.android.car.ui.recyclerview;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.rule.ActivityTestRule;
-
-import com.android.car.ui.test.R;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ContentLimitingAdapterTest {
 
@@ -48,60 +38,6 @@ public class ContentLimitingAdapterTest {
     @Before
     public void setUp() {
         mContentLimitingAdapter = new TestContentLimitingAdapter(50);
-    }
-
-    private static class TestContentLimitingAdapter extends ContentLimitingAdapter<TestViewHolder> {
-
-        private final List<String> mItems;
-
-        TestContentLimitingAdapter(int numItems) {
-            mItems = new ArrayList<>();
-            for (int i = 0; i < numItems; i++) {
-                mItems.add("Item " + i);
-            }
-        }
-
-        @Override
-        protected TestViewHolder onCreateViewHolderImpl(@NonNull ViewGroup parent,
-                int viewType) {
-            View layout = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.test_car_ui_recycler_view_list_item, parent, false);
-            return new TestViewHolder(layout);
-        }
-
-        @Override
-        protected void onBindViewHolderImpl(TestViewHolder holder, int position) {
-            holder.bind(mItems.get(position));
-        }
-
-        @Override
-        protected int getUnrestrictedItemCount() {
-            return mItems.size();
-        }
-
-        @Override
-        public int getConfigurationId() {
-            return 0;
-        }
-    }
-
-    private static class TestViewHolder extends RecyclerView.ViewHolder {
-
-        private CharSequence mText;
-
-        TestViewHolder(@NonNull View itemView) {
-            super(itemView);
-        }
-
-        void bind(CharSequence text) {
-            mText = text;
-            TextView textView = itemView.requireViewById(R.id.textTitle);
-            textView.setText(text);
-        }
-
-        CharSequence getText() {
-            return mText;
-        }
     }
 
     @Test
