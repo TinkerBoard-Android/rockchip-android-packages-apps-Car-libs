@@ -48,7 +48,7 @@ limitations under the License.
     <string name="car_ui_preference_switch_off">Off</string>
 
     <!-- Text to show when no button is provided and a default button is used. -->
-    <string name="car_ui_alert_dialog_default_button" translatable="false">Close</string>
+    <string name="car_ui_alert_dialog_default_button">Close</string>
 
     <!-- Shown at the bottom of a content limited list when user has scrolled past the limit while driving -->
     <string name="car_ui_scrolling_limited_message">Scrolling limited while driving</string>
