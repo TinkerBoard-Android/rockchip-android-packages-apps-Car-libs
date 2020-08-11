@@ -19,12 +19,18 @@ import static android.view.accessibility.AccessibilityNodeInfo.ACTION_COLLAPSE;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_DISMISS;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_FOCUS;
 
+import static com.android.car.ui.utils.RotaryConstants.ROTARY_HORIZONTALLY_SCROLLABLE;
+import static com.android.car.ui.utils.RotaryConstants.ROTARY_VERTICALLY_SCROLLABLE;
+
 import android.content.Context;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 /**
@@ -121,10 +127,31 @@ public class FocusParkingView extends View {
     public boolean performAccessibilityAction(int action, Bundle arguments) {
         switch (action) {
             case ACTION_DISMISS:
-                // Try to move focus to the default focus.
-                getRootView().restoreDefaultFocus();
-                // The action failed if the FocusParkingView is still focused.
-                return !isFocused();
+                View root = getRootView();
+
+                // If there is a view focused by default and it can take focus, move focus to it.
+                View defaultFocus = depthFirstSearch(root,
+                        v -> v.isFocusedByDefault() && canTakeFocus(v));
+                if (defaultFocus != null) {
+                    return defaultFocus.requestFocus();
+                }
+
+                // If there is a scrollable container with at least one descendant that can take
+                // focus, move focus to its first descendant that can take focus.
+                View scrollableContainer = depthFirstSearch(root, v -> {
+                    CharSequence contentDescription = v.getContentDescription();
+                    return TextUtils.equals(contentDescription, ROTARY_VERTICALLY_SCROLLABLE)
+                            || TextUtils.equals(contentDescription, ROTARY_HORIZONTALLY_SCROLLABLE);
+                });
+                if (scrollableContainer != null) {
+                    View focusable = depthFirstSearch(scrollableContainer,
+                            v -> v != scrollableContainer && canTakeFocus(v));
+                    if (focusable != null) {
+                        return focusable.requestFocus();
+                    }
+                }
+
+                return false;
             case ACTION_COLLAPSE:
                 // Hide the IME.
                 InputMethodManager inputMethodManager =
@@ -139,5 +166,33 @@ public class FocusParkingView extends View {
                 break;
         }
         return super.performAccessibilityAction(action, arguments);
+    }
+
+    private static boolean canTakeFocus(@NonNull View view) {
+        return view.isFocusable() && view.isEnabled() && view.getVisibility() == VISIBLE
+                && view.getWidth() > 0 && view.getHeight() > 0;
+    }
+
+    @Nullable
+    private View depthFirstSearch(@NonNull View view, @NonNull Predicate predicate) {
+        if (predicate.isTarget(view)) {
+            return view;
+        }
+        if (view instanceof ViewGroup) {
+            ViewGroup parent = (ViewGroup) view;
+            for (int i = 0; i < parent.getChildCount(); i++) {
+                View child = parent.getChildAt(i);
+                View target = depthFirstSearch(child, predicate);
+                if (target != null) {
+                    return target;
+                }
+            }
+        }
+        return null;
+    }
+
+    /** A function that takes a {@code view} and returns a {@code boolean}. */
+    private interface Predicate {
+        boolean isTarget(@NonNull View view);
     }
 }
