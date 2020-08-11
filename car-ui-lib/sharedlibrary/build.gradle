@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,31 @@
  * limitations under the License.
  */
 
-include ':car-ui-lib'
-project(':car-ui-lib').projectDir = new File('./car-ui-lib')
-include ':PaintBooth'
-project(':PaintBooth').projectDir = new File('./paintbooth')
-include ':shared-library'
-project(':shared-library').projectDir = new File('./sharedlibrary')
+// Library-level build file
 
-rootProject.name='Chassis'
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 30
+
+    defaultConfig {
+        minSdkVersion 28
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest-gradle.xml'
+        }
+    }
+}
+
+dependencies {
+}

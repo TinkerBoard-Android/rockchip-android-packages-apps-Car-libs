@@ -31,7 +31,6 @@ public class TestFocusArea extends FocusArea {
     /** Whether {@link #draw(Canvas)} was called. */
     private boolean mDrawCalled;
 
-    @LayoutDir
     private int mLayoutDirection = LAYOUT_DIRECTION_LTR;
 
     public TestFocusArea(Context context) {
@@ -80,7 +79,7 @@ public class TestFocusArea extends FocusArea {
     }
 
     @Override
-    public void setLayoutDirection(@LayoutDir int layoutDirection) {
+    public void setLayoutDirection(int layoutDirection) {
         // The real setLayoutDirection doesn't work in the test, so let's mock it.
         if (mLayoutDirection != layoutDirection) {
             mLayoutDirection = layoutDirection;
