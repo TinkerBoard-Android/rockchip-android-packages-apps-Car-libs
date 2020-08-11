@@ -20,6 +20,7 @@ import static android.view.View.GONE;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
+import static com.android.car.ui.utils.CarUiUtils.findViewByRefId;
 import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
 import android.app.Activity;
@@ -63,6 +64,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ToolbarControllerImpl implements ToolbarController {
     private static final String TAG = "CarUiToolbarController";
 
+    @Nullable
     private View mBackground;
     private ImageView mNavIcon;
     private ImageView mLogoInNavIconSpace;
@@ -152,7 +154,7 @@ public class ToolbarControllerImpl implements ToolbarController {
                 R.bool.car_ui_toolbar_show_logo);
         mSearchHint = getContext().getString(R.string.car_ui_toolbar_default_search_hint);
 
-        mBackground = requireViewByRefId(view, R.id.car_ui_toolbar_background);
+        mBackground = findViewByRefId(view, R.id.car_ui_toolbar_background);
         mTabLayout = requireViewByRefId(view, R.id.car_ui_toolbar_tabs);
         mNavIcon = requireViewByRefId(view, R.id.car_ui_toolbar_nav_icon);
         mLogoInNavIconSpace = requireViewByRefId(view, R.id.car_ui_toolbar_logo);
@@ -176,14 +178,16 @@ public class ToolbarControllerImpl implements ToolbarController {
             }
         });
 
-        mBackground.addOnLayoutChangeListener((v, left, top, right, bottom,
-                oldLeft, oldTop, oldRight, oldBottom) -> {
-            if (oldBottom - oldTop != bottom - top) {
-                for (Toolbar.OnHeightChangedListener listener : mOnHeightChangedListeners) {
-                    listener.onHeightChanged(mBackground.getHeight());
+        if (mBackground != null) {
+            mBackground.addOnLayoutChangeListener((v, left, top, right, bottom,
+                    oldLeft, oldTop, oldRight, oldBottom) -> {
+                if (oldBottom - oldTop != bottom - top) {
+                    for (Toolbar.OnHeightChangedListener listener : mOnHeightChangedListeners) {
+                        listener.onHeightChanged(mBackground.getHeight());
+                    }
                 }
-            }
-        });
+            });
+        }
 
         setBackgroundShown(true);
 
@@ -417,6 +421,10 @@ public class ToolbarControllerImpl implements ToolbarController {
     /** Show/hide the background. When hidden, the toolbar is completely transparent. */
     @Override
     public void setBackgroundShown(boolean shown) {
+        if (mBackground == null) {
+            return;
+        }
+
         if (shown) {
             mBackground.setBackground(
                     getContext().getDrawable(R.drawable.car_ui_toolbar_background));
@@ -428,6 +436,10 @@ public class ToolbarControllerImpl implements ToolbarController {
     /** Returns true is the toolbar background is shown */
     @Override
     public boolean getBackgroundShown() {
+        if (mBackground == null) {
+            return true;
+        }
+
         return mBackground.getBackground() != null;
     }
 
