@@ -25,6 +25,9 @@ android_library {
         enabled: false,
     },
 
+    sdk_version: "system_current",
+    min_sdk_version: "28",
+
     static_libs: [
         "androidx.legacy_legacy-support-v4",
         "car-apps-common",

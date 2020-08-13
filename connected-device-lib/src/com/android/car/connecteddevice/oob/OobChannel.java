@@ -16,7 +16,7 @@
 
 package com.android.car.connecteddevice.oob;
 
-import android.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.android.car.connecteddevice.model.OobEligibleDevice;
 
