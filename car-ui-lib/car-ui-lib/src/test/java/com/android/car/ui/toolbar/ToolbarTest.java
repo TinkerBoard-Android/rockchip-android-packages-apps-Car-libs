@@ -63,10 +63,6 @@ public class ToolbarTest {
         mToolbar = mActivity.findViewById(R.id.toolbar);
     }
 
-    private int getTestResourceIdInt(String resource) {
-        return mResources.getIdentifier(resource, "id", mContext.getPackageName());
-    }
-
     private int getTestDrawableInt(String drawable) {
         return mResources.getIdentifier(drawable, "drawable", mContext.getPackageName());
     }
@@ -108,7 +104,7 @@ public class ToolbarTest {
     @Test
     public void showLogo_whenSet_andStateIsHome() {
         mToolbar.setState(Toolbar.State.HOME);
-        mToolbar.setLogo(getTestResourceIdInt("test_ic_launcher"));
+        mToolbar.setLogo(getTestDrawableInt("test_ic_launcher"));
 
         assertThat(mToolbar.findViewById(R.id.car_ui_toolbar_logo).isShown()).isTrue();
         assertThat(mToolbar.findViewById(R.id.car_ui_toolbar_title_logo).isShown()).isFalse();
@@ -121,7 +117,7 @@ public class ToolbarTest {
 
         Toolbar toolbar = new Toolbar(mContext);
         toolbar.setState(Toolbar.State.HOME);
-        mToolbar.setLogo(getTestResourceIdInt("test_ic_launcher"));
+        mToolbar.setLogo(getTestDrawableInt("test_ic_launcher"));
 
         assertThat(isViewInToolbarShown(toolbar, R.id.car_ui_toolbar_logo)).isFalse();
         assertThat(isViewInToolbarShown(toolbar, R.id.car_ui_toolbar_title_logo)).isFalse();
@@ -130,7 +126,7 @@ public class ToolbarTest {
     @Test
     public void showTitleLogo_whenSet_andStateIsNotHome() {
         mToolbar.setState(Toolbar.State.SUBPAGE);
-        mToolbar.setLogo(getTestResourceIdInt("test_ic_launcher"));
+        mToolbar.setLogo(getTestDrawableInt("test_ic_launcher"));
 
         assertThat(mToolbar.findViewById(R.id.car_ui_toolbar_logo).isShown()).isFalse();
         assertThat(mToolbar.findViewById(R.id.car_ui_toolbar_title_logo).isShown()).isTrue();
