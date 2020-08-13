@@ -15,6 +15,8 @@
  */
 package com.android.car.ui.utils;
 
+import static android.os.Build.VERSION_CODES.R;
+
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.text.TextUtils;
@@ -24,8 +26,6 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.NonNull;
-
-import java.lang.reflect.Method;
 
 /** Helper class to toggle direct manipulation mode. */
 public final class DirectManipulationHelper {
@@ -74,31 +74,50 @@ public final class DirectManipulationHelper {
         return TextUtils.equals(DIRECT_MANIPULATION, event.getClassName());
     }
 
-    /** Returns whether the given {@code node} supports direct manipulation. */
-    @TargetApi(30)
-    public static boolean supportDirectManipulation(@NonNull AccessibilityNodeInfo node) {
-        try {
-            // TODO(b/156115044): remove the reflection once Android R sdk is publicly released.
-            Method getStateDescription =
-                    AccessibilityNodeInfo.class.getMethod("getStateDescription");
-            CharSequence stateDescription = (CharSequence) getStateDescription.invoke(node);
-            return TextUtils.equals(DIRECT_MANIPULATION, stateDescription);
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
-        }
+    /** Returns whether the given {@code node} supports rotate directly. */
+    @TargetApi(R)
+    public static boolean supportRotateDirectly(@NonNull AccessibilityNodeInfo node) {
+        return TextUtils.equals(DIRECT_MANIPULATION, node.getStateDescription());
     }
 
-    /** Sets whether the given {@code view} supports direct manipulation. */
-    @TargetApi(30)
+    /**
+     * Sets whether the given {@code view} supports rotate directly.
+     * <p>
+     * If the view supports rotate directly, when it's focused but not in direct manipulation mode,
+     * clicking the center button of the rotary controller will make RotaryService enter direct
+     * manipulation mode. In this mode, the view's selected state is toggled, and only controller
+     * rotation and Back button press are supported.
+     * <ul>
+     *   <li>When the controller is rotated, the view will be asked to perform ACTION_SCROLL_FORWARD
+     *       or ACTION_SCROLL_BACKWARD.
+     *   <li>When Back button is pressed, RotaryService will toggle off the view's selected state
+     *       and exit this mode.
+     * </ul>
+     * To support controller nudges as well in direct manipulation mode, use {@link
+     * #enableDirectManipulationMode} instead.
+     */
+    @TargetApi(R)
+    public static void setSupportsRotateDirectly(@NonNull View view, boolean enable) {
+        view.setStateDescription(enable ? DIRECT_MANIPULATION : null);
+    }
+
+    /**
+     * Returns whether the given {@code node} supports rotate directly.
+     *
+     * @deprecated use {@link #supportRotateDirectly} instead
+     */
+    @Deprecated
+    public static boolean supportDirectManipulation(@NonNull AccessibilityNodeInfo node) {
+        return supportRotateDirectly(node);
+    }
+
+    /**
+     * Sets whether the given {@code view} supports rotate directly.
+     *
+     * @deprecated use {@link #setSupportsRotateDirectly} instead
+     */
+    @Deprecated
     public static void setSupportsDirectManipulation(@NonNull View view, boolean enable) {
-        try {
-            // TODO(b/156115044): remove the reflection once Android R sdk is publicly released.
-            Method setStateDescription =
-                    View.class.getMethod("setStateDescription", CharSequence.class);
-            CharSequence stateDescription = enable ? DIRECT_MANIPULATION : null;
-            setStateDescription.invoke(view, stateDescription);
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
-        }
+        setSupportsRotateDirectly(view, enable);
     }
 }
