@@ -45,6 +45,10 @@ android {
             includeAndroidResources = true
         }
     }
+
+    // This is the gradle equivalent of the libs: ["android.car"] in the Android.bp
+    // Which will be in the SDK 30 R3+
+    useLibrary 'android.car'
 }
 
 dependencies {
@@ -55,9 +59,6 @@ dependencies {
     api 'androidx.recyclerview:recyclerview:1.0.0'
     api 'androidx.core:core:1.2.0'
     implementation 'com.android.support:support-annotations:28.0.0'
-
-    // This is the gradle equivalent of the libs: ["android.car"] in our Android.bp
-    implementation files('../../../../../../out/target/common/obj/JAVA_LIBRARIES/android.car_intermediates/classes.jar')
 
     testImplementation "androidx.test.ext:junit:1.1.1"
     testImplementation 'org.robolectric:robolectric:4.3.1'
