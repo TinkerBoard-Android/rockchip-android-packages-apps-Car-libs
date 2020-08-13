@@ -21,7 +21,10 @@ android_library {
     manifest: "car-ui-lib/AndroidManifest.xml",
     resource_dirs: ["car-ui-lib/src/main/res"],
     optimize: {
-        enabled: false,
+        proguard_flags_files: [
+            "car-ui-lib/proguard-rules.pro",
+            "car-ui-lib/proguard-rules-platform.pro",
+        ],
     },
     libs: ["android.car-stubs"],
     static_libs: [

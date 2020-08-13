@@ -253,6 +253,7 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
 
     // Mapping from regular preferences to CarUi preferences.
     // Order is important, subclasses must come before their base classes
+    // Make sure all the following classes are added to proguard configuration.
     private static final List<Pair<Class<? extends Preference>, Class<? extends Preference>>>
             sPreferenceMapping = Arrays.asList(
             new Pair<>(DropDownPreference.class, CarUiDropDownPreference.class),
