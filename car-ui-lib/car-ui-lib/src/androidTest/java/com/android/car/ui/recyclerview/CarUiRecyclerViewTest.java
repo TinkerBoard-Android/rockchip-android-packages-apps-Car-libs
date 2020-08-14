@@ -418,7 +418,8 @@ public class CarUiRecyclerViewTest {
         onView(withId(R.id.list)).check(matches(isDisplayed()));
 
         CarUiRecyclerView carUiRecyclerView = mActivity.requireViewById(R.id.list);
-        TestAdapter adapter = new TestAdapter(15);
+        //  50, because needs to be big enough to make sure content is scrollable.
+        TestAdapter adapter = new TestAdapter(50);
         mActivity.runOnUiThread(() -> {
             carUiRecyclerView.setAdapter(adapter);
         });
@@ -429,6 +430,7 @@ public class CarUiRecyclerViewTest {
         onView(withId(R.id.car_ui_scrollbar_page_up)).check(matches(not(isEnabled())));
 
         // Moving down, should enable the up bottom.
+        onView(withId(R.id.car_ui_scrollbar_page_down)).check(matches(isEnabled()));
         onView(withId(R.id.car_ui_scrollbar_page_down)).perform(click());
         onView(withId(R.id.car_ui_scrollbar_page_up)).check(matches(isEnabled()));
 
