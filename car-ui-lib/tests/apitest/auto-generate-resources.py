@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright 2019, The Android Open Source Project
 #
@@ -47,7 +47,7 @@ def main():
     if args.compare:
         compare_resources(ROOT_FOLDER+'/car-ui-lib/src/main/res', OUTPUT_FILE_PATH + 'current.xml')
     else:
-        generate_current_file(ROOT_FOLDER+'/res', output_file)
+        generate_current_file(ROOT_FOLDER+'/car-ui-lib/src/main/res', output_file)
 
 def generate_current_file(res_folder, output_file='current.xml'):
     resources = get_all_resources(res_folder)
@@ -67,7 +67,7 @@ def generate_current_file(res_folder, output_file='current.xml'):
 
     data = etree.ElementTree(root)
 
-    with open(OUTPUT_FILE_PATH + output_file, 'w') as f:
+    with open(OUTPUT_FILE_PATH + output_file, 'wb') as f:
         data.write(f, pretty_print=True, xml_declaration=True, encoding='utf-8')
 
 def generate_overlayable_file(res_folder):
@@ -124,8 +124,8 @@ def generate_overlayable_file(res_folder):
 
     data = etree.ElementTree(root)
 
-    output_file=ROOT_FOLDER+'/res/values/overlayable.xml'
-    with open(output_file, 'w') as f:
+    output_file=ROOT_FOLDER+'/car-ui-lib/src/main/res/values/overlayable.xml'
+    with open(output_file, 'wb') as f:
         data.write(f, pretty_print=True, xml_declaration=True, encoding='utf-8')
 
 def compare_resources(res_folder, res_public_file):
