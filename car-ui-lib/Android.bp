@@ -105,7 +105,7 @@ android_app {
     	"paintbooth/src/**/*.java",
     	"paintbooth/src/**/*.kt",
     ],
-    required: ["privapp_whitelist_com.android.car.ui.paintbooth"],
+    required: ["allowed_privapp_com.android.car.ui.paintbooth"],
     manifest: "paintbooth/AndroidManifest.xml",
     resource_dirs: ["paintbooth/src/main/res", "paintbooth/src/main/res-public"],
     platform_apis: true,
