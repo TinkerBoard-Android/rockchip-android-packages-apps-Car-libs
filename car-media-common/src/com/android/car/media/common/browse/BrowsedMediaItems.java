@@ -21,19 +21,21 @@ import android.os.Handler;
 import android.support.v4.media.MediaBrowserCompat;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 
 import com.android.car.media.common.MediaItemMetadata;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
  * A LiveData that provides access the a MediaBrowser's children
  */
 
-class BrowsedMediaItems extends LiveData<List<MediaItemMetadata>> {
+public class BrowsedMediaItems extends LiveData<List<MediaItemMetadata>> {
 
     /**
      * Number of times we will retry obtaining the list of children of a certain node
@@ -56,6 +58,19 @@ class BrowsedMediaItems extends LiveData<List<MediaItemMetadata>> {
     BrowsedMediaItems(@NonNull MediaBrowserCompat mediaBrowser, @NonNull String parentId) {
         mBrowser = mediaBrowser;
         mParentId = parentId;
+    }
+
+    /**
+     * Filters the items that are valid for the root (tabs) or the current node. Returns null when
+     * the given list is null to preserve its error signal.
+     */
+    @Nullable
+    public static List<MediaItemMetadata> filterItems(boolean forRoot,
+            @Nullable List<MediaItemMetadata> items) {
+        if (items == null) return null;
+        Predicate<MediaItemMetadata> predicate = forRoot ? MediaItemMetadata::isBrowsable
+                : item -> (item.isPlayable() || item.isBrowsable());
+        return items.stream().filter(predicate).collect(Collectors.toList());
     }
 
     @Override
