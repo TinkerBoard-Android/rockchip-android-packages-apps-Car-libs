@@ -97,6 +97,29 @@
                 app:layout_constraintEnd_toStartOf="@+id/app_selector_container"
                 app:layout_constraintTop_toBottomOf="@+id/title"/>
 
+            <com.android.car.apps.common.UxrTextView
+                android:id="@+id/error_message"
+                style="@style/FullScreenErrorMessageStyle"
+                android:layout_marginHorizontal="@dimen/playback_fragment_text_margin_x"
+                android:maxLines="@integer/widget_error_text_max_lines"
+                app:layout_constraintVertical_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/app_name"
+                app:layout_constraintBottom_toTopOf="@+id/error_button"
+            />
+
+            <com.android.car.apps.common.UxrButton
+                android:id="@+id/error_button"
+                style="@style/FullScreenErrorButtonStyle"
+                android:layout_marginTop="@dimen/playback_fragment_error_button_margin_top"
+                android:layout_marginBottom="@dimen/playback_fragment_error_button_margin_bottom"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/error_message"
+                app:layout_constraintBottom_toBottomOf="parent"
+            />
+
             <FrameLayout
                 android:id="@+id/app_selector_container"
                 xmlns:android="http://schemas.android.com/apk/res/android"
