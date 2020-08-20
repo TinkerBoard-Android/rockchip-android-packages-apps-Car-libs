@@ -60,22 +60,23 @@ public final class RotaryConstants {
     public @interface FocusActionType {
     }
 
-    /** The key to store the left padding of the FocusArea highlight in the node's extras. */
-    public static final String FOCUS_AREA_HIGHLIGHT_LEFT_PADDING =
-            "com.android.car.ui.utils.FOCUS_AREA_HIGHLIGHT_LEFT_PADDING";
+    /** The key to store the offset of the FocusArea's left bound in the node's extras. */
+    public static final String FOCUS_AREA_LEFT_BOUND_OFFSET =
+            "com.android.car.ui.utils.FOCUS_AREA_LEFT_BOUND_OFFSET";
 
-    /** The key to store the right padding of the FocusArea highlight in the node's extras. */
-    public static final String FOCUS_AREA_HIGHLIGHT_RIGHT_PADDING =
-            "com.android.car.ui.utils.FOCUS_AREA_HIGHLIGHT_RIGHT_PADDING";
+    /** The key to store the offset of the FocusArea's right bound in the node's extras. */
+    public static final String FOCUS_AREA_RIGHT_BOUND_OFFSET =
+            "com.android.car.ui.utils.FOCUS_AREA_RIGHT_BOUND_OFFSET";
 
-    /** The key to store the top padding of the FocusArea highlight in the node's extras. */
-    public static final String FOCUS_AREA_HIGHLIGHT_TOP_PADDING =
-            "com.android.car.ui.utils.FOCUS_AREA_HIGHLIGHT_TOP_PADDING";
+    /** The key to store the offset of the FocusArea's top bound in the node's extras. */
+    public static final String FOCUS_AREA_TOP_BOUND_OFFSET =
+            "com.android.car.ui.utils.FOCUS_AREA_TOP_BOUND_OFFSET";
 
-    /** The key to store the bottom padding of the FocusArea highlight in the node's extras. */
-    public static final String FOCUS_AREA_HIGHLIGHT_BOTTOM_PADDING =
-            "com.android.car.ui.utils.FOCUS_AREA_HIGHLIGHT_BOTTOM_PADDING";
+    /** The key to store the offset of the FocusArea's bottom bound in the node's extras. */
+    public static final String FOCUS_AREA_BOTTOM_BOUND_OFFSET =
+            "com.android.car.ui.utils.FOCUS_AREA_BOTTOM_BOUND_OFFSET";
 
     /** Prevent instantiation. */
-    private RotaryConstants() {}
+    private RotaryConstants() {
+    }
 }
