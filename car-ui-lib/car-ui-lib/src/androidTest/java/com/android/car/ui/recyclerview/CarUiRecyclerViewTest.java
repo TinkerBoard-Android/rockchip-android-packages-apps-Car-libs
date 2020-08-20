@@ -402,10 +402,13 @@ public class CarUiRecyclerViewTest {
 
         View trackView = mActivity.requireViewById(R.id.car_ui_scrollbar_track);
         View thumbView = mActivity.requireViewById(R.id.car_ui_scrollbar_thumb);
+        // if you drag too far in a single step you'll stop selecting the thumb view
+        int numSteps = (int) Math.ceil(
+                trackView.getHeight() / (float) thumbView.getHeight() * 1.1f);
         // drag and scroll to the middle
         onView(withId(R.id.car_ui_scrollbar_track)).perform(
                 performDrag(0f, (thumbView.getHeight() / 2f), 0,
-                        (thumbView.getHeight() / 2f) - 1, 10, Float.MAX_VALUE,
+                    (trackView.getHeight() / 2f) / numSteps, numSteps, Float.MAX_VALUE,
                         trackView.getHeight() / 2f));
         onView(withText(adapter.getItemText(25))).check(matches(isDisplayed()));
     }
