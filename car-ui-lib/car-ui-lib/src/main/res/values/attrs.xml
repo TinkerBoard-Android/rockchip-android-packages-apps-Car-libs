@@ -153,6 +153,7 @@
         <!-- The ID of a focusable descendant view which should be focused when the user nudges to
              this FocusArea. -->
         <attr name="defaultFocus" format="reference"/>
+
         <!-- The paddings of FocusArea highlight. It does't impact the paddings on its child views,
              or vice versa. -->
         <!-- The start padding of the FocusArea highlight. -->
@@ -169,5 +170,24 @@
         <!-- The vertical padding of the FocusArea highlight.  It can be overridden by
              highlightPaddingTop or highlightPaddingBottom. -->
         <attr name="highlightPaddingVertical" format="dimension"/>
+
+        <!-- The offset of the FocusArea's bounds. It only affects the perceived bounds for the
+             purposes of finding the nudge target. It doesn't affect the FocusArea's view bounds or
+             highlight bounds. The offset should only be used when FocusAreas are overlapping and
+             nudge interaction is ambiguous. -->
+        <!-- The offset of the FocusArea's start bound. -->
+        <attr name="startBoundOffset" format="dimension"/>
+        <!-- The offset of the FocusArea's end bound. -->
+        <attr name="endBoundOffset" format="dimension"/>
+        <!-- The offset of the FocusArea's top bound. -->
+        <attr name="topBoundOffset" format="dimension"/>
+        <!-- The offset of the FocusArea's bottom bound. -->
+        <attr name="bottomBoundOffset" format="dimension"/>
+        <!-- The offset of the FocusArea's horizontal bounds. It can be overridden by
+             startBoundOffset or endBoundOffset. -->
+        <attr name="horizontalBoundOffset" format="dimension"/>
+        <!-- The offset of the FocusArea's vertical bounds. It can be overridden by topBoundOffset
+             or bottomBoundOffset. -->
+        <attr name="verticalBoundOffset" format="dimension"/>
     </declare-styleable>
 </resources>

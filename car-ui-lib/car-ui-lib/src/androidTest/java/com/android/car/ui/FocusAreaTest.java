@@ -21,10 +21,10 @@ import static android.view.View.LAYOUT_DIRECTION_RTL;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_FOCUS;
 
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_ACTION_TYPE;
-import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_HIGHLIGHT_BOTTOM_PADDING;
-import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_HIGHLIGHT_LEFT_PADDING;
-import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_HIGHLIGHT_RIGHT_PADDING;
-import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_HIGHLIGHT_TOP_PADDING;
+import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_BOTTOM_BOUND_OFFSET;
+import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_LEFT_BOUND_OFFSET;
+import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_RIGHT_BOUND_OFFSET;
+import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_TOP_BOUND_OFFSET;
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_DEFAULT;
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_FIRST;
 
@@ -56,6 +56,7 @@ public class FocusAreaTest {
 
     private FocusAreaTestActivity mActivity;
     private TestFocusArea mFocusArea;
+    private TestFocusArea mFocusArea2;
     private View mChild;
     private View mDefaultFocus;
     private View mNonChild;
@@ -65,6 +66,7 @@ public class FocusAreaTest {
         mActivity = mActivityRule.getActivity();
         mFocusArea = mActivity.findViewById(R.id.focus_area);
         mFocusArea.registerFocusChangeListener();
+        mFocusArea2 = mActivity.findViewById(R.id.focus_area2);
         mChild = mActivity.findViewById(R.id.child);
         mDefaultFocus = mActivity.findViewById(R.id.default_focus);
         mNonChild = mActivity.findViewById(R.id.non_child);
@@ -139,21 +141,22 @@ public class FocusAreaTest {
     }
 
     @Test
-    public void testHighlightPadding() {
+    public void testBoundsOffset() {
         assertThat(mFocusArea.getLayoutDirection()).isEqualTo(LAYOUT_DIRECTION_LTR);
 
-        // FocusArea highlight padding specified in layout file:
+        // FocusArea's bounds offset specified in layout file:
         // 10dp(start), 20dp(end), 30dp(top), 40dp(bottom).
         int left = dp2Px(10);
         int right = dp2Px(20);
         int top = dp2Px(30);
         int bottom = dp2Px(40);
         AccessibilityNodeInfo node = mFocusArea.createAccessibilityNodeInfo();
-        assertHighlightPadding(node, left, top, right, bottom);
+        assertBoundsOffset(node, left, top, right, bottom);
+        node.recycle();
     }
 
     @Test
-    public void testHighlightPaddingWithRtl() throws Exception {
+    public void testBoundsOffsetWithRtl() throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
         mFocusArea.post(() -> {
             mFocusArea.setLayoutDirection(LAYOUT_DIRECTION_RTL);
@@ -169,23 +172,38 @@ public class FocusAreaTest {
         int top = dp2Px(30);
         int bottom = dp2Px(40);
         AccessibilityNodeInfo node = mFocusArea.createAccessibilityNodeInfo();
-        assertHighlightPadding(node, left, top, right, bottom);
+        assertBoundsOffset(node, left, top, right, bottom);
+        node.recycle();
     }
 
     @Test
-    public void testSetHighlightPadding() {
-        mFocusArea.setHighlightPadding(50, 60, 70, 80);
+    public void testSetBoundsOffset() {
+        mFocusArea.setBoundsOffset(50, 60, 70, 80);
         AccessibilityNodeInfo node = mFocusArea.createAccessibilityNodeInfo();
-        assertHighlightPadding(node, 50, 60, 70, 80);
+        assertBoundsOffset(node, 50, 60, 70, 80);
+        node.recycle();
     }
 
-    private void assertHighlightPadding(
+    @Test
+    public void testHighlightPadding() {
+        assertThat(mFocusArea2.getLayoutDirection()).isEqualTo(LAYOUT_DIRECTION_LTR);
+
+        int left = dp2Px(50);
+        int right = dp2Px(10);
+        int top = dp2Px(40);
+        int bottom = dp2Px(20);
+        AccessibilityNodeInfo node = mFocusArea2.createAccessibilityNodeInfo();
+        assertBoundsOffset(node, left, top, right, bottom);
+        node.recycle();
+    }
+
+    private void assertBoundsOffset(
             @NonNull AccessibilityNodeInfo node, int leftPx, int topPx, int rightPx, int bottomPx) {
         Bundle extras = node.getExtras();
-        assertThat(extras.getInt(FOCUS_AREA_HIGHLIGHT_LEFT_PADDING)).isEqualTo(leftPx);
-        assertThat(extras.getInt(FOCUS_AREA_HIGHLIGHT_RIGHT_PADDING)).isEqualTo(rightPx);
-        assertThat(extras.getInt(FOCUS_AREA_HIGHLIGHT_TOP_PADDING)).isEqualTo(topPx);
-        assertThat(extras.getInt(FOCUS_AREA_HIGHLIGHT_BOTTOM_PADDING)).isEqualTo(bottomPx);
+        assertThat(extras.getInt(FOCUS_AREA_LEFT_BOUND_OFFSET)).isEqualTo(leftPx);
+        assertThat(extras.getInt(FOCUS_AREA_RIGHT_BOUND_OFFSET)).isEqualTo(rightPx);
+        assertThat(extras.getInt(FOCUS_AREA_TOP_BOUND_OFFSET)).isEqualTo(topPx);
+        assertThat(extras.getInt(FOCUS_AREA_BOTTOM_BOUND_OFFSET)).isEqualTo(bottomPx);
     }
 
     /** Converts dp unit to equivalent pixels. */
