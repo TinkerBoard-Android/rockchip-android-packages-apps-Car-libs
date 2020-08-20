@@ -19,10 +19,10 @@ package com.android.car.ui;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_FOCUS;
 
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_ACTION_TYPE;
-import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_HIGHLIGHT_BOTTOM_PADDING;
-import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_HIGHLIGHT_LEFT_PADDING;
-import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_HIGHLIGHT_RIGHT_PADDING;
-import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_HIGHLIGHT_TOP_PADDING;
+import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_BOTTOM_BOUND_OFFSET;
+import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_LEFT_BOUND_OFFSET;
+import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_RIGHT_BOUND_OFFSET;
+import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_TOP_BOUND_OFFSET;
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_DEFAULT;
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_FIRST;
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_INVALID;
@@ -70,7 +70,7 @@ public class FocusArea extends LinearLayout {
 
     private static final String TAG = "FocusArea";
 
-    private static final int INVALID_PADDING = -1;
+    private static final int INVALID_DIMEN = -1;
 
     /** Whether the FocusArea's descendant has focus (the FocusArea itself is not focusable). */
     private boolean mHasFocus;
@@ -104,6 +104,12 @@ public class FocusArea extends LinearLayout {
     private int mPaddingRight;
     private int mPaddingTop;
     private int mPaddingBottom;
+
+    /** The offset (in pixels) of the FocusArea's bounds. */
+    private int mLeftOffset;
+    private int mRightOffset;
+    private int mTopOffset;
+    private int mBottomOffset;
 
     /** Whether the layout direction is {@link View#LAYOUT_DIRECTION_RTL}. */
     private boolean mRtl;
@@ -187,15 +193,15 @@ public class FocusArea extends LinearLayout {
             // 3. otherwise use 0
 
             int paddingStart = a.getDimensionPixelSize(
-                    R.styleable.FocusArea_highlightPaddingStart, INVALID_PADDING);
-            if (paddingStart == INVALID_PADDING) {
+                    R.styleable.FocusArea_highlightPaddingStart, INVALID_DIMEN);
+            if (paddingStart == INVALID_DIMEN) {
                 paddingStart = a.getDimensionPixelSize(
                         R.styleable.FocusArea_highlightPaddingHorizontal, 0);
             }
 
             int paddingEnd = a.getDimensionPixelSize(
-                    R.styleable.FocusArea_highlightPaddingEnd, INVALID_PADDING);
-            if (paddingEnd == INVALID_PADDING) {
+                    R.styleable.FocusArea_highlightPaddingEnd, INVALID_DIMEN);
+            if (paddingEnd == INVALID_DIMEN) {
                 paddingEnd = a.getDimensionPixelSize(
                         R.styleable.FocusArea_highlightPaddingHorizontal, 0);
             }
@@ -205,17 +211,54 @@ public class FocusArea extends LinearLayout {
             mPaddingRight = mRtl ? paddingStart : paddingEnd;
 
             mPaddingTop = a.getDimensionPixelSize(
-                    R.styleable.FocusArea_highlightPaddingTop, INVALID_PADDING);
-            if (mPaddingTop == INVALID_PADDING) {
+                    R.styleable.FocusArea_highlightPaddingTop, INVALID_DIMEN);
+            if (mPaddingTop == INVALID_DIMEN) {
                 mPaddingTop = a.getDimensionPixelSize(
                         R.styleable.FocusArea_highlightPaddingVertical, 0);
             }
 
             mPaddingBottom = a.getDimensionPixelSize(
-                    R.styleable.FocusArea_highlightPaddingBottom, INVALID_PADDING);
-            if (mPaddingBottom == INVALID_PADDING) {
+                    R.styleable.FocusArea_highlightPaddingBottom, INVALID_DIMEN);
+            if (mPaddingBottom == INVALID_DIMEN) {
                 mPaddingBottom = a.getDimensionPixelSize(
                         R.styleable.FocusArea_highlightPaddingVertical, 0);
+            }
+
+            // Initialize the offset of the FocusArea's bounds. The offset, for example, left
+            // offset, is set in the following order:
+            // 1. if startBoundOffset (or endBoundOffset in RTL layout) specified, use it
+            // 2. otherwise, if horizontalBoundOffset is specified, use it
+            // 3. otherwise use mPaddingLeft
+
+            int startOffset = a.getDimensionPixelSize(
+                    R.styleable.FocusArea_startBoundOffset, INVALID_DIMEN);
+            if (startOffset == INVALID_DIMEN) {
+                startOffset = a.getDimensionPixelSize(
+                        R.styleable.FocusArea_horizontalBoundOffset, paddingStart);
+            }
+
+            int endOffset = a.getDimensionPixelSize(
+                    R.styleable.FocusArea_endBoundOffset, INVALID_DIMEN);
+            if (endOffset == INVALID_DIMEN) {
+                endOffset = a.getDimensionPixelSize(
+                        R.styleable.FocusArea_horizontalBoundOffset, paddingEnd);
+            }
+
+            mLeftOffset = mRtl ? endOffset : startOffset;
+            mRightOffset = mRtl ? startOffset : endOffset;
+
+            mTopOffset = a.getDimensionPixelSize(
+                    R.styleable.FocusArea_topBoundOffset, INVALID_DIMEN);
+            if (mTopOffset == INVALID_DIMEN) {
+                mTopOffset = a.getDimensionPixelSize(
+                        R.styleable.FocusArea_verticalBoundOffset, mPaddingTop);
+            }
+
+            mBottomOffset = a.getDimensionPixelSize(
+                    R.styleable.FocusArea_bottomBoundOffset, INVALID_DIMEN);
+            if (mBottomOffset == INVALID_DIMEN) {
+                mBottomOffset = a.getDimensionPixelSize(
+                        R.styleable.FocusArea_verticalBoundOffset, mPaddingBottom);
             }
         } finally {
             a.recycle();
@@ -236,9 +279,14 @@ public class FocusArea extends LinearLayout {
         boolean rtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
         if (mRtl != rtl) {
             mRtl = rtl;
+
             int temp = mPaddingLeft;
             mPaddingLeft = mPaddingRight;
             mPaddingRight = temp;
+
+            temp = mLeftOffset;
+            mLeftOffset = mRightOffset;
+            mRightOffset = temp;
         }
     }
 
@@ -314,10 +362,10 @@ public class FocusArea extends LinearLayout {
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         Bundle bundle = info.getExtras();
-        bundle.putInt(FOCUS_AREA_HIGHLIGHT_LEFT_PADDING, mPaddingLeft);
-        bundle.putInt(FOCUS_AREA_HIGHLIGHT_RIGHT_PADDING, mPaddingRight);
-        bundle.putInt(FOCUS_AREA_HIGHLIGHT_TOP_PADDING, mPaddingTop);
-        bundle.putInt(FOCUS_AREA_HIGHLIGHT_BOTTOM_PADDING, mPaddingBottom);
+        bundle.putInt(FOCUS_AREA_LEFT_BOUND_OFFSET, mLeftOffset);
+        bundle.putInt(FOCUS_AREA_RIGHT_BOUND_OFFSET, mRightOffset);
+        bundle.putInt(FOCUS_AREA_TOP_BOUND_OFFSET, mTopOffset);
+        bundle.putInt(FOCUS_AREA_BOTTOM_BOUND_OFFSET, mBottomOffset);
     }
 
     /** Sets the padding (in pixels) of the FocusArea highlight. */
@@ -331,5 +379,13 @@ public class FocusArea extends LinearLayout {
         mPaddingRight = right;
         mPaddingBottom = bottom;
         invalidate();
+    }
+
+    /** Sets the offset (in pixels) of the FocusArea's bounds. */
+    public void setBoundsOffset(int left, int top, int right, int bottom) {
+        mLeftOffset = left;
+        mTopOffset = top;
+        mRightOffset = right;
+        mBottomOffset = bottom;
     }
 }
