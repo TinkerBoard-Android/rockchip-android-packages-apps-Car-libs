@@ -28,10 +28,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:defaultFocus="@+id/default_focus"
-        app:highlightPaddingStart="10dp"
-        app:highlightPaddingEnd="20dp"
-        app:highlightPaddingTop="30dp"
-        app:highlightPaddingBottom="40dp">
+        app:startBoundOffset="10dp"
+        app:endBoundOffset="20dp"
+        app:topBoundOffset="30dp"
+        app:bottomBoundOffset="40dp">
         <View
             android:id="@+id/child"
             android:focusable="true"
@@ -48,4 +48,13 @@
         android:focusable="true"
         android:layout_width="100dp"
         android:layout_height="100dp"/>
+    <com.android.car.ui.TestFocusArea
+        android:id="@+id/focus_area2"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        app:highlightPaddingHorizontal="10dp"
+        app:highlightPaddingVertical="20dp"
+        app:highlightPaddingStart="30dp"
+        app:highlightPaddingTop="40dp"
+        app:startBoundOffset="50dp"/>
 </LinearLayout>
