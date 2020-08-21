@@ -20,6 +20,7 @@ import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -38,15 +39,17 @@ class FastScroller implements View.OnTouchListener {
     private float mTouchDownY = -1;
 
     private View mScrollTrackView;
-    private boolean mIsDragging;
     private View mScrollThumb;
     private RecyclerView mRecyclerView;
+    private int mClickActionThreshold;
 
     FastScroller(@NonNull RecyclerView recyclerView, @NonNull View scrollTrackView,
             @NonNull View scrollView) {
         mRecyclerView = recyclerView;
         mScrollTrackView = scrollTrackView;
         mScrollThumb = requireViewByRefId(scrollView, R.id.car_ui_scrollbar_thumb);
+        mClickActionThreshold = ViewConfiguration.get(
+                recyclerView.getContext()).getScaledTouchSlop();
     }
 
     void enable() {
@@ -60,10 +63,8 @@ class FastScroller implements View.OnTouchListener {
         switch (me.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 mTouchDownY = me.getY();
-                mIsDragging = false;
                 break;
             case MotionEvent.ACTION_MOVE:
-                mIsDragging = true;
                 float thumbBottom = mScrollThumb.getY() + mScrollThumb.getHeight();
                 // check if the move coordinates are within the bounds of the thumb. i.e user is
                 // holding and dragging the thumb.
@@ -85,15 +86,19 @@ class FastScroller implements View.OnTouchListener {
                 break;
             case MotionEvent.ACTION_UP:
             default:
-                mTouchDownY = -1;
-                // if not dragged then it's a click. When a click is detected on the track and
-                // within the range we want to move the center of the thumb to the Y coordinate
-                // of the clicked position.
-                if (!mIsDragging) {
+                if (isClick(mTouchDownY, me.getY())) {
                     verticalScrollTo(me.getY() + mScrollTrackView.getY());
                 }
+                mTouchDownY = -1;
         }
         return true;
+    }
+
+    /**
+     * Checks if the start and end points are within the threshold to be considered as a click.
+     */
+    private boolean isClick(float startY, float endY) {
+        return Math.abs(startY - endY) < mClickActionThreshold;
     }
 
     private void verticalScrollTo(float y) {
