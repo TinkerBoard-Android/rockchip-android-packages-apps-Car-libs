@@ -19,4 +19,28 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="album_art" msgid="3392647029019061691">"এলবাম আৰ্ট"</string>
     <string name="metadata_default_title" msgid="5902775732281325081">"কোনো শিৰোনাম নাই"</string>
+    <!-- no translation found for default_error_message (4044331619453864482) -->
+    <skip />
+    <!-- no translation found for error_code_app_error (3608680401453743688) -->
+    <skip />
+    <!-- no translation found for error_code_not_supported (8004310657548193089) -->
+    <skip />
+    <!-- no translation found for error_code_authentication_expired (1727285213286610186) -->
+    <skip />
+    <!-- no translation found for error_code_premium_account_required (2328664287270814966) -->
+    <skip />
+    <!-- no translation found for error_code_concurrent_stream_limit (493048763425570552) -->
+    <skip />
+    <!-- no translation found for error_code_parental_control_restricted (325145513462419399) -->
+    <skip />
+    <!-- no translation found for error_code_not_available_in_region (5840935836875073145) -->
+    <skip />
+    <!-- no translation found for error_code_content_already_playing (1306236349553004461) -->
+    <skip />
+    <!-- no translation found for error_code_skip_limit_reached (4203743406433151146) -->
+    <skip />
+    <!-- no translation found for error_code_action_aborted (8611777981356536501) -->
+    <skip />
+    <!-- no translation found for error_code_end_of_queue (6935022448319288887) -->
+    <skip />
 </resources>
