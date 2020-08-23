@@ -19,6 +19,8 @@ package com.android.car.ui.paintbooth.caruirecyclerview;
 import android.app.Activity;
 import android.os.Bundle;
 
+import androidx.recyclerview.widget.GridLayoutManager;
+
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.core.CarUi;
@@ -45,6 +47,7 @@ public class GridCarUiRecyclerViewActivity extends Activity implements
         toolbar.setState(Toolbar.State.SUBPAGE);
 
         CarUiRecyclerView recyclerView = findViewById(R.id.list);
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
 
         RecyclerViewAdapter adapter = new RecyclerViewAdapter(generateDummyData());
         recyclerView.setAdapter(adapter);
