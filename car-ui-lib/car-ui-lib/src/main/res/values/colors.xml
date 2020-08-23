@@ -50,4 +50,13 @@
     <color name="car_ui_rotary_focus_fill_color">#3D94CBFF</color>
     <color name="car_ui_rotary_focus_stroke_secondary_color">#0059B3</color>
     <color name="car_ui_rotary_focus_fill_secondary_color">#3D0059B3</color>
+
+    <!-- IME wide screen -->
+
+    <color name="car_ui_ime_wide_screen_error_text_color">#F00</color>
+    <color name="car_ui_ime_wide_screen_divider_color">#2E3134</color>
+    <color name="car_ui_ime_wide_screen_description_title_color">#FFF</color>
+    <color name="car_ui_ime_wide_screen_description_color">#FFF</color>
+    <color name="car_ui_ime_wide_screen_search_item_title_color">#FFF</color>
+    <color name="car_ui_ime_wide_screen_search_item_sub_title_color">#FFF</color>
 </resources>
