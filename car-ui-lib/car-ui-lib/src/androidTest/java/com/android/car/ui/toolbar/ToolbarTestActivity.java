@@ -24,9 +24,25 @@ import com.android.car.ui.test.R;
 /** An Activity used for testing {@link ToolbarController}. */
 public class ToolbarTestActivity extends Activity {
 
+    private int mTimesOnBackPressed = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.empty_test_activity);
+    }
+
+    /**
+     * ag/12161937 changes the behavior of pressing back on the top level activity, so
+     * assert the number of times onBackPressed() is called instead of if the activity isFinishing()
+     */
+    public int getTimesOnBackPressed() {
+        return mTimesOnBackPressed;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        mTimesOnBackPressed++;
     }
 }
