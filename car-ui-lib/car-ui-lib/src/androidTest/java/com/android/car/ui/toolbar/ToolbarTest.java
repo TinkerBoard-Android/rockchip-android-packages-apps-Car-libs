@@ -33,14 +33,11 @@ import static com.android.car.ui.matchers.ViewMatchers.withDrawable;
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertTrue;
 
 import static org.hamcrest.core.IsNot.not;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import android.app.Activity;
 import android.view.View;
 
 import androidx.test.rule.ActivityTestRule;
@@ -118,8 +115,7 @@ public class ToolbarTest {
 
         onView(withId(R.id.car_ui_toolbar_nav_icon_container)).perform(click());
 
-        assertTrue(mActivityRule.getActivity().isFinishing());
-        assertEquals(mActivityRule.getActivityResult().getResultCode(), Activity.RESULT_CANCELED);
+        assertEquals(1, mActivityRule.getActivity().getTimesOnBackPressed());
     }
 
     @Test
@@ -131,8 +127,7 @@ public class ToolbarTest {
 
         onView(withId(R.id.car_ui_toolbar_nav_icon_container)).perform(click());
 
-        assertTrue(mActivityRule.getActivity().isFinishing());
-        assertEquals(mActivityRule.getActivityResult().getResultCode(), Activity.RESULT_CANCELED);
+        assertEquals(1, mActivityRule.getActivity().getTimesOnBackPressed());
     }
 
     @Test
@@ -144,7 +139,7 @@ public class ToolbarTest {
 
         onView(withId(R.id.car_ui_toolbar_nav_icon_container)).perform(click());
 
-        assertFalse(mActivityRule.getActivity().isFinishing());
+        assertEquals(0, mActivityRule.getActivity().getTimesOnBackPressed());
     }
 
     @Test
@@ -159,7 +154,7 @@ public class ToolbarTest {
 
         onView(withId(R.id.car_ui_toolbar_nav_icon_container)).perform(click());
 
-        assertTrue(mActivityRule.getActivity().isFinishing());
+        assertEquals(1, mActivityRule.getActivity().getTimesOnBackPressed());
     }
 
     @Test
