@@ -20,10 +20,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
 import com.android.car.apps.common.log.L;
@@ -55,6 +57,12 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
      * key to contacts for one account.
      */
     private final Map<String, Map<String, Contact>> mLookupKeyContactMap = new HashMap<>();
+
+    /**
+     * A map which divides contacts LiveData by account.
+     */
+    private final Map<String, MutableLiveData<List<Contact>>> mAccountContactsLiveDataMap =
+            new ArrayMap<>();
     private boolean mIsLoaded = false;
 
     /**
@@ -136,9 +144,26 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
 
     /**
      * Returns a {@link LiveData} which monitors the contact list changes.
+     *
+     * @deprecated Use {@link #getContactsLiveDataByAccount(String)} instead.
      */
+    @Deprecated
     public LiveData<List<Contact>> getContactsLiveData() {
         return mContactListAsyncQueryLiveData;
+    }
+
+    /**
+     * Returns a LiveData that represents all contacts within an account.
+     *
+     * @param accountName the name of an account that contains all the contacts. For the contacts
+     *                    from a Bluetooth connected phone, the account name is equal to the
+     *                    Bluetooth address.
+     */
+    public LiveData<List<Contact>> getContactsLiveDataByAccount(String accountName) {
+        if (!mAccountContactsLiveDataMap.containsKey(accountName)) {
+            mAccountContactsLiveDataMap.put(accountName, new MutableLiveData<>());
+        }
+        return mAccountContactsLiveDataMap.get(accountName);
     }
 
     /**
@@ -227,8 +252,12 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
             subMap.put(lookupKey, Contact.fromCursor(mContext, cursor, subMap.get(lookupKey)));
         }
 
-        for (Map<String, Contact> subMap : contactMap.values()) {
+        for (String accountName : contactMap.keySet()) {
+            Map<String, Contact> subMap = contactMap.get(accountName);
             contactList.addAll(subMap.values());
+            MutableLiveData<List<Contact>> accountContactsLiveData =
+                    (MutableLiveData<List<Contact>>) getContactsLiveDataByAccount(accountName);
+            accountContactsLiveData.postValue(new ArrayList<>(subMap.values()));
         }
 
         mLookupKeyContactMap.clear();
