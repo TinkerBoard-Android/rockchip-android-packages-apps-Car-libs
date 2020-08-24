@@ -35,7 +35,6 @@ allprojects {
         google()
         jcenter()
     }
-    buildDir = "/tmp/car-ui-build/${rootProject.name}/${project.name}"
     tasks.withType(JavaCompile) {
         options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
     }
