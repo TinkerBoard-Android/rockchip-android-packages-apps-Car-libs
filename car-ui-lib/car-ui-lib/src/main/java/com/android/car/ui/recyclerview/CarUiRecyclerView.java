@@ -82,7 +82,13 @@ public final class CarUiRecyclerView extends RecyclerView {
     private ScrollBar mScrollBar;
 
     @Nullable
-    private GridOffsetItemDecoration mOffsetItemDecoration;
+    private GridOffsetItemDecoration mTopOffsetItemDecorationGrid;
+    @Nullable
+    private GridOffsetItemDecoration mBottomOffsetItemDecorationGrid;
+    @Nullable
+    private RecyclerView.ItemDecoration mTopOffsetItemDecorationLinear;
+    @Nullable
+    private RecyclerView.ItemDecoration mBottomOffsetItemDecorationLinear;
     @NonNull
     private GridDividerItemDecoration mDividerItemDecorationGrid;
     @NonNull
@@ -96,6 +102,10 @@ public final class CarUiRecyclerView extends RecyclerView {
     private Rect mContainerPaddingRelative;
     @Nullable
     private LinearLayout mContainer;
+
+    private boolean mEnableDividers;
+    private int mTopOffset;
+    private int mBottomOffset;
 
 
     /**
@@ -182,7 +192,7 @@ public final class CarUiRecyclerView extends RecyclerView {
         @CarUiRecyclerViewLayout int carUiRecyclerViewLayout =
                 a.getInt(R.styleable.CarUiRecyclerView_layoutStyle, CarUiRecyclerViewLayout.LINEAR);
         mNumOfColumns = a.getInt(R.styleable.CarUiRecyclerView_numOfColumns, /* defValue= */ 2);
-        boolean enableDivider =
+        mEnableDividers =
                 a.getBoolean(R.styleable.CarUiRecyclerView_enableDivider, /* defValue= */ false);
 
         mDividerItemDecorationLinear = new LinearDividerItemDecoration(
@@ -194,41 +204,23 @@ public final class CarUiRecyclerView extends RecyclerView {
                         context.getDrawable(R.drawable.car_ui_divider),
                         mNumOfColumns);
 
-        int topOffset = a.getInteger(R.styleable.CarUiRecyclerView_topOffset, /* defValue= */0);
-        int bottomOffset = a.getInteger(
+        mTopOffset = a.getInteger(R.styleable.CarUiRecyclerView_topOffset, /* defValue= */0);
+        mBottomOffset = a.getInteger(
                 R.styleable.CarUiRecyclerView_bottomOffset, /* defValue= */0);
+        mTopOffsetItemDecorationLinear =
+                new LinearOffsetItemDecoration(mTopOffset, OffsetPosition.START);
+        mBottomOffsetItemDecorationLinear =
+                new LinearOffsetItemDecoration(mBottomOffset, OffsetPosition.END);
+        mTopOffsetItemDecorationGrid =
+                new GridOffsetItemDecoration(mTopOffset, mNumOfColumns,
+                        OffsetPosition.START);
+        mBottomOffsetItemDecorationGrid =
+                new GridOffsetItemDecoration(mBottomOffset, mNumOfColumns,
+                        OffsetPosition.END);
         if (carUiRecyclerViewLayout == CarUiRecyclerViewLayout.LINEAR) {
-
-            if (enableDivider) {
-                addItemDecoration(mDividerItemDecorationLinear);
-            }
-            RecyclerView.ItemDecoration topOffsetItemDecoration =
-                    new LinearOffsetItemDecoration(topOffset, OffsetPosition.START);
-
-            RecyclerView.ItemDecoration bottomOffsetItemDecoration =
-                    new LinearOffsetItemDecoration(bottomOffset, OffsetPosition.END);
-
-            addItemDecoration(topOffsetItemDecoration);
-            addItemDecoration(bottomOffsetItemDecoration);
             setLayoutManager(new LinearLayoutManager(getContext()));
         } else {
-
-            if (enableDivider) {
-                addItemDecoration(mDividerItemDecorationGrid);
-            }
-
-            mOffsetItemDecoration =
-                    new GridOffsetItemDecoration(topOffset, mNumOfColumns,
-                            OffsetPosition.START);
-
-            GridOffsetItemDecoration bottomOffsetItemDecoration =
-                    new GridOffsetItemDecoration(bottomOffset, mNumOfColumns,
-                            OffsetPosition.END);
-
-            addItemDecoration(mOffsetItemDecoration);
-            addItemDecoration(bottomOffsetItemDecoration);
             setLayoutManager(new GridLayoutManager(getContext(), mNumOfColumns));
-            setNumOfColumns(mNumOfColumns);
         }
 
         a.recycle();
@@ -253,6 +245,34 @@ public final class CarUiRecyclerView extends RecyclerView {
         setHorizontalScrollBarEnabled(false);
 
         mScrollBarClass = context.getResources().getString(R.string.car_ui_scrollbar_component);
+    }
+
+    @Override
+    public void setLayoutManager(@Nullable LayoutManager layout) {
+        addItemDecorations(layout);
+        super.setLayoutManager(layout);
+    }
+
+    private void addItemDecorations(LayoutManager layout) {
+        if (layout instanceof GridLayoutManager) {
+            if (mEnableDividers) {
+                removeItemDecoration(mDividerItemDecorationGrid);
+                addItemDecoration(mDividerItemDecorationGrid);
+            }
+            removeItemDecoration(mTopOffsetItemDecorationGrid);
+            addItemDecoration(mTopOffsetItemDecorationGrid);
+            removeItemDecoration(mBottomOffsetItemDecorationGrid);
+            addItemDecoration(mBottomOffsetItemDecorationGrid);
+            setNumOfColumns(((GridLayoutManager) layout).getSpanCount());
+        } else {
+            if (mEnableDividers) {
+                addItemDecoration(mDividerItemDecorationLinear);
+            }
+            removeItemDecoration(mTopOffsetItemDecorationLinear);
+            addItemDecoration(mTopOffsetItemDecorationLinear);
+            removeItemDecoration(mBottomOffsetItemDecorationLinear);
+            addItemDecoration(mBottomOffsetItemDecorationLinear);
+        }
     }
 
     /**
@@ -324,8 +344,8 @@ public final class CarUiRecyclerView extends RecyclerView {
      */
     public void setNumOfColumns(int numberOfColumns) {
         mNumOfColumns = numberOfColumns;
-        if (mOffsetItemDecoration != null) {
-            mOffsetItemDecoration.setNumOfColumns(mNumOfColumns);
+        if (mTopOffsetItemDecorationGrid != null) {
+            mTopOffsetItemDecorationGrid.setNumOfColumns(mNumOfColumns);
         }
         if (mDividerItemDecorationGrid != null) {
             mDividerItemDecorationGrid.setNumOfColumns(mNumOfColumns);
