@@ -20,5 +20,7 @@ include ':PaintBooth'
 project(':PaintBooth').projectDir = new File('./paintbooth')
 include ':shared-library'
 project(':shared-library').projectDir = new File('./sharedlibrary')
+include ':oem-apis'
+project(':oem-apis').projectDir = new File('./oem-apis')
 
 rootProject.name='Chassis'

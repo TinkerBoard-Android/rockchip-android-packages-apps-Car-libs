@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Copyright (C) 2019 The Android Open Source Project
+  Copyright (C) 2020 The Android Open Source Project
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -16,15 +16,5 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.car.ui">
-    <application>
-        <provider
-            android:name="com.android.car.ui.core.CarUiInstaller"
-            android:authorities="${applicationId}.CarUiInstaller"
-            android:exported="false"/>
-        <!-- Commented out until we're ready to ship the shared library feature -->
-        <!-- <uses-library
-            android:name="com.android.car.ui.sharedlibrary"
-            android:required="false"/> -->
-    </application>
+          package="should.not.matter.because.sta_tic.library">
 </manifest>

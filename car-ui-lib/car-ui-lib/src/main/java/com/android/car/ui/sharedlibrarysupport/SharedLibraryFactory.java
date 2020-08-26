@@ -13,33 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.car.ui.sharedlibrarysupport;
 
-// Library-level build file
+/**
+ * This interface contains methods to create customizable carui components.
+ */
+public interface SharedLibraryFactory {
 
-apply plugin: 'com.android.library'
-
-android {
-    compileSdkVersion 30
-
-    defaultConfig {
-        minSdkVersion 28
-        targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    sourceSets {
-        main {
-            manifest.srcFile 'AndroidManifest-gradle.xml'
-        }
-    }
-}
-
-dependencies {
-    implementation project(':oem-apis')
+    // This will have methods like the following to create components implemented by the OEM:
+    // @Nullable
+    // ToolbarController installBaseLayoutAround(
+    //         View contentView,
+    //         Consumer<InsetsOEMV1> insetsChangedListener,
+    //         boolean toolbarEnabled);
 }

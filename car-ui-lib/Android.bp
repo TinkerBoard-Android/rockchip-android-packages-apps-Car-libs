@@ -26,7 +26,10 @@ android_library {
             "car-ui-lib/proguard-rules-platform.pro",
         ],
     },
-    libs: ["android.car-stubs"],
+    libs: [
+        "android.car-stubs",
+        "car-ui-lib-oem-apis",
+    ],
     static_libs: [
         "androidx.annotation_annotation",
         "androidx.appcompat_appcompat",
@@ -63,6 +66,7 @@ android_app {
     srcs: ["sharedlibrary/src/main/java/**/*.java"],
     manifest: "sharedlibrary/AndroidManifest.xml",
     resource_dirs: ["sharedlibrary/src/main/res"],
+    static_libs: ["car-ui-lib-oem-apis"],
     visibility: [
         "//visibility:private",
     ],

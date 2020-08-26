@@ -16,21 +16,8 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.car.ui">
+          package="should.not.matter.because.sta_tic.library">
     <uses-sdk
-        android:minSdkVersion="14"
-        android:targetSdkVersion="28" />
-
-    <application>
-        <provider
-            android:name="com.android.car.ui.core.CarUiInstaller"
-            android:authorities="${applicationId}.CarUiInstaller"
-            android:directBootAware="true"
-            android:exported="false"
-            android:process="@string/car_ui_installer_process_name"/>
-        <!-- Commented out until we're ready to ship the shared library feature -->
-        <!-- <uses-library
-            android:name="com.android.car.ui.sharedlibrary"
-            android:required="false"/> -->
-    </application>
+        android:minSdkVersion="28"
+        android:targetSdkVersion="30" />
 </manifest>
