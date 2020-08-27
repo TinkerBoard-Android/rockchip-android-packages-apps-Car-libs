@@ -81,13 +81,13 @@ public final class CarUiRecyclerView extends RecyclerView {
     @Nullable
     private ScrollBar mScrollBar;
 
-    @Nullable
+    @NonNull
     private GridOffsetItemDecoration mTopOffsetItemDecorationGrid;
-    @Nullable
+    @NonNull
     private GridOffsetItemDecoration mBottomOffsetItemDecorationGrid;
-    @Nullable
+    @NonNull
     private RecyclerView.ItemDecoration mTopOffsetItemDecorationLinear;
-    @Nullable
+    @NonNull
     private RecyclerView.ItemDecoration mBottomOffsetItemDecorationLinear;
     @NonNull
     private GridDividerItemDecoration mDividerItemDecorationGrid;
@@ -254,23 +254,26 @@ public final class CarUiRecyclerView extends RecyclerView {
     }
 
     private void addItemDecorations(LayoutManager layout) {
+        // remove existing Item decorations
+        removeItemDecoration(mDividerItemDecorationGrid);
+        removeItemDecoration(mTopOffsetItemDecorationGrid);
+        removeItemDecoration(mBottomOffsetItemDecorationGrid);
+        removeItemDecoration(mDividerItemDecorationLinear);
+        removeItemDecoration(mTopOffsetItemDecorationLinear);
+        removeItemDecoration(mBottomOffsetItemDecorationLinear);
+
         if (layout instanceof GridLayoutManager) {
             if (mEnableDividers) {
-                removeItemDecoration(mDividerItemDecorationGrid);
                 addItemDecoration(mDividerItemDecorationGrid);
             }
-            removeItemDecoration(mTopOffsetItemDecorationGrid);
             addItemDecoration(mTopOffsetItemDecorationGrid);
-            removeItemDecoration(mBottomOffsetItemDecorationGrid);
             addItemDecoration(mBottomOffsetItemDecorationGrid);
             setNumOfColumns(((GridLayoutManager) layout).getSpanCount());
         } else {
             if (mEnableDividers) {
                 addItemDecoration(mDividerItemDecorationLinear);
             }
-            removeItemDecoration(mTopOffsetItemDecorationLinear);
             addItemDecoration(mTopOffsetItemDecorationLinear);
-            removeItemDecoration(mBottomOffsetItemDecorationLinear);
             addItemDecoration(mBottomOffsetItemDecorationLinear);
         }
     }
