@@ -220,6 +220,7 @@
   <public type="id" name="car_ui_toolbar_menu_item_icon_container"/>
   <public type="id" name="car_ui_toolbar_menu_item_switch"/>
   <public type="id" name="car_ui_toolbar_menu_item_text"/>
+  <public type="id" name="car_ui_toolbar_menu_item_text_container"/>
   <public type="id" name="car_ui_toolbar_menu_item_text_with_icon"/>
   <public type="id" name="car_ui_toolbar_menu_items_container"/>
   <public type="id" name="car_ui_toolbar_nav_icon"/>

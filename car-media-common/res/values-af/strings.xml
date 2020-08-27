@@ -21,7 +21,7 @@
     <string name="metadata_default_title" msgid="5902775732281325081">"Titelloos"</string>
     <string name="default_error_message" msgid="4044331619453864482">"Iets is fout. Probeer later."</string>
     <string name="error_code_app_error" msgid="3608680401453743688">"Kan dit nie op die oomblik doen nie"</string>
-    <string name="error_code_not_supported" msgid="8004310657548193089">"Hierdie program kan nie dit doen nie"</string>
+    <string name="error_code_not_supported" msgid="8004310657548193089">"Hierdie program kan dit nie doen nie"</string>
     <string name="error_code_authentication_expired" msgid="1727285213286610186">"Meld aan om hierdie program te gebruik"</string>
     <string name="error_code_premium_account_required" msgid="2328664287270814966">"Premiumtoegang word vereis"</string>
     <string name="error_code_concurrent_stream_limit" msgid="493048763425570552">"Luister tans op te veel toestelle"</string>
