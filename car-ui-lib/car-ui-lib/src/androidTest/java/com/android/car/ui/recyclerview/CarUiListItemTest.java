@@ -29,6 +29,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -42,12 +43,14 @@ import com.android.car.ui.R;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.ArgumentMatchers;
+import org.mockito.ArgumentCaptor;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/** Unit tests for {@link CarUiListItem}. */
+/**
+ * Unit tests for {@link CarUiListItem}.
+ */
 public class CarUiListItemTest {
 
     private CarUiRecyclerView mCarUiRecyclerView;
@@ -234,6 +237,46 @@ public class CarUiListItemTest {
     }
 
     @Test
+    public void testItem_withListenerAndSupplementalIconListener() {
+        List<CarUiListItem> items = new ArrayList<>();
+
+        CarUiContentListItem.OnClickListener clickListener = mock(
+                CarUiContentListItem.OnClickListener.class);
+        View.OnClickListener supplementalIconClickListener = mock(View.OnClickListener.class);
+
+        CarUiContentListItem item = new CarUiContentListItem(
+                CarUiContentListItem.Action.ICON);
+        item.setTitle("Test item with two listeners");
+        item.setOnItemClickedListener(clickListener);
+        item.setSupplementalIcon(
+                mActivityRule.getActivity().getDrawable(R.drawable.car_ui_icon_close),
+                supplementalIconClickListener);
+        items.add(item);
+
+        mCarUiRecyclerView.post(
+                () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items)));
+
+        onView(withId(R.id.title)).check(matches(isDisplayed()));
+
+        // Clicks anywhere on the item (except supplemental icon) should trigger the item click
+        // listener.
+        onView(withId(R.id.title)).perform(click());
+        verify(clickListener, times(1)).onClick(item);
+        verify(supplementalIconClickListener, times(0)).onClick(any());
+
+        ArgumentCaptor<View> iconCaptor = ArgumentCaptor.forClass(View.class);
+        onView(withId(R.id.supplemental_icon)).perform(click());
+        // Check that icon is argument for single call to click listener.
+        verify(supplementalIconClickListener, times(1)).onClick(iconCaptor.capture());
+
+        // Verify that the standard click listener wasn't also fired.
+        verify(clickListener, times(1)).onClick(item);
+
+        View icon = mCarUiRecyclerView.findViewById(R.id.supplemental_icon);
+        assertEquals(icon, iconCaptor.getValue());
+    }
+
+    @Test
     public void testItem_withSupplementalIconAndIconOnClickListener() {
         List<CarUiListItem> items = new ArrayList<>();
 
@@ -262,8 +305,8 @@ public class CarUiListItemTest {
 
         // Clicks anywhere on the icon should invoke both listeners.
         onView(withId(R.id.action_container)).perform(click());
-        verify(mockedItemOnClickListener, times(2)).onClick(item);
-        verify(mockedIconListener, times(1)).onClick(ArgumentMatchers.any(View.class));
+        verify(mockedItemOnClickListener, times(1)).onClick(item);
+        verify(mockedIconListener, times(1)).onClick(any(View.class));
     }
 
     @Test
