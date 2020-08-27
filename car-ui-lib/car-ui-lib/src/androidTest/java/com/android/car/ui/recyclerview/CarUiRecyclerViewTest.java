@@ -45,8 +45,10 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -71,6 +73,7 @@ import androidx.test.espresso.IdlingResource;
 import androidx.test.rule.ActivityTestRule;
 
 import com.android.car.ui.TestActivity;
+import com.android.car.ui.recyclerview.decorations.grid.GridDividerItemDecoration;
 import com.android.car.ui.test.R;
 
 import org.junit.After;
@@ -211,6 +214,42 @@ public class CarUiRecyclerViewTest {
                 isCompletelyAbove(withText(adapter.getItemText(2))));
         onView(withText(adapter.getItemText(2))).check(
                 isCompletelyAbove(withText(adapter.getItemText(3))));
+    }
+
+    @Test
+    public void testSetLayoutManager_shouldUpdateItemDecorations() {
+        TypedArray typedArray = spy(mActivity.getBaseContext().obtainStyledAttributes(
+                null, R.styleable.CarUiRecyclerView));
+
+        doReturn(typedArray).when(mTestableContext).obtainStyledAttributes(
+                any(),
+                eq(R.styleable.CarUiRecyclerView),
+                anyInt(),
+                anyInt());
+        when(typedArray.getBoolean(eq(R.styleable.CarUiRecyclerView_enableDivider), anyBoolean()))
+                .thenReturn(true);
+        when(typedArray.getInt(eq(R.styleable.CarUiRecyclerView_layoutStyle), anyInt()))
+                .thenReturn(CarUiRecyclerView.CarUiRecyclerViewLayout.GRID);
+        when(typedArray.getInt(eq(R.styleable.CarUiRecyclerView_numOfColumns), anyInt()))
+                .thenReturn(3);
+
+        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerView(mTestableContext);
+        ViewGroup container = mActivity.findViewById(R.id.test_container);
+        TestAdapter adapter = new TestAdapter(4);
+        container.post(() -> {
+            container.addView(carUiRecyclerView);
+            carUiRecyclerView.setAdapter(adapter);
+        });
+
+        assertTrue(carUiRecyclerView.getLayoutManager() instanceof GridLayoutManager);
+        assertEquals(carUiRecyclerView.getItemDecorationCount(), 3);
+        assertTrue(carUiRecyclerView.getItemDecorationAt(0) instanceof GridDividerItemDecoration);
+
+        carUiRecyclerView.setLayoutManager(new LinearLayoutManager(mTestableContext));
+
+        assertTrue(carUiRecyclerView.getLayoutManager() instanceof LinearLayoutManager);
+        assertEquals(carUiRecyclerView.getItemDecorationCount(), 3);
+        assertFalse(carUiRecyclerView.getItemDecorationAt(0) instanceof GridDividerItemDecoration);
     }
 
     @Test
@@ -408,7 +447,7 @@ public class CarUiRecyclerViewTest {
         // drag and scroll to the middle
         onView(withId(R.id.car_ui_scrollbar_track)).perform(
                 performDrag(0f, (thumbView.getHeight() / 2f), 0,
-                    (trackView.getHeight() / 2f) / numSteps, numSteps, Float.MAX_VALUE,
+                        (trackView.getHeight() / 2f) / numSteps, numSteps, Float.MAX_VALUE,
                         trackView.getHeight() / 2f));
         onView(withText(adapter.getItemText(25))).check(matches(isDisplayed()));
     }
