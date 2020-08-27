@@ -16,7 +16,7 @@
 
 package com.android.car.ui.paintbooth.overlays;
 
-import android.car.userlib.CarUserManagerHelper;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.om.IOverlayManager;
 import android.os.RemoteException;
@@ -35,11 +35,9 @@ import java.util.Map;
  * image.
  */
 public class OverlayManagerImpl implements OverlayManager {
-    private final CarUserManagerHelper mCarUserManagerHelper;
     private final IOverlayManager mOverlayManager;
 
     public OverlayManagerImpl(Context context) {
-        mCarUserManagerHelper = new CarUserManagerHelper(context);
         mOverlayManager = IOverlayManager.Stub.asInterface(
                 ServiceManager.getService(Context.OVERLAY_SERVICE));
     }
@@ -62,8 +60,8 @@ public class OverlayManagerImpl implements OverlayManager {
     @Override
     @NonNull
     public Map<String, List<OverlayManager.OverlayInfo>> getOverlays() throws RemoteException {
-        Map<String, List<android.content.om.OverlayInfo>> overlays = mOverlayManager
-                .getAllOverlays(mCarUserManagerHelper.getCurrentForegroundUserId());
+        Map<String, List<android.content.om.OverlayInfo>> overlays =
+                mOverlayManager.getAllOverlays(ActivityManager.getCurrentUser());
         return overlays.entrySet()
                 .stream()
                 .collect(toMap(Map.Entry::getKey, e -> e.getValue()
@@ -74,7 +72,6 @@ public class OverlayManagerImpl implements OverlayManager {
 
     @Override
     public void applyOverlay(@NonNull String packageName, boolean enable) throws RemoteException {
-        mOverlayManager.setEnabled(packageName, enable,
-                mCarUserManagerHelper.getCurrentForegroundUserId());
+        mOverlayManager.setEnabled(packageName, enable, ActivityManager.getCurrentUser());
     }
 }

@@ -17,11 +17,11 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     defaultConfig {
         applicationId "com.android.car.ui.paintbooth"
         minSdkVersion 28
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
     }
@@ -36,9 +36,12 @@ android {
             manifest.srcFile 'AndroidManifest-gradle.xml'
             java {
                 srcDirs = ['src']
-                filter.excludes = ["com/android/car/ui/paintbooth/overlays/OverlayManagerImpl.java"]
+                filter.excludes = [
+                        "com/android/car/ui/paintbooth/overlays/OverlayManagerImpl.java",
+                        "com/android/car/ui/paintbooth/currentactivity/ActivityTaskManagerImpl.java",
+                ]
             }
-            res.srcDirs = ['res']
+            res.srcDirs = ['res', 'res-public']
         }
     }
 }

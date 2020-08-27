@@ -17,7 +17,16 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.android.car.ui">
-  <uses-sdk
-      android:minSdkVersion="14"
-      android:targetSdkVersion="28" />
+    <uses-sdk
+        android:minSdkVersion="14"
+        android:targetSdkVersion="28" />
+
+    <application>
+        <provider
+            android:name="com.android.car.ui.core.CarUiInstaller"
+            android:authorities="${applicationId}.CarUiInstaller"
+            android:directBootAware="true"
+            android:exported="false"
+            android:process="@string/car_ui_installer_process_name"/>
+    </application>
 </manifest>

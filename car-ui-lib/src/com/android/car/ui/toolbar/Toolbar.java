@@ -23,7 +23,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.widget.FrameLayout;
-import android.widget.ProgressBar;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -157,7 +156,7 @@ public class Toolbar extends FrameLayout implements ToolbarController {
                 setSearchHint(searchHint);
             }
 
-            switch (a.getInt(R.styleable.CarUiToolbar_state, 0)) {
+            switch (a.getInt(R.styleable.CarUiToolbar_car_ui_state, 0)) {
                 case 0:
                     setState(State.HOME);
                     break;
@@ -174,7 +173,7 @@ public class Toolbar extends FrameLayout implements ToolbarController {
                     break;
             }
 
-            switch (a.getInt(R.styleable.CarUiToolbar_navButtonMode, 0)) {
+            switch (a.getInt(R.styleable.CarUiToolbar_car_ui_navButtonMode, 0)) {
                 case 0:
                     setNavButtonMode(NavButtonMode.BACK);
                     break;
@@ -212,6 +211,7 @@ public class Toolbar extends FrameLayout implements ToolbarController {
     /**
      * Returns {@code true} if a two row layout in enabled for the toolbar.
      */
+    @Override
     public boolean isTabsInSecondRow() {
         return mController.isTabsInSecondRow();
     }
@@ -221,6 +221,7 @@ public class Toolbar extends FrameLayout implements ToolbarController {
      *
      * <p>The title may not always be shown, for example with one row layout with tabs.
      */
+    @Override
     public void setTitle(@StringRes int title) {
         mController.setTitle(title);
     }
@@ -230,17 +231,45 @@ public class Toolbar extends FrameLayout implements ToolbarController {
      *
      * <p>The title may not always be shown, for example with one row layout with tabs.
      */
+    @Override
     public void setTitle(CharSequence title) {
         mController.setTitle(title);
     }
 
+    @Override
     public CharSequence getTitle() {
         return mController.getTitle();
     }
 
     /**
+     * Sets the subtitle of the toolbar to a string resource.
+     *
+     * <p>The title may not always be shown, for example with one row layout with tabs.
+     */
+    @Override
+    public void setSubtitle(@StringRes int title) {
+        mController.setSubtitle(title);
+    }
+
+    /**
+     * Sets the subtitle of the toolbar to a CharSequence.
+     *
+     * <p>The title may not always be shown, for example with one row layout with tabs.
+     */
+    @Override
+    public void setSubtitle(CharSequence title) {
+        mController.setSubtitle(title);
+    }
+
+    @Override
+    public CharSequence getSubtitle() {
+        return mController.getSubtitle();
+    }
+
+    /**
      * Gets the {@link TabLayout} for this toolbar.
      */
+    @Override
     public TabLayout getTabLayout() {
         return mController.getTabLayout();
     }
@@ -249,11 +278,13 @@ public class Toolbar extends FrameLayout implements ToolbarController {
      * Adds a tab to this toolbar. You can listen for when it is selected via
      * {@link #registerOnTabSelectedListener(OnTabSelectedListener)}.
      */
+    @Override
     public void addTab(TabLayout.Tab tab) {
         mController.addTab(tab);
     }
 
     /** Removes all the tabs. */
+    @Override
     public void clearAllTabs() {
         mController.clearAllTabs();
     }
@@ -262,6 +293,7 @@ public class Toolbar extends FrameLayout implements ToolbarController {
      * Gets a tab added to this toolbar. See
      * {@link #addTab(TabLayout.Tab)}.
      */
+    @Override
     public TabLayout.Tab getTab(int position) {
         return mController.getTab(position);
     }
@@ -270,6 +302,7 @@ public class Toolbar extends FrameLayout implements ToolbarController {
      * Selects a tab added to this toolbar. See
      * {@link #addTab(TabLayout.Tab)}.
      */
+    @Override
     public void selectTab(int position) {
         mController.selectTab(position);
     }
@@ -277,6 +310,7 @@ public class Toolbar extends FrameLayout implements ToolbarController {
     /**
      * Sets whether or not tabs should also be shown in the SUBPAGE {@link State}.
      */
+    @Override
     public void setShowTabsInSubpage(boolean showTabs) {
         mController.setShowTabsInSubpage(showTabs);
     }
@@ -284,6 +318,7 @@ public class Toolbar extends FrameLayout implements ToolbarController {
     /**
      * Gets whether or not tabs should also be shown in the SUBPAGE {@link State}.
      */
+    @Override
     public boolean getShowTabsInSubpage() {
         return mController.getShowTabsInSubpage();
     }
@@ -292,6 +327,7 @@ public class Toolbar extends FrameLayout implements ToolbarController {
      * Sets the logo to display in this toolbar. If navigation icon is being displayed, this logo
      * will be displayed next to the title.
      */
+    @Override
     public void setLogo(@DrawableRes int resId) {
         mController.setLogo(resId);
     }
@@ -300,21 +336,25 @@ public class Toolbar extends FrameLayout implements ToolbarController {
      * Sets the logo to display in this toolbar. If navigation icon is being displayed, this logo
      * will be displayed next to the title.
      */
+    @Override
     public void setLogo(Drawable drawable) {
         mController.setLogo(drawable);
     }
 
     /** Sets the hint for the search bar. */
+    @Override
     public void setSearchHint(@StringRes int resId) {
         mController.setSearchHint(resId);
     }
 
     /** Sets the hint for the search bar. */
+    @Override
     public void setSearchHint(CharSequence hint) {
         mController.setSearchHint(hint);
     }
 
     /** Gets the search hint */
+    @Override
     public CharSequence getSearchHint() {
         return mController.getSearchHint();
     }
@@ -325,6 +365,7 @@ public class Toolbar extends FrameLayout implements ToolbarController {
      * <p>The icon will be lost on configuration change, make sure to set it in onCreate() or
      * a similar place.
      */
+    @Override
     public void setSearchIcon(@DrawableRes int resId) {
         mController.setSearchIcon(resId);
     }
@@ -335,6 +376,7 @@ public class Toolbar extends FrameLayout implements ToolbarController {
      * <p>The icon will be lost on configuration change, make sure to set it in onCreate() or
      * a similar place.
      */
+    @Override
     public void setSearchIcon(Drawable d) {
         mController.setSearchIcon(d);
     }
@@ -353,11 +395,13 @@ public class Toolbar extends FrameLayout implements ToolbarController {
     }
 
     /** Sets the {@link NavButtonMode} */
+    @Override
     public void setNavButtonMode(NavButtonMode style) {
         mController.setNavButtonMode(style);
     }
 
     /** Gets the {@link NavButtonMode} */
+    @Override
     public NavButtonMode getNavButtonMode() {
         return mController.getNavButtonMode();
     }
@@ -373,11 +417,13 @@ public class Toolbar extends FrameLayout implements ToolbarController {
     }
 
     /** Show/hide the background. When hidden, the toolbar is completely transparent. */
+    @Override
     public void setBackgroundShown(boolean shown) {
         mController.setBackgroundShown(shown);
     }
 
     /** Returns true is the toolbar background is shown */
+    @Override
     public boolean getBackgroundShown() {
         return mController.getBackgroundShown();
     }
@@ -385,6 +431,7 @@ public class Toolbar extends FrameLayout implements ToolbarController {
     /**
      * Sets the {@link MenuItem Menuitems} to display.
      */
+    @Override
     public void setMenuItems(@Nullable List<MenuItem> items) {
         mController.setMenuItems(items);
     }
@@ -415,26 +462,30 @@ public class Toolbar extends FrameLayout implements ToolbarController {
      * </MenuItems>
      * </pre>
      *
-     * @see #setMenuItems(List)
      * @return The MenuItems that were loaded from XML.
+     * @see #setMenuItems(List)
      */
+    @Override
     public List<MenuItem> setMenuItems(@XmlRes int resId) {
         return mController.setMenuItems(resId);
     }
 
     /** Gets the {@link MenuItem MenuItems} currently displayed */
+    @Override
     @NonNull
     public List<MenuItem> getMenuItems() {
         return mController.getMenuItems();
     }
 
     /** Gets a {@link MenuItem} by id. */
+    @Override
     @Nullable
     public MenuItem findMenuItemById(int id) {
         return mController.findMenuItemById(id);
     }
 
     /** Gets a {@link MenuItem} by id. Will throw an exception if not found. */
+    @Override
     @NonNull
     public MenuItem requireMenuItemById(int id) {
         return mController.requireMenuItemById(id);
@@ -445,11 +496,13 @@ public class Toolbar extends FrameLayout implements ToolbarController {
      * Even if this is set to true, the {@link MenuItem} created by
      * {@link MenuItem.Builder#setToSearch()} will still be hidden.
      */
+    @Override
     public void setShowMenuItemsWhileSearching(boolean showMenuItems) {
         mController.setShowMenuItemsWhileSearching(showMenuItems);
     }
 
     /** Returns if {@link MenuItem MenuItems} are shown while searching */
+    @Override
     public boolean getShowMenuItemsWhileSearching() {
         return mController.getShowMenuItemsWhileSearching();
     }
@@ -457,6 +510,7 @@ public class Toolbar extends FrameLayout implements ToolbarController {
     /**
      * Sets the search query.
      */
+    @Override
     public void setSearchQuery(String query) {
         mController.setSearchQuery(query);
     }
@@ -465,11 +519,13 @@ public class Toolbar extends FrameLayout implements ToolbarController {
      * Sets the state of the toolbar. This will show/hide the appropriate elements of the toolbar
      * for the desired state.
      */
+    @Override
     public void setState(State state) {
         mController.setState(state);
     }
 
     /** Gets the current {@link State} of the toolbar. */
+    @Override
     public State getState() {
         return mController.getState();
     }
@@ -535,69 +591,70 @@ public class Toolbar extends FrameLayout implements ToolbarController {
      * nothing else. {@link com.android.car.ui.recyclerview.CarUiRecyclerView} will
      * automatically adjust its height according to the height of the Toolbar.
      */
+    @Override
     public void registerToolbarHeightChangeListener(
             OnHeightChangedListener listener) {
         mController.registerToolbarHeightChangeListener(listener);
     }
 
     /** Unregisters an existing {@link OnHeightChangedListener} from the list of listeners. */
+    @Override
     public boolean unregisterToolbarHeightChangeListener(
             OnHeightChangedListener listener) {
         return mController.unregisterToolbarHeightChangeListener(listener);
     }
 
     /** Registers a new {@link OnTabSelectedListener} to the list of listeners. */
+    @Override
     public void registerOnTabSelectedListener(OnTabSelectedListener listener) {
         mController.registerOnTabSelectedListener(listener);
     }
 
     /** Unregisters an existing {@link OnTabSelectedListener} from the list of listeners. */
+    @Override
     public boolean unregisterOnTabSelectedListener(OnTabSelectedListener listener) {
         return mController.unregisterOnTabSelectedListener(listener);
     }
 
     /** Registers a new {@link OnSearchListener} to the list of listeners. */
+    @Override
     public void registerOnSearchListener(OnSearchListener listener) {
         mController.registerOnSearchListener(listener);
     }
 
     /** Unregisters an existing {@link OnSearchListener} from the list of listeners. */
+    @Override
     public boolean unregisterOnSearchListener(OnSearchListener listener) {
         return mController.unregisterOnSearchListener(listener);
     }
 
     /** Registers a new {@link OnSearchCompletedListener} to the list of listeners. */
+    @Override
     public void registerOnSearchCompletedListener(OnSearchCompletedListener listener) {
         mController.registerOnSearchCompletedListener(listener);
     }
 
     /** Unregisters an existing {@link OnSearchCompletedListener} from the list of listeners. */
+    @Override
     public boolean unregisterOnSearchCompletedListener(OnSearchCompletedListener listener) {
         return mController.unregisterOnSearchCompletedListener(listener);
     }
 
     /** Registers a new {@link OnBackListener} to the list of listeners. */
+    @Override
     public void registerOnBackListener(OnBackListener listener) {
         mController.registerOnBackListener(listener);
     }
 
     /** Unregisters an existing {@link OnBackListener} from the list of listeners. */
+    @Override
     public boolean unregisterOnBackListener(OnBackListener listener) {
         return mController.unregisterOnBackListener(listener);
     }
 
-    /** Shows the progress bar */
-    public void showProgressBar() {
-        mController.showProgressBar();
-    }
-
-    /** Hides the progress bar */
-    public void hideProgressBar() {
-        mController.hideProgressBar();
-    }
-
     /** Returns the progress bar */
-    public ProgressBar getProgressBar() {
+    @Override
+    public ProgressBarController getProgressBar() {
         return mController.getProgressBar();
     }
 }

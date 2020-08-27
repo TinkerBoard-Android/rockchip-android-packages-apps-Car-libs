@@ -21,12 +21,8 @@
     <!-- App icons selection background -->
     <color name="appbar_view_icon_background_color">#66ffffff</color>
 
-    <!-- ColorChecker.java -->
-    <color name="media_tint_light">@*android:color/car_tint_light</color>
-    <color name="media_tint_dark">@*android:color/car_tint_dark</color>
-
     <!-- Color used on the placeholder album art -->
-    <color name="album_art_placeholder_color">@*android:color/car_grey_800</color>
+    <color name="album_art_placeholder_color">@color/car_grey_800</color>
 
     <!-- Media source's color if not provided -->
     <color name="media_source_default_color">@android:color/background_dark</color>

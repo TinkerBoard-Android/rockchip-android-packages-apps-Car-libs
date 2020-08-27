@@ -16,9 +16,9 @@
 
 package com.android.car.media.common.browse;
 
-import android.annotation.NonNull;
 import android.app.Application;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RestrictTo;
 
 /** This isn't a comment. */

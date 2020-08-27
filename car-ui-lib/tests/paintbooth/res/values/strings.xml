@@ -18,6 +18,9 @@
   <!-- Application name [CHAR LIMIT=30] -->
   <string name="app_name" translatable="false">Paint Booth (Gerrit)</string>
 
+  <!-- Description of the CurrentActivityService. [CHAR_LIMIT=200] -->
+  <string name="current_activity_service_description">Shows the current activity</string>
+
   <!-- Strings for Preference Samples -->
   <eat-comment/>
 
@@ -56,6 +59,11 @@
   <!-- Category title for preferences with widgets [CHAR_LIMIT=12]-->
   <string name="widgets">Widgets</string>
 
+  <!-- Title of a two action preference [CHAR_LIMIT=31]-->
+  <string name="title_twoaction_preference">TwoAction preference</string>
+  <!-- Summary of a two action preference [CHAR_LIMIT=70]-->
+  <string name="summary_twoaction_preference">A widget should be visible on the right</string>
+
   <!-- Title of a checkbox preference [CHAR_LIMIT=31]-->
   <string name="title_checkbox_preference">Checkbox preference</string>
   <!-- Summary of a checkbox preference [CHAR_LIMIT=78]-->
@@ -71,6 +79,8 @@
 
   <!-- Title of a seekbar preference [CHAR_LIMIT=30]-->
   <string name="title_seekbar_preference">Seekbar preference</string>
+  <!-- Summary of an seekbar preference [CHAR_LIMIT=32]-->
+  <string name="summary_seekbar_preference">Seekbar summary</string>
 
   <!--This section is for preferences that launch a dialog to edit the preference -->
   <eat-comment/>
@@ -153,7 +163,13 @@
   <string name="toolbar_add_untined_icon">MenuItem: Add untinted icon</string>
 
   <!-- Text for add overflow button [CHAR_LIMIT=36]-->
-  <string name="toolbar_add_overflow">MenuItem: Add Overflow</string>
+  <string name="toolbar_add_overflow">Overflow MenuItem: Add Simple</string>
+
+  <!-- Text for add overflow button [CHAR_LIMIT=36]-->
+  <string name="toolbar_add_overflow_switch">Overflow MenuItem: Add switchable</string>
+
+  <!-- Text for add icon text overflow button [CHAR_LIMIT=45]-->
+  <string name="toolbar_add_icon_text_overflow">Overflow MenuItem: Add icon and text</string>
 
   <!-- Text for add switch button [CHAR_LIMIT=33]-->
   <string name="toolbar_add_switch">MenuItem: Add Switch</string>
@@ -248,8 +264,23 @@
   <!-- Button that shows a dialog with a subtitle and icon [CHAR_LIMIT=50]-->
   <string name="dialog_show_subtitle_and_icon">Show Dialog with title, subtitle, and icon</string>
 
+  <!-- Button that shows a dialog with a long title, subtitle and icon [CHAR_LIMIT=500]-->
+  <string name="dialog_show_long_subtitle_and_icon">Show Dialog with a long title, subtitle, and icon</string>
+
   <!-- Text to show Dialog with single choice items-->
   <string name="dialog_show_single_choice">Show with single choice items</string>
+
+  <!-- Text to show a permission Dialog [CHAR_LIMIT=50] -->
+  <string name="dialog_show_permission_dialog">Show permission dialog</string>
+
+  <!-- Text to show a permission Dialog for multiple permissions [CHAR_LIMIT=50] -->
+  <string name="dialog_show_multi_permission_dialog">Show multiple permissions dialog</string>
+
+  <!-- Text on button to show a permission dialog asking for the users location. [CHAR_LIMIT=100] -->
+  <string name="dialog_show_foreground_permission_dialog">Show foreground permission dialog</string>
+
+  <!-- Text on button to show a permission dialog asking for the users location in the background [CHAR_LIMIT=100] -->
+  <string name="dialog_show_background_permission_dialog">Show background permission dialog</string>
 
   <!--This section is for widget attributes -->
   <eat-comment/>
@@ -257,5 +288,5 @@
   <string name="widget_checkbox_text">I\'m a check box</string>
   <!-- Text for switch [CHAR_LIMIT=25]-->
   <string name="widget_switch_text">I\'m a switch</string>
-  
+
 </resources>

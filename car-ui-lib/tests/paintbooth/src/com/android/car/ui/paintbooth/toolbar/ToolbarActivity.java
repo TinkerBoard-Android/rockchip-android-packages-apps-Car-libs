@@ -19,6 +19,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -55,9 +56,13 @@ public class ToolbarActivity extends AppCompatActivity implements InsetsChangedL
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.car_ui_recycler_view_activity);
+        setContentView(getLayout());
 
-        ToolbarController toolbar = CarUi.requireToolbar(this);
+        ToolbarController toolbarNonFinal = CarUi.getToolbar(this);
+        if (toolbarNonFinal == null) {
+            toolbarNonFinal = requireViewById(R.id.toolbar);
+        }
+        ToolbarController toolbar = toolbarNonFinal;
         toolbar.setTitle(getTitle());
         toolbar.setState(Toolbar.State.SUBPAGE);
         toolbar.setLogo(R.drawable.ic_launcher);
@@ -79,17 +84,20 @@ public class ToolbarActivity extends AppCompatActivity implements InsetsChangedL
         toolbar.setMenuItems(mMenuItems);
 
         mButtons.add(Pair.create("Toggle progress bar", v -> {
-            if (toolbar.getProgressBar().getVisibility() == View.GONE) {
-                toolbar.showProgressBar();
-                Toast.makeText(this, "showing progress bar", Toast.LENGTH_SHORT).show();
-            } else {
-                toolbar.hideProgressBar();
-                Toast.makeText(this, "hiding progress bar", Toast.LENGTH_SHORT).show();
-            }
+            toolbar.getProgressBar().setVisible(!toolbar.getProgressBar().isVisible());
         }));
 
         mButtons.add(Pair.create("Change title", v ->
                 toolbar.setTitle(toolbar.getTitle() + " X")));
+
+        mButtons.add(Pair.create("Add/Change subtitle", v -> {
+            CharSequence subtitle = toolbar.getSubtitle();
+            if (TextUtils.isEmpty(subtitle)) {
+                toolbar.setSubtitle("Subtitle");
+            } else {
+                toolbar.setSubtitle(subtitle + " X");
+            }
+        }));
 
         mButtons.add(Pair.create(getString(R.string.toolbar_set_xml_resource), v -> {
             mMenuItems.clear();
@@ -114,19 +122,6 @@ public class ToolbarActivity extends AppCompatActivity implements InsetsChangedL
                                     Toast.LENGTH_SHORT).show())
                     .build());
             toolbar.setMenuItems(mMenuItems);
-        }));
-
-        Mutable<Integer> overflowCounter = new Mutable<>(1);
-        mButtons.add(Pair.create(getString(R.string.toolbar_add_overflow), v -> {
-            mMenuItems.add(MenuItem.builder(this)
-                    .setTitle("Foo " + overflowCounter.value)
-                    .setOnClickListener(
-                            i -> Toast.makeText(this, "Clicked",
-                                    Toast.LENGTH_SHORT).show())
-                    .setDisplayBehavior(MenuItem.DisplayBehavior.NEVER)
-                    .build());
-            toolbar.setMenuItems(mMenuItems);
-            overflowCounter.value++;
         }));
 
         mButtons.add(Pair.create(getString(R.string.toolbar_add_switch), v -> {
@@ -193,6 +188,47 @@ public class ToolbarActivity extends AppCompatActivity implements InsetsChangedL
                     .setTitle("Become icon")
                     .setOnClickListener(i ->
                             i.setIcon(i.getIcon() == null ? R.drawable.ic_tracklist : 0))
+                    .build());
+            toolbar.setMenuItems(mMenuItems);
+        }));
+
+        Mutable<Integer> overflowCounter = new Mutable<>(1);
+        mButtons.add(Pair.create(getString(R.string.toolbar_add_overflow), v -> {
+            mMenuItems.add(MenuItem.builder(this)
+                    .setTitle("Foo " + overflowCounter.value)
+                    .setOnClickListener(
+                            i -> Toast.makeText(this, "Clicked",
+                                    Toast.LENGTH_SHORT).show())
+                    .setDisplayBehavior(MenuItem.DisplayBehavior.NEVER)
+                    .build());
+            toolbar.setMenuItems(mMenuItems);
+            overflowCounter.value++;
+        }));
+
+        mButtons.add(Pair.create(getString(R.string.toolbar_add_overflow_switch), v -> {
+            mMenuItems.add(MenuItem.builder(this)
+                    .setTitle("Foo " + overflowCounter.value)
+                    .setOnClickListener(
+                            i -> Toast.makeText(this,
+                                    i.isChecked() ? "Checked" : "Unchecked",
+                                    Toast.LENGTH_SHORT)
+                                    .show())
+                    .setDisplayBehavior(MenuItem.DisplayBehavior.NEVER)
+                    .setCheckable()
+                    .build());
+            toolbar.setMenuItems(mMenuItems);
+            overflowCounter.value++;
+        }));
+
+        mButtons.add(Pair.create(getString(R.string.toolbar_add_icon_text_overflow), v -> {
+            mMenuItems.add(MenuItem.builder(this)
+                    .setIcon(R.drawable.ic_tracklist)
+                    .setTitle("Bar")
+                    .setShowIconAndTitle(true)
+                    .setOnClickListener(
+                            i -> Toast.makeText(this, "Clicked",
+                                    Toast.LENGTH_SHORT).show())
+                    .setDisplayBehavior(MenuItem.DisplayBehavior.NEVER)
                     .build());
             toolbar.setMenuItems(mMenuItems);
         }));
@@ -295,8 +331,13 @@ public class ToolbarActivity extends AppCompatActivity implements InsetsChangedL
         prv.setAdapter(mAdapter);
     }
 
+    /** Override in subclasses to change the layout */
+    protected int getLayout() {
+        return R.layout.car_ui_recycler_view_activity;
+    }
+
     @Override
-    public void onCarUiInsetsChanged(Insets insets) {
+    public void onCarUiInsetsChanged(@NonNull Insets insets) {
         requireViewById(R.id.list)
                 .setPadding(0, insets.getTop(), 0, insets.getBottom());
         requireViewById(android.R.id.content)

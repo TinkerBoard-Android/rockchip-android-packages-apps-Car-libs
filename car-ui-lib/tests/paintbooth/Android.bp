@@ -17,18 +17,26 @@
 android_app {
     name: "PaintBooth",
 
-    srcs: ["src/**/*.java"],
+    srcs: [
+    	"src/**/*.java",
+    	"src/**/*.kt",
+    ],
 
-    resource_dirs: ["res"],
+    required: ["privapp_whitelist_com.android.car.ui.paintbooth"],
+
+    resource_dirs: ["res", "res-public"],
 
     platform_apis: true,
 
     certificate: "platform",
 
+    privileged: true,
 
     static_libs: [
         "car-ui-lib",
         "android.car.userlib",
+		"guava",
+		"gson-prebuilt-jar",
     ],
 
     optimize: {
@@ -44,4 +52,5 @@ android_app {
             enabled: false,
         },
     },
+    export_package_resources: true,
 }

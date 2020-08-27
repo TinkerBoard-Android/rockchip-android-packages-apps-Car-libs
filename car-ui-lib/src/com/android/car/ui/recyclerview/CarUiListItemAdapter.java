@@ -16,7 +16,7 @@
 
 package com.android.car.ui.recyclerview;
 
-import static com.android.car.ui.utils.CarUiUtils.findViewByRefId;
+import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
@@ -52,7 +52,7 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
     static final int VIEW_TYPE_LIST_ITEM = 1;
     static final int VIEW_TYPE_LIST_HEADER = 2;
 
-    private List<? extends CarUiListItem> mItems;
+    private final List<? extends CarUiListItem> mItems;
     private int mMaxItems = CarUiRecyclerView.ItemCap.UNLIMITED;
 
     public CarUiListItemAdapter(List<? extends CarUiListItem> items) {
@@ -110,7 +110,7 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
                 CarUiListItem item = mItems.get(position);
                 if (!(item instanceof CarUiContentListItem)) {
                     throw new IllegalStateException(
-                            "Expected item to be bound to viewholder to be instance of "
+                            "Expected item to be bound to viewHolder to be instance of "
                                     + "CarUiContentListItem.");
                 }
 
@@ -124,7 +124,7 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
                 CarUiListItem header = mItems.get(position);
                 if (!(header instanceof CarUiHeaderListItem)) {
                     throw new IllegalStateException(
-                            "Expected item to be bound to viewholder to be instance of "
+                            "Expected item to be bound to viewHolder to be instance of "
                                     + "CarUiHeaderListItem.");
                 }
 
@@ -170,21 +170,21 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         ListItemViewHolder(@NonNull View itemView) {
             super(itemView);
-            mTitle = findViewByRefId(itemView, R.id.title);
-            mBody = findViewByRefId(itemView, R.id.body);
-            mIcon = findViewByRefId(itemView, R.id.icon);
-            mContentIcon = findViewByRefId(itemView, R.id.content_icon);
-            mAvatarIcon = findViewByRefId(itemView, R.id.avatar_icon);
-            mIconContainer = findViewByRefId(itemView, R.id.icon_container);
-            mActionContainer = findViewByRefId(itemView, R.id.action_container);
-            mActionDivider = findViewByRefId(itemView, R.id.action_divider);
-            mSwitch = findViewByRefId(itemView, R.id.switch_widget);
-            mCheckBox = findViewByRefId(itemView, R.id.checkbox_widget);
-            mRadioButton = findViewByRefId(itemView, R.id.radio_button_widget);
-            mSupplementalIcon = findViewByRefId(itemView, R.id.supplemental_icon);
-            mReducedTouchInterceptor = findViewByRefId(itemView, R.id.reduced_touch_interceptor);
-            mTouchInterceptor = findViewByRefId(itemView, R.id.touch_interceptor);
-            mActionContainerTouchInterceptor = findViewByRefId(itemView,
+            mTitle = requireViewByRefId(itemView, R.id.title);
+            mBody = requireViewByRefId(itemView, R.id.body);
+            mIcon = requireViewByRefId(itemView, R.id.icon);
+            mContentIcon = requireViewByRefId(itemView, R.id.content_icon);
+            mAvatarIcon = requireViewByRefId(itemView, R.id.avatar_icon);
+            mIconContainer = requireViewByRefId(itemView, R.id.icon_container);
+            mActionContainer = requireViewByRefId(itemView, R.id.action_container);
+            mActionDivider = requireViewByRefId(itemView, R.id.action_divider);
+            mSwitch = requireViewByRefId(itemView, R.id.switch_widget);
+            mCheckBox = requireViewByRefId(itemView, R.id.checkbox_widget);
+            mRadioButton = requireViewByRefId(itemView, R.id.radio_button_widget);
+            mSupplementalIcon = requireViewByRefId(itemView, R.id.supplemental_icon);
+            mReducedTouchInterceptor = requireViewByRefId(itemView, R.id.reduced_touch_interceptor);
+            mTouchInterceptor = requireViewByRefId(itemView, R.id.touch_interceptor);
+            mActionContainerTouchInterceptor = requireViewByRefId(itemView,
                     R.id.action_container_touch_interceptor);
         }
 
@@ -266,19 +266,24 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
                 case RADIO_BUTTON:
                     bindCompoundButton(item, mRadioButton, itemOnClickListener);
                     break;
+                case CHEVRON:
+                    mSupplementalIcon.setVisibility(View.VISIBLE);
+                    mSupplementalIcon.setImageDrawable(itemView.getContext().getDrawable(
+                            R.drawable.car_ui_preference_icon_chevron));
+                    mActionContainer.setVisibility(View.VISIBLE);
+                    mTouchInterceptor.setVisibility(View.VISIBLE);
+                    mTouchInterceptor.setOnClickListener(v -> {
+                        if (itemOnClickListener != null) {
+                            itemOnClickListener.onClick(item);
+                        }
+                    });
+                    mReducedTouchInterceptor.setVisibility(View.GONE);
+                    mActionContainerTouchInterceptor.setVisibility(View.GONE);
+                    break;
                 case ICON:
                     mSupplementalIcon.setVisibility(View.VISIBLE);
                     mSupplementalIcon.setImageDrawable(item.getSupplementalIcon());
                     mActionContainer.setVisibility(View.VISIBLE);
-                    mActionContainerTouchInterceptor.setOnClickListener(
-                            (container) -> {
-                                if (item.getSupplementalIconOnClickListener() != null) {
-                                    item.getSupplementalIconOnClickListener().onClick(mIcon);
-                                }
-                                if (itemOnClickListener != null) {
-                                    itemOnClickListener.onClick(item);
-                                }
-                            });
 
                     // If the icon has a click listener, use a reduced touch interceptor to create
                     // two distinct touch area; the action container and the remainder of the list
@@ -301,6 +306,15 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
                             }
                         });
                         mActionContainerTouchInterceptor.setVisibility(View.VISIBLE);
+                        mActionContainerTouchInterceptor.setOnClickListener(
+                                (container) -> {
+                                    if (item.getSupplementalIconOnClickListener() != null) {
+                                        item.getSupplementalIconOnClickListener().onClick(mIcon);
+                                    }
+                                    if (itemOnClickListener != null) {
+                                        itemOnClickListener.onClick(item);
+                                    }
+                                });
                         mTouchInterceptor.setVisibility(View.GONE);
                     }
                     break;
@@ -359,8 +373,8 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         HeaderViewHolder(@NonNull View itemView) {
             super(itemView);
-            mTitle = findViewByRefId(itemView, R.id.title);
-            mBody = findViewByRefId(itemView, R.id.body);
+            mTitle = requireViewByRefId(itemView, R.id.title);
+            mBody = requireViewByRefId(itemView, R.id.body);
         }
 
         private void bind(@NonNull CarUiHeaderListItem item) {

@@ -16,11 +16,11 @@
 <resources>
     <!-- General resources -->
 
-    <dimen name="car_ui_touch_target_width">76dp</dimen>
-    <dimen name="car_ui_touch_target_height">76dp</dimen>
+    <dimen name="car_ui_touch_target_size">76dp</dimen>
+    <dimen name="car_ui_touch_target_width">@dimen/car_ui_touch_target_size</dimen>
+    <dimen name="car_ui_touch_target_height">@dimen/car_ui_touch_target_size</dimen>
+
     <dimen name="car_ui_primary_icon_size">44dp</dimen>
-    <item name="car_ui_letter_spacing_body1" format="float" type="dimen">0.0</item>
-    <item name="car_ui_letter_spacing_body3" format="float" type="dimen">0.0</item>
 
     <!-- Horizontal margin between screen content and display border. In reference
      implementation, this value matches the CarUiRecyclerView scrollbar width -->
@@ -39,12 +39,9 @@
     <dimen name="car_ui_body1_size">32sp</dimen>
     <dimen name="car_ui_body2_size">28sp</dimen>
     <dimen name="car_ui_body3_size">24sp</dimen>
-
-    <!-- Keylines -->
-    <dimen name="car_ui_keyline_1">24dp</dimen>
-    <dimen name="car_ui_keyline_2">96dp</dimen>
-    <dimen name="car_ui_keyline_3">112dp</dimen>
-    <dimen name="car_ui_keyline_4">148dp</dimen>
+    <dimen name="car_ui_sub1_size">22sp</dimen>
+    <dimen name="car_ui_sub2_size">20sp</dimen>
+    <dimen name="car_ui_sub3_size">18sp</dimen>
 
     <!-- Tabs -->
 
@@ -86,6 +83,8 @@
     <dimen name="car_ui_toolbar_title_logo_padding">0dp</dimen>
     <!-- Margin at the start of the title -->
     <dimen name="car_ui_toolbar_title_margin_start">@dimen/car_ui_padding_2</dimen>
+    <!-- Margin at the start of the title when there is no logo present -->
+    <dimen name="car_ui_toolbar_title_no_logo_margin_start">0dp</dimen>
     <!-- Space at the end and in between menu items -->
     <dimen name="car_ui_toolbar_menu_item_margin">@dimen/car_ui_padding_2</dimen>
     <!-- Ripple effect radius for icon menu items -->
@@ -137,15 +136,12 @@
     <item name="car_ui_scrollbar_deceleration_times_divisor" format="float" type="dimen">0.45</item>
     <item name="car_ui_scrollbar_decelerate_interpolator_factor" format="float" type="dimen">1.8</item>
 
-    <dimen name="car_ui_scrollbar_padding_start">0dp</dimen>
-    <dimen name="car_ui_scrollbar_padding_end">0dp</dimen>
+    <dimen name="car_ui_scrollbar_padding_top">0dp</dimen>
+    <dimen name="car_ui_scrollbar_padding_bottom">0dp</dimen>
 
     <!-- Preferences -->
 
-    <dimen name="car_ui_preference_category_text_size">24sp</dimen>
-    <dimen name="car_ui_preference_summary_text_size">24sp</dimen>
-    <dimen name="car_ui_preference_title_text_size">32sp</dimen>
-    <dimen name="car_ui_preference_edit_text_dialog_message_text_size">24sp</dimen>
+    <dimen name="car_ui_divider_width">1dp</dimen>
 
     <dimen name="car_ui_preference_content_margin_top">16dp</dimen>
     <dimen name="car_ui_preference_content_margin_bottom">16dp</dimen>
@@ -166,11 +162,6 @@
     <dimen name="car_ui_preference_edit_text_dialog_text_margin_start">24dp</dimen>
     <dimen name="car_ui_preference_edit_text_dialog_text_margin_end">24dp</dimen>
 
-    <dimen name="car_ui_preference_switch_text_size">30sp</dimen>
-    <dimen name="car_ui_preference_switch_width">288dp</dimen>
-    <dimen name="car_ui_preference_switch_width_half">144dp</dimen>
-    <dimen name="car_ui_preference_switch_height">101dp</dimen>
-
     <!-- Alert dialog   -->
 
     <dimen name="car_ui_dialog_edittext_height">50dp</dimen>
@@ -179,18 +170,16 @@
     <dimen name="car_ui_dialog_edittext_margin_start">22dp</dimen>
     <dimen name="car_ui_dialog_edittext_margin_end">22dp</dimen>
     <dimen name="car_ui_dialog_icon_size">56dp</dimen>
-    <dimen name="car_ui_dialog_title_margin">@dimen/car_ui_keyline_1</dimen>
+    <dimen name="car_ui_dialog_title_margin">24dp</dimen>
 
     <!-- List item  -->
 
-    <dimen name="car_ui_list_item_header_text_size">24sp</dimen>
-    <dimen name="car_ui_list_item_title_text_size">32sp</dimen>
-    <dimen name="car_ui_list_item_body_text_size">24sp</dimen>
     <dimen name="car_ui_list_item_height">116dp</dimen>
     <dimen name="car_ui_list_item_header_height">76dp</dimen>
     <dimen name="car_ui_list_item_header_start_inset">0dp</dimen>
     <dimen name="car_ui_list_item_start_inset">0dp</dimen>
     <dimen name="car_ui_list_item_end_inset">0dp</dimen>
+    <dimen name="car_ui_header_list_item_text_start_margin">0dp</dimen>
     <dimen name="car_ui_list_item_text_start_margin">24dp</dimen>
     <dimen name="car_ui_list_item_text_no_icon_start_margin">24dp</dimen>
 

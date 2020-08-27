@@ -15,16 +15,6 @@
   ~ limitations under the License
   -->
 <resources>
-    <!--
-    Configuration for a default scrollbar for the PagedRecyclerView. This component must inherit
-    abstract class ScrollBarUI. If the ScrollBar is enabled, the component will be initialized from
-    PagedRecyclerView#createScrollBarFromConfig().
-    -->
-    <string name="config_scrollBarComponent" translatable="false">
-        com.android.car.apps.common.widget.CarScrollBar
-    </string>
-
-
     <!-- This value must remain false for production builds. It is intended to be overlaid in
         the simulator, so third party app developers can notice quickly that they are sending
         improper image references.
@@ -41,4 +31,18 @@
          1 (show one letter) or 0 (show avatar anonymous icon)
     -->
     <integer name="config_number_of_letters_shown_for_avatar">1</integer>
+
+    <!-- A default mask to apply to icons cropped via IconCropper. The mask is defined as
+     an SVG path in the range of [0..100, 0..100], it is automatically scaled to fit
+     the actual icon size, following the adaptive icon definition guideline:
+     https://source.android.com/devices/tech/display/adaptive-icons#implementation -->
+    <string name="config_crop_icon_mask" translatable="false">
+        M0,50 a50,50 0 1,0 100,0 a50,50 0 1,0 -100,0
+    </string>
+
+    <!-- String format used to format a address Uri. -->
+    <string name="config_address_uri_format" translatable="false">geo:0,0?q=%s</string>
+    <!-- String format used to format a navigation Uri. -->
+    <string name="config_navigation_uri_format" translatable="false">google.navigation:q=%s</string>
+
 </resources>

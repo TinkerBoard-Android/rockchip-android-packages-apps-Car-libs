@@ -33,10 +33,12 @@ import androidx.room.Room;
 
 import com.android.car.connecteddevice.R;
 import com.android.car.connecteddevice.model.AssociatedDevice;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.InvalidParameterException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -52,8 +54,10 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
+import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 /** Storage for connected devices in a car. */
 public class ConnectedDeviceStorage {
@@ -66,6 +70,8 @@ public class ConnectedDeviceStorage {
     private static final String KEYSTORE_PROVIDER = "AndroidKeyStore";
     private static final String DATABASE_NAME = "connected-device-database";
     private static final String IV_SPEC_SEPARATOR = ";";
+
+    private static final String CHALLENGE_HASHING_ALGORITHM = "HmacSHA256";
     // This delimiter separates deviceId and deviceInfo, so it has to differ from the
     // TrustedDeviceInfo delimiter. Once new API can be added, deviceId will be added to
     // TrustedDeviceInfo and this delimiter will be removed.
@@ -74,6 +80,9 @@ public class ConnectedDeviceStorage {
     // that this length can only have the values {128, 120, 112, 104, 96}. Using the highest
     // possible value.
     private static final int GCM_AUTHENTICATION_TAG_LENGTH = 128;
+
+    @VisibleForTesting
+    static final int CHALLENGE_SECRET_BYTES = 32;
 
     private final Context mContext;
 
@@ -110,7 +119,7 @@ public class ConnectedDeviceStorage {
     }
 
     /**
-     * Get communication encryption key for the given device
+     * Get communication encryption key for the given device.
      *
      * @param deviceId id of trusted device
      * @return encryption key, null if device id is not recognized
@@ -136,9 +145,9 @@ public class ConnectedDeviceStorage {
     }
 
     /**
-     * Save encryption key for the given device
+     * Save encryption key for the given device.
      *
-     * @param deviceId      did of trusted device
+     * @param deviceId id of the device
      * @param encryptionKey encryption key
      */
     public void saveEncryptionKey(@NonNull String deviceId, @NonNull byte[] encryptionKey) {
@@ -146,6 +155,78 @@ public class ConnectedDeviceStorage {
         AssociatedDeviceKeyEntity entity = new AssociatedDeviceKeyEntity(deviceId, encryptedKey);
         mAssociatedDeviceDatabase.addOrReplaceAssociatedDeviceKey(entity);
         logd(TAG, "Successfully wrote encryption key.");
+    }
+
+    /**
+     * Save challenge secret for the given device.
+     *
+     * @param deviceId id of the device
+     * @param secret   Secret associated with this device. Note: must be
+     *                 {@value CHALLENGE_SECRET_BYTES} bytes in length or an
+     *                 {@link InvalidParameterException} will be thrown.
+     */
+    public void saveChallengeSecret(@NonNull String deviceId, @NonNull byte[] secret) {
+        if (secret.length != CHALLENGE_SECRET_BYTES) {
+            throw new InvalidParameterException("Secrets must be " + CHALLENGE_SECRET_BYTES
+                    + " bytes in length.");
+        }
+
+        String encryptedKey = encryptWithKeyStore(KEY_ALIAS, secret);
+        AssociatedDeviceChallengeSecretEntity entity = new AssociatedDeviceChallengeSecretEntity(
+                deviceId, encryptedKey);
+        mAssociatedDeviceDatabase.addOrReplaceAssociatedDeviceChallengeSecret(entity);
+        logd(TAG, "Successfully wrote challenge secret.");
+    }
+
+    /** Get the challenge secret associated with a device. */
+    public byte[] getChallengeSecret(@NonNull String deviceId) {
+        AssociatedDeviceChallengeSecretEntity entity =
+                mAssociatedDeviceDatabase.getAssociatedDeviceChallengeSecret(deviceId);
+        if (entity == null) {
+            logd(TAG, "Challenge secret not found!");
+            return null;
+        }
+        String[] values = entity.encryptedChallengeSecret.split(IV_SPEC_SEPARATOR, -1);
+
+        if (values.length != 2) {
+            logd(TAG, "Stored encryption key had the wrong length.");
+            return null;
+        }
+
+        byte[] encryptedSecret = Base64.decode(values[0], Base64.DEFAULT);
+        byte[] ivSpec = Base64.decode(values[1], Base64.DEFAULT);
+        return decryptWithKeyStore(KEY_ALIAS, encryptedSecret, ivSpec);
+    }
+
+    /**
+     * Hash provided value with device's challenge secret and return result. Returns {@code null} if
+     * unsuccessful.
+     */
+    @Nullable
+    public byte[] hashWithChallengeSecret(@NonNull String deviceId, @NonNull byte[] value) {
+        byte[] challengeSecret = getChallengeSecret(deviceId);
+        if (challengeSecret == null) {
+            loge(TAG, "Unable to find challenge secret for device " + deviceId + ".");
+            return null;
+        }
+
+        Mac mac;
+        try {
+            mac = Mac.getInstance(CHALLENGE_HASHING_ALGORITHM);
+        } catch (NoSuchAlgorithmException e) {
+            loge(TAG, "Unable to find hashing algorithm " + CHALLENGE_HASHING_ALGORITHM + ".", e);
+            return null;
+        }
+
+        SecretKeySpec keySpec = new SecretKeySpec(challengeSecret, CHALLENGE_HASHING_ALGORITHM);
+        try {
+            mac.init(keySpec);
+        } catch (InvalidKeyException e) {
+            loge(TAG, "Exception while initializing HMAC.", e);
+            return null;
+        }
+
+        return mac.doFinal(value);
     }
 
     /**

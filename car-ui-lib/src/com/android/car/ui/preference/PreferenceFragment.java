@@ -36,6 +36,7 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceGroup;
 import androidx.preference.PreferenceScreen;
+import androidx.preference.SwitchPreference;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.R;
@@ -82,8 +83,8 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
         }
 
         // TODO(b/150230923) remove the code for the old toolbar height change when apps are ready
-        final RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
-        final Toolbar toolbar = view.findViewById(R.id.toolbar);
+        final RecyclerView recyclerView = CarUiUtils.findViewByRefId(view, R.id.recycler_view);
+        final Toolbar toolbar = CarUiUtils.findViewByRefId(view, R.id.toolbar);
         if (recyclerView == null || toolbar == null) {
             return;
         }
@@ -106,12 +107,20 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
     }
 
     @Override
-    public void onCarUiInsetsChanged(Insets insets) {
+    public void onStart() {
+        super.onStart();
+        Insets insets = CarUi.getInsets(getActivity());
+        if (insets != null) {
+            onCarUiInsetsChanged(insets);
+        }
+    }
+
+    @Override
+    public void onCarUiInsetsChanged(@NonNull Insets insets) {
         View view = requireView();
-        view.requireViewById(R.id.recycler_view)
+        CarUiUtils.requireViewByRefId(view, R.id.recycler_view)
                 .setPadding(0, insets.getTop(), 0, insets.getBottom());
-        view.getRootView().requireViewById(android.R.id.content)
-                .setPadding(insets.getLeft(), 0, insets.getRight(), 0);
+        view.setPadding(insets.getLeft(), 0, insets.getRight(), 0);
     }
 
     /**
@@ -145,6 +154,8 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
             f = ListPreferenceFragment.newInstance(preference.getKey());
         } else if (preference instanceof MultiSelectListPreference) {
             f = MultiSelectListPreferenceFragment.newInstance(preference.getKey());
+        } else if (preference instanceof CarUiSeekBarDialogPreference) {
+            f = SeekbarPreferenceDialogFragment.newInstance(preference.getKey());
         } else {
             throw new IllegalArgumentException(
                     "Cannot display dialog for an unknown Preference type: "
@@ -241,6 +252,7 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
             new Pair<>(ListPreference.class, CarUiListPreference.class),
             new Pair<>(MultiSelectListPreference.class, CarUiMultiSelectListPreference.class),
             new Pair<>(EditTextPreference.class, CarUiEditTextPreference.class),
+            new Pair<>(SwitchPreference.class, CarUiSwitchPreference.class),
             new Pair<>(Preference.class, CarUiPreference.class)
     );
 

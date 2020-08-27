@@ -28,7 +28,7 @@
         android:id="@+id/metadata_background"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@drawable/car_card_ripple_background"
+        android:background="?android:attr/selectableItemBackground"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"

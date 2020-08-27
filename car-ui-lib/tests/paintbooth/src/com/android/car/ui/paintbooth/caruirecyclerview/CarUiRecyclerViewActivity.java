@@ -19,6 +19,7 @@ package com.android.car.ui.paintbooth.caruirecyclerview;
 import android.app.Activity;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.android.car.ui.baselayout.Insets;
@@ -62,7 +63,7 @@ public class CarUiRecyclerViewActivity extends Activity implements InsetsChanged
     }
 
     @Override
-    public void onCarUiInsetsChanged(Insets insets) {
+    public void onCarUiInsetsChanged(@NonNull Insets insets) {
         requireViewById(R.id.list)
                 .setPadding(0, insets.getTop(), 0, insets.getBottom());
         requireViewById(android.R.id.content)

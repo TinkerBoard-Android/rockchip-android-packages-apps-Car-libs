@@ -19,8 +19,9 @@ package com.android.car.apps.common.imaging;
 import android.net.Uri;
 import android.util.Size;
 
+import androidx.core.util.Preconditions;
+
 import com.android.car.apps.common.UriUtils;
-import com.android.internal.util.Preconditions;
 
 import java.util.Objects;
 

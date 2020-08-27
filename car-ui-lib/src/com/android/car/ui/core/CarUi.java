@@ -21,12 +21,18 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.car.ui.baselayout.Insets;
+import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.toolbar.ToolbarController;
+
+import java.lang.reflect.Method;
 
 /**
  * Public interface for general CarUi static functions.
  */
 public class CarUi {
+
+    /** Prevent instantiating this class */
+    private CarUi() {}
 
     /**
      * Gets the {@link ToolbarController} for an activity. Requires that the Activity uses
@@ -36,7 +42,7 @@ public class CarUi {
      */
     @Nullable
     public static ToolbarController getToolbar(Activity activity) {
-        BaseLayoutController controller = BaseLayoutController.getBaseLayout(activity);
+        BaseLayoutController controller = getBaseLayoutController(activity);
         if (controller != null) {
             return controller.getToolbarController();
         }
@@ -55,11 +61,23 @@ public class CarUi {
     public static ToolbarController requireToolbar(Activity activity) {
         ToolbarController result = getToolbar(activity);
         if (result == null) {
-            throw new IllegalArgumentException("Activity does not have a CarUi Toolbar! "
-                    + "Are you using Theme.CarUi.WithToolbar?");
+            throw new IllegalArgumentException("Activity " + activity
+                    + " does not have a CarUi Toolbar!"
+                    + " Are you using Theme.CarUi.WithToolbar?");
         }
 
         return result;
+    }
+
+    /**
+     * Registering a listener to receive the InsetsChanged updates instead of the Activity.
+     */
+    public static void replaceInsetsChangedListenerWith(Activity activity,
+            InsetsChangedListener listener) {
+        BaseLayoutController controller = getBaseLayoutController(activity);
+        if (controller != null) {
+            controller.replaceInsetsChangedListenerWith(listener);
+        }
     }
 
     /**
@@ -72,7 +90,7 @@ public class CarUi {
      */
     @Nullable
     public static Insets getInsets(Activity activity) {
-        BaseLayoutController controller = BaseLayoutController.getBaseLayout(activity);
+        BaseLayoutController controller = getBaseLayoutController(activity);
         if (controller != null) {
             return controller.getInsets();
         }
@@ -93,10 +111,30 @@ public class CarUi {
     public static Insets requireInsets(Activity activity) {
         Insets result = getInsets(activity);
         if (result == null) {
-            throw new IllegalArgumentException("Activity does not have a base layout! "
-                    + "Are you using Theme.CarUi.WithToolbar or Theme.CarUi.NoToolbar?");
+            throw new IllegalArgumentException("Activity " + activity
+                    + " does not have a base layout!"
+                    + " Are you using Theme.CarUi.WithToolbar or Theme.CarUi.NoToolbar?");
         }
 
         return result;
+    }
+
+    /* package */ static BaseLayoutController getBaseLayoutController(Activity activity) {
+        if (activity.getClassLoader().equals(CarUi.class.getClassLoader())) {
+            return BaseLayoutController.getBaseLayout(activity);
+        } else {
+            // Note: (b/156532465)
+            // The usage of the alternate classloader is to accommodate GMSCore.
+            // Some activities are loaded dynamically from external modules.
+            try {
+                Class baseLayoutControllerClass = activity.getClassLoader()
+                        .loadClass(BaseLayoutController.class.getName());
+                Method method = baseLayoutControllerClass
+                        .getDeclaredMethod("getBaseLayout", Activity.class);
+                return (BaseLayoutController) method.invoke(null, activity);
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

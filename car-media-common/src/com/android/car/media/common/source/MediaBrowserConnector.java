@@ -18,13 +18,14 @@ package com.android.car.media.common.source;
 
 import static com.android.car.apps.common.util.CarAppsDebugUtils.idHash;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.media.MediaBrowserCompat;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.car.media.common.MediaConstants;
 
@@ -56,7 +57,7 @@ public class MediaBrowserConnector {
      *
      * @param context The Context with which to build MediaBrowsers.
      */
-    MediaBrowserConnector(@NonNull Context context, @NonNull Callback callback) {
+    public MediaBrowserConnector(@NonNull Context context, @NonNull Callback callback) {
         mContext = context;
         mCallback = callback;
         mMaxBitmapSizePx = mContext.getResources().getInteger(

@@ -16,14 +16,13 @@
 
 package com.android.car.media.common.playback;
 
+import static android.car.media.CarMediaManager.MEDIA_SOURCE_MODE_PLAYBACK;
+
 import static androidx.lifecycle.Transformations.switchMap;
 
 import static com.android.car.arch.common.LiveDataFunctions.dataOf;
 import static com.android.car.media.common.playback.PlaybackStateAnnotations.Actions;
 
-import android.annotation.IntDef;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -38,6 +37,10 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -49,7 +52,6 @@ import com.android.car.media.common.MediaItemMetadata;
 import com.android.car.media.common.R;
 import com.android.car.media.common.source.MediaSourceColors;
 import com.android.car.media.common.source.MediaSourceViewModel;
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -74,14 +76,22 @@ public class PlaybackViewModel extends AndroidViewModel {
             "com.android.car.media.common.ACTION_SET_RATING";
     private static final String EXTRA_SET_HEART = "com.android.car.media.common.EXTRA_SET_HEART";
 
-    private static PlaybackViewModel sInstance;
+    private static PlaybackViewModel[] sInstances = new PlaybackViewModel[2];
+
+    /**
+     * Returns the PlaybackViewModel singleton tied to the application.
+     * @deprecated should use get(Application application, int mode) instead
+     */
+    public static PlaybackViewModel get(@NonNull Application application) {
+        return get(application, MEDIA_SOURCE_MODE_PLAYBACK);
+    }
 
     /** Returns the PlaybackViewModel singleton tied to the application. */
-    public static PlaybackViewModel get(@NonNull Application application) {
-        if (sInstance == null) {
-            sInstance = new PlaybackViewModel(application);
+    public static PlaybackViewModel get(@NonNull Application application, int mode) {
+        if (sInstances[mode] == null) {
+            sInstances[mode] = new PlaybackViewModel(application, mode);
         }
-        return sInstance;
+        return sInstances[mode];
     }
 
     /**
@@ -137,8 +147,8 @@ public class PlaybackViewModel extends AndroidViewModel {
                     state -> state == null ? dataOf(new PlaybackProgress(0L, 0L))
                             : new ProgressLiveData(state.mState, state.getMaxProgress()));
 
-    private PlaybackViewModel(Application application) {
-        this(application, MediaSourceViewModel.get(application).getMediaController());
+    private PlaybackViewModel(Application application, int mode) {
+        this(application, MediaSourceViewModel.get(application, mode).getMediaController());
     }
 
     @VisibleForTesting
@@ -293,7 +303,8 @@ public class PlaybackViewModel extends AndroidViewModel {
         public void onQueueChanged(@Nullable List<MediaSessionCompat.QueueItem> queue) {
             List<MediaItemMetadata> filtered = queue == null ? Collections.emptyList()
                     : queue.stream()
-                            .filter(item -> item.getDescription() != null
+                            .filter(item -> item != null
+                                    && item.getDescription() != null
                                     && item.getDescription().getTitle() != null)
                             .map(MediaItemMetadata::new)
                             .collect(Collectors.toList());

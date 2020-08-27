@@ -23,6 +23,7 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 
 import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.lang.annotation.Retention;
@@ -53,8 +54,9 @@ public class GridOffsetItemDecoration extends RecyclerView.ItemDecoration {
     /**
      * Constructor that takes in the size of the offset to be added to the top of the RecyclerView.
      *
-     * @param offsetPx The size of the offset to be added to the top of the RecyclerView in pixels
-     * @param numColumns The number of columns in the grid of the RecyclerView
+     * @param offsetPx       The size of the offset to be added to the top of the RecyclerView in
+     *                       pixels
+     * @param numColumns     The number of columns in the grid of the RecyclerView
      * @param offsetPosition Position where offset needs to be applied.
      */
     public GridOffsetItemDecoration(int offsetPx, int numColumns, int offsetPosition) {
@@ -67,7 +69,7 @@ public class GridOffsetItemDecoration extends RecyclerView.ItemDecoration {
      * Constructor that takes in a {@link Drawable} to be drawn at the top of the RecyclerView.
      *
      * @param offsetDrawable The {@code Drawable} to be added to the top of the RecyclerView
-     * @param numColumns The number of columns in the grid of the RecyclerView
+     * @param numColumns     The number of columns in the grid of the RecyclerView
      */
     public GridOffsetItemDecoration(Drawable offsetDrawable, int numColumns, int offsetPosition) {
         this.mOffsetDrawable = offsetDrawable;
@@ -84,13 +86,14 @@ public class GridOffsetItemDecoration extends RecyclerView.ItemDecoration {
      * RecyclerView.
      *
      * @param outRect The {@link Rect} of offsets to be added around the child view
-     * @param view The child view to be decorated with an offset
-     * @param parent The RecyclerView onto which dividers are being added
-     * @param state The current RecyclerView.State of the RecyclerView
+     * @param view    The child view to be decorated with an offset
+     * @param parent  The RecyclerView onto which dividers are being added
+     * @param state   The current RecyclerView.State of the RecyclerView
      */
     @Override
     public void getItemOffsets(
-            Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            @NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent,
+            @NonNull RecyclerView.State state) {
         super.getItemOffsets(outRect, view, parent, state);
 
         if (mOffsetPosition == OffsetPosition.START) {
@@ -120,7 +123,8 @@ public class GridOffsetItemDecoration extends RecyclerView.ItemDecoration {
     }
 
     @Override
-    public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
+    public void onDraw(@NonNull Canvas c, @NonNull RecyclerView parent,
+            @NonNull RecyclerView.State state) {
         super.onDraw(c, parent, state);
         if (mOffsetDrawable == null) {
             return;

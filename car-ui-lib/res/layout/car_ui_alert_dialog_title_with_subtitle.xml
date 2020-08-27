@@ -23,7 +23,7 @@
     style="@style/Widget.CarUi.AlertDialog.HeaderContainer">
 
     <ImageView
-        android:id="@+id/icon"
+        android:id="@+id/car_ui_alert_icon"
         android:layout_width="@dimen/car_ui_dialog_icon_size"
         android:layout_height="@dimen/car_ui_dialog_icon_size"
         style="@style/Widget.CarUi.AlertDialog.Icon"/>
@@ -33,17 +33,15 @@
         android:layout_height="wrap_content"
         style="@style/Widget.CarUi.AlertDialog.TitleContainer">
         <TextView
-            android:id="@+id/alertTitle"
-            android:singleLine="true"
+            android:id="@+id/car_ui_alert_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAlignment="viewStart"
-            style="?android:attr/windowTitleStyle" />
+            android:textAppearance="@style/TextAppearance.CarUi.AlertDialog.Title" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/alertSubtitle"
+            android:id="@+id/car_ui_alert_subtitle"
             android:textAppearance="@style/TextAppearance.CarUi.AlertDialog.Subtitle"/>
     </LinearLayout>
 

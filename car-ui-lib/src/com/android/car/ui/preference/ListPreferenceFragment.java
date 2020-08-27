@@ -31,11 +31,16 @@ import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 
 import com.android.car.ui.R;
+import com.android.car.ui.baselayout.Insets;
+import com.android.car.ui.baselayout.InsetsChangedListener;
+import com.android.car.ui.core.CarUi;
 import com.android.car.ui.recyclerview.CarUiContentListItem;
 import com.android.car.ui.recyclerview.CarUiListItem;
 import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.Toolbar;
+import com.android.car.ui.toolbar.ToolbarController;
+import com.android.car.ui.utils.CarUiUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,15 +49,29 @@ import java.util.List;
  * A fragment that provides a layout with a list of options associated with a {@link
  * ListPreference}.
  */
-public class ListPreferenceFragment extends Fragment {
+public class ListPreferenceFragment extends Fragment implements InsetsChangedListener {
 
+    private ToolbarController mToolbar;
     private ListPreference mPreference;
     private CarUiContentListItem mSelectedItem;
+    private int mSelectedIndex = -1;
+    private final Toolbar.OnBackListener mOnBackListener = () -> {
+        if (mSelectedIndex >= 0 && mPreference != null) {
+            String entryValue = mPreference.getEntryValues()[mSelectedIndex].toString();
+
+            if (mPreference.callChangeListener(entryValue)) {
+                mPreference.setValue(entryValue);
+            }
+        }
+
+        return false;
+    };
 
     /**
      * Returns a new instance of {@link ListPreferenceFragment} for the {@link ListPreference} with
      * the given {@code key}.
      */
+    @NonNull
     static ListPreferenceFragment newInstance(String key) {
         ListPreferenceFragment fragment = new ListPreferenceFragment();
         Bundle b = new Bundle(/* capacity= */ 1);
@@ -66,29 +85,40 @@ public class ListPreferenceFragment extends Fragment {
     public View onCreateView(
             @NonNull LayoutInflater inflater, @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.car_ui_list_preference, container, false);
+        if (CarUi.getToolbar(getActivity()) == null) {
+            return inflater.inflate(R.layout.car_ui_list_preference_with_toolbar, container, false);
+        } else {
+            return inflater.inflate(R.layout.car_ui_list_preference, container, false);
+        }
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        final CarUiRecyclerView carUiRecyclerView = view.requireViewById(R.id.list);
-        final Toolbar toolbar = view.requireViewById(R.id.toolbar);
+        final CarUiRecyclerView carUiRecyclerView = CarUiUtils.requireViewByRefId(view, R.id.list);
+        mToolbar = CarUi.getToolbar(getActivity());
 
-        carUiRecyclerView.setPadding(0, toolbar.getHeight(), 0, 0);
-        toolbar.registerToolbarHeightChangeListener(newHeight -> {
-            if (carUiRecyclerView.getPaddingTop() == newHeight) {
-                return;
-            }
+        // TODO(b/150230923) remove the code for the old toolbar height change when apps are ready
+        if (mToolbar == null) {
+            Toolbar toolbarView = CarUiUtils.requireViewByRefId(view, R.id.toolbar);
+            mToolbar = toolbarView;
 
-            int oldHeight = carUiRecyclerView.getPaddingTop();
-            carUiRecyclerView.setPadding(0, newHeight, 0, 0);
-            carUiRecyclerView.scrollBy(0, oldHeight - newHeight);
-        });
+            carUiRecyclerView.setPadding(0, toolbarView.getHeight(), 0, 0);
+            toolbarView.registerToolbarHeightChangeListener(newHeight -> {
+                if (carUiRecyclerView.getPaddingTop() == newHeight) {
+                    return;
+                }
+
+                int oldHeight = carUiRecyclerView.getPaddingTop();
+                carUiRecyclerView.setPadding(0, newHeight, 0, 0);
+                carUiRecyclerView.scrollBy(0, oldHeight - newHeight);
+            });
+        }
 
         carUiRecyclerView.setClipToPadding(false);
         mPreference = getListPreference();
-        toolbar.setTitle(mPreference.getTitle());
+        mToolbar.setTitle(mPreference.getTitle());
+        mToolbar.setState(Toolbar.State.SUBPAGE);
 
         CharSequence[] entries = mPreference.getEntries();
         CharSequence[] entryValues = mPreference.getEntryValues();
@@ -103,7 +133,7 @@ public class ListPreferenceFragment extends Fragment {
                     "ListPreference entries array length does not match entryValues array length.");
         }
 
-        int selectedEntryIndex = mPreference.findIndexOfValue(mPreference.getValue());
+        mSelectedIndex = mPreference.findIndexOfValue(mPreference.getValue());
         List<CarUiListItem> listItems = new ArrayList<>();
         CarUiListItemAdapter adapter = new CarUiListItemAdapter(listItems);
 
@@ -113,7 +143,7 @@ public class ListPreferenceFragment extends Fragment {
                     CarUiContentListItem.Action.RADIO_BUTTON);
             item.setTitle(entry);
 
-            if (i == selectedEntryIndex) {
+            if (i == mSelectedIndex) {
                 item.setChecked(true);
                 mSelectedItem = item;
             }
@@ -124,25 +154,29 @@ public class ListPreferenceFragment extends Fragment {
                     adapter.notifyItemChanged(listItems.indexOf(mSelectedItem));
                 }
                 mSelectedItem = listItem;
+                mSelectedIndex = listItems.indexOf(mSelectedItem);
             });
 
             listItems.add(item);
         }
 
-        toolbar.registerOnBackListener(() -> {
-            if (mSelectedItem != null) {
-                int selectedIndex = listItems.indexOf(mSelectedItem);
-                String entryValue = entryValues[selectedIndex].toString();
-
-                if (mPreference.callChangeListener(entryValue)) {
-                    mPreference.setValue(entryValue);
-                }
-            }
-
-            return false;
-        });
-
         carUiRecyclerView.setAdapter(adapter);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mToolbar.registerOnBackListener(mOnBackListener);
+        Insets insets = CarUi.getInsets(getActivity());
+        if (insets != null) {
+            onCarUiInsetsChanged(insets);
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mToolbar.unregisterOnBackListener(mOnBackListener);
     }
 
     private ListPreference getListPreference() {
@@ -174,5 +208,13 @@ public class ListPreferenceFragment extends Fragment {
         }
 
         return (ListPreference) preference;
+    }
+
+    @Override
+    public void onCarUiInsetsChanged(@NonNull Insets insets) {
+        View view = requireView();
+        CarUiUtils.requireViewByRefId(view, R.id.list)
+                .setPadding(0, insets.getTop(), 0, insets.getBottom());
+        view.setPadding(insets.getLeft(), 0, insets.getRight(), 0);
     }
 }

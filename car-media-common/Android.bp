@@ -36,5 +36,6 @@ android_library {
         "androidx-constraintlayout_constraintlayout-solver",
     ],
 
-    libs: ["android.car"],
+    libs: ["android.car-system-stubs"],
+    sdk_version: "system_current",
 }

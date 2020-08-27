@@ -29,6 +29,12 @@
         <item name="android:layout_height">@dimen/control_bar_button_size</item>
         <!-- This padding is used to force resizing of provided icons. -->
         <item name="android:padding">@dimen/control_bar_button_padding</item>
+        <!-- Added paddingStart/End explicitly to make sure style works regardless of whether -->
+        <!-- RTL is enabled or disabled. -->
+        <!-- Note: When RTL is enabled, paddingStart/End overrides value of padding, -->
+        <!-- while padding overrides value of paddingStart/End when RTL is disabled. -->
+        <item name="android:paddingStart">@dimen/control_bar_button_padding</item>
+        <item name="android:paddingEnd">@dimen/control_bar_button_padding</item>
         <!-- Note: fitCenter makes icons disappear if the view is too small... -->
         <item name="android:scaleType">fitCenter</item>
         <item name="android:layout_gravity">center</item>
@@ -69,6 +75,7 @@
     <style name="TextAppearance">
         <item name="android:fontFamily">roboto-regular</item>
         <item name="android:textColor">@color/primary_text_color</item>
+        <item name="android:textAlignment">viewStart</item>
     </style>
 
     <style name="TextAppearance.Display1" parent="TextAppearance">
@@ -101,12 +108,8 @@
         <item name="android:letterSpacing">@dimen/letter_spacing_body3</item>
     </style>
 
-    <style name="MinimizedControlBarTitle" parent="TextAppearance.Body1">
-        <item name="android:textDirection">locale</item>
-    </style>
-    <style name="MinimizedControlBarSubtitle" parent="TextAppearance.Body3">
-        <item name="android:textDirection">locale</item>
-    </style>
+    <style name="MinimizedControlBarTitle" parent="TextAppearance.Body1"/>
+    <style name="MinimizedControlBarSubtitle" parent="TextAppearance.Body3"/>
 
     <!-- Styles for ControlBar -->
     <style name="ControlBar">
@@ -117,14 +120,6 @@
     <style name="MinimizedControlBar">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">@dimen/minimized_control_bar_height</item>
-    </style>
-
-    <style name="PagedRecyclerView">
-        <item name="gutter">both</item>
-        <item name="scrollBarPosition">start</item>
-        <item name="scrollBarAboveRecyclerView">true</item>
-    </style>
-    <style name="PagedRecyclerView.NestedRecyclerView">
     </style>
 
     <style name="FullScreenErrorMessageStyle">

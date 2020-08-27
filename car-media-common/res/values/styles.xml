@@ -18,13 +18,11 @@
     <style name="PlaybackTitleStyle" parent="TextAppearance.Body1">
         <item name="android:singleLine">true</item>
         <item name="android:includeFontPadding">false</item>
-        <item name="android:textDirection">locale</item>
     </style>
 
     <style name="PlaybackSubtitleStyle" parent="TextAppearance.Body3">
         <item name="android:textColor">@color/secondary_text_color</item>
         <item name="android:singleLine">true</item>
         <item name="android:includeFontPadding">false</item>
-        <item name="android:textDirection">locale</item>
     </style>
 </resources>

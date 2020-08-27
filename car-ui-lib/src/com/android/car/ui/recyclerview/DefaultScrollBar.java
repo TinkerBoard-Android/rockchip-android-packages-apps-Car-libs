@@ -23,10 +23,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
-import android.widget.ImageView;
 
 import androidx.annotation.IntRange;
-import androidx.annotation.VisibleForTesting;
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.OrientationHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -41,29 +40,19 @@ import com.android.car.ui.utils.CarUiUtils;
  */
 class DefaultScrollBar implements ScrollBar {
 
-    @VisibleForTesting
-    int mPaddingStart;
-    @VisibleForTesting
-    int mPaddingEnd;
-
     private float mButtonDisabledAlpha;
     private CarUiSnapHelper mSnapHelper;
 
-    private ImageView mUpButton;
     private View mScrollView;
+    private View mScrollTrack;
     private View mScrollThumb;
-    private ImageView mDownButton;
-
-    private int mSeparatingMargin;
+    private View mUpButton;
+    private View mDownButton;
 
     private RecyclerView mRecyclerView;
 
-    /** The amount of space that the scroll thumb is allowed to roam over. */
-    private int mScrollThumbTrackHeight;
-
     private final Interpolator mPaginationInterpolator = new AccelerateDecelerateInterpolator();
 
-    private final int mRowsPerPage = -1;
     private final Handler mHandler = new Handler();
 
     private OrientationHelper mOrientationHelper;
@@ -81,24 +70,30 @@ class DefaultScrollBar implements ScrollBar {
         getRecyclerView().addOnScrollListener(mRecyclerViewOnScrollListener);
         getRecyclerView().getRecycledViewPool().setMaxRecycledViews(0, 12);
 
-        mSeparatingMargin = res.getDimensionPixelSize(R.dimen.car_ui_scrollbar_separator_margin);
+        mUpButton = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_page_up);
+        View.OnClickListener paginateUpButtonOnClickListener = v -> pageUp();
+        mUpButton.setOnClickListener(paginateUpButtonOnClickListener);
+        mUpButton.setOnTouchListener(
+                new OnContinuousScrollListener(rv.getContext(), paginateUpButtonOnClickListener));
 
-        mUpButton = requireViewByRefId(mScrollView, R.id.page_up);
-        PaginateButtonClickListener upButtonClickListener =
-                new PaginateButtonClickListener(PaginationListener.PAGE_UP);
-        mUpButton.setOnClickListener(upButtonClickListener);
+        mDownButton = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_page_down);
+        View.OnClickListener paginateDownButtonOnClickListener = v -> pageDown();
+        mDownButton.setOnClickListener(paginateDownButtonOnClickListener);
+        mDownButton.setOnTouchListener(
+                new OnContinuousScrollListener(rv.getContext(), paginateDownButtonOnClickListener));
 
-        mDownButton = requireViewByRefId(mScrollView, R.id.page_down);
-        PaginateButtonClickListener downButtonClickListener =
-                new PaginateButtonClickListener(PaginationListener.PAGE_DOWN);
-        mDownButton.setOnClickListener(downButtonClickListener);
-
-        mScrollThumb = requireViewByRefId(mScrollView, R.id.scrollbar_thumb);
+        mScrollTrack = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_track);
+        mScrollThumb = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_thumb);
 
         mSnapHelper = new CarUiSnapHelper(rv.getContext());
         getRecyclerView().setOnFlingListener(null);
         mSnapHelper.attachToRecyclerView(getRecyclerView());
 
+        // enables fast scrolling.
+        FastScroller fastScroller = new FastScroller(mRecyclerView, mScrollTrack, mScrollView);
+        fastScroller.enable();
+
+        mScrollView.setVisibility(View.INVISIBLE);
         mScrollView.addOnLayoutChangeListener(
                 (View v,
                         int left,
@@ -108,30 +103,7 @@ class DefaultScrollBar implements ScrollBar {
                         int oldLeft,
                         int oldTop,
                         int oldRight,
-                        int oldBottom) -> {
-                    int width = right - left;
-
-                    OrientationHelper orientationHelper =
-                            getOrientationHelper(getRecyclerView().getLayoutManager());
-
-                    // This value will keep track of the top of the current view being laid out.
-                    int layoutTop = orientationHelper.getStartAfterPadding() + mPaddingStart;
-
-                    // Lay out the up button at the top of the view.
-                    layoutViewCenteredFromTop(mUpButton, layoutTop, width);
-                    layoutTop = mUpButton.getBottom();
-
-                    // Lay out the scroll thumb
-                    layoutTop += mSeparatingMargin;
-                    layoutViewCenteredFromTop(mScrollThumb, layoutTop, width);
-
-                    // Lay out the bottom button at the bottom of the view.
-                    int downBottom = orientationHelper.getEndAfterPadding() - mPaddingEnd;
-                    layoutViewCenteredFromBottom(mDownButton, downBottom, width);
-
-                    mHandler.post(this::calculateScrollThumbTrackHeight);
-                    mHandler.post(() -> updatePaginationButtons(/* animate= */ false));
-                });
+                        int oldBottom) -> mHandler.post(this::updatePaginationButtons));
     }
 
     public RecyclerView getRecyclerView() {
@@ -145,9 +117,8 @@ class DefaultScrollBar implements ScrollBar {
 
     @Override
     public void setPadding(int paddingStart, int paddingEnd) {
-        this.mPaddingStart = paddingStart;
-        this.mPaddingEnd = paddingEnd;
-        requestLayout();
+        mScrollView.setPadding(mScrollView.getPaddingLeft(), paddingStart,
+                mScrollView.getPaddingRight(), paddingEnd);
     }
 
     /**
@@ -179,60 +150,6 @@ class DefaultScrollBar implements ScrollBar {
         return mDownButton.isEnabled();
     }
 
-    /** Listener for when the list should paginate. */
-    interface PaginationListener {
-        int PAGE_UP = 0;
-        int PAGE_DOWN = 1;
-
-        /** Called when the linked view should be paged in the given direction */
-        void onPaginate(int direction);
-    }
-
-    /**
-     * Calculate the amount of space that the scroll bar thumb is allowed to roam. The thumb is
-     * allowed to take up the space between the down bottom and the up or alpha jump button,
-     * depending
-     * on if the latter is visible.
-     */
-    private void calculateScrollThumbTrackHeight() {
-        // Subtracting (2 * mSeparatingMargin) for the top/bottom margin above and below the
-        // scroll bar thumb.
-        mScrollThumbTrackHeight = mDownButton.getTop() - (2 * mSeparatingMargin);
-
-        // If there's an alpha jump button, then the thumb is laid out starting from below that.
-        mScrollThumbTrackHeight -= mUpButton.getBottom();
-    }
-
-    /**
-     * Lays out the given View starting from the given {@code top} value downwards and centered
-     * within the given {@code availableWidth}.
-     *
-     * @param view The view to lay out.
-     * @param top The top value to start laying out from. This value will be the resulting top value
-     * of the view.
-     * @param availableWidth The width in which to center the given view.
-     */
-    private static void layoutViewCenteredFromTop(View view, int top, int availableWidth) {
-        int viewWidth = view.getMeasuredWidth();
-        int viewLeft = (availableWidth - viewWidth) / 2;
-        view.layout(viewLeft, top, viewLeft + viewWidth, top + view.getMeasuredHeight());
-    }
-
-    /**
-     * Lays out the given View starting from the given {@code bottom} value upwards and centered
-     * within the given {@code availableSpace}.
-     *
-     * @param view The view to lay out.
-     * @param bottom The bottom value to start laying out from. This value will be the resulting
-     * bottom value of the view.
-     * @param availableWidth The width in which to center the given view.
-     */
-    private static void layoutViewCenteredFromBottom(View view, int bottom, int availableWidth) {
-        int viewWidth = view.getMeasuredWidth();
-        int viewLeft = (availableWidth - viewWidth) / 2;
-        view.layout(viewLeft, bottom - view.getMeasuredHeight(), viewLeft + viewWidth, bottom);
-    }
-
     /**
      * Sets the range, offset and extent of the scroll bar. The range represents the size of a
      * container for the scrollbar thumb; offset is the distance from the start of the container to
@@ -242,17 +159,14 @@ class DefaultScrollBar implements ScrollBar {
      * The
      * values should also be positive.
      *
-     * @param range The range of the scrollbar's thumb
+     * @param range  The range of the scrollbar's thumb
      * @param offset The offset of the scrollbar's thumb
      * @param extent The extent of the scrollbar's thumb
-     * @param animate Whether or not the thumb should animate from its current position to the
-     * position specified by the given range, offset and extent.
      */
     private void setParameters(
             @IntRange(from = 0) int range,
             @IntRange(from = 0) int offset,
-            @IntRange(from = 0) int extent,
-            boolean animate) {
+            @IntRange(from = 0) int extent) {
         // Not laid out yet, so values cannot be calculated.
         if (!mScrollView.isLaidOut()) {
             return;
@@ -274,20 +188,20 @@ class DefaultScrollBar implements ScrollBar {
             mScrollThumb.requestLayout();
         }
 
-        moveY(mScrollThumb, thumbOffset, animate);
+        moveY(mScrollThumb, thumbOffset);
     }
 
     /**
      * Calculates and returns how big the scroll bar thumb should be based on the given range and
      * extent.
      *
-     * @param range The total amount of space the scroll bar is allowed to roam over.
+     * @param range  The total amount of space the scroll bar is allowed to roam over.
      * @param extent The amount of space that the scroll bar takes up relative to the range.
      * @return The height of the scroll bar thumb in pixels.
      */
     private int calculateScrollThumbLength(int range, int extent) {
         // Scale the length by the available space that the thumb can fill.
-        return Math.round(((float) extent / range) * mScrollThumbTrackHeight);
+        return Math.round(((float) extent / range) * mScrollTrack.getHeight());
     }
 
     /**
@@ -295,9 +209,10 @@ class DefaultScrollBar implements ScrollBar {
      * has
      * been laid out.
      *
-     * @param range The total amount of space the scroll bar is allowed to roam over.
-     * @param offset The amount the scroll bar should be offset, expressed in the same units as the
-     * given range.
+     * @param range       The total amount of space the scroll bar is allowed to roam over.
+     * @param offset      The amount the scroll bar should be offset, expressed in the same units as
+     *                    the
+     *                    given range.
      * @param thumbLength The current length of the thumb in pixels.
      * @return The amount the thumb should be offset in pixels.
      */
@@ -305,62 +220,29 @@ class DefaultScrollBar implements ScrollBar {
         // Ensure that if the user has reached the bottom of the list, then the scroll bar is
         // aligned to the bottom as well. Otherwise, scale the offset appropriately.
         // This offset will be a value relative to the parent of this scrollbar, so start by where
-        // the top of mScrollThumb is.
-        return mScrollThumb.getTop()
+        // the top of scrollbar track is.
+        return mScrollTrack.getTop()
                 + (isDownEnabled()
-                ? Math.round(((float) offset / range) * mScrollThumbTrackHeight)
-                : mScrollThumbTrackHeight - thumbLength);
+                ? Math.round(((float) offset / range) * mScrollTrack.getHeight())
+                : mScrollTrack.getHeight() - thumbLength);
     }
 
     /** Moves the given view to the specified 'y' position. */
-    private void moveY(final View view, float newPosition, boolean animate) {
-        final int duration = animate ? 200 : 0;
+    private void moveY(final View view, float newPosition) {
         view.animate()
                 .y(newPosition)
-                .setDuration(duration)
+                .setDuration(/* duration= */ 0)
                 .setInterpolator(mPaginationInterpolator)
                 .start();
-    }
-
-    private class PaginateButtonClickListener implements View.OnClickListener {
-        private final int mPaginateDirection;
-        private PaginationListener mPaginationListener;
-
-        PaginateButtonClickListener(int paginateDirection) {
-            this.mPaginateDirection = paginateDirection;
-        }
-
-        @Override
-        public void onClick(View v) {
-            if (mPaginationListener != null) {
-                mPaginationListener.onPaginate(mPaginateDirection);
-            }
-            if (mPaginateDirection == PaginationListener.PAGE_DOWN) {
-                pageDown();
-            } else if (mPaginateDirection == PaginationListener.PAGE_UP) {
-                pageUp();
-            }
-        }
     }
 
     private final RecyclerView.OnScrollListener mRecyclerViewOnScrollListener =
             new RecyclerView.OnScrollListener() {
                 @Override
-                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                    updatePaginationButtons(false);
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                    updatePaginationButtons();
                 }
             };
-
-    /** Returns the page the given position is on, starting with page 0. */
-    int getPage(int position) {
-        if (mRowsPerPage == -1) {
-            return -1;
-        }
-        if (mRowsPerPage == 0) {
-            return 0;
-        }
-        return position / mRowsPerPage;
-    }
 
     private OrientationHelper getOrientationHelper(RecyclerView.LayoutManager layoutManager) {
         if (mOrientationHelper == null || mOrientationHelper.getLayoutManager() != layoutManager) {
@@ -417,7 +299,7 @@ class DefaultScrollBar implements ScrollBar {
             }
         }
         // Distance should always be positive. Negate its value to scroll up.
-        mSnapHelper.smoothScrollBy(-scrollDistance);
+        mRecyclerView.smoothScrollBy(0, -scrollDistance);
     }
 
     /**
@@ -477,7 +359,7 @@ class DefaultScrollBar implements ScrollBar {
             }
         }
 
-        mSnapHelper.smoothScrollBy(scrollDistance);
+        mRecyclerView.smoothScrollBy(0, scrollDistance);
     }
 
     /**
@@ -489,24 +371,21 @@ class DefaultScrollBar implements ScrollBar {
      * this is called after an adapter change but before the new layout, the visibility
      * determination
      * may not be correct.
-     *
-     * @param animate {@code true} if the scrollbar should animate to its new position. {@code
-     * false}
-     * if no animation is used
      */
-    private void updatePaginationButtons(boolean animate) {
+    private void updatePaginationButtons() {
 
         boolean isAtStart = isAtStart();
         boolean isAtEnd = isAtEnd();
         RecyclerView.LayoutManager layoutManager = getRecyclerView().getLayoutManager();
 
+        // enable/disable the button before the view is shown. So there is no flicker.
+        setUpEnabled(!isAtStart);
+        setDownEnabled(!isAtEnd);
         if ((isAtStart && isAtEnd) || layoutManager == null || layoutManager.getItemCount() == 0) {
             mScrollView.setVisibility(View.INVISIBLE);
         } else {
             mScrollView.setVisibility(View.VISIBLE);
         }
-        setUpEnabled(!isAtStart);
-        setDownEnabled(!isAtEnd);
 
         if (layoutManager == null) {
             return;
@@ -516,14 +395,12 @@ class DefaultScrollBar implements ScrollBar {
             setParameters(
                     getRecyclerView().computeVerticalScrollRange(),
                     getRecyclerView().computeVerticalScrollOffset(),
-                    getRecyclerView().computeVerticalScrollExtent(),
-                    animate);
+                    getRecyclerView().computeVerticalScrollExtent());
         } else {
             setParameters(
                     getRecyclerView().computeHorizontalScrollRange(),
                     getRecyclerView().computeHorizontalScrollOffset(),
-                    getRecyclerView().computeHorizontalScrollExtent(),
-                    animate);
+                    getRecyclerView().computeHorizontalScrollExtent());
         }
 
         mScrollView.invalidate();

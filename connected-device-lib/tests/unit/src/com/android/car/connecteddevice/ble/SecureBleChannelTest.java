@@ -16,206 +16,194 @@
 
 package com.android.car.connecteddevice.ble;
 
+import static com.android.car.connecteddevice.BleStreamProtos.BleOperationProto.OperationType.CLIENT_MESSAGE;
+import static com.android.car.connecteddevice.BleStreamProtos.BleOperationProto.OperationType.ENCRYPTION_HANDSHAKE;
+import static com.android.car.connecteddevice.ble.SecureBleChannel.CHANNEL_ERROR_INVALID_HANDSHAKE;
+import static com.android.car.connecteddevice.ble.SecureBleChannel.Callback;
+
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockitoSession;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.car.encryptionrunner.DummyEncryptionRunner;
 import android.car.encryptionrunner.EncryptionRunnerFactory;
+import android.car.encryptionrunner.HandshakeException;
+import android.car.encryptionrunner.Key;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.android.car.connecteddevice.BleStreamProtos.BleOperationProto.OperationType;
-import com.android.car.connecteddevice.ble.BleDeviceMessageStream.MessageReceivedListener;
-import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
 import com.android.car.connecteddevice.util.ByteUtils;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
-public final class SecureBleChannelTest {
-    private static final UUID CLIENT_DEVICE_ID =
-            UUID.fromString("a5645523-3280-410a-90c1-582a6c6f4969");
-    private static final UUID SERVER_DEVICE_ID =
-            UUID.fromString("a29f0c74-2014-4b14-ac02-be6ed15b545a");
+public class SecureBleChannelTest {
 
-    private SecureBleChannel mChannel;
-    private MessageReceivedListener mMessageReceivedListener;
+    @Mock private BleDeviceMessageStream mMockStream;
 
-    @Mock private BleDeviceMessageStream mStreamMock;
-    @Mock private ConnectedDeviceStorage mStorageMock;
-    @Mock private SecureBleChannel.ShowVerificationCodeListener mShowVerificationCodeListenerMock;
+    @Mock private Key mKey = spy(new Key() {
+        @Override
+        public byte[] asBytes() {
+            return new byte[0];
+        }
+
+        @Override
+        public byte[] encryptData(byte[] data) {
+            return data;
+        }
+
+        @Override
+        public byte[] decryptData(byte[] encryptedData) throws SignatureException {
+            return encryptedData;
+        }
+
+        @Override
+        public byte[] getUniqueSession() throws NoSuchAlgorithmException {
+            return new byte[0];
+        }
+    });
+
+    private MockitoSession mMockitoSession;
+
+    private SecureBleChannel mSecureBleChannel;
 
     @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        when(mStorageMock.getUniqueId()).thenReturn(SERVER_DEVICE_ID);
+    public void setUp() throws SignatureException {
+        mMockitoSession = mockitoSession()
+                .initMocks(this)
+                .strictness(Strictness.WARN)
+                .startMocking();
+
+        mSecureBleChannel = new SecureBleChannel(mMockStream,
+                EncryptionRunnerFactory.newDummyRunner()) {
+            @Override
+            void processHandshake(byte[] message) { }
+        };
+        mSecureBleChannel.setEncryptionKey(mKey);
+    }
+
+    @After
+    public void tearDown() {
+        if (mMockitoSession != null) {
+            mMockitoSession.finishMocking();
+        }
     }
 
     @Test
-    public void testEncryptionHandshake_Association() throws InterruptedException {
-        Semaphore semaphore = new Semaphore(0);
-        ChannelCallback callbackSpy = spy(new ChannelCallback(semaphore));
-        setUpSecureBleChannel_Association(callbackSpy);
-        ArgumentCaptor<String> deviceIdCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<DeviceMessage> messageCaptor =
-                ArgumentCaptor.forClass(DeviceMessage.class);
-
-        sendDeviceId();
-        assertThat(semaphore.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
-        verify(callbackSpy).onDeviceIdReceived(deviceIdCaptor.capture());
-        verify(mStreamMock).writeMessage(messageCaptor.capture(), any());
-        byte[] deviceIdMessage = messageCaptor.getValue().getMessage();
-        assertThat(deviceIdMessage).isEqualTo(ByteUtils.uuidToBytes(SERVER_DEVICE_ID));
-        assertThat(deviceIdCaptor.getValue()).isEqualTo(CLIENT_DEVICE_ID.toString());
-
-        initHandshakeMessage();
-        verify(mStreamMock, times(2)).writeMessage(messageCaptor.capture(), any());
-        byte[] response = messageCaptor.getValue().getMessage();
-        assertThat(response).isEqualTo(DummyEncryptionRunner.INIT_RESPONSE.getBytes());
-
-        respondToContinueMessage();
-        verify(mShowVerificationCodeListenerMock).showVerificationCode(anyString());
-
-        mChannel.notifyOutOfBandAccepted();
-        verify(mStreamMock, times(3)).writeMessage(messageCaptor.capture(), any());
-        byte[] confirmMessage = messageCaptor.getValue().getMessage();
-        assertThat(confirmMessage).isEqualTo(SecureBleChannel.CONFIRMATION_SIGNAL);
-        assertThat(semaphore.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
-        verify(callbackSpy).onSecureChannelEstablished();
+    public void processMessage_doesNothingForUnencryptedMessage() throws SignatureException {
+        byte[] payload = ByteUtils.randomBytes(10);
+        DeviceMessage message = new DeviceMessage(UUID.randomUUID(), /* isEncrypted= */ false,
+                payload);
+        mSecureBleChannel.processMessage(message);
+        assertThat(message.getMessage()).isEqualTo(payload);
+        verify(mKey, times(0)).decryptData(any());
     }
 
     @Test
-    public void testEncryptionHandshake_Association_wrongInitHandshakeMessage()
+    public void processMessage_decryptsEncryptedMessage() throws SignatureException {
+        byte[] payload = ByteUtils.randomBytes(10);
+        DeviceMessage message = new DeviceMessage(UUID.randomUUID(), /* isEncrypted= */ true,
+                payload);
+        mSecureBleChannel.processMessage(message);
+        verify(mKey).decryptData(any());
+    }
+
+    @Test
+    public void processMessage_onMessageReceivedErrorForEncryptedMessageWithNoKey()
             throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
-        ChannelCallback callbackSpy = spy(new ChannelCallback(semaphore));
-        setUpSecureBleChannel_Association(callbackSpy);
+        DeviceMessage message = new DeviceMessage(UUID.randomUUID(), /* isEncrypted= */ true,
+                ByteUtils.randomBytes(10));
 
-        sendDeviceId();
-        assertThat(semaphore.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
-
-        // Wrong init handshake message
-        respondToContinueMessage();
-        assertThat(semaphore.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
-        verify(callbackSpy).onEstablishSecureChannelFailure(
-                eq(SecureBleChannel.CHANNEL_ERROR_INVALID_HANDSHAKE)
-        );
+        mSecureBleChannel.setEncryptionKey(null);
+        mSecureBleChannel.registerCallback(new Callback() {
+            @Override
+            public void onMessageReceivedError(Exception exception) {
+                semaphore.release();
+            }
+        });
+        mSecureBleChannel.processMessage(message);
+        assertThat(tryAcquire(semaphore)).isTrue();
+        assertThat(message.getMessage()).isNull();
     }
 
     @Test
-    public void testEncryptionHandshake_Association_wrongRespondToContinueMessage()
+    public void onMessageReceived_onEstablishSecureChannelFailureBadHandshakeMessage()
             throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
-        ChannelCallback callbackSpy = spy(new ChannelCallback(semaphore));
-        setUpSecureBleChannel_Association(callbackSpy);
+        DeviceMessage message = new DeviceMessage(UUID.randomUUID(), /* isEncrypted= */ true,
+                ByteUtils.randomBytes(10));
 
-        sendDeviceId();
-        assertThat(semaphore.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
-
-        initHandshakeMessage();
-
-        // Wrong respond to continue message
-        initHandshakeMessage();
-        assertThat(semaphore.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
-        verify(callbackSpy).onEstablishSecureChannelFailure(
-                eq(SecureBleChannel.CHANNEL_ERROR_INVALID_HANDSHAKE)
-        );
+        mSecureBleChannel.setEncryptionKey(null);
+        mSecureBleChannel.registerCallback(new Callback() {
+            @Override
+            public void onEstablishSecureChannelFailure(int error) {
+                assertThat(error).isEqualTo(CHANNEL_ERROR_INVALID_HANDSHAKE);
+                semaphore.release();
+            }
+        });
+        mSecureBleChannel.onMessageReceived(message, ENCRYPTION_HANDSHAKE);
+        assertThat(tryAcquire(semaphore)).isTrue();
     }
 
-    private void setUpSecureBleChannel_Association(ChannelCallback callback) {
-        mChannel = new SecureBleChannel(
-                mStreamMock,
-                mStorageMock,
-                /* isReconnect = */ false,
-                EncryptionRunnerFactory.newDummyRunner()
-        );
-        mChannel.registerCallback(callback);
-        mChannel.setShowVerificationCodeListener(mShowVerificationCodeListenerMock);
-        ArgumentCaptor<MessageReceivedListener> listenerCaptor =
-                ArgumentCaptor.forClass(MessageReceivedListener.class);
-        verify(mStreamMock).setMessageReceivedListener(listenerCaptor.capture());
-        mMessageReceivedListener = listenerCaptor.getValue();
+    @Test
+    public void onMessageReceived_onMessageReceivedNotIssuedForNullMessage()
+            throws InterruptedException {
+        Semaphore semaphore = new Semaphore(0);
+        DeviceMessage message = new DeviceMessage(UUID.randomUUID(), /* isEncrypted= */ false,
+                /* message= */ null);
+
+        mSecureBleChannel.registerCallback(new Callback() {
+            @Override
+            public void onMessageReceived(DeviceMessage message) {
+                semaphore.release();
+            }
+        });
+        mSecureBleChannel.onMessageReceived(message, CLIENT_MESSAGE);
+        assertThat(tryAcquire(semaphore)).isFalse();
     }
 
-    private void sendDeviceId() {
-        DeviceMessage message = new DeviceMessage(
-                /* recipient = */ null,
-                /* isMessageEncrypted = */ false,
-                ByteUtils.uuidToBytes(CLIENT_DEVICE_ID)
-        );
-        mMessageReceivedListener.onMessageReceived(message, OperationType.ENCRYPTION_HANDSHAKE);
+    @Test
+    public void onMessageReceived_processHandshakeExceptionIssuesSecureChannelFailureCallback()
+            throws InterruptedException {
+        SecureBleChannel secureChannel = new SecureBleChannel(mMockStream,
+                EncryptionRunnerFactory.newDummyRunner()) {
+            @Override
+            void processHandshake(byte[] message) throws HandshakeException {
+                DummyEncryptionRunner.throwHandshakeException("test");
+            }
+        };
+        Semaphore semaphore = new Semaphore(0);
+        secureChannel.registerCallback(new Callback() {
+            @Override
+            public void onEstablishSecureChannelFailure(int error) {
+                semaphore.release();
+            }
+        });
+        DeviceMessage message = new DeviceMessage(UUID.randomUUID(), /* isEncrypted= */ true,
+                /* message= */ ByteUtils.randomBytes(10));
+
+        secureChannel.onMessageReceived(message, ENCRYPTION_HANDSHAKE);
+        assertThat(tryAcquire(semaphore)).isTrue();
     }
 
-    private void initHandshakeMessage() {
-        DeviceMessage message = new DeviceMessage(
-                /* recipient = */ null,
-                /* isMessageEncrypted = */ false,
-                DummyEncryptionRunner.INIT.getBytes()
-        );
-        mMessageReceivedListener.onMessageReceived(message, OperationType.ENCRYPTION_HANDSHAKE);
-    }
-
-    private void respondToContinueMessage() {
-        DeviceMessage message = new DeviceMessage(
-                /* recipient = */ null,
-                /* isMessageEncrypted = */ false,
-                DummyEncryptionRunner.CLIENT_RESPONSE.getBytes()
-        );
-        mMessageReceivedListener.onMessageReceived(message, OperationType.ENCRYPTION_HANDSHAKE);
-    }
-
-    /**
-     * Add the thread control logic into {@link SecureBleChannel.Callback} only for spy purpose.
-     *
-     * <p>The callback will release the semaphore which hold by one test when this callback
-     * is called, telling the test that it can verify certain behaviors which will only occurred
-     * after the callback is notified. This is needed mainly because of the callback is notified
-     * in a different thread.
-     */
-    class ChannelCallback implements SecureBleChannel.Callback {
-        private final Semaphore mSemaphore;
-        ChannelCallback(Semaphore semaphore) {
-            mSemaphore = semaphore;
-        }
-        @Override
-        public void onSecureChannelEstablished() {
-            mSemaphore.release();
-        }
-
-        @Override
-        public void onEstablishSecureChannelFailure(int error) {
-            mSemaphore.release();
-        }
-
-        @Override
-        public void onMessageReceived(DeviceMessage deviceMessage) {
-            mSemaphore.release();
-        }
-
-        @Override
-        public void onMessageReceivedError(Exception exception) {
-            mSemaphore.release();
-        }
-
-        @Override
-        public void onDeviceIdReceived(String deviceId) {
-            mSemaphore.release();
-        }
+    private boolean tryAcquire(Semaphore semaphore) throws InterruptedException {
+        return semaphore.tryAcquire(100, TimeUnit.MILLISECONDS);
     }
 }

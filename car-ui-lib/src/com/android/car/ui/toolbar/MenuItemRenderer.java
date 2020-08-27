@@ -88,7 +88,7 @@ class MenuItemRenderer implements MenuItem.Listener {
     }
 
     @Override
-    public void onMenuItemChanged() {
+    public void onMenuItemChanged(MenuItem changedItem) {
         updateView();
     }
 
@@ -105,6 +105,7 @@ class MenuItemRenderer implements MenuItem.Listener {
             mTextView = requireViewByRefId(mView, R.id.car_ui_toolbar_menu_item_text);
             mTextWithIconView =
                     requireViewByRefId(mView, R.id.car_ui_toolbar_menu_item_text_with_icon);
+
             updateView();
             callback.accept(mView);
         });

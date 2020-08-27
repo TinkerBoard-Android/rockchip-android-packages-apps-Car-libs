@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2019 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2019 The Android Open Source Project
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -17,4 +16,6 @@
 <resources>
     <!-- Default max string length -->
     <integer name="car_ui_default_max_string_length">120</integer>
+    <integer name="car_ui_scrollbar_longpress_initial_delay">1000</integer>
+    <integer name="car_ui_scrollbar_longpress_repeat_interval">100</integer>
 </resources>

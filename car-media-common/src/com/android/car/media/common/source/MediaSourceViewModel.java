@@ -16,11 +16,11 @@
 
 package com.android.car.media.common.source;
 
+import static android.car.media.CarMediaManager.MEDIA_SOURCE_MODE_PLAYBACK;
+
 import static com.android.car.apps.common.util.CarAppsDebugUtils.idHash;
 import static com.android.car.arch.common.LiveDataFunctions.dataOf;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.Application;
 import android.car.Car;
 import android.car.CarNotConnectedException;
@@ -33,6 +33,8 @@ import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -47,12 +49,13 @@ import java.util.Objects;
 public class MediaSourceViewModel extends AndroidViewModel {
     private static final String TAG = "MediaSourceViewModel";
 
-    private static MediaSourceViewModel sInstance;
+    private static MediaSourceViewModel[] sInstances = new MediaSourceViewModel[2];
     private final Car mCar;
     private CarMediaManager mCarMediaManager;
 
     // Primary media source.
     private final MutableLiveData<MediaSource> mPrimaryMediaSource = dataOf(null);
+
     // Connected browser for the primary media source.
     private final MutableLiveData<MediaBrowserCompat> mConnectedMediaBrowser = dataOf(null);
     // Media controller for the connected browser.
@@ -78,12 +81,20 @@ public class MediaSourceViewModel extends AndroidViewModel {
         MediaSource getMediaSource(ComponentName componentName);
     }
 
-    /** Returns the MediaSourceViewModel singleton tied to the application. */
+    /**
+     * Returns the MediaSourceViewModel singleton tied to the application.
+     * @deprecated should use get(Application application, int mode) instead
+     */
     public static MediaSourceViewModel get(@NonNull Application application) {
-        if (sInstance == null) {
-            sInstance = new MediaSourceViewModel(application);
+        return get(application, MEDIA_SOURCE_MODE_PLAYBACK);
+    }
+
+    /** Returns the MediaSourceViewModel singleton tied to the application. */
+    public static MediaSourceViewModel get(@NonNull Application application, int mode) {
+        if (sInstances[mode] == null) {
+            sInstances[mode] = new MediaSourceViewModel(application, mode);
         }
-        return sInstance;
+        return sInstances[mode];
     }
 
     /**
@@ -91,8 +102,8 @@ public class MediaSourceViewModel extends AndroidViewModel {
      *
      * @see AndroidViewModel
      */
-    private MediaSourceViewModel(@NonNull Application application) {
-        this(application, new InputFactory() {
+    private MediaSourceViewModel(@NonNull Application application, int mode) {
+        this(application, mode, new InputFactory() {
             @Override
             public MediaBrowserConnector createMediaBrowserConnector(
                     @NonNull Application application,
@@ -129,7 +140,8 @@ public class MediaSourceViewModel extends AndroidViewModel {
     private final MediaBrowserConnector.Callback mConnectedBrowserCallback;
 
     @VisibleForTesting
-    MediaSourceViewModel(@NonNull Application application, @NonNull InputFactory inputFactory) {
+    MediaSourceViewModel(@NonNull Application application, int mode,
+            @NonNull InputFactory inputFactory) {
         super(application);
 
         mInputFactory = inputFactory;
@@ -159,11 +171,17 @@ public class MediaSourceViewModel extends AndroidViewModel {
 
         try {
             mCarMediaManager = mInputFactory.getCarMediaManager(mCar);
-            mCarMediaManager.registerMediaSourceListener(mMediaSourceListener);
-            updateModelState(mInputFactory.getMediaSource(mCarMediaManager.getMediaSource()));
+            mCarMediaManager.addMediaSourceListener(mMediaSourceListener, mode);
+            updateModelState(mInputFactory.getMediaSource(mCarMediaManager.getMediaSource(mode)));
         } catch (CarNotConnectedException e) {
             Log.e(TAG, "Car not connected", e);
         }
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        mCar.disconnect();
     }
 
     @VisibleForTesting
@@ -181,8 +199,8 @@ public class MediaSourceViewModel extends AndroidViewModel {
     /**
      * Updates the primary media source.
      */
-    public void setPrimaryMediaSource(@NonNull MediaSource mediaSource) {
-        mCarMediaManager.setMediaSource(mediaSource.getBrowseServiceComponentName());
+    public void setPrimaryMediaSource(@NonNull MediaSource mediaSource, int mode) {
+        mCarMediaManager.setMediaSource(mediaSource.getBrowseServiceComponentName(), mode);
     }
 
     /**
