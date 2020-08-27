@@ -67,6 +67,14 @@ import java.util.concurrent.CompletableFuture;
  */
 public class TelecomUtils {
     private static final String TAG = "CD.TelecomUtils";
+    /**
+     * A reference to keep track of the soring method of sorting by the contact's first name.
+     */
+    public static final Integer SORT_BY_FIRST_NAME = 1;
+    /**
+     * A reference to keep track of the soring method of sorting by the contact's last name.
+     */
+    public static final Integer SORT_BY_LAST_NAME = 2;
 
     private static String sVoicemailNumber;
     private static TelephonyManager sTelephonyManager;
@@ -381,26 +389,48 @@ public class TelecomUtils {
     /**
      * Sets a Contact avatar onto the provided {@code icon}. The first letter or both letters of the
      * contact's initials.
+     *
+     * @param sortMethod can be either {@link #SORT_BY_FIRST_NAME} or {@link #SORT_BY_LAST_NAME}.
      */
     public static void setContactBitmapAsync(
             Context context,
             @Nullable final ImageView icon,
-            @Nullable final Contact contact) {
-        setContactBitmapAsync(context, icon, contact, null);
+            @Nullable final Contact contact,
+            Integer sortMethod) {
+        setContactBitmapAsync(context, icon, contact, null, sortMethod);
     }
 
     /**
      * Sets a Contact avatar onto the provided {@code icon}. The first letter or both letters of the
-     * contact's initials or {@code fallbackDisplayName} will be used as a fallback resource if
-     * avatar loading fails.
+     * contact's initials. Will start with first name by default.
      */
     public static void setContactBitmapAsync(
             Context context,
             @Nullable final ImageView icon,
             @Nullable final Contact contact,
             @Nullable final String fallbackDisplayName) {
+        setContactBitmapAsync(context, icon, contact, fallbackDisplayName, SORT_BY_FIRST_NAME);
+    }
+
+    /**
+     * Sets a Contact avatar onto the provided {@code icon}. The first letter or both letters of the
+     * contact's initials or {@code fallbackDisplayName} will be used as a fallback resource if
+     * avatar loading fails.
+     *
+     * @param sortMethod can be either {@link #SORT_BY_FIRST_NAME} or {@link #SORT_BY_LAST_NAME}. If
+     *                   the value is {@link #SORT_BY_FIRST_NAME}, the name and initials order will
+     *                   be first name first. Otherwise, the order will be last name first.
+     */
+    public static void setContactBitmapAsync(
+            Context context,
+            @Nullable final ImageView icon,
+            @Nullable final Contact contact,
+            @Nullable final String fallbackDisplayName,
+            Integer sortMethod) {
         Uri avatarUri = contact != null ? contact.getAvatarUri() : null;
-        String initials = contact != null ? contact.getInitials()
+        boolean startWithFirstName = isSortByFirstName(sortMethod);
+        String initials = contact != null
+                ? contact.getInitialsBasedOnDisplayOrder(startWithFirstName)
                 : (fallbackDisplayName == null ? null : getInitials(fallbackDisplayName, null));
         String identifier = contact == null ? fallbackDisplayName : contact.getDisplayName();
 
@@ -552,7 +582,7 @@ public class TelecomUtils {
         RoundedBitmapDrawable roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(
                 context.getResources(), letterTileDrawable.toBitmap(avatarSize));
         return createFromRoundedBitmapDrawable(roundedBitmapDrawable, avatarSize,
-            cornerRadiusPercent);
+                cornerRadiusPercent);
     }
 
     /** Creates an Icon based on the given roundedBitmapDrawable. **/
@@ -584,4 +614,11 @@ public class TelecomUtils {
                 .build();
     }
 
+    /**
+     * Returns true if contacts are sorted by their first names. Returns false if they are sorted by
+     * last names.
+     */
+    public static boolean isSortByFirstName(Integer sortMethod) {
+        return SORT_BY_FIRST_NAME.equals(sortMethod);
+    }
 }
