@@ -63,8 +63,12 @@ class MenuItemRenderer implements MenuItem.Listener {
     private View mIconContainer;
     private ImageView mIconView;
     private Switch mSwitch;
+    private View mTextContainer;
     private TextView mTextView;
     private TextView mTextWithIconView;
+
+    /** Whether the layout file supports rotary mode. */
+    private boolean mIsRotaryEnabledLayout;
 
     MenuItemRenderer(MenuItem item, ViewGroup parentView) {
         mMenuItem = item;
@@ -102,6 +106,10 @@ class MenuItemRenderer implements MenuItem.Listener {
                     requireViewByRefId(mView, R.id.car_ui_toolbar_menu_item_icon_container);
             mIconView = requireViewByRefId(mView, R.id.car_ui_toolbar_menu_item_icon);
             mSwitch = requireViewByRefId(mView, R.id.car_ui_toolbar_menu_item_switch);
+            // mTextContainer is only available in rotary enabled layout.
+            mTextContainer =
+                    CarUiUtils.findViewByRefId(mView, R.id.car_ui_toolbar_menu_item_text_container);
+            mIsRotaryEnabledLayout = mTextContainer != null;
             mTextView = requireViewByRefId(mView, R.id.car_ui_toolbar_menu_item_text);
             mTextWithIconView =
                     requireViewByRefId(mView, R.id.car_ui_toolbar_menu_item_text_with_icon);
@@ -132,24 +140,36 @@ class MenuItemRenderer implements MenuItem.Listener {
         mView.setVisibility(View.VISIBLE);
         mView.setContentDescription(mMenuItem.getTitle());
 
-        mIconContainer.setVisibility(View.GONE);
+        int iconContainerVisibility = View.GONE;
+        int textContainerVisibility = View.GONE;
         mTextView.setVisibility(View.GONE);
         mTextWithIconView.setVisibility(View.GONE);
         mSwitch.setVisibility(View.GONE);
         if (checkable) {
             mSwitch.setChecked(mMenuItem.isChecked());
             mSwitch.setVisibility(View.VISIBLE);
+            if (mIsRotaryEnabledLayout) {
+                iconContainerVisibility = View.VISIBLE;
+            }
         } else if (hasText && hasIcon && textAndIcon) {
             mMenuItem.getIcon().setBounds(0, 0, mMenuItemIconSize, mMenuItemIconSize);
             mTextWithIconView.setCompoundDrawables(mMenuItem.getIcon(), null, null, null);
             mTextWithIconView.setText(mMenuItem.getTitle());
             mTextWithIconView.setVisibility(View.VISIBLE);
+            textContainerVisibility = View.VISIBLE;
         } else if (hasIcon) {
             mIconView.setImageDrawable(mMenuItem.getIcon());
-            mIconContainer.setVisibility(View.VISIBLE);
+            iconContainerVisibility = View.VISIBLE;
         } else { // hasText will be true
             mTextView.setText(mMenuItem.getTitle());
             mTextView.setVisibility(View.VISIBLE);
+            textContainerVisibility = View.VISIBLE;
+        }
+        // Unlike other views, we should only update the visibility of mIconContainer and
+        // mTextContainer once, otherwise rotary focus might break.
+        mIconContainer.setVisibility(iconContainerVisibility);
+        if (mTextContainer != null) {
+            mTextContainer.setVisibility(textContainerVisibility);
         }
 
         if (!mMenuItem.isTinted() && hasIcon) {
@@ -159,13 +179,19 @@ class MenuItemRenderer implements MenuItem.Listener {
         recursiveSetEnabledAndDrawableState(mView);
         mView.setActivated(mMenuItem.isActivated());
 
+        View clickTarget = null;
+        if (mIsRotaryEnabledLayout) {
+            clickTarget = iconContainerVisibility == View.VISIBLE ? mIconContainer : mTextContainer;
+        } else {
+            clickTarget = mView;
+        }
         if (mMenuItem.getOnClickListener() != null
                 || mMenuItem.isCheckable()
                 || mMenuItem.isActivatable()) {
-            mView.setOnClickListener(v -> mMenuItem.performClick());
+            clickTarget.setOnClickListener(v -> mMenuItem.performClick());
         } else {
-            mView.setOnClickListener(null);
-            mView.setClickable(false);
+            clickTarget.setOnClickListener(null);
+            clickTarget.setClickable(false);
         }
     }
 

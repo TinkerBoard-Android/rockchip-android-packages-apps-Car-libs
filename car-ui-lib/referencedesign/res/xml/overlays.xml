@@ -54,6 +54,7 @@
     <item target="id/car_ui_toolbar_menu_item_icon_container" value="@id/car_ui_toolbar_menu_item_icon_container"/>
     <item target="id/car_ui_toolbar_menu_item_icon" value="@id/car_ui_toolbar_menu_item_icon"/>
     <item target="id/car_ui_toolbar_menu_item_switch" value="@id/car_ui_toolbar_menu_item_switch"/>
+    <item target="id/car_ui_toolbar_menu_item_text_container" value="@id/car_ui_toolbar_menu_item_text_container"/>
     <item target="id/car_ui_toolbar_menu_item_text" value="@id/car_ui_toolbar_menu_item_text"/>
     <item target="id/car_ui_toolbar_menu_item_text_with_icon" value="@id/car_ui_toolbar_menu_item_text_with_icon"/>
 
