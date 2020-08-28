@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
@@ -98,6 +99,13 @@ public final class CarUiRecyclerView extends RecyclerView implements
     private boolean mEnableDividers;
     private int mTopOffset;
     private int mBottomOffset;
+
+    private ViewTreeObserver.OnGlobalLayoutListener mOnGlobalLayoutListener = () -> {
+        if (mInitialTopPadding == 0) {
+            mInitialTopPadding = getPaddingTop();
+        }
+        mFullyInitialized = true;
+    };
 
     /**
      * The possible values for setScrollBarPosition. The default value is actually {@link
@@ -225,13 +233,6 @@ public final class CarUiRecyclerView extends RecyclerView implements
 
         mScrollBarClass = context.getResources().getString(R.string.car_ui_scrollbar_component);
         a.recycle();
-        this.getViewTreeObserver()
-                .addOnGlobalLayoutListener(() -> {
-                    if (mInitialTopPadding == 0) {
-                        mInitialTopPadding = getPaddingTop();
-                    }
-                    mFullyInitialized = true;
-                });
     }
 
     @Override
@@ -306,6 +307,10 @@ public final class CarUiRecyclerView extends RecyclerView implements
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mCarUxRestrictionsUtil.register(mListener);
+
+        this.getViewTreeObserver()
+                .addOnGlobalLayoutListener(mOnGlobalLayoutListener);
+
         if (mInstallingExtScrollBar || !mScrollBarEnabled) {
             return;
         }
@@ -382,6 +387,7 @@ public final class CarUiRecyclerView extends RecyclerView implements
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mCarUxRestrictionsUtil.unregister(mListener);
+        this.getViewTreeObserver().removeOnGlobalLayoutListener(mOnGlobalLayoutListener);
     }
 
     @Override
