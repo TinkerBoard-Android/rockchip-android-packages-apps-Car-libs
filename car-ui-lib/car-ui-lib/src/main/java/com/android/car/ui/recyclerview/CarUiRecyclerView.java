@@ -36,6 +36,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
@@ -106,6 +107,17 @@ public final class CarUiRecyclerView extends RecyclerView {
     private boolean mEnableDividers;
     private int mTopOffset;
     private int mBottomOffset;
+
+    private ViewTreeObserver.OnGlobalLayoutListener mOnGlobalLayoutListener = () -> {
+        if (!mHasScrolledToTop && getLayoutManager() != null) {
+            // Scroll to the top after the first global layout, so that
+            // we can set padding for the insets and still have the
+            // recyclerview start at the top.
+            new Handler(Objects.requireNonNull(Looper.myLooper())).post(() ->
+                    getLayoutManager().scrollToPosition(0));
+            mHasScrolledToTop = true;
+        }
+    };
 
 
     /**
@@ -225,17 +237,6 @@ public final class CarUiRecyclerView extends RecyclerView {
 
         a.recycle();
 
-        this.getViewTreeObserver()
-                .addOnGlobalLayoutListener(() -> {
-                    if (!mHasScrolledToTop && getLayoutManager() != null) {
-                        // Scroll to the top after the first global layout, so that
-                        // we can set padding for the insets and still have the
-                        // recyclerview start at the top.
-                        new Handler(Objects.requireNonNull(Looper.myLooper())).post(() ->
-                                getLayoutManager().scrollToPosition(0));
-                        mHasScrolledToTop = true;
-                    }
-                });
 
         if (!mScrollBarEnabled) {
             return;
@@ -368,6 +369,7 @@ public final class CarUiRecyclerView extends RecyclerView {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mCarUxRestrictionsUtil.register(mListener);
+        this.getViewTreeObserver().addOnGlobalLayoutListener(mOnGlobalLayoutListener);
         if (mInstallingExtScrollBar || !mScrollBarEnabled) {
             return;
         }
@@ -445,6 +447,7 @@ public final class CarUiRecyclerView extends RecyclerView {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mCarUxRestrictionsUtil.unregister(mListener);
+        this.getViewTreeObserver().removeOnGlobalLayoutListener(mOnGlobalLayoutListener);
     }
 
     @Override
