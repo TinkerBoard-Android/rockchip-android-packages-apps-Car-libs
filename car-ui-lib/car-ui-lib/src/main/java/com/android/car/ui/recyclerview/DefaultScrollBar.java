@@ -348,7 +348,8 @@ class DefaultScrollBar implements ScrollBar {
             if (child.getHeight() > screenSize) {
                 if (orientationHelper.getDecoratedStart(child) > 0) {
                     // Child view top is entering screen. Align its top with parent top.
-                    scrollDistance = orientationHelper.getDecoratedStart(child);
+                    scrollDistance = orientationHelper.getDecoratedStart(lastChild)
+                            - orientationHelper.getStartAfterPadding();
                 } else if (screenSize < orientationHelper.getDecoratedEnd(child)
                         && orientationHelper.getDecoratedEnd(child) < 2 * screenSize) {
                     // Child view bottom is about to enter screen - its distance to parent bottom
