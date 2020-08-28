@@ -309,10 +309,8 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
                         mActionContainerTouchInterceptor.setOnClickListener(
                                 (container) -> {
                                     if (item.getSupplementalIconOnClickListener() != null) {
-                                        item.getSupplementalIconOnClickListener().onClick(mIcon);
-                                    }
-                                    if (itemOnClickListener != null) {
-                                        itemOnClickListener.onClick(item);
+                                        item.getSupplementalIconOnClickListener().onClick(
+                                                mSupplementalIcon);
                                     }
                                 });
                         mTouchInterceptor.setVisibility(View.GONE);
