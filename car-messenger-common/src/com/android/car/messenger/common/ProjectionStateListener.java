@@ -49,15 +49,11 @@ public class ProjectionStateListener implements CarProjectionManager.ProjectionS
     private List<ProjectionStatus> mProjectionDetails = Collections.emptyList();
 
     public ProjectionStateListener(Context context) {
-        Car.createCar(context, /* handler= */ null, Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT,
-                (car, ready) -> {
-                    mCar = car;
-                    mCarProjectionManager = (CarProjectionManager) mCar.getCarManager(
-                            Car.PROJECTION_SERVICE);
-                    if (mCarProjectionManager != null) {
-                        mCarProjectionManager.registerProjectionStatusListener(this);
-                    }
-                });
+        mCar = Car.createCar(context);
+        mCarProjectionManager = (CarProjectionManager) mCar.getCarManager(Car.PROJECTION_SERVICE);
+        if (mCarProjectionManager != null) {
+            mCarProjectionManager.registerProjectionStatusListener(this);
+        }
     }
 
     /** Unregisters the listener. Should be called when the caller's lifecycle is ending. **/

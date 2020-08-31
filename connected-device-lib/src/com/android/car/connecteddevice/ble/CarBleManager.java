@@ -19,10 +19,11 @@ package com.android.car.connecteddevice.ble;
 import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.logw;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
 import com.android.car.connecteddevice.util.ThreadSafeCallbacks;

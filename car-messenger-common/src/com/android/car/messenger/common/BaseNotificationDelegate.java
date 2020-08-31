@@ -16,7 +16,6 @@
 
 package com.android.car.messenger.common;
 
-import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.Notification.Action;
 import android.app.NotificationManager;
@@ -27,6 +26,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;

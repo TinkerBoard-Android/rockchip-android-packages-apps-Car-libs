@@ -45,7 +45,7 @@ android_test {
         "libstaticjvmtiagent",
     ],
 
-    platform_apis: true,
+    min_sdk_version: "29",
 
     certificate: "platform",
 

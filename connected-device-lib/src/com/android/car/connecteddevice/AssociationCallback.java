@@ -16,7 +16,7 @@
 
 package com.android.car.connecteddevice;
 
-import android.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /** Callbacks that will be invoked during associating a new client. */
 public interface AssociationCallback {
