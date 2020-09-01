@@ -11,52 +11,55 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.car.ui.recyclerview;
 
 import android.util.Log;
 
+import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.RecyclerView;
 
-
+/**
+ * An implementation of {@link RangeFilter} interface.
+ */
 public class RangeFilterImpl implements RangeFilter {
 
     private static final String TAG = "RangeFilterImpl";
 
     private final RecyclerView.Adapter<?> mAdapter;
     private final int mMaxItems;
-    private final int mMaxItemsDiv2;
+    private final int mMaxItemsFirstHalf;
+    private final int mMaxItemsSecondHalf;
 
     private int mUnlimitedCount;
     private int mPivotIndex;
     private final ListRange mRange = new ListRange();
-    private final ListRange mSavedRange = new ListRange();
-
 
     /**
      * Constructor
-     * @param adapter the adapter to notify of changes in {@link #updatePivotIndex}.
-     * @param maxItems the maximum number of items to show. When > 0, its value is rounded up to
-     *                 the nearest greater odd integer in order to show the active element plus or
-     *                 minus maxItems / 2.
+     * @param adapter the adapter to notify of changes in {@link #notifyPivotIndexChanged(int)}.
+     * @param maxItems the maximum number of items to show.
      */
     public RangeFilterImpl(RecyclerView.Adapter<?> adapter, int maxItems) {
         mAdapter = adapter;
         if (maxItems <= 0) {
-            mMaxItemsDiv2 = 0;
+            mMaxItemsFirstHalf = 0;
+            mMaxItemsSecondHalf = 0;
             mMaxItems = 0;
         } else {
-            mMaxItemsDiv2 = maxItems / 2;
-            mMaxItems = 1 + (mMaxItemsDiv2 * 2);
+            mMaxItemsFirstHalf = maxItems / 2;
+            mMaxItemsSecondHalf = maxItems - mMaxItemsFirstHalf;
+            mMaxItems = maxItems;
         }
     }
 
     @Override
     public String toString() {
         return "RangeFilterImpl{"
-                + "mMaxItemsDiv2=" + mMaxItemsDiv2
+                + "mMaxItemsFirstHalf=" + mMaxItemsFirstHalf
+                + "mMaxItemsSecondHalf=" + mMaxItemsSecondHalf
                 + ", mUnlimitedCount=" + mUnlimitedCount
                 + ", mPivotIndex=" + mPivotIndex
                 + ", mRange=" + mRange.toString()
@@ -79,6 +82,35 @@ public class RangeFilterImpl implements RangeFilter {
     }
 
     @Override
+    public void applyFilter() {
+        if (mRange.isTailClamped()) {
+            mAdapter.notifyItemInserted(mUnlimitedCount);
+            mAdapter.notifyItemRangeRemoved(mRange.mEndIndex, mUnlimitedCount - mRange.mEndIndex);
+        }
+        if (mRange.isHeadClamped()) {
+            mAdapter.notifyItemRangeRemoved(0, mRange.mStartIndex);
+            mAdapter.notifyItemInserted(0);
+        }
+    }
+
+    @Override
+    public void removeFilter() {
+        if (mRange.isTailClamped()) {
+            // Remove the message
+            mAdapter.notifyItemRemoved(mRange.mLimitedCount - 1);
+            // Add the tail items that were dropped
+            mAdapter.notifyItemRangeInserted(mRange.mLimitedCount - 1,
+                    mUnlimitedCount - mRange.mEndIndex);
+        }
+        if (mRange.isHeadClamped()) {
+            // Add the head items that were dropped
+            mAdapter.notifyItemRangeInserted(1, mRange.mStartIndex);
+            // Remove the message
+            mAdapter.notifyItemRemoved(0);
+        }
+    }
+
+    @Override
     public void recompute(int newCount, int pivotIndex) {
         if (pivotIndex < 0 || newCount <= pivotIndex) {
             Log.e(TAG, "Invalid pivotIndex: " + pivotIndex + " newCount: " + newCount);
@@ -86,10 +118,11 @@ public class RangeFilterImpl implements RangeFilter {
         }
         mUnlimitedCount = newCount;
         mPivotIndex = pivotIndex;
+
         mRange.mClampedHead = 0;
         mRange.mClampedTail = 0;
 
-        if (newCount <= mMaxItems) {
+        if (mUnlimitedCount <= mMaxItems) {
             // Under the cap case.
             mRange.mStartIndex = 0;
             mRange.mEndIndex = mUnlimitedCount;
@@ -100,7 +133,7 @@ public class RangeFilterImpl implements RangeFilter {
             mRange.mEndIndex = 0;
             mRange.mLimitedCount = 1; // One limit message
             mRange.mClampedTail = 1;
-        } else if (mPivotIndex <= mMaxItemsDiv2) {
+        } else if (mPivotIndex <= mMaxItemsFirstHalf) {
             // No need to clamp the head case
             // For example: P = 2, M/2 = 2 => exactly two items before the pivot.
             // Tail has to be clamped or we'd be in the "under the cap" case.
@@ -108,7 +141,7 @@ public class RangeFilterImpl implements RangeFilter {
             mRange.mEndIndex = mMaxItems;
             mRange.mLimitedCount = mMaxItems + 1; // One limit message at the end
             mRange.mClampedTail = 1;
-        } else if ((mUnlimitedCount - 1 - mPivotIndex) <= mMaxItemsDiv2) {
+        } else if ((mUnlimitedCount - 1 - mPivotIndex) <= mMaxItemsSecondHalf) {
             // No need to clamp the tail case
             // For example: C = 5, P = 2 => exactly 2 items after the pivot (count is exclusive).
             // Head has to be clamped or we'd be in the "under the cap" case.
@@ -118,97 +151,17 @@ public class RangeFilterImpl implements RangeFilter {
             mRange.mClampedHead = 1;
         } else {
             // Both head and tail need clamping
-            mRange.mStartIndex = mPivotIndex - mMaxItemsDiv2;
-            mRange.mEndIndex = mPivotIndex + mMaxItemsDiv2 + 1;
+            mRange.mStartIndex = mPivotIndex - mMaxItemsFirstHalf;
+            mRange.mEndIndex = mPivotIndex + mMaxItemsSecondHalf;
             mRange.mLimitedCount = mMaxItems + 2; // One limit message at each end.
             mRange.mClampedHead = 1;
             mRange.mClampedTail = 1;
         }
     }
 
-    /**
-     * Computes the new restrictions when the pivot changes but the list remains the same.
-     * Notifications are done from the end to the beginning of the list so we don't have to mess
-     * with the indices as we go. Beyond the addition or removal of head and tail messages, the
-     * method boils down to intersecting two segments and determining which elements to remove and
-     * which to add to go from the old one to the new one.<p/>
-     * The diagram below illustrates all the cases with [S1, E1[ the old range and [S2, E2[ the
-     * new one. The =, + and - signs identify identical, inserted and removed elements.<p/>
-     * <pre>
-     *                             S1                      E1
-     *                            |........................|
-     *                            |                        |
-     *             S2             |      E2                |
-     *             +++++++++++++++|======------------------|
-     *                            |                        |
-     *                            |             S2         |           E2
-     *                            |             ===========|+++++++++++
-     *                            |                        |
-     *                            |     S2         E2      |
-     *                            |-----===========--------|
-     *                            |                        |
-     *                  S2        |                        |                E2
-     *                  ++++++++++|========================|++++++++++++++++
-     * <pre/>
-     */
     @Override
-    public void updatePivotIndex(int pivotIndex) {
-        if (mPivotIndex == pivotIndex) return;
-
-        mSavedRange.copyFrom(mRange);
-
-        recompute(mUnlimitedCount, pivotIndex);
-
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "updatePivotIndex pivot: " + pivotIndex + " saved: " + mSavedRange
-                    + " new: " + mRange);
-        }
-
-        if (mSavedRange.intersects(mRange)) {
-            if (mSavedRange.mClampedTail < mRange.mClampedTail) {
-                // Add a tail message, inserting it after the last element of the restricted list.
-                mAdapter.notifyItemInserted(mSavedRange.mLimitedCount);
-            }
-            if (mSavedRange.mClampedTail > mRange.mClampedTail) {
-                // Remove a tail message which was shown as the last element of the restricted list.
-                mAdapter.notifyItemRemoved(mSavedRange.mLimitedCount - 1);
-            }
-
-            // Add or remove items at the end
-            if (mSavedRange.mEndIndex < mRange.mEndIndex) {
-                int insertPos = mSavedRange.indexToPosition(mSavedRange.mEndIndex);
-                int insertCount = mRange.mEndIndex - mSavedRange.mEndIndex;
-                mAdapter.notifyItemRangeInserted(insertPos, insertCount);
-            }
-            if (mSavedRange.mEndIndex > mRange.mEndIndex) {
-                int delPos = mSavedRange.indexToPosition(mRange.mEndIndex);
-                int delCount = mSavedRange.mEndIndex - mRange.mEndIndex;
-                mAdapter.notifyItemRangeRemoved(delPos, delCount);
-            }
-
-            // Add or remove items at the start
-            if (mSavedRange.mStartIndex > mRange.mStartIndex) {
-                int insertPos = mSavedRange.indexToPosition(mSavedRange.mStartIndex);
-                int insertCount = mSavedRange.mStartIndex - mRange.mStartIndex;
-                mAdapter.notifyItemRangeInserted(insertPos, insertCount);
-            }
-            if (mSavedRange.mStartIndex < mRange.mStartIndex) {
-                int delPos = mSavedRange.indexToPosition(mSavedRange.mStartIndex);
-                int delCount = mRange.mStartIndex - mSavedRange.mStartIndex;
-                mAdapter.notifyItemRangeRemoved(delPos, delCount);
-            }
-
-            // Add or remove the head message
-            if (mSavedRange.mClampedHead < mRange.mClampedHead) {
-                mAdapter.notifyItemInserted(0);
-            }
-            if (mSavedRange.mClampedHead > mRange.mClampedHead) {
-                mAdapter.notifyItemRemoved(0);
-            }
-        } else {
-            // No element is the same, invalidate all.
-            mAdapter.notifyDataSetChanged();
-        }
+    public void notifyPivotIndexChanged(int pivotIndex) {
+        // TODO: Implement this function.
     }
 
     @Override
@@ -225,23 +178,36 @@ public class RangeFilterImpl implements RangeFilter {
         return mRange.positionToIndex(position);
     }
 
+    @VisibleForTesting
+    ListRange getRange() {
+        return mRange;
+    }
 
-    /** A portion of the unfiltered list. */
-    private static class ListRange {
+    /** Represents a portion of the unfiltered list. */
+    static class ListRange {
+        public static final int INVALID_INDEX = -1;
 
-        /** In original data, inclusive. */
-        private int mStartIndex;
-        /** In original data, exclusive. */
-        private int mEndIndex;
+        @VisibleForTesting
+        /* In original data, inclusive. */
+                int mStartIndex;
+        @VisibleForTesting
+        /* In original data, exclusive. */
+                int mEndIndex;
 
-        /** 1 when clamped, otherwise 0. */
-        private int mClampedHead;
-        /** 1 when clamped, otherwise 0. */
-        private int mClampedTail;
+        @VisibleForTesting
+        /* 1 when clamped, otherwise 0. */
+                int mClampedHead;
+        @VisibleForTesting
+        /* 1 when clamped, otherwise 0. */
+                int mClampedTail;
 
-        /** The count of the resulting elements, including the truncation message(s). */
-        private int mLimitedCount;
+        @VisibleForTesting
+        /* The count of the resulting elements, including the truncation message(s). */
+                int mLimitedCount;
 
+        /**
+         * Deep copy from a ListRange.
+         */
         public void copyFrom(ListRange range) {
             mStartIndex = range.mStartIndex;
             mEndIndex = range.mEndIndex;
@@ -261,15 +227,23 @@ public class RangeFilterImpl implements RangeFilter {
                     + '}';
         }
 
+        /**
+         * Returns true if two ranges intersect.
+         */
         public boolean intersects(ListRange range) {
             return ((range.mEndIndex > mStartIndex) && (mEndIndex > range.mStartIndex));
         }
 
-        /** Unchecked index needed by {@link #updatePivotIndex}. */
+        /**
+         * Converts an index in the unrestricted list to the position in the restricted one.
+         *
+         * Unchecked index needed by {@link #notifyPivotIndexChanged(int)}.
+         */
         public int indexToPosition(int index) {
             return index - mStartIndex + mClampedHead;
         }
 
+        /** Converts the position in the restricted list to an index in the unrestricted one.*/
         public int positionToIndex(int position) {
             int index = position - mClampedHead + mStartIndex;
             if ((index < mStartIndex) || (mEndIndex <= index)) {
@@ -277,6 +251,14 @@ public class RangeFilterImpl implements RangeFilter {
             } else {
                 return index;
             }
+        }
+
+        public boolean isHeadClamped() {
+            return mClampedHead == 1;
+        }
+
+        public boolean isTailClamped() {
+            return mClampedTail == 1;
         }
     }
 }

@@ -21,7 +21,6 @@ package com.android.car.ui.recyclerview;
  * happens around a pivot element that can be anywhere in the list. Elements near that pivot will
  * be visible, while elements at the head and / or tail of the list will be replaced by a message
  * telling the user about the truncation.
- * When no restrictions are in effect, the {@link #PASS_THROUGH} instance should be used.
  */
 public interface RangeFilter {
 
@@ -38,7 +37,7 @@ public interface RangeFilter {
      * Computes new restrictions when only the pivot has changed.
      * The implementation must send notification changes (ideally incremental ones).
      */
-    void updatePivotIndex(int pivotIndex);
+    void notifyPivotIndexChanged(int pivotIndex);
 
     /** Returns the number of elements in the resulting list, including the message(s). */
     int getFilteredCount();
@@ -59,39 +58,15 @@ public interface RangeFilter {
     /** Send notification changes for the restriction message(s) if there are any. */
     void invalidateMessagePositions();
 
+    /**
+     * Called when the filter will be applied. If needed, notifies the adapter with data
+     * removal signal.
+     */
+    void applyFilter();
 
     /**
-     * A trivial implementation that doesn't do any filtering (simplifies the filter's code).
+     * Called when the filter will be removed. If needed, notifies the adapter with data
+     * inserted signal.
      */
-    RangeFilter PASS_THROUGH = new RangeFilter() {
-        private int mCount;
-
-        @Override
-        public void recompute(int newCount, int pivotIndex) {
-            mCount = newCount;
-        }
-
-        @Override
-        public void updatePivotIndex(int pivotIndex) {
-        }
-
-        @Override
-        public int getFilteredCount() {
-            return mCount;
-        }
-
-        @Override
-        public int indexToPosition(int index) {
-            return index;
-        }
-
-        @Override
-        public int positionToIndex(int position) {
-            return position;
-        }
-
-        @Override
-        public void invalidateMessagePositions() {
-        }
-    };
+    void removeFilter();
 }
