@@ -197,8 +197,6 @@
   <public type="id" name="car_ui_alert_subtitle"/>
   <public type="id" name="car_ui_alert_title"/>
   <public type="id" name="car_ui_base_layout_content_container"/>
-  <public type="id" name="car_ui_check_box_end_guideline"/>
-  <public type="id" name="car_ui_check_box_start_guideline"/>
   <public type="id" name="car_ui_focus_area"/>
   <public type="id" name="car_ui_list_item_end_guideline"/>
   <public type="id" name="car_ui_list_item_start_guideline"/>
@@ -242,8 +240,6 @@
   <public type="id" name="car_ui_toolbar_title_logo"/>
   <public type="id" name="car_ui_toolbar_title_logo_container"/>
   <public type="id" name="car_ui_toolbar_top_guideline"/>
-  <public type="id" name="check_box_container"/>
-  <public type="id" name="checkbox"/>
   <public type="id" name="checkbox_widget"/>
   <public type="id" name="container"/>
   <public type="id" name="content_icon"/>
@@ -265,7 +261,6 @@
   <public type="id" name="spinner"/>
   <public type="id" name="supplemental_icon"/>
   <public type="id" name="switch_widget"/>
-  <public type="id" name="text"/>
   <public type="id" name="textbox"/>
   <public type="id" name="title"/>
   <public type="id" name="title_template"/>
@@ -280,7 +275,6 @@
   <public type="layout" name="car_ui_base_layout"/>
   <public type="layout" name="car_ui_base_layout_toolbar"/>
   <public type="layout" name="car_ui_base_layout_toolbar_legacy"/>
-  <public type="layout" name="car_ui_check_box_list_item"/>
   <public type="layout" name="car_ui_header_list_item"/>
   <public type="layout" name="car_ui_list_item"/>
   <public type="layout" name="car_ui_list_limiting_message"/>
