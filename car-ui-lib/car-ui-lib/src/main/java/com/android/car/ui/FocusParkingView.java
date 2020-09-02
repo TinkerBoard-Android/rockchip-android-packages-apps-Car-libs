@@ -15,10 +15,10 @@
  */
 package com.android.car.ui;
 
-import static android.view.accessibility.AccessibilityNodeInfo.ACTION_COLLAPSE;
-import static android.view.accessibility.AccessibilityNodeInfo.ACTION_DISMISS;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_FOCUS;
 
+import static com.android.car.ui.utils.RotaryConstants.ACTION_HIDE_IME;
+import static com.android.car.ui.utils.RotaryConstants.ACTION_RESTORE_DEFAULT_FOCUS;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_HORIZONTALLY_SCROLLABLE;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_VERTICALLY_SCROLLABLE;
 
@@ -126,7 +126,7 @@ public class FocusParkingView extends View {
     @Override
     public boolean performAccessibilityAction(int action, Bundle arguments) {
         switch (action) {
-            case ACTION_DISMISS:
+            case ACTION_RESTORE_DEFAULT_FOCUS:
                 View root = getRootView();
 
                 // If there is a view focused by default and it can take focus, move focus to it.
@@ -152,8 +152,7 @@ public class FocusParkingView extends View {
                 }
 
                 return false;
-            case ACTION_COLLAPSE:
-                // Hide the IME.
+            case ACTION_HIDE_IME:
                 InputMethodManager inputMethodManager =
                         getContext().getSystemService(InputMethodManager.class);
                 return inputMethodManager.hideSoftInputFromWindow(getWindowToken(),
