@@ -138,7 +138,11 @@ public abstract class ContentLimitingAdapter<T extends RecyclerView.ViewHolder>
 
     @Override
     public final int getItemCount() {
-        return mRangeFilter.getFilteredCount();
+        if (mIsLimiting) {
+            return mRangeFilter.getFilteredCount();
+        } else {
+            return getUnrestrictedItemCount();
+        }
     }
 
     /**
