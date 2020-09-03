@@ -24,7 +24,8 @@ android_library {
         enabled: false,
     },
 
-    libs: ["android.car"],
+    libs: ["android.car-stubs",],
+    min_sdk_version: "29",
 
     static_libs: [
         "androidx.annotation_annotation",

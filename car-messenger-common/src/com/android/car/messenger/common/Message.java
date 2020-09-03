@@ -18,9 +18,9 @@ package com.android.car.messenger.common;
 
 import static com.android.car.apps.common.util.SafeLog.logw;
 
-import android.annotation.Nullable;
-import android.os.Build;
 import android.util.Log;
+
+import androidx.annotation.Nullable;
 
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.MessagingStyleMessage;
@@ -72,7 +72,7 @@ public class Message {
             MessagingStyleMessage updatedMessage, SenderKey senderKey) {
 
         if (!Utils.isValidMessagingStyleMessage(updatedMessage)) {
-            if (Log.isLoggable(TAG, Log.DEBUG) || Build.IS_DEBUGGABLE) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
                 throw new IllegalArgumentException(
                         "MessagingStyleMessage is missing required fields");
             } else {

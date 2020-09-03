@@ -35,5 +35,5 @@ android_test {
         "truth-prebuilt",
     ],
 
-    platform_apis: true,
+    min_sdk_version: "29",
 }

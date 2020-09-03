@@ -22,11 +22,12 @@ import static com.android.car.connecteddevice.util.SafeLog.logw;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-import android.annotation.CallbackExecutor;
-import android.annotation.IntDef;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
+
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.car.connecteddevice.ble.BleCentralManager;
 import com.android.car.connecteddevice.ble.BlePeripheralManager;
@@ -41,7 +42,6 @@ import com.android.car.connecteddevice.storage.ConnectedDeviceStorage.Associated
 import com.android.car.connecteddevice.util.ByteUtils;
 import com.android.car.connecteddevice.util.EventLog;
 import com.android.car.connecteddevice.util.ThreadSafeCallbacks;
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.time.Duration;
@@ -121,20 +121,18 @@ public class ConnectedDeviceManager {
     private MessageDeliveryDelegate mMessageDeliveryDelegate;
 
     @Retention(SOURCE)
-    @IntDef(prefix = { "DEVICE_ERROR_" },
-            value = {
-                    DEVICE_ERROR_INVALID_HANDSHAKE,
-                    DEVICE_ERROR_INVALID_MSG,
-                    DEVICE_ERROR_INVALID_DEVICE_ID,
-                    DEVICE_ERROR_INVALID_VERIFICATION,
-                    DEVICE_ERROR_INVALID_CHANNEL_STATE,
-                    DEVICE_ERROR_INVALID_ENCRYPTION_KEY,
-                    DEVICE_ERROR_STORAGE_FAILURE,
-                    DEVICE_ERROR_INVALID_SECURITY_KEY,
-                    DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED,
-                    DEVICE_ERROR_UNEXPECTED_DISCONNECTION
-            }
-    )
+    @IntDef({
+            DEVICE_ERROR_INVALID_HANDSHAKE,
+            DEVICE_ERROR_INVALID_MSG,
+            DEVICE_ERROR_INVALID_DEVICE_ID,
+            DEVICE_ERROR_INVALID_VERIFICATION,
+            DEVICE_ERROR_INVALID_CHANNEL_STATE,
+            DEVICE_ERROR_INVALID_ENCRYPTION_KEY,
+            DEVICE_ERROR_STORAGE_FAILURE,
+            DEVICE_ERROR_INVALID_SECURITY_KEY,
+            DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED,
+            DEVICE_ERROR_UNEXPECTED_DISCONNECTION
+    })
     public @interface DeviceError {}
     public static final int DEVICE_ERROR_INVALID_HANDSHAKE = 0;
     public static final int DEVICE_ERROR_INVALID_MSG = 1;
@@ -243,7 +241,7 @@ public class ConnectedDeviceManager {
      * @param executor {@link Executor} to execute triggers on.
      */
     public void registerDeviceAssociationCallback(@NonNull DeviceAssociationCallback callback,
-            @NonNull @CallbackExecutor Executor executor) {
+            @NonNull Executor executor) {
         mDeviceAssociationCallbacks.add(callback, executor);
     }
 
@@ -264,7 +262,7 @@ public class ConnectedDeviceManager {
      * @param executor {@link Executor} to execute triggers on.
      */
     public void registerActiveUserConnectionCallback(@NonNull ConnectionCallback callback,
-            @NonNull @CallbackExecutor Executor executor) {
+            @NonNull Executor executor) {
         mActiveUserConnectionCallbacks.add(callback, executor);
     }
 
@@ -414,7 +412,7 @@ public class ConnectedDeviceManager {
      * @param executor {@link Executor} on which to execute callback.
      */
     public void registerDeviceCallback(@NonNull ConnectedDevice device, @NonNull UUID recipientId,
-            @NonNull DeviceCallback callback, @NonNull @CallbackExecutor Executor executor) {
+            @NonNull DeviceCallback callback, @NonNull Executor executor) {
         if (isRecipientBlacklisted(recipientId)) {
             notifyOfBlacklisting(device, recipientId, callback, executor);
             return;

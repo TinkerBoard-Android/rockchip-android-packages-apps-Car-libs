@@ -19,15 +19,16 @@ package com.android.car.connecteddevice.ble;
 import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
 
-import android.annotation.IntDef;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.car.encryptionrunner.EncryptionRunner;
 import android.car.encryptionrunner.HandshakeException;
 import android.car.encryptionrunner.Key;
 
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+
 import com.android.car.connecteddevice.BleStreamProtos.BleOperationProto.OperationType;
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -44,17 +45,15 @@ abstract class SecureBleChannel {
     private static final String TAG = "SecureBleChannel";
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "CHANNEL_ERROR" },
-            value = {
-                    CHANNEL_ERROR_INVALID_HANDSHAKE,
-                    CHANNEL_ERROR_INVALID_MSG,
-                    CHANNEL_ERROR_INVALID_DEVICE_ID,
-                    CHANNEL_ERROR_INVALID_VERIFICATION,
-                    CHANNEL_ERROR_INVALID_STATE,
-                    CHANNEL_ERROR_INVALID_ENCRYPTION_KEY,
-                    CHANNEL_ERROR_STORAGE_ERROR
-            }
-    )
+    @IntDef({
+            CHANNEL_ERROR_INVALID_HANDSHAKE,
+            CHANNEL_ERROR_INVALID_MSG,
+            CHANNEL_ERROR_INVALID_DEVICE_ID,
+            CHANNEL_ERROR_INVALID_VERIFICATION,
+            CHANNEL_ERROR_INVALID_STATE,
+            CHANNEL_ERROR_INVALID_ENCRYPTION_KEY,
+            CHANNEL_ERROR_STORAGE_ERROR
+    })
     @interface ChannelError { }
 
     /** Indicates an error during a Handshake of EncryptionRunner. */
