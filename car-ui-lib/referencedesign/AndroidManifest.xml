@@ -8,6 +8,7 @@
       here. -->
     <overlay android:priority="10"
         android:targetPackage="{{TARGET_PACKAGE_NAME}}"
+        android:targetName="car-ui-lib"
         android:isStatic="true"
         android:category="BypassIdMapV1"
         android:requiredSystemPropertyName="ro.build.characteristics"

@@ -31,10 +31,24 @@ android_library {
     static_libs: [
         "androidx.annotation_annotation",
         "androidx.appcompat_appcompat",
-	"androidx.asynclayoutinflater_asynclayoutinflater",
+        "androidx.asynclayoutinflater_asynclayoutinflater",
         "androidx-constraintlayout_constraintlayout",
         "androidx.preference_preference",
         "androidx.recyclerview_recyclerview",
         "androidx-constraintlayout_constraintlayout-solver",
+    ],
+}
+
+// User this if your project includes overlayable.xml
+android_library {
+
+    name: "car-ui-lib-bp-overlayable",
+
+    resource_dirs: [
+        "res-overlayable"
+    ],
+
+    static_libs: [
+        "car-ui-lib-bp",
     ],
 }
