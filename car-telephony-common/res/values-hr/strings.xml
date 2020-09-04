@@ -19,11 +19,11 @@
     <string name="unknown" msgid="3237922751873109097">"Nepoznato"</string>
     <string name="voicemail" msgid="2125552157407909509">"Govorna pošta"</string>
     <string name="phone_label_with_info" msgid="4652109530699808645">"<xliff:g id="LABEL">%1$s</xliff:g>  ·  <xliff:g id="DURATION">%2$s</xliff:g>"</string>
-    <string name="call_state_connecting" msgid="6844097368588248151">"Povezivanje"</string>
-    <string name="call_state_dialing" msgid="4397655224585553327">"Biranje broja"</string>
+    <string name="call_state_connecting" msgid="5930724746375294866">"Povezivanje…"</string>
+    <string name="call_state_dialing" msgid="1534599871716648114">"Biranje broja…"</string>
     <string name="call_state_hold" msgid="6834028102796624100">"Na čekanju"</string>
     <string name="call_state_call_ended" msgid="4159349597599886429">"Poziv je završio"</string>
     <string name="call_state_call_active" msgid="2769644783657864202">"Povezano"</string>
-    <string name="call_state_call_ringing" msgid="2115824593555284816">"Zvonjenje"</string>
-    <string name="call_state_call_ending" msgid="738099494362020903">"Prekid veze"</string>
+    <string name="call_state_call_ringing" msgid="4618803402954375017">"Zvonjenje…"</string>
+    <string name="call_state_call_ending" msgid="5037498349965472247">"Isključivanje…"</string>
 </resources>
