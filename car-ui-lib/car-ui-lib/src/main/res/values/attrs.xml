@@ -186,5 +186,22 @@
         <!-- The offset of the FocusArea's vertical bounds. It can be overridden by topBoundOffset
              or bottomBoundOffset. -->
         <attr name="verticalBoundOffset" format="dimension"/>
+
+        <!-- Attributes for nudge shortcut. Usually nudge is used to navigate to another FocusArea,
+             but when a nudge shortcut is specified, it's used to navigate to the given view within
+             the same FocusArea. The 2 attributes must be specified together. -->
+        <!-- The ID of the nudge shortcut view. -->
+        <attr name="nudgeShortcut" format="reference"/>
+        <!-- The direction of the nudge shortcut. -->
+        <attr name="nudgeShortcutDirection">
+            <!-- View.FOCUS_LEFT -->
+            <flag name="left" value="0x11" />
+            <!-- View.FOCUS_RIGHT -->
+            <flag name="right" value="0x42" />
+            <!-- View.FOCUS_UP -->
+            <flag name="up" value="0x21" />
+            <!-- View.FOCUS_DOWN -->
+            <flag name="down" value="0x82" />
+        </attr>
     </declare-styleable>
 </resources>

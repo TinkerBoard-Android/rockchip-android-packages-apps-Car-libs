@@ -18,6 +18,7 @@ package com.android.car.ui;
 
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_FOCUS;
 
+import static com.android.car.ui.utils.RotaryConstants.ACTION_NUDGE_SHORTCUT;
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_ACTION_TYPE;
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_BOTTOM_BOUND_OFFSET;
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_LEFT_BOUND_OFFSET;
@@ -26,6 +27,7 @@ import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_TOP_BOUND_OFFS
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_DEFAULT;
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_FIRST;
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_INVALID;
+import static com.android.car.ui.utils.RotaryConstants.NUDGE_SHORTCUT_DIRECTION;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -72,6 +74,8 @@ public class FocusArea extends LinearLayout {
 
     private static final int INVALID_DIMEN = -1;
 
+    private static final int INVALID_DIRECTION = -1;
+
     /** Whether the FocusArea's descendant has focus (the FocusArea itself is not focusable). */
     private boolean mHasFocus;
 
@@ -115,10 +119,19 @@ public class FocusArea extends LinearLayout {
     private boolean mRtl;
 
     /** The ID of the view specified in {@code app:defaultFocus}. */
-    private int mDefaultFocusId = View.NO_ID;
+    private int mDefaultFocusId;
     /** The view specified in {@code app:defaultFocus}. */
     @Nullable
     private View mDefaultFocusView;
+
+    /** The ID of the view specified in {@code app:nudgeShortcut}. */
+    private int mNudgeShortcutId;
+    /** The view specified in {@code app:nudgeShortcut}. */
+    @Nullable
+    private View mNudgeShortcutView;
+
+    /** The direction specified in {@code app:nudgeShortcutDirection}. */
+    private int mNudgeShortcutDirection;
 
     public FocusArea(Context context) {
         super(context);
@@ -260,6 +273,14 @@ public class FocusArea extends LinearLayout {
                 mBottomOffset = a.getDimensionPixelSize(
                         R.styleable.FocusArea_verticalBoundOffset, mPaddingBottom);
             }
+
+            mNudgeShortcutId = a.getResourceId(R.styleable.FocusArea_nudgeShortcut, View.NO_ID);
+            mNudgeShortcutDirection = a.getInt(
+                    R.styleable.FocusArea_nudgeShortcutDirection, INVALID_DIRECTION);
+            if ((mNudgeShortcutId == View.NO_ID) ^ (mNudgeShortcutDirection == INVALID_DIRECTION)) {
+                throw new IllegalStateException("nudgeShortcut and nudgeShortcutDirection must "
+                        + "be specified together");
+            }
         } finally {
             a.recycle();
         }
@@ -270,6 +291,9 @@ public class FocusArea extends LinearLayout {
         super.onFinishInflate();
         if (mDefaultFocusId != View.NO_ID) {
             mDefaultFocusView = CarUiUtils.requireViewByRefId(this, mDefaultFocusId);
+        }
+        if (mNudgeShortcutId != View.NO_ID) {
+            mNudgeShortcutView = CarUiUtils.requireViewByRefId(this, mNudgeShortcutId);
         }
     }
 
@@ -292,33 +316,56 @@ public class FocusArea extends LinearLayout {
 
     @Override
     public boolean performAccessibilityAction(int action, Bundle arguments) {
-        // FocusArea is not focusable, so we focus on its descendant when handling ACTION_FOCUS.
-        if (action == ACTION_FOCUS) {
-            if (arguments == null) {
-                Log.e(TAG, "Must specify action type when performing ACTION_FOCUS on FocusArea");
-                return false;
-            }
-            @RotaryConstants.FocusActionType
-            int type = arguments.getInt(FOCUS_ACTION_TYPE, FOCUS_INVALID);
-            switch (type) {
-                case FOCUS_DEFAULT:
-                    // Move focus to the default focus (mDefaultFocusView), if any.
-                    if (mDefaultFocusView != null) {
-                        if (mDefaultFocusView.requestFocus()) {
-                            return true;
+        switch (action) {
+            case ACTION_FOCUS: {
+                // FocusArea is not focusable, so we focus on its descendant when handling
+                // ACTION_FOCUS.
+                if (arguments == null) {
+                    Log.e(TAG,
+                            "Must specify action type when performing ACTION_FOCUS on FocusArea");
+                    return false;
+                }
+                @RotaryConstants.FocusActionType
+                int type = arguments.getInt(FOCUS_ACTION_TYPE, FOCUS_INVALID);
+                switch (type) {
+                    case FOCUS_DEFAULT:
+                        // Move focus to the default focus (mDefaultFocusView), if any.
+                        if (mDefaultFocusView != null) {
+                            if (mDefaultFocusView.requestFocus()) {
+                                return true;
+                            }
+                            Log.e(TAG, "The default focus of the FocusArea can't take focus");
                         }
-                        Log.e(TAG, "The default focus of the FocusArea can't take focus");
-                    }
-                    return false;
-                case FOCUS_FIRST:
-                    // Focus on the first focusable view in the FocusArea.
-                    return requestFocus();
-                default:
-                    Log.e(TAG, "Invalid action type " + type);
-                    return false;
+                        return false;
+                    case FOCUS_FIRST:
+                        // Focus on the first focusable view in the FocusArea.
+                        return requestFocus();
+                    default:
+                        Log.e(TAG, "Invalid action type " + type);
+                        return false;
+                }
             }
+            case ACTION_NUDGE_SHORTCUT: {
+                if (mNudgeShortcutDirection == INVALID_DIRECTION) {
+                    // No nudge shortcut configured for this FocusArea.
+                    return false;
+                }
+                if (arguments == null
+                        || arguments.getInt(NUDGE_SHORTCUT_DIRECTION, INVALID_DIRECTION)
+                            != mNudgeShortcutDirection) {
+                    // The user is not nudging to the nudge shortcut direction.
+                    return false;
+                }
+                if (mNudgeShortcutView.isFocused()) {
+                    // The nudge shortcut view is already focused; return false so that the user can
+                    // nudge to another FocusArea.
+                    return false;
+                }
+                return mNudgeShortcutView.requestFocus(mNudgeShortcutDirection);
+            }
+            default:
+                return super.performAccessibilityAction(action, arguments);
         }
-        return super.performAccessibilityAction(action, arguments);
     }
 
     @Override
