@@ -19,4 +19,7 @@ limitations under the License.
     <string name="control_bar_expand_collapse_button" msgid="3420351169078117938">"Pulsante Espandi/Comprimi"</string>
     <string name="car_drawer_open" msgid="2676372472514742324">"Apri riquadro a scomparsa"</string>
     <string name="car_drawer_close" msgid="5329374630462464855">"Chiudi riquadro a scomparsa"</string>
+    <string name="restricted_while_driving" msgid="2278031053760704437">"Funzione non disponibile durante la guida."</string>
+    <string name="scroll_bar_page_down_button" msgid="8633547153186948066">"Scorri verso il basso"</string>
+    <string name="scroll_bar_page_up_button" msgid="8306413844913744345">"Scorri verso l\'alto"</string>
 </resources>
