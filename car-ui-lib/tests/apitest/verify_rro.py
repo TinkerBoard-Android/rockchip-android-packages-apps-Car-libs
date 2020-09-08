@@ -16,7 +16,7 @@
 
 import argparse
 import sys
-from resource_utils import get_all_resources, remove_layout_resources, merge_resources
+from resource_utils import get_all_resources, merge_resources
 from git_utils import has_chassis_changes
 
 def main():
@@ -36,11 +36,11 @@ def main():
 
     rro_resources = set()
     for resDir in args.rro:
-        merge_resources(rro_resources, remove_layout_resources(get_all_resources(resDir[0])))
+        merge_resources(rro_resources, get_all_resources(resDir[0]))
 
     base_resources = set()
     for resDir in args.base:
-        merge_resources(base_resources, remove_layout_resources(get_all_resources(resDir[0])))
+        merge_resources(base_resources, get_all_resources(resDir[0]))
 
     extras = rro_resources.difference(base_resources)
     if len(extras) > 0:
