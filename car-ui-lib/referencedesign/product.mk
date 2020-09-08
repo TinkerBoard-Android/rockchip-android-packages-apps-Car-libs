@@ -27,3 +27,15 @@ PRODUCT_PACKAGES += \
     googlecarui-com-google-android-carassistant \
     googlecarui-com-google-android-tts \
     googlecarui-com-android-vending \
+
+
+# Include generated RROs that that use targetName
+PRODUCT_PACKAGES += \
+    googlecarui-overlayable-com-google-android-apps-automotive-inputmethod \
+    googlecarui-overlayable-com-google-android-apps-automotive-inputmethod-dev \
+    googlecarui-overlayable-com-google-android-embedded-projection \
+    googlecarui-overlayable-com-google-android-gms \
+    googlecarui-overlayable-com-google-android-packageinstaller \
+    googlecarui-overlayable-com-google-android-carassistant \
+    googlecarui-overlayable-com-google-android-tts \
+    googlecarui-overlayable-com-android-vending \
