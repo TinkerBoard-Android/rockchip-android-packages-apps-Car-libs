@@ -19,15 +19,16 @@ package com.android.car.connecteddevice.oob;
 import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+
 import com.android.car.connecteddevice.model.OobEligibleDevice;
 
-import com.google.common.annotations.VisibleForTesting;
 
 import java.io.IOException;
 import java.io.OutputStream;

@@ -20,8 +20,6 @@ import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
 import static com.android.car.connecteddevice.util.SafeLog.logw;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -40,6 +38,9 @@ import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.car.connecteddevice.util.ByteUtils;
 
@@ -90,6 +91,7 @@ public class BlePeripheralManager {
     private BluetoothGattService mBluetoothGattService;
     private AdvertiseCallback mAdvertiseCallback;
     private AdvertiseData mAdvertiseData;
+    private AdvertiseData mScanResponse;
 
     public BlePeripheralManager(Context context) {
         mContext = context;
@@ -168,10 +170,12 @@ public class BlePeripheralManager {
      *
      * @param service           {@link BluetoothGattService} that will be discovered by clients
      * @param data              {@link AdvertiseData} data to advertise
+     * @param scanResponse      {@link AdvertiseData} scan response
      * @param advertiseCallback {@link AdvertiseCallback} callback for advertiser
      */
     void startAdvertising(
-            BluetoothGattService service, AdvertiseData data, AdvertiseCallback advertiseCallback) {
+            BluetoothGattService service, AdvertiseData data,
+            AdvertiseData scanResponse, AdvertiseCallback advertiseCallback) {
         logd(TAG, "Request to start advertising with service " + service.getUuid() + ".");
         if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             loge(TAG, "Attempted start advertising, but system does not support BLE. Ignoring.");
@@ -182,6 +186,7 @@ public class BlePeripheralManager {
         mBluetoothGattService = service;
         mAdvertiseCallback = advertiseCallback;
         mAdvertiseData = data;
+        mScanResponse = scanResponse;
         mGattServerRetryStartCount = 0;
         mBluetoothManager = (BluetoothManager) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
         mGattServer.set(mBluetoothManager.openGattServer(mContext, mGattServerCallback));
@@ -267,7 +272,7 @@ public class BlePeripheralManager {
                             .setConnectable(true)
                             .build();
             mAdvertiserStartCount = 0;
-            startAdvertisingInternally(settings, mAdvertiseData, mAdvertiseCallback);
+            startAdvertisingInternally(settings, mAdvertiseData, mScanResponse, mAdvertiseCallback);
             mGattServerRetryStartCount = 0;
         } else if (mGattServerRetryStartCount < GATT_SERVER_RETRY_LIMIT) {
             mGattServer.set(mBluetoothManager.openGattServer(mContext, mGattServerCallback));
@@ -279,7 +284,8 @@ public class BlePeripheralManager {
     }
 
     private void startAdvertisingInternally(
-            AdvertiseSettings settings, AdvertiseData data, AdvertiseCallback advertiseCallback) {
+            AdvertiseSettings settings, AdvertiseData advertisement,
+            AdvertiseData scanResponse, AdvertiseCallback advertiseCallback) {
         if (BluetoothAdapter.getDefaultAdapter() != null) {
             mAdvertiser.compareAndSet(null,
                     BluetoothAdapter.getDefaultAdapter().getBluetoothLeAdvertiser());
@@ -287,12 +293,12 @@ public class BlePeripheralManager {
         BluetoothLeAdvertiser advertiser = mAdvertiser.get();
         if (advertiser != null) {
             logd(TAG, "Advertiser created, retry count: " + mAdvertiserStartCount);
-            advertiser.startAdvertising(settings, data, advertiseCallback);
+            advertiser.startAdvertising(settings, advertisement, scanResponse, advertiseCallback);
             mAdvertiserStartCount = 0;
         } else if (mAdvertiserStartCount < BLE_RETRY_LIMIT) {
             mHandler.postDelayed(
-                    () -> startAdvertisingInternally(settings, data, advertiseCallback),
-                    BLE_RETRY_INTERVAL_MS);
+                    () -> startAdvertisingInternally(settings, advertisement, scanResponse,
+                            advertiseCallback), BLE_RETRY_INTERVAL_MS);
             mAdvertiserStartCount += 1;
         } else {
             loge(TAG, "Cannot start BLE Advertisement. Advertise Retry count: "

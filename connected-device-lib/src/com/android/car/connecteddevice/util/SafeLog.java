@@ -16,9 +16,10 @@
 
 package com.android.car.connecteddevice.util;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * Convenience logging methods that respect whitelisted tags.

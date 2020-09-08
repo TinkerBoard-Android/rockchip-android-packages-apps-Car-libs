@@ -20,9 +20,10 @@ import static com.android.car.connecteddevice.ConnectedDeviceManager.DEVICE_ERRO
 import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
 
-import android.annotation.NonNull;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+
+import androidx.annotation.NonNull;
 
 import com.android.car.connecteddevice.AssociationCallback;
 import com.android.car.connecteddevice.connection.AssociationSecureChannel;
@@ -139,7 +140,7 @@ public class CarSppManager extends CarBluetoothManager {
         mSppManager.unregisterCallback(mReconnectSppCallback);
         mSppManager.registerCallback(mAssociationSppCallback, mCallbackExecutor);
         if (mSppManager.startListening(mAssociationServiceUuid)) {
-            callback.onAssociationStartSuccess(adapter.getName());
+            callback.onAssociationStartSuccess(/* deviceName= */ null);
         } else {
             callback.onAssociationStartFailure();
         }

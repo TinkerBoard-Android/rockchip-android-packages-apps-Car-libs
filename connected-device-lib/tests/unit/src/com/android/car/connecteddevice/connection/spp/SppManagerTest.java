@@ -24,9 +24,9 @@ import static org.mockito.Mockito.mockitoSession;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-import android.annotation.NonNull;
 import android.bluetooth.BluetoothDevice;
 
+import androidx.annotation.NonNull;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.After;
