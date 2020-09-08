@@ -18,20 +18,31 @@ package com.android.car.ui.preference;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.View;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.preference.Preference;
+import androidx.preference.PreferenceViewHolder;
 
 import com.android.car.ui.R;
+import com.android.car.ui.utils.CarUiUtils;
 
 /**
  * This class extends the base {@link Preference} class. Adds the support to add a drawable icon to
  * the preference if there is one of fragment, intent or onPreferenceClickListener set.
  */
-public class CarUiPreference extends Preference {
+public class CarUiPreference extends Preference implements DisabledPreferenceCallback {
 
     private Context mContext;
     private boolean mShowChevron;
+    private String mMessageToShowWhenDisabledPreferenceClicked;
+
+    private boolean mShouldShowRippleOnDisabledPreference;
+    private Drawable mBackground;
+    private View mPreference;
 
     public CarUiPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
@@ -61,6 +72,20 @@ public class CarUiPreference extends Preference {
                 defStyleRes);
 
         mShowChevron = a.getBoolean(R.styleable.CarUiPreference_showChevron, true);
+        mShouldShowRippleOnDisabledPreference = a.getBoolean(
+                R.styleable.CarUiPreference_showRippleOnDisabledPreference, false);
+
+        a.recycle();
+    }
+
+
+    @Override
+    public void onBindViewHolder(PreferenceViewHolder holder) {
+        super.onBindViewHolder(holder);
+        boolean viewEnabled = isEnabled();
+        mPreference = holder.itemView;
+        mBackground = CarUiUtils.setPreferenceViewEnabled(viewEnabled, holder.itemView, mBackground,
+                mShouldShowRippleOnDisabledPreference);
     }
 
     @Override
@@ -80,7 +105,38 @@ public class CarUiPreference extends Preference {
         }
     }
 
+    /**
+     * This is similar to {@link Preference#performClick()} with the only difference that we do not
+     * return when view is not enabled.
+     */
+    @Override
+    @SuppressWarnings("RestrictTo")
+    public void performClick() {
+        if (isEnabled()) {
+            super.performClick();
+        } else if (mMessageToShowWhenDisabledPreferenceClicked != null
+                && !mMessageToShowWhenDisabledPreferenceClicked.isEmpty()) {
+            Toast.makeText(mContext, mMessageToShowWhenDisabledPreferenceClicked,
+                    Toast.LENGTH_LONG).show();
+        }
+    }
+
     public void setShowChevron(boolean showChevron) {
         mShowChevron = showChevron;
+    }
+
+    /**
+     * Sets the ripple on the disabled preference.
+     */
+    @Override
+    public void setShouldShowRippleOnDisabledPreference(boolean showRipple) {
+        mShouldShowRippleOnDisabledPreference = showRipple;
+        CarUiUtils.updateRippleStateOnDisabledPreference(isEnabled(),
+                mShouldShowRippleOnDisabledPreference, mBackground, mPreference);
+    }
+
+    @Override
+    public void setMessageToShowWhenDisabledPreferenceClicked(@NonNull String message) {
+        mMessageToShowWhenDisabledPreferenceClicked = message;
     }
 }

@@ -23,10 +23,12 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 
 import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.lang.annotation.Retention;
+import java.util.Objects;
 
 /**
  * Adds an offset to the start of a RecyclerView using a LinearLayoutManager or its subclass.
@@ -61,7 +63,8 @@ public class LinearOffsetItemDecoration extends RecyclerView.ItemDecoration {
      * Constructor that takes in the size of the offset to be added to the start of the
      * RecyclerView.
      *
-     * @param offsetPx The size of the offset to be added to the start of the RecyclerView in pixels
+     * @param offsetPx       The size of the offset to be added to the start of the RecyclerView in
+     *                       pixels
      * @param offsetPosition Position where offset needs to be applied.
      */
     public LinearOffsetItemDecoration(int offsetPx, int offsetPosition) {
@@ -82,13 +85,14 @@ public class LinearOffsetItemDecoration extends RecyclerView.ItemDecoration {
      * Determines the size and location of the offset to be added to the start of the RecyclerView.
      *
      * @param outRect The {@link Rect} of offsets to be added around the child view
-     * @param view The child view to be decorated with an offset
-     * @param parent The RecyclerView onto which dividers are being added
-     * @param state The current RecyclerView.State of the RecyclerView
+     * @param view    The child view to be decorated with an offset
+     * @param parent  The RecyclerView onto which dividers are being added
+     * @param state   The current RecyclerView.State of the RecyclerView
      */
     @Override
     public void getItemOffsets(
-            Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            @NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent,
+            @NonNull RecyclerView.State state) {
         super.getItemOffsets(outRect, view, parent, state);
 
         if (mOffsetPosition == OffsetPosition.START && parent.getChildAdapterPosition(view) > 0) {
@@ -101,7 +105,8 @@ public class LinearOffsetItemDecoration extends RecyclerView.ItemDecoration {
             return;
         }
 
-        mOrientation = ((LinearLayoutManager) parent.getLayoutManager()).getOrientation();
+        mOrientation = ((LinearLayoutManager) Objects.requireNonNull(
+                parent.getLayoutManager())).getOrientation();
         if (mOrientation == LinearLayoutManager.HORIZONTAL) {
             if (mOffsetPx > 0) {
                 if (mOffsetPosition == OffsetPosition.START) {
@@ -136,12 +141,13 @@ public class LinearOffsetItemDecoration extends RecyclerView.ItemDecoration {
     /**
      * Draws horizontal or vertical offset onto the start of the parent RecyclerView.
      *
-     * @param c The {@link Canvas} onto which an offset will be drawn
+     * @param c      The {@link Canvas} onto which an offset will be drawn
      * @param parent The RecyclerView onto which an offset is being added
-     * @param state The current RecyclerView.State of the RecyclerView
+     * @param state  The current RecyclerView.State of the RecyclerView
      */
     @Override
-    public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
+    public void onDraw(@NonNull Canvas c, @NonNull RecyclerView parent,
+            @NonNull RecyclerView.State state) {
         super.onDraw(c, parent, state);
         if (mOffsetDrawable == null) {
             return;
@@ -157,19 +163,18 @@ public class LinearOffsetItemDecoration extends RecyclerView.ItemDecoration {
     private void drawOffsetHorizontal(Canvas canvas, RecyclerView parent) {
         int parentTop = parent.getPaddingTop();
         int parentBottom = parent.getHeight() - parent.getPaddingBottom();
-        int parentLeft = 0;
-        int offsetDrawableRight = 0;
+        int parentLeft;
+        int offsetDrawableRight;
 
         if (mOffsetPosition == OffsetPosition.START) {
             parentLeft = parent.getPaddingLeft();
-            offsetDrawableRight = parentLeft + mOffsetDrawable.getIntrinsicWidth();
         } else {
             View lastChild = parent.getChildAt(parent.getChildCount() - 1);
             RecyclerView.LayoutParams lastChildLayoutParams =
                     (RecyclerView.LayoutParams) lastChild.getLayoutParams();
             parentLeft = lastChild.getRight() + lastChildLayoutParams.rightMargin;
-            offsetDrawableRight = parentLeft + mOffsetDrawable.getIntrinsicWidth();
         }
+        offsetDrawableRight = parentLeft + mOffsetDrawable.getIntrinsicWidth();
 
         mOffsetDrawable.setBounds(parentLeft, parentTop, offsetDrawableRight, parentBottom);
         mOffsetDrawable.draw(canvas);
@@ -179,19 +184,18 @@ public class LinearOffsetItemDecoration extends RecyclerView.ItemDecoration {
         int parentLeft = parent.getPaddingLeft();
         int parentRight = parent.getWidth() - parent.getPaddingRight();
 
-        int parentTop = 0;
-        int offsetDrawableBottom = 0;
+        int parentTop;
+        int offsetDrawableBottom;
 
         if (mOffsetPosition == OffsetPosition.START) {
             parentTop = parent.getPaddingTop();
-            offsetDrawableBottom = parentTop + mOffsetDrawable.getIntrinsicHeight();
         } else {
             View lastChild = parent.getChildAt(parent.getChildCount() - 1);
             RecyclerView.LayoutParams lastChildLayoutParams =
                     (RecyclerView.LayoutParams) lastChild.getLayoutParams();
             parentTop = lastChild.getBottom() + lastChildLayoutParams.bottomMargin;
-            offsetDrawableBottom = parentTop + mOffsetDrawable.getIntrinsicHeight();
         }
+        offsetDrawableBottom = parentTop + mOffsetDrawable.getIntrinsicHeight();
 
         mOffsetDrawable.setBounds(parentLeft, parentTop, parentRight, offsetDrawableBottom);
         mOffsetDrawable.draw(canvas);

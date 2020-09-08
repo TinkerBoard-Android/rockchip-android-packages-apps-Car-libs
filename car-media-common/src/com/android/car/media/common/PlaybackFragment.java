@@ -16,6 +16,8 @@
 
 package com.android.car.media.common;
 
+import static android.car.media.CarMediaManager.MEDIA_SOURCE_MODE_PLAYBACK;
+
 import static com.android.car.arch.common.LiveDataFunctions.mapNonNull;
 
 import android.app.Application;
@@ -62,8 +64,10 @@ public class PlaybackFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
             Bundle savedInstanceState) {
         FragmentActivity activity = requireActivity();
-        PlaybackViewModel playbackViewModel = PlaybackViewModel.get(activity.getApplication());
-        mMediaSourceViewModel = MediaSourceViewModel.get(activity.getApplication());
+        PlaybackViewModel playbackViewModel = PlaybackViewModel.get(activity.getApplication(),
+                MEDIA_SOURCE_MODE_PLAYBACK);
+        mMediaSourceViewModel = MediaSourceViewModel.get(activity.getApplication(),
+                MEDIA_SOURCE_MODE_PLAYBACK);
         mAppSelectorIntent = MediaSource.getSourceSelectorIntent(getContext(), true);
 
         ViewModel innerViewModel = ViewModelProviders.of(activity).get(ViewModel.class);
@@ -140,7 +144,7 @@ public class PlaybackFragment extends Fragment {
             mMediaSourceViewModel = mediaSourceViewModel;
             mMediaSource = mMediaSourceViewModel.getPrimaryMediaSource();
             mAppName = mapNonNull(mMediaSource, MediaSource::getDisplayName);
-            mAppIcon = mapNonNull(mMediaSource, MediaSource::getRoundPackageIcon);
+            mAppIcon = mapNonNull(mMediaSource, MediaSource::getCroppedPackageIcon);
             mTitle = mapNonNull(playbackViewModel.getMetadata(), MediaItemMetadata::getTitle);
             mSubtitle = mapNonNull(playbackViewModel.getMetadata(), MediaItemMetadata::getArtist);
         }

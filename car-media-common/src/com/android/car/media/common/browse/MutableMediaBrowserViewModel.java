@@ -16,12 +16,12 @@
 
 package com.android.car.media.common.browse;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.annotation.UiThread;
 import android.app.Application;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
+import androidx.annotation.UiThread;
 
 /** This isn't a comment. */
 @RestrictTo(RestrictTo.Scope.LIBRARY)

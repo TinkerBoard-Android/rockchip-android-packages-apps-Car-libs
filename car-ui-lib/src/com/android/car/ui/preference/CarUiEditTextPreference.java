@@ -18,10 +18,14 @@ package com.android.car.ui.preference;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
 
+import androidx.annotation.VisibleForTesting;
 import androidx.preference.EditTextPreference;
+import androidx.preference.PreferenceViewHolder;
 
 import com.android.car.ui.R;
+import com.android.car.ui.utils.CarUiUtils;
 
 /**
  * This class extends the base {@link EditTextPreference} class. Adds the drawable icon to
@@ -51,6 +55,18 @@ public class CarUiEditTextPreference extends EditTextPreference {
     public CarUiEditTextPreference(Context context) {
         super(context);
         mContext = context;
+    }
+
+    protected void setTwoActionLayout() {
+        setLayoutResource(R.layout.car_ui_two_action_preference);
+    }
+
+    /**
+     * Returns the widget container if {@link #setTwoActionLayout) was called, otherwise null.
+     */
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+    public View getWidgetActionContainer(PreferenceViewHolder holder) {
+        return CarUiUtils.findViewByRefId(holder.itemView, R.id.action_widget_container);
     }
 
     @Override

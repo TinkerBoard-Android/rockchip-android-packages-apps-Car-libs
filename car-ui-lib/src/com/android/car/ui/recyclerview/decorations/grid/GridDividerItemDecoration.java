@@ -20,6 +20,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.R;
@@ -36,12 +37,12 @@ public class GridDividerItemDecoration extends RecyclerView.ItemDecoration {
      * dividers.
      *
      * @param horizontalDivider A divider {@code Drawable} to be drawn on the rows of the grid of
-     * the
-     * RecyclerView
-     * @param verticalDivider A divider {@code Drawable} to be drawn on the columns of the grid of
-     * the
-     * RecyclerView
-     * @param numColumns The number of columns in the grid of the RecyclerView
+     *                          the
+     *                          RecyclerView
+     * @param verticalDivider   A divider {@code Drawable} to be drawn on the columns of the grid of
+     *                          the
+     *                          RecyclerView
+     * @param numColumns        The number of columns in the grid of the RecyclerView
      */
     public GridDividerItemDecoration(
             Drawable horizontalDivider, Drawable verticalDivider, int numColumns) {
@@ -55,10 +56,11 @@ public class GridDividerItemDecoration extends RecyclerView.ItemDecoration {
      *
      * @param canvas The {@link Canvas} onto which dividers will be drawn
      * @param parent The RecyclerView onto which dividers are being added
-     * @param state The current RecyclerView.State of the RecyclerView
+     * @param state  The current RecyclerView.State of the RecyclerView
      */
     @Override
-    public void onDrawOver(Canvas canvas, RecyclerView parent, RecyclerView.State state) {
+    public void onDrawOver(@NonNull Canvas canvas, @NonNull RecyclerView parent,
+            @NonNull RecyclerView.State state) {
         drawVerticalDividers(canvas, parent);
         drawHorizontalDividers(canvas, parent);
     }
@@ -67,13 +69,14 @@ public class GridDividerItemDecoration extends RecyclerView.ItemDecoration {
      * Determines the size and location of offsets between items in the parent RecyclerView.
      *
      * @param outRect The {@link Rect} of offsets to be added around the child view
-     * @param view The child view to be decorated with an offset
-     * @param parent The RecyclerView onto which dividers are being added
-     * @param state The current RecyclerView.State of the RecyclerView
+     * @param view    The child view to be decorated with an offset
+     * @param parent  The RecyclerView onto which dividers are being added
+     * @param state   The current RecyclerView.State of the RecyclerView
      */
     @Override
     public void getItemOffsets(
-            Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            Rect outRect, @NonNull View view, @NonNull RecyclerView parent,
+            @NonNull RecyclerView.State state) {
         outRect.set(
                 0, 0, mHorizontalDivider.getIntrinsicWidth(),
                 mHorizontalDivider.getIntrinsicHeight());
@@ -131,7 +134,7 @@ public class GridDividerItemDecoration extends RecyclerView.ItemDecoration {
         double rowCount = Math.ceil(childCount / mNumColumns);
         int rightmostChildIndex;
         for (int i = 1; i <= rowCount; i++) {
-            // we dont want the divider on top of first row.
+            // we don't want the divider on top of first row.
             if (i == 1) {
                 continue;
             }

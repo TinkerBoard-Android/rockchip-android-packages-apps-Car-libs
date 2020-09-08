@@ -20,6 +20,9 @@ import static com.android.car.apps.common.util.SafeLog.logw;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.bluetooth.BluetoothDevice;
+import android.content.Intent;
+import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.util.Log;
 
@@ -29,6 +32,7 @@ import com.android.car.messenger.NotificationMsgProto.NotificationMsg.MessagingS
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.PhoneToCarMessage;
 
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Represents a conversation notification's metadata that is shared between the conversation's
@@ -36,14 +40,14 @@ import java.util.LinkedList;
  * ConversationNotificationInfo object.
  **/
 public class ConversationNotificationInfo {
-    private static final String TAG = "CMC.ConversationNotificationInfo";
+    private static final String TAG = "CMC.ConvoNotifInfo";
     private static int sNextNotificationId = 0;
     final int mNotificationId = sNextNotificationId++;
 
     private final String mDeviceName;
     private final String mDeviceId;
     // This is always the sender name for SMS Messages from Bluetooth MAP.
-    private final String mConvoTitle;
+    private String mConvoTitle;
     private final boolean mIsGroupConvo;
 
     /** Only used for {@link NotificationMsg} conversations. **/
@@ -51,9 +55,14 @@ public class ConversationNotificationInfo {
     private final String mNotificationKey;
     @Nullable
     private final String mAppDisplayName;
+    private final String mAppPackageName;
     @Nullable
     private final String mUserDisplayName;
-    private final int mAppSmallIconResId;
+    @Nullable
+    private final Icon mAppIcon;
+    /** Uris of all members in a MMS Group Conversation. **/
+    @Nullable
+    private final List<String> mCcRecipientsUris;
 
     public final LinkedList<MessageKey> mMessageKeys = new LinkedList<>();
 
@@ -77,18 +86,39 @@ public class ConversationNotificationInfo {
             }
         }
 
+        Icon appIcon = null;
+        if (conversation.getAppIcon() != null) {
+            byte[] iconBytes = conversation.getAppIcon().toByteArray();
+            appIcon = Icon.createWithData(iconBytes, 0, iconBytes.length);
+        }
+
         return new ConversationNotificationInfo(deviceName, deviceId,
                 messagingStyle.getConvoTitle(),
                 messagingStyle.getIsGroupConvo(), notificationKey,
                 conversation.getMessagingAppDisplayName(),
-                messagingStyle.getUserDisplayName(), /* appSmallIconResId= */ 0);
+                conversation.getMessagingAppPackageName(),
+                messagingStyle.getUserDisplayName(),
+                appIcon,
+                /* ccUris= */null);
 
+    }
+    /** Creates a ConversationNotificationInfo for a BluetoothMapClient intent. **/
+    public static ConversationNotificationInfo createConversationNotificationInfo(Intent intent,
+            String conversationTitle, String appPackageName, @Nullable Icon appIcon) {
+        BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+        return new ConversationNotificationInfo(device.getName(), device.getAddress(),
+                conversationTitle, Utils.isGroupConversation(intent), /* notificationKey */ null,
+                /* appDisplayName */ null, appPackageName, /* userDisplayName */ null,
+                appIcon,
+                Utils.getInclusiveRecipientsUrisList(intent));
     }
 
     private ConversationNotificationInfo(@Nullable String deviceName, String deviceId,
             String convoTitle, boolean isGroupConvo, @Nullable String notificationKey,
-            @Nullable String appDisplayName, @Nullable String userDisplayName,
-            int appSmallIconResId) {
+            @Nullable String appDisplayName, String appPackageName,
+            @Nullable String userDisplayName, @Nullable Icon appIcon,
+            @Nullable List<String> ccUris) {
         boolean missingDeviceId = (deviceId == null);
         boolean missingTitle = (convoTitle == null);
         if (missingDeviceId || missingTitle) {
@@ -107,8 +137,10 @@ public class ConversationNotificationInfo {
         this.mIsGroupConvo = isGroupConvo;
         this.mNotificationKey = notificationKey;
         this.mAppDisplayName = appDisplayName;
+        this.mAppPackageName = appPackageName;
         this.mUserDisplayName = userDisplayName;
-        this.mAppSmallIconResId = appSmallIconResId;
+        this.mAppIcon = appIcon;
+        this.mCcRecipientsUris = ccUris;
     }
 
     /** Returns the id that should be used for this object's {@link android.app.Notification} **/
@@ -132,6 +164,11 @@ public class ConversationNotificationInfo {
      */
     public String getConvoTitle() {
         return mConvoTitle;
+    }
+
+    /** Update the conversation title. **/
+    public void setConvoTitle(String newTitle) {
+        mConvoTitle = newTitle;
     }
 
     /** Returns {@code true} if this message is in a group conversation **/
@@ -158,6 +195,13 @@ public class ConversationNotificationInfo {
     }
 
     /**
+     * Returns the package name of the application that posted this notification.
+     **/
+    public String getAppPackageName() {
+        return mAppPackageName;
+    }
+
+    /**
      * Returns the User Display Name if this object is based on a @link ConversationNotification}.
      * This is needed for {@link android.app.Notification.MessagingStyle}.
      */
@@ -167,12 +211,22 @@ public class ConversationNotificationInfo {
     }
 
 
-    /** Returns the icon's resource id of the application that posted this notification. **/
-    public int getAppSmallIconResId() {
-        return mAppSmallIconResId;
+    /** Returns the app's icon of the application that posted this notification. **/
+    @Nullable
+    public Icon getAppIcon() {
+        return mAppIcon;
     }
 
     public MessageKey getLastMessageKey() {
         return mMessageKeys.getLast();
+    }
+
+    /**
+     * Returns the sorted URIs of all the participants of a MMS/SMS/RCS conversation. Returns
+     * {@code null} if this is based on a {@link NotificationMsg} conversation.
+     */
+    @Nullable
+    public List<String> getCcRecipientsUris() {
+        return mCcRecipientsUris;
     }
 }

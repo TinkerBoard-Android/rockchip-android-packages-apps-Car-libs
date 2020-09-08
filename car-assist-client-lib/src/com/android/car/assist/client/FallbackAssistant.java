@@ -115,7 +115,6 @@ public class FallbackAssistant {
         }
 
         List<CharSequence> messages = new ArrayList<>();
-
         List<Message> messageList = Message.getMessagesFromBundleArray(messagesBundle);
         if (messageList == null || messageList.isEmpty()) {
             Log.w(TAG, "No messages could be extracted from the bundle");

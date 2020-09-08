@@ -52,24 +52,30 @@ public class BackgroundImageView extends ConstraintLayout {
     public BackgroundImageView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        inflate(getContext(), R.layout.background_image, this);
+        float extraScale;
+        int resId;
+        TypedArray a = context.getTheme().obtainStyledAttributes(attrs,
+                R.styleable.BackgroundImageView, defStyle, 0);
+        try {
+            extraScale = a.getFloat(R.styleable.BackgroundImageView_imageAdditionalScale, 1.05f);
+            resId = a.getResourceId(R.styleable.BackgroundImageView_contentLayout,
+                    R.layout.background_image);
+            mBitmapBlurPercent = a.getFloat(R.styleable.BackgroundImageView_bitmap_blur_percent,
+                    getResources().getFloat(R.dimen.background_bitmap_blur_percent));
+
+            int size = a.getInteger(R.styleable.BackgroundImageView_bitmap_target_size_px,
+                    getResources().getInteger(R.integer.background_bitmap_target_size_px));
+            mBitmapTargetSize = new Size(size, size);
+        } finally {
+            a.recycle();
+        }
+
+        inflate(getContext(), resId, this);
 
         mImageView = findViewById(R.id.background_image_image);
         mDarkeningScrim = findViewById(R.id.background_image_darkening_scrim);
 
-        int size = getResources().getInteger(R.integer.background_bitmap_target_size_px);
-        mBitmapTargetSize = new Size(size, size);
-        mBitmapBlurPercent = getResources().getFloat(R.dimen.background_bitmap_blur_percent);
-
-        TypedArray a = context.getTheme().obtainStyledAttributes(attrs,
-                R.styleable.BackgroundImageView, defStyle, 0);
-
-        try {
-            setImageAdditionalScale(a.getFloat(R.styleable.BackgroundImageView_imageAdditionalScale,
-                    1.05f));
-        } finally {
-            a.recycle();
-        }
+        setImageAdditionalScale(extraScale);
     }
 
     /**

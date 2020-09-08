@@ -46,4 +46,13 @@
     <!-- List items -->
 
     <bool name="car_ui_list_item_single_line_title">true</bool>
+
+    <!-- FocusArea -->
+
+    <!-- Whether to draw highlight (car_ui_focus_area_foreground_highlight) on top of the FocusArea
+         and its children when the FocusArea's descendant gets focused. -->
+    <bool name="car_ui_enable_focus_area_foreground_highlight">false</bool>
+    <!-- Whether to draw highlight (car_ui_focus_area_background_highlight) on top of the FocusArea
+         but behind its children when the FocusArea's descendant gets focused. -->
+    <bool name="car_ui_enable_focus_area_background_highlight">false</bool>
 </resources>

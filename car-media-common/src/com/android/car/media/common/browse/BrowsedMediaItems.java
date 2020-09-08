@@ -16,16 +16,17 @@
 
 package com.android.car.media.common.browse;
 
-import android.annotation.NonNull;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.media.MediaBrowserCompat;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 
 import com.android.car.media.common.MediaItemMetadata;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -146,6 +147,7 @@ class BrowsedMediaItems extends LiveData<List<MediaItemMetadata>> {
             mHandler.removeCallbacks(mRetryRunnable);
             mIsDataLoaded = true;
             setValue(children.stream()
+                    .filter(Objects::nonNull)
                     .map(MediaItemMetadata::new)
                     .collect(Collectors.toList()));
         }

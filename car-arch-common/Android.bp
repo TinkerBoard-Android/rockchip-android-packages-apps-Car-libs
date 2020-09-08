@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+// This is an unbundled target, sdk_version must be "system_current". If the car library is ever
+// needed, android."car-stubs" or "android.car-system-stubs" must be used.
 android_library {
     name: "car-arch-common",
 
@@ -22,6 +24,8 @@ android_library {
     optimize: {
         enabled: false,
     },
+
+    sdk_version: "system_current",
 
     static_libs: [
         "androidx.lifecycle_lifecycle-extensions",

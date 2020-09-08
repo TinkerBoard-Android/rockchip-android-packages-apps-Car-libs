@@ -24,6 +24,7 @@ import static org.mockito.Mockito.mockitoSession;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.bluetooth.BluetoothAdapter;
@@ -53,6 +54,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
+import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -60,6 +62,8 @@ import java.util.concurrent.TimeUnit;
 @RunWith(AndroidJUnit4.class)
 public class CarBlePeripheralManagerTest {
     private static final UUID ASSOCIATION_SERVICE_UUID = UUID.randomUUID();
+    private static final UUID RECONNECT_SERVICE_UUID = UUID.randomUUID();
+    private static final UUID RECONNECT_DATA_UUID = UUID.randomUUID();
     private static final UUID WRITE_UUID = UUID.randomUUID();
     private static final UUID READ_UUID = UUID.randomUUID();
     private static final int DEVICE_NAME_LENGTH_LIMIT = 8;
@@ -67,10 +71,15 @@ public class CarBlePeripheralManagerTest {
     private static final UUID TEST_REMOTE_DEVICE_ID = UUID.randomUUID();
     private static final String TEST_VERIFICATION_CODE = "000000";
     private static final byte[] TEST_KEY = "Key".getBytes();
+    private static final Duration RECONNECT_ADVERTISEMENT_DURATION = Duration.ofSeconds(2);
+    private static final int DEFAULT_MTU_SIZE = 23;
+
     private static String sAdapterName;
 
-    @Mock private BlePeripheralManager mMockPeripheralManager;
-    @Mock private ConnectedDeviceStorage mMockStorage;
+    @Mock
+    private BlePeripheralManager mMockPeripheralManager;
+    @Mock
+    private ConnectedDeviceStorage mMockStorage;
 
     private CarBlePeripheralManager mCarBlePeripheralManager;
 
@@ -80,14 +89,16 @@ public class CarBlePeripheralManagerTest {
     public static void beforeSetUp() {
         sAdapterName = BluetoothAdapter.getDefaultAdapter().getName();
     }
+
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         mMockitoSession = mockitoSession()
                 .initMocks(this)
-                .strictness(Strictness.LENIENT)
+                .strictness(Strictness.WARN)
                 .startMocking();
         mCarBlePeripheralManager = new CarBlePeripheralManager(mMockPeripheralManager, mMockStorage,
-                ASSOCIATION_SERVICE_UUID, WRITE_UUID, READ_UUID);
+                ASSOCIATION_SERVICE_UUID, RECONNECT_SERVICE_UUID, RECONNECT_DATA_UUID,
+                WRITE_UUID, READ_UUID, RECONNECT_ADVERTISEMENT_DURATION, DEFAULT_MTU_SIZE);
     }
 
     @After
@@ -158,7 +169,7 @@ public class CarBlePeripheralManagerTest {
     public void testShowVerificationCode() throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
         AssociationCallback callback = createAssociationCallback(semaphore);
-        SecureBleChannel channel = getChannelForAssociation(callback);
+        AssociationSecureChannel channel = getChannelForAssociation(callback);
         channel.getShowVerificationCodeListener().showVerificationCode(TEST_VERIFICATION_CODE);
         assertThat(tryAcquire(semaphore)).isTrue();
         verify(callback).onVerificationCodeAvailable(eq(TEST_VERIFICATION_CODE));
@@ -199,13 +210,15 @@ public class CarBlePeripheralManagerTest {
 
     @Test
     public void connectToDevice_stopsAdvertisingAfterTimeout() {
-        int timeoutSeconds = 2;
-        mCarBlePeripheralManager.connectToDevice(UUID.randomUUID(), timeoutSeconds);
+        when(mMockStorage.hashWithChallengeSecret(any(), any()))
+                .thenReturn(ByteUtils.randomBytes(32));
+        mCarBlePeripheralManager.connectToDevice(UUID.randomUUID());
         ArgumentCaptor<AdvertiseCallback> callbackCaptor =
                 ArgumentCaptor.forClass(AdvertiseCallback.class);
         verify(mMockPeripheralManager).startAdvertising(any(), any(), callbackCaptor.capture());
         callbackCaptor.getValue().onStartSuccess(null);
-        verify(mMockPeripheralManager, timeout(TimeUnit.SECONDS.toMillis(timeoutSeconds + 1)))
+        verify(mMockPeripheralManager,
+                timeout(RECONNECT_ADVERTISEMENT_DURATION.plusSeconds(1).toMillis()))
                 .stopAdvertising(any(AdvertiseCallback.class));
     }
 
@@ -218,13 +231,13 @@ public class CarBlePeripheralManagerTest {
         return callbackCaptor.getValue();
     }
 
-    private SecureBleChannel getChannelForAssociation(AssociationCallback callback) {
+    private AssociationSecureChannel getChannelForAssociation(AssociationCallback callback) {
         BlePeripheralManager.Callback bleManagerCallback = startAssociation(callback,
                 getNameForAssociation());
         BluetoothDevice bluetoothDevice = BluetoothAdapter.getDefaultAdapter()
                 .getRemoteDevice(TEST_REMOTE_DEVICE_ADDRESS);
         bleManagerCallback.onRemoteDeviceConnected(bluetoothDevice);
-        return mCarBlePeripheralManager.getConnectedDeviceChannel();
+        return (AssociationSecureChannel) mCarBlePeripheralManager.getConnectedDeviceChannel();
     }
 
     private boolean tryAcquire(Semaphore semaphore) throws InterruptedException {
@@ -243,6 +256,7 @@ public class CarBlePeripheralManagerTest {
             public void onAssociationStartSuccess(String deviceName) {
                 semaphore.release();
             }
+
             @Override
             public void onAssociationStartFailure() {
                 semaphore.release();

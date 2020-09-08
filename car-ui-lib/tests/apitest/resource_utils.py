@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import os
+import re
 
 class ResourceLocation:
     def __init__(self, file, line=None):
@@ -74,6 +75,9 @@ def get_all_resources(resDir):
                 add_resource_to_set(resources,
                                     Resource(file[:-4], type,
                                              ResourceLocation(os.path.join(resDir, dir, file))))
+                if dir.startswith("layout"):
+                    for resource in get_ids_from_layout_file(os.path.join(resDir, dir, file)):
+                        add_resource_to_set(resources, resource)
 
     for dir in valuesDirs:
         for file in os.listdir(os.path.join(resDir, dir)):
@@ -82,6 +86,14 @@ def get_all_resources(resDir):
                     add_resource_to_set(resources, resource)
 
     return resources
+
+def get_ids_from_layout_file(filename):
+    result = set()
+    with open(filename, 'r') as file:
+        r = re.compile("@\+id/([a-zA-Z0-9_]+)")
+        for i in r.findall(file.read()):
+            add_resource_to_set(result, Resource(i, 'id', ResourceLocation(filename)))
+    return result
 
 def get_resources_from_single_file(filename):
     # defer importing lxml to here so that people who aren't editing chassis don't have to have
@@ -94,19 +106,15 @@ def get_resources_from_single_file(filename):
         if resource.tag == 'declare-styleable' or resource.tag is etree.Comment:
             continue
 
+        resName = resource.get('name')
+        resType = resource.tag
         if resource.tag == 'item' or resource.tag == 'public':
-            add_resource_to_set(result, Resource(resource.get('name'), resource.get('type'),
-                                                 ResourceLocation(filename, resource.sourceline)))
-        else:
-            add_resource_to_set(result, Resource(resource.get('name'), resource.tag,
-                                                 ResourceLocation(filename, resource.sourceline)))
-    return result
+            resType = resource.get('type')
 
-def remove_layout_resources(resourceSet):
-    result = set()
-    for resource in resourceSet:
-        if resource.type != 'layout':
-            result.add(resource)
+        if resType != 'overlayable':
+            add_resource_to_set(result, Resource(resName, resType,
+                                                 ResourceLocation(filename, resource.sourceline)))
+
     return result
 
 # Used to get objects out of sets

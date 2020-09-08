@@ -96,7 +96,7 @@ public class MenuItem {
     private void update() {
         Listener listener = mListener.get();
         if (listener != null) {
-            listener.onMenuItemChanged();
+            listener.onMenuItemChanged(this);
         }
     }
 
@@ -343,14 +343,14 @@ public class MenuItem {
             if (mIsActivatable && (mShowIconAndTitle || mIcon == null)) {
                 throw new IllegalStateException("Only simple icons can be activatable");
             }
-            if (mIsCheckable
-                    && (mDisplayBehavior == DisplayBehavior.NEVER
-                    || mShowIconAndTitle
-                    || mIsActivatable)) {
+            if (mIsCheckable && (mShowIconAndTitle || mIsActivatable)) {
                 throw new IllegalStateException("Unsupported options for a checkable MenuItem");
             }
             if (mIsSearch && mIsSettings) {
                 throw new IllegalStateException("Can't have both a search and settings MenuItem");
+            }
+            if (mIsActivatable && mDisplayBehavior == DisplayBehavior.NEVER) {
+                throw new IllegalStateException("Activatable MenuItems not supported as Overflow");
             }
 
             if (mIsSearch && (!mSearchTitle.contentEquals(mTitle)
@@ -489,7 +489,7 @@ public class MenuItem {
 
         /**
          * Makes the MenuItem checkable, meaning it will be displayed as a
-         * switch. Currently a checkable MenuItem cannot have a {@link DisplayBehavior} of NEVER.
+         * switch.
          *
          * <p>The MenuItem is not checkable by default.
          */
@@ -599,7 +599,7 @@ public class MenuItem {
     /** Listener for {@link Toolbar} to update when this MenuItem changes */
     interface Listener {
         /** Called when the MenuItem is changed. For use only by {@link Toolbar} */
-        void onMenuItemChanged();
+        void onMenuItemChanged(MenuItem item);
     }
 
     /**

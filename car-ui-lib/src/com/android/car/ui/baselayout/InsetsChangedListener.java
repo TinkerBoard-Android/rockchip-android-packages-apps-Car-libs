@@ -16,6 +16,8 @@
 
 package com.android.car.ui.baselayout;
 
+import androidx.annotation.NonNull;
+
 /**
  * Interface for receiving changes to {@link Insets}.
  *
@@ -27,5 +29,5 @@ package com.android.car.ui.baselayout;
  */
 public interface InsetsChangedListener {
     /** Called when the insets change */
-    void onCarUiInsetsChanged(Insets insets);
+    void onCarUiInsetsChanged(@NonNull Insets insets);
 }

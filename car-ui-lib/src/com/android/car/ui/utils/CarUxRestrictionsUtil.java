@@ -18,7 +18,6 @@ package com.android.car.ui.utils;
 import static android.car.drivingstate.CarUxRestrictions.UX_RESTRICTIONS_LIMIT_STRING_LENGTH;
 
 import android.car.Car;
-import android.car.CarNotConnectedException;
 import android.car.drivingstate.CarUxRestrictions;
 import android.car.drivingstate.CarUxRestrictions.CarUxRestrictionsInfo;
 import android.car.drivingstate.CarUxRestrictionsManager;
@@ -35,6 +34,10 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+// This can't be in the middle of the rest of the imports on gerrit or it will
+// fail our style checks
+// copybara:insert import android.car.CarNotConnectedException;
+
 /**
  * Utility class to access Car Restriction Manager.
  *
@@ -45,12 +48,15 @@ import java.util.WeakHashMap;
 public class CarUxRestrictionsUtil {
     private static final String TAG = "CarUxRestrictionsUtil";
 
+    /* copybara:insert
     private final Car mCarApi;
     private CarUxRestrictionsManager mCarUxRestrictionsManager;
+    */
     @NonNull
     private CarUxRestrictions mCarUxRestrictions = getDefaultRestrictions();
 
-    private Set<OnUxRestrictionsChangedListener> mObservers;
+    private final Set<OnUxRestrictionsChangedListener> mObservers =
+            Collections.newSetFromMap(new WeakHashMap<>());
     private static CarUxRestrictionsUtil sInstance = null;
 
     private CarUxRestrictionsUtil(Context context) {
@@ -67,8 +73,23 @@ public class CarUxRestrictionsUtil {
                     }
                 };
 
+        // copybara:strip_begin
+        Car.createCar(context.getApplicationContext(), null, Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT,
+                (Car car, boolean ready) -> {
+                    if (ready) {
+                        CarUxRestrictionsManager carUxRestrictionsManager =
+                                (CarUxRestrictionsManager) car.getCarManager(
+                                        Car.CAR_UX_RESTRICTION_SERVICE);
+                        carUxRestrictionsManager.registerListener(listener);
+                        listener.onUxRestrictionsChanged(
+                                carUxRestrictionsManager.getCurrentCarUxRestrictions());
+                    } else {
+                        Log.w(TAG, "Car service disconnected, assuming fully restricted uxr");
+                        listener.onUxRestrictionsChanged(null);
+                    }
+                });
+        /* copybara:strip_end_and_replace
         mCarApi = Car.createCar(context.getApplicationContext());
-        mObservers = Collections.newSetFromMap(new WeakHashMap<>());
 
         try {
             mCarUxRestrictionsManager =
@@ -81,6 +102,7 @@ public class CarUxRestrictionsUtil {
             Log.e(TAG, "Car not connected", e);
             // mCarUxRestrictions will be the default
         }
+        */
     }
 
     @NonNull

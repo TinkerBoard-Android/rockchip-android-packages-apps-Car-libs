@@ -17,7 +17,7 @@
 import argparse
 import os
 import sys
-from resource_utils import get_all_resources, get_resources_from_single_file, remove_layout_resources
+from resource_utils import get_all_resources, get_resources_from_single_file, add_resource_to_set, Resource
 from git_utils import has_chassis_changes
 
 # path to 'packages/apps/Car/libs/car-ui-lib/'
@@ -50,7 +50,7 @@ def main():
         generate_current_file(ROOT_FOLDER+'/res', output_file)
 
 def generate_current_file(res_folder, output_file='current.xml'):
-    resources = remove_layout_resources(get_all_resources(res_folder))
+    resources = get_all_resources(res_folder)
     resources = sorted(resources, key=lambda x: x.type + x.name)
 
     # defer importing lxml to here so that people who aren't editing chassis don't have to have
@@ -70,10 +70,68 @@ def generate_current_file(res_folder, output_file='current.xml'):
     with open(OUTPUT_FILE_PATH + output_file, 'w') as f:
         data.write(f, pretty_print=True, xml_declaration=True, encoding='utf-8')
 
+def generate_overlayable_file(res_folder):
+    resources = get_all_resources(res_folder)
+    # We need these to be able to use base layouts in RROs
+    # This should become unnecessary in S
+    add_resource_to_set(resources, Resource('layout_constraintGuide_begin', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintGuide_end', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintHorizontal_bias', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintTop_toTopOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintTop_toBottomOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintBottom_toBottomOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintBottom_toTopOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintStart_toStartOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintStart_toEndOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintEnd_toEndOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintEnd_toStartOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintLeft_toLeftOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintLeft_toRightOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintRight_toRightOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintRight_toLeftOf', 'attr'))
+    resources = sorted(resources, key=lambda x: x.type + x.name)
+
+    # defer importing lxml to here so that people who aren't editing chassis don't have to have
+    # lxml installed
+    import lxml.etree as etree
+
+    root = etree.Element('resources')
+
+    root.addprevious(etree.Comment(' Copyright (C) 2020 The Android Open Source Project\n\n' +
+
+                                   '     Licensed under the Apache License, Version 2.0 (the "License");\n' +
+                                   '     you may not use this file except in compliance with the License.\n' +
+                                   '     You may obtain a copy of the License at\n\n' +
+
+                                   '     http://www.apache.org/licenses/LICENSE-2.0\n\n'
+
+                                   '     Unless required by applicable law or agreed to in writing, software\n'
+                                   '     distributed under the License is distributed on an "AS IS" BASIS,\n'
+                                   '     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n'
+                                   '     See the License for the specific language governing permissions and\n'
+                                   '     limitations under the License.\n'))
+
+    overlayable = etree.SubElement(root, 'overlayable')
+    overlayable.set('name', 'CarUiLibOverlayableResources')
+
+    policy = etree.SubElement(overlayable, 'policy')
+    policy.set('type', 'public')
+
+    for resource in resources:
+        item = etree.SubElement(policy, 'item')
+        item.set('type', resource.type)
+        item.set('name', resource.name)
+
+    data = etree.ElementTree(root)
+
+    output_file=ROOT_FOLDER+'/res/values/overlayable.xml'
+    with open(output_file, 'w') as f:
+        data.write(f, pretty_print=True, xml_declaration=True, encoding='utf-8')
+
 def compare_resources(res_folder, res_public_file):
     old_mapping = get_resources_from_single_file(res_public_file)
 
-    new_mapping = remove_layout_resources(get_all_resources(res_folder))
+    new_mapping = get_all_resources(res_folder)
 
     removed = old_mapping.difference(new_mapping)
     added = new_mapping.difference(old_mapping)

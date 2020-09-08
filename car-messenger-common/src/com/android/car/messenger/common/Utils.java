@@ -18,7 +18,9 @@ package com.android.car.messenger.common;
 
 import static com.android.car.apps.common.util.SafeLog.logw;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.text.TextUtils;
@@ -29,10 +31,21 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
 import com.android.car.apps.common.LetterTileDrawable;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg;
+import com.android.car.messenger.NotificationMsgProto.NotificationMsg.AvatarIconSync;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.ConversationNotification;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.MessagingStyle;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.MessagingStyleMessage;
 import com.android.car.messenger.NotificationMsgProto.NotificationMsg.Person;
+
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /** Utils methods for the car-messenger-common lib. **/
 public class Utils {
@@ -42,6 +55,24 @@ public class Utils {
      * message's unique handle/key.
      */
     private static final int MAX_SUB_MESSAGE_LENGTH = 5;
+
+    /** The Regex format of a telephone number in a BluetoothMapClient contact URI. **/
+    private static final String MAP_CLIENT_URI_REGEX = "tel:(.+)";
+
+    /** The starting substring index for a string formatted with the MAP_CLIENT_URI_REGEX above. **/
+    private static final int MAP_CLIENT_URI_PHONE_NUMBER_SUBSTRING_INDEX = 4;
+
+    // TODO (150711637): Reference BluetoothMapClient Extras once BluetoothMapClient is SystemApi.
+    protected static final String BMC_EXTRA_MESSAGE_HANDLE =
+            "android.bluetooth.mapmce.profile.extra.MESSAGE_HANDLE";
+    protected static final String BMC_EXTRA_SENDER_CONTACT_URI =
+            "android.bluetooth.mapmce.profile.extra.SENDER_CONTACT_URI";
+    protected static final String BMC_EXTRA_SENDER_CONTACT_NAME =
+            "android.bluetooth.mapmce.profile.extra.SENDER_CONTACT_NAME";
+    protected static final String BMC_EXTRA_MESSAGE_TIMESTAMP =
+            "android.bluetooth.mapmce.profile.extra.MESSAGE_TIMESTAMP";
+    protected static final String BMC_EXTRA_MESSAGE_READ_STATUS =
+            "android.bluetooth.mapmce.profile.extra.MESSAGE_READ_STATUS";
 
     /** Gets the latest message for a {@link NotificationMsg} Conversation. **/
     public static MessagingStyleMessage getLatestMessage(
@@ -152,6 +183,49 @@ public class Utils {
     }
 
     /**
+     * Ensure the {@link AvatarIconSync} object has all the required fields.
+     **/
+    public static boolean isValidAvatarIconSync(AvatarIconSync iconSync) {
+        if (iconSync == null) {
+            logw(TAG, "AvatarIconSync is null");
+            return false;
+        } else if (iconSync.getMessagingAppPackageName() == null) {
+            logw(TAG, "AvatarIconSync is missing required field: appPackageName");
+            return false;
+        } else if (iconSync.getPerson().getName() == null) {
+            logw(TAG, "AvatarIconSync is missing required field: Person's name");
+            return false;
+        } else if (iconSync.getPerson().getAvatar() == null) {
+            logw(TAG, "AvatarIconSync is missing required field: Person's avatar");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Ensure the BluetoothMapClient intent has all the required fields.
+     **/
+    public static boolean isValidMapClientIntent(Intent intent) {
+        if (intent == null) {
+            logw(TAG, "BluetoothMapClient intent is null");
+            return false;
+        } else if (intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE) == null) {
+            logw(TAG, "BluetoothMapClient intent is missing required field: device");
+            return false;
+        } else if (intent.getStringExtra(BMC_EXTRA_MESSAGE_HANDLE) == null) {
+            logw(TAG, "BluetoothMapClient intent is missing required field: senderName");
+            return false;
+        } else if (intent.getStringExtra(BMC_EXTRA_SENDER_CONTACT_NAME) == null) {
+            logw(TAG, "BluetoothMapClient intent is missing required field: handle");
+            return false;
+        } else if (intent.getStringExtra(android.content.Intent.EXTRA_TEXT) == null) {
+            logw(TAG, "BluetoothMapClient intent is missing required field: messageText");
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Creates a Letter Tile Icon that will display the given initials. If the initials are null,
      * then an avatar anonymous icon will be drawn.
      **/
@@ -205,6 +279,11 @@ public class Utils {
         return letterTileDrawable;
     }
 
+    /** Returns whether the BluetoothMapClient intent represents a group conversation. **/
+    public static boolean isGroupConversation(Intent intent) {
+        return (intent.getStringArrayExtra(Intent.EXTRA_CC) != null
+                && intent.getStringArrayExtra(Intent.EXTRA_CC).length > 0);
+    }
 
     /**
      * Returns the initials based on the name and nameAlt.
@@ -226,4 +305,69 @@ public class Utils {
         return initials.toString();
     }
 
+    /** Returns the list of sender uri for a BluetoothMapClient intent. **/
+    public static String getSenderUri(Intent intent) {
+        return intent.getStringExtra(BMC_EXTRA_SENDER_CONTACT_URI);
+    }
+
+    /** Returns the sender name for a BluetoothMapClient intent. **/
+    public static String getSenderName(Intent intent) {
+        return intent.getStringExtra(BMC_EXTRA_SENDER_CONTACT_NAME);
+    }
+
+    /** Returns the list of recipient uris for a BluetoothMapClient intent. **/
+    public static List<String> getInclusiveRecipientsUrisList(Intent intent) {
+        List<String> ccUris = new ArrayList<>();
+        ccUris.add(getSenderUri(intent));
+        if (isGroupConversation(intent)) {
+            ccUris.addAll(Arrays.asList(intent.getStringArrayExtra(Intent.EXTRA_CC)));
+            Collections.sort(ccUris);
+        }
+        return ccUris;
+    }
+
+    /**
+     * Extracts the phone number from the BluetoothMapClient contact Uri.
+     **/
+    @Nullable
+    public static String getPhoneNumberFromMapClient(@Nullable String senderContactUri) {
+        if (senderContactUri == null || !senderContactUri.matches(MAP_CLIENT_URI_REGEX)) {
+            return null;
+        }
+
+        return senderContactUri.substring(MAP_CLIENT_URI_PHONE_NUMBER_SUBSTRING_INDEX);
+    }
+
+    /** Comparator that sorts names alphabetically first, then phone numbers numerically. **/
+    public static final Comparator<String> ALPHA_THEN_NUMERIC_COMPARATOR =
+            new Comparator<String>() {
+                private boolean isPhoneNumber(String input) {
+                    PhoneNumberUtil util = PhoneNumberUtil.getInstance();
+                    try {
+                        Phonenumber.PhoneNumber phoneNumber = util.parse(input, /* defaultRegion */
+                                null);
+                        return util.isValidNumber(phoneNumber);
+                    } catch (NumberParseException e) {
+                        return false;
+                    }
+                }
+
+                private boolean isOfSameType(String o1, String o2) {
+                    boolean isO1PhoneNumber = isPhoneNumber(o1);
+                    boolean isO2PhoneNumber = isPhoneNumber(o2);
+                    return isO1PhoneNumber == isO2PhoneNumber;
+                }
+
+                @Override
+                public int compare(String o1, String o2) {
+                    // if both are names, sort based on names.
+                    // if both are number, sort numerically.
+                    // if one is phone number and the other is a name, give name precedence.
+                    if (!isOfSameType(o1, o2)) {
+                        return isPhoneNumber(o1) ? 1 : -1;
+                    } else {
+                        return o1.compareTo(o2);
+                    }
+                }
+            };
 }

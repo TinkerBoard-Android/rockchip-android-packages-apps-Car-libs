@@ -15,10 +15,9 @@
  */
 package com.android.car.ui.core;
 
-import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
-
 import android.app.Activity;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,9 +35,10 @@ import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.toolbar.ToolbarController;
 import com.android.car.ui.toolbar.ToolbarControllerImpl;
+import com.android.car.ui.utils.CarUiUtils;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * BaseLayoutController accepts an {@link Activity} and sets up the base layout inside of it.
@@ -47,7 +47,7 @@ import java.util.Map;
  */
 class BaseLayoutController {
 
-    private static Map<Activity, BaseLayoutController> sBaseLayoutMap = new HashMap<>();
+    private static final Map<Activity, BaseLayoutController> sBaseLayoutMap = new WeakHashMap<>();
 
     private InsetsUpdater mInsetsUpdater;
 
@@ -72,14 +72,18 @@ class BaseLayoutController {
      *
      * <p>You can get a reference to it by calling {@link #getBaseLayout(Activity)}.
      */
-    /* package */ static void build(Activity activity) {
-        sBaseLayoutMap.put(activity, new BaseLayoutController(activity));
+    /* package */
+    static void build(Activity activity) {
+        if (getThemeBoolean(activity, R.attr.carUiBaseLayout)) {
+            sBaseLayoutMap.put(activity, new BaseLayoutController(activity));
+        }
     }
 
     /**
      * Destroy the BaseLayoutController for the given {@link Activity}.
      */
-    /* package */ static void destroy(Activity activity) {
+    /* package */
+    static void destroy(Activity activity) {
         sBaseLayoutMap.remove(activity);
     }
 
@@ -96,6 +100,14 @@ class BaseLayoutController {
         return mInsetsUpdater.getInsets();
     }
 
+    /* package */ void dispatchNewInsets(Insets insets) {
+        mInsetsUpdater.dispatchNewInsets(insets);
+    }
+
+    /* package */ void replaceInsetsChangedListenerWith(InsetsChangedListener listener) {
+        mInsetsUpdater.replaceInsetsChangedListenerWith(listener);
+    }
+
     /**
      * Installs the base layout into an activity, moving its content view under the base layout.
      *
@@ -104,34 +116,41 @@ class BaseLayoutController {
      * @param activity The {@link Activity} to install a base layout in.
      */
     private void installBaseLayout(Activity activity) {
-        boolean baseLayoutEnabled = getThemeBoolean(activity, R.attr.carUiBaseLayout);
         boolean toolbarEnabled = getThemeBoolean(activity, R.attr.carUiToolbar);
-        if (!baseLayoutEnabled) {
-            return;
-        }
+        boolean legacyToolbar = Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q;
+        @LayoutRes final int baseLayoutRes;
 
-        @LayoutRes final int baseLayoutRes = toolbarEnabled
-                ? R.layout.car_ui_base_layout_toolbar
-                : R.layout.car_ui_base_layout;
+        if (toolbarEnabled) {
+            baseLayoutRes = legacyToolbar
+                    ? R.layout.car_ui_base_layout_toolbar_legacy
+                    : R.layout.car_ui_base_layout_toolbar;
+        } else {
+            baseLayoutRes = R.layout.car_ui_base_layout;
+        }
 
         View baseLayout = LayoutInflater.from(activity)
                 .inflate(baseLayoutRes, null, false);
 
         // Replace windowContentView with baseLayout
-        ViewGroup windowContentView = activity.getWindow().findViewById(android.R.id.content);
+        ViewGroup windowContentView = CarUiUtils.findViewByRefId(
+                activity.getWindow().getDecorView(), android.R.id.content);
         ViewGroup contentViewParent = (ViewGroup) windowContentView.getParent();
         int contentIndex = contentViewParent.indexOfChild(windowContentView);
         contentViewParent.removeView(windowContentView);
         contentViewParent.addView(baseLayout, contentIndex, windowContentView.getLayoutParams());
 
         // Add windowContentView to the baseLayout's content view
-        FrameLayout contentView = requireViewByRefId(baseLayout, R.id.content);
+        FrameLayout contentView = CarUiUtils.requireViewByRefId(baseLayout, R.id.content);
         contentView.addView(windowContentView, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
 
         if (toolbarEnabled) {
-            mToolbarController = new ToolbarControllerImpl(baseLayout);
+            if (legacyToolbar) {
+                mToolbarController = CarUiUtils.requireViewByRefId(baseLayout, R.id.car_ui_toolbar);
+            } else {
+                mToolbarController = new ToolbarControllerImpl(baseLayout);
+            }
         }
 
         mInsetsUpdater = new InsetsUpdater(activity, baseLayout, windowContentView);
@@ -142,8 +161,8 @@ class BaseLayoutController {
      * Gets the boolean value of an Attribute from an {@link Activity Activity's}
      * {@link android.content.res.Resources.Theme}.
      */
-    private boolean getThemeBoolean(Activity activity, int attr) {
-        TypedArray a = activity.getTheme().obtainStyledAttributes(new int[] { attr });
+    private static boolean getThemeBoolean(Activity activity, int attr) {
+        TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]{attr});
 
         try {
             return a.getBoolean(0, false);
@@ -176,6 +195,7 @@ class BaseLayoutController {
         private final View mRightInsetView;
         private final View mTopInsetView;
         private final View mBottomInsetView;
+        private InsetsChangedListener mInsetsChangedListenerDelegate;
 
         private boolean mInsetsDirty = true;
         @NonNull
@@ -184,8 +204,8 @@ class BaseLayoutController {
         /**
          * Constructs an InsetsUpdater that calculates and dispatches insets to an {@link Activity}.
          *
-         * @param activity The activity that is using base layouts
-         * @param baseLayout The root view of the base layout
+         * @param activity    The activity that is using base layouts
+         * @param baseLayout  The root view of the base layout
          * @param contentView The android.R.id.content View
          */
         InsetsUpdater(Activity activity, View baseLayout, View contentView) {
@@ -236,6 +256,10 @@ class BaseLayoutController {
             return mInsets;
         }
 
+        public void replaceInsetsChangedListenerWith(InsetsChangedListener listener) {
+            mInsetsChangedListenerDelegate = listener;
+        }
+
         /**
          * onGlobalLayout() should recalculate the amount of insets we need, and then dispatch them.
          */
@@ -245,11 +269,14 @@ class BaseLayoutController {
                 return;
             }
 
-            View content = mActivity.requireViewById(android.R.id.content);
+            View content = CarUiUtils.requireViewByRefId(mActivity.getWindow().getDecorView(),
+                    android.R.id.content);
 
             // Calculate how much each inset view overlays the content view
-            int top, bottom, left, right;
-            top = bottom = left = right = 0;
+            int top = 0;
+            int left = 0;
+            int right = 0;
+            int bottom = 0;
             if (mTopInsetView != null) {
                 top = Math.max(0, getBottomOfView(mTopInsetView) - getTopOfView(content));
             }
@@ -278,26 +305,37 @@ class BaseLayoutController {
          *
          * @param insets The newly-changed insets.
          */
-        private void dispatchNewInsets(Insets insets) {
-            boolean handled = false;
-            if (mActivity instanceof InsetsChangedListener) {
-                ((InsetsChangedListener) mActivity).onCarUiInsetsChanged(insets);
-                handled = true;
-            }
+        /* package */ void dispatchNewInsets(Insets insets) {
+            mInsets = insets;
 
-            if (mActivity instanceof FragmentActivity) {
-                for (Fragment fragment : ((FragmentActivity) mActivity).getSupportFragmentManager()
-                        .getFragments()) {
-                    if (fragment instanceof InsetsChangedListener) {
-                        ((InsetsChangedListener) fragment).onCarUiInsetsChanged(insets);
-                        handled = true;
+            boolean handled = false;
+
+            if (mInsetsChangedListenerDelegate != null) {
+                mInsetsChangedListenerDelegate.onCarUiInsetsChanged(insets);
+                handled = true;
+            } else {
+                // If an explicit InsetsChangedListener is not provided,
+                // pass the insets to activities and fragments
+                if (mActivity instanceof InsetsChangedListener) {
+                    ((InsetsChangedListener) mActivity).onCarUiInsetsChanged(insets);
+                    handled = true;
+                }
+
+                if (mActivity instanceof FragmentActivity) {
+                    for (Fragment fragment : ((FragmentActivity) mActivity)
+                            .getSupportFragmentManager().getFragments()) {
+                        if (fragment instanceof InsetsChangedListener) {
+                            ((InsetsChangedListener) fragment).onCarUiInsetsChanged(insets);
+                            handled = true;
+                        }
                     }
                 }
             }
 
             if (!handled) {
-                mActivity.requireViewById(android.R.id.content).setPadding(
-                        insets.getLeft(), insets.getTop(), insets.getRight(), insets.getBottom());
+                CarUiUtils.requireViewByRefId(mActivity.getWindow().getDecorView(),
+                        android.R.id.content).setPadding(insets.getLeft(), insets.getTop(),
+                        insets.getRight(), insets.getBottom());
             }
         }
 

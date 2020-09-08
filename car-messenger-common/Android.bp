@@ -32,6 +32,8 @@ android_library {
         "androidx.legacy_legacy-support-v4",
         "car-apps-common",
         "car-messenger-protos",
+        "car-telephony-common",
         "connected-device-protos",
+        "libphonenumber",
     ],
 }

@@ -25,20 +25,17 @@ import android.view.View;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.android.car.ui.CarUiRobolectricTestRunner;
 import com.android.car.ui.R;
-import com.android.car.ui.TestConfig;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
-@RunWith(CarUiRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
+@RunWith(RobolectricTestRunner.class)
 public class CarUiRecyclerViewTest {
 
     private Context mContext;
@@ -79,7 +76,7 @@ public class CarUiRecyclerViewTest {
 
         mCarUiRecyclerView = mView.findViewById(R.id.test_prv);
 
-        assertThat(mCarUiRecyclerView.getEffectiveLayoutManager()).isInstanceOf(
+        assertThat(mCarUiRecyclerView.getLayoutManager()).isInstanceOf(
                 LinearLayoutManager.class);
     }
 
@@ -90,7 +87,7 @@ public class CarUiRecyclerViewTest {
 
         mCarUiRecyclerView = mView.findViewById(R.id.test_prv);
 
-        assertThat(mCarUiRecyclerView.getEffectiveLayoutManager()).isInstanceOf(
+        assertThat(mCarUiRecyclerView.getLayoutManager()).isInstanceOf(
                 GridLayoutManager.class);
     }
 
@@ -108,7 +105,7 @@ public class CarUiRecyclerViewTest {
     public void init_shouldHaveGridLayout() {
         mCarUiRecyclerView = new CarUiRecyclerView(mContext,
                 Robolectric.buildAttributeSet().addAttribute(R.attr.layoutStyle, "grid").build());
-        assertThat(mCarUiRecyclerView.getEffectiveLayoutManager()).isInstanceOf(
+        assertThat(mCarUiRecyclerView.getLayoutManager()).isInstanceOf(
                 GridLayoutManager.class);
     }
 }

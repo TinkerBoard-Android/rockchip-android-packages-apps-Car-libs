@@ -30,6 +30,7 @@
 #
 # Your AndroidManifest must use {{TARGET_PACKAGE_NAME}} and {{RRO_PACKAGE_NAME}}
 # tags, which will be replaced accordingly during build.
+LOCAL_PATH:= $(call my-dir)
 
 CAR_UI_GENERATE_RRO_SET := $(call my-dir)/generate_rros.mk
 

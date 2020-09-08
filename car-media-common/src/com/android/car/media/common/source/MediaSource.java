@@ -16,8 +16,6 @@
 
 package com.android.car.media.common.source;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -26,17 +24,16 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.service.media.MediaBrowserService;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.android.car.apps.common.BitmapUtils;
+import com.android.car.apps.common.IconCropper;
 import com.android.car.media.common.R;
 
 import java.net.URISyntaxException;
@@ -57,6 +54,8 @@ public class MediaSource {
     private final CharSequence mDisplayName;
     @NonNull
     private final Drawable mIcon;
+    @NonNull
+    private final IconCropper mIconCropper;
 
     /**
      * Creates a {@link MediaSource} for the given {@link ComponentName}
@@ -78,7 +77,7 @@ public class MediaSource {
             CharSequence displayName = extractDisplayName(context, serviceInfo, packageName);
             Drawable icon = extractIcon(context, serviceInfo, packageName);
             ComponentName browseService = new ComponentName(packageName, className);
-            return new MediaSource(browseService, displayName, icon);
+            return new MediaSource(browseService, displayName, icon, new IconCropper(context));
         } catch (PackageManager.NameNotFoundException e) {
             Log.w(TAG, "Component not found " + componentName.flattenToString());
             return null;
@@ -86,10 +85,11 @@ public class MediaSource {
     }
 
     private MediaSource(@NonNull ComponentName browseService, @NonNull CharSequence displayName,
-            @NonNull Drawable icon) {
+            @NonNull Drawable icon, @NonNull IconCropper iconCropper) {
         mBrowseService = browseService;
         mDisplayName = displayName;
         mIcon = icon;
+        mIconCropper = iconCropper;
     }
 
     /**
@@ -186,29 +186,11 @@ public class MediaSource {
     }
 
     /**
-     * Returns this media source's icon cropped to a circle.
+     * Returns this media source's icon cropped to a predefined shape (see
+     * {@link #IconCropper(Context)} on where and how the shape is defined).
      */
-    public Bitmap getRoundPackageIcon() {
-        return getRoundCroppedBitmap(BitmapUtils.fromDrawable(mIcon, null));
-    }
-
-    private static Bitmap getRoundCroppedBitmap(Bitmap bitmap) {
-        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(),
-                Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(output);
-
-        final int color = 0xff424242;
-        final Paint paint = new Paint();
-        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-
-        paint.setAntiAlias(true);
-        canvas.drawARGB(0, 0, 0, 0);
-        paint.setColor(color);
-        canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
-                bitmap.getWidth() / 2f, paint);
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        canvas.drawBitmap(bitmap, rect, rect, paint);
-        return output;
+    public Bitmap getCroppedPackageIcon() {
+        return mIconCropper.crop(mIcon);
     }
 
     @Override

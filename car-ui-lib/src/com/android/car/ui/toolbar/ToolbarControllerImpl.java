@@ -26,12 +26,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.DrawableRes;
@@ -40,7 +40,11 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.annotation.XmlRes;
 
+import com.android.car.ui.AlertDialogBuilder;
 import com.android.car.ui.R;
+import com.android.car.ui.recyclerview.CarUiContentListItem;
+import com.android.car.ui.recyclerview.CarUiListItem;
+import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.utils.CarUiUtils;
 import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
@@ -63,7 +67,9 @@ public class ToolbarControllerImpl implements ToolbarController {
     private ImageView mNavIcon;
     private ImageView mLogoInNavIconSpace;
     private ViewGroup mNavIconContainer;
+    private ViewGroup mTitleContainer;
     private TextView mTitle;
+    private TextView mSubtitle;
     private ImageView mTitleLogo;
     private ViewGroup mTitleLogoContainer;
     private TabLayout mTabLayout;
@@ -95,6 +101,8 @@ public class ToolbarControllerImpl implements ToolbarController {
     @NonNull
     private List<MenuItem> mMenuItems = Collections.emptyList();
     private List<MenuItem> mOverflowItems = new ArrayList<>();
+    private final List<CarUiListItem> mUiOverflowItems = new ArrayList<>();
+    private final CarUiListItemAdapter mOverflowAdapter;
     private final List<MenuItemRenderer> mMenuItemRenderers = new ArrayList<>();
     private View[] mMenuItemViews;
     private int mMenuItemsXmlId = 0;
@@ -102,11 +110,12 @@ public class ToolbarControllerImpl implements ToolbarController {
     private boolean mNavIconSpaceReserved;
     private boolean mLogoFillsNavIconSpace;
     private boolean mShowLogo;
-    private ProgressBar mProgressBar;
-    private MenuItem.Listener mOverflowItemListener = () -> {
-        createOverflowDialog();
+    private final ProgressBarController mProgressBar;
+    private final MenuItem.Listener mOverflowItemListener = item -> {
+        updateOverflowDialog(item);
         setState(getState());
     };
+
     // Despite the warning, this has to be a field so it's not garbage-collected.
     // The only other reference to it is a weak reference
     private final CarUxRestrictionsUtil.OnUxRestrictionsChangedListener
@@ -115,6 +124,7 @@ public class ToolbarControllerImpl implements ToolbarController {
                     renderer.setCarUxRestrictions(restrictions);
                 }
             };
+
 
     public ToolbarControllerImpl(View view) {
         mContext = view.getContext();
@@ -140,6 +150,7 @@ public class ToolbarControllerImpl implements ToolbarController {
                 R.bool.car_ui_toolbar_logo_fills_nav_icon_space);
         mShowLogo = getContext().getResources().getBoolean(
                 R.bool.car_ui_toolbar_show_logo);
+        mSearchHint = getContext().getString(R.string.car_ui_toolbar_default_search_hint);
 
         mBackground = requireViewByRefId(view, R.id.car_ui_toolbar_background);
         mTabLayout = requireViewByRefId(view, R.id.car_ui_toolbar_tabs);
@@ -147,11 +158,14 @@ public class ToolbarControllerImpl implements ToolbarController {
         mLogoInNavIconSpace = requireViewByRefId(view, R.id.car_ui_toolbar_logo);
         mNavIconContainer = requireViewByRefId(view, R.id.car_ui_toolbar_nav_icon_container);
         mMenuItemsContainer = requireViewByRefId(view, R.id.car_ui_toolbar_menu_items_container);
+        mTitleContainer = requireViewByRefId(view, R.id.car_ui_toolbar_title_container);
+        mSubtitle = requireViewByRefId(view, R.id.car_ui_toolbar_subtitle);
         mTitle = requireViewByRefId(view, R.id.car_ui_toolbar_title);
         mTitleLogoContainer = requireViewByRefId(view, R.id.car_ui_toolbar_title_logo_container);
         mTitleLogo = requireViewByRefId(view, R.id.car_ui_toolbar_title_logo);
         mSearchViewContainer = requireViewByRefId(view, R.id.car_ui_toolbar_search_view_container);
-        mProgressBar = requireViewByRefId(view, R.id.car_ui_toolbar_progress_bar);
+        mProgressBar = new ProgressBarControllerImpl(
+                requireViewByRefId(view, R.id.car_ui_toolbar_progress_bar));
 
         mTabLayout.addListener(new TabLayout.Listener() {
             @Override
@@ -173,6 +187,8 @@ public class ToolbarControllerImpl implements ToolbarController {
 
         setBackgroundShown(true);
 
+        mOverflowAdapter = new CarUiListItemAdapter(mUiOverflowItems);
+
         // This holds weak references so we don't need to unregister later
         CarUxRestrictionsUtil.getInstance(getContext())
                 .register(mOnUxRestrictionsChangedListener);
@@ -185,6 +201,7 @@ public class ToolbarControllerImpl implements ToolbarController {
     /**
      * Returns {@code true} if a two row layout in enabled for the toolbar.
      */
+    @Override
     public boolean isTabsInSecondRow() {
         return mIsTabsInSecondRow;
     }
@@ -194,6 +211,7 @@ public class ToolbarControllerImpl implements ToolbarController {
      *
      * <p>The title may not always be shown, for example with one row layout with tabs.
      */
+    @Override
     public void setTitle(@StringRes int title) {
         mTitle.setText(title);
         setState(getState());
@@ -204,18 +222,48 @@ public class ToolbarControllerImpl implements ToolbarController {
      *
      * <p>The title may not always be shown, for example with one row layout with tabs.
      */
+    @Override
     public void setTitle(CharSequence title) {
         mTitle.setText(title);
         setState(getState());
     }
 
+    @Override
     public CharSequence getTitle() {
         return mTitle.getText();
     }
 
     /**
+     * Sets the subtitle of the toolbar to a string resource.
+     *
+     * <p>The title may not always be shown, for example with one row layout with tabs.
+     */
+    @Override
+    public void setSubtitle(@StringRes int title) {
+        mSubtitle.setText(title);
+        setState(getState());
+    }
+
+    /**
+     * Sets the subtitle of the toolbar to a CharSequence.
+     *
+     * <p>The title may not always be shown, for example with one row layout with tabs.
+     */
+    @Override
+    public void setSubtitle(CharSequence title) {
+        mSubtitle.setText(title);
+        setState(getState());
+    }
+
+    @Override
+    public CharSequence getSubtitle() {
+        return mSubtitle.getText();
+    }
+
+    /**
      * Gets the {@link TabLayout} for this toolbar.
      */
+    @Override
     public TabLayout getTabLayout() {
         return mTabLayout;
     }
@@ -224,12 +272,14 @@ public class ToolbarControllerImpl implements ToolbarController {
      * Adds a tab to this toolbar. You can listen for when it is selected via
      * {@link #registerOnTabSelectedListener(Toolbar.OnTabSelectedListener)}.
      */
+    @Override
     public void addTab(TabLayout.Tab tab) {
         mTabLayout.addTab(tab);
         setState(getState());
     }
 
     /** Removes all the tabs. */
+    @Override
     public void clearAllTabs() {
         mTabLayout.clearAllTabs();
         setState(getState());
@@ -239,6 +289,7 @@ public class ToolbarControllerImpl implements ToolbarController {
      * Gets a tab added to this toolbar. See
      * {@link #addTab(TabLayout.Tab)}.
      */
+    @Override
     public TabLayout.Tab getTab(int position) {
         return mTabLayout.get(position);
     }
@@ -247,6 +298,7 @@ public class ToolbarControllerImpl implements ToolbarController {
      * Selects a tab added to this toolbar. See
      * {@link #addTab(TabLayout.Tab)}.
      */
+    @Override
     public void selectTab(int position) {
         mTabLayout.selectTab(position);
     }
@@ -254,6 +306,7 @@ public class ToolbarControllerImpl implements ToolbarController {
     /**
      * Sets whether or not tabs should also be shown in the SUBPAGE {@link Toolbar.State}.
      */
+    @Override
     public void setShowTabsInSubpage(boolean showTabs) {
         if (showTabs != mShowTabsInSubpage) {
             mShowTabsInSubpage = showTabs;
@@ -264,6 +317,7 @@ public class ToolbarControllerImpl implements ToolbarController {
     /**
      * Gets whether or not tabs should also be shown in the SUBPAGE {@link Toolbar.State}.
      */
+    @Override
     public boolean getShowTabsInSubpage() {
         return mShowTabsInSubpage;
     }
@@ -272,6 +326,7 @@ public class ToolbarControllerImpl implements ToolbarController {
      * Sets the logo to display in this toolbar. If navigation icon is being displayed, this logo
      * will be displayed next to the title.
      */
+    @Override
     public void setLogo(@DrawableRes int resId) {
         setLogo(resId != 0 ? getContext().getDrawable(resId) : null);
     }
@@ -280,6 +335,7 @@ public class ToolbarControllerImpl implements ToolbarController {
      * Sets the logo to display in this toolbar. If navigation icon is being displayed, this logo
      * will be displayed next to the title.
      */
+    @Override
     public void setLogo(Drawable drawable) {
         if (!mShowLogo) {
             // If no logo should be shown then we act as if we never received one.
@@ -296,6 +352,7 @@ public class ToolbarControllerImpl implements ToolbarController {
     }
 
     /** Sets the hint for the search bar. */
+    @Override
     public void setSearchHint(@StringRes int resId) {
         setSearchHint(getContext().getString(resId));
     }
@@ -309,6 +366,7 @@ public class ToolbarControllerImpl implements ToolbarController {
     }
 
     /** Gets the search hint */
+    @Override
     public CharSequence getSearchHint() {
         return mSearchHint;
     }
@@ -319,6 +377,7 @@ public class ToolbarControllerImpl implements ToolbarController {
      * <p>The icon will be lost on configuration change, make sure to set it in onCreate() or
      * a similar place.
      */
+    @Override
     public void setSearchIcon(@DrawableRes int resId) {
         setSearchIcon(getContext().getDrawable(resId));
     }
@@ -329,6 +388,7 @@ public class ToolbarControllerImpl implements ToolbarController {
      * <p>The icon will be lost on configuration change, make sure to set it in onCreate() or
      * a similar place.
      */
+    @Override
     public void setSearchIcon(Drawable d) {
         if (!Objects.equals(d, mSearchIcon)) {
             mSearchIcon = d;
@@ -340,6 +400,7 @@ public class ToolbarControllerImpl implements ToolbarController {
 
 
     /** Sets the {@link Toolbar.NavButtonMode} */
+    @Override
     public void setNavButtonMode(Toolbar.NavButtonMode style) {
         if (style != mNavButtonMode) {
             mNavButtonMode = style;
@@ -348,11 +409,13 @@ public class ToolbarControllerImpl implements ToolbarController {
     }
 
     /** Gets the {@link Toolbar.NavButtonMode} */
+    @Override
     public Toolbar.NavButtonMode getNavButtonMode() {
         return mNavButtonMode;
     }
 
     /** Show/hide the background. When hidden, the toolbar is completely transparent. */
+    @Override
     public void setBackgroundShown(boolean shown) {
         if (shown) {
             mBackground.setBackground(
@@ -363,6 +426,7 @@ public class ToolbarControllerImpl implements ToolbarController {
     }
 
     /** Returns true is the toolbar background is shown */
+    @Override
     public boolean getBackgroundShown() {
         return mBackground.getBackground() != null;
     }
@@ -433,6 +497,7 @@ public class ToolbarControllerImpl implements ToolbarController {
     /**
      * Sets the {@link MenuItem Menuitems} to display.
      */
+    @Override
     public void setMenuItems(@Nullable List<MenuItem> items) {
         mMenuItemsXmlId = 0;
         setMenuItemsInternal(items);
@@ -467,6 +532,7 @@ public class ToolbarControllerImpl implements ToolbarController {
      * @return The MenuItems that were loaded from XML.
      * @see #setMenuItems(List)
      */
+    @Override
     public List<MenuItem> setMenuItems(@XmlRes int resId) {
         if (mMenuItemsXmlId != 0 && mMenuItemsXmlId == resId) {
             return mMenuItems;
@@ -479,12 +545,14 @@ public class ToolbarControllerImpl implements ToolbarController {
     }
 
     /** Gets the {@link MenuItem MenuItems} currently displayed */
+    @Override
     @NonNull
     public List<MenuItem> getMenuItems() {
         return Collections.unmodifiableList(mMenuItems);
     }
 
     /** Gets a {@link MenuItem} by id. */
+    @Override
     @Nullable
     public MenuItem findMenuItemById(int id) {
         for (MenuItem item : mMenuItems) {
@@ -496,6 +564,7 @@ public class ToolbarControllerImpl implements ToolbarController {
     }
 
     /** Gets a {@link MenuItem} by id. Will throw an IllegalArgumentException if not found. */
+    @Override
     @NonNull
     public MenuItem requireMenuItemById(int id) {
         MenuItem result = findMenuItemById(id);
@@ -518,40 +587,60 @@ public class ToolbarControllerImpl implements ToolbarController {
     }
 
     private void createOverflowDialog() {
-        // TODO(b/140564530) Use a carui alert with a (car ui)recyclerview here
-        // TODO(b/140563930) Support enabled/disabled overflow items
-
-        CharSequence[] itemTitles = new CharSequence[countVisibleOverflowItems()];
-        int i = 0;
-        for (MenuItem item : mOverflowItems) {
-            if (item.isVisible()) {
-                itemTitles[i++] = item.getTitle();
+        mUiOverflowItems.clear();
+        for (MenuItem menuItem : mOverflowItems) {
+            if (menuItem.isVisible()) {
+                mUiOverflowItems.add(toCarUiContentListItem(menuItem));
             }
         }
 
-        mOverflowDialog = new AlertDialog.Builder(getContext())
-                .setItems(itemTitles, (dialog, which) -> {
-                    MenuItem item = mOverflowItems.get(which);
-                    MenuItem.OnClickListener listener = item.getOnClickListener();
-                    if (listener != null) {
-                        listener.onClick(item);
-                    }
-                })
+        mOverflowDialog = new AlertDialogBuilder(getContext())
+                .setAdapter(mOverflowAdapter)
                 .create();
     }
 
+    private void updateOverflowDialog(MenuItem changedItem) {
+        int itemIndex = mOverflowItems.indexOf(changedItem);
+        if (itemIndex >= 0) {
+            mUiOverflowItems.set(itemIndex, toCarUiContentListItem(changedItem));
+            mOverflowAdapter.notifyItemChanged(itemIndex);
+        } else {
+            createOverflowDialog();
+        }
+    }
+
+    private CarUiContentListItem toCarUiContentListItem(MenuItem menuItem) {
+        CarUiContentListItem carUiItem;
+        if (menuItem.isCheckable()) {
+            carUiItem = new CarUiContentListItem(CarUiContentListItem.Action.SWITCH);
+        } else {
+            carUiItem = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
+        }
+        carUiItem.setIcon(menuItem.getIcon());
+        carUiItem.setActivated(menuItem.isActivated());
+        carUiItem.setChecked(menuItem.isChecked());
+        carUiItem.setEnabled(menuItem.isEnabled());
+        carUiItem.setTitle(menuItem.getTitle());
+        carUiItem.setOnItemClickedListener(item -> {
+            menuItem.performClick();
+            mOverflowDialog.hide();
+        });
+        return carUiItem;
+    }
 
     /**
      * Set whether or not to show the {@link MenuItem MenuItems} while searching. Default false.
      * Even if this is set to true, the {@link MenuItem} created by
      * {@link MenuItem.Builder#setToSearch()} will still be hidden.
      */
+    @Override
     public void setShowMenuItemsWhileSearching(boolean showMenuItems) {
         mShowMenuItemsWhileSearching = showMenuItems;
         setState(mState);
     }
 
     /** Returns if {@link MenuItem MenuItems} are shown while searching */
+    @Override
     public boolean getShowMenuItemsWhileSearching() {
         return mShowMenuItemsWhileSearching;
     }
@@ -559,6 +648,7 @@ public class ToolbarControllerImpl implements ToolbarController {
     /**
      * Sets the search query.
      */
+    @Override
     public void setSearchQuery(String query) {
         if (mSearchView != null) {
             mSearchView.setSearchQuery(query);
@@ -574,6 +664,7 @@ public class ToolbarControllerImpl implements ToolbarController {
      * Sets the state of the toolbar. This will show/hide the appropriate elements of the toolbar
      * for the desired state.
      */
+    @Override
     public void setState(Toolbar.State state) {
         mState = state;
 
@@ -654,15 +745,22 @@ public class ToolbarControllerImpl implements ToolbarController {
         mNavIconContainer.setOnClickListener(
                 state != Toolbar.State.HOME ? backClickListener : null);
         mNavIconContainer.setClickable(state != Toolbar.State.HOME);
+        mNavIconContainer.setContentDescription(state != Toolbar.State.HOME
+                ? mContext.getString(R.string.car_ui_toolbar_nav_icon_content_description)
+                : null);
 
         boolean hasTabs = mTabLayout.getTabCount() > 0
                 && (state == Toolbar.State.HOME
                 || (state == Toolbar.State.SUBPAGE && mShowTabsInSubpage));
         // Show the title if we're in the subpage state, or in the home state with no tabs or tabs
         // on the second row
-        mTitle.setVisibility((state == Toolbar.State.SUBPAGE || state == Toolbar.State.HOME)
+        int visibility = (state == Toolbar.State.SUBPAGE || state == Toolbar.State.HOME)
                 && (!hasTabs || mIsTabsInSecondRow)
-                ? VISIBLE : GONE);
+                ? VISIBLE : GONE;
+        mTitleContainer.setVisibility(visibility);
+        mSubtitle.setVisibility(
+                TextUtils.isEmpty(mSubtitle.getText()) ? GONE : VISIBLE);
+
         mTabLayout.setVisibility(hasTabs ? VISIBLE : GONE);
 
         if (mSearchView != null) {
@@ -681,6 +779,7 @@ public class ToolbarControllerImpl implements ToolbarController {
     }
 
     /** Gets the current {@link Toolbar.State} of the toolbar. */
+    @Override
     public Toolbar.State getState() {
         return mState;
     }
@@ -693,6 +792,7 @@ public class ToolbarControllerImpl implements ToolbarController {
      * nothing else. {@link com.android.car.ui.recyclerview.CarUiRecyclerView} will
      * automatically adjust its height according to the height of the Toolbar.
      */
+    @Override
     public void registerToolbarHeightChangeListener(
             Toolbar.OnHeightChangedListener listener) {
         mOnHeightChangedListeners.add(listener);
@@ -702,32 +802,38 @@ public class ToolbarControllerImpl implements ToolbarController {
      * Unregisters an existing {@link Toolbar.OnHeightChangedListener} from the list of
      * listeners.
      */
+    @Override
     public boolean unregisterToolbarHeightChangeListener(
             Toolbar.OnHeightChangedListener listener) {
         return mOnHeightChangedListeners.remove(listener);
     }
 
     /** Registers a new {@link Toolbar.OnTabSelectedListener} to the list of listeners. */
+    @Override
     public void registerOnTabSelectedListener(Toolbar.OnTabSelectedListener listener) {
         mOnTabSelectedListeners.add(listener);
     }
 
     /** Unregisters an existing {@link Toolbar.OnTabSelectedListener} from the list of listeners. */
+    @Override
     public boolean unregisterOnTabSelectedListener(Toolbar.OnTabSelectedListener listener) {
         return mOnTabSelectedListeners.remove(listener);
     }
 
     /** Registers a new {@link Toolbar.OnSearchListener} to the list of listeners. */
+    @Override
     public void registerOnSearchListener(Toolbar.OnSearchListener listener) {
         mOnSearchListeners.add(listener);
     }
 
     /** Unregisters an existing {@link Toolbar.OnSearchListener} from the list of listeners. */
+    @Override
     public boolean unregisterOnSearchListener(Toolbar.OnSearchListener listener) {
         return mOnSearchListeners.remove(listener);
     }
 
     /** Registers a new {@link Toolbar.OnSearchCompletedListener} to the list of listeners. */
+    @Override
     public void registerOnSearchCompletedListener(Toolbar.OnSearchCompletedListener listener) {
         mOnSearchCompletedListeners.add(listener);
     }
@@ -736,32 +842,26 @@ public class ToolbarControllerImpl implements ToolbarController {
      * Unregisters an existing {@link Toolbar.OnSearchCompletedListener} from the list of
      * listeners.
      */
+    @Override
     public boolean unregisterOnSearchCompletedListener(Toolbar.OnSearchCompletedListener listener) {
         return mOnSearchCompletedListeners.remove(listener);
     }
 
     /** Registers a new {@link Toolbar.OnBackListener} to the list of listeners. */
+    @Override
     public void registerOnBackListener(Toolbar.OnBackListener listener) {
         mOnBackListeners.add(listener);
     }
 
     /** Unregisters an existing {@link Toolbar.OnBackListener} from the list of listeners. */
+    @Override
     public boolean unregisterOnBackListener(Toolbar.OnBackListener listener) {
         return mOnBackListeners.remove(listener);
     }
 
-    /** Shows the progress bar */
-    public void showProgressBar() {
-        mProgressBar.setVisibility(View.VISIBLE);
-    }
-
-    /** Hides the progress bar */
-    public void hideProgressBar() {
-        mProgressBar.setVisibility(View.GONE);
-    }
-
     /** Returns the progress bar */
-    public ProgressBar getProgressBar() {
+    @Override
+    public ProgressBarController getProgressBar() {
         return mProgressBar;
     }
 }

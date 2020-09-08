@@ -22,9 +22,12 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.text.InputFilter;
+import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -41,6 +44,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.recyclerview.CarUiRadioButtonListItemAdapter;
+import com.android.car.ui.utils.CarUiUtils;
 
 /**
  * Wrapper for AlertDialog.Builder
@@ -55,6 +59,7 @@ public class AlertDialogBuilder {
     private CharSequence mTitle;
     private CharSequence mSubtitle;
     private Drawable mIcon;
+    private boolean mIconTinted;
 
     public AlertDialogBuilder(Context context) {
         // Resource id specified as 0 uses the parent contexts resolved value for alertDialogTheme.
@@ -152,7 +157,18 @@ public class AlertDialogBuilder {
      */
     public AlertDialogBuilder setIcon(Drawable icon) {
         mIcon = icon;
-        mBuilder.setIcon(icon);
+        return this;
+    }
+
+    /**
+     * Whether the icon provided by {@link #setIcon(Drawable)} should be
+     * tinted with the default system color.
+     *
+     * @return this Builder object to allow for chaining of calls to set
+     * methods.
+     */
+    public AlertDialogBuilder setIconTinted(boolean tinted) {
+        mIconTinted = tinted;
         return this;
     }
 
@@ -160,8 +176,7 @@ public class AlertDialogBuilder {
      * Set an icon as supplied by a theme attribute. e.g.
      * {@link android.R.attr#alertDialogIcon}.
      * <p>
-     * Takes precedence over values set using {@link #setIcon(int)} or
-     * {@link #setIcon(Drawable)}.
+     * Takes precedence over values set using {@link #setIcon(Drawable)}.
      *
      * @param attrId ID of a theme attribute that points to a drawable resource.
      */
@@ -354,7 +369,7 @@ public class AlertDialogBuilder {
     private void setCustomList(@NonNull CarUiListItemAdapter adapter) {
         View customList = LayoutInflater.from(mContext).inflate(
                 R.layout.car_ui_alert_dialog_list, null);
-        RecyclerView mList = customList.requireViewById(R.id.list);
+        RecyclerView mList = CarUiUtils.requireViewByRefId(customList, R.id.list);
         mList.setLayoutManager(new LinearLayoutManager(mContext));
         mList.setAdapter(adapter);
         mBuilder.setView(customList);
@@ -587,7 +602,7 @@ public class AlertDialogBuilder {
         View contentView = LayoutInflater.from(mContext).inflate(
                 R.layout.car_ui_alert_dialog_edit_text, null);
 
-        EditText editText = contentView.requireViewById(R.id.textbox);
+        EditText editText = CarUiUtils.requireViewByRefId(contentView, R.id.textbox);
         editText.setText(prompt);
 
         if (textChangedListener != null) {
@@ -623,21 +638,26 @@ public class AlertDialogBuilder {
 
     /** Final steps common to both {@link #create()} and {@link #show()} */
     private void prepareDialog() {
-        if (mSubtitle != null) {
+        View customTitle = LayoutInflater.from(mContext).inflate(
+                R.layout.car_ui_alert_dialog_title_with_subtitle, null);
 
-            View customTitle = LayoutInflater.from(mContext).inflate(
-                    R.layout.car_ui_alert_dialog_title_with_subtitle, null);
+        TextView mTitleView = CarUiUtils.requireViewByRefId(customTitle, R.id.car_ui_alert_title);
+        TextView mSubtitleView =
+                CarUiUtils.requireViewByRefId(customTitle, R.id.car_ui_alert_subtitle);
+        mSubtitleView.setMovementMethod(LinkMovementMethod.getInstance());
+        ImageView mIconView = CarUiUtils.requireViewByRefId(customTitle, R.id.car_ui_alert_icon);
 
-            TextView mTitleView = customTitle.requireViewById(R.id.alertTitle);
-            TextView mSubtitleView = customTitle.requireViewById(R.id.alertSubtitle);
-            ImageView mIconView = customTitle.requireViewById(R.id.icon);
-
-            mTitleView.setText(mTitle);
-            mSubtitleView.setText(mSubtitle);
-            mIconView.setImageDrawable(mIcon);
-            mIconView.setVisibility(mIcon != null ? View.VISIBLE : View.GONE);
-            mBuilder.setCustomTitle(customTitle);
+        mTitleView.setText(mTitle);
+        mTitleView.setVisibility(TextUtils.isEmpty(mTitle) ? View.GONE : View.VISIBLE);
+        mSubtitleView.setText(mSubtitle);
+        mSubtitleView.setVisibility(TextUtils.isEmpty(mSubtitle) ? View.GONE : View.VISIBLE);
+        mIconView.setImageDrawable(mIcon);
+        mIconView.setVisibility(mIcon != null ? View.VISIBLE : View.GONE);
+        if (mIconTinted) {
+            mIconView.setImageTintList(
+                    mContext.getColorStateList(R.color.car_ui_dialog_icon_color));
         }
+        mBuilder.setCustomTitle(customTitle);
 
         if (!mNeutralButtonSet && !mNegativeButtonSet && !mPositiveButtonSet) {
             String mDefaultButtonText = mContext.getString(
@@ -657,21 +677,26 @@ public class AlertDialogBuilder {
      */
     public AlertDialog create() {
         prepareDialog();
-        return mBuilder.create();
+        AlertDialog alertDialog = mBuilder.create();
+
+        // Put a FocusParkingView at the end of dialog window to prevent rotary controller
+        // wrap-around. Android will focus on the first view automatically when the dialog is shown,
+        // and we want it to focus on the title instead of the FocusParkingView, so we put the
+        // FocusParkingView at the end of dialog window.
+        ViewGroup root = (ViewGroup) alertDialog.getWindow().getDecorView().getRootView();
+        FocusParkingView fpv = new FocusParkingView(mContext);
+        root.addView(fpv);
+
+        return alertDialog;
     }
 
     /**
      * Creates an {@link AlertDialog} with the arguments supplied to this
      * builder and immediately displays the dialog.
-     * <p>
-     * Calling this method is functionally identical to:
-     * <pre>
-     *     AlertDialog dialog = builder.create();
-     *     dialog.show();
-     * </pre>
      */
     public AlertDialog show() {
-        prepareDialog();
-        return mBuilder.show();
+        AlertDialog alertDialog = create();
+        alertDialog.show();
+        return alertDialog;
     }
 }

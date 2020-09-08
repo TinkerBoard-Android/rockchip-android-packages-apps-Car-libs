@@ -44,6 +44,7 @@ import com.android.car.connecteddevice.util.ThreadSafeCallbacks;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -72,6 +73,10 @@ public class ConnectedDeviceManager {
     // Subtracting 2 bytes used by header, we have 8 bytes for device name.
     private static final int DEVICE_NAME_LENGTH_LIMIT = 8;
 
+    // The mac address randomly rotates every 7-15 minutes. To be safe, we will rotate our
+    // reconnect advertisement every 6 minutes to avoid crossing a rotation.
+    private static final Duration MAX_ADVERTISEMENT_DURATION = Duration.ofMinutes(6);
+
     private final ConnectedDeviceStorage mStorage;
 
     private final CarBleCentralManager mCentralManager;
@@ -96,7 +101,7 @@ public class ConnectedDeviceManager {
             new ConcurrentHashMap<>();
 
     // recipientId -> (deviceId -> message bytes)
-    private final Map<UUID, Map<String, byte[]>> mRecipientMissedMessages =
+    private final Map<UUID, Map<String, List<byte[]>>> mRecipientMissedMessages =
             new ConcurrentHashMap<>();
 
     // Recipient ids that received multiple callback registrations indicate that the recipient id
@@ -108,8 +113,6 @@ public class ConnectedDeviceManager {
     private final AtomicBoolean mIsConnectingToUserDevice = new AtomicBoolean(false);
 
     private final AtomicBoolean mHasStarted = new AtomicBoolean(false);
-
-    private final int mReconnectTimeoutSeconds;
 
     private String mNameForAssociation;
 
@@ -149,10 +152,12 @@ public class ConnectedDeviceManager {
                 new BlePeripheralManager(context),
                 UUID.fromString(context.getString(R.string.car_service_uuid)),
                 UUID.fromString(context.getString(R.string.car_association_service_uuid)),
+                UUID.fromString(context.getString(R.string.car_reconnect_service_uuid)),
+                UUID.fromString(context.getString(R.string.car_reconnect_data_uuid)),
                 context.getString(R.string.car_bg_mask),
                 UUID.fromString(context.getString(R.string.car_secure_write_uuid)),
                 UUID.fromString(context.getString(R.string.car_secure_read_uuid)),
-                context.getResources().getInteger(R.integer.car_reconnect_timeout_sec));
+                context.getResources().getInteger(R.integer.car_default_mtu_size));
     }
 
     private ConnectedDeviceManager(
@@ -162,23 +167,25 @@ public class ConnectedDeviceManager {
             @NonNull BlePeripheralManager blePeripheralManager,
             @NonNull UUID serviceUuid,
             @NonNull UUID associationServiceUuid,
+            @NonNull UUID reconnectServiceUuid,
+            @NonNull UUID reconnectDataUuid,
             @NonNull String bgMask,
             @NonNull UUID writeCharacteristicUuid,
             @NonNull UUID readCharacteristicUuid,
-            int reconnectTimeoutSeconds) {
+            int defaultMtuSize) {
         this(storage,
                 new CarBleCentralManager(context, bleCentralManager, storage, serviceUuid, bgMask,
                         writeCharacteristicUuid, readCharacteristicUuid),
                 new CarBlePeripheralManager(blePeripheralManager, storage, associationServiceUuid,
-                        writeCharacteristicUuid, readCharacteristicUuid), reconnectTimeoutSeconds);
+                        reconnectServiceUuid, reconnectDataUuid, writeCharacteristicUuid,
+                        readCharacteristicUuid, MAX_ADVERTISEMENT_DURATION, defaultMtuSize));
     }
 
     @VisibleForTesting
     ConnectedDeviceManager(
             @NonNull ConnectedDeviceStorage storage,
             @NonNull CarBleCentralManager centralManager,
-            @NonNull CarBlePeripheralManager peripheralManager,
-            int reconnectTimeoutSeconds) {
+            @NonNull CarBlePeripheralManager peripheralManager) {
         Executor callbackExecutor = Executors.newSingleThreadExecutor();
         mStorage = storage;
         mCentralManager = centralManager;
@@ -187,7 +194,6 @@ public class ConnectedDeviceManager {
         mPeripheralManager.registerCallback(generateCarBleCallback(peripheralManager),
                 callbackExecutor);
         mStorage.setAssociatedDeviceCallback(mAssociatedDeviceCallback);
-        mReconnectTimeoutSeconds = reconnectTimeoutSeconds;
     }
 
     /**
@@ -308,8 +314,7 @@ public class ConnectedDeviceManager {
             }
             EventLog.onStartDeviceSearchStarted();
             mIsConnectingToUserDevice.set(true);
-            mPeripheralManager.connectToDevice(UUID.fromString(userDevice.getDeviceId()),
-                    mReconnectTimeoutSeconds);
+            mPeripheralManager.connectToDevice(UUID.fromString(userDevice.getDeviceId()));
         } catch (Exception e) {
             loge(TAG, "Exception while attempting connection with active user's device.", e);
         }
@@ -372,7 +377,7 @@ public class ConnectedDeviceManager {
     public void enableAssociatedDeviceConnection(@NonNull String deviceId) {
         logd(TAG, "enableAssociatedDeviceConnection() called on " + deviceId);
         mStorage.updateAssociatedDeviceConnectionEnabled(deviceId,
-                /* isConnectionEnabled = */ true);
+                /* isConnectionEnabled= */ true);
         connectToActiveUserDevice();
     }
 
@@ -384,7 +389,7 @@ public class ConnectedDeviceManager {
     public void disableAssociatedDeviceConnection(@NonNull String deviceId) {
         logd(TAG, "disableAssociatedDeviceConnection() called on " + deviceId);
         mStorage.updateAssociatedDeviceConnectionEnabled(deviceId,
-                /* isConnectionEnabled = */ false);
+                /* isConnectionEnabled= */ false);
         disconnectDevice(deviceId);
     }
 
@@ -429,10 +434,12 @@ public class ConnectedDeviceManager {
         newCallbacks.add(callback, executor);
         recipientCallbacks.put(recipientId, newCallbacks);
 
-        byte[] message = popMissedMessage(recipientId, device.getDeviceId());
-        if (message != null) {
-            newCallbacks.invoke(deviceCallback ->
-                    deviceCallback.onMessageReceived(device, message));
+        List<byte[]> messages = popMissedMessages(recipientId, device.getDeviceId());
+        if (messages != null) {
+            for (byte[] message : messages) {
+                newCallbacks.invoke(deviceCallback ->
+                        deviceCallback.onMessageReceived(device, message));
+            }
         }
     }
 
@@ -458,8 +465,8 @@ public class ConnectedDeviceManager {
         // Store last message in case recipient registers callbacks in the future.
         logd(TAG, "No recipient registered for device " + deviceId + " and recipient "
                 + recipientId + " combination. Saving message.");
-        mRecipientMissedMessages.putIfAbsent(recipientId, new HashMap<>());
-        mRecipientMissedMessages.get(recipientId).putIfAbsent(deviceId, message);
+        mRecipientMissedMessages.computeIfAbsent(recipientId, __ -> new HashMap<>())
+                .computeIfAbsent(deviceId, __ -> new ArrayList<>()).add(message);
     }
 
     /**
@@ -468,12 +475,12 @@ public class ConnectedDeviceManager {
      *
      * @param recipientId Recipient's id
      * @param deviceId Device id
-     * @return The last missed {@code byte[]} of the message, or {@code null} if no messages were
+     * @return The missed {@code byte[]} messages, or {@code null} if no messages were
      *         missed.
      */
     @Nullable
-    private byte[] popMissedMessage(@NonNull UUID recipientId, @NonNull String deviceId) {
-        Map<String, byte[]> missedMessages = mRecipientMissedMessages.get(recipientId);
+    private List<byte[]> popMissedMessages(@NonNull UUID recipientId, @NonNull String deviceId) {
+        Map<String, List<byte[]>> missedMessages = mRecipientMissedMessages.get(recipientId);
         if (missedMessages == null) {
             return null;
         }
@@ -519,7 +526,7 @@ public class ConnectedDeviceManager {
      */
     public void sendMessageSecurely(@NonNull ConnectedDevice device, @NonNull UUID recipientId,
             @NonNull byte[] message) throws IllegalStateException {
-        sendMessage(device, recipientId, message, /* isEncrypted = */ true);
+        sendMessage(device, recipientId, message, /* isEncrypted= */ true);
     }
 
     /**
@@ -531,7 +538,7 @@ public class ConnectedDeviceManager {
      */
     public void sendMessageUnsecurely(@NonNull ConnectedDevice device, @NonNull UUID recipientId,
             @NonNull byte[] message) {
-        sendMessage(device, recipientId, message, /* isEncrypted = */ false);
+        sendMessage(device, recipientId, message, /* isEncrypted= */ false);
     }
 
     private void sendMessage(@NonNull ConnectedDevice device, @NonNull UUID recipientId,
@@ -596,9 +603,9 @@ public class ConnectedDeviceManager {
         logd(TAG, "New device with id " + deviceId + " connected.");
         ConnectedDevice connectedDevice = new ConnectedDevice(
                 deviceId,
-                /* deviceName = */ null,
+                /* deviceName= */ null,
                 mStorage.getActiveUserAssociatedDeviceIds().contains(deviceId),
-                /* hasSecureChannel = */ false
+                /* hasSecureChannel= */ false
         );
 
         mConnectedDevices.put(deviceId, new InternalConnectedDevice(connectedDevice, bleManager));
@@ -642,7 +649,7 @@ public class ConnectedDeviceManager {
         ConnectedDevice connectedDevice = mConnectedDevices.get(deviceId).mConnectedDevice;
         ConnectedDevice updatedConnectedDevice = new ConnectedDevice(connectedDevice.getDeviceId(),
                 connectedDevice.getDeviceName(), connectedDevice.isAssociatedWithActiveUser(),
-                /* hasSecureChannel = */ true);
+                /* hasSecureChannel= */ true);
 
         boolean notifyCallbacks = getConnectedDeviceForManager(deviceId, bleManager) != null;
 

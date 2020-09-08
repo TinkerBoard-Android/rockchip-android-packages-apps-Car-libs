@@ -19,6 +19,7 @@ package com.android.car.connecteddevice.ble;
 import static com.android.car.connecteddevice.BleStreamProtos.BleDeviceMessageProto.BleDeviceMessage;
 import static com.android.car.connecteddevice.BleStreamProtos.BleOperationProto.OperationType;
 import static com.android.car.connecteddevice.BleStreamProtos.BlePacketProto.BlePacket;
+import static com.android.car.connecteddevice.ble.BleDeviceMessageStream.MessageReceivedErrorListener;
 import static com.android.car.connecteddevice.ble.BleDeviceMessageStream.MessageReceivedListener;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -57,7 +58,7 @@ import java.util.concurrent.TimeUnit;
 @RunWith(AndroidJUnit4.class)
 public class BleDeviceMessageStreamTest {
 
-    private static final String TAG = "BleDeviceMessageStreamTest";
+    private static final int PACKET_SIZE = 500;
 
     private BleDeviceMessageStream mStream;
 
@@ -83,7 +84,7 @@ public class BleDeviceMessageStreamTest {
                 .startMocking();
 
         mStream = new BleDeviceMessageStream(mMockBlePeripheralManager, mMockBluetoothDevice,
-                mMockWriteCharacteristic, mMockReadCharacteristic);
+                mMockWriteCharacteristic, mMockReadCharacteristic, PACKET_SIZE);
     }
 
     @After
@@ -126,7 +127,7 @@ public class BleDeviceMessageStreamTest {
         Semaphore semaphore = new Semaphore(0);
         MessageReceivedListener listener = createMessageReceivedListener(semaphore);
         mStream.setMessageReceivedListener(listener);
-        byte[] data = ByteUtils.randomBytes(750);
+        byte[] data = ByteUtils.randomBytes((int) (PACKET_SIZE * 1.5));
         List<BlePacket> packets1 = createPackets(data);
         List<BlePacket> packets2 = createPackets(data);
 
@@ -154,14 +155,52 @@ public class BleDeviceMessageStreamTest {
     public void processPacket_doesNotNotifyOfNewMessageIfNotAllPacketsReceived()
             throws InterruptedException {
         Semaphore semaphore = new Semaphore(0);
-        MessageReceivedListener listener = createMessageReceivedListener(semaphore);
-        mStream.setMessageReceivedListener(listener);
-        byte[] data = ByteUtils.randomBytes(750);
+        mStream.setMessageReceivedListener(createMessageReceivedListener(semaphore));
+        mStream.setMessageReceivedErrorListener(createMessageReceivedErrorListener(semaphore));
+        byte[] data = ByteUtils.randomBytes((int) (PACKET_SIZE * 1.5));
         List<BlePacket> packets = createPackets(data);
         for (int i = 0; i < packets.size() - 1; i++) {
             mStream.processPacket(packets.get(i));
         }
         assertThat(tryAcquire(semaphore)).isFalse();
+    }
+
+    @Test
+    public void processPacket_ignoresDuplicatePacket() {
+        Semaphore semaphore = new Semaphore(0);
+        byte[] data = ByteUtils.randomBytes((int) (PACKET_SIZE * 2.5));
+        MessageReceivedListener listener = createMessageReceivedListener(semaphore);
+        mStream.setMessageReceivedListener(listener);
+        ArgumentCaptor<DeviceMessage> messageCaptor = ArgumentCaptor.forClass(DeviceMessage.class);
+        List<BlePacket> packets = createPackets(data);
+        for (int i = 0; i < packets.size(); i++) {
+            mStream.processPacket(packets.get(i));
+            mStream.processPacket(packets.get(i)); // Process each packet twice.
+        }
+        verify(listener).onMessageReceived(messageCaptor.capture(), any());
+        assertThat(Arrays.equals(data, messageCaptor.getValue().getMessage())).isTrue();
+    }
+
+    @Test
+    public void processPacket_packetBeforeExpectedRangeNotifiesMessageError()
+            throws InterruptedException {
+        Semaphore semaphore = new Semaphore(0);
+        mStream.setMessageReceivedErrorListener(createMessageReceivedErrorListener(semaphore));
+        List<BlePacket> packets = createPackets(ByteUtils.randomBytes((int) (PACKET_SIZE * 2.5)));
+        mStream.processPacket(packets.get(0));
+        mStream.processPacket(packets.get(1));
+        mStream.processPacket(packets.get(0));
+        assertThat(tryAcquire(semaphore)).isTrue();
+    }
+
+    @Test
+    public void processPacket_packetAfterExpectedNotifiesMessageError()
+            throws InterruptedException {
+        Semaphore semaphore = new Semaphore(0);
+        mStream.setMessageReceivedErrorListener(createMessageReceivedErrorListener(semaphore));
+        List<BlePacket> packets = createPackets(ByteUtils.randomBytes((int) (PACKET_SIZE * 1.5)));
+        mStream.processPacket(packets.get(1));
+        assertThat(tryAcquire(semaphore)).isTrue();
     }
 
     @NonNull
@@ -172,7 +211,7 @@ public class BleDeviceMessageStreamTest {
                     .setOperation(OperationType.CLIENT_MESSAGE)
                     .build();
             return BlePacketFactory.makeBlePackets(message.toByteArray(),
-                    ThreadLocalRandom.current().nextInt(), 500);
+                    ThreadLocalRandom.current().nextInt(), PACKET_SIZE);
         } catch (Exception e) {
             assertWithMessage("Uncaught exception while making packets.").fail();
             return new ArrayList<>();
@@ -186,14 +225,18 @@ public class BleDeviceMessageStreamTest {
         }
     }
 
-    private boolean tryAcquire(Semaphore semaphore) throws InterruptedException {
+    private boolean tryAcquire(@NonNull Semaphore semaphore) throws InterruptedException {
         return semaphore.tryAcquire(100, TimeUnit.MILLISECONDS);
     }
 
     @NonNull
-    private MessageReceivedListener createMessageReceivedListener(
-            Semaphore semaphore) {
+    private MessageReceivedListener createMessageReceivedListener(@NonNull Semaphore semaphore) {
         return spy((deviceMessage, operationType) -> semaphore.release());
     }
 
+    @NonNull
+    private MessageReceivedErrorListener createMessageReceivedErrorListener(
+            @NonNull Semaphore semaphore) {
+        return exception -> semaphore.release();
+    }
 }

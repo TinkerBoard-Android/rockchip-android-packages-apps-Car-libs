@@ -17,7 +17,6 @@
 package com.android.car.ui.toolbar;
 
 import android.graphics.drawable.Drawable;
-import android.widget.ProgressBar;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -56,6 +55,25 @@ public interface ToolbarController {
      * Gets the current toolbar title.
      */
     CharSequence getTitle();
+
+    /**
+     * Sets the subtitle of the toolbar to a string resource.
+     *
+     * <p>The title may not always be shown, for example with one row layout with tabs.
+     */
+    void setSubtitle(@StringRes int title);
+
+    /**
+     * Sets the subtitle of the toolbar to a CharSequence.
+     *
+     * <p>The title may not always be shown, for example with one row layout with tabs.
+     */
+    void setSubtitle(CharSequence title);
+
+    /**
+     * Gets the current toolbar subtitle.
+     */
+    CharSequence getSubtitle();
 
     /**
      * Gets the {@link TabLayout} for this toolbar.
@@ -253,12 +271,6 @@ public interface ToolbarController {
     /** Unregisters an existing {@link Toolbar.OnBackListener} from the list of listeners. */
     boolean unregisterOnBackListener(Toolbar.OnBackListener listener);
 
-    /** Shows the progress bar */
-    void showProgressBar();
-
-    /** Hides the progress bar */
-    void hideProgressBar();
-
-    /** Returns the progress bar */
-    ProgressBar getProgressBar();
+    /** Gets a {@link ProgressBarController} */
+    ProgressBarController getProgressBar();
 }

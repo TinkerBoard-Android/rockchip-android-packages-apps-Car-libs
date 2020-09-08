@@ -24,9 +24,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
 
-import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.support.v4.media.MediaBrowserCompat;
+
+import androidx.annotation.NonNull;
 
 import com.android.car.arch.common.testing.InstantTaskExecutorRule;
 import com.android.car.arch.common.testing.TestLifecycleOwner;

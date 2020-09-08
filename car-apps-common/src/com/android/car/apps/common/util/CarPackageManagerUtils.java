@@ -16,15 +16,12 @@
 
 package com.android.car.apps.common.util;
 
-import android.car.Car;
-import android.car.CarNotConnectedException;
+import android.app.PendingIntent;
 import android.car.content.pm.CarPackageManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -34,43 +31,26 @@ import androidx.annotation.NonNull;
 public class CarPackageManagerUtils {
     private static final String TAG = "CarPackageManagerUtils";
 
-    private final Car mCarApi;
-    private CarPackageManager mCarPackageManager;
-
-    private static CarPackageManagerUtils sInstance = null;
-
-    private CarPackageManagerUtils(Context context) {
-        mCarApi = Car.createCar(context.getApplicationContext());
-        try {
-            mCarPackageManager = (CarPackageManager) mCarApi.getCarManager(Car.PACKAGE_SERVICE);
-        } catch (CarNotConnectedException e) {
-            Log.e(TAG, "Car not connected when retrieving car package manager", e);
-        }
-    }
-
     /**
-     * Returns the singleton instance of this class
+     * Returns whether the given {@link PendingIntent} represents an activity that is distraction
+     * optimized.
      */
-    @NonNull
-    public static CarPackageManagerUtils getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new CarPackageManagerUtils(context);
+    public static boolean isDistractionOptimized(CarPackageManager carPackageManager,
+            @NonNull PendingIntent pendingIntent) {
+        if (carPackageManager != null) {
+            return carPackageManager.isPendingIntentDistractionOptimized(pendingIntent);
         }
-        return sInstance;
+        return false;
     }
 
     /**
      * Returns true if the provided Activity is distraction optimized
      */
-    public boolean isDistractionOptimized(@NonNull ActivityInfo activityInfo) {
-        if (mCarPackageManager != null) {
-            try {
-                return mCarPackageManager.isActivityDistractionOptimized(
-                        activityInfo.packageName, activityInfo.name);
-            } catch (CarNotConnectedException e) {
-                Log.e(TAG, "Car not connected when getting driver optimization info", e);
-                return false;
-            }
+    public static boolean isDistractionOptimized(CarPackageManager carPackageManager,
+            @NonNull ActivityInfo activityInfo) {
+        if (carPackageManager != null) {
+            return carPackageManager.isActivityDistractionOptimized(
+                    activityInfo.packageName, activityInfo.name);
         }
         return false;
     }
@@ -79,9 +59,11 @@ public class CarPackageManagerUtils {
      * Attempts to resolve the provided intent into an activity, and returns true if the
      * resolved activity is distraction optimized
      */
-    public boolean isDistractionOptimized(PackageManager packageManager, Intent intent) {
+    public static boolean isDistractionOptimized(CarPackageManager carPackageManager,
+            PackageManager packageManager, Intent intent) {
         ResolveInfo info = packageManager.resolveActivity(
                 intent, PackageManager.MATCH_DEFAULT_ONLY);
-        return (info != null) ? isDistractionOptimized(info.activityInfo) : false;
+        return (info != null) ? isDistractionOptimized(carPackageManager, info.activityInfo)
+                : false;
     }
 }

@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -51,9 +52,9 @@ class BleDeviceMessageStream {
 
     private static final String TAG = "BleDeviceMessageStream";
 
-    // Only version 2 of the messaging and version 1 of the security supported.
+    // Only version 2 of the messaging and version 2 of the security supported.
     private static final int MESSAGING_VERSION = 2;
-    private static final int SECURITY_VERSION = 1;
+    private static final int SECURITY_VERSION = 2;
 
     /*
      * During bandwidth testing, it was discovered that allowing the stream to send as fast as it
@@ -66,8 +67,10 @@ class BleDeviceMessageStream {
 
     private final ArrayDeque<BlePacket> mPacketQueue = new ArrayDeque<>();
 
-    private final HashMap<Integer, ByteArrayOutputStream> mPendingData =
-            new HashMap<>();
+    private final Map<Integer, ByteArrayOutputStream> mPendingData = new HashMap<>();
+
+    // messageId -> nextExpectedPacketNumber
+    private final Map<Integer, Integer> mPendingPacketNumber = new HashMap<>();
 
     private final MessageIdGenerator mMessageIdGenerator = new MessageIdGenerator();
 
@@ -91,22 +94,20 @@ class BleDeviceMessageStream {
 
     private MessageReceivedErrorListener mMessageReceivedErrorListener;
 
-    /*
-     * This initial value is 20 because BLE has a default write of 23 bytes. However, 3 bytes are
-     * subtracted due to bytes being reserved for the command type and attribute ID.
-     */
-    private int mMaxWriteSize = 20;
+    private int mMaxWriteSize;
 
     BleDeviceMessageStream(@NonNull BlePeripheralManager blePeripheralManager,
             @NonNull BluetoothDevice device,
             @NonNull BluetoothGattCharacteristic writeCharacteristic,
-            @NonNull BluetoothGattCharacteristic readCharacteristic) {
+            @NonNull BluetoothGattCharacteristic readCharacteristic,
+            int defaultMaxWriteSize) {
         mBlePeripheralManager = blePeripheralManager;
         mDevice = device;
         mWriteCharacteristic = writeCharacteristic;
         mReadCharacteristic = readCharacteristic;
         mBlePeripheralManager.addOnCharacteristicWriteListener(this::onCharacteristicWrite);
         mBlePeripheralManager.addOnCharacteristicReadListener(this::onCharacteristicRead);
+        mMaxWriteSize = defaultMaxWriteSize;
     }
 
     /**
@@ -132,7 +133,8 @@ class BleDeviceMessageStream {
      * @param operationType The {@link OperationType} of this message.
      */
     void writeMessage(@NonNull DeviceMessage deviceMessage, OperationType operationType) {
-        logd(TAG, "Writing message to device: " + mDevice.getAddress() + ".");
+        logd(TAG, "Writing message with " + deviceMessage.getMessage().length + " bytes to device: "
+                + mDevice.getAddress() + ".");
         BleDeviceMessage.Builder builder = BleDeviceMessage.newBuilder()
                 .setOperation(operationType)
                 .setIsPayloadEncrypted(deviceMessage.isMessageEncrypted())
@@ -174,7 +176,7 @@ class BleDeviceMessageStream {
                     + packet.getTotalPackets() + " for " + packet.getMessageId() + ".");
             mWriteCharacteristic.setValue(packet.toByteArray());
             mBlePeripheralManager.notifyCharacteristicChanged(mDevice, mWriteCharacteristic,
-                    /* confirm = */ false);
+                    /* confirm= */ false);
         }, mThrottleDelay.get());
     }
 
@@ -261,7 +263,7 @@ class BleDeviceMessageStream {
                 .build();
         mWriteCharacteristic.setValue(headunitVersion.toByteArray());
         mBlePeripheralManager.notifyCharacteristicChanged(device, mWriteCharacteristic,
-                /* confirm = */ false);
+                /* confirm= */ false);
         mIsVersionExchanged.set(true);
         logd(TAG, "Sent supported version to the phone.");
     }
@@ -273,6 +275,24 @@ class BleDeviceMessageStream {
         mThrottleDelay.set(THROTTLE_WAIT_MS);
 
         int messageId = packet.getMessageId();
+        int packetNumber = packet.getPacketNumber();
+        int expectedPacket = mPendingPacketNumber.getOrDefault(messageId, 1);
+        if (packetNumber == expectedPacket - 1) {
+            logw(TAG, "Received duplicate packet " + packet.getPacketNumber() + " for message "
+                    + messageId + ". Ignoring.");
+            return;
+        }
+        if (packetNumber != expectedPacket) {
+            loge(TAG, "Received unexpected packet " + packetNumber + " for message "
+                    + messageId + ".");
+            if (mMessageReceivedErrorListener != null) {
+                mMessageReceivedErrorListener.onMessageReceivedError(
+                        new IllegalStateException("Packet received out of order."));
+            }
+            return;
+        }
+        mPendingPacketNumber.put(messageId, packetNumber + 1);
+
         ByteArrayOutputStream currentPayloadStream =
                 mPendingData.getOrDefault(messageId, new ByteArrayOutputStream());
         mPendingData.putIfAbsent(messageId, currentPayloadStream);
@@ -325,6 +345,9 @@ class BleDeviceMessageStream {
 
     /** The maximum amount of bytes that can be written over BLE. */
     void setMaxWriteSize(int maxWriteSize) {
+        if (maxWriteSize <= 0) {
+            return;
+        }
         mMaxWriteSize = maxWriteSize;
     }
 

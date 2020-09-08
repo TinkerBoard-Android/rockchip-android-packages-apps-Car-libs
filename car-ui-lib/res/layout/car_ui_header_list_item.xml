@@ -33,7 +33,7 @@
         android:id="@+id/title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/car_ui_list_item_text_no_icon_start_margin"
+        android:layout_marginStart="@dimen/car_ui_header_list_item_text_start_margin"
         android:textAppearance="@style/TextAppearance.CarUi.ListItem.Header"
         app:layout_constraintBottom_toTopOf="@+id/body"
         app:layout_constraintEnd_toEndOf="parent"

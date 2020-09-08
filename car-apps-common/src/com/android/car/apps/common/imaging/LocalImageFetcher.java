@@ -16,10 +16,8 @@
 
 package com.android.car.apps.common.imaging;
 
-import android.annotation.UiThread;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
@@ -30,21 +28,21 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.util.LruCache;
 
+import androidx.annotation.UiThread;
+
 import com.android.car.apps.common.BitmapUtils;
 import com.android.car.apps.common.CommonFlags;
 import com.android.car.apps.common.R;
 import com.android.car.apps.common.UriUtils;
 import com.android.car.apps.common.util.CarAppsIOUtils;
 
-import libcore.io.IoUtils;
-
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -248,7 +246,7 @@ public class LocalImageFetcher {
         };
 
         // ALLOCATOR_HARDWARE causes crashes on some emulators (in media center's queue).
-        private @ImageDecoder.Allocator int mAllocatorMode = ImageDecoder.ALLOCATOR_SOFTWARE;
+        private int mAllocatorMode = ImageDecoder.ALLOCATOR_SOFTWARE;
 
         @Override
         protected Drawable doInBackground(Void... voids) {
@@ -265,18 +263,8 @@ public class LocalImageFetcher {
                             UriUtils.getIconResource(context, imageUri));
                 } else if (UriUtils.isContentUri(imageUri)) {
                     ContentResolver resolver = context.getContentResolver();
-
-                    // TODO(b/140959390): Remove the check once the bug is fixed in framework.
-                    if (!hasFile(resolver, imageUri)) {
-                        if (L_WARN) {
-                            Log.w(TAG, "File not found in uri: " + imageUri);
-                        }
-                        return null;
-                    }
-
                     ImageDecoder.Source src = ImageDecoder.createSource(resolver, imageUri);
                     return ImageDecoder.decodeDrawable(src, mOnHeaderDecodedListener);
-
                 } else if (mFlagRemoteImages) {
                     mAllocatorMode = ImageDecoder.ALLOCATOR_SOFTWARE; // Needed for canvas drawing.
                     URL url = new URL(imageUri.toString());
@@ -285,7 +273,8 @@ public class LocalImageFetcher {
                          ByteArrayOutputStream bytes = new ByteArrayOutputStream()) {
 
                         CarAppsIOUtils.copy(is, bytes);
-                        ImageDecoder.Source src = ImageDecoder.createSource(bytes.toByteArray());
+                        ImageDecoder.Source src =
+                                ImageDecoder.createSource(ByteBuffer.wrap(bytes.toByteArray()));
                         Bitmap decoded = ImageDecoder.decodeBitmap(src, mOnHeaderDecodedListener);
                         Bitmap tinted = BitmapUtils.createTintedBitmap(decoded,
                                 context.getColor(R.color.improper_image_refs_tint_color));
@@ -298,34 +287,6 @@ public class LocalImageFetcher {
                 return null;
             }
             return null;
-        }
-
-        private boolean hasFile(ContentResolver resolver, Uri uri) {
-            AssetFileDescriptor assetFd = null;
-            try {
-                if (uri.getScheme() == ContentResolver.SCHEME_CONTENT) {
-                    assetFd = resolver.openTypedAssetFileDescriptor(uri, "image/*", null);
-                } else {
-                    assetFd = resolver.openAssetFileDescriptor(uri, "r");
-                }
-            } catch (FileNotFoundException e) {
-                // Some images cannot be opened as AssetFileDescriptors (e.g.bmp, ico). Open them
-                // as InputStreams.
-                try {
-                    InputStream is = resolver.openInputStream(uri);
-                    if (is != null) {
-                        IoUtils.closeQuietly(is);
-                        return true;
-                    }
-                } catch (IOException exception) {
-                    return false;
-                }
-            }
-            if (assetFd != null) {
-                IoUtils.closeQuietly(assetFd);
-                return true;
-            }
-            return false;
         }
 
         @UiThread

@@ -19,6 +19,8 @@ package com.android.car.ui.paintbooth.preferences;
 import android.os.Bundle;
 
 import com.android.car.ui.paintbooth.R;
+import com.android.car.ui.preference.CarUiPreference;
+import com.android.car.ui.preference.CarUiSwitchPreference;
 import com.android.car.ui.preference.PreferenceFragment;
 
 /**
@@ -30,5 +32,23 @@ public class PreferenceDemoFragment extends PreferenceFragment {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         // Load the preferences from an XML resource
         setPreferencesFromResource(R.xml.preference_samples, rootKey);
+        CarUiPreference preferenceDisabledWithoutRipple = findPreference(
+                "preference_disabled_without_ripple");
+        preferenceDisabledWithoutRipple.setEnabled(false);
+        preferenceDisabledWithoutRipple.setMessageToShowWhenDisabledPreferenceClicked(
+                "I am disabled because...");
+        preferenceDisabledWithoutRipple.setShouldShowRippleOnDisabledPreference(false);
+
+        CarUiPreference preferenceDisabledWithRipple = findPreference(
+                "preference_disabled_with_ripple");
+        preferenceDisabledWithRipple.setEnabled(false);
+        preferenceDisabledWithRipple.setMessageToShowWhenDisabledPreferenceClicked(
+                "I am disabled because...");
+        preferenceDisabledWithRipple.setShouldShowRippleOnDisabledPreference(true);
+
+        CarUiSwitchPreference carUiSwitchPreference = findPreference("switch");
+        carUiSwitchPreference.setEnabled(false);
+        carUiSwitchPreference.setMessageToShowWhenDisabledPreferenceClicked(
+                "I am disabled because...");
     }
 }
