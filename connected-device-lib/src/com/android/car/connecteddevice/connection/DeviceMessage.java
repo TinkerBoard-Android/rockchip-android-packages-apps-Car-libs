@@ -18,8 +18,8 @@ package com.android.car.connecteddevice.connection;
 
 import static com.android.car.connecteddevice.StreamProtos.DeviceMessageProto.Message;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.Arrays;
 import java.util.Objects;

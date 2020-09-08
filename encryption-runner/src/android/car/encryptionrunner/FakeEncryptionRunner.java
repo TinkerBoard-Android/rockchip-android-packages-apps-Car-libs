@@ -16,9 +16,8 @@
 
 package android.car.encryptionrunner;
 
-import android.annotation.IntDef;
-
-import com.android.internal.annotations.VisibleForTesting;
+import androidx.annotation.IntDef;
+import androidx.annotation.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

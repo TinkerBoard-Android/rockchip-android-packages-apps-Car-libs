@@ -20,11 +20,12 @@ import static android.car.encryptionrunner.HandshakeMessage.HandshakeState;
 
 import static com.android.car.connecteddevice.util.SafeLog.loge;
 
-import android.annotation.NonNull;
 import android.car.encryptionrunner.EncryptionRunner;
 import android.car.encryptionrunner.EncryptionRunnerFactory;
 import android.car.encryptionrunner.HandshakeException;
 import android.car.encryptionrunner.HandshakeMessage;
+
+import androidx.annotation.NonNull;
 
 import com.android.car.connecteddevice.oob.OobConnectionManager;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;

@@ -16,7 +16,6 @@
 
 package com.android.car.messenger.common;
 
-import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -24,8 +23,10 @@ import android.app.RemoteInput;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationCompat.Action;
 import androidx.core.app.Person;
@@ -202,9 +203,11 @@ public class BaseNotificationDelegate {
         if (avatarIcon != null) {
             builder.setLargeIcon(avatarIcon);
         } else if (mUseLetterTile) {
-            builder.setLargeIcon(TelecomUtils.createLetterTile(mContext,
+            BitmapDrawable drawable = (BitmapDrawable) TelecomUtils.createLetterTile(mContext,
                     Utils.getInitials(lastMessage.getSenderName(), ""),
-                    lastMessage.getSenderName(), mBitmapSize, mCornerRadiusPercent).getBitmap());
+                    lastMessage.getSenderName(), mBitmapSize, mCornerRadiusPercent)
+                    .loadDrawable(mContext);
+            builder.setLargeIcon(drawable.getBitmap());
         }
         // Else, no avatar icon will be shown.
 

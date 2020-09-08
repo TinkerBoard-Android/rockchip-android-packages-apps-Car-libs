@@ -18,10 +18,10 @@ package com.android.car.connecteddevice.oob;
 
 import static com.android.car.connecteddevice.util.SafeLog.loge;
 
-import android.annotation.NonNull;
 import android.security.keystore.KeyProperties;
 
-import com.android.internal.annotations.VisibleForTesting;
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 import com.google.common.primitives.Bytes;
 

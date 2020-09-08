@@ -23,16 +23,17 @@ import static android.car.encryptionrunner.HandshakeMessage.HandshakeState;
 import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.car.encryptionrunner.EncryptionRunner;
 import android.car.encryptionrunner.HandshakeException;
 import android.car.encryptionrunner.HandshakeMessage;
 import android.car.encryptionrunner.Key;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
 import com.android.car.connecteddevice.util.ByteUtils;
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.security.InvalidParameterException;
 import java.util.Arrays;
