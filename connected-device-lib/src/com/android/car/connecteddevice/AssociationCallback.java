@@ -16,7 +16,7 @@
 
 package com.android.car.connecteddevice;
 
-import android.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /** Callbacks that will be invoked during associating a new client. */
 public interface AssociationCallback {
@@ -26,7 +26,7 @@ public interface AssociationCallback {
      *
      * @param deviceName The device name to identify the car.
      */
-    default void onAssociationStartSuccess(@NonNull String deviceName) {}
+    default void onAssociationStartSuccess(String deviceName) {}
 
     /** Invoked when IHU failed to start advertising for association. */
     default void onAssociationStartFailure() {}

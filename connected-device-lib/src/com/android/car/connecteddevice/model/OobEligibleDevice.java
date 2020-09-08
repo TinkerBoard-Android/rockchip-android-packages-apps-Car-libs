@@ -18,8 +18,8 @@ package com.android.car.connecteddevice.model;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-import android.annotation.IntDef;
-import android.annotation.NonNull;
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
 
 import java.lang.annotation.Retention;
 import java.util.Objects;
@@ -28,11 +28,7 @@ import java.util.Objects;
 public class OobEligibleDevice {
 
     @Retention(SOURCE)
-    @IntDef(prefix = { "OOB_TYPE_" },
-            value = {
-                    OOB_TYPE_BLUETOOTH
-            }
-    )
+    @IntDef(value = { OOB_TYPE_BLUETOOTH })
     public @interface OobType {}
     public static final int OOB_TYPE_BLUETOOTH = 0;
 

@@ -23,13 +23,14 @@ android_library {
         enabled: false,
     },
 
-    libs: ["android.car"],
+    sdk_version: "system_current",
+    min_sdk_version: "28",
+
+    libs: ["android.car-system-stubs",],
 
     resource_dirs: ["res"],
 
     static_libs: [
-        "android.car.userlib",
-        "androidx.legacy_legacy-support-v4",
         "car-apps-common",
         "car-messenger-protos",
         "car-telephony-common",

@@ -21,7 +21,6 @@ import static com.android.car.connecteddevice.util.SafeLog.loge;
 import static com.android.car.connecteddevice.util.SafeLog.logw;
 import static com.android.car.connecteddevice.util.ScanDataAnalyzer.containsUuidsInOverflow;
 
-import android.annotation.NonNull;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
@@ -35,6 +34,8 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.os.ParcelUuid;
+
+import androidx.annotation.NonNull;
 
 import com.android.car.connecteddevice.AssociationCallback;
 import com.android.car.connecteddevice.connection.CarBluetoothManager;

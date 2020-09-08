@@ -25,9 +25,10 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.annotation.NonNull;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+
+import androidx.annotation.NonNull;
 
 import com.android.car.connecteddevice.AssociationCallback;
 import com.android.car.connecteddevice.connection.AssociationSecureChannel;
@@ -92,7 +93,7 @@ public class CarSppManagerTest {
 
         verify(mMockSppManager).startListening(TEST_SERVICE_UUID);
         assertThat(tryAcquire(semaphore)).isTrue();
-        verify(callback).onAssociationStartSuccess(BluetoothAdapter.getDefaultAdapter().getName());
+        verify(callback).onAssociationStartSuccess(eq(null));
     }
 
     @Test

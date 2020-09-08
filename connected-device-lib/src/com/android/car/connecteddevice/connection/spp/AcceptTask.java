@@ -19,10 +19,11 @@ package com.android.car.connecteddevice.connection.spp;
 import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
 
-import android.annotation.Nullable;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+
+import androidx.annotation.Nullable;
 
 import java.io.IOException;
 import java.util.UUID;
