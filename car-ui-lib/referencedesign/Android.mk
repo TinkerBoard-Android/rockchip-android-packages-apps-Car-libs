@@ -2,6 +2,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 CAR_UI_RRO_SET_NAME := googlecarui
+CAR_UI_RRO_MANIFEST_FILE := $(LOCAL_PATH)/AndroidManifest.xml
 CAR_UI_RESOURCE_DIR := $(LOCAL_PATH)/res
 CAR_UI_RRO_TARGETS := \
     com.android.car.ui.paintbooth \
@@ -21,6 +22,21 @@ CAR_UI_RRO_TARGETS := \
     com.android.car.faceenroll \
     com.android.permissioncontroller \
     com.android.settings.intelligence \
+    com.google.android.apps.automotive.inputmethod \
+    com.google.android.apps.automotive.inputmethod.dev \
+    com.google.android.embedded.projection \
+    com.google.android.gms \
+    com.google.android.packageinstaller \
+    com.google.android.carassistant \
+    com.google.android.tts \
+    com.android.vending \
+
+include packages/apps/Car/libs/car-ui-lib/generate_rros.mk
+
+CAR_UI_RRO_SET_NAME := googlecarui.overlayable
+CAR_UI_RRO_MANIFEST_FILE := $(LOCAL_PATH)/AndroidManifest-overlayable.xml
+CAR_UI_RESOURCE_DIR := $(LOCAL_PATH)/res
+CAR_UI_RRO_TARGETS := \
     com.google.android.apps.automotive.inputmethod \
     com.google.android.apps.automotive.inputmethod.dev \
     com.google.android.embedded.projection \

@@ -27,8 +27,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Icon;
-import android.location.Country;
-import android.location.CountryDetector;
 import android.net.Uri;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
@@ -138,22 +136,7 @@ public class TelecomUtils {
      * @return The ISO 3166-1 two letters country code of the country the user is in.
      */
     private static String getCurrentCountryIso(Context context, Locale locale) {
-        String countryIso = null;
-        CountryDetector detector = (CountryDetector) context.getSystemService(
-                Context.COUNTRY_DETECTOR);
-        if (detector != null) {
-            Country country = detector.detectCountry();
-            if (country != null) {
-                countryIso = country.getCountryIso();
-            } else {
-                L.e(TAG, "CountryDetector.detectCountry() returned null.");
-            }
-        }
-        if (countryIso == null) {
-            countryIso = locale.getCountry();
-            L.w(TAG, "No CountryDetector; falling back to countryIso based on locale: "
-                    + countryIso);
-        }
+        String countryIso = locale.getCountry();
         if (countryIso == null || countryIso.length() != 2) {
             L.w(TAG, "Invalid locale, falling back to US");
             countryIso = COUNTRY_US;
@@ -589,7 +572,7 @@ public class TelecomUtils {
     private static Uri makeResourceUri(Context context, int resourceId) {
         return new Uri.Builder()
                 .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-                .encodedAuthority(context.getBasePackageName())
+                .encodedAuthority(context.getPackageName())
                 .appendEncodedPath(String.valueOf(resourceId))
                 .build();
     }

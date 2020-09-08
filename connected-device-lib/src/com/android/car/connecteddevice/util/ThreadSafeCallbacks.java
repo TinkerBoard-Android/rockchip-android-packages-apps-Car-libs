@@ -16,8 +16,7 @@
 
 package com.android.car.connecteddevice.util;
 
-import android.annotation.CallbackExecutor;
-import android.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
@@ -33,7 +32,7 @@ public class ThreadSafeCallbacks<T> {
     private final ConcurrentHashMap<T, Executor> mCallbacks = new ConcurrentHashMap<>();
 
     /** Add a callback to be notified on its executor. */
-    public void add(@NonNull T callback, @NonNull @CallbackExecutor Executor executor) {
+    public void add(@NonNull T callback, @NonNull Executor executor) {
         mCallbacks.put(callback, executor);
     }
 

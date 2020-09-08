@@ -17,9 +17,10 @@ package com.android.car.connecteddevice.connection;
 
 import static com.android.car.connecteddevice.util.SafeLog.loge;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.car.connecteddevice.StreamProtos.PacketProto.Packet;
 import com.android.car.protobuf.ByteString;
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -20,9 +20,10 @@ import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
 import static com.android.car.connecteddevice.util.SafeLog.logw;
 
-import android.annotation.IntRange;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
+import androidx.annotation.IntRange;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.car.connecteddevice.StreamProtos.DeviceMessageProto.Message;
 import com.android.car.connecteddevice.StreamProtos.OperationProto.OperationType;
@@ -31,7 +32,6 @@ import com.android.car.connecteddevice.StreamProtos.VersionExchangeProto.Version
 import com.android.car.connecteddevice.util.ByteUtils;
 import com.android.car.protobuf.ByteString;
 import com.android.car.protobuf.InvalidProtocolBufferException;
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

@@ -20,8 +20,6 @@ import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
 import static com.android.car.connecteddevice.util.SafeLog.logw;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -29,11 +27,13 @@ import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Base64;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.room.Room;
 
 import com.android.car.connecteddevice.R;
 import com.android.car.connecteddevice.model.AssociatedDevice;
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;

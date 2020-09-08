@@ -19,10 +19,27 @@ import os
 import sys
 from resource_utils import get_all_resources, get_resources_from_single_file, add_resource_to_set, Resource
 from git_utils import has_chassis_changes
+from datetime import date
 
 # path to 'packages/apps/Car/libs/car-ui-lib/'
 ROOT_FOLDER = os.path.dirname(os.path.abspath(__file__)) + '/../..'
 OUTPUT_FILE_PATH = ROOT_FOLDER + '/tests/apitest/'
+
+
+COPYRIGHT_STR = """Copyright (C) %s The Android Open Source Project
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.""" % (date.today().strftime("%Y"))
+
 
 """
 Script used to update the 'current.xml' file. This is being used as part of pre-submits to
@@ -48,6 +65,7 @@ def main():
         compare_resources(ROOT_FOLDER+'/car-ui-lib/src/main/res', OUTPUT_FILE_PATH + 'current.xml')
     else:
         generate_current_file(ROOT_FOLDER+'/car-ui-lib/src/main/res', output_file)
+        generate_overlayable_file(ROOT_FOLDER+'/car-ui-lib/src/main/res')
 
 def generate_current_file(res_folder, output_file='current.xml'):
     resources = get_all_resources(res_folder)
@@ -74,21 +92,57 @@ def generate_overlayable_file(res_folder):
     resources = get_all_resources(res_folder)
     # We need these to be able to use base layouts in RROs
     # This should become unnecessary in S
+    # source: https://android.googlesource.com/platform/frameworks/opt/sherpa/+/studio-3.0/constraintlayout/src/main/res/values/attrs.xml
+    add_resource_to_set(resources, Resource('layout_optimizationLevel', 'attr'))
+    add_resource_to_set(resources, Resource('constraintSet', 'attr'))
+    add_resource_to_set(resources, Resource('barrierDirection', 'attr'))
+    add_resource_to_set(resources, Resource('constraint_referenced_ids', 'attr'))
+    add_resource_to_set(resources, Resource('chainUseRtl', 'attr'))
+    add_resource_to_set(resources, Resource('title', 'attr'))
     add_resource_to_set(resources, Resource('layout_constraintGuide_begin', 'attr'))
     add_resource_to_set(resources, Resource('layout_constraintGuide_end', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintHorizontal_bias', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintTop_toTopOf', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintTop_toBottomOf', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintBottom_toBottomOf', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintBottom_toTopOf', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintStart_toStartOf', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintStart_toEndOf', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintEnd_toEndOf', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintEnd_toStartOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintGuide_percent', 'attr'))
     add_resource_to_set(resources, Resource('layout_constraintLeft_toLeftOf', 'attr'))
     add_resource_to_set(resources, Resource('layout_constraintLeft_toRightOf', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintRight_toRightOf', 'attr'))
     add_resource_to_set(resources, Resource('layout_constraintRight_toLeftOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintRight_toRightOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintTop_toTopOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintTop_toBottomOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintBottom_toTopOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintBottom_toBottomOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintBaseline_toBaselineOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintStart_toEndOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintStart_toStartOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintEnd_toStartOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintEnd_toEndOf', 'attr'))
+    add_resource_to_set(resources, Resource('layout_goneMarginLeft', 'attr'))
+    add_resource_to_set(resources, Resource('layout_goneMarginTop', 'attr'))
+    add_resource_to_set(resources, Resource('layout_goneMarginRight', 'attr'))
+    add_resource_to_set(resources, Resource('layout_goneMarginBottom', 'attr'))
+    add_resource_to_set(resources, Resource('layout_goneMarginStart', 'attr'))
+    add_resource_to_set(resources, Resource('layout_goneMarginEnd', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintHorizontal_bias', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintVertical_bias', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintWidth_default', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintHeight_default', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintWidth_min', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintWidth_max', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintWidth_percent', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintHeight_min', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintHeight_max', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintHeight_percent', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintLeft_creator', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintTop_creator', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintRight_creator', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintBottom_creator', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintBaseline_creator', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintDimensionRatio', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintHorizontal_weight', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintVertical_weight', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintHorizontal_chainStyle', 'attr'))
+    add_resource_to_set(resources, Resource('layout_constraintVertical_chainStyle', 'attr'))
+    add_resource_to_set(resources, Resource('layout_editor_absoluteX', 'attr'))
+    add_resource_to_set(resources, Resource('layout_editor_absoluteY', 'attr'))
     resources = sorted(resources, key=lambda x: x.type + x.name)
 
     # defer importing lxml to here so that people who aren't editing chassis don't have to have
@@ -97,22 +151,11 @@ def generate_overlayable_file(res_folder):
 
     root = etree.Element('resources')
 
-    root.addprevious(etree.Comment(' Copyright (C) 2020 The Android Open Source Project\n\n' +
-
-                                   '     Licensed under the Apache License, Version 2.0 (the "License");\n' +
-                                   '     you may not use this file except in compliance with the License.\n' +
-                                   '     You may obtain a copy of the License at\n\n' +
-
-                                   '     http://www.apache.org/licenses/LICENSE-2.0\n\n'
-
-                                   '     Unless required by applicable law or agreed to in writing, software\n'
-                                   '     distributed under the License is distributed on an "AS IS" BASIS,\n'
-                                   '     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n'
-                                   '     See the License for the specific language governing permissions and\n'
-                                   '     limitations under the License.\n'))
+    root.addprevious(etree.Comment(COPYRIGHT_STR))
+    root.addprevious(etree.Comment('THIS FILE IS AUTO GENERATED, DO NOT EDIT MANUALLY.'))
 
     overlayable = etree.SubElement(root, 'overlayable')
-    overlayable.set('name', 'CarUiLibOverlayableResources')
+    overlayable.set('name', 'car-ui-lib')
 
     policy = etree.SubElement(overlayable, 'policy')
     policy.set('type', 'public')
@@ -124,7 +167,7 @@ def generate_overlayable_file(res_folder):
 
     data = etree.ElementTree(root)
 
-    output_file=ROOT_FOLDER+'/car-ui-lib/src/main/res/values/overlayable.xml'
+    output_file=ROOT_FOLDER+'/car-ui-lib/src/main/res-overlayable/values/overlayable.xml'
     with open(output_file, 'wb') as f:
         data.write(f, pretty_print=True, xml_declaration=True, encoding='utf-8')
 
