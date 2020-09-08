@@ -21,7 +21,8 @@
 define generate-rro
   include $$(CLEAR_VARS)
 
-  rro_package_name := $(2)-$(subst .,-,$(1))
+  rro_package_name := $(subst .,-,$(2))-$(subst .,-,$(1))
+  manifest_file := $(4)
   LOCAL_RESOURCE_DIR := $(3)
   LOCAL_RRO_THEME := $$(rro_package_name)
   LOCAL_PACKAGE_NAME := $$(rro_package_name)
@@ -34,7 +35,7 @@ define generate-rro
   LOCAL_AAPT_FLAGS := --no-resource-deduping
 
   gen := $$(call intermediates-dir-for,ETC,$$(rro_package_name))/AndroidManifest.xml
-  $$(gen): $(LOCAL_PATH)/AndroidManifest.xml
+  $$(gen): $$(manifest_file)
 	@echo Generate $$@
 	$$(hide) mkdir -p $$(dir $$@)
 	$$(hide) sed -e "s/{{TARGET_PACKAGE_NAME}}/$(1)/" \
@@ -44,11 +45,17 @@ define generate-rro
   include $$(BUILD_RRO_PACKAGE)
 endef
 
+ifndef CAR_UI_RRO_MANIFEST_FILE
+CAR_UI_RRO_MANIFEST_FILE = $(LOCAL_PATH)/AndroidManifest.xml
+endif
+
 $(foreach t,\
   $(CAR_UI_RRO_TARGETS),\
-  $(eval $(call generate-rro,$(t),$(CAR_UI_RRO_SET_NAME),$(CAR_UI_RESOURCE_DIR))))
+  $(eval $(call generate-rro,$(t),$(CAR_UI_RRO_SET_NAME),$(CAR_UI_RESOURCE_DIR),$(CAR_UI_RRO_MANIFEST_FILE))) \
+  )
 
 # Clear variables
 CAR_UI_RRO_SET_NAME :=
+CAR_UI_RRO_MANIFEST_FILE :=
 CAR_UI_RESOURCE_DIR :=
 CAR_UI_RRO_TARGETS :=
