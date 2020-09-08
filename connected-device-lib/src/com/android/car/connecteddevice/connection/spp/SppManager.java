@@ -19,14 +19,15 @@ package com.android.car.connecteddevice.connection.spp;
 import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
 
-import android.annotation.NonNull;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 
+import androidx.annotation.GuardedBy;
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
+
 import com.android.car.connecteddevice.util.ThreadSafeCallbacks;
-import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.IOException;
 import java.io.InputStream;

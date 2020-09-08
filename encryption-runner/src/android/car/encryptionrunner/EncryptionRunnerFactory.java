@@ -16,9 +16,8 @@
 
 package android.car.encryptionrunner;
 
-import android.annotation.IntDef;
-
-import com.android.internal.annotations.VisibleForTesting;
+import androidx.annotation.IntDef;
+import androidx.annotation.VisibleForTesting;
 
 /**
  * Factory that creates encryption runner.
@@ -66,8 +65,8 @@ public class EncryptionRunnerFactory {
      * for testing.
      */
     @VisibleForTesting
-    public static EncryptionRunner newDummyRunner() {
-        return new DummyEncryptionRunner();
+    public static EncryptionRunner newFakeRunner() {
+        return new FakeEncryptionRunner();
     }
 
     /**
@@ -75,7 +74,7 @@ public class EncryptionRunnerFactory {
      * for out of band association testing.
      */
     @VisibleForTesting
-    public static EncryptionRunner newOobDummyRunner() {
-        return new OobDummyEncryptionRunner();
+    public static EncryptionRunner newOobFakeRunner() {
+        return new OobFakeEncryptionRunner();
     }
 }

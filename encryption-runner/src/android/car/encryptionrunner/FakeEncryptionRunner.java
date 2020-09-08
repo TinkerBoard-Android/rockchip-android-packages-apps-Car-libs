@@ -16,9 +16,8 @@
 
 package android.car.encryptionrunner;
 
-import android.annotation.IntDef;
-
-import com.android.internal.annotations.VisibleForTesting;
+import androidx.annotation.IntDef;
+import androidx.annotation.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -28,10 +27,10 @@ import java.lang.annotation.RetentionPolicy;
  * production environments.
  */
 @VisibleForTesting
-public class DummyEncryptionRunner implements EncryptionRunner {
+public class FakeEncryptionRunner implements EncryptionRunner {
 
     private static final String KEY = "key";
-    private static final byte[] DUMMY_MESSAGE = "Dummy Message".getBytes();
+    private static final byte[] PLACEHOLDER_MESSAGE = "Placeholder Message".getBytes();
     @VisibleForTesting
     public static final String INIT = "init";
     @VisibleForTesting
@@ -51,7 +50,7 @@ public class DummyEncryptionRunner implements EncryptionRunner {
 
     private boolean mIsReconnect;
     private boolean mInitReconnectVerification;
-    private Key mCurrentDummyKey;
+    private Key mCurrentFakeKey;
     @Mode
     private int mMode;
     @HandshakeMessage.HandshakeState
@@ -144,12 +143,12 @@ public class DummyEncryptionRunner implements EncryptionRunner {
     @Override
     public HandshakeMessage authenticateReconnection(byte[] message, byte[] previousKey)
             throws HandshakeException {
-        mCurrentDummyKey = new DummyKey();
-        // Blindly verify the reconnection because this is a dummy encryption runner.
+        mCurrentFakeKey = new FakeKey();
+        // Blindly verify the reconnection because this is a fake encryption runner.
         return HandshakeMessage.newBuilder()
                 .setHandshakeState(HandshakeMessage.HandshakeState.FINISHED)
-                .setKey(mCurrentDummyKey)
-                .setNextMessage(mInitReconnectVerification ? null : DUMMY_MESSAGE)
+                .setKey(mCurrentFakeKey)
+                .setNextMessage(mInitReconnectVerification ? null : PLACEHOLDER_MESSAGE)
                 .build();
     }
 
@@ -160,13 +159,13 @@ public class DummyEncryptionRunner implements EncryptionRunner {
         mState = HandshakeMessage.HandshakeState.RESUMING_SESSION;
         return HandshakeMessage.newBuilder()
                 .setHandshakeState(mState)
-                .setNextMessage(DUMMY_MESSAGE)
+                .setNextMessage(PLACEHOLDER_MESSAGE)
                 .build();
     }
 
     @Override
     public Key keyOf(byte[] serialized) {
-        return new DummyKey();
+        return new FakeKey();
     }
 
     @Override
@@ -175,7 +174,7 @@ public class DummyEncryptionRunner implements EncryptionRunner {
             throw new IllegalStateException("asking to verify pin, state = " + mState);
         }
         mState = HandshakeMessage.HandshakeState.FINISHED;
-        return HandshakeMessage.newBuilder().setKey(new DummyKey()).setHandshakeState(
+        return HandshakeMessage.newBuilder().setKey(new FakeKey()).setHandshakeState(
                 mState).build();
     }
 
@@ -194,7 +193,7 @@ public class DummyEncryptionRunner implements EncryptionRunner {
         throw new HandshakeException(message);
     }
 
-    class DummyKey implements Key {
+    class FakeKey implements Key {
         @Override
         public byte[] asBytes() {
             return KEY.getBytes();

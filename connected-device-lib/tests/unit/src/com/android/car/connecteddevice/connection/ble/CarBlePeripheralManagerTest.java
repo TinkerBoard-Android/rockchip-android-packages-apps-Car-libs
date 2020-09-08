@@ -22,19 +22,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mockitoSession;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.annotation.NonNull;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
-import android.car.encryptionrunner.EncryptionRunnerFactory;
-import android.car.encryptionrunner.Key;
 import android.os.ParcelUuid;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -48,9 +44,7 @@ import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
 import com.android.car.connecteddevice.util.ByteUtils;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -60,8 +54,6 @@ import org.mockito.quality.Strictness;
 
 import java.time.Duration;
 import java.util.UUID;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
 public class CarBlePeripheralManagerTest {
@@ -75,11 +67,8 @@ public class CarBlePeripheralManagerTest {
     private static final UUID TEST_REMOTE_DEVICE_ID = UUID.randomUUID();
     private static final String TEST_VERIFICATION_CODE = "000000";
     private static final String TEST_ENCRYPTED_VERIFICATION_CODE = "12345";
-    private static final byte[] TEST_KEY = "Key".getBytes();
     private static final Duration RECONNECT_ADVERTISEMENT_DURATION = Duration.ofSeconds(2);
     private static final int DEFAULT_MTU_SIZE = 23;
-
-    private static String sAdapterName;
 
     @Mock
     private BlePeripheralManager mMockPeripheralManager;
@@ -87,15 +76,12 @@ public class CarBlePeripheralManagerTest {
     private ConnectedDeviceStorage mMockStorage;
     @Mock
     private OobConnectionManager mMockOobConnectionManager;
+    @Mock
+    private AssociationCallback mAssociationCallback;
 
     private CarBlePeripheralManager mCarBlePeripheralManager;
 
     private MockitoSession mMockitoSession;
-
-    @BeforeClass
-    public static void beforeSetUp() {
-        sAdapterName = BluetoothAdapter.getDefaultAdapter().getName();
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -104,8 +90,9 @@ public class CarBlePeripheralManagerTest {
                 .strictness(Strictness.WARN)
                 .startMocking();
         mCarBlePeripheralManager = new CarBlePeripheralManager(mMockPeripheralManager, mMockStorage,
-                ASSOCIATION_SERVICE_UUID, RECONNECT_SERVICE_UUID, RECONNECT_DATA_UUID,
-                WRITE_UUID, READ_UUID, RECONNECT_ADVERTISEMENT_DURATION, DEFAULT_MTU_SIZE);
+                ASSOCIATION_SERVICE_UUID, RECONNECT_SERVICE_UUID,
+                RECONNECT_DATA_UUID, WRITE_UUID, READ_UUID, RECONNECT_ADVERTISEMENT_DURATION,
+                DEFAULT_MTU_SIZE);
 
         when(mMockOobConnectionManager.encryptVerificationCode(
                 TEST_VERIFICATION_CODE.getBytes())).thenReturn(
@@ -126,101 +113,84 @@ public class CarBlePeripheralManagerTest {
         }
     }
 
-    @AfterClass
-    public static void afterTearDown() {
-        BluetoothAdapter.getDefaultAdapter().setName(sAdapterName);
-    }
-
     @Test
     public void testStartAssociationAdvertisingSuccess() {
-        Semaphore semaphore = new Semaphore(0);
-        AssociationCallback callback = createAssociationCallback(semaphore);
         String testDeviceName = getNameForAssociation();
-        startAssociation(callback, testDeviceName);
-        ArgumentCaptor<AdvertiseData> dataCaptor = ArgumentCaptor.forClass(AdvertiseData.class);
-        verify(mMockPeripheralManager, timeout(3000)).startAdvertising(any(),
-                dataCaptor.capture(), any());
-        AdvertiseData data = dataCaptor.getValue();
-        assertThat(data.getIncludeDeviceName()).isTrue();
-        ParcelUuid expected = new ParcelUuid(ASSOCIATION_SERVICE_UUID);
-        assertThat(data.getServiceUuids().get(0)).isEqualTo(expected);
-        assertThat(BluetoothAdapter.getDefaultAdapter().getName()).isEqualTo(testDeviceName);
+        startAssociation(mAssociationCallback, testDeviceName);
+        ArgumentCaptor<AdvertiseData> advertisementDataCaptor =
+                ArgumentCaptor.forClass(AdvertiseData.class);
+        ArgumentCaptor<AdvertiseData> scanResponseDataCaptor =
+                ArgumentCaptor.forClass(AdvertiseData.class);
+        verify(mMockPeripheralManager).startAdvertising(any(), advertisementDataCaptor.capture(),
+                scanResponseDataCaptor.capture(), any());
+        AdvertiseData advertisementData = advertisementDataCaptor.getValue();
+        ParcelUuid serviceUuid = new ParcelUuid(ASSOCIATION_SERVICE_UUID);
+        assertThat(advertisementData.getServiceUuids()).contains(serviceUuid);
+        AdvertiseData scanResponseData = scanResponseDataCaptor.getValue();
+        assertThat(scanResponseData.getIncludeDeviceName()).isFalse();
+        ParcelUuid dataUuid = new ParcelUuid(RECONNECT_DATA_UUID);
+        assertThat(scanResponseData.getServiceData().get(dataUuid)).isEqualTo(
+                testDeviceName.getBytes());
     }
 
     @Test
-    public void testStartAssociationAdvertisingFailure() throws InterruptedException {
-        Semaphore semaphore = new Semaphore(0);
-        AssociationCallback callback = createAssociationCallback(semaphore);
-        startAssociation(callback, getNameForAssociation());
+    public void testStartAssociationAdvertisingFailure() {
+        startAssociation(mAssociationCallback, getNameForAssociation());
         ArgumentCaptor<AdvertiseCallback> callbackCaptor =
                 ArgumentCaptor.forClass(AdvertiseCallback.class);
-        verify(mMockPeripheralManager, timeout(3000))
-                .startAdvertising(any(), any(), callbackCaptor.capture());
+        verify(mMockPeripheralManager).startAdvertising(any(), any(), any(),
+                callbackCaptor.capture());
         AdvertiseCallback advertiseCallback = callbackCaptor.getValue();
         int testErrorCode = 2;
         advertiseCallback.onStartFailure(testErrorCode);
-        assertThat(tryAcquire(semaphore)).isTrue();
-        verify(callback).onAssociationStartFailure();
+        verify(mAssociationCallback).onAssociationStartFailure();
     }
 
     @Test
-    public void testNotifyAssociationSuccess() throws InterruptedException {
-        Semaphore semaphore = new Semaphore(0);
-        AssociationCallback callback = createAssociationCallback(semaphore);
+    public void testNotifyAssociationSuccess() {
         String testDeviceName = getNameForAssociation();
-        startAssociation(callback, testDeviceName);
+        startAssociation(mAssociationCallback, testDeviceName);
         ArgumentCaptor<AdvertiseCallback> callbackCaptor =
                 ArgumentCaptor.forClass(AdvertiseCallback.class);
-        verify(mMockPeripheralManager, timeout(3000))
-                .startAdvertising(any(), any(), callbackCaptor.capture());
+        verify(mMockPeripheralManager).startAdvertising(any(), any(), any(),
+                callbackCaptor.capture());
         AdvertiseCallback advertiseCallback = callbackCaptor.getValue();
         AdvertiseSettings settings = new AdvertiseSettings.Builder().build();
         advertiseCallback.onStartSuccess(settings);
-        assertThat(tryAcquire(semaphore)).isTrue();
-        verify(callback).onAssociationStartSuccess(eq(testDeviceName));
+        verify(mAssociationCallback).onAssociationStartSuccess(eq(testDeviceName));
     }
 
     @Test
-    public void testShowVerificationCode() throws InterruptedException {
-        Semaphore semaphore = new Semaphore(0);
-        AssociationCallback callback = createAssociationCallback(semaphore);
-        AssociationSecureChannel channel = getChannelForAssociation(callback);
+    public void testShowVerificationCode() {
+        AssociationSecureChannel channel = getChannelForAssociation(mAssociationCallback);
         channel.getShowVerificationCodeListener().showVerificationCode(TEST_VERIFICATION_CODE);
-        assertThat(tryAcquire(semaphore)).isTrue();
-        verify(callback).onVerificationCodeAvailable(eq(TEST_VERIFICATION_CODE));
+        verify(mAssociationCallback).onVerificationCodeAvailable(eq(TEST_VERIFICATION_CODE));
     }
 
     @Test
-    public void testAssociationSuccess() throws InterruptedException {
-        Semaphore semaphore = new Semaphore(0);
-        AssociationCallback callback = createAssociationCallback(semaphore);
-        SecureChannel channel = getChannelForAssociation(callback);
+    public void testAssociationSuccess() {
+        SecureChannel channel = getChannelForAssociation(mAssociationCallback);
         SecureChannel.Callback channelCallback = channel.getCallback();
         assertThat(channelCallback).isNotNull();
         channelCallback.onDeviceIdReceived(TEST_REMOTE_DEVICE_ID.toString());
-        Key key = EncryptionRunnerFactory.newDummyRunner().keyOf(TEST_KEY);
         channelCallback.onSecureChannelEstablished();
         ArgumentCaptor<AssociatedDevice> deviceCaptor =
                 ArgumentCaptor.forClass(AssociatedDevice.class);
         verify(mMockStorage).addAssociatedDeviceForActiveUser(deviceCaptor.capture());
         AssociatedDevice device = deviceCaptor.getValue();
         assertThat(device.getDeviceId()).isEqualTo(TEST_REMOTE_DEVICE_ID.toString());
-        assertThat(tryAcquire(semaphore)).isTrue();
-        verify(callback).onAssociationCompleted(eq(TEST_REMOTE_DEVICE_ID.toString()));
+        verify(mAssociationCallback).onAssociationCompleted(eq(TEST_REMOTE_DEVICE_ID.toString()));
     }
 
     @Test
-    public void testAssociationFailure_channelError() throws InterruptedException {
-        Semaphore semaphore = new Semaphore(0);
-        AssociationCallback callback = createAssociationCallback(semaphore);
-        SecureChannel channel = getChannelForAssociation(callback);
+    public void testAssociationFailure_channelError() {
+        SecureChannel channel = getChannelForAssociation(mAssociationCallback);
         SecureChannel.Callback channelCallback = channel.getCallback();
         int testErrorCode = 1;
         assertThat(channelCallback).isNotNull();
         channelCallback.onDeviceIdReceived(TEST_REMOTE_DEVICE_ID.toString());
         channelCallback.onEstablishSecureChannelFailure(testErrorCode);
-        assertThat(tryAcquire(semaphore)).isTrue();
-        verify(callback).onAssociationError(eq(testErrorCode));
+        verify(mAssociationCallback).onAssociationError(eq(testErrorCode));
     }
 
     @Test
@@ -230,7 +200,8 @@ public class CarBlePeripheralManagerTest {
         mCarBlePeripheralManager.connectToDevice(UUID.randomUUID());
         ArgumentCaptor<AdvertiseCallback> callbackCaptor =
                 ArgumentCaptor.forClass(AdvertiseCallback.class);
-        verify(mMockPeripheralManager).startAdvertising(any(), any(), callbackCaptor.capture());
+        verify(mMockPeripheralManager).startAdvertising(any(), any(), any(),
+                callbackCaptor.capture());
         callbackCaptor.getValue().onStartSuccess(null);
         verify(mMockPeripheralManager,
                 timeout(RECONNECT_ADVERTISEMENT_DURATION.plusSeconds(1).toMillis()))
@@ -266,42 +237,8 @@ public class CarBlePeripheralManagerTest {
         return (AssociationSecureChannel) mCarBlePeripheralManager.getConnectedDeviceChannel();
     }
 
-    private boolean tryAcquire(Semaphore semaphore) throws InterruptedException {
-        return semaphore.tryAcquire(100, TimeUnit.MILLISECONDS);
-    }
-
     private String getNameForAssociation() {
         return ByteUtils.generateRandomNumberString(DEVICE_NAME_LENGTH_LIMIT);
 
-    }
-
-    @NonNull
-    private AssociationCallback createAssociationCallback(@NonNull final Semaphore semaphore) {
-        return spy(new AssociationCallback() {
-            @Override
-            public void onAssociationStartSuccess(String deviceName) {
-                semaphore.release();
-            }
-
-            @Override
-            public void onAssociationStartFailure() {
-                semaphore.release();
-            }
-
-            @Override
-            public void onAssociationError(int error) {
-                semaphore.release();
-            }
-
-            @Override
-            public void onVerificationCodeAvailable(String code) {
-                semaphore.release();
-            }
-
-            @Override
-            public void onAssociationCompleted(String deviceId) {
-                semaphore.release();
-            }
-        });
     }
 }

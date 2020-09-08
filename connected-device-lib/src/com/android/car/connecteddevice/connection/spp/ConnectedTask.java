@@ -20,8 +20,9 @@ import static com.android.car.connecteddevice.util.SafeLog.logd;
 import static com.android.car.connecteddevice.util.SafeLog.loge;
 import static com.android.car.connecteddevice.util.SafeLog.logi;
 
-import android.annotation.NonNull;
 import android.bluetooth.BluetoothSocket;
+
+import androidx.annotation.NonNull;
 
 import java.io.IOException;
 import java.io.InputStream;
