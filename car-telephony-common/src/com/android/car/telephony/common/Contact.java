@@ -450,6 +450,17 @@ public class Contact implements Parcelable, Comparable<Contact> {
     }
 
     /**
+     * Returns the initials of the contact's name based on display order.
+     */
+    public String getInitialsBasedOnDisplayOrder(boolean startWithFirstName) {
+        if (startWithFirstName) {
+            return TelecomUtils.getInitials(mDisplayName, mDisplayNameAlt);
+        } else {
+            return TelecomUtils.getInitials(mDisplayNameAlt, mDisplayName);
+        }
+    }
+
+    /**
      * Returns {@link #mPhoneBookLabel}
      */
     public String getPhonebookLabel() {
