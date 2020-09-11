@@ -545,6 +545,51 @@ public class CarUiRecyclerViewTest {
     }
 
     @Test
+    public void testPageDownScrollsOverLongItemAtTheEnd() {
+        mActivity.runOnUiThread(
+                () -> mActivity.setContentView(R.layout.car_ui_recycler_view_test_activity));
+
+        onView(withId(R.id.list)).check(matches(isDisplayed()));
+
+        int itemCount = 100;
+        // Position the long item at the end.
+        int longItemPosition = itemCount - 1;
+
+        Map<Integer, TestAdapter.ItemHeight> heightOverrides = new HashMap<>();
+        heightOverrides.put(longItemPosition, TestAdapter.ItemHeight.TALL);
+        TestAdapter adapter = new TestAdapter(itemCount, heightOverrides);
+
+        CarUiRecyclerView carUiRecyclerView = mActivity.requireViewById(R.id.list);
+        mActivity.runOnUiThread(() -> {
+            // Setting top padding to any number greater than 0.
+            // Not having padding will make this test pass all the time.
+            // Also adding bottom padding to make sure the padding
+            // after the last content is considered in calculations.
+            carUiRecyclerView.setPadding(0, 1, 0, 1);
+            carUiRecyclerView.setAdapter(adapter);
+        });
+
+        IdlingRegistry.getInstance().register(new ScrollIdlingResource(carUiRecyclerView));
+
+        OrientationHelper orientationHelper =
+                OrientationHelper.createVerticalHelper(carUiRecyclerView.getLayoutManager());
+
+        // 20 is just an arbitrary number to make sure we reach the end of the recyclerview.
+        for (int i = 0; i < 20; i++) {
+            onView(withId(R.id.car_ui_scrollbar_page_down)).perform(click());
+        }
+
+        onView(withId(R.id.car_ui_scrollbar_page_down)).check(matches(not(isEnabled())));
+
+        View longItem = getLongItem(carUiRecyclerView);
+        // Making sure we've reached end of the recyclerview, after
+        // adding bottom padding
+        assertThat(orientationHelper.getDecoratedEnd(longItem)
+                + carUiRecyclerView.getPaddingBottom(),
+                is(equalTo(carUiRecyclerView.getHeight())));
+    }
+
+    @Test
     public void testPageUpScrollsOverLongItem() {
         mActivity.runOnUiThread(
                 () -> mActivity.setContentView(R.layout.car_ui_recycler_view_test_activity));
@@ -650,6 +695,52 @@ public class CarUiRecyclerViewTest {
         assertThat(orientationHelper.getDecoratedEnd(longItem),
                 not(equalTo(carUiRecyclerView.getHeight())));
     }
+
+    @Test
+    public void testPageDownScrollsOverVeryLongItemAtTheEnd() {
+        mActivity.runOnUiThread(
+                () -> mActivity.setContentView(R.layout.car_ui_recycler_view_test_activity));
+
+        onView(withId(R.id.list)).check(matches(isDisplayed()));
+
+        int itemCount = 100;
+        // Position the long item at the end.
+        int longItemPosition = itemCount - 1;
+
+        Map<Integer, TestAdapter.ItemHeight> heightOverrides = new HashMap<>();
+        heightOverrides.put(longItemPosition, TestAdapter.ItemHeight.EXTRA_TALL);
+        TestAdapter adapter = new TestAdapter(itemCount, heightOverrides);
+
+        CarUiRecyclerView carUiRecyclerView = mActivity.requireViewById(R.id.list);
+        mActivity.runOnUiThread(() -> {
+            // Setting top padding to any number greater than 0.
+            // Not having padding will make this test pass all the time.
+            // Also adding bottom padding to make sure the padding
+            // after the last content is considered in calculations.
+            carUiRecyclerView.setPadding(0, 1, 0, 1);
+            carUiRecyclerView.setAdapter(adapter);
+        });
+
+        IdlingRegistry.getInstance().register(new ScrollIdlingResource(carUiRecyclerView));
+
+        OrientationHelper orientationHelper =
+                OrientationHelper.createVerticalHelper(carUiRecyclerView.getLayoutManager());
+
+        // 20 is just an arbitrary number to make sure we reach the end of the recyclerview.
+        for (int i = 0; i < 20; i++) {
+            onView(withId(R.id.car_ui_scrollbar_page_down)).perform(click());
+        }
+
+        onView(withId(R.id.car_ui_scrollbar_page_down)).check(matches(not(isEnabled())));
+
+        View longItem = getLongItem(carUiRecyclerView);
+        // Making sure we've reached end of the recyclerview, after
+        // adding bottom padding
+        assertThat(orientationHelper.getDecoratedEnd(longItem)
+                + carUiRecyclerView.getPaddingBottom(),
+                is(equalTo(carUiRecyclerView.getHeight())));
+    }
+
 
     @Test
     public void testPageDownMaintainsMinimumScrollThumbTrackHeight() {
