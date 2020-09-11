@@ -76,5 +76,5 @@ dependencies {
     androidTestImplementation 'androidx.test:rules:1.1.0'
     // This is needed to be able to spy certain classes with Mockito
     // It's major/minor version must match Mockito's.
-    androidTestImplementation 'com.linkedin.dexmaker:dexmaker-mockito:2.19.0'
+    androidTestImplementation 'com.linkedin.dexmaker:dexmaker-mockito-inline:2.19.0'
 }
