@@ -31,7 +31,7 @@ import androidx.recyclerview.widget.RecyclerView;
  *
  * @param <T> type of the {@link RecyclerView.ViewHolder} objects used by the delegate.
  */
-public final class DelegatingContentLimitingAdapter<T extends RecyclerView.ViewHolder>
+public class DelegatingContentLimitingAdapter<T extends RecyclerView.ViewHolder>
         extends ContentLimitingAdapter<T> {
     private static final int SCROLLING_LIMITED_MESSAGE_VIEW_TYPE = Integer.MAX_VALUE;
     private static final int SCROLLING_LIMITED_MESSAGE_DEFAULT_POSITION_OFFSET = -1;
