@@ -88,14 +88,19 @@ public class CarUiTwoActionPreference extends CarUiPreference {
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
+        View containerWithoutWidget = CarUiUtils.findViewByRefId(holder.itemView,
+                R.id.car_ui_preference_container_without_widget);
         View actionContainer = CarUiUtils.findViewByRefId(holder.itemView,
                 R.id.action_widget_container);
         View widgetFrame = CarUiUtils.findViewByRefId(holder.itemView, android.R.id.widget_frame);
+        holder.itemView.setFocusable(!mIsActionShown);
+        containerWithoutWidget.setOnClickListener(mIsActionShown ? this::performClick : null);
+        containerWithoutWidget.setClickable(mIsActionShown);
+        containerWithoutWidget.setFocusable(mIsActionShown);
+        actionContainer.setVisibility(mIsActionShown ? View.VISIBLE : View.GONE);
+        widgetFrame.setFocusable(mIsActionShown);
         if (mIsActionShown) {
-            actionContainer.setVisibility(View.VISIBLE);
             onBindWidgetFrame(widgetFrame);
-        } else {
-            actionContainer.setVisibility(View.GONE);
         }
     }
 
