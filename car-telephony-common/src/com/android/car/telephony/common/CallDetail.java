@@ -50,7 +50,7 @@ public class CallDetail {
     public static CallDetail fromTelecomCallDetail(@Nullable Call.Details callDetail) {
         return new CallDetail(getNumber(callDetail), getDisconnectCause(callDetail),
                 getGatewayInfoOriginalAddress(callDetail), getConnectTimeMillis(callDetail),
-                callDetail.hasProperty(Call.Details.PROPERTY_CONFERENCE));
+                isConferenceCall(callDetail));
     }
 
     /**
@@ -125,5 +125,9 @@ public class CallDetail {
         } else {
             return 0;
         }
+    }
+
+    private static boolean isConferenceCall(Call.Details callDetail) {
+        return callDetail != null && callDetail.hasProperty(Call.Details.PROPERTY_CONFERENCE);
     }
 }
