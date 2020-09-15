@@ -346,7 +346,8 @@ class DefaultScrollBar implements ScrollBar {
              */
             View child = getRecyclerView().getChildAt(i);
             if (child.getHeight() > screenSize) {
-                if (orientationHelper.getDecoratedStart(child) > 0) {
+                if (orientationHelper.getDecoratedStart(child)
+                        - orientationHelper.getStartAfterPadding() > 0) {
                     // Child view top is entering screen. Align its top with parent top.
                     scrollDistance = orientationHelper.getDecoratedStart(lastChild)
                             - orientationHelper.getStartAfterPadding();
