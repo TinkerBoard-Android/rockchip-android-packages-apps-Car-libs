@@ -59,7 +59,7 @@ public class ContentLimitingAdapterUiTest {
         mActivityRule.runOnUiThread(() -> {
             mContentLimitingAdapter.setMaxItems(20);
         });
-
+        Thread.sleep(300);
         onView(withText("Item 0")).check(matches(isDisplayed()));
         onView(withId(R.id.list)).perform(scrollToPosition(20));
         onView(withText("Item 19")).check(matches(isDisplayed()));
@@ -70,7 +70,7 @@ public class ContentLimitingAdapterUiTest {
         mActivityRule.runOnUiThread(() -> {
             mContentLimitingAdapter.setMaxItems(-1);
         });
-
+        Thread.sleep(300);
         onView(withId(com.android.car.ui.R.id.car_ui_list_limiting_message)).check(doesNotExist());
     }
 
@@ -81,7 +81,7 @@ public class ContentLimitingAdapterUiTest {
         mActivityRule.runOnUiThread(() -> {
             mContentLimitingAdapter.setMaxItems(1);
         });
-
+        Thread.sleep(300);
         onView(withText("Item 0")).check(matches(isDisplayed()));
         onView(withText("Item 1")).check(doesNotExist());
         onView(withId(com.android.car.ui.R.id.car_ui_list_limiting_message))
@@ -91,7 +91,7 @@ public class ContentLimitingAdapterUiTest {
         mActivityRule.runOnUiThread(() -> {
             mContentLimitingAdapter.setMaxItems(-1);
         });
-
+        Thread.sleep(300);
         onView(withId(com.android.car.ui.R.id.car_ui_list_limiting_message)).check(doesNotExist());
     }
 
@@ -102,7 +102,7 @@ public class ContentLimitingAdapterUiTest {
         mActivityRule.runOnUiThread(() -> {
             mContentLimitingAdapter.setMaxItems(0);
         });
-
+        Thread.sleep(300);
         onView(withText("Item 0")).check(doesNotExist());
         onView(withId(com.android.car.ui.R.id.car_ui_list_limiting_message))
                 .check(matches(isDisplayed()));
@@ -110,7 +110,7 @@ public class ContentLimitingAdapterUiTest {
         mActivityRule.runOnUiThread(() -> {
             mContentLimitingAdapter.setMaxItems(-1);
         });
-
+        Thread.sleep(300);
         onView(withId(com.android.car.ui.R.id.car_ui_list_limiting_message)).check(doesNotExist());
     }
 
@@ -119,7 +119,7 @@ public class ContentLimitingAdapterUiTest {
         mActivityRule.runOnUiThread(() -> {
             mContentLimitingAdapter.setMaxItems(70);
         });
-
+        Thread.sleep(300);
         onView(withText("Item 0")).check(matches(isDisplayed()));
         onView(withId(R.id.list)).perform(scrollToPosition(49));
         onView(withText("Item 49")).check(matches(isDisplayed()));
@@ -130,7 +130,7 @@ public class ContentLimitingAdapterUiTest {
         mActivityRule.runOnUiThread(() -> {
             mContentLimitingAdapter.setMaxItems(-1);
         });
-
+        Thread.sleep(300);
         onView(withId(com.android.car.ui.R.id.car_ui_list_limiting_message)).check(doesNotExist());
     }
 }
