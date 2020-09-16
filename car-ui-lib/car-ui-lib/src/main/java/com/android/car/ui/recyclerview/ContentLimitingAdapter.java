@@ -35,8 +35,10 @@ public abstract class ContentLimitingAdapter<T extends RecyclerView.ViewHolder>
 
     private static final int SCROLLING_LIMITED_MESSAGE_VIEW_TYPE = Integer.MAX_VALUE;
 
-    private int mMaxItems = ContentLimiting.UNLIMITED;
     private Integer mScrollingLimitedMessageResId;
+    private RangeFilter mRangeFilter = new PassThroughFilter();
+    private RecyclerView mRecyclerView;
+    private boolean mIsLimiting = false;
 
     /**
      * Returns the viewType value to use for the scrolling limited message views.
@@ -71,11 +73,25 @@ public abstract class ContentLimitingAdapter<T extends RecyclerView.ViewHolder>
     @Override
     @SuppressWarnings("unchecked")
     public final void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        if (isContentLimited() && position == getScrollingLimitedMessagePosition()) {
-            ((ScrollingLimitedViewHolder) holder).bind(mScrollingLimitedMessageResId);
-            return;
+        if (holder instanceof ScrollingLimitedViewHolder) {
+            ScrollingLimitedViewHolder vh = (ScrollingLimitedViewHolder) holder;
+            vh.bind(mScrollingLimitedMessageResId);
+        } else {
+            int index = mRangeFilter.positionToIndex(position);
+            if (index != RangeFilterImpl.INVALID_INDEX) {
+                int size = getUnrestrictedItemCount();
+                if (0 <= index && index < size) {
+                    onBindViewHolderImpl((T) holder, index);
+                } else {
+                    Log.e(TAG, "onBindViewHolder pos: " + position + " gave index: "
+                            + index + " out of bounds size: " + size
+                            + " " + mRangeFilter.toString());
+                }
+            } else {
+                Log.e(TAG, "onBindViewHolder invalid position " + position
+                        + " " + mRangeFilter.toString());
+            }
         }
-        onBindViewHolderImpl((T) holder, position);
     }
 
     /**
@@ -88,10 +104,11 @@ public abstract class ContentLimitingAdapter<T extends RecyclerView.ViewHolder>
 
     @Override
     public final int getItemViewType(int position) {
-        if (isContentLimited() && position == getScrollingLimitedMessagePosition()) {
+        if (mRangeFilter.positionToIndex(position) == RangeFilterImpl.INVALID_INDEX) {
             return getScrollingLimitedMessageViewType();
+        } else {
+            return getItemViewTypeImpl(mRangeFilter.positionToIndex(position));
         }
-        return getItemViewTypeImpl(position);
     }
 
     /**
@@ -111,23 +128,21 @@ public abstract class ContentLimitingAdapter<T extends RecyclerView.ViewHolder>
      *
      * <p>The default implementation is to put this item at the very end of the limited list.
      * Subclasses can override to choose a different position to suit their needs.
+     *
+     * @deprecated limiting message offset is not supported any more.
      */
+    @Deprecated
     protected int getScrollingLimitedMessagePosition() {
         return getItemCount() - 1;
     }
 
     @Override
     public final int getItemCount() {
-        if (isContentLimited()) {
-            // If there are more items than the content limit, return the limit plus 1 more row
-            // for the special "scrolling limited message" item.
-            return mMaxItems + 1;
+        if (mIsLimiting) {
+            return mRangeFilter.getFilteredCount();
+        } else {
+            return getUnrestrictedItemCount();
         }
-        return getUnrestrictedItemCount();
-    }
-
-    private boolean isContentLimited() {
-        return mMaxItems > ContentLimiting.UNLIMITED && getUnrestrictedItemCount() > mMaxItems;
     }
 
     /**
@@ -196,6 +211,11 @@ public abstract class ContentLimitingAdapter<T extends RecyclerView.ViewHolder>
     }
 
     @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        mRecyclerView = recyclerView;
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public final void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder) {
         super.onViewDetachedFromWindow(holder);
@@ -217,33 +237,76 @@ public abstract class ContentLimitingAdapter<T extends RecyclerView.ViewHolder>
 
     @Override
     public void setMaxItems(int maxItems) {
-        int originalCount = getItemCount();
-        mMaxItems = maxItems;
-        int newCount = getItemCount();
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "maxItems " + mMaxItems
-                    + " unrestrictedItemCount " + getUnrestrictedItemCount()
-                    + " originalCount " + originalCount
-                    + " newCount " + newCount);
-        }
-
-        if (newCount == originalCount && newCount == 1) {
-            // Need to update the single item to show scrolling limited message or the actual
-            // item, depending on the state of the car.
-            notifyItemChanged(1);
-        }
-        if (newCount < originalCount) {
-            notifyItemRangeRemoved(newCount, originalCount - newCount);
+        if (maxItems >= 0) {
+            if (mRangeFilter != null && mIsLimiting) {
+                Log.w(TAG, "A new filter range received before parked");
+                // remove the original filter first.
+                mRangeFilter.removeFilter();
+            }
+            mIsLimiting = true;
+            mRangeFilter = new RangeFilterImpl(this, maxItems);
+            mRangeFilter.recompute(getUnrestrictedItemCount(), computeAnchorIndexWhenRestricting());
+            mRangeFilter.applyFilter();
+            autoScrollWhenRestricted();
         } else {
-            notifyItemRangeInserted(originalCount, newCount - originalCount + 1);
+            mRangeFilter.removeFilter();
+
+            mIsLimiting = false;
+            mRangeFilter = new PassThroughFilter();
+            mRangeFilter.recompute(getUnrestrictedItemCount(), 0);
         }
+    }
+
+    /**
+     * Returns the position in the truncated list to scroll to when the list is limited.
+     *
+     * Returns -1 to disable the scrolling.
+     */
+    protected int getScrollToPositionWhenRestricted() {
+        return -1;
+    }
+
+    private void autoScrollWhenRestricted() {
+        int scrollToPosition = getScrollToPositionWhenRestricted();
+        if (scrollToPosition >= 0) {
+            RecyclerView.LayoutManager layoutManager = mRecyclerView.getLayoutManager();
+            if (layoutManager != null) {
+                mRecyclerView.getLayoutManager().scrollToPosition(scrollToPosition);
+            }
+        }
+    }
+
+    /**
+     * Computes the anchor point index in the original list when limiting starts.
+     * Returns position 0 by default.
+     *
+     * Override this function to return a different anchor point to control the position of the
+     * limiting window.
+     */
+    protected int computeAnchorIndexWhenRestricting() {
+        return 0;
+    }
+
+    /**
+     * Updates the changes from underlying data along with a new anchor.
+     */
+    public void updateUnderlyingDataChanged(int unrestrictedCount, int newAnchorIndex) {
+        mRangeFilter.recompute(unrestrictedCount, newAnchorIndex);
+    }
+
+    /**
+     * Changes the index where the limiting range surrounds. Items that are added and removed will
+     * be notified.
+     */
+    public void notifyLimitingAnchorChanged(int newPivotIndex) {
+        mRangeFilter.notifyPivotIndexChanged(newPivotIndex);
     }
 
     @Override
     public void setScrollingLimitedMessageResId(@StringRes int resId) {
         if (mScrollingLimitedMessageResId == null || mScrollingLimitedMessageResId != resId) {
             mScrollingLimitedMessageResId = resId;
-            notifyItemChanged(getScrollingLimitedMessagePosition());
+            mRangeFilter.invalidateMessagePositions();
         }
     }
 }
