@@ -130,17 +130,6 @@ public class ContentLimitingAdapterTest {
         isTestViewHolderWithText(last, "Item 49");
     }
 
-    @Test(expected = IndexOutOfBoundsException.class)
-    public void setMaxItem_toZeroOnAnEmptyList() {
-        mContentLimitingAdapter = new TestContentLimitingAdapter(0);
-        assertThat(mContentLimitingAdapter.getItemCount()).isEqualTo(0);
-
-        mContentLimitingAdapter.setMaxItems(0);
-
-        assertThat(mContentLimitingAdapter.getItemCount()).isEqualTo(0);
-        getItemAtPosition(0);
-    }
-
     private RecyclerView.ViewHolder getItemAtPosition(int position) {
         int viewType = mContentLimitingAdapter.getItemViewType(position);
         RecyclerView.ViewHolder viewHolder =
