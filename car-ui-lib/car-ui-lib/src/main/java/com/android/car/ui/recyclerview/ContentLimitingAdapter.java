@@ -61,6 +61,16 @@ public abstract class ContentLimitingAdapter<T extends RecyclerView.ViewHolder>
         return onCreateViewHolderImpl(parent, viewType);
     }
 
+    /** See {@link RangeFilter#indexToPosition}. */
+    protected int indexToPosition(int index) {
+        return mRangeFilter.indexToPosition(index);
+    }
+
+    /** See {@link RangeFilter#positionToIndex}. */
+    protected int positionToIndex(int position) {
+        return mRangeFilter.positionToIndex(position);
+    }
+
     /**
      * Returns a {@link androidx.recyclerview.widget.RecyclerView.ViewHolder} of type {@code T}.
      *
