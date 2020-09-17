@@ -34,8 +34,6 @@ import android.view.inputmethod.InputMethodManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import java.util.function.Predicate;
-
 /**
  * A transparent {@link View} that can take focus. It's used by {@link
  * com.android.car.rotary.RotaryService} to support rotary controller navigation. Each {@link
@@ -215,5 +213,10 @@ public class FocusParkingView extends View {
             }
         }
         return null;
+    }
+
+    /** A function that takes a {@code T} and returns a {@code boolean}. */
+    private interface Predicate<T> {
+        boolean test(@NonNull T view);
     }
 }
