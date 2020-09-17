@@ -55,13 +55,6 @@ public class MultiSelectListPreferenceFragment extends Fragment implements Inset
     private CarUiMultiSelectListPreference mPreference;
     private Set<String> mNewValues;
     private ToolbarController mToolbar;
-    private final Toolbar.OnBackListener mOnBackListener = () -> {
-        if (mPreference.callChangeListener(mNewValues)) {
-            mPreference.setValues(mNewValues);
-        }
-
-        return false;
-    };
 
     /**
      * Returns a new instance of {@link MultiSelectListPreferenceFragment} for the {@link
@@ -161,7 +154,6 @@ public class MultiSelectListPreferenceFragment extends Fragment implements Inset
     @Override
     public void onStart() {
         super.onStart();
-        mToolbar.registerOnBackListener(mOnBackListener);
         Insets insets = CarUi.getInsets(getActivity());
         if (insets != null) {
             onCarUiInsetsChanged(insets);
@@ -171,7 +163,13 @@ public class MultiSelectListPreferenceFragment extends Fragment implements Inset
     @Override
     public void onStop() {
         super.onStop();
-        mToolbar.unregisterOnBackListener(mOnBackListener);
+        updatePreference();
+    }
+
+    private void updatePreference() {
+        if (mPreference.callChangeListener(mNewValues)) {
+            mPreference.setValues(mNewValues);
+        }
     }
 
     private CarUiMultiSelectListPreference getPreference() {
