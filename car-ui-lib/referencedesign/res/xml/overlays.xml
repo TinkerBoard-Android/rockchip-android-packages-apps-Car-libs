@@ -3,6 +3,7 @@
     <item target="layout/car_ui_toolbar" value="@layout/car_ui_toolbar"/>
     <item target="layout/car_ui_toolbar_two_row" value="@layout/car_ui_toolbar_two_row"/>
     <item target="layout/car_ui_toolbar_menu_item" value="@layout/car_ui_toolbar_menu_item"/>
+    <item target="layout/car_ui_preference_widget_seekbar" value="@layout/car_ui_preference_widget_seekbar"/>
 
     <item target="drawable/car_ui_icon_arrow_back" value="@drawable/car_ui_icon_arrow_back"/>
     <item target="drawable/car_ui_toolbar_menu_item_icon_ripple" value="@drawable/car_ui_toolbar_menu_item_icon_ripple"/>
@@ -18,14 +19,23 @@
     <item target="style/Widget.CarUi.Button.Borderless.Colored" value="@style/Widget.CarUi.Button.Borderless.Colored"/>
     <item target="style/Widget.CarUi.Toolbar.TextButton" value="@style/Widget.CarUi.Toolbar.TextButton"/>
     <item target="style/Widget.CarUi.Toolbar.TextButton.WithIcon" value="@style/Widget.CarUi.Toolbar.TextButton.WithIcon"/>
+    <item target="style/Widget.CarUi.SeekbarPreference" value="@style/Widget.CarUi.SeekbarPreference"/>
+    <item target="style/Widget.CarUi.SeekbarPreference.Seekbar" value="@style/Widget.CarUi.SeekbarPreference.Seekbar"/>
 
     <item target="dimen/car_ui_toolbar_margin" value="@dimen/car_ui_toolbar_margin"/>
 
+    <item target="color/car_ui_text_color_secondary" value="@color/car_ui_text_color_secondary"/>
     <item target="color/car_ui_toolbar_menu_item_icon_background_color" value="@color/car_ui_toolbar_menu_item_icon_background_color"/>
     <item target="color/car_ui_toolbar_menu_item_icon_color" value="@color/car_ui_toolbar_menu_item_icon_color"/>
 
     <item target="drawable/car_ui_icon_arrow_back" value="@drawable/car_ui_icon_arrow_back"/>
     <item target="drawable/car_ui_toolbar_menu_item_icon_ripple" value="@drawable/car_ui_toolbar_menu_item_icon_ripple"/>
+
+    <item target="style/TextAppearance.CarUi" value="@style/TextAppearance.CarUi"/>
+    <item target="style/TextAppearance.CarUi.Body1" value="@style/TextAppearance.CarUi.Body1"/>
+    <item target="style/TextAppearance.CarUi.PreferenceTitle" value="@style/TextAppearance.CarUi.PreferenceTitle"/>
+    <item target="style/TextAppearance.CarUi.Body3" value="@style/TextAppearance.CarUi.Body3"/>
+    <item target="style/TextAppearance.CarUi.PreferenceSummary" value="@style/TextAppearance.CarUi.PreferenceSummary"/>
 
     <item target="style/Widget.CarUi" value="@style/Widget.CarUi"/>
     <item target="style/Widget.CarUi.Toolbar" value="@style/Widget.CarUi.Toolbar"/>
@@ -57,6 +67,8 @@
     <item target="id/car_ui_toolbar_menu_item_text_container" value="@id/car_ui_toolbar_menu_item_text_container"/>
     <item target="id/car_ui_toolbar_menu_item_text" value="@id/car_ui_toolbar_menu_item_text"/>
     <item target="id/car_ui_toolbar_menu_item_text_with_icon" value="@id/car_ui_toolbar_menu_item_text_with_icon"/>
+    <item target="id/seekbar" value="@id/seekbar"/>
+    <item target="id/seekbar_value" value="@id/seekbar_value"/>
 
     <item target="attr/layout_constraintGuide_begin" value="@attr/layout_constraintGuide_begin"/>
     <item target="attr/layout_constraintGuide_end" value="@attr/layout_constraintGuide_end"/>

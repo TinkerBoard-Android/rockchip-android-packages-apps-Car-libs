@@ -50,4 +50,35 @@
     <style name="Widget.CarUi.Toolbar.TextButton.WithIcon">
         <item name="android:textColor">@color/car_ui_toolbar_menu_item_icon_color</item>
     </style>
+
+    <style name="Widget.CarUi.SeekbarPreference"/>
+
+    <!-- Style applied to the seekbar widget within the seekbar preference -->
+    <style name="Widget.CarUi.SeekbarPreference.Seekbar">
+        <item name="android:background">@null</item>
+        <item name="android:clickable">false</item>
+        <item name="android:focusable">false</item>
+        <item name="android:thumb">@drawable/car_ui_seekbar_thumb</item>
+        <item name="android:splitTrack">false</item>
+    </style>
+
+    <style name="TextAppearance.CarUi" parent="android:TextAppearance.DeviceDefault">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textAlignment">viewStart</item>
+    </style>
+
+    <style name="TextAppearance.CarUi.Body1">
+        <item name="android:textSize">32sp</item>
+    </style>
+
+    <style name="TextAppearance.CarUi.PreferenceTitle" parent="TextAppearance.CarUi.Body1"/>
+
+    <style name="TextAppearance.CarUi.Body3">
+        <item name="android:textSize">24sp</item>
+    </style>
+
+    <style name="TextAppearance.CarUi.PreferenceSummary" parent="TextAppearance.CarUi.Body3">
+        <item name="android:textColor">@color/car_ui_text_color_secondary</item>
+    </style>
+
 </resources>
