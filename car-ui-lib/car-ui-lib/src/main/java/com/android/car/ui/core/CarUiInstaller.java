@@ -183,7 +183,7 @@ public class CarUiInstaller extends ContentProvider {
         // The usage of the alternate classloader is to accommodate GMSCore.
         // Some activities are loaded dynamically from external modules.
         try {
-            Class baseLayoutControllerClass =
+            Class<?> baseLayoutControllerClass =
                     activity.getClassLoader()
                             .loadClass(BaseLayoutController.class.getName());
             Method method = baseLayoutControllerClass
