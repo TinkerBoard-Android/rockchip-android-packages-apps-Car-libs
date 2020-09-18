@@ -207,10 +207,11 @@ public class PlaybackViewModelTest {
         // Ensure that all values are coming from the correct MediaController.
         mPlaybackViewModel.getMetadata().observe(mLifecycleOwner, mediaItemMetadata -> {
             if (mPlaybackViewModel.getMediaMetadata() == newMetadata) {
-                assertThat(mPlaybackViewModel.getMediaController()).isSameAs(newController);
+                assertThat(mPlaybackViewModel.getMediaController()).isSameInstanceAs(newController);
             }
             if (mPlaybackViewModel.getMediaMetadata() == mMediaMetadata) {
-                assertThat(mPlaybackViewModel.getMediaController()).isSameAs(mMediaController);
+                assertThat(mPlaybackViewModel.getMediaController())
+                        .isSameInstanceAs(mMediaController);
             }
         });
 
@@ -218,10 +219,11 @@ public class PlaybackViewModelTest {
             if (state == null) return;
 
             if (state.getStateCompat() == newPlaybackState) {
-                assertThat(mPlaybackViewModel.getMediaController()).isSameAs(newController);
+                assertThat(mPlaybackViewModel.getMediaController()).isSameInstanceAs(newController);
             }
             if (state.getStateCompat() == mPlaybackState) {
-                assertThat(mPlaybackViewModel.getMediaController()).isSameAs(mMediaController);
+                assertThat(mPlaybackViewModel.getMediaController())
+                        .isSameInstanceAs(mMediaController);
             }
         });
 
