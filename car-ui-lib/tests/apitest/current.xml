@@ -244,6 +244,7 @@
   <public type="id" name="checkbox_widget"/>
   <public type="id" name="container"/>
   <public type="id" name="content_icon"/>
+  <public type="id" name="text_container"/>
   <public type="id" name="icon"/>
   <public type="id" name="icon_container"/>
   <public type="id" name="list"/>
