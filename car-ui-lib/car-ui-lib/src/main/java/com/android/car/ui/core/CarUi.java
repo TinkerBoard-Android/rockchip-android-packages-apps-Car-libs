@@ -16,15 +16,19 @@
 package com.android.car.ui.core;
 
 import android.app.Activity;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.util.Pair;
 
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
+import com.android.car.ui.core.BaseLayoutController.InsetsUpdater;
 import com.android.car.ui.toolbar.ToolbarController;
 
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 /**
  * Public interface for general CarUi static functions.
@@ -117,6 +121,34 @@ public class CarUi {
         }
 
         return result;
+    }
+
+    /**
+     * Most apps should not use this method, but instead rely on CarUi automatically
+     * installing the base layout into their activities. See {@link #requireToolbar(Activity)}.
+     *
+     * This method installs the base layout *around* the provided view. As a result, this view
+     * must have a parent ViewGroup.
+     *
+     * When using this method, you can't use the other activity-based methods.
+     * ({@link #requireToolbar(Activity)}, {@link #requireInsets(Activity)}, ect.)
+     *
+     * @param view The view to wrap inside a base layout.
+     * @param hasToolbar if there should be a toolbar in the base layout.
+     * @return The {@link ToolbarController}, which will be null if hasToolbar is false.
+     */
+    @Nullable
+    public static ToolbarController installBaseLayoutAround(
+            View view,
+            InsetsChangedListener insetsChangedListener,
+            boolean hasToolbar) {
+        Pair<ToolbarController, InsetsUpdater> results =
+                BaseLayoutController.installBaseLayoutAround(null, view, hasToolbar);
+
+        Objects.requireNonNull(results.second)
+                .replaceInsetsChangedListenerWith(insetsChangedListener);
+
+        return results.first;
     }
 
     /* package */ static BaseLayoutController getBaseLayoutController(Activity activity) {

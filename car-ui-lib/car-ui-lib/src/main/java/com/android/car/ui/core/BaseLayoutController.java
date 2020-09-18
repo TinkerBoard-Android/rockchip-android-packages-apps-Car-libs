@@ -15,6 +15,8 @@
  */
 package com.android.car.ui.core;
 
+import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
+
 import android.app.Activity;
 import android.content.res.TypedArray;
 import android.os.Build;
@@ -27,6 +29,7 @@ import android.widget.FrameLayout;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
@@ -35,7 +38,6 @@ import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.toolbar.ToolbarController;
 import com.android.car.ui.toolbar.ToolbarControllerImpl;
-import com.android.car.ui.utils.CarUiUtils;
 
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -117,6 +119,30 @@ public class BaseLayoutController {
      */
     private void installBaseLayout(Activity activity) {
         boolean toolbarEnabled = getThemeBoolean(activity, R.attr.carUiToolbar);
+        Pair<ToolbarController, InsetsUpdater> results = installBaseLayoutAround(
+                activity,
+                requireViewByRefId(activity.getWindow().getDecorView(), android.R.id.content),
+                toolbarEnabled);
+
+        mToolbarController = results.first;
+        mInsetsUpdater = results.second;
+    }
+
+    /**
+     * Installs a base layout *around* the provided contentView.
+     *
+     * @param activity May be null. Used to dispatch inset changes to, if it implements
+     *                 {@link InsetsChangedListener}
+     * @param contentView The view to install the base layout around.
+     * @param toolbarEnabled If there should be a toolbar in the base layout.
+     * @return Both the {@link ToolbarController} and {@link InsetsUpdater} for the base layout.
+     *         The InsetsUpdater will never be null. The ToolbarController will be null if
+     *         {@code toolbarEnabled} was false.
+     */
+    public static Pair<ToolbarController, InsetsUpdater> installBaseLayoutAround(
+            @Nullable Activity activity,
+            @NonNull View contentView,
+            boolean toolbarEnabled) {
         boolean legacyToolbar = Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q;
         @LayoutRes final int baseLayoutRes;
 
@@ -128,34 +154,35 @@ public class BaseLayoutController {
             baseLayoutRes = R.layout.car_ui_base_layout;
         }
 
-        View baseLayout = LayoutInflater.from(activity)
+        View baseLayout = LayoutInflater.from(contentView.getContext())
                 .inflate(baseLayoutRes, null, false);
 
         // Replace the app's content view with a base layout
-        ViewGroup contentView = CarUiUtils.requireViewByRefId(
-                activity.getWindow().getDecorView(), android.R.id.content);
         ViewGroup contentViewParent = (ViewGroup) contentView.getParent();
         int contentIndex = contentViewParent.indexOfChild(contentView);
         contentViewParent.removeView(contentView);
         contentViewParent.addView(baseLayout, contentIndex, contentView.getLayoutParams());
 
         // Add the app's content view to the baseLayout's content view container
-        FrameLayout contentViewContainer = CarUiUtils.requireViewByRefId(baseLayout,
+        FrameLayout contentViewContainer = requireViewByRefId(baseLayout,
                 R.id.car_ui_base_layout_content_container);
         contentViewContainer.addView(contentView, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
 
+        ToolbarController toolbarController = null;
         if (toolbarEnabled) {
             if (legacyToolbar) {
-                mToolbarController = CarUiUtils.requireViewByRefId(baseLayout, R.id.car_ui_toolbar);
+                toolbarController = requireViewByRefId(baseLayout, R.id.car_ui_toolbar);
             } else {
-                mToolbarController = new ToolbarControllerImpl(baseLayout);
+                toolbarController = new ToolbarControllerImpl(baseLayout);
             }
         }
 
-        mInsetsUpdater = new InsetsUpdater(activity, baseLayout, contentView);
-        mInsetsUpdater.installListeners();
+        InsetsUpdater insetsUpdater = new InsetsUpdater(activity, baseLayout, contentView);
+        insetsUpdater.installListeners();
+
+        return Pair.create(toolbarController, insetsUpdater);
     }
 
     /**
@@ -191,6 +218,7 @@ public class BaseLayoutController {
         private static final String TOP_INSET_TAG = "car_ui_top_inset";
         private static final String BOTTOM_INSET_TAG = "car_ui_bottom_inset";
 
+        @Nullable
         private final Activity mActivity;
         private final View mContentView;
         private final View mContentViewContainer; // Equivalent to mContentView except in Media
@@ -207,14 +235,18 @@ public class BaseLayoutController {
         /**
          * Constructs an InsetsUpdater that calculates and dispatches insets to an {@link Activity}.
          *
-         * @param activity    The activity that is using base layouts
+         * @param activity    The activity that is using base layouts. Used to dispatch insets to if
+         *                    it implements {@link InsetsChangedListener}
          * @param baseLayout  The root view of the base layout
          * @param contentView The android.R.id.content View
          */
-        public InsetsUpdater(Activity activity, View baseLayout, View contentView) {
+        public InsetsUpdater(
+                @Nullable Activity activity,
+                @NonNull View baseLayout,
+                @NonNull View contentView) {
             mActivity = activity;
             mContentView = contentView;
-            mContentViewContainer = CarUiUtils.requireViewByRefId(baseLayout,
+            mContentViewContainer = requireViewByRefId(baseLayout,
                     R.id.car_ui_base_layout_content_container);
 
             mLeftInsetView = baseLayout.findViewWithTag(LEFT_INSET_TAG);
@@ -254,7 +286,7 @@ public class BaseLayoutController {
         public void installListeners() {
             // The global layout listener will run after all the individual layout change listeners
             // so that we only updateInsets once per layout, even if multiple inset views changed
-            mActivity.getWindow().getDecorView().getViewTreeObserver()
+            mContentView.getRootView().getViewTreeObserver()
                     .addOnGlobalLayoutListener(this);
         }
 
@@ -350,8 +382,7 @@ public class BaseLayoutController {
             }
 
             if (!handled) {
-                CarUiUtils.requireViewByRefId(mActivity.getWindow().getDecorView(),
-                        android.R.id.content).setPadding(insets.getLeft(), insets.getTop(),
+                mContentView.setPadding(insets.getLeft(), insets.getTop(),
                         insets.getRight(), insets.getBottom());
             }
         }
