@@ -347,7 +347,7 @@ class DefaultScrollBar implements ScrollBar {
             }
         }
         // Distance should always be positive. Negate its value to scroll up.
-        mSnapHelper.smoothScrollBy(-scrollDistance);
+        mRecyclerView.smoothScrollBy(0, -scrollDistance);
     }
 
     /**
@@ -373,7 +373,8 @@ class DefaultScrollBar implements ScrollBar {
         View lastChild = getRecyclerView().getChildAt(getRecyclerView().getChildCount() - 1);
         if (getRecyclerView().getLayoutManager().isViewPartiallyVisible(lastChild,
                 /* completelyVisible= */ false, /* acceptEndPointInclusion= */ false)) {
-            scrollDistance = orientationHelper.getDecoratedStart(lastChild);
+            scrollDistance = orientationHelper.getDecoratedStart(lastChild)
+                    - orientationHelper.getStartAfterPadding();
             if (scrollDistance <= 0) {
                 // - Scroll value is zero if the top of last item is aligned with top of the screen;
                 // - Scroll value can be negative if the child is longer than the screen size and
@@ -392,9 +393,11 @@ class DefaultScrollBar implements ScrollBar {
              */
             View child = getRecyclerView().getChildAt(i);
             if (child.getHeight() > screenSize) {
-                if (orientationHelper.getDecoratedStart(child) > 0) {
+                if (orientationHelper.getDecoratedStart(child)
+                        - orientationHelper.getStartAfterPadding() > 0) {
                     // Child view top is entering screen. Align its top with parent top.
-                    scrollDistance = orientationHelper.getDecoratedStart(child);
+                    scrollDistance = orientationHelper.getDecoratedStart(lastChild)
+                            - orientationHelper.getStartAfterPadding();
                 } else if (screenSize < orientationHelper.getDecoratedEnd(child)
                         && orientationHelper.getDecoratedEnd(child) < 2 * screenSize) {
                     // Child view bottom is about to enter screen - its distance to parent bottom
@@ -407,7 +410,7 @@ class DefaultScrollBar implements ScrollBar {
             }
         }
 
-        mSnapHelper.smoothScrollBy(scrollDistance);
+        mRecyclerView.smoothScrollBy(0, scrollDistance);
     }
 
     /**
