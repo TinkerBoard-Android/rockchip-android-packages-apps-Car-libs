@@ -13,3 +13,6 @@ build/
 
 # Python
 *.pyc
+
+# Android studio's layout inspector captures
+captures/
