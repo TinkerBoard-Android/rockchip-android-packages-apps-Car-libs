@@ -26,8 +26,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.Transformations;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,10 +58,9 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
     private final Map<String, Map<String, Contact>> mLookupKeyContactMap = new HashMap<>();
 
     /**
-     * A map which divides contacts LiveData by account.
+     * A map which divides contacts by account.
      */
-    private final Map<String, MutableLiveData<List<Contact>>> mAccountContactsLiveDataMap =
-            new ArrayMap<>();
+    private final Map<String, List<Contact>> mAccountContactsMap = new ArrayMap<>();
     private boolean mIsLoaded = false;
 
     /**
@@ -159,10 +158,8 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
      *                    Bluetooth address.
      */
     public LiveData<List<Contact>> getContactsLiveDataByAccount(String accountName) {
-        if (!mAccountContactsLiveDataMap.containsKey(accountName)) {
-            mAccountContactsLiveDataMap.put(accountName, new MutableLiveData<>());
-        }
-        return mAccountContactsLiveDataMap.get(accountName);
+        return Transformations.map(mContactListAsyncQueryLiveData,
+                contacts -> contacts == null ? null : mAccountContactsMap.get(accountName));
     }
 
     /**
@@ -251,12 +248,13 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
             subMap.put(lookupKey, Contact.fromCursor(mContext, cursor, subMap.get(lookupKey)));
         }
 
+        mAccountContactsMap.clear();
         for (String accountName : contactMap.keySet()) {
             Map<String, Contact> subMap = contactMap.get(accountName);
             contactList.addAll(subMap.values());
-            MutableLiveData<List<Contact>> accountContactsLiveData =
-                    (MutableLiveData<List<Contact>>) getContactsLiveDataByAccount(accountName);
-            accountContactsLiveData.postValue(new ArrayList<>(subMap.values()));
+            List<Contact> accountContacts = new ArrayList<>();
+            accountContacts.addAll(subMap.values());
+            mAccountContactsMap.put(accountName, accountContacts);
         }
 
         mLookupKeyContactMap.clear();
