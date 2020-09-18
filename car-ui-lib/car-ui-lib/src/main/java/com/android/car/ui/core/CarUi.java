@@ -159,7 +159,7 @@ public class CarUi {
             // The usage of the alternate classloader is to accommodate GMSCore.
             // Some activities are loaded dynamically from external modules.
             try {
-                Class baseLayoutControllerClass = activity.getClassLoader()
+                Class<?> baseLayoutControllerClass = activity.getClassLoader()
                         .loadClass(BaseLayoutController.class.getName());
                 Method method = baseLayoutControllerClass
                         .getDeclaredMethod("getBaseLayout", Activity.class);
