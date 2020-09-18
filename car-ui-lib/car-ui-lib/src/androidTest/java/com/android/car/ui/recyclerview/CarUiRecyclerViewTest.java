@@ -68,9 +68,10 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.OrientationHelper;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.test.core.app.ActivityScenario;
 import androidx.test.espresso.IdlingRegistry;
 import androidx.test.espresso.IdlingResource;
-import androidx.test.rule.ActivityTestRule;
+import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
 import com.android.car.ui.TestActivity;
 import com.android.car.ui.recyclerview.decorations.grid.GridDividerItemDecoration;
@@ -90,8 +91,10 @@ import java.util.Map;
 public class CarUiRecyclerViewTest {
 
     @Rule
-    public ActivityTestRule<TestActivity> mActivityRule =
-            new ActivityTestRule<>(TestActivity.class);
+    public ActivityScenarioRule<TestActivity> mActivityRule =
+            new ActivityScenarioRule<>(TestActivity.class);
+
+    ActivityScenario<TestActivity> mScenario = ActivityScenario.launch(TestActivity.class);
 
     private TestActivity mActivity;
     private Context mTestableContext;
@@ -99,9 +102,12 @@ public class CarUiRecyclerViewTest {
 
     @Before
     public void setUp() {
-        mActivity = mActivityRule.getActivity();
-        mTestableContext = spy(mActivity);
-        mTestableResources = spy(mActivity.getResources());
+        mScenario.onActivity(activity -> {
+            mActivity = activity;
+            mTestableContext = spy(mActivity);
+            mTestableResources = spy(mActivity.getResources());
+        });
+
         when(mTestableContext.getResources()).thenReturn(mTestableResources);
     }
 
