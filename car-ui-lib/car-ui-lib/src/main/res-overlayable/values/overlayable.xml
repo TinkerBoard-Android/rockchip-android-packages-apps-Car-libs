@@ -177,6 +177,7 @@ limitations under the License.-->
       <item type="dimen" name="car_ui_scrollbar_deceleration_times_divisor"/>
       <item type="dimen" name="car_ui_scrollbar_margin"/>
       <item type="dimen" name="car_ui_scrollbar_milliseconds_per_inch"/>
+      <item type="dimen" name="car_ui_scrollbar_min_thumb_height"/>
       <item type="dimen" name="car_ui_scrollbar_padding_bottom"/>
       <item type="dimen" name="car_ui_scrollbar_padding_top"/>
       <item type="dimen" name="car_ui_scrollbar_separator_margin"/>
@@ -266,6 +267,7 @@ limitations under the License.-->
       <item type="id" name="car_ui_list_item_end_guideline"/>
       <item type="id" name="car_ui_list_item_start_guideline"/>
       <item type="id" name="car_ui_list_limiting_message"/>
+      <item type="id" name="car_ui_preference_container_without_widget"/>
       <item type="id" name="car_ui_preference_fragment_container"/>
       <item type="id" name="car_ui_recycler_view"/>
       <item type="id" name="car_ui_scroll_bar"/>

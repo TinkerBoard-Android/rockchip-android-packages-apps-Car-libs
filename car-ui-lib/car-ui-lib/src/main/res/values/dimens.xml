@@ -127,6 +127,7 @@
     <dimen name="car_ui_scrollbar_container_width">@dimen/car_ui_margin</dimen>
     <dimen name="car_ui_scrollbar_button_size">@dimen/car_ui_touch_target_width</dimen>
     <dimen name="car_ui_scrollbar_thumb_width">7dp</dimen>
+    <dimen name="car_ui_scrollbar_min_thumb_height">56dp</dimen>
     <dimen name="car_ui_scrollbar_separator_margin">16dp</dimen>
     <dimen name="car_ui_scrollbar_margin">@dimen/car_ui_margin</dimen>
     <dimen name="car_ui_scrollbar_thumb_radius">100dp</dimen>
