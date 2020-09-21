@@ -14,11 +14,16 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<com.android.car.ui.recyclerview.CarUiRecyclerView
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/list"
-    app:numOfColumns="4"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/car_ui_activity_background" />
+    android:background="@drawable/car_ui_activity_background">
+    <com.android.car.ui.recyclerview.CarUiRecyclerView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:numOfColumns="4"
+        app:layoutStyle="grid"/>
+</FrameLayout>

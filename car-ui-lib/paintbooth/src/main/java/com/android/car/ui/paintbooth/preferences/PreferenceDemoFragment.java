@@ -20,7 +20,6 @@ import android.os.Bundle;
 
 import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.preference.CarUiPreference;
-import com.android.car.ui.preference.CarUiSwitchPreference;
 import com.android.car.ui.preference.PreferenceFragment;
 
 /**
@@ -45,10 +44,5 @@ public class PreferenceDemoFragment extends PreferenceFragment {
         preferenceDisabledWithRipple.setMessageToShowWhenDisabledPreferenceClicked(
                 "I am disabled because...");
         preferenceDisabledWithRipple.setShouldShowRippleOnDisabledPreference(true);
-
-        CarUiSwitchPreference carUiSwitchPreference = findPreference("switch");
-        carUiSwitchPreference.setEnabled(false);
-        carUiSwitchPreference.setMessageToShowWhenDisabledPreferenceClicked(
-                "I am disabled because...");
     }
 }
