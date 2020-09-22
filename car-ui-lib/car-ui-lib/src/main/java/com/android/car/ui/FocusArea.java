@@ -19,33 +19,40 @@ package com.android.car.ui;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_FOCUS;
 
 import static com.android.car.ui.utils.RotaryConstants.ACTION_NUDGE_SHORTCUT;
-import static com.android.car.ui.utils.RotaryConstants.FOCUS_ACTION_TYPE;
+import static com.android.car.ui.utils.RotaryConstants.ACTION_NUDGE_TO_ANOTHER_FOCUS_AREA;
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_BOTTOM_BOUND_OFFSET;
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_LEFT_BOUND_OFFSET;
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_RIGHT_BOUND_OFFSET;
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_TOP_BOUND_OFFSET;
-import static com.android.car.ui.utils.RotaryConstants.FOCUS_DEFAULT;
-import static com.android.car.ui.utils.RotaryConstants.FOCUS_FIRST;
-import static com.android.car.ui.utils.RotaryConstants.FOCUS_INVALID;
-import static com.android.car.ui.utils.RotaryConstants.NUDGE_SHORTCUT_DIRECTION;
+import static com.android.car.ui.utils.RotaryConstants.NUDGE_DIRECTION;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.car.ui.utils.CarUiUtils;
-import com.android.car.ui.utils.RotaryConstants;
+import com.android.car.ui.utils.ViewUtils;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A {@link LinearLayout} used as a navigation block for the rotary controller.
@@ -75,6 +82,9 @@ public class FocusArea extends LinearLayout {
     private static final int INVALID_DIMEN = -1;
 
     private static final int INVALID_DIRECTION = -1;
+
+    private static final List<Integer> NUDGE_DIRECTIONS =
+            Arrays.asList(FOCUS_LEFT, FOCUS_RIGHT, FOCUS_UP, FOCUS_DOWN);
 
     /** Whether the FocusArea's descendant has focus (the FocusArea itself is not focusable). */
     private boolean mHasFocus;
@@ -124,6 +134,12 @@ public class FocusArea extends LinearLayout {
     @Nullable
     private View mDefaultFocusView;
 
+    /**
+     * Whether to focus on the {@code app:defaultFocus} view when nudging to the FocusArea, even if
+     * there was another view in the FocusArea focused before.
+     */
+    private boolean mDefaultFocusOverridesHistory;
+
     /** The ID of the view specified in {@code app:nudgeShortcut}. */
     private int mNudgeShortcutId;
     /** The view specified in {@code app:nudgeShortcut}. */
@@ -132,6 +148,48 @@ public class FocusArea extends LinearLayout {
 
     /** The direction specified in {@code app:nudgeShortcutDirection}. */
     private int mNudgeShortcutDirection;
+
+    /**
+     * Map of nudge target FocusArea IDs specified in {@code app:nudgeLeft}, {@code app:nudgRight},
+     * {@code app:nudgeUp}, or {@code app:nudgeDown}.
+     */
+    private Map<Integer, Integer> mSpecifiedNudgeIdMap;
+
+    /** Map of specified nudge target FocusAreas. */
+    private Map<Integer, FocusArea> mSpecifiedNudgeFocusAreaMap;
+
+    /**
+     * Cache of focus history and nudge history of the rotary controller.
+     * <p>
+     * For focus history, the previously focused view and a timestamp will be saved when the
+     * focused view has changed.
+     * <p>
+     * For nudge history, the target FocusArea, direction, and a timestamp will be saved when the
+     * focus has moved from another FocusArea to this FocusArea. There are 2 cases:
+     * <ul>
+     *     <li>The focus is moved to another FocusArea because this FocusArea has called {@link
+     *         #nudgeToAnotherFocusArea}. In this case, the target FocusArea and direction are
+     *         trivial to this FocusArea.
+     *     <li>The focus is moved to this FocusArea because RotaryService has performed {@link
+     *         AccessibilityNodeInfo#ACTION_FOCUS} on this FocusArea. In this case, this FocusArea
+     *         can get the source FocusArea through the {@link
+     *         android.view.ViewTreeObserver.OnGlobalFocusChangeListener} registered, and can get
+     *         the direction when handling the action. Since the listener is triggered before
+     *         {@link #requestFocus} returns (which is called when handling the action), the
+     *         source FocusArea is revealed earlier than the direction, so the nudge history should
+     *         be saved when the direction is revealed.
+     * </ul>
+     */
+    private RotaryCache mRotaryCache;
+
+    /** Whether to clear focus area history when the user rotates the rotary controller. */
+    private boolean mClearFocusAreaHistoryWhenRotating;
+
+    /** The FocusArea that had focus before this FocusArea, if any. */
+    private FocusArea mPreviousFocusArea;
+
+    /** The focused view in this FocusArea, if any. */
+    private View mFocusedView;
 
     public FocusArea(Context context) {
         super(context);
@@ -155,14 +213,32 @@ public class FocusArea extends LinearLayout {
     }
 
     private void init(Context context, @Nullable AttributeSet attrs) {
-        mEnableForegroundHighlight = getContext().getResources().getBoolean(
+        Resources resources = getContext().getResources();
+        mEnableForegroundHighlight = resources.getBoolean(
                 R.bool.car_ui_enable_focus_area_foreground_highlight);
-        mEnableBackgroundHighlight = getContext().getResources().getBoolean(
+        mEnableBackgroundHighlight = resources.getBoolean(
                 R.bool.car_ui_enable_focus_area_background_highlight);
-        mForegroundHighlight = getContext().getResources().getDrawable(
+        mForegroundHighlight = resources.getDrawable(
                 R.drawable.car_ui_focus_area_foreground_highlight, getContext().getTheme());
-        mBackgroundHighlight = getContext().getResources().getDrawable(
+        mBackgroundHighlight = resources.getDrawable(
                 R.drawable.car_ui_focus_area_background_highlight, getContext().getTheme());
+
+        mDefaultFocusOverridesHistory = resources.getBoolean(
+                R.bool.car_ui_focus_area_default_focus_overrides_history);
+        mClearFocusAreaHistoryWhenRotating = resources.getBoolean(
+                R.bool.car_ui_clear_focus_area_history_when_rotating);
+
+        @RotaryCache.CacheType
+        int focusHistoryCacheType = resources.getInteger(R.integer.car_ui_focus_history_cache_type);
+        int focusHistoryExpirationPeriodMs =
+                resources.getInteger(R.integer.car_ui_focus_history_expiration_period_ms);
+        @RotaryCache.CacheType
+        int focusAreaHistoryCacheType = resources.getInteger(
+                R.integer.car_ui_focus_area_history_cache_type);
+        int focusAreaHistoryExpirationPeriodMs =
+                resources.getInteger(R.integer.car_ui_focus_area_history_expiration_period_ms);
+        mRotaryCache = new RotaryCache(focusHistoryCacheType, focusHistoryExpirationPeriodMs,
+                focusAreaHistoryCacheType, focusAreaHistoryExpirationPeriodMs);
 
         // Ensure that an AccessibilityNodeInfo is created for this view.
         setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
@@ -171,24 +247,79 @@ public class FocusArea extends LinearLayout {
         // should enable it since we override these methods.
         setWillNotDraw(false);
 
-        if (mEnableBackgroundHighlight || mEnableForegroundHighlight) {
-            // Update highlight of the FocusArea when the focus of its descendants has changed.
-            registerFocusChangeListener();
-        }
+        registerFocusChangeListener();
 
         initAttrs(context, attrs);
     }
 
-    @VisibleForTesting
-    void registerFocusChangeListener() {
+    private void registerFocusChangeListener() {
         getViewTreeObserver().addOnGlobalFocusChangeListener(
                 (oldFocus, newFocus) -> {
                     boolean hasFocus = hasFocus();
-                    if (mHasFocus != hasFocus) {
-                        mHasFocus = hasFocus;
-                        invalidate();
-                    }
+                    saveFocusHistory(hasFocus);
+                    maybeUpdatePreviousFocusArea(hasFocus, oldFocus);
+                    maybeClearFocusAreaHistory(hasFocus, oldFocus);
+                    maybeUpdateFocusAreaHighlight(hasFocus);
+                    mHasFocus = hasFocus;
                 });
+    }
+
+    private void saveFocusHistory(boolean hasFocus) {
+        if (!hasFocus) {
+            mRotaryCache.saveFocusedView(mFocusedView, SystemClock.uptimeMillis());
+            mFocusedView = null;
+            return;
+        }
+        View v = getFocusedChild();
+        while (v != null) {
+            if (v.isFocused()) {
+                break;
+            }
+            v = v instanceof ViewGroup ? ((ViewGroup) v).getFocusedChild() : null;
+        }
+        mFocusedView = v;
+    }
+
+    /**
+     * Updates {@link #mPreviousFocusArea} when the focus has moved from another FocusArea to this
+     * FocusArea.
+     */
+    private void maybeUpdatePreviousFocusArea(boolean hasFocus, View oldFocus) {
+        if (mHasFocus || !hasFocus || oldFocus == null) {
+            return;
+        }
+        mPreviousFocusArea = getAncestorFocusArea(oldFocus);
+        if (mPreviousFocusArea == null) {
+            Log.w(TAG, "No parent FocusArea for " + oldFocus);
+        }
+    }
+
+    /**
+     * Clears FocusArea nudge history when the user rotates the controller to move focus within this
+     * FocusArea.
+     */
+    private void maybeClearFocusAreaHistory(boolean hasFocus, View oldFocus) {
+        if (!mClearFocusAreaHistoryWhenRotating) {
+            return;
+        }
+        if (!hasFocus || oldFocus == null) {
+            return;
+        }
+        FocusArea oldFocusArea = getAncestorFocusArea(oldFocus);
+        if (oldFocusArea != this) {
+            return;
+        }
+        mRotaryCache.clearFocusAreaHistory();
+    }
+
+    /** Updates highlight of the FocusArea if this FocusArea has gained or lost focus. */
+    private void maybeUpdateFocusAreaHighlight(boolean hasFocus) {
+        if (!mEnableBackgroundHighlight && !mEnableForegroundHighlight) {
+            return;
+        }
+        if (mHasFocus != hasFocus) {
+            invalidate();
+        }
     }
 
     private void initAttrs(Context context, @Nullable AttributeSet attrs) {
@@ -281,6 +412,16 @@ public class FocusArea extends LinearLayout {
                 throw new IllegalStateException("nudgeShortcut and nudgeShortcutDirection must "
                         + "be specified together");
             }
+
+            mSpecifiedNudgeIdMap = new HashMap<>();
+            mSpecifiedNudgeIdMap.put(FOCUS_LEFT,
+                    a.getResourceId(R.styleable.FocusArea_nudgeLeft, View.NO_ID));
+            mSpecifiedNudgeIdMap.put(FOCUS_RIGHT,
+                    a.getResourceId(R.styleable.FocusArea_nudgeRight, View.NO_ID));
+            mSpecifiedNudgeIdMap.put(FOCUS_UP,
+                    a.getResourceId(R.styleable.FocusArea_nudgeUp, View.NO_ID));
+            mSpecifiedNudgeIdMap.put(FOCUS_DOWN,
+                    a.getResourceId(R.styleable.FocusArea_nudgeDown, View.NO_ID));
         } finally {
             a.recycle();
         }
@@ -317,55 +458,159 @@ public class FocusArea extends LinearLayout {
     @Override
     public boolean performAccessibilityAction(int action, Bundle arguments) {
         switch (action) {
-            case ACTION_FOCUS: {
-                // FocusArea is not focusable, so we focus on its descendant when handling
-                // ACTION_FOCUS.
-                if (arguments == null) {
-                    Log.e(TAG,
-                            "Must specify action type when performing ACTION_FOCUS on FocusArea");
-                    return false;
+            case ACTION_FOCUS:
+                // Repurpose ACTION_FOCUS to focus on its descendant. We can do this because
+                // FocusArea is not focusable and it didn't consume ACTION_FOCUS previously.
+                boolean success = focusOnDescendant();
+                if (success && mPreviousFocusArea != null) {
+                    int direction = getNudgeDirection(arguments);
+                    if (direction != INVALID_DIRECTION) {
+                        saveFocusAreaHistory(direction, mPreviousFocusArea, this,
+                                SystemClock.uptimeMillis());
+                    }
                 }
-                @RotaryConstants.FocusActionType
-                int type = arguments.getInt(FOCUS_ACTION_TYPE, FOCUS_INVALID);
-                switch (type) {
-                    case FOCUS_DEFAULT:
-                        // Move focus to the default focus (mDefaultFocusView), if any.
-                        if (mDefaultFocusView != null) {
-                            if (mDefaultFocusView.requestFocus()) {
-                                return true;
-                            }
-                            Log.e(TAG, "The default focus of the FocusArea can't take focus");
-                        }
-                        return false;
-                    case FOCUS_FIRST:
-                        // Focus on the first focusable view in the FocusArea.
-                        return requestFocus();
-                    default:
-                        Log.e(TAG, "Invalid action type " + type);
-                        return false;
-                }
-            }
-            case ACTION_NUDGE_SHORTCUT: {
-                if (mNudgeShortcutDirection == INVALID_DIRECTION) {
-                    // No nudge shortcut configured for this FocusArea.
-                    return false;
-                }
-                if (arguments == null
-                        || arguments.getInt(NUDGE_SHORTCUT_DIRECTION, INVALID_DIRECTION)
-                            != mNudgeShortcutDirection) {
-                    // The user is not nudging to the nudge shortcut direction.
-                    return false;
-                }
-                if (mNudgeShortcutView.isFocused()) {
-                    // The nudge shortcut view is already focused; return false so that the user can
-                    // nudge to another FocusArea.
-                    return false;
-                }
-                return mNudgeShortcutView.requestFocus(mNudgeShortcutDirection);
-            }
+                return success;
+            case ACTION_NUDGE_SHORTCUT:
+                return nudgeToShortcutView(arguments);
+            case ACTION_NUDGE_TO_ANOTHER_FOCUS_AREA:
+                return nudgeToAnotherFocusArea(arguments);
             default:
                 return super.performAccessibilityAction(action, arguments);
         }
+    }
+
+    private boolean focusOnDescendant() {
+        if (focusOnFocusedByDefaultView()) {
+            return true;
+        }
+        if (focusOnPrimaryFocusView()) {
+            return true;
+        }
+        if (mDefaultFocusOverridesHistory) {
+            // Check mDefaultFocus before last focused view.
+            if (focusDefaultFocusView() || focusOnLastFocusedView()) {
+                return true;
+            }
+        } else {
+            // Check last focused view before mDefaultFocus.
+            if (focusOnLastFocusedView() || focusDefaultFocusView()) {
+                return true;
+            }
+        }
+        return focusOnFirstFocusableView();
+    }
+
+    private boolean focusOnFocusedByDefaultView() {
+        View focusedByDefaultView = ViewUtils.findFocusedByDefaultView(this);
+        return requestFocus(focusedByDefaultView);
+    }
+
+    private boolean focusOnPrimaryFocusView() {
+        View primaryFocus = ViewUtils.findPrimaryFocusView(this);
+        return requestFocus(primaryFocus);
+    }
+
+    private boolean focusDefaultFocusView() {
+        return requestFocus(mDefaultFocusView);
+    }
+
+    private boolean focusOnLastFocusedView() {
+        View lastFocusedView = mRotaryCache.getFocusedView(SystemClock.uptimeMillis());
+        return requestFocus(lastFocusedView);
+    }
+
+    private boolean focusOnFirstFocusableView() {
+        View firstFocusableView = ViewUtils.findFocusableDescendant(this);
+        return requestFocus(firstFocusableView);
+    }
+
+    private boolean nudgeToShortcutView(Bundle arguments) {
+        if (mNudgeShortcutDirection == INVALID_DIRECTION) {
+            // No nudge shortcut configured for this FocusArea.
+            return false;
+        }
+        if (arguments == null
+                || arguments.getInt(NUDGE_DIRECTION, INVALID_DIRECTION)
+                    != mNudgeShortcutDirection) {
+            // The user is not nudging in the nudge shortcut direction.
+            return false;
+        }
+        if (mNudgeShortcutView.isFocused()) {
+            // The nudge shortcut view is already focused; return false so that the user can
+            // nudge to another FocusArea.
+            return false;
+        }
+        return requestFocus(mNudgeShortcutView);
+    }
+
+    private boolean nudgeToAnotherFocusArea(Bundle arguments) {
+        int direction = getNudgeDirection(arguments);
+        long elapsedRealtime = SystemClock.uptimeMillis();
+
+        // Try to nudge to specified FocusArea, if any.
+        FocusArea targetFocusArea = getSpecifiedFocusArea(direction);
+        boolean success = targetFocusArea != null && targetFocusArea.focusOnDescendant();
+
+        // If failed, try to nudge to cached FocusArea, if any.
+        if (!success) {
+            targetFocusArea = mRotaryCache.getCachedFocusArea(direction, elapsedRealtime);
+            success = targetFocusArea != null && targetFocusArea.focusOnDescendant();
+        }
+
+        if (success) {
+            saveFocusAreaHistory(direction, this, targetFocusArea, elapsedRealtime);
+        }
+        return success;
+    }
+
+    private static int getNudgeDirection(Bundle arguments) {
+        return arguments == null
+                ? INVALID_DIRECTION
+                : arguments.getInt(NUDGE_DIRECTION, INVALID_DIRECTION);
+    }
+
+    /** Saves bidirectional FocusArea nudge history. */
+    private void saveFocusAreaHistory(int direction, @NonNull FocusArea sourceFocusArea,
+            @NonNull FocusArea targetFocusArea, long elapsedRealtime) {
+        sourceFocusArea.mRotaryCache.saveFocusArea(direction, targetFocusArea, elapsedRealtime);
+
+        int oppositeDirection = getOppositeDirection(direction);
+        targetFocusArea.mRotaryCache.saveFocusArea(oppositeDirection, sourceFocusArea,
+                elapsedRealtime);
+    }
+
+    /** Returns the direction opposite the given {@code direction} */
+    @VisibleForTesting
+    private static int getOppositeDirection(int direction) {
+        switch (direction) {
+            case View.FOCUS_LEFT:
+                return View.FOCUS_RIGHT;
+            case View.FOCUS_RIGHT:
+                return View.FOCUS_LEFT;
+            case View.FOCUS_UP:
+                return View.FOCUS_DOWN;
+            case View.FOCUS_DOWN:
+                return View.FOCUS_UP;
+        }
+        throw new IllegalArgumentException("direction must be "
+                + "FOCUS_UP, FOCUS_DOWN, FOCUS_LEFT, or FOCUS_RIGHT.");
+    }
+
+    private static FocusArea getAncestorFocusArea(@NonNull View view) {
+        ViewParent parent = view.getParent();
+        while (parent != null) {
+            if (parent instanceof FocusArea) {
+                return (FocusArea) parent;
+            }
+            parent = parent.getParent();
+        }
+        return null;
+    }
+
+    @Nullable
+    private FocusArea getSpecifiedFocusArea(int direction) {
+        maybeInitializeSpecifiedFocusAreas();
+        return mSpecifiedNudgeFocusAreaMap.get(direction);
     }
 
     @Override
@@ -415,6 +660,27 @@ public class FocusArea extends LinearLayout {
         bundle.putInt(FOCUS_AREA_BOTTOM_BOUND_OFFSET, mBottomOffset);
     }
 
+    private void maybeInitializeSpecifiedFocusAreas() {
+        if (mSpecifiedNudgeFocusAreaMap != null) {
+            return;
+        }
+        View root = getRootView();
+        mSpecifiedNudgeFocusAreaMap = new HashMap<>();
+        for (Integer direction : NUDGE_DIRECTIONS) {
+            int id = mSpecifiedNudgeIdMap.get(direction);
+            mSpecifiedNudgeFocusAreaMap.put(direction, root.findViewById(id));
+        }
+    }
+
+    private boolean requestFocus(@Nullable View view) {
+        if (view == null) {
+            return false;
+        }
+        // Exit touch mode and focus the view. The view may not be focusable in touch mode, so we
+        // need to exit touch mode before focusing it.
+        return view.performAccessibilityAction(ACTION_FOCUS, null);
+    }
+
     /** Sets the padding (in pixels) of the FocusArea highlight. */
     public void setHighlightPadding(int left, int top, int right, int bottom) {
         if (mPaddingLeft == left && mPaddingTop == top && mPaddingRight == right
@@ -434,5 +700,10 @@ public class FocusArea extends LinearLayout {
         mTopOffset = top;
         mRightOffset = right;
         mBottomOffset = bottom;
+    }
+
+    @VisibleForTesting
+    void enableForegroundHighlight() {
+        mEnableForegroundHighlight = true;
     }
 }

@@ -16,12 +16,11 @@
 
 package com.android.car.ui.utils;
 
-import androidx.annotation.IntDef;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
-/** Constants for the rotary controller. */
+/**
+ * Constants for the rotary controller.
+ *
+ * @hide
+ */
 public final class RotaryConstants {
     /**
      * Content description indicating that the rotary controller should scroll this view
@@ -36,29 +35,6 @@ public final class RotaryConstants {
      */
     public static final String ROTARY_VERTICALLY_SCROLLABLE =
             "com.android.car.ui.utils.VERTICALLY_SCROLLABLE";
-
-    /** The key to store a FocusActionType in the Bundle. */
-    public static final String FOCUS_ACTION_TYPE = "com.android.car.ui.utils.FOCUS_ACTION_TYPE";
-
-    /** Value indicating that the ACTION_FOCUS hasn't specified what to focus. */
-    public static final int FOCUS_INVALID = 0;
-
-    /**
-     * Value indicating that the ACTION_FOCUS is meant to focus on the default focus in the
-     * FocusArea.
-     */
-    public static final int FOCUS_DEFAULT = 1;
-
-    /**
-     * Value indicating that the ACTION_FOCUS is meant to focus on the first focusable view in the
-     * FocusArea.
-     */
-    public static final int FOCUS_FIRST = 2;
-
-    @IntDef(flag = true, value = {FOCUS_DEFAULT, FOCUS_FIRST})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FocusActionType {
-    }
 
     /** The key to store the offset of the FocusArea's left bound in the node's extras. */
     public static final String FOCUS_AREA_LEFT_BOUND_OFFSET =
@@ -76,9 +52,9 @@ public final class RotaryConstants {
     public static final String FOCUS_AREA_BOTTOM_BOUND_OFFSET =
             "com.android.car.ui.utils.FOCUS_AREA_BOTTOM_BOUND_OFFSET";
 
-    /** The key to store the FocusArea nudge shortcut direction in the Bundle . */
-    public static final String NUDGE_SHORTCUT_DIRECTION =
-            "com.android.car.ui.utils.NUDGE_SHORTCUT_DIRECTION";
+    /** The key to store nudge direction in the Bundle. */
+    public static final String NUDGE_DIRECTION =
+            "com.android.car.ui.utils.NUDGE_DIRECTION";
 
     /**
      * Action performed on a FocusArea to move focus to the nudge shortcut within the same
@@ -90,6 +66,9 @@ public final class RotaryConstants {
      * framework (which start with 0x0102), e.g. R.id.accessibilityActionScrollUp.
      */
     public static final int ACTION_NUDGE_SHORTCUT = 0x01000000;
+
+    /** Action performed on a FocusArea to move focus to another FocusArea. */
+    public static final int ACTION_NUDGE_TO_ANOTHER_FOCUS_AREA = 0x02000000;
 
     /** Action performed on a FocusParkingView to restore the default focus. */
     public static final int ACTION_RESTORE_DEFAULT_FOCUS = 0x04000000;
