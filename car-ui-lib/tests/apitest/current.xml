@@ -5,8 +5,10 @@
   <public type="attr" name="carUiPreferenceStyle"/>
   <public type="attr" name="carUiRecyclerViewStyle"/>
   <public type="attr" name="state_ux_restricted"/>
+  <public type="bool" name="car_ui_clear_focus_area_history_when_rotating"/>
   <public type="bool" name="car_ui_enable_focus_area_background_highlight"/>
   <public type="bool" name="car_ui_enable_focus_area_foreground_highlight"/>
+  <public type="bool" name="car_ui_focus_area_default_focus_overrides_history"/>
   <public type="bool" name="car_ui_list_item_single_line_title"/>
   <public type="bool" name="car_ui_preference_list_show_full_screen"/>
   <public type="bool" name="car_ui_preference_show_chevron"/>
@@ -269,6 +271,10 @@
   <public type="id" name="toolbar"/>
   <public type="id" name="touch_interceptor"/>
   <public type="integer" name="car_ui_default_max_string_length"/>
+  <public type="integer" name="car_ui_focus_area_history_cache_type"/>
+  <public type="integer" name="car_ui_focus_area_history_expiration_period_ms"/>
+  <public type="integer" name="car_ui_focus_history_cache_type"/>
+  <public type="integer" name="car_ui_focus_history_expiration_period_ms"/>
   <public type="integer" name="car_ui_scrollbar_longpress_initial_delay"/>
   <public type="integer" name="car_ui_scrollbar_longpress_repeat_interval"/>
   <public type="layout" name="car_ui_alert_dialog_edit_text"/>
