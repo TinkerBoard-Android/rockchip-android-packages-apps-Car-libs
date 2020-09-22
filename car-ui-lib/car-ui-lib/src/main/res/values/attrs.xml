@@ -148,7 +148,8 @@
     <!-- Attributes for FocusArea. -->
     <declare-styleable name="FocusArea">
         <!-- The ID of a focusable descendant view which should be focused when the user nudges to
-             this FocusArea. -->
+             this FocusArea, if there was no view focused in the FocusArea or
+             car_ui_focus_area_default_focus_overrides_history is true. -->
         <attr name="defaultFocus" format="reference"/>
 
         <!-- The paddings of FocusArea highlight. It does't impact the paddings on its child views,
@@ -203,5 +204,15 @@
             <!-- View.FOCUS_DOWN -->
             <flag name="down" value="0x82" />
         </attr>
+
+        <!-- Attributes to specify the target FocusArea for a nudge. -->
+        <!-- The ID of the target FocusArea when nudging to the left. -->
+        <attr name="nudgeLeft" format="reference"/>
+        <!-- The ID of the target FocusArea when nudging to the right. -->
+        <attr name="nudgeRight" format="reference"/>
+        <!-- The ID of the target FocusArea when nudging up. -->
+        <attr name="nudgeUp" format="reference"/>
+        <!-- The ID of the target FocusArea when nudging down. -->
+        <attr name="nudgeDown" format="reference"/>
     </declare-styleable>
 </resources>

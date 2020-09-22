@@ -20,13 +20,10 @@ import static android.view.View.LAYOUT_DIRECTION_LTR;
 import static android.view.View.LAYOUT_DIRECTION_RTL;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_FOCUS;
 
-import static com.android.car.ui.utils.RotaryConstants.FOCUS_ACTION_TYPE;
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_BOTTOM_BOUND_OFFSET;
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_LEFT_BOUND_OFFSET;
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_RIGHT_BOUND_OFFSET;
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_TOP_BOUND_OFFSET;
-import static com.android.car.ui.utils.RotaryConstants.FOCUS_DEFAULT;
-import static com.android.car.ui.utils.RotaryConstants.FOCUS_FIRST;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -36,8 +33,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.NonNull;
 import androidx.test.rule.ActivityTestRule;
-
-import com.android.car.ui.test.R;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -65,7 +60,7 @@ public class FocusAreaTest {
     public void setUp() {
         mActivity = mActivityRule.getActivity();
         mFocusArea = mActivity.findViewById(R.id.focus_area);
-        mFocusArea.registerFocusChangeListener();
+        mFocusArea.enableForegroundHighlight();
         mFocusArea2 = mActivity.findViewById(R.id.focus_area2);
         mChild = mActivity.findViewById(R.id.child);
         mDefaultFocus = mActivity.findViewById(R.id.default_focus);
@@ -115,7 +110,6 @@ public class FocusAreaTest {
         assertThat(mDefaultFocus.isFocused()).isFalse();
 
         Bundle bundle = new Bundle();
-        bundle.putInt(FOCUS_ACTION_TYPE, FOCUS_DEFAULT);
         CountDownLatch latch = new CountDownLatch(1);
         mFocusArea.post(() -> {
             mFocusArea.performAccessibilityAction(ACTION_FOCUS, bundle);
@@ -123,21 +117,6 @@ public class FocusAreaTest {
         });
         latch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
         assertThat(mDefaultFocus.isFocused()).isTrue();
-    }
-
-    @Test
-    public void testFocusOnFirstFocusable() throws Exception {
-        assertThat(mChild.isFocused()).isFalse();
-
-        Bundle bundle = new Bundle();
-        bundle.putInt(FOCUS_ACTION_TYPE, FOCUS_FIRST);
-        CountDownLatch latch = new CountDownLatch(1);
-        mFocusArea.post(() -> {
-            mFocusArea.performAccessibilityAction(ACTION_FOCUS, bundle);
-            latch.countDown();
-        });
-        latch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
-        assertThat(mChild.isFocused()).isTrue();
     }
 
     @Test
