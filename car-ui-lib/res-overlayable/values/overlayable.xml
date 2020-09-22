@@ -264,6 +264,7 @@ limitations under the License.-->
       <item type="id" name="car_ui_alert_icon"/>
       <item type="id" name="car_ui_alert_subtitle"/>
       <item type="id" name="car_ui_alert_title"/>
+      <item type="id" name="car_ui_base_layout_content_container"/>
       <item type="id" name="car_ui_check_box_end_guideline"/>
       <item type="id" name="car_ui_check_box_start_guideline"/>
       <item type="id" name="car_ui_list_item_end_guideline"/>
@@ -311,7 +312,6 @@ limitations under the License.-->
       <item type="id" name="checkbox"/>
       <item type="id" name="checkbox_widget"/>
       <item type="id" name="container"/>
-      <item type="id" name="content"/>
       <item type="id" name="content_icon"/>
       <item type="id" name="icon"/>
       <item type="id" name="icon_container"/>
