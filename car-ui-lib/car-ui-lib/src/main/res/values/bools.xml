@@ -55,4 +55,9 @@
     <!-- Whether to draw highlight (car_ui_focus_area_background_highlight) on top of the FocusArea
          but behind its children when the FocusArea's descendant gets focused. -->
     <bool name="car_ui_enable_focus_area_background_highlight">false</bool>
+    <!-- Whether to focus on the app:defaultFocus view when nudging to the FocusArea, even if there
+         was another view focused in the FocusArea. -->
+    <bool name="car_ui_focus_area_default_focus_overrides_history">true</bool>
+    <!-- Whether to clear FocusArea history when the user rotates the rotary controller. -->
+    <bool name="car_ui_clear_focus_area_history_when_rotating">true</bool>
 </resources>
