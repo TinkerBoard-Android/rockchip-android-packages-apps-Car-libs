@@ -111,8 +111,6 @@ public class FocusAreaTest {
 
     @Test
     public void testFocusOnDefaultFocus() throws Exception {
-        assertThat(mDefaultFocus.isFocused()).isFalse();
-
         Bundle bundle = new Bundle();
         CountDownLatch latch = new CountDownLatch(1);
         mFocusArea.post(() -> {
