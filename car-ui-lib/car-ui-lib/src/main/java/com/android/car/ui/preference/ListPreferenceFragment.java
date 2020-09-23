@@ -55,17 +55,6 @@ public class ListPreferenceFragment extends Fragment implements InsetsChangedLis
     private ListPreference mPreference;
     private CarUiContentListItem mSelectedItem;
     private int mSelectedIndex = -1;
-    private final Toolbar.OnBackListener mOnBackListener = () -> {
-        if (mSelectedIndex >= 0 && mPreference != null) {
-            String entryValue = mPreference.getEntryValues()[mSelectedIndex].toString();
-
-            if (mPreference.callChangeListener(entryValue)) {
-                mPreference.setValue(entryValue);
-            }
-        }
-
-        return false;
-    };
 
     /**
      * Returns a new instance of {@link ListPreferenceFragment} for the {@link ListPreference} with
@@ -166,7 +155,6 @@ public class ListPreferenceFragment extends Fragment implements InsetsChangedLis
     @Override
     public void onStart() {
         super.onStart();
-        mToolbar.registerOnBackListener(mOnBackListener);
         Insets insets = CarUi.getInsets(getActivity());
         if (insets != null) {
             onCarUiInsetsChanged(insets);
@@ -176,7 +164,17 @@ public class ListPreferenceFragment extends Fragment implements InsetsChangedLis
     @Override
     public void onStop() {
         super.onStop();
-        mToolbar.unregisterOnBackListener(mOnBackListener);
+        updatePreference();
+    }
+
+    private void updatePreference() {
+        if (mSelectedIndex >= 0 && mPreference != null) {
+            String entryValue = mPreference.getEntryValues()[mSelectedIndex].toString();
+
+            if (mPreference.callChangeListener(entryValue)) {
+                mPreference.setValue(entryValue);
+            }
+        }
     }
 
     private ListPreference getListPreference() {
