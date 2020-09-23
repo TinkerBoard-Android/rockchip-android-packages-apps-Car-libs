@@ -72,6 +72,7 @@ limitations under the License.-->
       <item type="attr" name="title"/>
       <item type="bool" name="car_ui_enable_focus_area_background_highlight"/>
       <item type="bool" name="car_ui_enable_focus_area_foreground_highlight"/>
+      <item type="bool" name="car_ui_escrow_check_components_automatically"/>
       <item type="bool" name="car_ui_list_item_single_line_title"/>
       <item type="bool" name="car_ui_preference_list_show_full_screen"/>
       <item type="bool" name="car_ui_preference_show_chevron"/>
