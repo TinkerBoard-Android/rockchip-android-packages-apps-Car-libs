@@ -321,11 +321,16 @@ public class Utils {
     /** Returns the list of recipient uris for a BluetoothMapClient intent. **/
     public static List<String> getInclusiveRecipientsUrisList(Intent intent) {
         List<String> ccUris = new ArrayList<>();
-        ccUris.add(getSenderUri(intent));
+        String uri = getSenderUri(intent);
         if (isGroupConversation(intent)) {
             ccUris.addAll(Arrays.asList(intent.getStringArrayExtra(Intent.EXTRA_CC)));
-            Collections.sort(ccUris);
         }
+        if (!ccUris.contains(uri)) {
+            ccUris.add(uri);
+        }
+        // TODO (b/169183358): remove sorting.
+        Collections.sort(ccUris);
+
         return ccUris;
     }
 
@@ -335,6 +340,7 @@ public class Utils {
     @Nullable
     public static String getPhoneNumberFromMapClient(@Nullable String senderContactUri) {
         if (senderContactUri == null || !senderContactUri.matches(MAP_CLIENT_URI_REGEX)) {
+            logw(TAG, " contactUri is malformed! " + senderContactUri);
             return null;
         }
 
@@ -456,4 +462,5 @@ public class Utils {
                     }
                 }
             };
+
 }
