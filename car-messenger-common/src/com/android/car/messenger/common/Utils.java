@@ -285,7 +285,7 @@ public class Utils {
     /** Returns whether the BluetoothMapClient intent represents a group conversation. **/
     public static boolean isGroupConversation(Intent intent) {
         return (intent.getStringArrayExtra(Intent.EXTRA_CC) != null
-                && intent.getStringArrayExtra(Intent.EXTRA_CC).length > 0);
+                && intent.getStringArrayExtra(Intent.EXTRA_CC).length > 1);
     }
 
     /**
