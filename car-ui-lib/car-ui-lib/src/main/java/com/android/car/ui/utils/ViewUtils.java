@@ -42,11 +42,14 @@ public final class ViewUtils {
 
     /**
      * Searches the {@code view} and its descendants in depth first order, and returns the first
-     * view that is focused by default and can take focus. Returns null if not found.
+     * view that is focused by default, can take focus, but has no invisible ancestors. Returns null
+     * if not found.
      */
     @Nullable
     public static View findFocusedByDefaultView(@NonNull View view) {
-        return depthFirstSearch(view, v -> v.isFocusedByDefault() && canTakeFocus(v));
+        return depthFirstSearch(view,
+                /* targetPredicate= */ v -> v.isFocusedByDefault() && canTakeFocus(v),
+                /* skipPredicate= */ v -> v.getVisibility() != VISIBLE);
     }
 
     /**
@@ -61,27 +64,44 @@ public final class ViewUtils {
 
     /**
      * Searches the {@code view}'s descendants in depth first order, and returns the first view
-     * that can take focus, or null if not found.
+     * that can take focus but has no invisible ancestors, or null if not found.
      */
     @Nullable
     public static View findFocusableDescendant(@NonNull View view) {
-        return depthFirstSearch(view, v -> v != view && canTakeFocus(v));
+        return depthFirstSearch(view,
+                /* targetPredicate= */ v -> v != view && canTakeFocus(v),
+                /* skipPredicate= */ v -> v.getVisibility() != VISIBLE);
     }
 
     /**
-     * Searches the {@code view} and its descendants in depth first order, and returns the view that
-     * meets the given condition. Returns null if not found.
+     * Searches the {@code view} and its descendants in depth first order, and returns the first
+     * view that meets the given condition. Returns null if not found.
      */
     @Nullable
     public static View depthFirstSearch(@NonNull View view, @NonNull Predicate<View> predicate) {
-        if (predicate.test(view)) {
+        return depthFirstSearch(view, predicate, /* skipPredicate= */ null);
+    }
+
+    /**
+     * Searches the {@code view} and its descendants in depth first order, skips the views that
+     * match {@code skipPredicate} and their descendants, and returns the first view that matches
+     * {@code targetPredicate}. Returns null if not found.
+     */
+    @Nullable
+    private static View depthFirstSearch(@NonNull View view,
+            @NonNull Predicate<View> targetPredicate,
+            @NonNull Predicate<View> skipPredicate) {
+        if (skipPredicate != null && skipPredicate.test(view)) {
+            return null;
+        }
+        if (targetPredicate.test(view)) {
             return view;
         }
         if (view instanceof ViewGroup) {
             ViewGroup parent = (ViewGroup) view;
             for (int i = 0; i < parent.getChildCount(); i++) {
                 View child = parent.getChildAt(i);
-                View target = depthFirstSearch(child, predicate);
+                View target = depthFirstSearch(child, targetPredicate, skipPredicate);
                 if (target != null) {
                     return target;
                 }
@@ -103,15 +123,17 @@ public final class ViewUtils {
 
     /**
      * Searches the {@code view} and its descendants in depth first order, and returns the first
-     * scrollable container. Returns null if not found.
+     * scrollable container that has no invisible ancestors. Returns null if not found.
      */
     @Nullable
     private static View findScrollableContainer(@NonNull View view) {
-        return depthFirstSearch(view, v -> {
-            CharSequence contentDescription = v.getContentDescription();
-            return TextUtils.equals(contentDescription, ROTARY_VERTICALLY_SCROLLABLE)
-                    || TextUtils.equals(contentDescription, ROTARY_HORIZONTALLY_SCROLLABLE);
-        });
+        return depthFirstSearch(view,
+                /* targetPredicate= */ v -> {
+                    CharSequence contentDescription = v.getContentDescription();
+                    return TextUtils.equals(contentDescription, ROTARY_VERTICALLY_SCROLLABLE)
+                            || TextUtils.equals(contentDescription, ROTARY_HORIZONTALLY_SCROLLABLE);
+                },
+                /* skipPredicate= */ v -> v.getVisibility() != VISIBLE);
     }
 
     /** Returns whether {@code view} can be focused. */
