@@ -37,6 +37,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceGroup;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreference;
+import androidx.preference.TwoStatePreference;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.FocusArea;
@@ -366,6 +367,18 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
             toMulti.setEntries(fromMulti.getEntries());
             toMulti.setEntryValues(fromMulti.getEntryValues());
             toMulti.setValues(fromMulti.getValues());
+        } else if (from instanceof TwoStatePreference) {
+            TwoStatePreference fromTwoState = (TwoStatePreference) from;
+            TwoStatePreference toTwoState = (TwoStatePreference) to;
+            toTwoState.setSummaryOn(fromTwoState.getSummaryOn());
+            toTwoState.setSummaryOff(fromTwoState.getSummaryOff());
+
+            if (from instanceof SwitchPreference) {
+                SwitchPreference fromSwitch = (SwitchPreference) from;
+                SwitchPreference toSwitch = (SwitchPreference) to;
+                toSwitch.setSwitchTextOn(fromSwitch.getSwitchTextOn());
+                toSwitch.setSwitchTextOff(fromSwitch.getSwitchTextOff());
+            }
         }
 
         // We don't need to add checks for things that we will never replace,
