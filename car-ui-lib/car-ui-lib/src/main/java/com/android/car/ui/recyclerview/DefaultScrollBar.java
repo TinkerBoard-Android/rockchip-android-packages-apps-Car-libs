@@ -40,6 +40,7 @@ import com.android.car.ui.utils.CarUiUtils;
  */
 class DefaultScrollBar implements ScrollBar {
 
+
     private float mButtonDisabledAlpha;
     private CarUiSnapHelper mSnapHelper;
 
@@ -48,6 +49,7 @@ class DefaultScrollBar implements ScrollBar {
     private View mScrollThumb;
     private View mUpButton;
     private View mDownButton;
+    private int mScrollbarThumbMinHeight;
 
     private RecyclerView mRecyclerView;
 
@@ -66,6 +68,8 @@ class DefaultScrollBar implements ScrollBar {
         Resources res = rv.getContext().getResources();
 
         mButtonDisabledAlpha = CarUiUtils.getFloat(res, R.dimen.car_ui_button_disabled_alpha);
+        mScrollbarThumbMinHeight = rv.getContext().getResources()
+                .getDimensionPixelSize(R.dimen.car_ui_scrollbar_min_thumb_height);
 
         getRecyclerView().addOnScrollListener(mRecyclerViewOnScrollListener);
         getRecyclerView().getRecycledViewPool().setMaxRecycledViews(0, 12);
@@ -159,7 +163,7 @@ class DefaultScrollBar implements ScrollBar {
      * The
      * values should also be positive.
      *
-     * @param range  The range of the scrollbar's thumb
+     * @param range The range of the scrollbar's thumb
      * @param offset The offset of the scrollbar's thumb
      * @param extent The extent of the scrollbar's thumb
      */
@@ -195,25 +199,23 @@ class DefaultScrollBar implements ScrollBar {
      * Calculates and returns how big the scroll bar thumb should be based on the given range and
      * extent.
      *
-     * @param range  The total amount of space the scroll bar is allowed to roam over.
+     * @param range The total amount of space the scroll bar is allowed to roam over.
      * @param extent The amount of space that the scroll bar takes up relative to the range.
      * @return The height of the scroll bar thumb in pixels.
      */
     private int calculateScrollThumbLength(int range, int extent) {
         // Scale the length by the available space that the thumb can fill.
-        // Use max to have a lower bound of 1 unit in length.
-        return Math.max(Math.round(((float) extent / range) * mScrollTrack.getHeight()), 1);
+        return Math.max(Math.round(((float) extent / range) * mScrollTrack.getHeight()),
+                mScrollbarThumbMinHeight);
     }
 
     /**
      * Calculates and returns how much the scroll thumb should be offset from the top of where it
-     * has
-     * been laid out.
+     * has been laid out.
      *
-     * @param range       The total amount of space the scroll bar is allowed to roam over.
-     * @param offset      The amount the scroll bar should be offset, expressed in the same units as
-     *                    the
-     *                    given range.
+     * @param range The total amount of space the scroll bar is allowed to roam over.
+     * @param offset The amount the scroll bar should be offset, expressed in the same units as
+     * the given range.
      * @param thumbLength The current length of the thumb in pixels.
      * @return The amount the thumb should be offset in pixels.
      */
@@ -224,7 +226,7 @@ class DefaultScrollBar implements ScrollBar {
         // the top of scrollbar track is.
         return mScrollTrack.getTop()
                 + (isDownEnabled()
-                ? Math.round(((float) offset / range) * mScrollTrack.getHeight())
+                ? Math.round(((float) offset / range) * (mScrollTrack.getHeight() - thumbLength))
                 : mScrollTrack.getHeight() - thumbLength);
     }
 

@@ -447,13 +447,12 @@ public class CarUiRecyclerViewTest {
 
         View trackView = mActivity.requireViewById(R.id.car_ui_scrollbar_track);
         View thumbView = mActivity.requireViewById(R.id.car_ui_scrollbar_thumb);
-        // if you drag too far in a single step you'll stop selecting the thumb view
-        int numSteps = (int) Math.ceil(
-                trackView.getHeight() / (float) thumbView.getHeight() * 1.1f);
-        // drag and scroll to the middle
+        // if you drag too far in a single step you'll stop selecting the thumb view. Hence, drag
+        // 5 units at a time for 200 intervals and stop at the center of the track by limitY.
+
         onView(withId(R.id.car_ui_scrollbar_track)).perform(
                 performDrag(0f, (thumbView.getHeight() / 2f), 0,
-                        (trackView.getHeight() / 2f) / numSteps, numSteps, Float.MAX_VALUE,
+                        5, 200, Float.MAX_VALUE,
                         trackView.getHeight() / 2f));
         onView(withText(adapter.getItemText(25))).check(matches(isDisplayed()));
     }
@@ -591,7 +590,7 @@ public class CarUiRecyclerViewTest {
         // Making sure we've reached end of the recyclerview, after
         // adding bottom padding
         assertThat(orientationHelper.getDecoratedEnd(longItem)
-                + carUiRecyclerView.getPaddingBottom(),
+                        + carUiRecyclerView.getPaddingBottom(),
                 is(equalTo(carUiRecyclerView.getHeight())));
     }
 
@@ -743,7 +742,7 @@ public class CarUiRecyclerViewTest {
         // Making sure we've reached end of the recyclerview, after
         // adding bottom padding
         assertThat(orientationHelper.getDecoratedEnd(longItem)
-                + carUiRecyclerView.getPaddingBottom(),
+                        + carUiRecyclerView.getPaddingBottom(),
                 is(equalTo(carUiRecyclerView.getHeight())));
     }
 
@@ -768,7 +767,8 @@ public class CarUiRecyclerViewTest {
         onView(withId(R.id.car_ui_scrollbar_page_down)).perform(click());
 
         // Check that thumb track maintains minimum height
-        int minThumbViewHeight = 1;
+        int minThumbViewHeight = mActivity.getResources()
+                .getDimensionPixelOffset(R.dimen.car_ui_scrollbar_min_thumb_height);
         View thumbView = mActivity.requireViewById(R.id.car_ui_scrollbar_thumb);
         assertThat(thumbView.getHeight(), is(equalTo(minThumbViewHeight)));
     }
