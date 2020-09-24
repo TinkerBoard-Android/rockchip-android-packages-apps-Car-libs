@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!--This file is AUTO GENERATED, DO NOT EDIT MANUALLY.-->
+<!-- THIS FILE WAS AUTO GENERATED ON 24-Sep-2020 (15:01:57), DO NOT EDIT MANUALLY. -->
 <resources>
   <public type="attr" name="CarUiToolbarStyle"/>
   <public type="attr" name="carUiPreferenceStyle"/>
