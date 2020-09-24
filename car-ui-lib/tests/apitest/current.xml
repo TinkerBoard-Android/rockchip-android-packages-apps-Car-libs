@@ -114,6 +114,7 @@
   <public type="dimen" name="car_ui_scrollbar_deceleration_times_divisor"/>
   <public type="dimen" name="car_ui_scrollbar_margin"/>
   <public type="dimen" name="car_ui_scrollbar_milliseconds_per_inch"/>
+  <public type="dimen" name="car_ui_scrollbar_min_thumb_height"/>
   <public type="dimen" name="car_ui_scrollbar_padding_bottom"/>
   <public type="dimen" name="car_ui_scrollbar_padding_top"/>
   <public type="dimen" name="car_ui_scrollbar_separator_margin"/>
