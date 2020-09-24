@@ -55,6 +55,8 @@ public class FocusAreaTest {
     private View mChild;
     private View mDefaultFocus;
     private View mNonChild;
+    private View mChild1;
+    private View mChild2;
 
     @Before
     public void setUp() {
@@ -65,6 +67,8 @@ public class FocusAreaTest {
         mChild = mActivity.findViewById(R.id.child);
         mDefaultFocus = mActivity.findViewById(R.id.default_focus);
         mNonChild = mActivity.findViewById(R.id.non_child);
+        mChild1 = mActivity.findViewById(R.id.child1);
+        mChild2 = mActivity.findViewById(R.id.child2);
     }
 
     @Test
@@ -174,6 +178,24 @@ public class FocusAreaTest {
         AccessibilityNodeInfo node = mFocusArea2.createAccessibilityNodeInfo();
         assertBoundsOffset(node, left, top, right, bottom);
         node.recycle();
+    }
+
+    @Test
+    public void testLastFocusedViewRemoved() {
+        mChild1.post(() -> {
+            // Focus on mChild1 in mFocusArea2, then mChild in mFocusArea .
+            mChild1.requestFocus();
+            assertThat(mChild1.isFocused()).isTrue();
+            mChild.requestFocus();
+            assertThat(mChild.isFocused()).isTrue();
+
+            // Remove mChild1 in mFocusArea2, then Perform ACTION_FOCUS on mFocusArea2.
+            mFocusArea2.removeView(mChild1);
+            mFocusArea2.performAccessibilityAction(ACTION_FOCUS, null);
+
+            // mChild2 in mFocusArea2 should get focused.
+            assertThat(mChild2.isFocused()).isTrue();
+        });
     }
 
     private void assertBoundsOffset(

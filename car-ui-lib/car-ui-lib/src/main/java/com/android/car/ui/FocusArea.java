@@ -673,7 +673,7 @@ public class FocusArea extends LinearLayout {
     }
 
     private boolean requestFocus(@Nullable View view) {
-        if (view == null) {
+        if (view == null || !view.isAttachedToWindow()) {
             return false;
         }
         // Exit touch mode and focus the view. The view may not be focusable in touch mode, so we
