@@ -60,4 +60,7 @@
     <bool name="car_ui_focus_area_default_focus_overrides_history">true</bool>
     <!-- Whether to clear FocusArea history when the user rotates the rotary controller. -->
     <bool name="car_ui_clear_focus_area_history_when_rotating">true</bool>
+
+    <!--  Whether to log the escrow components check automatically for all the activities or not.  -->
+    <bool name="car_ui_escrow_check_components_automatically">false</bool>
 </resources>
