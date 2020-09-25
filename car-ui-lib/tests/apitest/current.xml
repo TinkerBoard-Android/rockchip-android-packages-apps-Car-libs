@@ -8,6 +8,7 @@
   <public type="bool" name="car_ui_clear_focus_area_history_when_rotating"/>
   <public type="bool" name="car_ui_enable_focus_area_background_highlight"/>
   <public type="bool" name="car_ui_enable_focus_area_foreground_highlight"/>
+  <public type="bool" name="car_ui_escrow_check_components_automatically"/>
   <public type="bool" name="car_ui_focus_area_default_focus_overrides_history"/>
   <public type="bool" name="car_ui_list_item_single_line_title"/>
   <public type="bool" name="car_ui_preference_list_show_full_screen"/>
@@ -247,7 +248,6 @@
   <public type="id" name="checkbox_widget"/>
   <public type="id" name="container"/>
   <public type="id" name="content_icon"/>
-  <public type="id" name="text_container"/>
   <public type="id" name="icon"/>
   <public type="id" name="icon_container"/>
   <public type="id" name="list"/>
@@ -266,6 +266,7 @@
   <public type="id" name="spinner"/>
   <public type="id" name="supplemental_icon"/>
   <public type="id" name="switch_widget"/>
+  <public type="id" name="text_container"/>
   <public type="id" name="textbox"/>
   <public type="id" name="title"/>
   <public type="id" name="title_template"/>
