@@ -33,7 +33,7 @@ import com.android.car.ui.utils.CarUiUtils;
  * This class extends the base {@link Preference} class. Adds the support to add a drawable icon to
  * the preference if there is one of fragment, intent or onPreferenceClickListener set.
  */
-public class CarUiPreference extends Preference implements IDisabledPreferenceCallback {
+public class CarUiPreference extends Preference implements DisabledPreferenceCallback {
 
     private Context mContext;
     private boolean mShowChevron;

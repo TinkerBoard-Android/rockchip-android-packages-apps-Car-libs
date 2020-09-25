@@ -19,7 +19,7 @@ package com.android.car.ui.preference;
 /**
  * Interface for preferences to handle clicks when its disabled.
  */
-public interface IDisabledPreferenceCallback {
+public interface DisabledPreferenceCallback {
 
     /**
      * Sets if the ripple effect should be shown on disabled preference.

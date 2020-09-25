@@ -33,7 +33,7 @@ import com.android.car.ui.utils.CarUiUtils;
  * This class extends the base {@link SwitchPreference} class. Adds the functionality to show
  * message when preference is disabled.
  */
-public class CarUiSwitchPreference extends SwitchPreference implements IDisabledPreferenceCallback {
+public class CarUiSwitchPreference extends SwitchPreference implements DisabledPreferenceCallback {
 
     private String mMessageToShowWhenDisabledPreferenceClicked;
 
