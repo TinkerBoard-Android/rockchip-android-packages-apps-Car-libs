@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,7 @@ import android.widget.Toast;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.car.ui.R;
 import com.android.car.ui.utils.CarUiUtils;
 
 /**
@@ -39,45 +41,29 @@ import com.android.car.ui.utils.CarUiUtils;
  * To check if the activity is using the CarUI components properly, navigate to the activity and
  * run: adb shell am broadcast -a com.android.car.ui.intent.CHECK_CAR_UI_COMPONENTS. Filter
  * the logs with "CheckCarUiComponents". This is ONLY available for debug and eng builds.
+ *
+ * Other than using the adb command you can also set a boolean resource
+ * "car_ui_escrow_check_components_automatically" to true. This will generate the logs 2 seconds
+ * after launching any activity.
  */
 class CheckCarUiComponents implements Application.ActivityLifecycleCallbacks {
     private static final String TAG = CheckCarUiComponents.class.getSimpleName();
     private static final String INTENT_FILTER = "com.android.car.ui.intent.CHECK_CAR_UI_COMPONENTS";
+    private static final String NO_CAR_UI_RV = "CarUiRecyclerView not used:";
+    private static final String NO_CAR_UI_TOOLBAR = "CarUiToolbar is not used: ";
+    private static final String NO_CAR_UI_TOOLBAR_BL = "CarUiBaseLayoutToolbar is not used: ";
+    private static final String NO_CAR_UI_PREFERENCE = "CarUiPreference is not used: ";
+    private static final String NO_LIST_ITEM =
+            "CarUiListItem are not used within CarUiRecyclerView: ";
     private View mRootView;
     private boolean mIsScreenVisible;
+
+    private Handler mHandler = new Handler();
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (!mIsScreenVisible) {
-                return;
-            }
-
-            CarUiComponents carUiComponents = new CarUiComponents();
-            checkForCarUiComponents(mRootView, carUiComponents);
-            if (carUiComponents.mIsUsingCarUiRecyclerView
-                    && !carUiComponents.mIsCarUiRecyclerViewUsingListItem) {
-                Log.e(TAG, "CarUiListItem are not used within CarUiRecyclerView: ");
-                showToast(context, "CarUiListItem are not used within CarUiRecyclerView");
-            }
-            if (carUiComponents.mIsUsingAndroidXRecyclerView) {
-                Log.e(TAG, "CarUiRecyclerView not used: ");
-                showToast(context, "CarUiRecycler is not used");
-            }
-            if (!carUiComponents.mIsUsingCarUiToolbar) {
-                Log.e(TAG, "CarUiToolbar is not used: ");
-                showToast(context, "CarUiToolbar is not used");
-            }
-            if (!carUiComponents.mIsUsingCarUiBaseLayoutToolbar
-                    && carUiComponents.mIsUsingCarUiToolbar) {
-                Log.e(TAG, "CarUiBaseLayoutToolbar is not used: ");
-                showToast(context, "CarUiBaseLayoutToolbar is not used");
-            }
-            if (carUiComponents.mIsUsingCarUiRecyclerViewForPreference
-                    && !carUiComponents.mIsUsingCarUiPreference) {
-                Log.e(TAG, "CarUiPreference is not used: ");
-                showToast(context, "CarUiPreference is not used");
-            }
+            checkForComponents(context, true);
         }
     };
 
@@ -97,8 +83,17 @@ class CheckCarUiComponents implements Application.ActivityLifecycleCallbacks {
 
     @Override
     public void onActivityResumed(Activity activity) {
+    }
+
+    @Override
+    public void onActivityPostResumed(Activity activity) {
         mRootView = activity.getWindow().getDecorView().getRootView();
         mIsScreenVisible = true;
+        if (checkComponentsForAllActivities(activity)) {
+            // post a message after 2 seconds delay. This is an arbitrary number so that activity
+            // is ready with all its views rendered by this time.
+            mHandler.postDelayed(() -> checkForComponents(activity, false), 2000);
+        }
     }
 
     @Override
@@ -108,6 +103,7 @@ class CheckCarUiComponents implements Application.ActivityLifecycleCallbacks {
 
     @Override
     public void onActivityStopped(Activity activity) {
+        mHandler.removeCallbacksAndMessages(null);
     }
 
     @Override
@@ -119,6 +115,43 @@ class CheckCarUiComponents implements Application.ActivityLifecycleCallbacks {
         if (mRootView != null
                 && CarUiUtils.getActivity(mRootView.getContext()) == activity) {
             mRootView = null;
+        }
+    }
+
+    private boolean checkComponentsForAllActivities(Context context) {
+        return context.getResources().getBoolean(
+                R.bool.car_ui_escrow_check_components_automatically);
+    }
+
+    private void checkForComponents(Context context, boolean showToast) {
+        if (!mIsScreenVisible) {
+            return;
+        }
+
+        CarUiComponents carUiComponents = new CarUiComponents();
+        checkForCarUiComponents(mRootView, carUiComponents);
+        if (carUiComponents.mIsUsingCarUiRecyclerView
+                && !carUiComponents.mIsCarUiRecyclerViewUsingListItem) {
+            Log.d(TAG, NO_LIST_ITEM);
+            mayShowToast(context, NO_LIST_ITEM, showToast);
+        }
+        if (carUiComponents.mIsUsingAndroidXRecyclerView) {
+            Log.d(TAG, NO_CAR_UI_RV);
+            mayShowToast(context, NO_CAR_UI_RV, showToast);
+        }
+        if (!carUiComponents.mIsUsingCarUiToolbar) {
+            Log.d(TAG, NO_CAR_UI_TOOLBAR);
+            mayShowToast(context, NO_CAR_UI_TOOLBAR, showToast);
+        }
+        if (!carUiComponents.mIsUsingCarUiBaseLayoutToolbar
+                && carUiComponents.mIsUsingCarUiToolbar) {
+            Log.d(TAG, NO_CAR_UI_TOOLBAR_BL);
+            mayShowToast(context, NO_CAR_UI_TOOLBAR_BL, showToast);
+        }
+        if (carUiComponents.mIsUsingCarUiRecyclerViewForPreference
+                && !carUiComponents.mIsUsingCarUiPreference) {
+            Log.d(TAG, NO_CAR_UI_PREFERENCE);
+            mayShowToast(context, NO_CAR_UI_PREFERENCE, showToast);
         }
     }
 
@@ -194,7 +227,10 @@ class CheckCarUiComponents implements Application.ActivityLifecycleCallbacks {
         return view.getClass() == RecyclerView.class;
     }
 
-    private static void showToast(Context context, String message) {
+    private static void mayShowToast(Context context, String message, boolean show) {
+        if (!show) {
+            return;
+        }
         Toast.makeText(context, message, Toast.LENGTH_LONG).show();
     }
 
