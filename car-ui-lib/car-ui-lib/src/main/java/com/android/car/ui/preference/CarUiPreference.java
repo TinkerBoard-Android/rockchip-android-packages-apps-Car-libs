@@ -25,7 +25,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.preference.Preference;
-import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceViewHolder;
 
 import com.android.car.ui.R;
@@ -107,34 +106,13 @@ public class CarUiPreference extends Preference implements DisabledPreferenceCal
     }
 
     /**
-     * This code is exact copy of {@link androidx.preference.Preference::performClick}
-     * method except the usage of private fields is now through public accessors.
+     * An exact copy of {@link androidx.preference.Preference#performClick(View)}
+     * This method was added here because super.performClick(View) is not open
+     * for app usage.
      */
-    private void performClickInternal() {
-        if (!isEnabled() || !isSelectable()) {
-            return;
-        }
-
-        onClick();
-
-        if (getOnPreferenceClickListener() != null
-                && getOnPreferenceClickListener().onPreferenceClick(this)) {
-            return;
-        }
-
-        PreferenceManager preferenceManager = getPreferenceManager();
-        if (preferenceManager != null) {
-            PreferenceManager.OnPreferenceTreeClickListener listener = preferenceManager
-                    .getOnPreferenceTreeClickListener();
-            if (listener != null && listener.onPreferenceTreeClick(this)) {
-                return;
-            }
-        }
-
-        if (getIntent() != null) {
-            Context context = getContext();
-            context.startActivity(getIntent());
-        }
+    @SuppressWarnings("RestrictTo")
+    void performClickUnrestricted(View v) {
+        performClick();
     }
 
     /**
@@ -142,9 +120,10 @@ public class CarUiPreference extends Preference implements DisabledPreferenceCal
      * return when view is not enabled.
      */
     @Override
+    @SuppressWarnings("RestrictTo")
     public void performClick() {
         if (isEnabled()) {
-            performClickInternal();
+            super.performClick();
         } else if (mMessageToShowWhenDisabledPreferenceClicked != null
                 && !mMessageToShowWhenDisabledPreferenceClicked.isEmpty()) {
             Toast.makeText(mContext, mMessageToShowWhenDisabledPreferenceClicked,
