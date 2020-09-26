@@ -70,9 +70,11 @@ limitations under the License.-->
       <item type="attr" name="layout_optimizationLevel"/>
       <item type="attr" name="state_ux_restricted"/>
       <item type="attr" name="title"/>
+      <item type="bool" name="car_ui_clear_focus_area_history_when_rotating"/>
       <item type="bool" name="car_ui_enable_focus_area_background_highlight"/>
       <item type="bool" name="car_ui_enable_focus_area_foreground_highlight"/>
       <item type="bool" name="car_ui_escrow_check_components_automatically"/>
+      <item type="bool" name="car_ui_focus_area_default_focus_overrides_history"/>
       <item type="bool" name="car_ui_list_item_single_line_title"/>
       <item type="bool" name="car_ui_preference_list_show_full_screen"/>
       <item type="bool" name="car_ui_preference_show_chevron"/>
@@ -329,12 +331,17 @@ limitations under the License.-->
       <item type="id" name="spinner"/>
       <item type="id" name="supplemental_icon"/>
       <item type="id" name="switch_widget"/>
+      <item type="id" name="text_container"/>
       <item type="id" name="textbox"/>
       <item type="id" name="title"/>
       <item type="id" name="title_template"/>
       <item type="id" name="toolbar"/>
       <item type="id" name="touch_interceptor"/>
       <item type="integer" name="car_ui_default_max_string_length"/>
+      <item type="integer" name="car_ui_focus_area_history_cache_type"/>
+      <item type="integer" name="car_ui_focus_area_history_expiration_period_ms"/>
+      <item type="integer" name="car_ui_focus_history_cache_type"/>
+      <item type="integer" name="car_ui_focus_history_expiration_period_ms"/>
       <item type="integer" name="car_ui_scrollbar_longpress_initial_delay"/>
       <item type="integer" name="car_ui_scrollbar_longpress_repeat_interval"/>
       <item type="layout" name="car_ui_alert_dialog_edit_text"/>
