@@ -43,9 +43,12 @@
     <item target="style/Widget.CarUi.Toolbar.NavIcon" value="@style/Widget.CarUi.Toolbar.NavIcon"/>
 
     <item target="dimen/car_ui_toolbar_margin" value="@dimen/car_ui_toolbar_margin"/>
+    <item target="layout/car_ui_recycler_view" value="@layout/car_ui_recycler_view"/>
 
     <item target="bool/car_ui_toolbar_nav_icon_reserve_space" value="@bool/car_ui_toolbar_nav_icon_reserve_space" />
     <item target="bool/car_ui_toolbar_logo_fills_nav_icon_space" value="@bool/car_ui_toolbar_logo_fills_nav_icon_space" />
+    <item target="bool/car_ui_toolbar_tab_flexible_layout" value="@bool/car_ui_toolbar_tab_flexible_layout" />
+    <item target="bool/car_ui_toolbar_tabs_on_second_row" value="@bool/car_ui_toolbar_tabs_on_second_row" />
 
     <item target="id/car_ui_toolbar_background" value="@id/car_ui_toolbar_background" />
     <item target="id/car_ui_toolbar_nav_icon_container" value="@id/car_ui_toolbar_nav_icon_container" />
@@ -69,6 +72,7 @@
     <item target="id/car_ui_toolbar_menu_item_text_with_icon" value="@id/car_ui_toolbar_menu_item_text_with_icon"/>
     <item target="id/seekbar" value="@id/seekbar"/>
     <item target="id/seekbar_value" value="@id/seekbar_value"/>
+    <item target="id/car_ui_recycler_view" value="@id/car_ui_recycler_view" />
 
     <item target="attr/layout_constraintGuide_begin" value="@attr/layout_constraintGuide_begin"/>
     <item target="attr/layout_constraintGuide_end" value="@attr/layout_constraintGuide_end"/>
