@@ -580,7 +580,6 @@ public class FocusArea extends LinearLayout {
     }
 
     /** Returns the direction opposite the given {@code direction} */
-    @VisibleForTesting
     private static int getOppositeDirection(int direction) {
         switch (direction) {
             case View.FOCUS_LEFT:
@@ -591,6 +590,7 @@ public class FocusArea extends LinearLayout {
                 return View.FOCUS_DOWN;
             case View.FOCUS_DOWN:
                 return View.FOCUS_UP;
+            default: // fall out
         }
         throw new IllegalArgumentException("direction must be "
                 + "FOCUS_UP, FOCUS_DOWN, FOCUS_LEFT, or FOCUS_RIGHT.");
