@@ -58,7 +58,7 @@ class CheckCarUiComponents implements Application.ActivityLifecycleCallbacks {
     private View mRootView;
     private boolean mIsScreenVisible;
 
-    private Handler mHandler = new Handler();
+    private final Handler mHandler = new Handler();
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override

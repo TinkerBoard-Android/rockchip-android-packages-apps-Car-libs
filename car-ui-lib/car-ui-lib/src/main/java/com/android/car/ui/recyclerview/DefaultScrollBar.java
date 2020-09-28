@@ -17,6 +17,8 @@ package com.android.car.ui.recyclerview;
 
 import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
+import static java.lang.Math.max;
+
 import android.content.res.Resources;
 import android.os.Handler;
 import android.view.View;
@@ -205,7 +207,7 @@ class DefaultScrollBar implements ScrollBar {
      */
     private int calculateScrollThumbLength(int range, int extent) {
         // Scale the length by the available space that the thumb can fill.
-        return Math.max(Math.round(((float) extent / range) * mScrollTrack.getHeight()),
+        return max(Math.round(((float) extent / range) * mScrollTrack.getHeight()),
                 mScrollbarThumbMinHeight);
     }
 
