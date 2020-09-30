@@ -73,6 +73,11 @@
     <item target="id/seekbar" value="@id/seekbar"/>
     <item target="id/seekbar_value" value="@id/seekbar_value"/>
     <item target="id/car_ui_recycler_view" value="@id/car_ui_recycler_view" />
+    <item target="id/car_ui_scroll_bar" value="@id/car_ui_scroll_bar"/>
+    <item target="id/car_ui_scrollbar_page_down" value="@id/car_ui_scrollbar_page_down"/>
+    <item target="id/car_ui_scrollbar_page_up" value="@id/car_ui_scrollbar_page_up"/>
+    <item target="id/car_ui_scrollbar_thumb" value="@id/car_ui_scrollbar_thumb"/>
+    <item target="id/car_ui_scrollbar_track" value="@id/car_ui_scrollbar_track"/>
 
     <item target="attr/layout_constraintGuide_begin" value="@attr/layout_constraintGuide_begin"/>
     <item target="attr/layout_constraintGuide_end" value="@attr/layout_constraintGuide_end"/>
