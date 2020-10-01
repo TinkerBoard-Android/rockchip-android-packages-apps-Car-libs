@@ -10,6 +10,8 @@
   <public type="bool" name="car_ui_enable_focus_area_foreground_highlight"/>
   <public type="bool" name="car_ui_escrow_check_components_automatically"/>
   <public type="bool" name="car_ui_focus_area_default_focus_overrides_history"/>
+  <public type="bool" name="car_ui_ime_wide_screen_aligned_left"/>
+  <public type="bool" name="car_ui_ime_wide_screen_allow_app_hide_content_area"/>
   <public type="bool" name="car_ui_list_item_single_line_title"/>
   <public type="bool" name="car_ui_preference_list_show_full_screen"/>
   <public type="bool" name="car_ui_preference_show_chevron"/>
@@ -22,6 +24,12 @@
   <public type="color" name="car_ui_activity_background_color"/>
   <public type="color" name="car_ui_color_accent"/>
   <public type="color" name="car_ui_dialog_icon_color"/>
+  <public type="color" name="car_ui_ime_wide_screen_description_color"/>
+  <public type="color" name="car_ui_ime_wide_screen_description_title_color"/>
+  <public type="color" name="car_ui_ime_wide_screen_divider_color"/>
+  <public type="color" name="car_ui_ime_wide_screen_error_text_color"/>
+  <public type="color" name="car_ui_ime_wide_screen_search_item_sub_title_color"/>
+  <public type="color" name="car_ui_ime_wide_screen_search_item_title_color"/>
   <public type="color" name="car_ui_list_item_divider"/>
   <public type="color" name="car_ui_preference_icon_color"/>
   <public type="color" name="car_ui_preference_two_action_divider_color"/>
@@ -55,6 +63,37 @@
   <public type="dimen" name="car_ui_dialog_title_margin"/>
   <public type="dimen" name="car_ui_divider_width"/>
   <public type="dimen" name="car_ui_header_list_item_text_start_margin"/>
+  <public type="dimen" name="car_ui_ime_wide_screen_action_button_height"/>
+  <public type="dimen" name="car_ui_ime_wide_screen_action_button_margin_bottom"/>
+  <public type="dimen" name="car_ui_ime_wide_screen_action_button_margin_left"/>
+  <public type="dimen" name="car_ui_ime_wide_screen_action_button_text_size"/>
+  <public type="dimen" name="car_ui_ime_wide_screen_description_padding_top"/>
+  <public type="dimen" name="car_ui_ime_wide_screen_description_text_size"/>
+  <public type="dimen" name="car_ui_ime_wide_screen_description_title_margin_top"/>
+  <public type="dimen" name="car_ui_ime_wide_screen_description_title_padding_left"/>
+  <public type="dimen" name="car_ui_ime_wide_screen_description_title_text_size"/>
+  <public type="dimen" name="car_ui_ime_wide_screen_divider_width"/>
+  <public type="dimen" name="car_ui_ime_wide_screen_error_text_padding_start"/>
+  <public type="dimen" name="car_ui_ime_wide_screen_error_text_size"/>
+  <public type="dimen" name="car_ui_ime_wide_screen_input_area_height"/>
+  <public type="dimen" name="car_ui_ime_wide_screen_input_area_margin_top"/>
+  <public type="dimen" name="car_ui_ime_wide_screen_input_edit_text_padding_left"/>
+  <public type="dimen" name="car_ui_ime_wide_screen_input_edit_text_padding_right"/>
+  <public type="dimen" name="car_ui_ime_wide_screen_input_edit_text_size"/>
+  <public type="dimen" name="car_ui_ime_wide_screen_input_padding_start"/>
+  <public type="dimen" name="car_ui_ime_wide_screen_keyboard_area_padding_bottom"/>
+  <public type="dimen" name="car_ui_ime_wide_screen_keyboard_area_padding_end"/>
+  <public type="dimen" name="car_ui_ime_wide_screen_keyboard_area_padding_start"/>
+  <public type="dimen" name="car_ui_ime_wide_screen_keyboard_width"/>
+  <public type="dimen" name="car_ui_ime_wide_screen_recycler_view_padding_top"/>
+  <public type="dimen" name="car_ui_ime_wide_search_item_icon_size"/>
+  <public type="dimen" name="car_ui_ime_wide_search_item_secondary_image_padding_left"/>
+  <public type="dimen" name="car_ui_ime_wide_search_item_sub_title_padding_left"/>
+  <public type="dimen" name="car_ui_ime_wide_search_item_sub_title_padding_top"/>
+  <public type="dimen" name="car_ui_ime_wide_search_item_sub_title_text_size"/>
+  <public type="dimen" name="car_ui_ime_wide_search_item_title_padding_left"/>
+  <public type="dimen" name="car_ui_ime_wide_search_item_title_padding_top"/>
+  <public type="dimen" name="car_ui_ime_wide_search_item_title_text_size"/>
   <public type="dimen" name="car_ui_list_item_action_divider_height"/>
   <public type="dimen" name="car_ui_list_item_action_divider_width"/>
   <public type="dimen" name="car_ui_list_item_avatar_icon_height"/>
@@ -166,12 +205,19 @@
   <public type="drawable" name="car_ui_icon_delete"/>
   <public type="drawable" name="car_ui_icon_down"/>
   <public type="drawable" name="car_ui_icon_edit"/>
+  <public type="drawable" name="car_ui_icon_error"/>
   <public type="drawable" name="car_ui_icon_lock"/>
   <public type="drawable" name="car_ui_icon_overflow_menu"/>
   <public type="drawable" name="car_ui_icon_save"/>
   <public type="drawable" name="car_ui_icon_search"/>
   <public type="drawable" name="car_ui_icon_search_nav_icon"/>
   <public type="drawable" name="car_ui_icon_settings"/>
+  <public type="drawable" name="car_ui_ime_wide_screen_background"/>
+  <public type="drawable" name="car_ui_ime_wide_screen_content_area_background"/>
+  <public type="drawable" name="car_ui_ime_wide_screen_input_area_background"/>
+  <public type="drawable" name="car_ui_ime_wide_screen_input_area_tint_color"/>
+  <public type="drawable" name="car_ui_ime_wide_screen_input_area_tint_error_color"/>
+  <public type="drawable" name="car_ui_ime_wide_screen_no_content_background"/>
   <public type="drawable" name="car_ui_list_header_background"/>
   <public type="drawable" name="car_ui_list_item_avatar_icon_outline"/>
   <public type="drawable" name="car_ui_list_item_background"/>
@@ -180,6 +226,7 @@
   <public type="drawable" name="car_ui_preference_icon_chevron"/>
   <public type="drawable" name="car_ui_preference_icon_chevron_disabled"/>
   <public type="drawable" name="car_ui_preference_icon_chevron_enabled"/>
+  <public type="drawable" name="car_ui_recycler_view_ime_wide_screen_thumb"/>
   <public type="drawable" name="car_ui_recyclerview_button_ripple_background"/>
   <public type="drawable" name="car_ui_recyclerview_divider"/>
   <public type="drawable" name="car_ui_recyclerview_ic_down"/>
@@ -197,6 +244,8 @@
   <public type="id" name="action_widget_container"/>
   <public type="id" name="avatar_icon"/>
   <public type="id" name="body"/>
+  <public type="id" name="carUiImeWideScreenInputArea"/>
+  <public type="id" name="carUiWideScreenInputArea"/>
   <public type="id" name="car_ui_alert_icon"/>
   <public type="id" name="car_ui_alert_subtitle"/>
   <public type="id" name="car_ui_alert_title"/>
@@ -246,10 +295,16 @@
   <public type="id" name="car_ui_toolbar_title_logo_container"/>
   <public type="id" name="car_ui_toolbar_top_guideline"/>
   <public type="id" name="checkbox_widget"/>
+  <public type="id" name="closeKeyboard"/>
   <public type="id" name="container"/>
+  <public type="id" name="contentAreaAutomotive"/>
   <public type="id" name="content_icon"/>
+  <public type="id" name="fullscreenArea"/>
   <public type="id" name="icon"/>
   <public type="id" name="icon_container"/>
+  <public type="id" name="inputExtractActionAutomotive"/>
+  <public type="id" name="inputExtractEditText"/>
+  <public type="id" name="inputExtractEditTextContainer"/>
   <public type="id" name="list"/>
   <public type="id" name="nested_recycler_view_layout"/>
   <public type="id" name="radio_button"/>
@@ -272,6 +327,17 @@
   <public type="id" name="title_template"/>
   <public type="id" name="toolbar"/>
   <public type="id" name="touch_interceptor"/>
+  <public type="id" name="wideScreenClearData"/>
+  <public type="id" name="wideScreenDescription"/>
+  <public type="id" name="wideScreenDescriptionTitle"/>
+  <public type="id" name="wideScreenError"/>
+  <public type="id" name="wideScreenErrorMessage"/>
+  <public type="id" name="wideScreenExtractedTextIcon"/>
+  <public type="id" name="wideScreenSearchItemPrimaryImageView"/>
+  <public type="id" name="wideScreenSearchItemSecondaryImageView"/>
+  <public type="id" name="wideScreenSearchItemSubTitle"/>
+  <public type="id" name="wideScreenSearchItemTitle"/>
+  <public type="id" name="wideScreenSearchResultList"/>
   <public type="integer" name="car_ui_default_max_string_length"/>
   <public type="integer" name="car_ui_focus_area_history_cache_type"/>
   <public type="integer" name="car_ui_focus_area_history_expiration_period_ms"/>
@@ -286,6 +352,7 @@
   <public type="layout" name="car_ui_base_layout_toolbar"/>
   <public type="layout" name="car_ui_base_layout_toolbar_legacy"/>
   <public type="layout" name="car_ui_header_list_item"/>
+  <public type="layout" name="car_ui_ims_wide_screen_input_view"/>
   <public type="layout" name="car_ui_list_item"/>
   <public type="layout" name="car_ui_list_limiting_message"/>
   <public type="layout" name="car_ui_list_preference"/>
@@ -318,6 +385,8 @@
   <public type="string" name="car_ui_dialog_preference_negative"/>
   <public type="string" name="car_ui_dialog_preference_positive"/>
   <public type="string" name="car_ui_ellipsis"/>
+  <public type="string" name="car_ui_ime_wide_screen_allowed_package_list"/>
+  <public type="string" name="car_ui_ime_wide_screen_system_property_name"/>
   <public type="string" name="car_ui_installer_process_name"/>
   <public type="string" name="car_ui_preference_switch_off"/>
   <public type="string" name="car_ui_preference_switch_on"/>
