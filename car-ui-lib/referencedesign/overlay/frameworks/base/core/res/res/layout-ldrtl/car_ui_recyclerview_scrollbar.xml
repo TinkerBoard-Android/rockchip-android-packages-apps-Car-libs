@@ -42,11 +42,9 @@
         android:id="@+id/car_ui_scrollbar_thumb"
         android:layout_width="@dimen/car_ui_scrollbar_thumb_width"
         android:layout_height="0dp"
-        android:layout_gravity="center_horizontal"
+        android:layout_centerHorizontal="true"
         android:background="@drawable/car_ui_recyclerview_scrollbar_thumb"
-        android:layout_below="@+id/car_ui_scrollbar_page_up"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"/>
+        android:layout_below="@+id/car_ui_scrollbar_page_up" />
 
     <View
         android:id="@+id/car_ui_scrollbar_track"
