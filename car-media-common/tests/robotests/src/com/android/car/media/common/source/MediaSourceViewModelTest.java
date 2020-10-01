@@ -150,7 +150,7 @@ public class MediaSourceViewModelTest {
         mViewModel.getConnectedBrowserCallback().onConnectedBrowserChanged(mMediaBrowser);
         mViewModel.getMediaController().observe(mLifecycleOwner, observer);
 
-        assertThat(observer.getObservedValue()).isSameAs(mMediaControllerFromBrowser);
+        assertThat(observer.getObservedValue()).isSameInstanceAs(mMediaControllerFromBrowser);
         assertThat(mRequestedBrowseService).isEqualTo(testComponent);
     }
 
