@@ -63,4 +63,11 @@
 
     <!--  Whether to log the escrow components check automatically for all the activities or not.  -->
     <bool name="car_ui_escrow_check_components_automatically">false</bool>
+
+    <!-- Whether or not to allow application to hide the content area in IME wide screen.  -->
+    <bool name="car_ui_ime_wide_screen_allow_app_hide_content_area">true</bool>
+
+    <!-- Whether IME is aligned left or not(which means its on right). This value will be used by
+         the applications not using car-ui-lib components and are hiding the content area. -->
+    <bool name="car_ui_ime_wide_screen_aligned_left">true</bool>
 </resources>

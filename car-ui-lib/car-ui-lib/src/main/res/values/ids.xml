@@ -19,4 +19,24 @@
 
     <!-- Id used for in car_ui_toolbar_menu_item.xml -->
     <item name="car_ui_toolbar_menu_item_text_container" type="id"/>
+
+    <item type="id" name="carUiImeWideScreenInputArea"/>
+    <item type="id" name="closeKeyboard"/>
+    <item type="id" name="fullscreenArea"/>
+    <item type="id" name="wideScreenErrorMessage"/>
+    <item type="id" name="carUiWideScreenInputArea"/>
+    <item type="id" name="contentAreaAutomotive"/>
+    <item type="id" name="wideScreenSearchResultList"/>
+    <item type="id" name="wideScreenDescriptionTitle"/>
+    <item type="id" name="wideScreenDescription"/>
+    <item type="id" name="inputExtractActionAutomotive"/>
+    <item type="id" name="inputExtractEditText"/>
+    <item type="id" name="wideScreenExtractedTextIcon"/>
+    <item type="id" name="wideScreenClearData"/>
+    <item type="id" name="wideScreenError"/>
+    <item type="id" name="wideScreenSearchItemPrimaryImageView"/>
+    <item type="id" name="wideScreenSearchItemTitle"/>
+    <item type="id" name="wideScreenSearchItemSubTitle"/>
+    <item type="id" name="wideScreenSearchItemSecondaryImageView"/>
+    <item type="id" name="inputExtractEditTextContainer"/>
 </resources>

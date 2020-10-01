@@ -36,4 +36,25 @@
     <item name="car_ui_preference_icon_chevron_enabled" type="drawable">@null</item>
     <!-- Overlayable drawable to use for the preference chevron when preference is disabled -->
     <item name="car_ui_preference_icon_chevron_disabled" type="drawable">@null</item>
+
+    <!-- IME wide screen -->
+
+    <!--  Background of the entire area other than content area which is
+          input text box and keyboard.  -->
+    <drawable name="car_ui_ime_wide_screen_background">#000</drawable>
+
+    <!--  Background of the content area.  -->
+    <drawable name="car_ui_ime_wide_screen_content_area_background">#000</drawable>
+
+    <!--  Background of the content area when there is no content.  -->
+    <drawable name="car_ui_ime_wide_screen_no_content_background">#cc000000</drawable>
+
+    <!--  Background of the input area.  -->
+    <drawable name="car_ui_ime_wide_screen_input_area_background">#000</drawable>
+
+    <!--  Tint color of input area in wide screen with error string.  -->
+    <drawable name="car_ui_ime_wide_screen_input_area_tint_error_color">#f00</drawable>
+
+    <!--  Tint color of input area in wide screen.  -->
+    <drawable name="car_ui_ime_wide_screen_input_area_tint_color">#f5f5f5</drawable>
 </resources>
