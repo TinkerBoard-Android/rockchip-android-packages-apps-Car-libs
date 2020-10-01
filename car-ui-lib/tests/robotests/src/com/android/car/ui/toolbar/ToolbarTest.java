@@ -407,7 +407,7 @@ public class ToolbarTest {
 
         mToolbar.setMenuItems(menuItems);
 
-        assertThat(firstMenuItemView).isSameAs(getMenuItemView(0));
+        assertThat(firstMenuItemView).isSameInstanceAs(getMenuItemView(0));
     }
 
     @Test
