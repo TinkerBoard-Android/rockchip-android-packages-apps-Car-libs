@@ -163,8 +163,9 @@ public class CarUi {
                         .loadClass(BaseLayoutController.class.getName());
                 Method method = baseLayoutControllerClass
                         .getDeclaredMethod("getBaseLayout", Activity.class);
+                method.setAccessible(true);
                 return (BaseLayoutController) method.invoke(null, activity);
-            } catch (ReflectiveOperationException e) {
+            } catch (ReflectiveOperationException | SecurityException e) {
                 throw new RuntimeException(e);
             }
         }
