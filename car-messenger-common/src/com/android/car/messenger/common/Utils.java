@@ -438,7 +438,10 @@ public class Utils {
                                 null);
                         return util.isValidNumber(phoneNumber);
                     } catch (NumberParseException e) {
-                        return false;
+                        // Phone numbers without country codes should still be classified as
+                        // phone numbers.
+                        return e.getErrorType().equals(
+                                NumberParseException.ErrorType.INVALID_COUNTRY_CODE);
                     }
                 }
 
