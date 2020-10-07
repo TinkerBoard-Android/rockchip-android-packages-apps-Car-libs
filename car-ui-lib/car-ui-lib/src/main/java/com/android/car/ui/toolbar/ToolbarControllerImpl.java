@@ -61,7 +61,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * The implementation of {@link ToolbarController}. This class takes a ViewGroup, and looks
  * in the ViewGroup to find all the toolbar-related views to control.
  */
-public class ToolbarControllerImpl implements ToolbarController {
+public final class ToolbarControllerImpl implements ToolbarController {
     private static final String TAG = "CarUiToolbarController";
 
     @Nullable
