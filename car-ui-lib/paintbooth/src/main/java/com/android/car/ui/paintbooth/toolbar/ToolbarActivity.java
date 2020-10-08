@@ -305,7 +305,7 @@ public class ToolbarActivity extends AppCompatActivity implements InsetsChangedL
             new AlertDialogBuilder(this)
                     .setEditBox(null, textWatcher, null)
                     .setTitle("Enter the text for the title")
-                    .setPositiveButton("Ok", (dialog, which) ->
+                    .setPositiveButton(getString(R.string.ok), (dialog, which) ->
                             toolbar.addTab(
                                     new TabLayout.Tab(
                                             getDrawable(
@@ -359,7 +359,7 @@ public class ToolbarActivity extends AppCompatActivity implements InsetsChangedL
         new AlertDialogBuilder(this)
                 .setEditBox("", textWatcher, null, InputType.TYPE_CLASS_NUMBER)
                 .setTitle("Enter the index of the MenuItem")
-                .setPositiveButton("Ok", (dialog, which) -> {
+                .setPositiveButton(getString(R.string.ok), (dialog, which) -> {
                     try {
                         MenuItem item = mMenuItems.get(
                                 Integer.parseInt(textWatcher.getText()));
