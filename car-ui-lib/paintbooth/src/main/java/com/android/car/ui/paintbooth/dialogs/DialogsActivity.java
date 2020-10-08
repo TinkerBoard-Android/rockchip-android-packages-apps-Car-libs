@@ -98,69 +98,70 @@ public class DialogsActivity extends Activity implements InsetsChangedListener {
 
     private void showDialog() {
         new AlertDialogBuilder(this)
-                .setTitle("Standard Alert Dialog")
-                .setMessage("With a message to show.")
-                .setNeutralButton("NEUTRAL", (dialogInterface, which) -> {
+                .setTitle(getString(R.string.standard_alert_dialog))
+                .setMessage(getString(R.string.my_message))
+                .setNeutralButton(getString(R.string.neutral), (dialogInterface, which) -> {
                 })
-                .setPositiveButton("OK", (dialogInterface, which) -> {
+                .setPositiveButton(getString(R.string.ok), (dialogInterface, which) -> {
                 })
-                .setNegativeButton("CANCEL", (dialogInterface, which) -> {
+                .setNegativeButton(getString(R.string.cancel), (dialogInterface, which) -> {
                 })
                 .show();
     }
 
     private void showDialogWithIcon() {
         new AlertDialogBuilder(this)
-                .setTitle("Alert dialog with icon")
-                .setMessage("The message body of the alert")
+                .setTitle(getString(R.string.alert_dialog_with_icon))
+                .setMessage(getString(R.string.my_message))
                 .setIcon(R.drawable.ic_tracklist)
                 .show();
     }
 
     private void showDialogWithNoButtonProvided() {
         new AlertDialogBuilder(this)
-                .setTitle("Standard Alert Dialog")
+                .setTitle(getString(R.string.standard_alert_dialog))
                 .show();
     }
 
     private void showDialogWithCheckbox() {
         new AlertDialogBuilder(this)
-                .setTitle("Custom Dialog Box")
+                .setTitle(R.string.custom_dialog_box)
                 .setMultiChoiceItems(
                         new CharSequence[]{"I am a checkbox"},
                         new boolean[]{false},
                         (dialog, which, isChecked) -> {
                         })
-                .setPositiveButton("OK", (dialogInterface, which) -> {
+                .setPositiveButton(getString(R.string.ok), (dialogInterface, which) -> {
                 })
-                .setNegativeButton("CANCEL", (dialogInterface, which) -> {
+                .setNegativeButton(getString(R.string.cancel), (dialogInterface, which) -> {
                 })
                 .show();
     }
 
     private void showDialogWithTextBox() {
         new AlertDialogBuilder(this)
-                .setTitle("Standard Alert Dialog")
-                .setEditBox("Edit me please", null, null)
-                .setPositiveButton("OK", (dialogInterface, i) -> {
+                .setTitle(R.string.standard_alert_dialog)
+                .setEditBox(getString(R.string.edit_me_please), null, null)
+                .setPositiveButton(getString(R.string.ok), (dialogInterface, i) -> {
                 })
                 .show();
     }
 
     private void showDialogWithOnlyPositiveButton() {
         new AlertDialogBuilder(this)
-                .setTitle("Standard Alert Dialog").setMessage("With a message to show.")
-                .setPositiveButton("OK", (dialogInterface, i) -> {
+                .setTitle(R.string.standard_alert_dialog)
+                .setMessage(getString(R.string.my_message))
+                .setPositiveButton(getString(R.string.ok), (dialogInterface, i) -> {
                 })
                 .show();
     }
 
     private void showDialogWithoutTitle() {
         new AlertDialogBuilder(this)
-                .setMessage("I dont have a title.")
-                .setPositiveButton("OK", (dialogInterface, i) -> {
+                .setMessage(R.string.no_title_message)
+                .setPositiveButton(getString(R.string.ok), (dialogInterface, i) -> {
                 })
-                .setNegativeButton("CANCEL", (dialogInterface, which) -> {
+                .setNegativeButton(getString(R.string.cancel), (dialogInterface, which) -> {
                 })
                 .show();
     }
@@ -171,9 +172,9 @@ public class DialogsActivity extends Activity implements InsetsChangedListener {
 
     private void showDialogWithSubtitle() {
         new AlertDialogBuilder(this)
-                .setTitle("My Title!")
-                .setSubtitle("My Subtitle!")
-                .setMessage("My Message!")
+                .setTitle(R.string.my_title)
+                .setSubtitle(R.string.my_subtitle)
+                .setMessage(getString(R.string.my_message))
                 .show();
     }
 
@@ -181,40 +182,38 @@ public class DialogsActivity extends Activity implements InsetsChangedListener {
         ArrayList<CarUiRadioButtonListItem> data = new ArrayList<>();
 
         CarUiRadioButtonListItem item = new CarUiRadioButtonListItem();
-        item.setTitle("First item");
+        item.setTitle(getString(R.string.first_item));
         data.add(item);
 
         item = new CarUiRadioButtonListItem();
-        item.setTitle("Second item");
+        item.setTitle(getString(R.string.second_item));
         data.add(item);
 
         item = new CarUiRadioButtonListItem();
-        item.setTitle("Third item");
+        item.setTitle(getString(R.string.third_item));
         data.add(item);
 
         new AlertDialogBuilder(this)
-                .setTitle("Select one option.")
-                .setSubtitle("Ony one option may be selected at a time")
+                .setTitle(R.string.select_one_option)
+                .setSubtitle(R.string.select_one_option_at_a_time)
                 .setSingleChoiceItems(new CarUiRadioButtonListItemAdapter(data), null)
                 .show();
     }
 
     private void showDialogWithSubtitleAndIcon() {
         new AlertDialogBuilder(this)
-                .setTitle("My Title!")
-                .setSubtitle("My Subtitle!")
-                .setMessage("My Message!")
+                .setTitle(R.string.my_title)
+                .setSubtitle(R.string.my_subtitle)
+                .setMessage(getString(R.string.my_message))
                 .setIcon(R.drawable.ic_tracklist)
                 .show();
     }
 
     private void showDialogWithLongSubtitleAndIcon() {
         new AlertDialogBuilder(this)
-                .setTitle("This is a very long title. It should likely span across "
-                            + "multiple lines or something. It shouldn't get cut off.")
-                .setSubtitle("This is a very long subtitle. It should likely span across "
-                        + "multiple lines or something. It shouldn't get cut off.")
-                .setMessage("My Message!")
+                .setTitle(getString(R.string.long_title))
+                .setSubtitle(R.string.long_subtitle)
+                .setMessage(getString(R.string.my_message))
                 .setIcon(R.drawable.ic_tracklist)
                 .show();
     }

@@ -289,4 +289,48 @@
   <!-- Text for switch [CHAR_LIMIT=25]-->
   <string name="widget_switch_text">I\'m a switch</string>
 
+  <!-- ListItem related resources  -->
+  <string name="first_header">First header</string>
+  <string name="test_title">Test title</string>
+  <string name="test_body">Test body</string>
+  <string name="test_title_no_body">Test title with no body</string>
+  <string name="random_header">Random header</string>
+  <string name="header_with_body">with header body</string>
+  <string name="test_body_no_title">Test body with no title</string>
+  <string name="title_with_content_icon">Test Title — with content icon</string>
+  <string name="with_avatar_icon">With avatar icon.</string>
+  <string name="display_toast_on_click">Displays toast on click</string>
+  <string name="title_item_with_checkbox">Title — Item with checkbox</string>
+  <string name="toast_on_selection_changed">Will present toast on change of selection state.</string>
+  <string name="title_with_disabled_checkbox">Title — Checkbox that is disabled</string>
+  <string name="click_should_have_no_effect">Clicks should not have any affect</string>
+  <string name="body_item_with_switch">Body — Item with switch  — with click listener</string>
+  <string name="item_initially_checked">Item is initially checked</string>
+  <string name="title_item_with_radio_button">Title — Item with radio button</string>
+  <string name="item_mutually_exclusive_with_item_above">Item is mutually exclusive with item above</string>
+  <string name="random_body_text_with_action_divider">Random body text — with action divider</string>
+  <string name="null_supplement_icon">Null supplemental icon</string>
+  <string name="supplemental_icon_with_listener">Supplemental icon with listener</string>
+  <string name="test_data">Test data</string>
+
+  <!-- Dialog -->
+  <string name="standard_alert_dialog">Standard Alert Dialog</string>
+  <string name="my_message">My message</string>
+  <string name="alert_dialog_with_icon">Alert dialog with icon</string>
+  <string name="neutral">NEUTRAL</string>
+  <string name="ok">OK</string>
+  <string name="cancel">CANCEL</string>
+  <string name="custom_dialog_box">Custom Dialog Box</string>
+  <string name="edit_me_please">Edit me please</string>
+  <string name="no_title_message">I don\'t have a title.</string>
+  <string name="my_title">My Title!</string>
+  <string name="my_subtitle">My Subtitle!</string>
+  <string name="first_item">First item</string>
+  <string name="second_item">Second item</string>
+  <string name="third_item">Third item</string>
+  <string name="select_one_option">Select one option.</string>
+  <string name="select_one_option_at_a_time">Ony one option may be selected at a time</string>
+  <string name="long_title">This is a very long title. It should likely span across multiple lines or something. It shouldn\'t get cut off.</string>
+  <string name="long_subtitle">This is a very long subtitle. It should likely span across  multiple lines or something. It shouldn\'t get cut off.</string>
+
 </resources>

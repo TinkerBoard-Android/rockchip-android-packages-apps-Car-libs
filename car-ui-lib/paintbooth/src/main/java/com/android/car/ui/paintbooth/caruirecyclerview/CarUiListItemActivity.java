@@ -62,51 +62,52 @@ public class CarUiListItemActivity extends Activity implements InsetsChangedList
     private ArrayList<CarUiListItem> generateSampleData() {
         Context context = this;
 
-        CarUiHeaderListItem header = new CarUiHeaderListItem("First header");
+        CarUiHeaderListItem header = new CarUiHeaderListItem(getString(R.string.first_header));
         mData.add(header);
 
         CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
-        item.setTitle("Test title");
-        item.setBody("Test body");
+        item.setTitle(getString(R.string.test_title));
+        item.setBody(getString(R.string.test_body));
         mData.add(item);
 
         item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
-        item.setTitle("Test title with no body");
+        item.setTitle(getString(R.string.test_title_no_body));
         mData.add(item);
 
-        header = new CarUiHeaderListItem("Random header", "with header body");
+        header = new CarUiHeaderListItem(getString(R.string.random_header),
+            getString(R.string.header_with_body));
         mData.add(header);
 
         item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
-        item.setBody("Test body with no title");
+        item.setBody(getString(R.string.test_body_no_title));
         mData.add(item);
 
         item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
-        item.setTitle("Test Title");
+        item.setTitle(getString(R.string.test_title));
         item.setIcon(getDrawable(R.drawable.ic_launcher));
         mData.add(item);
 
         item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
-        item.setTitle("Test Title");
-        item.setBody("Test body text");
+        item.setTitle(getString(R.string.test_title));
+        item.setBody(getString(R.string.test_body));
         item.setIcon(getDrawable(R.drawable.ic_launcher));
         mData.add(item);
 
         item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
-        item.setTitle("Test Title -- with content icon");
+        item.setTitle(getString(R.string.title_with_content_icon));
         item.setPrimaryIconType(CarUiContentListItem.IconType.CONTENT);
         item.setIcon(getDrawable(R.drawable.ic_sample_logo));
         mData.add(item);
 
         item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
-        item.setTitle("Test Title");
-        item.setBody("With avatar icon.");
+        item.setTitle(getString(R.string.test_title));
+        item.setBody(getString(R.string.with_avatar_icon));
         item.setIcon(getDrawable(R.drawable.ic_sample_logo));
         item.setPrimaryIconType(CarUiContentListItem.IconType.AVATAR);
 
         item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
-        item.setTitle("Test Title");
-        item.setBody("Displays toast on click");
+        item.setTitle(getString(R.string.test_title));
+        item.setBody(getString(R.string.display_toast_on_click));
         item.setIcon(getDrawable(R.drawable.ic_launcher));
         item.setOnItemClickedListener(item1 -> {
             Toast.makeText(context, "Item clicked", Toast.LENGTH_SHORT).show();
@@ -115,8 +116,8 @@ public class CarUiListItemActivity extends Activity implements InsetsChangedList
 
         item = new CarUiContentListItem(CarUiContentListItem.Action.CHECK_BOX);
         item.setIcon(getDrawable(R.drawable.ic_launcher));
-        item.setTitle("Title -- Item with checkbox");
-        item.setBody("Will present toast on change of selection state.");
+        item.setTitle(getString(R.string.title_item_with_checkbox));
+        item.setBody(getString(R.string.toast_on_selection_changed));
         item.setOnCheckedChangeListener(
                 (listItem, isChecked) -> Toast.makeText(context,
                         "Item checked state is: " + isChecked, Toast.LENGTH_SHORT).show());
@@ -125,8 +126,8 @@ public class CarUiListItemActivity extends Activity implements InsetsChangedList
         item = new CarUiContentListItem(CarUiContentListItem.Action.CHECK_BOX);
         item.setIcon(getDrawable(R.drawable.ic_launcher));
         item.setEnabled(false);
-        item.setTitle("Title -- Checkbox that is disabled");
-        item.setBody("Clicks should not have any affect");
+        item.setTitle(getString(R.string.title_with_disabled_checkbox));
+        item.setBody(getString(R.string.click_should_have_no_effect));
         item.setOnCheckedChangeListener(
                 (listItem, isChecked) -> Toast.makeText(context,
                         "Item checked state is: " + isChecked, Toast.LENGTH_SHORT).show());
@@ -134,7 +135,7 @@ public class CarUiListItemActivity extends Activity implements InsetsChangedList
 
         item = new CarUiContentListItem(CarUiContentListItem.Action.SWITCH);
         item.setIcon(getDrawable(R.drawable.ic_launcher));
-        item.setBody("Body -- Item with switch  -- with click listener");
+        item.setBody(getString(R.string.body_item_with_switch));
         item.setOnItemClickedListener(item1 -> {
             Toast.makeText(context, "Click on item with switch", Toast.LENGTH_SHORT).show();
         });
@@ -142,8 +143,8 @@ public class CarUiListItemActivity extends Activity implements InsetsChangedList
 
         item = new CarUiContentListItem(CarUiContentListItem.Action.CHECK_BOX);
         item.setIcon(getDrawable(R.drawable.ic_launcher));
-        item.setTitle("Title -- Item with checkbox");
-        item.setBody("Item is initially checked");
+        item.setTitle(getString(R.string.title_item_with_checkbox));
+        item.setBody(getString(R.string.item_initially_checked));
         item.setChecked(true);
         mData.add(item);
 
@@ -152,8 +153,8 @@ public class CarUiListItemActivity extends Activity implements InsetsChangedList
         CarUiContentListItem radioItem2 = new CarUiContentListItem(
                 CarUiContentListItem.Action.RADIO_BUTTON);
 
-        radioItem1.setTitle("Title -- Item with radio button");
-        radioItem1.setBody("Item is initially unchecked checked");
+        radioItem1.setTitle(getString(R.string.title_item_with_radio_button));
+        radioItem1.setBody(getString(R.string.item_initially_checked));
         radioItem1.setChecked(false);
         radioItem1.setOnCheckedChangeListener((listItem, isChecked) -> {
             if (isChecked) {
@@ -164,7 +165,7 @@ public class CarUiListItemActivity extends Activity implements InsetsChangedList
         mData.add(radioItem1);
 
         radioItem2.setIcon(getDrawable(R.drawable.ic_launcher));
-        radioItem2.setTitle("Item is mutually exclusive with item above");
+        radioItem2.setTitle(getString(R.string.item_mutually_exclusive_with_item_above));
         radioItem2.setChecked(true);
         radioItem2.setOnCheckedChangeListener((listItem, isChecked) -> {
             if (isChecked) {
@@ -176,8 +177,8 @@ public class CarUiListItemActivity extends Activity implements InsetsChangedList
 
         item = new CarUiContentListItem(CarUiContentListItem.Action.ICON);
         item.setIcon(getDrawable(R.drawable.ic_launcher));
-        item.setTitle("Title");
-        item.setBody("Random body text -- with action divider");
+        item.setTitle(getString(R.string.test_title));
+        item.setBody(getString(R.string.random_body_text_with_action_divider));
         item.setActionDividerVisible(true);
         item.setSupplementalIcon(getDrawable(R.drawable.ic_launcher));
         item.setChecked(true);
@@ -185,15 +186,15 @@ public class CarUiListItemActivity extends Activity implements InsetsChangedList
 
         item = new CarUiContentListItem(CarUiContentListItem.Action.ICON);
         item.setIcon(getDrawable(R.drawable.ic_launcher));
-        item.setTitle("Null supplemental icon");
+        item.setTitle(getString(R.string.null_supplement_icon));
         item.setChecked(true);
         mData.add(item);
 
         item = new CarUiContentListItem(CarUiContentListItem.Action.ICON);
-        item.setTitle("Supplemental icon with listener");
+        item.setTitle(getString(R.string.supplemental_icon_with_listener));
         item.setPrimaryIconType(CarUiContentListItem.IconType.CONTENT);
         item.setIcon(getDrawable(R.drawable.ic_launcher));
-        item.setBody("body");
+        item.setBody(getString(R.string.test_body));
         item.setOnItemClickedListener(v -> Toast.makeText(context, "Clicked item",
                 Toast.LENGTH_SHORT).show());
         item.setSupplementalIcon(getDrawable(R.drawable.ic_launcher),
