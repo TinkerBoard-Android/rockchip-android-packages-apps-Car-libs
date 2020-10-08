@@ -57,7 +57,7 @@ public class CarUiRecyclerViewActivity extends Activity implements InsetsChanged
 
     private ArrayList<String> generateSampleData() {
         for (int i = 0; i <= mDataToGenerate; i++) {
-            mData.add("data" + i);
+            mData.add(getString(R.string.test_data) + i);
         }
         return mData;
     }
