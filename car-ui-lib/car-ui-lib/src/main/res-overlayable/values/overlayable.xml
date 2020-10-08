@@ -12,7 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.-->
-<!-- THIS FILE WAS AUTO GENERATED ON 24-Sep-2020 (15:01:57), DO NOT EDIT MANUALLY. -->
+<!-- THIS FILE WAS AUTO GENERATED ON 06-Oct-2020 (18:35:45), DO NOT EDIT MANUALLY. -->
 <resources>
   <overlayable name="car-ui-lib">
     <policy type="public">
@@ -386,7 +386,6 @@ limitations under the License.-->
       <item type="id" name="spinner"/>
       <item type="id" name="supplemental_icon"/>
       <item type="id" name="switch_widget"/>
-      <item type="id" name="text_container"/>
       <item type="id" name="textbox"/>
       <item type="id" name="title"/>
       <item type="id" name="title_template"/>
@@ -446,6 +445,7 @@ limitations under the License.-->
       <item type="layout" name="car_ui_toolbar_tab_item_layout_flexible"/>
       <item type="layout" name="car_ui_toolbar_two_row"/>
       <item type="layout" name="car_ui_two_action_preference"/>
+      <item type="raw" name="keep"/>
       <item type="string" name="car_ui_alert_dialog_default_button"/>
       <item type="string" name="car_ui_dialog_preference_negative"/>
       <item type="string" name="car_ui_dialog_preference_positive"/>

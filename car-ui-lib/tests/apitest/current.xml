@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- THIS FILE WAS AUTO GENERATED ON 24-Sep-2020 (15:01:57), DO NOT EDIT MANUALLY. -->
+<!-- THIS FILE WAS AUTO GENERATED ON 06-Oct-2020 (18:35:45), DO NOT EDIT MANUALLY. -->
 <resources>
   <public type="attr" name="CarUiToolbarStyle"/>
   <public type="attr" name="carUiPreferenceStyle"/>
@@ -321,7 +321,6 @@
   <public type="id" name="spinner"/>
   <public type="id" name="supplemental_icon"/>
   <public type="id" name="switch_widget"/>
-  <public type="id" name="text_container"/>
   <public type="id" name="textbox"/>
   <public type="id" name="title"/>
   <public type="id" name="title_template"/>
@@ -381,6 +380,7 @@
   <public type="layout" name="car_ui_toolbar_tab_item_layout_flexible"/>
   <public type="layout" name="car_ui_toolbar_two_row"/>
   <public type="layout" name="car_ui_two_action_preference"/>
+  <public type="raw" name="keep"/>
   <public type="string" name="car_ui_alert_dialog_default_button"/>
   <public type="string" name="car_ui_dialog_preference_negative"/>
   <public type="string" name="car_ui_dialog_preference_positive"/>
