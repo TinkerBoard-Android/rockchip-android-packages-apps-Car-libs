@@ -188,41 +188,6 @@ public class CarUiSnapHelper extends LinearSnapHelper {
     }
 
     /**
-     * Finds the view to snap to. The view to snap to is the child of the LayoutManager that is
-     * closest to the start of the RecyclerView. The "start" depends on if the LayoutManager is
-     * scrolling horizontally or vertically. If it is horizontally scrolling, then the start is the
-     * view on the left (right if RTL). Otherwise, it is the top-most view.
-     *
-     * @param layoutManager The current {@link RecyclerView.LayoutManager} for the attached
-     *                      RecyclerView.
-     * @return The View closest to the start of the RecyclerView.
-     */
-    private static View findTopView(LayoutManager layoutManager, OrientationHelper helper) {
-        int childCount = layoutManager.getChildCount();
-        if (childCount == 0) {
-            return null;
-        }
-
-        View closestChild = null;
-        int absClosest = Integer.MAX_VALUE;
-
-        for (int i = 0; i < childCount; i++) {
-            View child = layoutManager.getChildAt(i);
-            if (child == null) {
-                continue;
-            }
-            int absDistance = Math.abs(distanceToTopMargin(child, helper));
-
-            /* if child top is closer than previous closest, set it as closest */
-            if (absDistance < absClosest) {
-                absClosest = absDistance;
-                closestChild = child;
-            }
-        }
-        return closestChild;
-    }
-
-    /**
      * Returns whether or not the given View is a valid snapping view. A view is considered valid
      * for snapping if it can fit entirely within the height of the RecyclerView it is contained
      * within.
