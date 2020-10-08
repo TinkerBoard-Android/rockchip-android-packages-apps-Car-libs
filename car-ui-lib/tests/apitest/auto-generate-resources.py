@@ -17,6 +17,7 @@
 import argparse
 import os
 import sys
+import re
 from resource_utils import get_all_resources, get_resources_from_single_file, add_resource_to_set, Resource
 from git_utils import has_chassis_changes
 from datetime import datetime
@@ -62,7 +63,8 @@ def main():
         # Don't run because there were no chassis changes
         return
 
-    resources = get_all_resources(ROOT_FOLDER+'/car-ui-lib/src/main/res')
+    resources = get_all_resources(ROOT_FOLDER + '/car-ui-lib/src/main/res')
+    check_resource_names(resources, get_resources_from_single_file(OUTPUT_FILE_PATH + 'resource_name_allowed.xml'))
 
     OVERLAYABLE_OUTPUT_FILE_PATH = ROOT_FOLDER + '/car-ui-lib/src/main/res-overlayable/values/overlayable.xml'
     output_file = args.file or 'current.xml'
@@ -180,6 +182,24 @@ def add_constraintlayout_resources(resources):
     add_resource_to_set(resources, Resource('layout_constraintVertical_chainStyle', 'attr'))
     add_resource_to_set(resources, Resource('layout_editor_absoluteX', 'attr'))
     add_resource_to_set(resources, Resource('layout_editor_absoluteY', 'attr'))
+
+def check_resource_names(resources, allowed):
+    newlist = resources.difference(allowed)
+    failed=False
+    for resource in newlist:
+        resourceType= resource.type
+        resourceName = resource.name
+        if resourceType == 'attr' and not re.match("^CarUi", resourceName, re.IGNORECASE):
+            print(f"Please consider changing {resourceType}/{resourceName} to something like CarUi{resourceName}")
+            failed=True
+        elif resourceType == 'style' and not re.search("CarUi", resourceName, re.IGNORECASE):
+            print(f"Please consider changing {resourceType}/{resourceName} to something like CarUi{resourceName}")
+            failed=True
+        elif resourceType != 'attr' and resourceType != 'style' and not re.match("^car_ui_", resourceName, re.IGNORECASE):
+            print(f"Please consider changing {resourceType}/{resourceName} to something like car_ui_{resourceName}")
+            failed=True
+    if failed:
+        sys.exit(1)
 
 def compare_resources(old_mapping, new_mapping, res_public_file):
     removed = old_mapping.difference(new_mapping)
