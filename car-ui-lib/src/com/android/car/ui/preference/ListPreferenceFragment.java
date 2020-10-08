@@ -49,6 +49,8 @@ public class ListPreferenceFragment extends Fragment {
 
     private ListPreference mPreference;
     private CarUiContentListItem mSelectedItem;
+    private List<CarUiListItem> mListItems;
+    private CharSequence[] mEntryValues;
 
     /**
      * Returns a new instance of {@link ListPreferenceFragment} for the {@link ListPreference} with
@@ -92,21 +94,21 @@ public class ListPreferenceFragment extends Fragment {
         toolbar.setTitle(mPreference.getTitle());
 
         CharSequence[] entries = mPreference.getEntries();
-        CharSequence[] entryValues = mPreference.getEntryValues();
+        mEntryValues = mPreference.getEntryValues();
 
-        if (entries == null || entryValues == null) {
+        if (entries == null || mEntryValues == null) {
             throw new IllegalStateException(
                     "ListPreference requires an entries array and an entryValues array.");
         }
 
-        if (entries.length != entryValues.length) {
+        if (entries.length != mEntryValues.length) {
             throw new IllegalStateException(
                     "ListPreference entries array length does not match entryValues array length.");
         }
 
         int selectedEntryIndex = mPreference.findIndexOfValue(mPreference.getValue());
-        List<CarUiListItem> listItems = new ArrayList<>();
-        CarUiListItemAdapter adapter = new CarUiListItemAdapter(listItems);
+        mListItems = new ArrayList<>();
+        CarUiListItemAdapter adapter = new CarUiListItemAdapter(mListItems);
 
         for (int i = 0; i < entries.length; i++) {
             String entry = entries[i].toString();
@@ -122,28 +124,32 @@ public class ListPreferenceFragment extends Fragment {
             item.setOnCheckedChangeListener((listItem, isChecked) -> {
                 if (mSelectedItem != null) {
                     mSelectedItem.setChecked(false);
-                    adapter.notifyItemChanged(listItems.indexOf(mSelectedItem));
+                    adapter.notifyItemChanged(mListItems.indexOf(mSelectedItem));
                 }
                 mSelectedItem = listItem;
             });
 
-            listItems.add(item);
+            mListItems.add(item);
         }
 
-        toolbar.registerOnBackListener(() -> {
-            if (mSelectedItem != null) {
-                int selectedIndex = listItems.indexOf(mSelectedItem);
-                String entryValue = entryValues[selectedIndex].toString();
-
-                if (mPreference.callChangeListener(entryValue)) {
-                    mPreference.setValue(entryValue);
-                }
-            }
-
-            return false;
-        });
-
         carUiRecyclerView.setAdapter(adapter);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        updatePreference();
+    }
+
+    private void updatePreference() {
+        if (mSelectedItem != null) {
+            int selectedIndex = mListItems.indexOf(mSelectedItem);
+            String entryValue = mEntryValues[selectedIndex].toString();
+
+            if (mPreference.callChangeListener(entryValue)) {
+                mPreference.setValue(entryValue);
+            }
+        }
     }
 
     private ListPreference getListPreference() {
