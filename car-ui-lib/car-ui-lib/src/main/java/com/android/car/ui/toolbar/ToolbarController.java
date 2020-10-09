@@ -77,8 +77,21 @@ public interface ToolbarController {
 
     /**
      * Gets the {@link TabLayout} for this toolbar.
+     * @deprecated Use other tab-related functions in this interface.
      */
+    @Deprecated
     TabLayout getTabLayout();
+
+    /**
+     * Gets the number of tabs in the toolbar. The tabs can be retrieved using
+     * {@link #getTab(int)}.
+     */
+    int getTabCount();
+
+    /**
+     * Gets the index of the tab.
+     */
+    int getTabPosition(TabLayout.Tab tab);
 
     /**
      * Adds a tab to this toolbar. You can listen for when it is selected via
