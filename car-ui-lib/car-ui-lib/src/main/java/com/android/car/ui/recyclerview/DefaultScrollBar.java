@@ -279,6 +279,7 @@ class DefaultScrollBar implements ScrollBar {
                 getOrientationHelper(getRecyclerView().getLayoutManager());
         int screenSize = orientationHelper.getTotalSpace();
         int scrollDistance = screenSize;
+        boolean isPageUpOverLongItem;
         // The iteration order matters. In case where there are 2 items longer than screen size, we
         // want to focus on upcoming view.
         for (int i = 0; i < getRecyclerView().getChildCount(); i++) {
@@ -298,13 +299,32 @@ class DefaultScrollBar implements ScrollBar {
                     // is less than a full scroll. Align child top with parent top.
                     scrollDistance = Math.abs(orientationHelper.getDecoratedStart(child));
                 }
+
                 // There can be two items that are longer than the screen. We stop at the first one.
                 // This is affected by the iteration order.
-                break;
+                // Distance should always be positive. Negate its value to scroll up.
+                mRecyclerView.smoothScrollBy(0, -scrollDistance);
+                return;
             }
         }
-        // Distance should always be positive. Negate its value to scroll up.
-        mRecyclerView.smoothScrollBy(0, -scrollDistance);
+
+        int nextPos = mSnapHelper.estimateNextPositionDiffForScrollDistance(orientationHelper,
+                -scrollDistance);
+        View currentPosView = getFirstFullyVisibleChild(orientationHelper);
+        int currentPos = currentPosView != null ? mRecyclerView.getLayoutManager().getPosition(
+                currentPosView) : 0;
+        mRecyclerView.smoothScrollToPosition(Math.max(0, currentPos + nextPos));
+    }
+
+    private View getFirstFullyVisibleChild(OrientationHelper helper) {
+        for (int i = 0; i < getRecyclerView().getChildCount(); i++) {
+            View child = getRecyclerView().getChildAt(i);
+            if (CarUiSnapHelper.getPercentageVisible(child, helper) == 1f) {
+                return getRecyclerView().getChildAt(i);
+            }
+        }
+
+        return null;
     }
 
     /**
