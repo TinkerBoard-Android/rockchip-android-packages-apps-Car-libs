@@ -282,10 +282,11 @@ public class FocusArea extends LinearLayout {
 
     /**
      * Updates {@link #mPreviousFocusArea} when the focus has moved from another FocusArea to this
-     * FocusArea.
+     * FocusArea, and sets it to {@code null} in any other cases.
      */
     private void maybeUpdatePreviousFocusArea(boolean hasFocus, View oldFocus) {
-        if (mHasFocus || !hasFocus || oldFocus == null) {
+        if (mHasFocus || !hasFocus || oldFocus == null || oldFocus instanceof FocusParkingView) {
+            mPreviousFocusArea = null;
             return;
         }
         mPreviousFocusArea = getAncestorFocusArea(oldFocus);

@@ -210,5 +210,6 @@
     <!-- Rotary focus highlight  -->
 
     <dimen name="car_ui_rotary_focus_stroke_width">8dp</dimen>
+    <dimen name="car_ui_rotary_focus_pressed_stroke_width">4dp</dimen>
 
 </resources>
