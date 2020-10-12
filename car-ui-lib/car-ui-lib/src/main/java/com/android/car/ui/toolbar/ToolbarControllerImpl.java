@@ -266,10 +266,29 @@ public class ToolbarControllerImpl implements ToolbarController {
 
     /**
      * Gets the {@link TabLayout} for this toolbar.
+     * @deprecated Use other tab-related functions in the ToolbarController interface.
      */
+    @Deprecated
     @Override
     public TabLayout getTabLayout() {
         return mTabLayout;
+    }
+
+    /**
+     * Gets the number of tabs in the toolbar. The tabs can be retrieved using
+     * {@link #getTab(int)}.
+     */
+    @Override
+    public int getTabCount() {
+        return mTabLayout.getTabCount();
+    }
+
+    /**
+     * Gets the index of the tab.
+     */
+    @Override
+    public int getTabPosition(TabLayout.Tab tab) {
+        return mTabLayout.getTabPosition(tab);
     }
 
     /**
