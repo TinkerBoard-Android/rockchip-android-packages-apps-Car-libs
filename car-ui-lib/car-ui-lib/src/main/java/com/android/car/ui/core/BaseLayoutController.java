@@ -47,7 +47,7 @@ import java.util.WeakHashMap;
  * It also exposes a {@link ToolbarController} to access the toolbar. This may be null if
  * used with a base layout without a Toolbar.
  */
-public class BaseLayoutController {
+final class BaseLayoutController {
 
     private static final Map<Activity, BaseLayoutController> sBaseLayoutMap = new WeakHashMap<>();
 
@@ -208,7 +208,7 @@ public class BaseLayoutController {
      * none of the Activity/Fragments implement {@link InsetsChangedListener}, it will set
      * padding on the content view equal to the insets.
      */
-    public static final class InsetsUpdater implements ViewTreeObserver.OnGlobalLayoutListener {
+    static final class InsetsUpdater implements ViewTreeObserver.OnGlobalLayoutListener {
         // These tags mark views that should overlay the content view in the base layout.
         // OEMs should add them to views in their base layout, ie: android:tag="car_ui_left_inset"
         // Apps will then be able to draw under these views, but will be encouraged to not put
@@ -240,7 +240,7 @@ public class BaseLayoutController {
          * @param baseLayout  The root view of the base layout
          * @param contentView The android.R.id.content View
          */
-        public InsetsUpdater(
+        InsetsUpdater(
                 @Nullable Activity activity,
                 @NonNull View baseLayout,
                 @NonNull View contentView) {
