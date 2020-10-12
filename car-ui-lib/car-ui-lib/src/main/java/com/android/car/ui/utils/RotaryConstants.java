@@ -70,7 +70,7 @@ public final class RotaryConstants {
     /** Action performed on a FocusArea to move focus to another FocusArea. */
     public static final int ACTION_NUDGE_TO_ANOTHER_FOCUS_AREA = 0x02000000;
 
-    /** Action performed on a FocusParkingView to restore the default focus. */
+    /** Action performed on a FocusParkingView to restore the focus in the window. */
     public static final int ACTION_RESTORE_DEFAULT_FOCUS = 0x04000000;
 
     /** Action performed on a FocusParkingView to hide the IME. */

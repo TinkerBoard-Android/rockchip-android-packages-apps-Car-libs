@@ -46,7 +46,7 @@ public class FocusParkingViewTest {
     }
 
     @Test
-    public void testFocusParkingViewCanTakeFocus() throws Exception {
+    public void testFocusParkingViewCannotTakeFocus() throws Exception {
         FocusParkingView focusParkingView = mActivity.findViewById(R.id.focus_parking);
 
         CountDownLatch latch = new CountDownLatch(1);
@@ -58,7 +58,7 @@ public class FocusParkingViewTest {
         });
         latch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
 
-        assertThat(focusParkingView.isFocused()).isTrue();
+        assertThat(focusParkingView.isFocused()).isFalse();
     }
     @Test
     public void testFocusParkingViewFocusedWhenWindowLostFocus() throws Exception {
