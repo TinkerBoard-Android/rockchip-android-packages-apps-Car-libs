@@ -94,6 +94,8 @@ limitations under the License.-->
       <item type="color" name="car_ui_ripple_color"/>
       <item type="color" name="car_ui_rotary_focus_fill_color"/>
       <item type="color" name="car_ui_rotary_focus_fill_secondary_color"/>
+      <item type="color" name="car_ui_rotary_focus_pressed_fill_color"/>
+      <item type="color" name="car_ui_rotary_focus_pressed_stroke_color"/>
       <item type="color" name="car_ui_rotary_focus_stroke_color"/>
       <item type="color" name="car_ui_rotary_focus_stroke_secondary_color"/>
       <item type="color" name="car_ui_scrollbar_thumb"/>
@@ -173,6 +175,7 @@ limitations under the License.-->
       <item type="dimen" name="car_ui_recyclerview_divider_height"/>
       <item type="dimen" name="car_ui_recyclerview_divider_start_margin"/>
       <item type="dimen" name="car_ui_recyclerview_divider_top_margin"/>
+      <item type="dimen" name="car_ui_rotary_focus_pressed_stroke_width"/>
       <item type="dimen" name="car_ui_rotary_focus_stroke_width"/>
       <item type="dimen" name="car_ui_scrollbar_button_size"/>
       <item type="dimen" name="car_ui_scrollbar_container_width"/>
