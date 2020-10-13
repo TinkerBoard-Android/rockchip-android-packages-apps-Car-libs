@@ -200,4 +200,17 @@ public class UtilsTest {
 
         assertThat(actual).isEqualTo(expected);
     }
+
+    @Test
+    public void testTitleConstructorRtl_withTrailingPunctuation() {
+        String actual = Utils.constructGroupConversationHeader("Christopher",
+                "Abcd!!!", TITLE_DELIMITER, /* isRtl */
+                RTL_FORMATTER).trim();
+
+        String expected =
+                "\u200F\u202A\u200F\u202AChristopher\u202C\u200F : \u200F\u202AAbcd!!!"
+                        + "\u202C\u200F\u202C\u200F";
+
+        assertThat(actual).isEqualTo(expected);
+    }
 }
