@@ -33,7 +33,7 @@
         android:layout_marginEnd="@dimen/car_ui_preference_edit_text_dialog_message_margin_end"
         android:visibility="gone"/>
 
-    <com.android.car.ui.CarUiEditText
+    <com.android.car.ui.toolbar.CarUiEditText
         android:id="@android:id/edit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

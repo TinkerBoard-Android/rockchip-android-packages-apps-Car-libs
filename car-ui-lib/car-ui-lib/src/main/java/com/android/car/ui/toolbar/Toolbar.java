@@ -30,9 +30,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.annotation.XmlRes;
 
-import com.android.car.ui.CarUiEditText;
 import com.android.car.ui.R;
-import com.android.car.ui.recyclerview.CarUiListItem;
+import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
 
 import java.util.List;
 
@@ -650,32 +649,12 @@ public final class Toolbar extends FrameLayout implements ToolbarController {
     }
 
     /**
-     * Registers a new {@link CarUiEditText.PrivateImeCommandCallback} to the list of
-     * listeners.
-     */
-    @Override
-    public void registerOnPrivateImeCommandListener(
-            CarUiEditText.PrivateImeCommandCallback listener) {
-        mController.registerOnPrivateImeCommandListener(listener);
-    }
-
-    /**
-     * Unregisters an existing {@link CarUiEditText.PrivateImeCommandCallback} from the list
-     * of listeners.
-     */
-    @Override
-    public boolean unregisterOnPrivateImeCommandListener(
-            CarUiEditText.PrivateImeCommandCallback listener) {
-        return mController.unregisterOnPrivateImeCommandListener(listener);
-    }
-
-    /**
      * Sets a list of search items to be displayed in the IME window when running as a wide screen
      * mode. This should be called each time the list is updated. For example, when a user is typing
      * in the input field and the list gets filtered this method should be invoked each time.
      */
     @Override
-    public void setSearchItemsForWideScreen(List<CarUiListItem> searchItems) {
+    public void setSearchItemsForWideScreen(List<? extends CarUiImeSearchListItem> searchItems) {
         mController.setSearchItemsForWideScreen(searchItems);
     }
 
