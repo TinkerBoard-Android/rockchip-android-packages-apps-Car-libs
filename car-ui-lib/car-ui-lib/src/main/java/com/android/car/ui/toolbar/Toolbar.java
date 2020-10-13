@@ -43,7 +43,7 @@ import java.util.List;
  *
  * <p>The toolbar supports a navigation button, title, tabs, search, and {@link MenuItem MenuItems}
  */
-public class Toolbar extends FrameLayout implements ToolbarController {
+public final class Toolbar extends FrameLayout implements ToolbarController {
 
     /** Callback that will be issued whenever the height of toolbar is changed. */
     public interface OnHeightChangedListener {

@@ -34,6 +34,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import androidx.annotation.NonNull;
 import androidx.test.rule.ActivityTestRule;
 
+import com.android.car.ui.test.R;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -111,8 +113,6 @@ public class FocusAreaTest {
 
     @Test
     public void testFocusOnDefaultFocus() throws Exception {
-        assertThat(mDefaultFocus.isFocused()).isFalse();
-
         Bundle bundle = new Bundle();
         CountDownLatch latch = new CountDownLatch(1);
         mFocusArea.post(() -> {
