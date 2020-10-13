@@ -369,10 +369,8 @@ public class CarUiImeWideScreenController {
                 searchItem = new CarUiImeSearchListItem(CarUiContentListItem.Action.NONE);
             } else {
                 searchItem = new CarUiImeSearchListItem(CarUiContentListItem.Action.ICON);
-                searchItem.setSupplementalIconId(secondaryImageIdList.get(i));
             }
 
-            searchItem.setItemId(itemIdList.get(i));
             searchItem.setOnItemClickedListener(v -> {
                 Bundle bundle = new Bundle();
                 bundle.putString(SEARCH_RESULT_ITEM_ID, itemIdList.get(index));

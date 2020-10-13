@@ -17,7 +17,6 @@
 package com.android.car.ui.recyclerview;
 
 import android.graphics.drawable.Drawable;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -114,7 +113,7 @@ public class CarUiContentListItem extends CarUiListItem {
     private boolean mIsActivated;
     private OnClickListener mOnClickListener;
     private OnCheckedChangeListener mOnCheckedChangeListener;
-    private View.OnClickListener mSupplementalIconOnClickListener;
+    private OnClickListener mSupplementalIconOnClickListener;
 
 
     public CarUiContentListItem(Action action) {
@@ -301,7 +300,7 @@ public class CarUiContentListItem extends CarUiListItem {
      * @param listener the callback that is invoked when the icon is clicked.
      */
     public void setSupplementalIcon(@Nullable Drawable icon,
-            @Nullable View.OnClickListener listener) {
+            @Nullable OnClickListener listener) {
         if (mAction != Action.ICON) {
             throw new IllegalStateException(
                     "Cannot set supplemental icon on list item that does not have an action of "
@@ -313,7 +312,7 @@ public class CarUiContentListItem extends CarUiListItem {
     }
 
     @Nullable
-    public View.OnClickListener getSupplementalIconOnClickListener() {
+    public OnClickListener getSupplementalIconOnClickListener() {
         return mSupplementalIconOnClickListener;
     }
 

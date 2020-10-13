@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.car.ui;
+package com.android.car.ui.toolbar;
 
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_ITEM_ID;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SECONDARY_IMAGE_ID;
@@ -29,15 +29,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Edit text supporting the callbacks from the IMS.This will be useful in widescreen IME mode to
- * notify apps of specific action through Interface.
+ * Edit text supporting the callbacks from the IMS. This will be useful in widescreen IME mode to
+ * allow car-ui-lib to receive responses (like onClick events) from the IMS
  */
-public class CarUiEditText extends EditText {
+class CarUiEditText extends EditText {
     /**
      * Interface for {@link CarUiEditText} to support different actions and callbacks from IME
      * when running in wide screen mode.
      */
-    public interface PrivateImeCommandCallback {
+    interface PrivateImeCommandCallback {
         /**
          * Called when user clicks on an item in the search results.
          *
@@ -58,6 +58,9 @@ public class CarUiEditText extends EditText {
 
     private final Set<PrivateImeCommandCallback> mPrivateImeCommandCallback = new HashSet<>();
 
+    // These need to be public for the layout inflater to inflate them, but
+    // checkstyle complains about a public constructor on a package-private class
+    //CHECKSTYLE:OFF Generated code
     public CarUiEditText(Context context) {
         super(context);
     }
@@ -74,6 +77,7 @@ public class CarUiEditText extends EditText {
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
+    //CHECKSTYLE:ON Generated code
 
     @Override
     public boolean onPrivateIMECommand(String action, Bundle data) {
