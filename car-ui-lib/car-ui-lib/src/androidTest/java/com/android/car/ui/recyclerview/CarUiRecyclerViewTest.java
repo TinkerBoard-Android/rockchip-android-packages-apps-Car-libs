@@ -16,6 +16,8 @@
 
 package com.android.car.ui.recyclerview;
 
+import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE;
+import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_SETTLING;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.assertion.PositionAssertions.isBottomAlignedWith;
@@ -52,7 +54,10 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -484,6 +489,74 @@ public class CarUiRecyclerViewTest {
         // Move back up; this should disable the up button again.
         onView(withId(R.id.car_ui_scrollbar_page_up)).perform(click()).check(
                 matches(not(isEnabled())));
+    }
+
+    @Test
+    public void testPageUpScrollsWithoutSnap() {
+        RecyclerView.OnScrollListener scrollListener = mock(RecyclerView.OnScrollListener.class);
+
+        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerView(mTestableContext);
+        ViewGroup container = mActivity.findViewById(R.id.test_container);
+        container.post(() -> {
+            container.addView(carUiRecyclerView);
+            carUiRecyclerView.setAdapter(new TestAdapter(100));
+        });
+
+        IdlingRegistry.getInstance().register(new ScrollIdlingResource(carUiRecyclerView));
+
+        // Scroll down a few pages so that you can perform page up operations.
+        onView(withId(R.id.car_ui_scrollbar_page_down)).perform(click());
+        onView(withId(R.id.car_ui_scrollbar_page_down)).perform(click());
+        onView(withId(R.id.car_ui_scrollbar_page_down)).perform(click());
+        onView(withId(R.id.car_ui_scrollbar_page_down)).perform(click());
+
+        // Set a mocked scroll listener on the CarUiRecyclerView
+        carUiRecyclerView.addOnScrollListener(scrollListener);
+
+        onView(withId(R.id.car_ui_scrollbar_page_up)).perform(click());
+
+        // Verify that scroll operation only settles on the destination once. This means a single
+        // smooth scroll to the destination. If the scroll includes a secondary snap after an
+        // initial scroll, this callback will have more than one invocation.
+        verify(scrollListener, times(1)).onScrollStateChanged(carUiRecyclerView,
+                SCROLL_STATE_SETTLING);
+
+        onView(withId(R.id.car_ui_scrollbar_page_up)).perform(click());
+
+        // Make same verification as above for a second page up operation.
+        verify(scrollListener, times(2)).onScrollStateChanged(carUiRecyclerView,
+                SCROLL_STATE_SETTLING);
+    }
+
+    @Test
+    public void testPageDownScrollsWithoutSnap() {
+        RecyclerView.OnScrollListener scrollListener = mock(RecyclerView.OnScrollListener.class);
+
+        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerView(mTestableContext);
+        ViewGroup container = mActivity.findViewById(R.id.test_container);
+        container.post(() -> {
+            container.addView(carUiRecyclerView);
+            carUiRecyclerView.setAdapter(new TestAdapter(100));
+        });
+
+        IdlingRegistry.getInstance().register(new ScrollIdlingResource(carUiRecyclerView));
+
+        // Set a mocked scroll listener on the CarUiRecyclerView
+        carUiRecyclerView.addOnScrollListener(scrollListener);
+
+        onView(withId(R.id.car_ui_scrollbar_page_down)).perform(click());
+
+        // Verify that scroll operation only settles on the destination once. This means a single
+        // smooth scroll to the destination. If the scroll includes a secondary snap after an
+        // initial scroll, this callback will have more than one invocation.
+        verify(scrollListener, times(1)).onScrollStateChanged(carUiRecyclerView,
+                SCROLL_STATE_SETTLING);
+
+        onView(withId(R.id.car_ui_scrollbar_page_down)).perform(click());
+
+        // Make same verification as above for a second page down operation.
+        verify(scrollListener, times(2)).onScrollStateChanged(carUiRecyclerView,
+                SCROLL_STATE_SETTLING);
     }
 
     @Test
@@ -1008,7 +1081,7 @@ public class CarUiRecyclerViewTest {
                                 public void onScrollStateChanged(@NonNull RecyclerView recyclerView,
                                         int newState) {
                                     super.onScrollStateChanged(recyclerView, newState);
-                                    mIdle = (newState == RecyclerView.SCROLL_STATE_IDLE
+                                    mIdle = (newState == SCROLL_STATE_IDLE
                                             // Treat dragging as idle, or Espresso will
                                             // block itself when swiping.
                                             || newState == RecyclerView.SCROLL_STATE_DRAGGING);
