@@ -16,7 +16,7 @@
 
 package com.android.car.ui.utils;
 
-import static android.view.View.VISIBLE;
+import static android.view.accessibility.AccessibilityNodeInfo.ACTION_FOCUS;
 
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_HORIZONTALLY_SCROLLABLE;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_VERTICALLY_SCROLLABLE;
@@ -24,9 +24,18 @@ import static com.android.car.ui.utils.RotaryConstants.ROTARY_VERTICALLY_SCROLLA
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 
+import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+
+import com.android.car.ui.FocusArea;
+import com.android.car.ui.FocusParkingView;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Utility class used by {@link com.android.car.ui.FocusArea} and {@link
@@ -36,50 +45,310 @@ import androidx.annotation.Nullable;
  */
 public final class ViewUtils {
 
-    /** This is a utility class */
+    /**
+     * No view is focused, the focused view is not shown, or the focused view is a FocusParkingView.
+     */
+    public static final int NO_FOCUS = 1;
+
+    /** A regular view is focused. */
+    public static final int REGULAR_FOCUS = 2;
+
+    /**
+     * An implicit default focus view (i.e., the first focusable item in a scrollable container) is
+     * focused.
+     */
+    public static final int IMPLICIT_DEFAULT_FOCUS = 3;
+
+    /** The {@code app:defaultFocus} view is focused. */
+    public static final int DEFAULT_FOCUS = 4;
+
+    /** The {@code android:focusedByDefault} view is focused. */
+    public static final int FOCUSED_BY_DEFAULT = 5;
+
+    /**
+     * Focus level of a view. When adjusting the focus, the view with the highest focus level will
+     * be focused.
+     */
+    @IntDef(flag = true, value = {NO_FOCUS, REGULAR_FOCUS, IMPLICIT_DEFAULT_FOCUS,
+            DEFAULT_FOCUS, FOCUSED_BY_DEFAULT})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FocusLevel {
+    }
+
+    /** This is a utility class. */
     private ViewUtils() {
     }
 
     /**
-     * Searches the {@code view} and its descendants in depth first order, and returns the first
-     * view that is focused by default, can take focus, but has no invisible ancestors. Returns null
-     * if not found.
+     * This is a functional interface and can therefore be used as the assignment target for a
+     * lambda expression or method reference.
+     *
+     * @param <T> the type of the input to the predicate
+     */
+    private interface Predicate<T> {
+        /** Evaluates this predicate on the given argument. */
+        boolean test(@NonNull T t);
+    }
+
+    /** Gets the ancestor FocusArea of the {@code view}, if any. Returns null if not found. */
+    @Nullable
+    public static FocusArea getAncestorFocusArea(@NonNull View view) {
+        ViewParent parent = view.getParent();
+        while (parent != null) {
+            if (parent instanceof FocusArea) {
+                return (FocusArea) parent;
+            }
+            parent = parent.getParent();
+        }
+        return null;
+    }
+
+    /**
+     * Gets the ancestor scrollable container of the {@code view}, if any. Returns null if not
+     * found.
      */
     @Nullable
-    public static View findFocusedByDefaultView(@NonNull View view) {
-        return depthFirstSearch(view,
-                /* targetPredicate= */ v -> v.isFocusedByDefault() && canTakeFocus(v),
-                /* skipPredicate= */ v -> v.getVisibility() != VISIBLE);
+    public static ViewGroup getAncestorScrollableContainer(@Nullable View view) {
+        if (view == null) {
+            return null;
+        }
+        ViewParent parent = view.getParent();
+        // A scrollable container can't contain a FocusArea, so let's return earlier if we found
+        // a FocusArea.
+        while (parent != null && parent instanceof ViewGroup && !(parent instanceof FocusArea)) {
+            ViewGroup viewGroup = (ViewGroup) parent;
+            if (isScrollableContainer(viewGroup)) {
+                return viewGroup;
+            }
+            parent = parent.getParent();
+        }
+        return null;
+    }
+
+    /**
+     * Focuses on the {@code view} if it can be focused.
+     *
+     * @return whether it was successfully focused or already focused
+     */
+    public static boolean requestFocus(@Nullable View view) {
+        if (view == null || !canTakeFocus(view)) {
+            return false;
+        }
+        if (view.isFocused()) {
+            return true;
+        }
+        // Exit touch mode and focus the view. The view may not be focusable in touch mode, so we
+        // need to exit touch mode before focusing it.
+        return view.performAccessibilityAction(ACTION_FOCUS, /* arguments= */ null);
+    }
+
+    /**
+     * Searches the {@code root}'s descendants for a view with the highest {@link FocusLevel}. If
+     * the view's FocusLevel is higher than the {@code currentFocus}'s FocusLevel, focuses on the
+     * view.
+     *
+     * @return whether the view is focused
+     */
+    public static boolean adjustFocus(@NonNull View root, @Nullable View currentFocus) {
+        @FocusLevel int level = getFocusLevel(currentFocus);
+        return adjustFocus(root, level);
+    }
+
+    /**
+     * Searches the {@code root}'s descendants for a view with the highest {@link FocusLevel}. If
+     * the view's FocusLevel is higher than {@code currentLevel}, focuses on the view.
+     *
+     * @return whether the view is focused
+     */
+    public static boolean adjustFocus(@NonNull View root, @FocusLevel int currentLevel) {
+        if (currentLevel < FOCUSED_BY_DEFAULT && focusOnFocusedByDefaultView(root)) {
+            return true;
+        }
+        if (currentLevel < DEFAULT_FOCUS && focusOnDefaultFocusView(root)) {
+            return true;
+        }
+        if (currentLevel < IMPLICIT_DEFAULT_FOCUS && focusOnImplicitDefaultFocusView(root)) {
+            return true;
+        }
+        if (currentLevel < REGULAR_FOCUS) {
+            return focusOnFirstFocus(root);
+        }
+        return false;
+    }
+
+    @FocusLevel
+    private static int getFocusLevel(@Nullable View view) {
+        if (view == null || view instanceof FocusParkingView || !view.isShown()) {
+            return NO_FOCUS;
+        }
+        if (view.isFocusedByDefault()) {
+            return FOCUSED_BY_DEFAULT;
+        }
+        if (isDefaultFocus(view)) {
+            return DEFAULT_FOCUS;
+        }
+        if (isImplicitDefaultFocusView(view)) {
+            return IMPLICIT_DEFAULT_FOCUS;
+        }
+        return REGULAR_FOCUS;
+    }
+
+    /** Returns whether the {@code view} is a {@code app:defaultFocus} view. */
+    private static boolean isDefaultFocus(@NonNull View view) {
+        FocusArea parent = getAncestorFocusArea(view);
+        return parent != null && view == parent.getDefaultFocusView();
+    }
+
+    /**
+     * Returns whether the {@code view} is an implicit default focus view, i.e., the first focusable
+     * item in a scrollable container.
+     */
+    @VisibleForTesting
+    static boolean isImplicitDefaultFocusView(@NonNull View view) {
+        ViewGroup scrollableContainer = null;
+        ViewParent parent = view.getParent();
+        while (parent != null && parent instanceof ViewGroup) {
+            ViewGroup viewGroup = (ViewGroup) parent;
+            if (isScrollableContainer(viewGroup)) {
+                scrollableContainer = viewGroup;
+                break;
+            }
+            parent = parent.getParent();
+        }
+        if (scrollableContainer == null) {
+            return false;
+        }
+        return findFirstFocusableDescendant(scrollableContainer) == view;
+    }
+
+    private static boolean isScrollableContainer(@NonNull View view) {
+        CharSequence contentDescription = view.getContentDescription();
+        return TextUtils.equals(contentDescription, ROTARY_VERTICALLY_SCROLLABLE)
+                || TextUtils.equals(contentDescription, ROTARY_HORIZONTALLY_SCROLLABLE);
+    }
+
+    /**
+     * Focuses on the first {@code app:defaultFocus} view in the view tree, if any.
+     *
+     * @param root the root of the view tree
+     * @return whether succeeded
+     */
+    private static boolean focusOnDefaultFocusView(@NonNull View root) {
+        View defaultFocus = findDefaultFocusView(root);
+        return requestFocus(defaultFocus);
+    }
+
+    /**
+     * Focuses on the first {@code android:focusedByDefault} view in the view tree, if any.
+     *
+     * @param root the root of the view tree
+     * @return whether succeeded
+     */
+    private static boolean focusOnFocusedByDefaultView(@NonNull View root) {
+        View focusedByDefault = findFocusedByDefaultView(root);
+        return requestFocus(focusedByDefault);
+    }
+
+    /**
+     * Focuses on the first implicit default focus view in the view tree, if any.
+     *
+     * @param root the root of the view tree
+     * @return whether succeeded
+     */
+    private static boolean focusOnImplicitDefaultFocusView(@NonNull View root) {
+        View implicitDefaultFocus = findImplicitDefaultFocusView(root);
+        return requestFocus(implicitDefaultFocus);
+    }
+
+    /**
+     * Tries to focus on the first focusable view in the view tree in depth first order. If failed,
+     * keeps trying other views in depth first order until succeeded.
+     *
+     * @param root the root of the view tree
+     * @return whether succeeded
+     */
+    private static boolean focusOnFirstFocus(@NonNull View root) {
+        View focusedView = ViewUtils.depthFirstSearch(root,
+                /* targetPredicate= */ v -> canTakeFocus(v) && requestFocus(v),
+                /* skipPredicate= */ v -> !v.isShown());
+        return focusedView != null;
+    }
+
+    /**
+     * Searches the {@code root}'s descendants in depth first order, and returns the first
+     * {@code app:defaultFocus} view that can take focus. Returns null if not found.
+     */
+    @Nullable
+    private static View findDefaultFocusView(@NonNull View view) {
+        if (!view.isShown()) {
+            return null;
+        }
+        if (view instanceof FocusArea) {
+            FocusArea focusArea = (FocusArea) view;
+            View defaultFocus = focusArea.getDefaultFocusView();
+            if (defaultFocus != null && canTakeFocus(defaultFocus)) {
+                return defaultFocus;
+            }
+        } else if (view instanceof ViewGroup) {
+            ViewGroup parent = (ViewGroup) view;
+            for (int i = 0; i < parent.getChildCount(); i++) {
+                View child = parent.getChildAt(i);
+                View defaultFocus = findDefaultFocusView(child);
+                if (defaultFocus != null) {
+                    return defaultFocus;
+                }
+            }
+        }
+        return null;
     }
 
     /**
      * Searches the {@code view} and its descendants in depth first order, and returns the first
-     * primary focus view, i.e., the first focusable item in a scrollable container. Returns null
-     * if not found.
+     * {@code android:focusedByDefault} view that can take focus. Returns null if not found.
      */
-    public static View findPrimaryFocusView(@NonNull View view) {
+    @VisibleForTesting
+    @Nullable
+    static View findFocusedByDefaultView(@NonNull View view) {
+        return depthFirstSearch(view,
+                /* targetPredicate= */ v -> v.isFocusedByDefault() && canTakeFocus(v),
+                /* skipPredicate= */ v -> !v.isShown());
+    }
+
+    /**
+     * Searches the {@code view} and its descendants in depth first order, and returns the first
+     * implicit default focus view, i.e., the first focusable item in the first scrollable
+     * container. Returns null if not found.
+     */
+    @VisibleForTesting
+    @Nullable
+    static View findImplicitDefaultFocusView(@NonNull View view) {
         View scrollableContainer = findScrollableContainer(view);
-        return scrollableContainer == null ? null : findFocusableDescendant(scrollableContainer);
+        return scrollableContainer == null
+                ? null
+                : findFirstFocusableDescendant(scrollableContainer);
     }
 
     /**
      * Searches the {@code view}'s descendants in depth first order, and returns the first view
-     * that can take focus but has no invisible ancestors, or null if not found.
+     * that can take focus, or null if not found.
      */
+    @VisibleForTesting
     @Nullable
-    public static View findFocusableDescendant(@NonNull View view) {
+    static View findFirstFocusableDescendant(@NonNull View view) {
         return depthFirstSearch(view,
                 /* targetPredicate= */ v -> v != view && canTakeFocus(v),
-                /* skipPredicate= */ v -> v.getVisibility() != VISIBLE);
+                /* skipPredicate= */ v -> !v.isShown());
     }
 
     /**
      * Searches the {@code view} and its descendants in depth first order, and returns the first
-     * view that meets the given condition. Returns null if not found.
+     * scrollable container shown on the screen. Returns null if not found.
      */
     @Nullable
-    public static View depthFirstSearch(@NonNull View view, @NonNull Predicate<View> predicate) {
-        return depthFirstSearch(view, predicate, /* skipPredicate= */ null);
+    private static View findScrollableContainer(@NonNull View view) {
+        return depthFirstSearch(view,
+                /* targetPredicate= */ v -> isScrollableContainer(v),
+                /* skipPredicate= */ v -> !v.isShown());
     }
 
     /**
@@ -90,7 +359,7 @@ public final class ViewUtils {
     @Nullable
     private static View depthFirstSearch(@NonNull View view,
             @NonNull Predicate<View> targetPredicate,
-            @NonNull Predicate<View> skipPredicate) {
+            @Nullable Predicate<View> skipPredicate) {
         if (skipPredicate != null && skipPredicate.test(view)) {
             return null;
         }
@@ -110,35 +379,13 @@ public final class ViewUtils {
         return null;
     }
 
-    /**
-     * This is a functional interface and can therefore be used as the assignment target for a
-     * lambda expression or method reference.
-     *
-     * @param <T> the type of the input to the predicate
-     */
-    public interface Predicate<T> {
-        /** Evaluates this predicate on the given argument. */
-        boolean test(@NonNull T t);
-    }
-
-    /**
-     * Searches the {@code view} and its descendants in depth first order, and returns the first
-     * scrollable container that has no invisible ancestors. Returns null if not found.
-     */
-    @Nullable
-    private static View findScrollableContainer(@NonNull View view) {
-        return depthFirstSearch(view,
-                /* targetPredicate= */ v -> {
-                    CharSequence contentDescription = v.getContentDescription();
-                    return TextUtils.equals(contentDescription, ROTARY_VERTICALLY_SCROLLABLE)
-                            || TextUtils.equals(contentDescription, ROTARY_HORIZONTALLY_SCROLLABLE);
-                },
-                /* skipPredicate= */ v -> v.getVisibility() != VISIBLE);
-    }
-
     /** Returns whether {@code view} can be focused. */
     private static boolean canTakeFocus(@NonNull View view) {
-        return view.isFocusable() && view.isEnabled() && view.getVisibility() == VISIBLE
-                && view.getWidth() > 0 && view.getHeight() > 0;
+        return view.isFocusable() && view.isEnabled() && view.isShown()
+                && view.getWidth() > 0 && view.getHeight() > 0 && view.isAttachedToWindow()
+                && !(view instanceof FocusParkingView)
+                // If it's a scrollable container, it can be focused only when it has no focusable
+                // descendants. We focus on it so that the rotary controller can scroll it.
+                && (!isScrollableContainer(view) || findFirstFocusableDescendant(view) == null);
     }
 }

@@ -150,9 +150,30 @@
 
     <!-- Attributes for FocusArea. -->
     <declare-styleable name="FocusArea">
-        <!-- The ID of a focusable descendant view which should be focused when the user nudges to
-             this FocusArea, if there was no view focused in the FocusArea or
-             car_ui_focus_area_default_focus_overrides_history is true. -->
+        <!-- The ID of the default focus view. The view will be prioritized when searching for a
+             focus target.
+             (1) When the user nudges the rotary controller, it will search for a target FocusArea,
+                 then search for a target view within the target FocusArea, and focus on the target
+                 view. The target view is chosen in the following order:
+                   1. the "android:focusedByDefault" view, if any
+                   2. the "app:defaultFocus" view, if any
+                   3. the first focusable item in a scrollable container, if any
+                   4. previously focused view, if any and the cache is not stale
+                   5. the first focusable view, if any
+                 Note that 4 will be prioritized over 1&2&3 when
+                 car_ui_focus_area_default_focus_overrides_history is false.
+             (2) When it needs to initialize the focus (such as when a window is opened), it will
+                 search for a view in the window and focus on it. The view is chosen in the
+                 following order:
+                   1. the first "android:focusedByDefault" view, if any
+                   2. the first "app:defaultFocus" view, if any
+                   3. the first focusable item in a scrollable container, if any
+                   4. the first focusable view that is not a FocusParkingView, if any
+             If there is only one FocusArea that needs to set default focus, you can use either
+             "app:defaultFocus" or "android:focusedByDefault". If there are more than one, you
+             should use "android:focusedByDefault" in the primary FocusArea, and use
+             "app:defaultFocus" in other FocusAreas. -->
+
         <attr name="defaultFocus" format="reference"/>
 
         <!-- The paddings of FocusArea highlight. It does't impact the paddings on its child views,
