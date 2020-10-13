@@ -21,10 +21,11 @@ import static com.android.car.ui.utils.RotaryConstants.ACTION_HIDE_IME;
 import static com.android.car.ui.utils.RotaryConstants.ACTION_RESTORE_DEFAULT_FOCUS;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.Nullable;
@@ -33,10 +34,11 @@ import com.android.car.ui.utils.ViewUtils;
 
 /**
  * A transparent {@link View} that can take focus. It's used by {@link
- * com.android.car.rotary.RotaryService} to support rotary controller navigation. Each {@link
- * android.view.Window} should have one FocusParkingView as the first focusable view in the view
- * tree, and outside of all {@link FocusArea}s. If multiple FocusParkingView are added in the
- * window, only the first one will be focusable.
+ * com.android.car.rotary.RotaryService} to support rotary controller navigation. It's also used to
+ * initialize the focus when in rotary mode.
+ * <p>
+ * To support the rotary controller, each {@link android.view.Window} must have a FocusParkingView
+ * as the first focusable view in the view tree, and outside of all {@link FocusArea}s.
  * <p>
  * Android doesn't clear focus automatically when focus is set in another window. If we try to clear
  * focus in the previous window, Android will re-focus a view in that window, resulting in two
@@ -45,18 +47,32 @@ import com.android.car.ui.utils.ViewUtils;
  * matter whether it's focused or not. It can take focus so that RotaryService can "park" the focus
  * on it to remove the focus highlight.
  * <p>
- * If the focused view is scrolled off the screen, Android will refocus the first focusable view in
- * the window. The FocusParkingView should be the first view so that it gets focus. The
- * RotaryService detects this and moves focus to the scrolling container.
- * <p>
  * If there is only one focus area in the current window, rotating the controller within the focus
  * area will cause RotaryService to move the focus around from the view on the right to the view on
  * the left or vice versa. Adding this view to each window can fix this issue. When RotaryService
  * finds out the focus target is a FocusParkingView, it will know a wrap-around is going to happen.
  * Then it will avoid the wrap-around by not moving focus.
+ * <p>
+ * To ensure the focus is initialized properly when there is a window change, the FocusParkingView
+ * will not get focused when the framework wants to focus on it. Instead, it will try to find a
+ * better focus target in the window and focus on the target. That said, the FocusParkingView can
+ * still be focused in order to clear focus highlight in the window, such as when RotaryService
+ * performs {@link android.view.accessibility.AccessibilityNodeInfo#ACTION_FOCUS} on the
+ * FocusParkingView, or the window has lost focus.
  */
 public class FocusParkingView extends View {
     private static final String TAG = "FocusParkingView";
+
+    /**
+     * The focused view in the window containing this FocusParkingView. It's null if no view is
+     * focused, or the focused view is a FocusParkingView.
+     */
+    @Nullable
+    private View mFocusedView;
+
+    /** The scrollable container that contains the {@link #mFocusedView}, if any. */
+    @Nullable
+    ViewGroup mScrollableContainer;
 
     public FocusParkingView(Context context) {
         super(context);
@@ -94,6 +110,12 @@ public class FocusParkingView extends View {
 
         // Prevent Android from drawing the default focus highlight for this view when it's focused.
         setDefaultFocusHighlightEnabled(false);
+
+        // Keep track of the focused view so that we can recover focus when it's removed.
+        getViewTreeObserver().addOnGlobalFocusChangeListener((oldFocus, newFocus) -> {
+            mFocusedView = newFocus instanceof FocusParkingView ? null : newFocus;
+            mScrollableContainer = ViewUtils.getAncestorScrollableContainer(mFocusedView);
+        });
     }
 
     @Override
@@ -107,12 +129,16 @@ public class FocusParkingView extends View {
     @Override
     public void onWindowFocusChanged(boolean hasWindowFocus) {
         if (!hasWindowFocus) {
-            // We need to clear the focus (by parking the focus on the FocusParkingView) once the
-            // current window goes to background. This can't be done by RotaryService because
-            // RotaryService sees the window as removed, thus can't perform any action (such as
-            // focus, clear focus) on the nodes in the window. So FocusParkingView has to grab the
-            // focus proactively.
-            requestFocus();
+            // We need to clear the focus highlight(by parking the focus on the FocusParkingView)
+            // once the current window goes to background. This can't be done by RotaryService
+            // because RotaryService sees the window as removed, thus can't perform any action
+            // (such as focus, clear focus) on the nodes in the window. So FocusParkingView has to
+            // grab the focus proactively.
+            super.requestFocus(FOCUS_DOWN, null);
+        } else if (isFocused()) {
+            // When FocusParkingView is focused and the window just gets focused, transfer the view
+            // focus to a non-FocusParkingView in the window.
+            restoreFocusInRoot();
         }
         super.onWindowFocusChanged(hasWindowFocus);
     }
@@ -126,21 +152,7 @@ public class FocusParkingView extends View {
     public boolean performAccessibilityAction(int action, Bundle arguments) {
         switch (action) {
             case ACTION_RESTORE_DEFAULT_FOCUS:
-                View root = getRootView();
-
-                // If there is a view focused by default and it can take focus, move focus to it.
-                View defaultFocus = ViewUtils.findFocusedByDefaultView(root);
-                if (defaultFocus != null) {
-                    return defaultFocus.requestFocus();
-                }
-
-                // If there is a primary focus view, move focus to it.
-                View primaryFocus = ViewUtils.findPrimaryFocusView(root);
-                if (primaryFocus != null) {
-                    return primaryFocus.requestFocus();
-                }
-
-                return false;
+                return restoreFocusInRoot();
             case ACTION_HIDE_IME:
                 InputMethodManager inputMethodManager =
                         getContext().getSystemService(InputMethodManager.class);
@@ -149,33 +161,37 @@ public class FocusParkingView extends View {
             case ACTION_FOCUS:
                 // Don't leave this to View to handle as it will exit touch mode.
                 if (!hasFocus()) {
-                    return requestFocus();
+                    return super.requestFocus(FOCUS_DOWN, null);
                 }
-                break;
+                return false;
         }
         return super.performAccessibilityAction(action, arguments);
     }
 
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
+    public boolean requestFocus(int direction, Rect previouslyFocusedRect) {
+        // Find a better target to focus instead of focusing this FocusParkingView when the
+        // framework wants to focus it.
+        return restoreFocusInRoot();
+    }
 
-        // If there is a FocusParkingView already, make the one after in the view tree
-        // non-focusable.
-        boolean []isBefore = new boolean[1];
-        View anotherFpv = ViewUtils.depthFirstSearch(getRootView(), v -> {
-            if (this == v) {
-                isBefore[0] = true;
-            }
-            return v != this && v instanceof FocusParkingView && v.isFocusable();
-        });
-        if (anotherFpv != null) {
-            Log.w(TAG, "There should be only one FocusParkingView in the window");
-            if (isBefore[0]) {
-                anotherFpv.setFocusable(false);
-            } else {
-                setFocusable(false);
-            }
+    @Override
+    public boolean restoreDefaultFocus() {
+        // Find a better target to focus instead of focusing this FocusParkingView when the
+        // framework wants to focus it.
+        return restoreFocusInRoot();
+    }
+
+    private boolean restoreFocusInRoot() {
+        // The focused view was in a scrollable container and it was removed, e.g., it was scrolled
+        // off the screen. Let's focus on the scrollable container so that the rotary controller
+        // can scroll it.
+        if (mFocusedView != null && !mFocusedView.isAttachedToWindow()
+                && mScrollableContainer != null && mScrollableContainer.isAttachedToWindow()
+                && mScrollableContainer.isShown() && mScrollableContainer.requestFocus()) {
+            return true;
         }
+        // Otherwise find the best target view to focus.
+        return ViewUtils.adjustFocus(getRootView(), /* currentFocus= */ null);
     }
 }
