@@ -16,8 +16,6 @@
 
 package com.android.car.ui.imewidescreen;
 
-import androidx.annotation.Nullable;
-
 import com.android.car.ui.recyclerview.CarUiContentListItem;
 import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 
@@ -31,30 +29,11 @@ import com.android.car.ui.recyclerview.CarUiListItemAdapter;
  */
 public class CarUiImeSearchListItem extends CarUiContentListItem {
 
-    private CharSequence mItemId;
     private int mIconResId;
-    private CharSequence mSupplementalIconId;
     private int mSupplementalIconResId;
 
     public CarUiImeSearchListItem(Action action) {
         super(action);
-    }
-
-    /**
-     * Returns the id of the item.
-     */
-    @Nullable
-    public CharSequence getItemId() {
-        return mItemId;
-    }
-
-    /**
-     * Sets the id of the item.
-     *
-     * @param itemId text to display as title.
-     */
-    public void setItemId(CharSequence itemId) {
-        mItemId = itemId;
     }
 
     /**
@@ -83,20 +62,5 @@ public class CarUiImeSearchListItem extends CarUiContentListItem {
      */
     public void setSupplementalIconResId(int supplementalIconResId) {
         mSupplementalIconResId = supplementalIconResId;
-    }
-
-    /**
-     * Returns the supplemental icon id of the item.
-     */
-    @Nullable
-    public CharSequence getSupplementalIconId() {
-        return mSupplementalIconId;
-    }
-
-    /**
-     * Sets supplemental icon id.
-     */
-    public void setSupplementalIconId(CharSequence supplementalIconId) {
-        mSupplementalIconId = supplementalIconId;
     }
 }
