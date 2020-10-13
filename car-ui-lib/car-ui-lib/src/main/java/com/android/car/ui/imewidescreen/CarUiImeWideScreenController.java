@@ -94,7 +94,7 @@ public class CarUiImeWideScreenController {
     public static final String WIDE_SCREEN_ACTION = "automotive_wide_screen";
     // Action name of action that will be used by IMS to notify the application to clear the data
     // in the EditText.
-    private static final String WIDE_SCREEN_CLEAR_DATA_ACTION = "automotive_wide_screen_clear_data";
+    public static final String WIDE_SCREEN_CLEAR_DATA_ACTION = "automotive_wide_screen_clear_data";
     // Key to provide the resource id for the icon that will be displayed in the input area. If
     // this is not provided applications icon will be used. Value format is int.
     public static final String WIDE_SCREEN_EXTRACTED_TEXT_ICON_RES_ID =

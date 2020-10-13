@@ -15,10 +15,20 @@
  */
 package com.android.car.ui.toolbar;
 
+import static android.view.WindowInsets.Type.ime;
+
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_ITEM_ID;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_PRIMARY_IMAGE_RES_ID_LIST;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SECONDARY_IMAGE_ID;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SECONDARY_IMAGE_RES_ID_LIST;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SUB_TITLE_LIST;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_TITLE_LIST;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_ACTION;
 import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -34,9 +44,15 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.android.car.ui.CarUiEditText;
 import com.android.car.ui.R;
+import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
+import com.android.car.ui.recyclerview.CarUiContentListItem;
+import com.android.car.ui.recyclerview.CarUiListItem;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -50,6 +66,7 @@ public class SearchView extends ConstraintLayout {
     private final int mStartPaddingWithoutIcon;
     private final int mStartPadding;
     private final int mEndPadding;
+    private List<CarUiListItem> mWideScreenSearchItemList = new ArrayList<>();
     private Set<Toolbar.OnSearchListener> mSearchListeners = Collections.emptySet();
     private Set<Toolbar.OnSearchCompletedListener> mSearchCompletedListeners =
             Collections.emptySet();
@@ -82,7 +99,7 @@ public class SearchView extends ConstraintLayout {
         super(context, attrs, defStyleAttr);
 
         mInputMethodManager = (InputMethodManager)
-            getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
         LayoutInflater inflater = LayoutInflater.from(context);
         inflater.inflate(R.layout.car_ui_toolbar_search_view, this, true);
@@ -127,6 +144,18 @@ public class SearchView extends ConstraintLayout {
                 return true;
             }
             return false;
+        });
+    }
+
+    /**
+     * Apply window inset listener to the search container.
+     */
+    void installWindowInsetsListener(View searchContainer) {
+        searchContainer.getRootView().setOnApplyWindowInsetsListener((v, insets) -> {
+            if (insets.isVisible(ime())) {
+                displaySearchWideScreen();
+            }
+            return insets;
         });
     }
 
@@ -177,6 +206,71 @@ public class SearchView extends ConstraintLayout {
      */
     public void setSearchCompletedListeners(Set<Toolbar.OnSearchCompletedListener> listeners) {
         mSearchCompletedListeners = listeners;
+    }
+
+    /**
+     * Sets list of search item {@link CarUiListItem} to be displayed in the IMS
+     * template.
+     */
+    public void setSearchItemsForWideScreen(List<CarUiListItem> searchItems) {
+        mWideScreenSearchItemList = searchItems;
+        displaySearchWideScreen();
+    }
+
+    private void displaySearchWideScreen() {
+        if (mWideScreenSearchItemList.isEmpty()) {
+            return;
+        }
+        ArrayList<String> itemIdList = new ArrayList<>();
+        ArrayList<String> titleList = new ArrayList<>();
+        ArrayList<String> subTitleList = new ArrayList<>();
+        ArrayList<Integer> primaryImageResId = new ArrayList<>();
+        ArrayList<String> secondaryItemId = new ArrayList<>();
+        ArrayList<Integer> secondaryImageResId = new ArrayList<>();
+        for (CarUiListItem listItem : mWideScreenSearchItemList) {
+            if (listItem instanceof CarUiContentListItem) {
+                CarUiImeSearchListItem item = (CarUiImeSearchListItem) listItem;
+                itemIdList.add(item.getItemId() != null ? item.getItemId().toString() : null);
+                titleList.add(item.getTitle() != null ? item.getTitle().toString() : null);
+                subTitleList.add(item.getBody() != null ? item.getBody().toString() : null);
+                primaryImageResId.add(item.getIconResId());
+                secondaryItemId.add(item.getSupplementalIconId() != null
+                        ? item.getSupplementalIconId().toString() : null);
+                secondaryImageResId.add(item.getSupplementalIconResId());
+            }
+        }
+
+        Bundle bundle = new Bundle();
+        bundle.putStringArrayList(SEARCH_RESULT_ITEM_ID, itemIdList);
+        bundle.putStringArrayList(SEARCH_RESULT_TITLE_LIST, titleList);
+        bundle.putStringArrayList(SEARCH_RESULT_SUB_TITLE_LIST, subTitleList);
+        bundle.putIntegerArrayList(SEARCH_RESULT_PRIMARY_IMAGE_RES_ID_LIST, primaryImageResId);
+        bundle.putStringArrayList(SEARCH_RESULT_SECONDARY_IMAGE_ID, secondaryItemId);
+        bundle.putIntegerArrayList(SEARCH_RESULT_SECONDARY_IMAGE_RES_ID_LIST, secondaryImageResId);
+        mInputMethodManager.sendAppPrivateCommand(mSearchText, WIDE_SCREEN_ACTION, bundle);
+    }
+
+    /**
+     * Registers a new {@link CarUiEditText.PrivateImeCommandCallback} to the list of
+     * listeners.
+     */
+    public void registerOnPrivateImeCommandListener(
+            CarUiEditText.PrivateImeCommandCallback listener) {
+        if (mSearchText instanceof CarUiEditText) {
+            ((CarUiEditText) mSearchText).registerOnPrivateImeCommandListener(listener);
+        }
+    }
+
+    /**
+     * Unregisters an existing {@link CarUiEditText.PrivateImeCommandCallback} from the list
+     * of listeners.
+     */
+    public boolean unregisterOnPrivateImeCommandListener(
+            CarUiEditText.PrivateImeCommandCallback listener) {
+        if (mSearchText instanceof CarUiEditText) {
+            return ((CarUiEditText) mSearchText).unregisterOnPrivateImeCommandListener(listener);
+        }
+        return false;
     }
 
     /**
