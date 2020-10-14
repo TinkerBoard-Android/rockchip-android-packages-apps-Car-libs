@@ -132,14 +132,18 @@ public class MultiSelectListPreferenceFragment extends Fragment {
 
         CarUiListItemAdapter adapter = new CarUiListItemAdapter(listItems);
         recyclerView.setAdapter(adapter);
+    }
 
-        toolbar.registerOnBackListener(() -> {
-            if (mPreference.callChangeListener(mNewValues)) {
-                mPreference.setValues(mNewValues);
-            }
+    @Override
+    public void onStop() {
+        super.onStop();
+        updatePreference();
+    }
 
-            return false;
-        });
+    private void updatePreference() {
+        if (mPreference.callChangeListener(mNewValues)) {
+            mPreference.setValues(mNewValues);
+        }
     }
 
     private CarUiMultiSelectListPreference getPreference() {
