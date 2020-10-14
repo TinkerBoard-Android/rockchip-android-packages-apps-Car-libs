@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -228,6 +229,8 @@ public final class CarUiRecyclerView extends RecyclerView implements
             return;
         }
 
+        mContainer = new LinearLayout(getContext());
+
         setVerticalScrollBarEnabled(false);
         setHorizontalScrollBarEnabled(false);
 
@@ -330,7 +333,6 @@ public final class CarUiRecyclerView extends RecyclerView implements
      * parent where the recycler view was set with the same layout params.
      */
     private void installExternalScrollBar() {
-        mContainer = new LinearLayout(getContext());
         LayoutInflater inflater = LayoutInflater.from(getContext());
         inflater.inflate(R.layout.car_ui_recycler_view, mContainer, true);
         mContainer.setVisibility(mContainerVisibility);
@@ -388,6 +390,20 @@ public final class CarUiRecyclerView extends RecyclerView implements
         super.onDetachedFromWindow();
         mCarUxRestrictionsUtil.unregister(mListener);
         this.getViewTreeObserver().removeOnGlobalLayoutListener(mOnGlobalLayoutListener);
+    }
+
+    @Override
+    public void setAlpha(float value) {
+        if (mScrollBarEnabled) {
+            mContainer.setAlpha(value);
+        } else {
+            super.setAlpha(value);
+        }
+    }
+
+    @Override
+    public ViewPropertyAnimator animate() {
+        return mScrollBarEnabled ? mContainer.animate() : super.animate();
     }
 
     @Override
