@@ -42,8 +42,8 @@ import androidx.annotation.StringRes;
 import androidx.annotation.XmlRes;
 
 import com.android.car.ui.AlertDialogBuilder;
-import com.android.car.ui.CarUiEditText;
 import com.android.car.ui.R;
+import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
 import com.android.car.ui.recyclerview.CarUiContentListItem;
 import com.android.car.ui.recyclerview.CarUiListItem;
 import com.android.car.ui.recyclerview.CarUiListItemAdapter;
@@ -113,7 +113,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
     private boolean mNavIconSpaceReserved;
     private boolean mLogoFillsNavIconSpace;
     private boolean mShowLogo;
-    private List<CarUiListItem> mSearchItems;
+    private List<? extends CarUiImeSearchListItem> mSearchItems;
     private final ProgressBarController mProgressBar;
     private final MenuItem.Listener mOverflowItemListener = item -> {
         updateOverflowDialog(item);
@@ -871,33 +871,8 @@ public final class ToolbarControllerImpl implements ToolbarController {
         return mOnSearchListeners.remove(listener);
     }
 
-    /**
-     * Registers a new {@link CarUiEditText.PrivateImeCommandCallback} to the list of
-     * listeners.
-     */
     @Override
-    public void registerOnPrivateImeCommandListener(
-            CarUiEditText.PrivateImeCommandCallback listener) {
-        if (mSearchView != null) {
-            mSearchView.registerOnPrivateImeCommandListener(listener);
-        }
-    }
-
-    /**
-     * Unregisters an existing {@link CarUiEditText.PrivateImeCommandCallback} from the list
-     * of listeners.
-     */
-    @Override
-    public boolean unregisterOnPrivateImeCommandListener(
-            CarUiEditText.PrivateImeCommandCallback listener) {
-        if (mSearchView != null) {
-            return mSearchView.unregisterOnPrivateImeCommandListener(listener);
-        }
-        return false;
-    }
-
-    @Override
-    public void setSearchItemsForWideScreen(List<CarUiListItem> searchItems) {
+    public void setSearchItemsForWideScreen(List<? extends CarUiImeSearchListItem> searchItems) {
         mSearchItems = searchItems;
         if (mSearchView != null) {
             mSearchView.setSearchItemsForWideScreen(searchItems);

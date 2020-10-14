@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.TextUtils;
@@ -78,6 +79,11 @@ public class AlertDialogBuilder {
     // passed to the IME to be rendered. If the information is not passed to the IME the content
     // area of the IME will render nothing into the content area.
     private final View.OnApplyWindowInsetsListener mOnApplyWindowInsetsListener = (v, insets) -> {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            // WindowInsets.isVisible() is only available on R or above
+            return insets;
+        }
+
         if (insets.isVisible(ime())) {
             Bundle bundle = new Bundle();
             String title = mWideScreenTitle != null ? mWideScreenTitle : mTitle.toString();
