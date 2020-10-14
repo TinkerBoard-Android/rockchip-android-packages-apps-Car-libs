@@ -849,6 +849,58 @@ public class CarUiRecyclerViewTest {
         assertThat(mCarUiRecyclerView.getPaddingEnd(), is(equalTo(10)));
     }
 
+    @Test
+    public void testSetAlphaToRecyclerViewWithoutScrollbar() {
+        doReturn(false).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
+
+        CarUiRecyclerView mCarUiRecyclerView = new CarUiRecyclerView(mTestableContext);
+
+        assertThat(mCarUiRecyclerView.getAlpha(), is(equalTo(1.0f)));
+
+        mCarUiRecyclerView.setAlpha(0.5f);
+
+        assertThat(mCarUiRecyclerView.getAlpha(), is(equalTo(0.5f)));
+    }
+
+    @Test
+    public void testSetAlphaToRecyclerViewWithScrollbar() {
+        mActivity.runOnUiThread(
+                () -> mActivity.setContentView(
+                        R.layout.car_ui_recycler_view_test_activity));
+
+        onView(withId(R.id.list)).check(matches(isDisplayed()));
+
+        CarUiRecyclerView carUiRecyclerView = mActivity.requireViewById(R.id.list);
+
+        ViewGroup container = (ViewGroup) carUiRecyclerView.getParent().getParent();
+
+        assertThat(carUiRecyclerView.getAlpha(), is(equalTo(1.0f)));
+        assertThat(container.getAlpha(), is(equalTo(1.0f)));
+
+        carUiRecyclerView.setAlpha(0.5f);
+
+        assertThat(carUiRecyclerView.getAlpha(), is(equalTo(1.0f)));
+        assertThat(container.getAlpha(), is(equalTo(0.5f)));
+    }
+
+    @Test
+    public void testCallAnimateOnRecyclerViewWithScrollbar() {
+        doReturn(true).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
+        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerView(mTestableContext);
+
+        ViewGroup container = mActivity.findViewById(R.id.test_container);
+        container.post(() -> {
+            container.addView(carUiRecyclerView);
+            carUiRecyclerView.setAdapter(new TestAdapter(100));
+        });
+
+        onView(withId(R.id.car_ui_scroll_bar)).check(matches(isDisplayed()));
+
+        ViewGroup recyclerViewContainer = (ViewGroup) carUiRecyclerView.getParent().getParent();
+
+        assertThat(carUiRecyclerView.animate(), is(equalTo(recyclerViewContainer.animate())));
+    }
+
     /**
      * Returns an item in the current list view whose height is taller than that of
      * the CarUiRecyclerView. If that item exists, then it is returned; otherwise an {@link
