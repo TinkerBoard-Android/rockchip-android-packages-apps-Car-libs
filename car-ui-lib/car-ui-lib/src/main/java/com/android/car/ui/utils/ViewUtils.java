@@ -176,8 +176,9 @@ public final class ViewUtils {
         return false;
     }
 
+    @VisibleForTesting
     @FocusLevel
-    private static int getFocusLevel(@Nullable View view) {
+    static int getFocusLevel(@Nullable View view) {
         if (view == null || view instanceof FocusParkingView || !view.isShown()) {
             return NO_FOCUS;
         }
