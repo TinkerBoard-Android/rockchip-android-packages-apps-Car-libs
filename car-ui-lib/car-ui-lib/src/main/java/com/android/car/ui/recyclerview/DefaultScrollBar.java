@@ -37,8 +37,8 @@ import com.android.car.ui.utils.CarUiUtils;
 /**
  * The default scroll bar widget for the {@link CarUiRecyclerView}.
  *
- * <p>Inspired by {@link androidx.car.widget.PagedListView}. Most pagination and scrolling logic has
- * been ported from the PLV with minor updates.
+ * <p>Inspired by {@link androidx.car.widget.PagedListView}. Most pagination and scrolling logic
+ * has been ported from the PLV with minor updates.
  */
 class DefaultScrollBar implements ScrollBar {
 
@@ -61,6 +61,9 @@ class DefaultScrollBar implements ScrollBar {
 
     private OrientationHelper mOrientationHelper;
 
+    private OnContinuousScrollListener mPageUpOnContinuousScrollListener;
+    private OnContinuousScrollListener mPageDownOnContinuousScrollListener;
+
     @Override
     public void initialize(RecyclerView rv, View scrollView) {
         mRecyclerView = rv;
@@ -79,14 +82,17 @@ class DefaultScrollBar implements ScrollBar {
         mUpButton = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_page_up);
         View.OnClickListener paginateUpButtonOnClickListener = v -> pageUp();
         mUpButton.setOnClickListener(paginateUpButtonOnClickListener);
-        mUpButton.setOnTouchListener(
-                new OnContinuousScrollListener(rv.getContext(), paginateUpButtonOnClickListener));
+        mPageUpOnContinuousScrollListener = new OnContinuousScrollListener(rv.getContext(),
+                paginateUpButtonOnClickListener);
+        mUpButton.setOnTouchListener(mPageUpOnContinuousScrollListener);
+
 
         mDownButton = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_page_down);
         View.OnClickListener paginateDownButtonOnClickListener = v -> pageDown();
         mDownButton.setOnClickListener(paginateDownButtonOnClickListener);
-        mDownButton.setOnTouchListener(
-                new OnContinuousScrollListener(rv.getContext(), paginateDownButtonOnClickListener));
+        mPageDownOnContinuousScrollListener = new OnContinuousScrollListener(rv.getContext(),
+                paginateDownButtonOnClickListener);
+        mDownButton.setOnTouchListener(mPageDownOnContinuousScrollListener);
 
         mScrollTrack = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_track);
         mScrollThumb = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_thumb);
@@ -133,6 +139,13 @@ class DefaultScrollBar implements ScrollBar {
      * @param enabled {@code true} if the up button is enabled.
      */
     private void setUpEnabled(boolean enabled) {
+        // If the button is held down the button is disabled, the MotionEvent.ACTION_UP event on
+        // button release will not be sent to cancel pending scrolls. Manually cancel any pending
+        // scroll.
+        if (!enabled) {
+            mPageUpOnContinuousScrollListener.cancelPendingScroll();
+        }
+
         mUpButton.setEnabled(enabled);
         mUpButton.setAlpha(enabled ? 1f : mButtonDisabledAlpha);
     }
@@ -143,6 +156,13 @@ class DefaultScrollBar implements ScrollBar {
      * @param enabled {@code true} if the down button is enabled.
      */
     private void setDownEnabled(boolean enabled) {
+        // If the button is held down the button is disabled, the MotionEvent.ACTION_UP event on
+        // button release will not be sent to cancel pending scrolls. Manually cancel any pending
+        // scroll.
+        if (!enabled) {
+            mPageDownOnContinuousScrollListener.cancelPendingScroll();
+        }
+
         mDownButton.setEnabled(enabled);
         mDownButton.setAlpha(enabled ? 1f : mButtonDisabledAlpha);
     }
@@ -162,10 +182,9 @@ class DefaultScrollBar implements ScrollBar {
      * where the thumb should be; and finally, extent is the size of the thumb.
      *
      * <p>These values can be expressed in arbitrary units, so long as they share the same units.
-     * The
-     * values should also be positive.
+     * The values should also be positive.
      *
-     * @param range The range of the scrollbar's thumb
+     * @param range  The range of the scrollbar's thumb
      * @param offset The offset of the scrollbar's thumb
      * @param extent The extent of the scrollbar's thumb
      */
@@ -201,7 +220,7 @@ class DefaultScrollBar implements ScrollBar {
      * Calculates and returns how big the scroll bar thumb should be based on the given range and
      * extent.
      *
-     * @param range The total amount of space the scroll bar is allowed to roam over.
+     * @param range  The total amount of space the scroll bar is allowed to roam over.
      * @param extent The amount of space that the scroll bar takes up relative to the range.
      * @return The height of the scroll bar thumb in pixels.
      */
@@ -215,9 +234,9 @@ class DefaultScrollBar implements ScrollBar {
      * Calculates and returns how much the scroll thumb should be offset from the top of where it
      * has been laid out.
      *
-     * @param range The total amount of space the scroll bar is allowed to roam over.
-     * @param offset The amount the scroll bar should be offset, expressed in the same units as
-     * the given range.
+     * @param range       The total amount of space the scroll bar is allowed to roam over.
+     * @param offset      The amount the scroll bar should be offset, expressed in the same units as
+     *                    the given range.
      * @param thumbLength The current length of the thumb in pixels.
      * @return The amount the thumb should be offset in pixels.
      */
@@ -232,7 +251,9 @@ class DefaultScrollBar implements ScrollBar {
                 : mScrollTrack.getHeight() - thumbLength);
     }
 
-    /** Moves the given view to the specified 'y' position. */
+    /**
+     * Moves the given view to the specified 'y' position.
+     */
     private void moveY(final View view, float newPosition) {
         view.animate()
                 .y(newPosition)
@@ -262,8 +283,7 @@ class DefaultScrollBar implements ScrollBar {
      * {@code CarUiRecyclerView}.
      *
      * <p>The resulting first item in the list will be snapped to so that it is completely visible.
-     * If
-     * this is not possible due to the first item being taller than the containing {@code
+     * If this is not possible due to the first item being taller than the containing {@code
      * CarUiRecyclerView}, then the snapping will not occur.
      */
     void pageUp() {
@@ -393,12 +413,9 @@ class DefaultScrollBar implements ScrollBar {
     /**
      * Determines if scrollbar should be visible or not and shows/hides it accordingly. If this is
      * being called as a result of adapter changes, it should be called after the new layout has
-     * been
-     * calculated because the method of determining scrollbar visibility uses the current layout.
-     * If
-     * this is called after an adapter change but before the new layout, the visibility
-     * determination
-     * may not be correct.
+     * been calculated because the method of determining scrollbar visibility uses the current
+     * layout. If this is called after an adapter change but before the new layout, the visibility
+     * determination may not be correct.
      */
     private void updatePaginationButtons() {
 
@@ -409,6 +426,7 @@ class DefaultScrollBar implements ScrollBar {
         // enable/disable the button before the view is shown. So there is no flicker.
         setUpEnabled(!isAtStart);
         setDownEnabled(!isAtEnd);
+
         if ((isAtStart && isAtEnd) || layoutManager == null || layoutManager.getItemCount() == 0) {
             mScrollView.setVisibility(View.INVISIBLE);
         } else {
@@ -434,12 +452,16 @@ class DefaultScrollBar implements ScrollBar {
         mScrollView.invalidate();
     }
 
-    /** Returns {@code true} if the RecyclerView is completely displaying the first item. */
+    /**
+     * Returns {@code true} if the RecyclerView is completely displaying the first item.
+     */
     boolean isAtStart() {
         return mSnapHelper.isAtStart(getRecyclerView().getLayoutManager());
     }
 
-    /** Returns {@code true} if the RecyclerView is completely displaying the last item. */
+    /**
+     * Returns {@code true} if the RecyclerView is completely displaying the last item.
+     */
     boolean isAtEnd() {
         return mSnapHelper.isAtEnd(getRecyclerView().getLayoutManager());
     }
