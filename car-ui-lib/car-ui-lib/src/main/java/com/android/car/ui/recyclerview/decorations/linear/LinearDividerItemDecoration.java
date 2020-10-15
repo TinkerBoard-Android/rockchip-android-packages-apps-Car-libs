@@ -104,9 +104,10 @@ public class LinearDividerItemDecoration extends RecyclerView.ItemDecoration {
                 - (int) parent.getContext().getResources().getDimension(
                 R.dimen.car_ui_recyclerview_divider_bottom_margin);
 
-        int childCount = parent.getChildCount();
+        RecyclerView.LayoutManager layoutManager = parent.getLayoutManager();
+        int childCount = layoutManager.getChildCount();
         for (int i = 0; i < childCount - 1; i++) {
-            View child = parent.getChildAt(i);
+            View child = layoutManager.getChildAt(i);
 
             RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child.getLayoutParams();
 
@@ -133,9 +134,10 @@ public class LinearDividerItemDecoration extends RecyclerView.ItemDecoration {
                 - (int) parent.getContext().getResources().getDimension(
                 R.dimen.car_ui_recyclerview_divider_end_margin);
 
-        int childCount = parent.getChildCount();
+        RecyclerView.LayoutManager layoutManager = parent.getLayoutManager();
+        int childCount = layoutManager.getChildCount();
         for (int i = 0; i < childCount - 1; i++) {
-            View child = parent.getChildAt(i);
+            View child = layoutManager.getChildAt(i);
 
             RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child.getLayoutParams();
 
