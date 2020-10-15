@@ -43,7 +43,6 @@ limitations under the License.-->
     <item type="id" name="icon"/>
     <item type="id" name="content_icon"/>
     <item type="id" name="action_container"/>
-    <item type="raw" name="keep"/>
     <item type="id" name="action_divider"/>
     <item type="id" name="seekbar"/>
     <item type="id" name="seekbar_value"/>
