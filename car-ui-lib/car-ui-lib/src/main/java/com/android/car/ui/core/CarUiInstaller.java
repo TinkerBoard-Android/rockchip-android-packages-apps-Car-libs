@@ -188,8 +188,9 @@ public class CarUiInstaller extends ContentProvider {
                             .loadClass(BaseLayoutController.class.getName());
             Method method = baseLayoutControllerClass
                     .getDeclaredMethod(methodName, Activity.class);
+            method.setAccessible(true);
             method.invoke(null, activity);
-        } catch (ReflectiveOperationException e) {
+        } catch (ReflectiveOperationException | SecurityException e) {
             throw new RuntimeException(e);
         }
     }
