@@ -169,7 +169,8 @@ public class LinearOffsetItemDecoration extends RecyclerView.ItemDecoration {
         if (mOffsetPosition == OffsetPosition.START) {
             parentLeft = parent.getPaddingLeft();
         } else {
-            View lastChild = parent.getChildAt(parent.getChildCount() - 1);
+            RecyclerView.LayoutManager layoutManager = parent.getLayoutManager();
+            View lastChild = layoutManager.getChildAt(layoutManager.getChildCount() - 1);
             RecyclerView.LayoutParams lastChildLayoutParams =
                     (RecyclerView.LayoutParams) lastChild.getLayoutParams();
             parentLeft = lastChild.getRight() + lastChildLayoutParams.rightMargin;
@@ -190,7 +191,8 @@ public class LinearOffsetItemDecoration extends RecyclerView.ItemDecoration {
         if (mOffsetPosition == OffsetPosition.START) {
             parentTop = parent.getPaddingTop();
         } else {
-            View lastChild = parent.getChildAt(parent.getChildCount() - 1);
+            RecyclerView.LayoutManager layoutManager = parent.getLayoutManager();
+            View lastChild = layoutManager.getChildAt(layoutManager.getChildCount() - 1);
             RecyclerView.LayoutParams lastChildLayoutParams =
                     (RecyclerView.LayoutParams) lastChild.getLayoutParams();
             parentTop = lastChild.getBottom() + lastChildLayoutParams.bottomMargin;

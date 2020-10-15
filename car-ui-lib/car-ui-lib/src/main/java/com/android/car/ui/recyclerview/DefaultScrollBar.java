@@ -288,27 +288,25 @@ class DefaultScrollBar implements ScrollBar {
      */
     void pageUp() {
         int currentOffset = getRecyclerView().computeVerticalScrollOffset();
-        if (getRecyclerView().getLayoutManager() == null
-                || getRecyclerView().getChildCount() == 0
-                || currentOffset == 0) {
+        RecyclerView.LayoutManager layoutManager = getRecyclerView().getLayoutManager();
+        if (layoutManager == null || layoutManager.getChildCount() == 0 || currentOffset == 0) {
             return;
         }
 
         // Use OrientationHelper to calculate scroll distance in order to match snapping behavior.
-        OrientationHelper orientationHelper =
-                getOrientationHelper(getRecyclerView().getLayoutManager());
+        OrientationHelper orientationHelper = getOrientationHelper(layoutManager);
         int screenSize = orientationHelper.getTotalSpace();
         int scrollDistance = screenSize;
         boolean isPageUpOverLongItem;
         // The iteration order matters. In case where there are 2 items longer than screen size, we
         // want to focus on upcoming view.
-        for (int i = 0; i < getRecyclerView().getChildCount(); i++) {
+        for (int i = 0; i < layoutManager.getChildCount(); i++) {
             /*
              * We treat child View longer than screen size differently:
              * 1) When it enters screen, next pageUp will align its bottom with parent bottom;
              * 2) When it leaves screen, next pageUp will align its top with parent top.
              */
-            View child = getRecyclerView().getChildAt(i);
+            View child = layoutManager.getChildAt(i);
             if (child.getHeight() > screenSize) {
                 if (orientationHelper.getDecoratedEnd(child) < screenSize) {
                     // Child view bottom is entering screen. Align its bottom with parent bottom.
@@ -356,19 +354,18 @@ class DefaultScrollBar implements ScrollBar {
      * scrolled the length of a page, but not snapped to.
      */
     void pageDown() {
-        if (getRecyclerView().getLayoutManager() == null
-                || getRecyclerView().getChildCount() == 0) {
+        RecyclerView.LayoutManager layoutManager = getRecyclerView().getLayoutManager();
+        if (layoutManager == null || layoutManager.getChildCount() == 0) {
             return;
         }
 
-        OrientationHelper orientationHelper =
-                getOrientationHelper(getRecyclerView().getLayoutManager());
+        OrientationHelper orientationHelper = getOrientationHelper(layoutManager);
         int screenSize = orientationHelper.getTotalSpace();
         int scrollDistance = screenSize;
 
         // If the last item is partially visible, page down should bring it to the top.
-        View lastChild = getRecyclerView().getChildAt(getRecyclerView().getChildCount() - 1);
-        if (getRecyclerView().getLayoutManager().isViewPartiallyVisible(lastChild,
+        View lastChild = layoutManager.getChildAt(layoutManager.getChildCount() - 1);
+        if (layoutManager.isViewPartiallyVisible(lastChild,
                 /* completelyVisible= */ false, /* acceptEndPointInclusion= */ false)) {
             scrollDistance = orientationHelper.getDecoratedStart(lastChild)
                     - orientationHelper.getStartAfterPadding();
@@ -383,12 +380,12 @@ class DefaultScrollBar implements ScrollBar {
 
         // The iteration order matters. In case where there are 2 items longer than screen size, we
         // want to focus on upcoming view (the one at the bottom of screen).
-        for (int i = getRecyclerView().getChildCount() - 1; i >= 0; i--) {
+        for (int i = layoutManager.getChildCount() - 1; i >= 0; i--) {
             /* We treat child View longer than screen size differently:
              * 1) When it enters screen, next pageDown will align its top with parent top;
              * 2) When it leaves screen, next pageDown will align its bottom with parent bottom.
              */
-            View child = getRecyclerView().getChildAt(i);
+            View child = layoutManager.getChildAt(i);
             if (child.getHeight() > screenSize) {
                 if (orientationHelper.getDecoratedStart(child)
                         - orientationHelper.getStartAfterPadding() > 0) {

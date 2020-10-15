@@ -25,6 +25,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.R;
 
+import java.util.Objects;
+
 /** Adds interior dividers to a RecyclerView with a GridLayoutManager. */
 public class GridDividerItemDecoration extends RecyclerView.ItemDecoration {
 
@@ -89,7 +91,9 @@ public class GridDividerItemDecoration extends RecyclerView.ItemDecoration {
      * @param parent The RecyclerView onto which dividers are being added
      */
     private void drawHorizontalDividers(Canvas canvas, RecyclerView parent) {
-        int childCount = parent.getChildCount();
+        RecyclerView.LayoutManager layoutManager = Objects.requireNonNull(
+                parent.getLayoutManager());
+        int childCount = layoutManager.getChildCount();
         int rowCount = childCount / mNumColumns;
         int lastRowChildCount = childCount % mNumColumns;
         int lastColumn = Math.min(childCount, mNumColumns);
@@ -102,8 +106,9 @@ public class GridDividerItemDecoration extends RecyclerView.ItemDecoration {
                 lastRowChildIndex = i + ((rowCount - 1) * mNumColumns);
             }
 
-            View firstRowChild = parent.getChildAt(i);
-            View lastRowChild = parent.getChildAt(lastRowChildIndex);
+
+            View firstRowChild = layoutManager.getChildAt(i);
+            View lastRowChild = layoutManager.getChildAt(lastRowChildIndex);
 
             int dividerTop =
                     firstRowChild.getTop() + (int) parent.getContext().getResources().getDimension(
@@ -130,7 +135,9 @@ public class GridDividerItemDecoration extends RecyclerView.ItemDecoration {
      * @param parent The RecyclerView onto which dividers are being added
      */
     private void drawVerticalDividers(Canvas canvas, RecyclerView parent) {
-        double childCount = parent.getChildCount();
+        RecyclerView.LayoutManager layoutManager = Objects.requireNonNull(
+                parent.getLayoutManager());
+        double childCount = layoutManager.getChildCount();
         double rowCount = Math.ceil(childCount / mNumColumns);
         int rightmostChildIndex;
         for (int i = 1; i <= rowCount; i++) {
@@ -144,8 +151,8 @@ public class GridDividerItemDecoration extends RecyclerView.ItemDecoration {
                 rightmostChildIndex = (i * mNumColumns) - 1;
             }
 
-            View leftmostChild = parent.getChildAt(mNumColumns * (i - 1));
-            View rightmostChild = parent.getChildAt(rightmostChildIndex);
+            View leftmostChild = layoutManager.getChildAt(mNumColumns * (i - 1));
+            View rightmostChild = layoutManager.getChildAt(rightmostChildIndex);
 
             // draws on top of each row.
             int dividerLeft =
