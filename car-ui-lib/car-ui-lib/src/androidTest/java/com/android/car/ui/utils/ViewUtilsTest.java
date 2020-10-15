@@ -20,6 +20,12 @@ import static android.view.View.GONE;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
+import static com.android.car.ui.utils.ViewUtils.DEFAULT_FOCUS;
+import static com.android.car.ui.utils.ViewUtils.FOCUSED_BY_DEFAULT;
+import static com.android.car.ui.utils.ViewUtils.IMPLICIT_DEFAULT_FOCUS;
+import static com.android.car.ui.utils.ViewUtils.NO_FOCUS;
+import static com.android.car.ui.utils.ViewUtils.REGULAR_FOCUS;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import android.view.LayoutInflater;
@@ -90,6 +96,34 @@ public class ViewUtilsTest {
     @Test
     public void testRootVisible() {
         mRoot.post(() -> assertThat(mRoot.getVisibility()).isEqualTo(VISIBLE));
+    }
+
+    @Test
+    public void testGetAncestorFocusArea() {
+        mRoot.post(() -> assertThat(ViewUtils.getAncestorFocusArea(mView2)).isEqualTo(mFocusArea2));
+    }
+
+    @Test
+    public void testGetAncestorFocusArea_doesNotReturnItself() {
+        mRoot.post(() -> assertThat(ViewUtils.getAncestorFocusArea(mFocusArea2)).isNull());
+    }
+
+    @Test
+    public void testGetAncestorFocusArea_outsideFocusArea() {
+        mRoot.post(() -> assertThat(ViewUtils.getAncestorFocusArea(mFpv)).isNull());
+    }
+
+    @Test
+    public void testGetAncestorScrollableContainer() {
+        mRoot.post(() -> {
+            View firstItem = mList5.getLayoutManager().findViewByPosition(0);
+            assertThat(ViewUtils.getAncestorScrollableContainer(firstItem)).isEqualTo(mList5);
+        });
+    }
+
+    @Test
+    public void testGetAncestorScrollableContainer_returnNull() {
+        mRoot.post(() -> assertThat(ViewUtils.getAncestorScrollableContainer(mView2)).isNull());
     }
 
     @Test
@@ -345,6 +379,42 @@ public class ViewUtilsTest {
             boolean success = ViewUtils.adjustFocus(mFocusArea1, null);
             assertThat(mFocusArea1.hasFocus()).isFalse();
             assertThat(success).isFalse();
+        });
+    }
+
+    @Test
+    public void testAdjustFocus_differentFocusLevels() {
+        mRoot.post(() -> {
+            assertThat(ViewUtils.adjustFocus(mFocusArea2, NO_FOCUS)).isTrue();
+            assertThat(ViewUtils.adjustFocus(mFocusArea2, REGULAR_FOCUS)).isFalse();
+
+            assertThat(ViewUtils.adjustFocus(mFocusArea5, REGULAR_FOCUS)).isTrue();
+            assertThat(ViewUtils.adjustFocus(mFocusArea5, IMPLICIT_DEFAULT_FOCUS)).isFalse();
+
+            assertThat(ViewUtils.adjustFocus(mFocusArea4, IMPLICIT_DEFAULT_FOCUS)).isTrue();
+            assertThat(ViewUtils.adjustFocus(mFocusArea4, DEFAULT_FOCUS)).isFalse();
+
+            assertThat(ViewUtils.adjustFocus(mFocusArea3, DEFAULT_FOCUS)).isTrue();
+            assertThat(ViewUtils.adjustFocus(mFocusArea3, FOCUSED_BY_DEFAULT)).isFalse();
+        });
+    }
+
+    @Test
+    public void testGetFocusLevel() {
+        mRoot.post(() -> {
+            assertThat(ViewUtils.getFocusLevel(null)).isEqualTo(NO_FOCUS);
+            assertThat(ViewUtils.getFocusLevel(mFpv)).isEqualTo(NO_FOCUS);
+            mFocusArea2.setVisibility(INVISIBLE);
+            assertThat(ViewUtils.getFocusLevel(mView2)).isEqualTo(NO_FOCUS);
+
+            assertThat(ViewUtils.getFocusLevel(mView4)).isEqualTo(REGULAR_FOCUS);
+
+            View firstItem = mList5.getLayoutManager().findViewByPosition(0);
+            assertThat(ViewUtils.getFocusLevel(firstItem)).isEqualTo(IMPLICIT_DEFAULT_FOCUS);
+
+            assertThat(ViewUtils.getFocusLevel(mDefaultFocus4)).isEqualTo(DEFAULT_FOCUS);
+
+            assertThat(ViewUtils.getFocusLevel(mFocusedByDefault3)).isEqualTo(FOCUSED_BY_DEFAULT);
         });
     }
 
