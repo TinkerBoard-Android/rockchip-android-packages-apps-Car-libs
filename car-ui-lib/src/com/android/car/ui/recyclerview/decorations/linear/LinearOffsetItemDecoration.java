@@ -164,7 +164,8 @@ public class LinearOffsetItemDecoration extends RecyclerView.ItemDecoration {
             parentLeft = parent.getPaddingLeft();
             offsetDrawableRight = parentLeft + mOffsetDrawable.getIntrinsicWidth();
         } else {
-            View lastChild = parent.getChildAt(parent.getChildCount() - 1);
+            RecyclerView.LayoutManager layoutManager = parent.getLayoutManager();
+            View lastChild = layoutManager.getChildAt(layoutManager.getChildCount() - 1);
             RecyclerView.LayoutParams lastChildLayoutParams =
                     (RecyclerView.LayoutParams) lastChild.getLayoutParams();
             parentLeft = lastChild.getRight() + lastChildLayoutParams.rightMargin;
@@ -186,7 +187,8 @@ public class LinearOffsetItemDecoration extends RecyclerView.ItemDecoration {
             parentTop = parent.getPaddingTop();
             offsetDrawableBottom = parentTop + mOffsetDrawable.getIntrinsicHeight();
         } else {
-            View lastChild = parent.getChildAt(parent.getChildCount() - 1);
+            RecyclerView.LayoutManager layoutManager = parent.getLayoutManager();
+            View lastChild = layoutManager.getChildAt(layoutManager.getChildCount() - 1);
             RecyclerView.LayoutParams lastChildLayoutParams =
                     (RecyclerView.LayoutParams) lastChild.getLayoutParams();
             parentTop = lastChild.getBottom() + lastChildLayoutParams.bottomMargin;
