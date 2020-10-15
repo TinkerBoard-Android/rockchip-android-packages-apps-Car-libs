@@ -96,21 +96,21 @@ public class CarUiImeWideScreenControllerTest {
         assertNotNull(mActivity.findViewById(R.id.test_ime_input_view_id));
 
         // check all views in template default visibility.
-        onView(withId(R.id.wideScreenDescriptionTitle)).check(matches(not(isDisplayed())));
-        onView(withId(R.id.wideScreenDescription)).check(matches(not(isDisplayed())));
-        onView(withId(R.id.inputExtractActionAutomotive)).check(matches(not(isDisplayed())));
-        onView(withId(R.id.wideScreenSearchResultList)).check(matches(not(isDisplayed())));
-        onView(withId(R.id.wideScreenErrorMessage)).check(matches(not(isDisplayed())));
-        onView(withId(R.id.wideScreenError)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.car_ui_wideScreenDescriptionTitle)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.car_ui_wideScreenDescription)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.car_ui_inputExtractActionAutomotive)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.car_ui_wideScreenSearchResultList)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.car_ui_wideScreenErrorMessage)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.car_ui_wideScreenError)).check(matches(not(isDisplayed())));
 
-        onView(withId(R.id.contentAreaAutomotive)).check(matches(isDisplayed()));
-        onView(withId(R.id.wideScreenExtractedTextIcon)).check(matches(isDisplayed()));
-        onView(withId(R.id.wideScreenClearData)).check(matches(isDisplayed()));
-        onView(withId(R.id.fullscreenArea)).check(matches(isDisplayed()));
-        onView(withId(R.id.inputExtractEditTextContainer)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_contentAreaAutomotive)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_wideScreenExtractedTextIcon)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_wideScreenClearData)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_fullscreenArea)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_inputExtractEditTextContainer)).check(matches(isDisplayed()));
 
         // check if the click listener is installed on the image to clear data.
-        View clearDataIcon = mActivity.findViewById(R.id.wideScreenClearData);
+        View clearDataIcon = mActivity.findViewById(R.id.car_ui_wideScreenClearData);
         assertTrue(clearDataIcon.hasOnClickListeners());
     }
 
