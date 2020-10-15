@@ -328,8 +328,6 @@ public class Utils {
         if (!ccUris.contains(uri)) {
             ccUris.add(uri);
         }
-        // TODO (b/169183358): remove sorting.
-        Collections.sort(ccUris);
 
         return ccUris;
     }
