@@ -31,13 +31,13 @@
         android:background="@drawable/car_ui_ime_wide_screen_background">
 
         <RelativeLayout
-            android:id="@id/carUiImeWideScreenInputArea"
+            android:id="@id/car_ui_imeWideScreenInputArea"
             android:layout_width="match_parent"
             android:layout_height="@dimen/car_ui_ime_wide_screen_input_area_height"
             android:layout_marginTop="@dimen/car_ui_ime_wide_screen_input_area_margin_top"
             android:layout_alignParentTop="true">
             <ImageView
-                android:id="@id/closeKeyboard"
+                android:id="@id/car_ui_closeKeyboard"
                 android:layout_width="@dimen/car_ui_primary_icon_size"
                 android:layout_height="@dimen/car_ui_primary_icon_size"
                 android:layout_centerVertical="true"
@@ -45,17 +45,17 @@
                 android:layout_alignParentLeft="true"/>
 
             <FrameLayout
-                android:id="@id/fullscreenArea"
+                android:id="@id/car_ui_fullscreenArea"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_centerVertical="true"
-                android:layout_toRightOf="@id/closeKeyboard"
+                android:layout_toRightOf="@id/car_ui_closeKeyboard"
                 android:paddingLeft="@dimen/car_ui_ime_wide_screen_input_padding_start"
                 android:background="@drawable/car_ui_ime_wide_screen_input_area_background"
                 android:orientation="vertical">
 
                 <FrameLayout
-                    android:id="@id/inputExtractEditTextContainer"
+                    android:id="@id/car_ui_inputExtractEditTextContainer"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
@@ -70,7 +70,7 @@
                     android:layout_height="match_parent"
                     android:background="@android:color/transparent">
                     <ImageView
-                        android:id="@id/wideScreenExtractedTextIcon"
+                        android:id="@id/car_ui_wideScreenExtractedTextIcon"
                         android:layout_width="@dimen/car_ui_primary_icon_size"
                         android:layout_height="@dimen/car_ui_primary_icon_size"
                         android:gravity="center"
@@ -79,7 +79,7 @@
                         android:layout_centerVertical="true"/>
 
                     <ImageView
-                        android:id="@id/wideScreenClearData"
+                        android:id="@id/car_ui_wideScreenClearData"
                         android:layout_width="@dimen/car_ui_primary_icon_size"
                         android:layout_height="@dimen/car_ui_primary_icon_size"
                         android:gravity="center"
@@ -89,7 +89,7 @@
                         android:layout_centerVertical="true"/>
 
                     <ImageView
-                        android:id="@id/wideScreenError"
+                        android:id="@id/car_ui_wideScreenError"
                         android:layout_width="@dimen/car_ui_primary_icon_size"
                         android:layout_height="@dimen/car_ui_primary_icon_size"
                         android:gravity="center"
@@ -104,18 +104,18 @@
         </RelativeLayout>
 
         <TextView
-            android:id="@id/wideScreenErrorMessage"
+            android:id="@id/car_ui_wideScreenErrorMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_below="@id/carUiImeWideScreenInputArea"
+            android:layout_below="@id/car_ui_imeWideScreenInputArea"
             android:paddingLeft="@dimen/car_ui_ime_wide_screen_error_text_padding_start"
             android:textColor="@color/car_ui_ime_wide_screen_error_text_color"
             android:visibility="gone"
             android:textSize="@dimen/car_ui_ime_wide_screen_error_text_size"/>
 
         <FrameLayout
-            android:id="@id/carUiWideScreenInputArea"
+            android:id="@id/car_ui_wideScreenInputArea"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true">
@@ -128,12 +128,12 @@
         android:background="@color/car_ui_ime_wide_screen_divider_color"/>
 
     <RelativeLayout
-        android:id="@id/contentAreaAutomotive"
+        android:id="@id/car_ui_contentAreaAutomotive"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/car_ui_ime_wide_screen_no_content_background">
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@id/wideScreenSearchResultList"
+            android:id="@id/car_ui_wideScreenSearchResultList"
             android:scrollbarThumbVertical="@drawable/car_ui_recycler_view_ime_wide_screen_thumb"
             android:scrollbars="vertical"
             android:requiresFadingEdge="vertical"
@@ -142,7 +142,7 @@
             android:visibility="gone"
             android:layout_height="match_parent"/>
         <TextView
-            android:id="@id/wideScreenDescriptionTitle"
+            android:id="@id/car_ui_wideScreenDescriptionTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
@@ -152,10 +152,10 @@
             android:textSize="@dimen/car_ui_ime_wide_screen_description_title_text_size"
             android:visibility="gone"/>
         <TextView
-            android:id="@id/wideScreenDescription"
+            android:id="@id/car_ui_wideScreenDescription"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/wideScreenDescriptionTitle"
+            android:layout_below="@id/car_ui_wideScreenDescriptionTitle"
             android:layout_alignParentLeft="true"
             android:paddingLeft="@dimen/car_ui_ime_wide_screen_description_title_padding_left"
             android:paddingTop="@dimen/car_ui_ime_wide_screen_description_padding_top"
@@ -164,7 +164,7 @@
             android:visibility="gone"/>
 
         <Button
-            android:id="@id/inputExtractActionAutomotive"
+            android:id="@id/car_ui_inputExtractActionAutomotive"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/car_ui_ime_wide_screen_action_button_height"
             android:theme="@android:style/Theme.DeviceDefault"
