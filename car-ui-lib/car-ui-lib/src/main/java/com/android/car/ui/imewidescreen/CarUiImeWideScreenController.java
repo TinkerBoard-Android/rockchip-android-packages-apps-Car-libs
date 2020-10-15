@@ -201,7 +201,7 @@ public class CarUiImeWideScreenController {
         }
         mRootView = View.inflate(mContext, R.layout.car_ui_ims_wide_screen_input_view, null);
 
-        mInputFrame = mRootView.requireViewById(R.id.carUiWideScreenInputArea);
+        mInputFrame = mRootView.requireViewById(R.id.car_ui_wideScreenInputArea);
         mInputFrame.addView(inputView, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
@@ -209,18 +209,21 @@ public class CarUiImeWideScreenController {
                 mContext.getResources().getBoolean(
                         R.bool.car_ui_ime_wide_screen_allow_app_hide_content_area);
 
-        mWideScreenDescriptionTitle = mRootView.requireViewById(R.id.wideScreenDescriptionTitle);
-        mWideScreenDescription = mRootView.requireViewById(R.id.wideScreenDescription);
-        mExtractActionAutomotive = mRootView.findViewById(R.id.inputExtractActionAutomotive);
-        mContentAreaAutomotive = mRootView.requireViewById(R.id.contentAreaAutomotive);
-        mRecyclerView = mRootView.requireViewById(R.id.wideScreenSearchResultList);
-        mWideScreenErrorMessage = mRootView.requireViewById(R.id.wideScreenErrorMessage);
-        mWideScreenExtractedTextIcon = mRootView.findViewById(R.id.wideScreenExtractedTextIcon);
-        mWideScreenErrorImage = mRootView.requireViewById(R.id.wideScreenError);
-        mWideScreenClearData = mRootView.requireViewById(R.id.wideScreenClearData);
-        mFullscreenArea = mRootView.requireViewById(R.id.fullscreenArea);
+        mWideScreenDescriptionTitle =
+                mRootView.requireViewById(R.id.car_ui_wideScreenDescriptionTitle);
+        mWideScreenDescription = mRootView.requireViewById(R.id.car_ui_wideScreenDescription);
+        mExtractActionAutomotive =
+                mRootView.findViewById(R.id.car_ui_inputExtractActionAutomotive);
+        mContentAreaAutomotive = mRootView.requireViewById(R.id.car_ui_contentAreaAutomotive);
+        mRecyclerView = mRootView.requireViewById(R.id.car_ui_wideScreenSearchResultList);
+        mWideScreenErrorMessage = mRootView.requireViewById(R.id.car_ui_wideScreenErrorMessage);
+        mWideScreenExtractedTextIcon =
+                mRootView.findViewById(R.id.car_ui_wideScreenExtractedTextIcon);
+        mWideScreenErrorImage = mRootView.requireViewById(R.id.car_ui_wideScreenError);
+        mWideScreenClearData = mRootView.requireViewById(R.id.car_ui_wideScreenClearData);
+        mFullscreenArea = mRootView.requireViewById(R.id.car_ui_fullscreenArea);
         mInputExtractEditTextContainer = mRootView.requireViewById(
-                R.id.inputExtractEditTextContainer);
+                R.id.car_ui_inputExtractEditTextContainer);
         mWideScreenClearData.setOnClickListener(
                 v -> {
                     // notify the app to clear the data.
@@ -427,7 +430,7 @@ public class CarUiImeWideScreenController {
         }
         mInputEditorInfo = editorInfo;
         mInputConnection = inputConnection;
-        View header = mRootView.requireViewById(R.id.carUiImeWideScreenInputArea);
+        View header = mRootView.requireViewById(R.id.car_ui_imeWideScreenInputArea);
 
         header.setVisibility(View.VISIBLE);
         if (mExtractViewHidden) {
@@ -466,7 +469,7 @@ public class CarUiImeWideScreenController {
 
         mInputExtractEditTextContainer.addView(mExtractEditText, params);
 
-        ImageView close = mRootView.findViewById(R.id.closeKeyboard);
+        ImageView close = mRootView.findViewById(R.id.car_ui_closeKeyboard);
         if (close != null) {
             close.setOnClickListener(
                     (v) -> {
