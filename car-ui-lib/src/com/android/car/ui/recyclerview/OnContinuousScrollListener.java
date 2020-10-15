@@ -28,16 +28,16 @@ import androidx.annotation.NonNull;
 import com.android.car.ui.R;
 
 /**
- * A class, that can be used as a TouchListener on any view (e.g. a Button).
- * It periodically calls the provided clickListener. The first callback is fired after the
- * initial Delay, and subsequent ones after the defined interval.
+ * A class, that can be used as a TouchListener on any view (e.g. a Button). It periodically calls
+ * the provided clickListener. The first callback is fired after the initial Delay, and subsequent
+ * ones after the defined interval.
  */
 public class OnContinuousScrollListener implements OnTouchListener {
 
-    private Handler mHandler = new Handler();
+    private final Handler mHandler = new Handler();
 
-    private int mInitialDelay;
-    private int mRepeatInterval;
+    private final int mInitialDelay;
+    private final int mRepeatInterval;
     private final OnClickListener mOnClickListener;
     private View mTouchedView;
     private boolean mIsLongPressed;
@@ -45,7 +45,7 @@ public class OnContinuousScrollListener implements OnTouchListener {
     /**
      * Notifies listener and self schedules to be re-run at next callback interval.
      */
-    private Runnable mPeriodicRunnable = new Runnable() {
+    private final Runnable mPeriodicRunnable = new Runnable() {
         @Override
         public void run() {
             if (mTouchedView.isEnabled()) {
@@ -59,8 +59,7 @@ public class OnContinuousScrollListener implements OnTouchListener {
     };
 
     /**
-     * @param clickListener The OnClickListener, that will be called
-     *                      periodically
+     * @param clickListener The OnClickListener, that will be called periodically
      */
     public OnContinuousScrollListener(@NonNull Context context,
             @NonNull OnClickListener clickListener) {
@@ -74,6 +73,15 @@ public class OnContinuousScrollListener implements OnTouchListener {
             throw new IllegalArgumentException("negative intervals are not allowed");
         }
         this.mOnClickListener = clickListener;
+    }
+
+    /**
+     * Cancel pending scroll operations. Any scroll operations that were scheduled to possibly be
+     * performed, as part of a continuous scroll, will be cancelled.
+     */
+    public void cancelPendingScroll() {
+        mHandler.removeCallbacks(mPeriodicRunnable);
+        mIsLongPressed = false;
     }
 
     @Override
