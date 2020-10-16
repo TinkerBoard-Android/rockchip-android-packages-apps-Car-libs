@@ -49,6 +49,7 @@
     <item target="bool/car_ui_toolbar_logo_fills_nav_icon_space" value="@bool/car_ui_toolbar_logo_fills_nav_icon_space" />
     <item target="bool/car_ui_toolbar_tab_flexible_layout" value="@bool/car_ui_toolbar_tab_flexible_layout" />
     <item target="bool/car_ui_toolbar_tabs_on_second_row" value="@bool/car_ui_toolbar_tabs_on_second_row" />
+    <item target="bool/car_ui_alert_dialog_force_dismiss_button" value="@bool/car_ui_alert_dialog_force_dismiss_button" />
 
     <item target="id/car_ui_toolbar_background" value="@id/car_ui_toolbar_background" />
     <item target="id/car_ui_toolbar_nav_icon_container" value="@id/car_ui_toolbar_nav_icon_container" />
