@@ -270,6 +270,9 @@
   <!-- Text to show Dialog with single choice items-->
   <string name="dialog_show_single_choice">Show with single choice items</string>
 
+  <!-- Text to show a dialog with single choice items and no default button [CHAR_LIMIT=200] -->
+  <string name="dialog_show_list_items_without_default_button">Show with single choice items and no default button</string>
+
   <!-- Text to show a permission Dialog [CHAR_LIMIT=50] -->
   <string name="dialog_show_permission_dialog">Show permission dialog</string>
 

@@ -71,6 +71,7 @@ limitations under the License.-->
       <item type="attr" name="layout_optimizationLevel"/>
       <item type="attr" name="state_ux_restricted"/>
       <item type="attr" name="title"/>
+      <item type="bool" name="car_ui_alert_dialog_force_dismiss_button"/>
       <item type="bool" name="car_ui_clear_focus_area_history_when_rotating"/>
       <item type="bool" name="car_ui_enable_focus_area_background_highlight"/>
       <item type="bool" name="car_ui_enable_focus_area_foreground_highlight"/>
