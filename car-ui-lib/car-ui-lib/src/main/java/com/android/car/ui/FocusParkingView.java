@@ -15,6 +15,7 @@
  */
 package com.android.car.ui;
 
+import static android.view.accessibility.AccessibilityEvent.TYPE_VIEW_FOCUSED;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_FOCUS;
 
 import static com.android.car.ui.utils.RotaryConstants.ACTION_HIDE_IME;
@@ -26,9 +27,11 @@ import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.utils.ViewUtils;
 
@@ -61,7 +64,6 @@ import com.android.car.ui.utils.ViewUtils;
  * FocusParkingView, or the window has lost focus.
  */
 public class FocusParkingView extends View {
-    private static final String TAG = "FocusParkingView";
 
     /**
      * The focused view in the window containing this FocusParkingView. It's null if no view is
@@ -186,12 +188,39 @@ public class FocusParkingView extends View {
         // The focused view was in a scrollable container and it was removed, e.g., it was scrolled
         // off the screen. Let's focus on the scrollable container so that the rotary controller
         // can scroll it.
-        if (mFocusedView != null && !mFocusedView.isAttachedToWindow()
-                && mScrollableContainer != null && mScrollableContainer.isAttachedToWindow()
-                && mScrollableContainer.isShown() && mScrollableContainer.requestFocus()) {
+        if (maybeFocusOnScrollableContainer()) {
             return true;
         }
         // Otherwise find the best target view to focus.
         return ViewUtils.adjustFocus(getRootView(), /* currentFocus= */ null);
+    }
+
+    private boolean maybeFocusOnScrollableContainer() {
+        if (mFocusedView != null && !mFocusedView.isAttachedToWindow()
+                && mScrollableContainer != null && mScrollableContainer.isAttachedToWindow()
+                && mScrollableContainer.isShown()) {
+            RecyclerView recyclerView = mScrollableContainer instanceof RecyclerView
+                    ? (RecyclerView) mScrollableContainer
+                    : null;
+            if (mScrollableContainer.requestFocus()) {
+                if (recyclerView != null && recyclerView.isComputingLayout()) {
+                    // When a RecyclerView gains focus, it won't dispatch AccessibilityEvent if its
+                    // layout is not ready. So wait until its layout is ready then dispatch the
+                    // event.
+                    getViewTreeObserver().addOnGlobalLayoutListener(
+                            new ViewTreeObserver.OnGlobalLayoutListener() {
+                                @Override
+                                public void onGlobalLayout() {
+                                    // At this point the layout is complete and the dimensions of
+                                    // recyclerView and any child views are known.
+                                    recyclerView.sendAccessibilityEvent(TYPE_VIEW_FOCUSED);
+                                    getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                                }
+                            });
+                }
+                return true;
+            }
+        }
+        return false;
     }
 }
