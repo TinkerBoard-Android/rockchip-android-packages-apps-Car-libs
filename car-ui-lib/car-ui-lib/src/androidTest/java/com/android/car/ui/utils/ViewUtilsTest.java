@@ -28,28 +28,22 @@ import static com.android.car.ui.utils.ViewUtils.REGULAR_FOCUS;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.rule.ActivityTestRule;
 
 import com.android.car.ui.FocusArea;
 import com.android.car.ui.FocusParkingView;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
+import com.android.car.ui.recyclerview.TestContentLimitingAdapter;
 import com.android.car.ui.test.R;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.List;
 
 /** Unit tests for {@link ViewUtils}. */
 public class ViewUtilsTest {
@@ -428,42 +422,6 @@ public class ViewUtilsTest {
 
     private void setUpRecyclerView(@NonNull CarUiRecyclerView list) {
         list.setLayoutManager(new LinearLayoutManager(mActivity));
-        list.setAdapter(new TestAdapter());
-    }
-
-    private static class TestAdapter extends RecyclerView.Adapter<TestViewHolder> {
-
-        private static final List<String> DATA = Arrays.asList("first", "second");
-
-        @NonNull
-        @Override
-        public TestViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.test_list_item, parent, false);
-            return new TestViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull TestViewHolder holder, int position) {
-            holder.bind(DATA.get(position));
-        }
-
-        @Override
-        public int getItemCount() {
-            return DATA.size();
-        }
-    }
-
-    private static class TestViewHolder extends RecyclerView.ViewHolder {
-        private final TextView mTextView;
-
-        TestViewHolder(View view) {
-            super(view);
-            mTextView = view.findViewById(R.id.text);
-        }
-
-        void bind(String text) {
-            mTextView.setText(text);
-        }
+        list.setAdapter(new TestContentLimitingAdapter(/* numItems= */ 2));
     }
 }

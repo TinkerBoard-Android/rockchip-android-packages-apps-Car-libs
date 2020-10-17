@@ -14,18 +14,27 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <!-- In some cases Android will focus the first focusable view automatically. To prevent the
-         FocusParkingView getting focused unintentionally, we put a focusable Button above the
-         FocusParkingView. -->
-    <Button
-        android:layout_width="100dp"
-        android:layout_height="40dp"/>
     <com.android.car.ui.FocusParkingView
-        android:id="@+id/focus_parking"
+        android:id="@+id/fpv"
+        android:layout_width="10dp"
+        android:layout_height="10dp"/>
+    <View
+        android:id="@+id/view1"
+        android:layout_width="100dp"
+        android:layout_height="40dp"
+        android:focusable="true"/>
+    <View
+        android:id="@+id/focused_by_default"
+        android:layout_width="100dp"
+        android:layout_height="40dp"
+        android:focusable="true"
+        android:focusedByDefault="true"/>
+    <com.android.car.ui.recyclerview.CarUiRecyclerView
+        android:id="@+id/list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
-</FrameLayout>
+</LinearLayout>
