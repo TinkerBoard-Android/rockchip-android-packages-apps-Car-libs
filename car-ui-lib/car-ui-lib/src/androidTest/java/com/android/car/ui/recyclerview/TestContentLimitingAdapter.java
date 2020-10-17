@@ -31,7 +31,7 @@ public class TestContentLimitingAdapter extends ContentLimitingAdapter<TestViewH
 
     private final List<String> mItems;
 
-    TestContentLimitingAdapter(int numItems) {
+    public TestContentLimitingAdapter(int numItems) {
         mItems = new ArrayList<>();
         for (int i = 0; i < numItems; i++) {
             mItems.add("Item " + i);

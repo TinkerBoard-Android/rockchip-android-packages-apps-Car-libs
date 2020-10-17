@@ -16,64 +16,135 @@
 
 package com.android.car.ui;
 
+import static android.view.accessibility.AccessibilityNodeInfo.ACTION_FOCUS;
+
+import static com.android.car.ui.utils.RotaryConstants.ACTION_RESTORE_DEFAULT_FOCUS;
+
 import static com.google.common.truth.Truth.assertThat;
 
+import android.view.View;
+import android.view.ViewGroup;
+
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.rule.ActivityTestRule;
 
+import com.android.car.ui.recyclerview.TestContentLimitingAdapter;
 import com.android.car.ui.test.R;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 /** Unit test for {@link FocusParkingView}. */
 public class FocusParkingViewTest {
-
-    private static final long WAIT_TIME_MS = 3000;
 
     @Rule
     public ActivityTestRule<FocusParkingViewTestActivity> mActivityRule =
             new ActivityTestRule<>(FocusParkingViewTestActivity.class);
 
     private FocusParkingViewTestActivity mActivity;
+    private FocusParkingView mFpv;
+    private View mView1;
+    private View mFocusedByDefault;
+    private RecyclerView mList;
 
     @Before
     public void setUp() {
         mActivity = mActivityRule.getActivity();
+        mFpv = mActivity.findViewById(R.id.fpv);
+        mView1 = mActivity.findViewById(R.id.view1);
+        mFocusedByDefault = mActivity.findViewById(R.id.focused_by_default);
+        mList = mActivity.findViewById(R.id.list);
+
+        mList.post(() -> {
+            mList.setLayoutManager(new LinearLayoutManager(mActivity));
+            mList.setAdapter(new TestContentLimitingAdapter(/* numItems= */ 2));
+        });
     }
 
     @Test
-    public void testFocusParkingViewCannotTakeFocus() throws Exception {
-        FocusParkingView focusParkingView = mActivity.findViewById(R.id.focus_parking);
-
-        CountDownLatch latch = new CountDownLatch(1);
-        focusParkingView.post(() -> {
-            focusParkingView.requestFocus();
-            focusParkingView.post(() -> {
-                latch.countDown();
-            });
-        });
-        latch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
-
-        assertThat(focusParkingView.isFocused()).isFalse();
+    public void testGetWidthAndHeight() {
+        assertThat(mFpv.getWidth()).isEqualTo(1);
+        assertThat(mFpv.getHeight()).isEqualTo(1);
     }
+
     @Test
-    public void testFocusParkingViewFocusedWhenWindowLostFocus() throws Exception {
-        FocusParkingView focusParkingView = mActivity.findViewById(R.id.focus_parking);
-        assertThat(focusParkingView.isFocused()).isFalse();
+    public void testRequestFocus_focusOnDefaultFocus() {
+        mFpv.post(() -> {
+            mView1.requestFocus();
+            assertThat(mView1.isFocused()).isTrue();
 
-        CountDownLatch latch = new CountDownLatch(1);
-        focusParkingView.post(() -> {
-            focusParkingView.onWindowFocusChanged(false);
-            focusParkingView.post(() -> {
-                latch.countDown();
-            });
+            mFpv.requestFocus();
+            assertThat(mFocusedByDefault.isFocused()).isTrue();
         });
-        latch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+    }
 
-        assertThat(focusParkingView.isFocused()).isTrue();
+    @Test
+    public void testRestoreDefaultFocus_focusOnDefaultFocus() {
+        mFpv.post(() -> {
+            mView1.requestFocus();
+            assertThat(mView1.isFocused()).isTrue();
+
+            mFpv.restoreDefaultFocus();
+            assertThat(mFocusedByDefault.isFocused()).isTrue();
+        });
+    }
+
+    @Test
+    public void testOnWindowFocusChanged_loseFocus() {
+        mFpv.post(() -> {
+            mView1.requestFocus();
+            assertThat(mView1.isFocused()).isTrue();
+
+            mFpv.onWindowFocusChanged(false);
+            assertThat(mFpv.isFocused()).isTrue();
+        });
+    }
+
+    @Test
+    public void testOnWindowFocusChanged_focusOnDefaultFocus() {
+        mFpv.post(() -> {
+            mFpv.performAccessibilityAction(ACTION_FOCUS, null);
+            assertThat(mFpv.isFocused()).isTrue();
+
+            mFpv.onWindowFocusChanged(true);
+            assertThat(mFocusedByDefault.isFocused()).isTrue();
+        });
+    }
+
+    @Test
+    public void testPerformAccessibilityAction_actionRestoreDefaultFocus() {
+        mFpv.post(() -> {
+            mView1.requestFocus();
+            assertThat(mView1.isFocused()).isTrue();
+
+            mFpv.performAccessibilityAction(ACTION_RESTORE_DEFAULT_FOCUS, null);
+            assertThat(mFocusedByDefault.isFocused()).isTrue();
+        });
+    }
+
+    @Test
+    public void testPerformAccessibilityAction_actionFocus() {
+        mFpv.post(() -> {
+            mView1.requestFocus();
+            assertThat(mView1.isFocused()).isTrue();
+
+            mFpv.performAccessibilityAction(ACTION_FOCUS, null);
+            assertThat(mFpv.isFocused()).isTrue();
+        });
+    }
+
+    @Test
+    public void testRestoreFocusInRoot_recyclerViewItemRemoved() {
+        mFpv.post(() -> {
+            View firstItem = mList.getLayoutManager().findViewByPosition(0);
+            firstItem.requestFocus();
+            assertThat(firstItem.isFocused()).isTrue();
+
+            ViewGroup parent = (ViewGroup) firstItem.getParent();
+            parent.removeView(firstItem);
+            assertThat(mList.isFocused()).isTrue();
+        });
     }
 }
