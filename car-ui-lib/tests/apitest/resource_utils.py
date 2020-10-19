@@ -108,6 +108,8 @@ def get_resources_from_single_file(filename):
 
         resName = resource.get('name')
         resType = resource.tag
+        if resType == "string-array":
+            resType = "array"
         if resource.tag == 'item' or resource.tag == 'public':
             resType = resource.get('type')
 
