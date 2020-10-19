@@ -20,15 +20,13 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.util.Pair;
 
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
-import com.android.car.ui.core.BaseLayoutController.InsetsUpdater;
+import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
 import com.android.car.ui.toolbar.ToolbarController;
 
 import java.lang.reflect.Method;
-import java.util.Objects;
 
 /**
  * Public interface for general CarUi static functions.
@@ -142,13 +140,8 @@ public class CarUi {
             View view,
             InsetsChangedListener insetsChangedListener,
             boolean hasToolbar) {
-        Pair<ToolbarController, InsetsUpdater> results =
-                BaseLayoutController.installBaseLayoutAround(null, view, hasToolbar);
-
-        Objects.requireNonNull(results.second)
-                .replaceInsetsChangedListenerWith(insetsChangedListener);
-
-        return results.first;
+        return SharedLibraryFactorySingleton.get()
+                .installBaseLayoutAround(view, insetsChangedListener, hasToolbar);
     }
 
     /* package */ static BaseLayoutController getBaseLayoutController(Activity activity) {

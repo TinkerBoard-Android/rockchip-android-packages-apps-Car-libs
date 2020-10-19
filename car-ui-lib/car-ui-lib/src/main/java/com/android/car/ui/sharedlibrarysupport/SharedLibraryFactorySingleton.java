@@ -67,7 +67,7 @@ public final class SharedLibraryFactorySingleton {
                     (SharedLibraryVersionProviderOEMV1) oemVersionProvider);
         } else {
             Log.e("carui", "SharedLibraryVersionProviderImpl was not instanceof any known "
-                    + "versions of SharedLibraryVersionProviderOEMV#");
+                    + "versions of SharedLibraryVersionProviderOEMV#.");
 
             sInstance = new SharedLibraryFactoryStub();
             return sInstance;

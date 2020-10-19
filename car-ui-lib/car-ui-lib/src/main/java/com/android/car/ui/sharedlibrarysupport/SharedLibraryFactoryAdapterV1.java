@@ -15,7 +15,17 @@
  */
 package com.android.car.ui.sharedlibrarysupport;
 
+import android.view.View;
+
+import androidx.annotation.Nullable;
+
+import com.android.car.ui.baselayout.Insets;
+import com.android.car.ui.baselayout.InsetsChangedListener;
+import com.android.car.ui.sharedlibrary.oemapis.InsetsOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryFactoryOEMV1;
+import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
+import com.android.car.ui.toolbar.ToolbarController;
+import com.android.car.ui.toolbar.ToolbarControllerAdapterV1;
 
 /**
  * This class is an wrapper around {@link SharedLibraryFactoryOEMV1} that implements
@@ -30,6 +40,24 @@ public final class SharedLibraryFactoryAdapterV1 implements SharedLibraryFactory
         mOem = oem;
     }
 
-    // This will have methods delegating from SharedLibraryFactory to SharedLibraryFactoryOEMV1
-    // once they have methods.
+    @Override
+    @Nullable
+    public ToolbarController installBaseLayoutAround(
+            View contentView,
+            InsetsChangedListener insetsChangedListener,
+            boolean toolbarEnabled) {
+        ToolbarControllerOEMV1 toolbar = mOem.installBaseLayoutAround(contentView,
+                insets -> insetsChangedListener.onCarUiInsetsChanged(adaptInsets(insets)),
+                toolbarEnabled, true);
+
+        if (toolbar == null) {
+            return null;
+        }
+        return new ToolbarControllerAdapterV1(toolbar);
+    }
+
+    private Insets adaptInsets(InsetsOEMV1 insetsOEM) {
+        return new Insets(insetsOEM.getLeft(), insetsOEM.getTop(),
+                insetsOEM.getRight(), insetsOEM.getBottom());
+    }
 }

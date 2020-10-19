@@ -29,8 +29,8 @@
             android:exported="false"
             android:process="@string/car_ui_installer_process_name"/>
         <!-- Commented out until we're ready to ship the shared library feature -->
-        <!-- <uses-library
+        <uses-library
             android:name="com.android.car.ui.sharedlibrary"
-            android:required="false"/> -->
+            android:required="false"/>
     </application>
 </manifest>
