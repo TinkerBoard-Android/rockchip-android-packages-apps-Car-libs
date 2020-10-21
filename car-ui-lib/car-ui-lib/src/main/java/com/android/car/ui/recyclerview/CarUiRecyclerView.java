@@ -187,7 +187,7 @@ public final class CarUiRecyclerView extends RecyclerView {
     }
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr) {
-        initRotaryScroll(context, attrs, defStyleAttr);
+        initRotaryScroll();
         setClipToPadding(false);
         TypedArray a = context.obtainStyledAttributes(
                 attrs,
@@ -283,28 +283,19 @@ public final class CarUiRecyclerView extends RecyclerView {
     }
 
     /**
-     * If this view's content description isn't set to opt out of scrolling via the rotary
-     * controller, initialize it accordingly.
+     * If this view's content description is set to opt into scrolling via the rotary controller,
+     * initialize it accordingly.
      */
-    private void initRotaryScroll(Context context, AttributeSet attrs, int defStyleAttr) {
+    private void initRotaryScroll() {
         CharSequence contentDescription = getContentDescription();
-        if (contentDescription == null) {
-            TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CarUiRecyclerView,
-                    defStyleAttr, /* defStyleRes= */ 0);
-            int orientation = a.getInt(R.styleable.CarUiRecyclerView_android_orientation,
-                    LinearLayout.VERTICAL);
-            setContentDescription(
-                    orientation == LinearLayout.HORIZONTAL
-                            ? ROTARY_HORIZONTALLY_SCROLLABLE
-                            : ROTARY_VERTICALLY_SCROLLABLE);
-        } else if (!ROTARY_HORIZONTALLY_SCROLLABLE.contentEquals(contentDescription)
-                && !ROTARY_VERTICALLY_SCROLLABLE.contentEquals(contentDescription)) {
-            return;
-        }
+        boolean rotaryScrollEnabled = contentDescription != null
+                && (ROTARY_HORIZONTALLY_SCROLLABLE.contentEquals(contentDescription)
+                || ROTARY_VERTICALLY_SCROLLABLE.contentEquals(contentDescription));
 
-        // Convert SOURCE_ROTARY_ENCODER scroll events into SOURCE_MOUSE scroll events that
-        // RecyclerView knows how to handle.
-        setOnGenericMotionListener((v, event) -> {
+        // If rotary scrolling is enabled, set a generic motion event listener to convert
+        // SOURCE_ROTARY_ENCODER scroll events into SOURCE_MOUSE scroll events that RecyclerView
+        // knows how to handle.
+        setOnGenericMotionListener(rotaryScrollEnabled ? (v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_SCROLL) {
                 if (event.getSource() == InputDevice.SOURCE_ROTARY_ENCODER) {
                     MotionEvent mouseEvent = MotionEvent.obtain(event);
@@ -314,11 +305,11 @@ public final class CarUiRecyclerView extends RecyclerView {
                 }
             }
             return false;
-        });
+        } : null);
 
-        // Mark this view as focusable. This view will be focused when no focusable elements are
-        // visible.
-        setFocusable(true);
+        // If rotary scrolling is enabled, mark this view as focusable. This view will be focused
+        // when no focusable elements are visible.
+        setFocusable(rotaryScrollEnabled);
 
         // Focus this view before descendants so that the RotaryService can focus this view when it
         // wants to.
@@ -532,6 +523,12 @@ public final class CarUiRecyclerView extends RecyclerView {
             return;
         }
         removeItemDecoration(mDividerItemDecorationGrid);
+    }
+
+    @Override
+    public void setContentDescription(CharSequence contentDescription) {
+        super.setContentDescription(contentDescription);
+        initRotaryScroll();
     }
 
     private static RuntimeException andLog(String msg, Throwable t) {
