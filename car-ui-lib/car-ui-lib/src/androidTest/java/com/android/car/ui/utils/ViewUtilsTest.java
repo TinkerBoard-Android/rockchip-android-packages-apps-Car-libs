@@ -29,6 +29,7 @@ import static com.android.car.ui.utils.ViewUtils.REGULAR_FOCUS;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.view.View;
+import android.view.ViewTreeObserver;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -82,9 +83,7 @@ public class ViewUtilsTest {
         mList5 = mActivity.findViewById(R.id.list5);
         mRoot = mFocusArea1.getRootView();
 
-        mRoot.post(() -> {
-            setUpRecyclerView(mList5);
-        });
+        mRoot.post(() -> setUpRecyclerView(mList5));
     }
 
     @Test
@@ -109,10 +108,16 @@ public class ViewUtilsTest {
 
     @Test
     public void testGetAncestorScrollableContainer() {
-        mRoot.post(() -> {
-            View firstItem = mList5.getLayoutManager().findViewByPosition(0);
-            assertThat(ViewUtils.getAncestorScrollableContainer(firstItem)).isEqualTo(mList5);
-        });
+        mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        View firstItem = mList5.getLayoutManager().findViewByPosition(0);
+                        assertThat(ViewUtils.getAncestorScrollableContainer(firstItem))
+                                .isEqualTo(mList5);
+                    }
+                }));
     }
 
     @Test
@@ -158,20 +163,31 @@ public class ViewUtilsTest {
 
     @Test
     public void testFindImplicitDefaultFocusView_inRoot() {
-        mRoot.post(() -> {
-            View firstItem = mList5.getLayoutManager().findViewByPosition(0);
-            View implicitDefaultFocus = ViewUtils.findImplicitDefaultFocusView(mRoot);
-            assertThat(implicitDefaultFocus).isEqualTo(firstItem);
-        });
+        mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        View firstItem = mList5.getLayoutManager().findViewByPosition(0);
+                        View implicitDefaultFocus = ViewUtils.findImplicitDefaultFocusView(mRoot);
+                        assertThat(implicitDefaultFocus).isEqualTo(firstItem);
+                    }
+                }));
     }
 
     @Test
     public void testFindImplicitDefaultFocusView_inFocusArea() {
-        mRoot.post(() -> {
-            View firstItem = mList5.getLayoutManager().findViewByPosition(0);
-            View implicitDefaultFocus = ViewUtils.findImplicitDefaultFocusView(mFocusArea5);
-            assertThat(implicitDefaultFocus).isEqualTo(firstItem);
-        });
+        mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        View firstItem = mList5.getLayoutManager().findViewByPosition(0);
+                        View implicitDefaultFocus =
+                                ViewUtils.findImplicitDefaultFocusView(mFocusArea5);
+                        assertThat(implicitDefaultFocus).isEqualTo(firstItem);
+                    }
+                }));
     }
 
     @Test
@@ -222,41 +238,52 @@ public class ViewUtilsTest {
 
     @Test
     public void testIsImplicitDefaultFocusView_firstItem() {
-        mRoot.post(() -> {
-            View firstItem = mList5.getLayoutManager().findViewByPosition(0);
-            assertThat(ViewUtils.isImplicitDefaultFocusView(firstItem)).isTrue();
-        });
+        mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        View firstItem = mList5.getLayoutManager().findViewByPosition(0);
+                        assertThat(ViewUtils.isImplicitDefaultFocusView(firstItem)).isTrue();
+                    }
+                }));
     }
 
     @Test
     public void testIsImplicitDefaultFocusView_secondItem() {
-        mRoot.post(() -> {
-            View secondItem = mList5.getLayoutManager().findViewByPosition(1);
-            assertThat(ViewUtils.isImplicitDefaultFocusView(secondItem)).isFalse();
-        });
+        mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        View secondItem = mList5.getLayoutManager().findViewByPosition(1);
+                        assertThat(ViewUtils.isImplicitDefaultFocusView(secondItem)).isFalse();
+                    }
+                }));
     }
 
     @Test
     public void testIsImplicitDefaultFocusView_normalView() {
-        mRoot.post(() -> {
-            assertThat(ViewUtils.isImplicitDefaultFocusView(mView2)).isFalse();
-        });
+        mRoot.post(() -> assertThat(ViewUtils.isImplicitDefaultFocusView(mView2)).isFalse());
     }
 
     @Test
     public void testIsImplicitDefaultFocusView_skipInvisibleAncestor() {
-        mRoot.post(() -> {
-            mFocusArea5.setVisibility(INVISIBLE);
-            View firstItem = mList5.getLayoutManager().findViewByPosition(0);
-            assertThat(ViewUtils.isImplicitDefaultFocusView(firstItem)).isFalse();
-        });
+        mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        mFocusArea5.setVisibility(INVISIBLE);
+                        View firstItem = mList5.getLayoutManager().findViewByPosition(0);
+                        assertThat(ViewUtils.isImplicitDefaultFocusView(firstItem)).isFalse();
+                    }
+                }));
     }
 
     @Test
     public void testRequestFocus() {
-        mRoot.post(() -> {
-            assertRequestFocus(mView2, true);
-        });
+        mRoot.post(() -> assertRequestFocus(mView2, true));
     }
 
     @Test
@@ -334,9 +361,14 @@ public class ViewUtilsTest {
 
     @Test
     public void testRequestFocus_scrollableContainer() {
-        mRoot.post(() -> {
-            assertRequestFocus(mList5, false);
-        });
+        mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        assertRequestFocus(mList5, false);
+                    }
+                }));
     }
 
     @Test
@@ -403,8 +435,16 @@ public class ViewUtilsTest {
 
             assertThat(ViewUtils.getFocusLevel(mView4)).isEqualTo(REGULAR_FOCUS);
 
-            View firstItem = mList5.getLayoutManager().findViewByPosition(0);
-            assertThat(ViewUtils.getFocusLevel(firstItem)).isEqualTo(IMPLICIT_DEFAULT_FOCUS);
+            mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
+                    new ViewTreeObserver.OnGlobalLayoutListener() {
+                        @Override
+                        public void onGlobalLayout() {
+                            mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                            View firstItem = mList5.getLayoutManager().findViewByPosition(0);
+                            assertThat(ViewUtils.getFocusLevel(firstItem))
+                                    .isEqualTo(IMPLICIT_DEFAULT_FOCUS);
+                        }
+                    }));
 
             assertThat(ViewUtils.getFocusLevel(mDefaultFocus4)).isEqualTo(DEFAULT_FOCUS);
 

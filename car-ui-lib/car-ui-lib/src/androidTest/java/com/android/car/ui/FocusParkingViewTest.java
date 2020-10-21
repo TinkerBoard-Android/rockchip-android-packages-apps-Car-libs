@@ -24,6 +24,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -45,6 +46,7 @@ public class FocusParkingViewTest {
 
     private FocusParkingViewTestActivity mActivity;
     private FocusParkingView mFpv;
+    private ViewGroup mParent1;
     private View mView1;
     private View mFocusedByDefault;
     private RecyclerView mList;
@@ -53,6 +55,7 @@ public class FocusParkingViewTest {
     public void setUp() {
         mActivity = mActivityRule.getActivity();
         mFpv = mActivity.findViewById(R.id.fpv);
+        mParent1 = mActivity.findViewById(R.id.parent1);
         mView1 = mActivity.findViewById(R.id.view1);
         mFocusedByDefault = mActivity.findViewById(R.id.focused_by_default);
         mList = mActivity.findViewById(R.id.list);
@@ -137,14 +140,64 @@ public class FocusParkingViewTest {
 
     @Test
     public void testRestoreFocusInRoot_recyclerViewItemRemoved() {
-        mFpv.post(() -> {
-            View firstItem = mList.getLayoutManager().findViewByPosition(0);
-            firstItem.requestFocus();
-            assertThat(firstItem.isFocused()).isTrue();
+        mList.post(() -> mList.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        mList.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        View firstItem = mList.getLayoutManager().findViewByPosition(0);
+                        firstItem.requestFocus();
+                        assertThat(firstItem.isFocused()).isTrue();
 
-            ViewGroup parent = (ViewGroup) firstItem.getParent();
-            parent.removeView(firstItem);
-            assertThat(mList.isFocused()).isTrue();
+                        ViewGroup parent = (ViewGroup) firstItem.getParent();
+                        parent.removeView(firstItem);
+                        assertThat(mList.isFocused()).isTrue();
+                    }
+                }));
+    }
+
+    @Test
+    public void testRestoreFocusInRoot_focusedViewRemoved() {
+        mFpv.post(() -> {
+            mView1.requestFocus();
+            assertThat(mView1.isFocused()).isTrue();
+
+            ViewGroup parent = (ViewGroup) mView1.getParent();
+            parent.removeView(mView1);
+            assertThat(mFocusedByDefault.isFocused()).isTrue();
+        });
+    }
+
+    @Test
+    public void testRestoreFocusInRoot_focusedViewDisabled() {
+        mFpv.post(() -> {
+            mView1.requestFocus();
+            assertThat(mView1.isFocused()).isTrue();
+
+            mView1.setEnabled(false);
+            assertThat(mFocusedByDefault.isFocused()).isTrue();
+        });
+    }
+
+    @Test
+    public void testRestoreFocusInRoot_focusedViewBecomesInvisible() {
+        mFpv.post(() -> {
+            mView1.requestFocus();
+            assertThat(mView1.isFocused()).isTrue();
+
+            mView1.setVisibility(View.INVISIBLE);
+            assertThat(mFocusedByDefault.isFocused()).isTrue();
+        });
+    }
+
+    @Test
+    public void testRestoreFocusInRoot_focusedViewParentBecomesInvisible() {
+        mFpv.post(() -> {
+            mView1.requestFocus();
+            assertThat(mView1.isFocused()).isTrue();
+
+            mParent1.setVisibility(View.INVISIBLE);
+            assertThat(mFocusedByDefault.isFocused()).isTrue();
         });
     }
 }

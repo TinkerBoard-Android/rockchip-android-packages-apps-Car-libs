@@ -659,7 +659,8 @@ public class AlertDialogBuilder {
         }
         mBuilder.setCustomTitle(customTitle);
 
-        if (!mNeutralButtonSet && !mNegativeButtonSet && !mPositiveButtonSet) {
+        if (mContext.getResources().getBoolean(R.bool.car_ui_alert_dialog_force_dismiss_button)
+                && !mNeutralButtonSet && !mNegativeButtonSet && !mPositiveButtonSet) {
             String mDefaultButtonText = mContext.getString(
                     R.string.car_ui_alert_dialog_default_button);
             mBuilder.setNegativeButton(mDefaultButtonText, (dialog, which) -> {

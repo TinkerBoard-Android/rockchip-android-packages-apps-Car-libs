@@ -22,11 +22,16 @@
         android:id="@+id/fpv"
         android:layout_width="10dp"
         android:layout_height="10dp"/>
-    <View
-        android:id="@+id/view1"
-        android:layout_width="100dp"
-        android:layout_height="40dp"
-        android:focusable="true"/>
+    <LinearLayout
+        android:id="@+id/parent1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <View
+            android:id="@+id/view1"
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:focusable="true"/>
+    </LinearLayout>
     <View
         android:id="@+id/focused_by_default"
         android:layout_width="100dp"
@@ -36,5 +41,7 @@
     <com.android.car.ui.recyclerview.CarUiRecyclerView
         android:id="@+id/list"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:contentDescription="com.android.car.ui.utils.VERTICALLY_SCROLLABLE"/>
+    <!-- TODO(b/171339427) Use app:rotaryScrollEnabled instead of contentDescription. -->
 </LinearLayout>

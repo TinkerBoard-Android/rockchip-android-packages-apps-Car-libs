@@ -63,4 +63,7 @@
 
     <!--  Whether to log the escrow components check automatically for all the activities or not.  -->
     <bool name="car_ui_escrow_check_components_automatically">false</bool>
+
+    <!-- If there is no positive/negative/neutral button, should we add one that says "dismiss"? -->
+    <bool name="car_ui_alert_dialog_force_dismiss_button">true</bool>
 </resources>

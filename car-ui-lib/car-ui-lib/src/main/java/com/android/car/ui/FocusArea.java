@@ -713,4 +713,19 @@ public class FocusArea extends LinearLayout {
     void enableForegroundHighlight() {
         mEnableForegroundHighlight = true;
     }
+
+    @VisibleForTesting
+    void setDefaultFocusOverridesHistory(boolean override) {
+        mDefaultFocusOverridesHistory = override;
+    }
+
+    @VisibleForTesting
+    void setRotaryCache(@NonNull RotaryCache rotaryCache) {
+        mRotaryCache = rotaryCache;
+    }
+
+    @VisibleForTesting
+    void setClearFocusAreaHistoryWhenRotating(boolean clear) {
+        mClearFocusAreaHistoryWhenRotating = clear;
+    }
 }
