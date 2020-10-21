@@ -20,7 +20,6 @@ CAR_UI_RRO_TARGETS := \
     com.android.car.settings \
     com.android.car.voicecontrol \
     com.android.car.faceenroll \
-    com.android.permissioncontroller \
     com.android.settings.intelligence \
     com.google.android.apps.automotive.inputmethod \
     com.google.android.apps.automotive.inputmethod.dev \
@@ -42,6 +41,7 @@ CAR_UI_RRO_TARGETS := \
     com.google.android.embedded.projection \
     com.google.android.gms \
     com.google.android.packageinstaller \
+    com.google.android.permissioncontroller \
     com.google.android.carassistant \
     com.google.android.tts \
     com.android.vending \

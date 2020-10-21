@@ -17,7 +17,6 @@ PRODUCT_PACKAGES += \
     googlecarui-com-android-car-settings \
     googlecarui-com-android-car-voicecontrol \
     googlecarui-com-android-car-faceenroll \
-    googlecarui-com-android-permissioncontroller \
     googlecarui-com-android-settings-intelligence \
     googlecarui-com-google-android-apps-automotive-inputmethod \
     googlecarui-com-google-android-apps-automotive-inputmethod-dev \
@@ -36,6 +35,7 @@ PRODUCT_PACKAGES += \
     googlecarui-overlayable-com-google-android-embedded-projection \
     googlecarui-overlayable-com-google-android-gms \
     googlecarui-overlayable-com-google-android-packageinstaller \
+    googlecarui-overlayable-com-google-android-permissioncontroller \
     googlecarui-overlayable-com-google-android-carassistant \
     googlecarui-overlayable-com-google-android-tts \
     googlecarui-overlayable-com-android-vending \
