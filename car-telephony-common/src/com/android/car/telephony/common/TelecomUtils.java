@@ -129,11 +129,10 @@ public class TelecomUtils {
         }
 
         String countryIso = getCurrentCountryIsoFromLocale(context);
-        L.d(TAG, "PhoneNumberUtils.formatNumberToE16, number: "
-                    + piiLog(number) + ", country: " + countryIso);
+        L.d(TAG, "PhoneNumberUtils.formatNumber, number: " + piiLog(number)
+                + ", country: " + countryIso);
 
-        String e164 = PhoneNumberUtils.formatNumberToE164(number, countryIso);
-        String formattedNumber = PhoneNumberUtils.formatNumber(number, e164, countryIso);
+        String formattedNumber = PhoneNumberUtils.formatNumber(number, countryIso);
         formattedNumber = TextUtils.isEmpty(formattedNumber) ? number : formattedNumber;
         L.d(TAG, "getFormattedNumber, result: " + piiLog(formattedNumber));
 
