@@ -15,6 +15,9 @@
  */
 package com.android.car.ui.utils;
 
+import static com.android.car.ui.utils.RotaryConstants.ROTARY_HORIZONTALLY_SCROLLABLE;
+import static com.android.car.ui.utils.RotaryConstants.ROTARY_VERTICALLY_SCROLLABLE;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -150,6 +153,19 @@ public final class CarUiUtils {
         } else {
             ViewCompat.setBackground(preference, null);
         }
+    }
+
+    /**
+     * Enables rotary scrolling for {@code view}, either vertically (if {@code isVertical} is true)
+     * or horizontally (if {@code isVertical} is false). With rotary scrolling enabled, rotating the
+     * rotary controller will scroll rather than moving the focus when moving the focus would cause
+     * a lot of scrolling. Rotary scrolling should be enabled for scrolling views which contain
+     * content which the user may want to see but can't interact with, either alone or along with
+     * interactive (focusable) content.
+     */
+    public static void setRotaryScrollEnabled(@NonNull View view, boolean isVertical) {
+        view.setContentDescription(
+                isVertical ? ROTARY_VERTICALLY_SCROLLABLE : ROTARY_HORIZONTALLY_SCROLLABLE);
     }
 
     /**
