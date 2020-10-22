@@ -193,7 +193,7 @@ public class SearchView extends ConstraintLayout {
             if (insets.isVisible(ime())) {
                 displaySearchWideScreen();
             }
-            return insets;
+            return v.onApplyWindowInsets(insets);
         });
     }
 

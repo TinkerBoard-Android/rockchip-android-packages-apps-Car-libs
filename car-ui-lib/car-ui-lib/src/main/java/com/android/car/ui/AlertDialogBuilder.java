@@ -81,7 +81,7 @@ public class AlertDialogBuilder {
     private final View.OnApplyWindowInsetsListener mOnApplyWindowInsetsListener = (v, insets) -> {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             // WindowInsets.isVisible() is only available on R or above
-            return insets;
+            return v.onApplyWindowInsets(insets);
         }
 
         if (insets.isVisible(ime())) {
@@ -94,7 +94,7 @@ public class AlertDialogBuilder {
             mInputMethodManager.sendAppPrivateCommand(mCarUiEditText, WIDE_SCREEN_ACTION,
                     bundle);
         }
-        return insets;
+        return v.onApplyWindowInsets(insets);
     };
 
     private final AlertDialog.OnDismissListener mOnDismissListener = dialog -> {
