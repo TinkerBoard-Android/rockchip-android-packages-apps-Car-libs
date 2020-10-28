@@ -1,6 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- THIS FILE WAS AUTO GENERATED ON 15-Oct-2020 (16:25:22), DO NOT EDIT MANUALLY. -->
+<!-- THIS FILE WAS AUTO GENERATED ON 26-Oct-2020 (13:14:37), DO NOT EDIT MANUALLY. -->
 <resources>
+  <public type="array" name="car_ui_ime_wide_screen_allowed_package_list"/>
   <public type="attr" name="CarUiToolbarStyle"/>
   <public type="attr" name="carUiPreferenceStyle"/>
   <public type="attr" name="carUiRecyclerViewStyle"/>
@@ -256,6 +257,7 @@
   <public type="id" name="car_ui_focus_area"/>
   <public type="id" name="car_ui_fullscreenArea"/>
   <public type="id" name="car_ui_imeWideScreenInputArea"/>
+  <public type="id" name="car_ui_ime_surface"/>
   <public type="id" name="car_ui_inputExtractActionAutomotive"/>
   <public type="id" name="car_ui_inputExtractEditTextContainer"/>
   <public type="id" name="car_ui_list_item_end_guideline"/>
@@ -383,7 +385,6 @@
   <public type="string" name="car_ui_dialog_preference_negative"/>
   <public type="string" name="car_ui_dialog_preference_positive"/>
   <public type="string" name="car_ui_ellipsis"/>
-  <public type="string" name="car_ui_ime_wide_screen_allowed_package_list"/>
   <public type="string" name="car_ui_ime_wide_screen_system_property_name"/>
   <public type="string" name="car_ui_installer_process_name"/>
   <public type="string" name="car_ui_preference_switch_off"/>

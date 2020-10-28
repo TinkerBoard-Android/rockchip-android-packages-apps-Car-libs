@@ -102,8 +102,8 @@ public class CarUiImeWideScreenControllerTest {
         onView(withId(R.id.car_ui_wideScreenSearchResultList)).check(matches(not(isDisplayed())));
         onView(withId(R.id.car_ui_wideScreenErrorMessage)).check(matches(not(isDisplayed())));
         onView(withId(R.id.car_ui_wideScreenError)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.car_ui_contentAreaAutomotive)).check(matches(not(isDisplayed())));
 
-        onView(withId(R.id.car_ui_contentAreaAutomotive)).check(matches(isDisplayed()));
         onView(withId(R.id.car_ui_wideScreenExtractedTextIcon)).check(matches(isDisplayed()));
         onView(withId(R.id.car_ui_wideScreenClearData)).check(matches(isDisplayed()));
         onView(withId(R.id.car_ui_fullscreenArea)).check(matches(isDisplayed()));

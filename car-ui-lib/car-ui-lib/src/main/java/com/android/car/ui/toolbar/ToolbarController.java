@@ -17,6 +17,7 @@
 package com.android.car.ui.toolbar;
 
 import android.graphics.drawable.Drawable;
+import android.view.View;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -80,6 +81,7 @@ public interface ToolbarController {
 
     /**
      * Gets the {@link TabLayout} for this toolbar.
+     *
      * @deprecated Use other tab-related functions in this interface.
      */
     @Deprecated
@@ -277,10 +279,36 @@ public interface ToolbarController {
     boolean unregisterOnSearchListener(Toolbar.OnSearchListener listener);
 
     /**
-     * Sets list of search item {@link CarUiListItem} to be displayed in the IMS
-     * template.
+     * Returns true if the toolbar can display search result items. One example of this is when the
+     * system is configured to display search items in the IME instead of in the app.
      */
-    void setSearchItemsForWideScreen(List<? extends CarUiImeSearchListItem> searchItems);
+    boolean canShowSearchResultItems();
+
+    /**
+     * Returns true if the app is allowed to set search results view.
+     */
+    boolean canShowSearchResultsView();
+
+    /**
+     * Add a view within a container that will animate with the wide screen IME to display search
+     * results.
+     *
+     * <p>Note: Apps can only call this method if the package name is allowed via OEM to render
+     * their view.  To check if the application have the permission to do so or not first call
+     * {@link #canShowSearchResultsView()}. If the app is not allowed this method will throw an
+     * {@link RuntimeException}
+     *
+     * @param view to be added in the container.
+     */
+    void setSearchResultsView(View view);
+
+    /**
+     * Sets list of search item {@link CarUiListItem} to be displayed in the IMS
+     * template. This method should be called when system is running in a wide screen mode. Apps
+     * can check that by using {@link #canShowSearchResultItems()}
+     * Else, this method will throw an {@link RuntimeException}
+     */
+    void setSearchResultItems(List<? extends CarUiImeSearchListItem> searchItems);
 
     /** Registers a new {@link Toolbar.OnSearchCompletedListener} to the list of listeners. */
     void registerOnSearchCompletedListener(Toolbar.OnSearchCompletedListener listener);
