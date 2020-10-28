@@ -866,15 +866,16 @@ public final class ToolbarControllerImpl implements ToolbarController {
      * results.
      *
      * <p>Note: Apps can only call this method if the package name is allowed via OEM to render
-     * their view. If the app is not allowed this method will throw an
-     * {@link IllegalAccessException}
+     * their view.  To check if the application have the permission to do so or not first call
+     * {@link #canShowSearchResultsView()}. If the app is not allowed this method will throw an
+     * {@link IllegalStateException}
      *
      * @param view to be added in the container.
      */
     @Override
     public void setSearchResultsView(View view) {
         if (!canShowSearchResultsView()) {
-            throw new RuntimeException(
+            throw new IllegalStateException(
                     "not allowed to add view to wide screen IME, package name: "
                             + mContext.getPackageName());
         }
@@ -890,12 +891,12 @@ public final class ToolbarControllerImpl implements ToolbarController {
      * Sets list of search item {@link CarUiListItem} to be displayed in the IMS
      * template. This method should be called when system is running in a wide screen mode. Apps
      * can check that by using {@link #canShowSearchResultItems()}
-     * Else, this method would have no effect.
+     * Else, this method will throw an {@link IllegalStateException}
      */
     @Override
     public void setSearchResultItems(List<? extends CarUiImeSearchListItem> searchItems) {
         if (!canShowSearchResultItems()) {
-            throw new RuntimeException(
+            throw new IllegalStateException(
                     "system not in wide screen mode, not allowed to set search result items ");
         }
         mSearchItems = searchItems;
