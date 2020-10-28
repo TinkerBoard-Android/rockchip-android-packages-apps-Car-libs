@@ -33,6 +33,7 @@ import androidx.annotation.XmlRes;
 
 import com.android.car.ui.R;
 import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
+import com.android.car.ui.recyclerview.CarUiListItem;
 
 import java.util.List;
 
@@ -674,7 +675,7 @@ public final class Toolbar extends FrameLayout implements ToolbarController {
      * <p>Note: Apps can only call this method if the package name is allowed via OEM to render
      * their view.  To check if the application have the permission to do so or not first call
      * {@link #canShowSearchResultsView()}. If the app is not allowed this method will throw an
-     * {@link RuntimeException}
+     * {@link IllegalStateException}
      *
      * @param view to be added in the container.
      */
@@ -684,9 +685,10 @@ public final class Toolbar extends FrameLayout implements ToolbarController {
     }
 
     /**
-     * Sets a list of search items to be displayed in the IME window when running as a wide screen
-     * mode. This should be called each time the list is updated. For example, when a user is typing
-     * in the input field and the list gets filtered this method should be invoked each time.
+     * Sets list of search item {@link CarUiListItem} to be displayed in the IMS
+     * template. This method should be called when system is running in a wide screen mode. Apps
+     * can check that by using {@link #canShowSearchResultItems()}
+     * Else, this method will throw an {@link IllegalStateException}
      */
     @Override
     public void setSearchResultItems(List<? extends CarUiImeSearchListItem> searchItems) {

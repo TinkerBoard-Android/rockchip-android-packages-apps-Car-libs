@@ -296,7 +296,7 @@ public interface ToolbarController {
      * <p>Note: Apps can only call this method if the package name is allowed via OEM to render
      * their view.  To check if the application have the permission to do so or not first call
      * {@link #canShowSearchResultsView()}. If the app is not allowed this method will throw an
-     * {@link RuntimeException}
+     * {@link IllegalStateException}
      *
      * @param view to be added in the container.
      */
@@ -306,7 +306,7 @@ public interface ToolbarController {
      * Sets list of search item {@link CarUiListItem} to be displayed in the IMS
      * template. This method should be called when system is running in a wide screen mode. Apps
      * can check that by using {@link #canShowSearchResultItems()}
-     * Else, this method will throw an {@link RuntimeException}
+     * Else, this method will throw an {@link IllegalStateException}
      */
     void setSearchResultItems(List<? extends CarUiImeSearchListItem> searchItems);
 
