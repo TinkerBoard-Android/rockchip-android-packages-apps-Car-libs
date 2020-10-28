@@ -66,6 +66,8 @@ import java.util.List;
  */
 public class WideScreenImeActivity extends AppCompatActivity implements InsetsChangedListener {
 
+    private static final String TAG = "WideScreenImeActivity";
+
     private final List<MenuItem> mMenuItems = new ArrayList<>();
     private final List<Pair<CharSequence, View.OnFocusChangeListener>> mEditText =
             new ArrayList<>();
@@ -125,7 +127,26 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
         searchItems.add(item);
 
         // initial list to display in search view.
-        toolbar.setSearchItemsForWideScreen(searchItems);
+        if (toolbar.canShowSearchResultItems()) {
+            toolbar.setSearchResultItems(searchItems);
+        }
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View contentArea = inflater.inflate(R.layout.ime_wide_screen_dummy_view, null, true);
+
+        if (toolbar.canShowSearchResultsView()) {
+            toolbar.setSearchResultsView(contentArea);
+        }
+
+        contentArea.findViewById(R.id.button_1).setOnClickListener(v ->
+                Toast.makeText(this, "Button 1 clicked", Toast.LENGTH_SHORT).show()
+        );
+
+        contentArea.findViewById(R.id.button_2).setOnClickListener(v -> {
+                    Toast.makeText(this, "Clearing the view...", Toast.LENGTH_SHORT).show();
+                    toolbar.setSearchResultsView(null);
+                }
+        );
 
         toolbar.registerOnSearchListener((query) -> {
             count[0]++;
@@ -139,7 +160,9 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
             item1.setOnItemClickedListener(mainClickListener);
             searchItems.add(item1);
 
-            toolbar.setSearchItemsForWideScreen(searchItems);
+            if (toolbar.canShowSearchResultItems()) {
+                toolbar.setSearchResultItems(searchItems);
+            }
         });
 
         mMenuItems.add(MenuItem.builder(this)
@@ -171,7 +194,7 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
             mSecondaryImageResId.add(R.drawable.ic_launcher);
         }
 
-        mEditText.add(Pair.create("Show IME  list view", this::showImeListView));
+        mEditText.add(Pair.create("Show IME list view", this::showImeListView));
 
         mEditText.add(Pair.create("Add icon to extracted view", this::addIconToExtractedView));
 

@@ -16,12 +16,17 @@
 
 package com.android.car.ui.toolbar;
 
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.CONTENT_AREA_SURFACE_DISPLAY_ID;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.CONTENT_AREA_SURFACE_HEIGHT;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.CONTENT_AREA_SURFACE_HOST_TOKEN;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.CONTENT_AREA_SURFACE_WIDTH;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_ITEM_ID;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SECONDARY_IMAGE_ID;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_CLEAR_DATA_ACTION;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.AttributeSet;
 import android.widget.EditText;
 
@@ -33,28 +38,6 @@ import java.util.Set;
  * allow car-ui-lib to receive responses (like onClick events) from the IMS
  */
 class CarUiEditText extends EditText {
-    /**
-     * Interface for {@link CarUiEditText} to support different actions and callbacks from IME
-     * when running in wide screen mode.
-     */
-    interface PrivateImeCommandCallback {
-        /**
-         * Called when user clicks on an item in the search results.
-         *
-         * @param itemId the id of the item clicked. This will be the same id that was passed by the
-         *               application to the IMS template to display search results.
-         */
-        void onItemClicked(String itemId);
-
-        /**
-         * Called when user clicks on a secondary image within item in the search results.
-         *
-         * @param secondaryImageId the id of the secondary image clicked. This will be the same id
-         *                         that was passed by the application to the IMS template to display
-         *                         search results.
-         */
-        void onSecondaryImageClicked(String secondaryImageId);
-    }
 
     private final Set<PrivateImeCommandCallback> mPrivateImeCommandCallback = new HashSet<>();
 
@@ -101,6 +84,17 @@ class CarUiEditText extends EditText {
             for (PrivateImeCommandCallback listener : mPrivateImeCommandCallback) {
                 listener.onSecondaryImageClicked(
                         data.getString(SEARCH_RESULT_SECONDARY_IMAGE_ID));
+            }
+        }
+
+        int displayId = data.getInt(CONTENT_AREA_SURFACE_DISPLAY_ID);
+        int height = data.getInt(CONTENT_AREA_SURFACE_HEIGHT);
+        int width = data.getInt(CONTENT_AREA_SURFACE_WIDTH);
+        IBinder binder = data.getBinder(CONTENT_AREA_SURFACE_HOST_TOKEN);
+
+        if (binder != null) {
+            for (PrivateImeCommandCallback listener : mPrivateImeCommandCallback) {
+                listener.onSurfaceInfo(displayId, binder, height, width);
             }
         }
 

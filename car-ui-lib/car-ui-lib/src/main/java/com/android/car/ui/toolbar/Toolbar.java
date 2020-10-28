@@ -22,6 +22,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.FrameLayout;
 
 import androidx.annotation.DrawableRes;
@@ -269,6 +270,7 @@ public final class Toolbar extends FrameLayout implements ToolbarController {
 
     /**
      * Gets the {@link TabLayout} for this toolbar.
+     *
      * @deprecated Use other tab-related functions in the ToolbarController interface.
      */
     @Deprecated
@@ -649,13 +651,46 @@ public final class Toolbar extends FrameLayout implements ToolbarController {
     }
 
     /**
+     * Returns true if the toolbar can display search result items. One example of this is when the
+     * system is configured to display search items in the IME instead of in the app.
+     */
+    @Override
+    public boolean canShowSearchResultItems() {
+        return mController.canShowSearchResultItems();
+    }
+
+    /**
+     * Returns true if the app is allowed to set search results view.
+     */
+    @Override
+    public boolean canShowSearchResultsView() {
+        return mController.canShowSearchResultsView();
+    }
+
+    /**
+     * Add a view within a container that will animate with the wide screen IME to display search
+     * results.
+     *
+     * <p>Note: Apps can only call this method if the package name is allowed via OEM to render
+     * their view.  To check if the application have the permission to do so or not first call
+     * {@link #canShowSearchResultsView()}. If the app is not allowed this method will throw an
+     * {@link RuntimeException}
+     *
+     * @param view to be added in the container.
+     */
+    @Override
+    public void setSearchResultsView(View view) {
+        mController.setSearchResultsView(view);
+    }
+
+    /**
      * Sets a list of search items to be displayed in the IME window when running as a wide screen
      * mode. This should be called each time the list is updated. For example, when a user is typing
      * in the input field and the list gets filtered this method should be invoked each time.
      */
     @Override
-    public void setSearchItemsForWideScreen(List<? extends CarUiImeSearchListItem> searchItems) {
-        mController.setSearchItemsForWideScreen(searchItems);
+    public void setSearchResultItems(List<? extends CarUiImeSearchListItem> searchItems) {
+        mController.setSearchResultItems(searchItems);
     }
 
     /** Registers a new {@link OnSearchCompletedListener} to the list of listeners. */

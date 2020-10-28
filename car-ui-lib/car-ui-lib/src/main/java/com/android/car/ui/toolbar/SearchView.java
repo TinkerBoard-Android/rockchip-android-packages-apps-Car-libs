@@ -17,6 +17,7 @@ package com.android.car.ui.toolbar;
 
 import static android.view.WindowInsets.Type.ime;
 
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.CONTENT_AREA_SURFACE_PACKAGE;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_ITEM_ID;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_PRIMARY_IMAGE_RES_ID_LIST;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SECONDARY_IMAGE_ID;
@@ -28,14 +29,21 @@ import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.hardware.display.DisplayManager;
 import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.SurfaceControlViewHost;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -43,6 +51,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.android.car.ui.R;
@@ -68,7 +77,14 @@ public class SearchView extends ConstraintLayout {
     private final int mStartPaddingWithoutIcon;
     private final int mStartPadding;
     private final int mEndPadding;
-    private List<? extends CarUiImeSearchListItem> mWideScreenSearchItemList = new ArrayList<>();
+    @Nullable
+    private View mWideScreenImeContentAreaView;
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
+
+    private SurfaceControlViewHost mSurfaceControlViewHost;
+    private int mSurfaceHeight;
+    private int mSurfaceWidth;
+    private List<? extends CarUiImeSearchListItem> mWideScreenSearchItemList;
     private final Map<String, CarUiImeSearchListItem> mIdToListItem = new HashMap<>();
 
     private Set<Toolbar.OnSearchListener> mSearchListeners = Collections.emptySet();
@@ -152,31 +168,7 @@ public class SearchView extends ConstraintLayout {
 
         if (mSearchText instanceof CarUiEditText) {
             ((CarUiEditText) mSearchText).registerOnPrivateImeCommandListener(
-                    new CarUiEditText.PrivateImeCommandCallback() {
-                        @Override
-                        public void onItemClicked(String itemId) {
-                            CarUiImeSearchListItem item = mIdToListItem.get(itemId);
-                            if (item != null) {
-                                CarUiContentListItem.OnClickListener listener =
-                                        item.getOnClickListener();
-                                if (listener != null) {
-                                    listener.onClick(item);
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onSecondaryImageClicked(String secondaryImageId) {
-                            CarUiImeSearchListItem item = mIdToListItem.get(secondaryImageId);
-                            if (item != null) {
-                                CarUiContentListItem.OnClickListener listener =
-                                        item.getSupplementalIconOnClickListener();
-                                if (listener != null) {
-                                    listener.onClick(item);
-                                }
-                            }
-                        }
-                    });
+                    new SearchViewImeCallback());
         }
     }
 
@@ -192,9 +184,27 @@ public class SearchView extends ConstraintLayout {
         searchContainer.getRootView().setOnApplyWindowInsetsListener((v, insets) -> {
             if (insets.isVisible(ime())) {
                 displaySearchWideScreen();
+                mHandler.post(() -> {
+                    if (mSurfaceControlViewHost != null && mWideScreenImeContentAreaView != null
+                            && mSurfaceControlViewHost.getView() == null) {
+                        mSurfaceControlViewHost.setView(
+                                mWideScreenImeContentAreaView, mSurfaceWidth, mSurfaceHeight);
+                    }
+                });
             }
             return v.onApplyWindowInsets(insets);
         });
+    }
+
+    void setViewToImeWideScreenSurface(View view) {
+        if (view == null && mSurfaceControlViewHost != null) {
+            mSurfaceControlViewHost.release();
+        }
+
+        if (view != null && view.getParent() != null) {
+            throw new IllegalStateException("view should not have a parent");
+        }
+        mWideScreenImeContentAreaView = view;
     }
 
     private boolean isEnter(KeyEvent event) {
@@ -250,15 +260,24 @@ public class SearchView extends ConstraintLayout {
      * template.
      */
     public void setSearchItemsForWideScreen(List<? extends CarUiImeSearchListItem> searchItems) {
-        mWideScreenSearchItemList = new ArrayList<>(searchItems);
+        mWideScreenSearchItemList = searchItems != null ? new ArrayList<>(searchItems) : null;
         displaySearchWideScreen();
     }
 
     private void displaySearchWideScreen() {
         mIdToListItem.clear();
-        if (mWideScreenSearchItemList.isEmpty()) {
+        // mWideScreenImeContentAreaView will only be set when running in widescreen mode and
+        // apps allowed by OEMs are trying to set their own view. In that case we did not want to
+        // send the information to IME for templatized solution.
+        if (mWideScreenImeContentAreaView != null) {
             return;
         }
+
+        if (mWideScreenSearchItemList == null) {
+            mInputMethodManager.sendAppPrivateCommand(mSearchText, WIDE_SCREEN_ACTION, null);
+            return;
+        }
+
         ArrayList<String> itemIdList = new ArrayList<>();
         ArrayList<String> titleList = new ArrayList<>();
         ArrayList<String> subTitleList = new ArrayList<>();
@@ -356,5 +375,63 @@ public class SearchView extends ConstraintLayout {
     public void setSearchQuery(String query) {
         mSearchText.setText(query);
         mSearchText.setSelection(mSearchText.getText().length());
+    }
+
+    private class SearchViewImeCallback implements PrivateImeCommandCallback {
+
+        @Override
+        public void onItemClicked(String itemId) {
+            CarUiImeSearchListItem item = mIdToListItem.get(itemId);
+            if (item != null) {
+                CarUiContentListItem.OnClickListener listener =
+                        item.getOnClickListener();
+                if (listener != null) {
+                    listener.onClick(item);
+                }
+            }
+        }
+
+        @Override
+        public void onSecondaryImageClicked(String secondaryImageId) {
+            CarUiImeSearchListItem item = mIdToListItem.get(secondaryImageId);
+            if (item != null) {
+                CarUiContentListItem.OnClickListener listener =
+                        item.getSupplementalIconOnClickListener();
+                if (listener != null) {
+                    listener.onClick(item);
+                }
+            }
+        }
+
+        @Override
+        public void onSurfaceInfo(int displayId, IBinder binder, int height,
+                int width) {
+            if (Build.VERSION.SDK_INT < VERSION_CODES.R
+                    || mWideScreenImeContentAreaView == null) {
+                // SurfaceControlViewHost is only available on R and above
+                return;
+            }
+
+            DisplayManager dm = (DisplayManager) getContext().getSystemService(
+                    Context.DISPLAY_SERVICE);
+
+            Display display = dm.getDisplay(displayId);
+
+            if (mSurfaceControlViewHost != null) {
+                mSurfaceControlViewHost.release();
+            }
+
+            mSurfaceControlViewHost = new SurfaceControlViewHost(getContext(),
+                    display, binder);
+
+            mSurfaceHeight = height;
+            mSurfaceWidth = width;
+
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(CONTENT_AREA_SURFACE_PACKAGE,
+                    mSurfaceControlViewHost.getSurfacePackage());
+            mInputMethodManager.sendAppPrivateCommand(mSearchText,
+                    WIDE_SCREEN_ACTION, bundle);
+        }
     }
 }

@@ -127,10 +127,18 @@
         android:layout_height="match_parent"
         android:background="@color/car_ui_ime_wide_screen_divider_color"/>
 
+    <SurfaceView
+        android:id="@id/car_ui_ime_surface"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:focusable="false"/>
+
     <RelativeLayout
         android:id="@id/car_ui_contentAreaAutomotive"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:visibility="gone"
         android:background="@drawable/car_ui_ime_wide_screen_no_content_background">
         <androidx.recyclerview.widget.RecyclerView
             android:id="@id/car_ui_wideScreenSearchResultList"
