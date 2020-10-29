@@ -53,7 +53,7 @@ import org.junit.Test;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-/** Unit tests for {@link FocusArea}. */
+/** Unit tests for {@link FocusArea} not in touch mode. */
 public class FocusAreaTest {
     private static final long WAIT_TIME_MS = 3000;
 
