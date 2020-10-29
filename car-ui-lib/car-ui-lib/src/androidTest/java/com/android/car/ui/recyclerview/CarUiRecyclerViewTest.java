@@ -92,7 +92,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Unit tests for {@link CarUiRecyclerView}. */
+/**
+ * Unit tests for {@link CarUiRecyclerView}.
+ */
 public class CarUiRecyclerViewTest {
 
     @Rule
@@ -225,6 +227,31 @@ public class CarUiRecyclerViewTest {
                 isCompletelyAbove(withText(adapter.getItemText(2))));
         onView(withText(adapter.getItemText(2))).check(
                 isCompletelyAbove(withText(adapter.getItemText(3))));
+    }
+
+    @Test
+    public void testLayoutManagerSetInXml() {
+        // Inflate activity where a LayoutManger is set for a CarUiRecyclerView through a
+        // styleable attribute.
+        mActivity.runOnUiThread(
+                () -> mActivity.setContentView(
+                        R.layout.car_ui_recycler_view_layout_manager_xml_test_activity));
+
+        onView(withId(R.id.list)).check(matches(isDisplayed()));
+
+        CarUiRecyclerView carUiRecyclerView = mActivity.requireViewById(R.id.list);
+        TestAdapter adapter = new TestAdapter(3);
+        mActivity.runOnUiThread(() -> {
+            carUiRecyclerView.setAdapter(adapter);
+            carUiRecyclerView.setVisibility(View.VISIBLE);
+        });
+
+        // Check that items in are displayed.
+        onView(withText(adapter.getItemText(0))).check(matches(isDisplayed()));
+        onView(withText(adapter.getItemText(1))).check(matches(isDisplayed()));
+        onView(withText(adapter.getItemText(2))).check(matches(isDisplayed()));
+
+        assertTrue(carUiRecyclerView.getLayoutManager() instanceof GridLayoutManager);
     }
 
     @Test
@@ -975,8 +1002,8 @@ public class CarUiRecyclerViewTest {
     }
 
     /**
-     * Returns an item in the current list view whose height is taller than that of
-     * the CarUiRecyclerView. If that item exists, then it is returned; otherwise an {@link
+     * Returns an item in the current list view whose height is taller than that of the
+     * CarUiRecyclerView. If that item exists, then it is returned; otherwise an {@link
      * IllegalStateException} is thrown.
      *
      * @return An item that is taller than the CarUiRecyclerView.
@@ -994,7 +1021,9 @@ public class CarUiRecyclerViewTest {
                 "No item found that is longer than the height of the CarUiRecyclerView.");
     }
 
-    /** A test adapter that handles inflating test views and binding data to it. */
+    /**
+     * A test adapter that handles inflating test views and binding data to it.
+     */
     private static class TestAdapter extends RecyclerView.Adapter<TestViewHolder> {
 
         public enum ItemHeight {
