@@ -60,9 +60,9 @@ import java.lang.annotation.Retention;
 import java.util.Objects;
 
 /**
- * View that extends a {@link RecyclerView} and wraps itself into a {@link LinearLayout} which
- * could potentially include a scrollbar that has page up and down arrows. Interaction with this
- * view is similar to a {@code RecyclerView} as it takes the same adapter and the layout manager.
+ * View that extends a {@link RecyclerView} and wraps itself into a {@link LinearLayout} which could
+ * potentially include a scrollbar that has page up and down arrows. Interaction with this view is
+ * similar to a {@code RecyclerView} as it takes the same adapter and the layout manager.
  */
 public final class CarUiRecyclerView extends RecyclerView {
 
@@ -83,17 +83,17 @@ public final class CarUiRecyclerView extends RecyclerView {
     @Nullable
     private ScrollBar mScrollBar;
 
-    @NonNull
+    @Nullable
     private GridOffsetItemDecoration mTopOffsetItemDecorationGrid;
-    @NonNull
+    @Nullable
     private GridOffsetItemDecoration mBottomOffsetItemDecorationGrid;
-    @NonNull
+    @Nullable
     private RecyclerView.ItemDecoration mTopOffsetItemDecorationLinear;
-    @NonNull
+    @Nullable
     private RecyclerView.ItemDecoration mBottomOffsetItemDecorationLinear;
-    @NonNull
+    @Nullable
     private GridDividerItemDecoration mDividerItemDecorationGrid;
-    @NonNull
+    @Nullable
     private RecyclerView.ItemDecoration mDividerItemDecorationLinear;
     private int mNumOfColumns;
     private boolean mInstallingExtScrollBar = false;
@@ -105,6 +105,8 @@ public final class CarUiRecyclerView extends RecyclerView {
     @Nullable
     private LinearLayout mContainer;
 
+    // Set to true when when styled attributes are read and initialized.
+    private boolean mIsInitialized;
     private boolean mEnableDividers;
     private int mTopOffset;
     private int mBottomOffset;
@@ -132,12 +134,14 @@ public final class CarUiRecyclerView extends RecyclerView {
     @Retention(SOURCE)
     public @interface CarUiRecyclerViewLayout {
         /**
-         * Arranges items either horizontally in a single row or vertically in a single column.
-         * This is default.
+         * Arranges items either horizontally in a single row or vertically in a single column. This
+         * is default.
          */
         int LINEAR = 0;
 
-        /** Arranges items in a Grid. */
+        /**
+         * Arranges items in a Grid.
+         */
         int GRID = 2;
     }
 
@@ -165,8 +169,7 @@ public final class CarUiRecyclerView extends RecyclerView {
 
         /**
          * Sets the maximum number of items available in the adapter. A value less than '0' means
-         * the
-         * list should not be capped.
+         * the list should not be capped.
          */
         void setMaxItems(int maxItems);
     }
@@ -230,14 +233,18 @@ public final class CarUiRecyclerView extends RecyclerView {
         mBottomOffsetItemDecorationGrid =
                 new GridOffsetItemDecoration(mBottomOffset, mNumOfColumns,
                         OffsetPosition.END);
-        if (carUiRecyclerViewLayout == CarUiRecyclerViewLayout.LINEAR) {
+
+        mIsInitialized = true;
+
+        // Check if a layout manager has already been set via XML
+        boolean isLayoutMangerSet = getLayoutManager() != null;
+        if (!isLayoutMangerSet && carUiRecyclerViewLayout == CarUiRecyclerViewLayout.LINEAR) {
             setLayoutManager(new LinearLayoutManager(getContext()));
-        } else {
+        } else if (!isLayoutMangerSet && carUiRecyclerViewLayout == CarUiRecyclerViewLayout.GRID) {
             setLayoutManager(new GridLayoutManager(getContext(), mNumOfColumns));
         }
 
         a.recycle();
-
 
         if (!mScrollBarEnabled) {
             return;
@@ -252,33 +259,38 @@ public final class CarUiRecyclerView extends RecyclerView {
     }
 
     @Override
-    public void setLayoutManager(@Nullable LayoutManager layout) {
-        addItemDecorations(layout);
-        super.setLayoutManager(layout);
+    public void setLayoutManager(@Nullable LayoutManager layoutManager) {
+        // Cannot setup item decorations before stylized attributes have been read.
+        if (mIsInitialized) {
+            addItemDecorations(layoutManager);
+        }
+        super.setLayoutManager(layoutManager);
     }
 
-    private void addItemDecorations(LayoutManager layout) {
-        // remove existing Item decorations
-        removeItemDecoration(mDividerItemDecorationGrid);
-        removeItemDecoration(mTopOffsetItemDecorationGrid);
-        removeItemDecoration(mBottomOffsetItemDecorationGrid);
-        removeItemDecoration(mDividerItemDecorationLinear);
-        removeItemDecoration(mTopOffsetItemDecorationLinear);
-        removeItemDecoration(mBottomOffsetItemDecorationLinear);
+    // This method should not be invoked before item decorations are initialized by the #init()
+    // method.
+    private void addItemDecorations(LayoutManager layoutManager) {
+        // remove existing Item decorations.
+        removeItemDecoration(Objects.requireNonNull(mDividerItemDecorationGrid));
+        removeItemDecoration(Objects.requireNonNull(mTopOffsetItemDecorationGrid));
+        removeItemDecoration(Objects.requireNonNull(mBottomOffsetItemDecorationGrid));
+        removeItemDecoration(Objects.requireNonNull(mDividerItemDecorationLinear));
+        removeItemDecoration(Objects.requireNonNull(mTopOffsetItemDecorationLinear));
+        removeItemDecoration(Objects.requireNonNull(mBottomOffsetItemDecorationLinear));
 
-        if (layout instanceof GridLayoutManager) {
+        if (layoutManager instanceof GridLayoutManager) {
             if (mEnableDividers) {
-                addItemDecoration(mDividerItemDecorationGrid);
+                addItemDecoration(Objects.requireNonNull(mDividerItemDecorationGrid));
             }
-            addItemDecoration(mTopOffsetItemDecorationGrid);
-            addItemDecoration(mBottomOffsetItemDecorationGrid);
-            setNumOfColumns(((GridLayoutManager) layout).getSpanCount());
+            addItemDecoration(Objects.requireNonNull(mTopOffsetItemDecorationGrid));
+            addItemDecoration(Objects.requireNonNull(mBottomOffsetItemDecorationGrid));
+            setNumOfColumns(((GridLayoutManager) layoutManager).getSpanCount());
         } else {
             if (mEnableDividers) {
-                addItemDecoration(mDividerItemDecorationLinear);
+                addItemDecoration(Objects.requireNonNull(mDividerItemDecorationLinear));
             }
-            addItemDecoration(mTopOffsetItemDecorationLinear);
-            addItemDecoration(mBottomOffsetItemDecorationLinear);
+            addItemDecoration(Objects.requireNonNull(mTopOffsetItemDecorationLinear));
+            addItemDecoration(Objects.requireNonNull(mBottomOffsetItemDecorationLinear));
         }
     }
 
@@ -379,8 +391,8 @@ public final class CarUiRecyclerView extends RecyclerView {
 
     /**
      * This method will detach the current recycler view from its parent and attach it to the
-     * container which is a LinearLayout. Later the entire container is attached to the
-     * parent where the recycler view was set with the same layout params.
+     * container which is a LinearLayout. Later the entire container is attached to the parent where
+     * the recycler view was set with the same layout params.
      */
     private void installExternalScrollBar() {
         LayoutInflater inflater = LayoutInflater.from(getContext());
@@ -488,8 +500,8 @@ public final class CarUiRecyclerView extends RecyclerView {
     }
 
     /**
-     * Sets the scrollbar's padding top and bottom.
-     * This padding is applied in addition to the padding of the RecyclerView.
+     * Sets the scrollbar's padding top and bottom. This padding is applied in addition to the
+     * padding of the RecyclerView.
      */
     public void setScrollBarPadding(int paddingTop, int paddingBottom) {
         if (mScrollBarEnabled) {
