@@ -113,6 +113,7 @@ public class ViewUtilsTest {
                     @Override
                     public void onGlobalLayout() {
                         mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        CarUiUtils.setRotaryScrollEnabled(mList5, /* isVertical= */ true);
                         View firstItem = mList5.getLayoutManager().findViewByPosition(0);
                         assertThat(ViewUtils.getAncestorScrollableContainer(firstItem))
                                 .isEqualTo(mList5);
@@ -360,12 +361,25 @@ public class ViewUtilsTest {
     }
 
     @Test
+    public void testRequestFocus_rotaryContainer() {
+        mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        assertRequestFocus(mList5, false);
+                    }
+                }));
+    }
+
+    @Test
     public void testRequestFocus_scrollableContainer() {
         mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
                 new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
                         mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        CarUiUtils.setRotaryScrollEnabled(mList5, /* isVertical= */ true);
                         assertRequestFocus(mList5, false);
                     }
                 }));

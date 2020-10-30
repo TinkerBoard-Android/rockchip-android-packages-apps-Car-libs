@@ -151,7 +151,7 @@ public class FocusParkingViewTest {
 
                         ViewGroup parent = (ViewGroup) firstItem.getParent();
                         parent.removeView(firstItem);
-                        assertThat(mList.isFocused()).isTrue();
+                        assertThat(mFocusedByDefault.isFocused()).isTrue();
                     }
                 }));
     }

@@ -91,8 +91,6 @@
         <com.android.car.ui.recyclerview.CarUiRecyclerView
             android:id="@+id/list5"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="com.android.car.ui.utils.VERTICALLY_SCROLLABLE"/>
-        <!-- TODO(b/171339427) Use app:rotaryScrollEnabled instead of contentDescription. -->
+            android:layout_height="wrap_content"/>
     </com.android.car.ui.FocusArea>
 </LinearLayout>

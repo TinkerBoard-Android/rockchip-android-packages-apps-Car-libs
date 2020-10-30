@@ -16,6 +16,7 @@
 package com.android.car.ui.recyclerview;
 
 import static com.android.car.ui.utils.CarUiUtils.findViewByRefId;
+import static com.android.car.ui.utils.RotaryConstants.ROTARY_CONTAINER;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_HORIZONTALLY_SCROLLABLE;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_VERTICALLY_SCROLLABLE;
 
@@ -330,6 +331,11 @@ public final class CarUiRecyclerView extends RecyclerView {
         // Disable the default focus highlight. No highlight should appear when this view is
         // focused.
         setDefaultFocusHighlightEnabled(false);
+
+        // This view is a rotary container if it's not a scrollable container.
+        if (!rotaryScrollEnabled) {
+            super.setContentDescription(ROTARY_CONTAINER);
+        }
     }
 
     @Override
