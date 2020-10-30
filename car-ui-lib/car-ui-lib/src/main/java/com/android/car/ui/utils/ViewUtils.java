@@ -18,6 +18,7 @@ package com.android.car.ui.utils;
 
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_FOCUS;
 
+import static com.android.car.ui.utils.RotaryConstants.ROTARY_CONTAINER;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_HORIZONTALLY_SCROLLABLE;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_VERTICALLY_SCROLLABLE;
 
@@ -202,24 +203,31 @@ public final class ViewUtils {
 
     /**
      * Returns whether the {@code view} is an implicit default focus view, i.e., the first focusable
-     * item in a scrollable container.
+     * item in a rotary container.
      */
     @VisibleForTesting
     static boolean isImplicitDefaultFocusView(@NonNull View view) {
-        ViewGroup scrollableContainer = null;
+        ViewGroup rotaryContainer = null;
         ViewParent parent = view.getParent();
         while (parent != null && parent instanceof ViewGroup) {
             ViewGroup viewGroup = (ViewGroup) parent;
-            if (isScrollableContainer(viewGroup)) {
-                scrollableContainer = viewGroup;
+            if (isRotaryContainer(viewGroup)) {
+                rotaryContainer = viewGroup;
                 break;
             }
             parent = parent.getParent();
         }
-        if (scrollableContainer == null) {
+        if (rotaryContainer == null) {
             return false;
         }
-        return findFirstFocusableDescendant(scrollableContainer) == view;
+        return findFirstFocusableDescendant(rotaryContainer) == view;
+    }
+
+    private static boolean isRotaryContainer(@NonNull View view) {
+        CharSequence contentDescription = view.getContentDescription();
+        return TextUtils.equals(contentDescription, ROTARY_CONTAINER)
+                || TextUtils.equals(contentDescription, ROTARY_VERTICALLY_SCROLLABLE)
+                || TextUtils.equals(contentDescription, ROTARY_HORIZONTALLY_SCROLLABLE);
     }
 
     private static boolean isScrollableContainer(@NonNull View view) {
@@ -317,16 +325,16 @@ public final class ViewUtils {
 
     /**
      * Searches the {@code view} and its descendants in depth first order, and returns the first
-     * implicit default focus view, i.e., the first focusable item in the first scrollable
-     * container. Returns null if not found.
+     * implicit default focus view, i.e., the first focusable item in the first rotary container.
+     * Returns null if not found.
      */
     @VisibleForTesting
     @Nullable
     static View findImplicitDefaultFocusView(@NonNull View view) {
-        View scrollableContainer = findScrollableContainer(view);
-        return scrollableContainer == null
+        View rotaryContainer = findRotaryContainer(view);
+        return rotaryContainer == null
                 ? null
-                : findFirstFocusableDescendant(scrollableContainer);
+                : findFirstFocusableDescendant(rotaryContainer);
     }
 
     /**
@@ -343,12 +351,12 @@ public final class ViewUtils {
 
     /**
      * Searches the {@code view} and its descendants in depth first order, and returns the first
-     * scrollable container shown on the screen. Returns null if not found.
+     * rotary container shown on the screen. Returns null if not found.
      */
     @Nullable
-    private static View findScrollableContainer(@NonNull View view) {
+    private static View findRotaryContainer(@NonNull View view) {
         return depthFirstSearch(view,
-                /* targetPredicate= */ v -> isScrollableContainer(v),
+                /* targetPredicate= */ v -> isRotaryContainer(v),
                 /* skipPredicate= */ v -> !v.isShown());
     }
 

@@ -23,15 +23,34 @@ package com.android.car.ui.utils;
  */
 public final class RotaryConstants {
     /**
-     * Content description indicating that the rotary controller should scroll this view
-     * horizontally.
+     * Content description indicating that the view is a rotary container.
+     * <p>
+     * A rotary container contains focusable elements. When initializing focus, the first element
+     * in the rotary container is prioritized to take focus. When searching for nudge target, the
+     * bounds of the rotary container is the minimum bounds containing its descendants.
+     * <p>
+     * A rotary container shouldn't be focusable unless it's a scrollable container. Though it
+     * can't be focused, it can be scrolled as a side-effect of moving the focus within it.
+     */
+    public static final String ROTARY_CONTAINER =
+            "com.android.car.ui.utils.ROTARY_CONTAINER";
+
+    /**
+     * Content description indicating that the view is a scrollable container and can be scrolled
+     * horizontally by the rotary controller.
+     * <p>
+     * A scrollable container is a focusable rotary container. When it's focused, it can be scrolled
+     * when the rotary controller rotates. A scrollable container is often used to show long text.
      */
     public static final String ROTARY_HORIZONTALLY_SCROLLABLE =
             "com.android.car.ui.utils.HORIZONTALLY_SCROLLABLE";
 
     /**
-     * Content description indicating that the rotary controller should scroll this view
-     * vertically.
+     * Content description indicating that the view is a scrollable container and can be scrolled
+     * vertically by the rotary controller.
+     * <p>
+     * A scrollable container is a focusable rotary container. When it's focused, it can be scrolled
+     * when the rotary controller rotates. A scrollable container is often used to show long text.
      */
     public static final String ROTARY_VERTICALLY_SCROLLABLE =
             "com.android.car.ui.utils.VERTICALLY_SCROLLABLE";
