@@ -70,4 +70,7 @@
     <!-- Whether IME is aligned left or not(which means its on right). This value will be used by
          the applications not using car-ui-lib components and are hiding the content area. -->
     <bool name="car_ui_ime_wide_screen_aligned_left">true</bool>
+
+    <!-- If there is no positive/negative/neutral button, should we add one that says "dismiss"? -->
+    <bool name="car_ui_alert_dialog_force_dismiss_button">true</bool>
 </resources>

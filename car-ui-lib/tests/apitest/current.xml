@@ -6,6 +6,7 @@
   <public type="attr" name="carUiPreferenceStyle"/>
   <public type="attr" name="carUiRecyclerViewStyle"/>
   <public type="attr" name="state_ux_restricted"/>
+  <public type="bool" name="car_ui_alert_dialog_force_dismiss_button"/>
   <public type="bool" name="car_ui_clear_focus_area_history_when_rotating"/>
   <public type="bool" name="car_ui_enable_focus_area_background_highlight"/>
   <public type="bool" name="car_ui_enable_focus_area_foreground_highlight"/>
