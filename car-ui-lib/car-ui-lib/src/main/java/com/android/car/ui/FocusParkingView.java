@@ -137,6 +137,11 @@ public class FocusParkingView extends View {
             // (such as focus, clear focus) on the nodes in the window. So FocusParkingView has to
             // grab the focus proactively.
             super.requestFocus(FOCUS_DOWN, null);
+
+            // OnGlobalFocusChangeListener won't be triggered when the window lost focus, so reset
+            // the focused view here.
+            mFocusedView = null;
+            mScrollableContainer = null;
         } else if (isFocused()) {
             // When FocusParkingView is focused and the window just gets focused, transfer the view
             // focus to a non-FocusParkingView in the window.
@@ -185,9 +190,9 @@ public class FocusParkingView extends View {
     }
 
     private boolean restoreFocusInRoot() {
-        // The focused view was in a scrollable container and it was removed, e.g., it was scrolled
-        // off the screen. Let's focus on the scrollable container so that the rotary controller
-        // can scroll it.
+        // The focused view was in a scrollable container and the Framework unfocused it because it
+        // was scrolled off the screen. In this case focus on the scrollable container so that the
+        // rotary controller can scroll the scrollable container.
         if (maybeFocusOnScrollableContainer()) {
             return true;
         }
@@ -196,9 +201,14 @@ public class FocusParkingView extends View {
     }
 
     private boolean maybeFocusOnScrollableContainer() {
+        // If the focused view was in a scrollable container and it was scrolled off the screen,
+        // focus on the scrollable container. When a view is scrolled off the screen, it is no
+        // longer attached to window and its parent is not null. When a view is removed, its parent
+        // is null. There is no need to focus on the scrollable container when its focused element
+        // is removed.
         if (mFocusedView != null && !mFocusedView.isAttachedToWindow()
-                && mScrollableContainer != null && mScrollableContainer.isAttachedToWindow()
-                && mScrollableContainer.isShown()) {
+                && mFocusedView.getParent() != null && mScrollableContainer != null
+                && mScrollableContainer.isAttachedToWindow() && mScrollableContainer.isShown()) {
             RecyclerView recyclerView = mScrollableContainer instanceof RecyclerView
                     ? (RecyclerView) mScrollableContainer
                     : null;
