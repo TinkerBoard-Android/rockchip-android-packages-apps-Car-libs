@@ -51,27 +51,33 @@ public final class ViewUtils {
      */
     public static final int NO_FOCUS = 1;
 
-    /** A regular view is focused. */
-    public static final int REGULAR_FOCUS = 2;
+    /** A scrollable container is focused. */
+    public static final int SCROLLABLE_CONTAINER_FOCUS = 2;
+
+    /**
+     * A regular view is focused. A regular View is a View that is neither a FocusParkingView nor a
+     * scrollable container.
+     */
+    public static final int REGULAR_FOCUS = 3;
 
     /**
      * An implicit default focus view (i.e., the first focusable item in a scrollable container) is
      * focused.
      */
-    public static final int IMPLICIT_DEFAULT_FOCUS = 3;
+    public static final int IMPLICIT_DEFAULT_FOCUS = 4;
 
     /** The {@code app:defaultFocus} view is focused. */
-    public static final int DEFAULT_FOCUS = 4;
+    public static final int DEFAULT_FOCUS = 5;
 
     /** The {@code android:focusedByDefault} view is focused. */
-    public static final int FOCUSED_BY_DEFAULT = 5;
+    public static final int FOCUSED_BY_DEFAULT = 6;
 
     /**
      * Focus level of a view. When adjusting the focus, the view with the highest focus level will
      * be focused.
      */
-    @IntDef(flag = true, value = {NO_FOCUS, REGULAR_FOCUS, IMPLICIT_DEFAULT_FOCUS,
-            DEFAULT_FOCUS, FOCUSED_BY_DEFAULT})
+    @IntDef(flag = true, value = {NO_FOCUS, SCROLLABLE_CONTAINER_FOCUS, REGULAR_FOCUS,
+            IMPLICIT_DEFAULT_FOCUS, DEFAULT_FOCUS, FOCUSED_BY_DEFAULT})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FocusLevel {
     }
@@ -171,8 +177,11 @@ public final class ViewUtils {
         if (currentLevel < IMPLICIT_DEFAULT_FOCUS && focusOnImplicitDefaultFocusView(root)) {
             return true;
         }
-        if (currentLevel < REGULAR_FOCUS) {
-            return focusOnFirstFocus(root);
+        if (currentLevel < REGULAR_FOCUS && focusOnFirstRegularView(root)) {
+            return true;
+        }
+        if (currentLevel < SCROLLABLE_CONTAINER_FOCUS) {
+            return focusOnScrollableContainer(root);
         }
         return false;
     }
@@ -191,6 +200,9 @@ public final class ViewUtils {
         }
         if (isImplicitDefaultFocusView(view)) {
             return IMPLICIT_DEFAULT_FOCUS;
+        }
+        if (isScrollableContainer(view)) {
+            return SCROLLABLE_CONTAINER_FOCUS;
         }
         return REGULAR_FOCUS;
     }
@@ -270,17 +282,32 @@ public final class ViewUtils {
     }
 
     /**
-     * Tries to focus on the first focusable view in the view tree in depth first order. If failed,
-     * keeps trying other views in depth first order until succeeded.
+     * Tries to focus on the first focusable view in the view tree in depth first order, excluding
+     * the FocusParkingView and scrollable containers. If focusing on the first such view fails,
+     * keeps trying other views in depth first order until succeeds or there are no more such views.
      *
      * @param root the root of the view tree
      * @return whether succeeded
      */
-    private static boolean focusOnFirstFocus(@NonNull View root) {
+    private static boolean focusOnFirstRegularView(@NonNull View root) {
         View focusedView = ViewUtils.depthFirstSearch(root,
-                /* targetPredicate= */ v -> canTakeFocus(v) && requestFocus(v),
+                /* targetPredicate= */
+                v -> !isScrollableContainer(v) && canTakeFocus(v) && requestFocus(v),
                 /* skipPredicate= */ v -> !v.isShown());
         return focusedView != null;
+    }
+
+    /**
+     * Focuses on the first scrollable container in the view tree, if any.
+     *
+     * @param root the root of the view tree
+     * @return whether succeeded
+     */
+    private static boolean focusOnScrollableContainer(@NonNull View root) {
+        View focusedView = ViewUtils.depthFirstSearch(root,
+                /* targetPredicate= */ v -> isScrollableContainer(v) && canTakeFocus(v),
+                /* skipPredicate= */ v -> !v.isShown());
+        return requestFocus(focusedView);
     }
 
     /**
