@@ -688,7 +688,11 @@ public class FocusArea extends LinearLayout {
         }
     }
 
-    /** Sets the padding (in pixels) of the FocusArea highlight. */
+    /**
+     * Sets the padding (in pixels) of the FocusArea highlight.
+     * <p>
+     * It doesn't affect other values, such as the paddings on its child views.
+     */
     public void setHighlightPadding(int left, int top, int right, int bottom) {
         if (mPaddingLeft == left && mPaddingTop == top && mPaddingRight == right
                 && mPaddingBottom == bottom) {
@@ -701,7 +705,13 @@ public class FocusArea extends LinearLayout {
         invalidate();
     }
 
-    /** Sets the offset (in pixels) of the FocusArea's bounds. */
+    /**
+     * Sets the offset (in pixels) of the FocusArea's bounds.
+     * <p>
+     * It only affects the perceived bounds for the purposes of finding the nudge target. It doesn't
+     * affect the FocusArea's view bounds or highlight bounds. The offset should only be used when
+     * FocusAreas are overlapping and nudge interaction is ambiguous.
+     */
     public void setBoundsOffset(int left, int top, int right, int bottom) {
         mLeftOffset = left;
         mTopOffset = top;
