@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 
 import com.android.car.ui.button.CarUiButton;
 import com.android.car.ui.button.CarUiButtonAttributes;
+import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
 
 /**
@@ -40,19 +41,24 @@ public final class CarUiLayoutInflaterFactory implements LayoutInflater.Factory2
     @Override
     public View onCreateView(View parent, String name, Context context,
             AttributeSet attributeSet) {
+        View view = null;
+
         if (CarUiButton.class.getSimpleName().equals(name)) {
             CarUiButton controller = SharedLibraryFactorySingleton.get(context).createButton(
                     context, CarUiButtonAttributes.fromAttributeSet(context, attributeSet));
-            View view = controller.getView();
+            view = controller.getView();
             if (view != null) {
-                if (parent instanceof ViewGroup) {
-                    view.setLayoutParams(((ViewGroup) parent).generateLayoutParams(attributeSet));
-                }
                 view.setTag(R.id.car_ui_component_reference, controller);
-                return view;
             }
+        } else if (CarUiRecyclerView.class.getName().equals(name)) {
+            view = SharedLibraryFactorySingleton.get(context)
+                    .createRecyclerView(context, attributeSet);
         }
 
-        return null;
+        if (view != null && parent instanceof ViewGroup) {
+            view.setLayoutParams(((ViewGroup) parent).generateLayoutParams(attributeSet));
+        }
+
+        return view;
     }
 }
