@@ -38,3 +38,22 @@ android_library {
         "libphonenumber",
     ],
 }
+// Car Messaging Models, Unbundled
+android_library {
+    name: "car-messaging-models",
+
+    srcs: [
+      "src/com/android/car/messenger/common/Conversation.java",
+    ],
+
+    optimize: {
+        enabled: false,
+    },
+
+    sdk_version: "current",
+
+    static_libs: [
+        "androidx.legacy_legacy-support-v4",
+        "androidx.annotation_annotation",
+    ],
+}
