@@ -33,3 +33,7 @@ PRODUCT_PACKAGES += \
     googlecarui-com-google-android-carassistant \
     googlecarui-com-google-android-tts \
     googlecarui-com-android-vending \
+
+# This system property is used to enable the RROs on startup via
+# the requiredSystemPropertyName/Value attributes in the manifest
+PRODUCT_PRODUCT_PROPERTIES += ro.build.car_ui_rros_enabled=true
