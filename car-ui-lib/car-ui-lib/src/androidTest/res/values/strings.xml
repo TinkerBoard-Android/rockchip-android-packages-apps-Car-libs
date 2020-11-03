@@ -31,4 +31,10 @@
     <string name="title_dropdown_preference">Dropdown preference</string>
     <string name="title_twoaction_preference">TwoAction preference</string>
     <string name="summary_twoaction_preference">A widget should be visible on the right</string>
+
+    <string-array name="test_string_array">
+        <item>Item 1</item>
+        <item>Item 2</item>
+        <item>Item 3</item>
+    </string-array>
 </resources>

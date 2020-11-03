@@ -60,6 +60,8 @@ public class AlertDialogBuilder {
     private CharSequence mSubtitle;
     private Drawable mIcon;
     private boolean mIconTinted;
+    private boolean mAllowDismissButton = true;
+    private boolean mHasSingleChoiceBodyButton = false;
 
     public AlertDialogBuilder(Context context) {
         // Resource id specified as 0 uses the parent contexts resolved value for alertDialogTheme.
@@ -329,6 +331,7 @@ public class AlertDialogBuilder {
     public AlertDialogBuilder setItems(@ArrayRes int itemsId,
             final DialogInterface.OnClickListener listener) {
         mBuilder.setItems(itemsId, listener);
+        mHasSingleChoiceBodyButton = true;
         return this;
     }
 
@@ -341,6 +344,7 @@ public class AlertDialogBuilder {
     public AlertDialogBuilder setItems(CharSequence[] items,
             final DialogInterface.OnClickListener listener) {
         mBuilder.setItems(items, listener);
+        mHasSingleChoiceBodyButton = true;
         return this;
     }
 
@@ -353,6 +357,7 @@ public class AlertDialogBuilder {
     public AlertDialogBuilder setAdapter(final ListAdapter adapter,
             final DialogInterface.OnClickListener listener) {
         mBuilder.setAdapter(adapter, listener);
+        mHasSingleChoiceBodyButton = true;
         return this;
     }
 
@@ -363,6 +368,7 @@ public class AlertDialogBuilder {
      */
     public AlertDialogBuilder setAdapter(final CarUiListItemAdapter adapter) {
         setCustomList(adapter);
+        mHasSingleChoiceBodyButton = true;
         return this;
     }
 
@@ -390,6 +396,7 @@ public class AlertDialogBuilder {
             final DialogInterface.OnClickListener listener,
             String labelColumn) {
         mBuilder.setCursor(cursor, listener, labelColumn);
+        mHasSingleChoiceBodyButton = true;
         return this;
     }
 
@@ -413,6 +420,7 @@ public class AlertDialogBuilder {
     public AlertDialogBuilder setMultiChoiceItems(@ArrayRes int itemsId, boolean[] checkedItems,
             final DialogInterface.OnMultiChoiceClickListener listener) {
         mBuilder.setMultiChoiceItems(itemsId, checkedItems, listener);
+        mHasSingleChoiceBodyButton = false;
         return this;
     }
 
@@ -435,6 +443,7 @@ public class AlertDialogBuilder {
     public AlertDialogBuilder setMultiChoiceItems(CharSequence[] items, boolean[] checkedItems,
             final DialogInterface.OnMultiChoiceClickListener listener) {
         mBuilder.setMultiChoiceItems(items, checkedItems, listener);
+        mHasSingleChoiceBodyButton = false;
         return this;
     }
 
@@ -460,6 +469,7 @@ public class AlertDialogBuilder {
             String labelColumn,
             final DialogInterface.OnMultiChoiceClickListener listener) {
         mBuilder.setMultiChoiceItems(cursor, isCheckedColumn, labelColumn, listener);
+        mHasSingleChoiceBodyButton = true;
         return this;
     }
 
@@ -480,6 +490,7 @@ public class AlertDialogBuilder {
     public AlertDialogBuilder setSingleChoiceItems(@ArrayRes int itemsId, int checkedItem,
             final DialogInterface.OnClickListener listener) {
         mBuilder.setSingleChoiceItems(itemsId, checkedItem, listener);
+        mHasSingleChoiceBodyButton = true;
         return this;
     }
 
@@ -502,6 +513,7 @@ public class AlertDialogBuilder {
             String labelColumn,
             final DialogInterface.OnClickListener listener) {
         mBuilder.setSingleChoiceItems(cursor, checkedItem, labelColumn, listener);
+        mHasSingleChoiceBodyButton = true;
         return this;
     }
 
@@ -521,6 +533,7 @@ public class AlertDialogBuilder {
     public AlertDialogBuilder setSingleChoiceItems(CharSequence[] items, int checkedItem,
             final DialogInterface.OnClickListener listener) {
         mBuilder.setSingleChoiceItems(items, checkedItem, listener);
+        mHasSingleChoiceBodyButton = true;
         return this;
     }
 
@@ -534,6 +547,7 @@ public class AlertDialogBuilder {
     public AlertDialogBuilder setSingleChoiceItems(ListAdapter adapter, int checkedItem,
             final DialogInterface.OnClickListener listener) {
         mBuilder.setSingleChoiceItems(adapter, checkedItem, listener);
+        mHasSingleChoiceBodyButton = true;
         return this;
     }
 
@@ -555,6 +569,7 @@ public class AlertDialogBuilder {
     public AlertDialogBuilder setSingleChoiceItems(CarUiRadioButtonListItemAdapter adapter,
             final DialogInterface.OnClickListener listener) {
         setCustomList(adapter);
+        mHasSingleChoiceBodyButton = false;
         return this;
     }
 
@@ -570,6 +585,7 @@ public class AlertDialogBuilder {
      */
     public AlertDialogBuilder setSingleChoiceItems(CarUiRadioButtonListItemAdapter adapter) {
         setCustomList(adapter);
+        mHasSingleChoiceBodyButton = false;
         return this;
     }
 
@@ -583,6 +599,7 @@ public class AlertDialogBuilder {
     public AlertDialogBuilder setOnItemSelectedListener(
             final AdapterView.OnItemSelectedListener listener) {
         mBuilder.setOnItemSelectedListener(listener);
+        mHasSingleChoiceBodyButton = true;
         return this;
     }
 
@@ -635,6 +652,22 @@ public class AlertDialogBuilder {
         return setEditBox(prompt, textChangedListener, inputFilters, 0);
     }
 
+    /**
+     * By default, the AlertDialogBuilder may add a "Dismiss" button if you don't provide
+     * a positive/negative/neutral button. This is so that the dialog is still dismissible
+     * using the rotary controller. If however, you add buttons that can close the dialog via
+     * {@link #setAdapter(CarUiListItemAdapter)} or a similar method, then you may wish to
+     * suppress the addition of the dismiss button, which this method allows for.
+     *
+     * @param allowDismissButton If true, a "Dismiss" button may be added to the dialog.
+     *                           If false, it will never be added.
+     * @return this Builder object to allow for chaining of calls to set methods
+     */
+    public AlertDialogBuilder setAllowDismissButton(boolean allowDismissButton) {
+        mAllowDismissButton = allowDismissButton;
+        return this;
+    }
+
 
     /** Final steps common to both {@link #create()} and {@link #show()} */
     private void prepareDialog() {
@@ -659,8 +692,14 @@ public class AlertDialogBuilder {
         }
         mBuilder.setCustomTitle(customTitle);
 
-        if (mContext.getResources().getBoolean(R.bool.car_ui_alert_dialog_force_dismiss_button)
+        if (!mAllowDismissButton && !mHasSingleChoiceBodyButton
                 && !mNeutralButtonSet && !mNegativeButtonSet && !mPositiveButtonSet) {
+            throw new RuntimeException(
+                    "The dialog must have at least one button to disable the dismiss button");
+        }
+        if (mContext.getResources().getBoolean(R.bool.car_ui_alert_dialog_force_dismiss_button)
+                && !mNeutralButtonSet && !mNegativeButtonSet && !mPositiveButtonSet
+                && mAllowDismissButton) {
             String mDefaultButtonText = mContext.getString(
                     R.string.car_ui_alert_dialog_default_button);
             mBuilder.setNegativeButton(mDefaultButtonText, (dialog, which) -> {
