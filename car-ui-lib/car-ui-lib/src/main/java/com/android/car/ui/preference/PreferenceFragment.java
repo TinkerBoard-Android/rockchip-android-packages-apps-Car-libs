@@ -103,6 +103,7 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
 
             FocusArea focusArea = CarUiUtils.requireViewByRefId(view, R.id.car_ui_focus_area);
             focusArea.setHighlightPadding(0, newHeight, 0, 0);
+            focusArea.setBoundsOffset(0, newHeight, 0, 0);
         });
 
         recyclerView.setClipToPadding(false);
@@ -125,6 +126,7 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
         View view = requireView();
         FocusArea focusArea = CarUiUtils.requireViewByRefId(view, R.id.car_ui_focus_area);
         focusArea.setHighlightPadding(0, insets.getTop(), 0, insets.getBottom());
+        focusArea.setBoundsOffset(0, insets.getTop(), 0, insets.getBottom());
         CarUiUtils.requireViewByRefId(view, R.id.recycler_view)
                 .setPadding(0, insets.getTop(), 0, insets.getBottom());
         view.setPadding(insets.getLeft(), 0, insets.getRight(), 0);
