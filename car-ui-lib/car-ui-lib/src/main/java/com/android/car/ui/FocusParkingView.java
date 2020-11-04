@@ -190,6 +190,10 @@ public class FocusParkingView extends View {
     }
 
     private boolean restoreFocusInRoot() {
+        // Don't do anything in touch mode.
+        if (isInTouchMode()) {
+            return false;
+        }
         // The focused view was in a scrollable container and the Framework unfocused it because it
         // was scrolled off the screen. In this case focus on the scrollable container so that the
         // rotary controller can scroll the scrollable container.
