@@ -166,6 +166,9 @@ public class CarUiRecyclerViewTest {
         when(typedArray.getInt(eq(R.styleable.CarUiRecyclerView_numOfColumns), anyInt()))
                 .thenReturn(3);
 
+        // Ensure the CarUiRecyclerViewLayout constant matches the styleable attribute enum value
+        assertEquals(CarUiRecyclerView.CarUiRecyclerViewLayout.GRID, 1);
+
         CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerView(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         TestAdapter adapter = new TestAdapter(4);
@@ -209,6 +212,9 @@ public class CarUiRecyclerViewTest {
                 anyInt());
         when(typedArray.getInt(eq(R.styleable.CarUiRecyclerView_layoutStyle), anyInt()))
                 .thenReturn(CarUiRecyclerView.CarUiRecyclerViewLayout.LINEAR);
+
+        // Ensure the CarUiRecyclerViewLayout constant matches the styleable attribute enum value
+        assertEquals(CarUiRecyclerView.CarUiRecyclerViewLayout.LINEAR, 0);
 
         CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerView(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
