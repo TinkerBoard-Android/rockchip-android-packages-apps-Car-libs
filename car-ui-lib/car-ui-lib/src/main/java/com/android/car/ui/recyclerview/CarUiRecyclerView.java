@@ -143,7 +143,7 @@ public final class CarUiRecyclerView extends RecyclerView {
         /**
          * Arranges items in a Grid.
          */
-        int GRID = 2;
+        int GRID = 1;
     }
 
     /**
