@@ -32,6 +32,7 @@ import androidx.test.rule.ActivityTestRule;
 
 import com.android.car.ui.recyclerview.TestContentLimitingAdapter;
 import com.android.car.ui.test.R;
+import com.android.car.ui.utils.CarUiUtils;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -39,6 +40,8 @@ import org.junit.Test;
 
 /** Unit test for {@link FocusParkingView}. */
 public class FocusParkingViewTest {
+
+    private static final int NUM_ITEMS = 40;
 
     @Rule
     public ActivityTestRule<FocusParkingViewTestActivity> mActivityRule =
@@ -62,7 +65,8 @@ public class FocusParkingViewTest {
 
         mList.post(() -> {
             mList.setLayoutManager(new LinearLayoutManager(mActivity));
-            mList.setAdapter(new TestContentLimitingAdapter(/* numItems= */ 2));
+            mList.setAdapter(new TestContentLimitingAdapter(NUM_ITEMS));
+            CarUiUtils.setRotaryScrollEnabled(mList, /* isVertical= */ true);
         });
     }
 
@@ -152,6 +156,32 @@ public class FocusParkingViewTest {
                         ViewGroup parent = (ViewGroup) firstItem.getParent();
                         parent.removeView(firstItem);
                         assertThat(mFocusedByDefault.isFocused()).isTrue();
+                    }
+                })
+        );
+    }
+
+    @Test
+    public void testRestoreFocusInRoot_recyclerViewItemScrolledOffScreen() {
+        mList.post(() -> mList.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        mList.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        View firstItem = mList.getLayoutManager().findViewByPosition(0);
+                        firstItem.requestFocus();
+                        assertThat(firstItem.isFocused()).isTrue();
+
+                        mList.scrollToPosition(NUM_ITEMS - 1);
+                        mList.getViewTreeObserver().addOnGlobalLayoutListener(
+                                new ViewTreeObserver.OnGlobalLayoutListener() {
+                                    @Override
+                                    public void onGlobalLayout() {
+                                        mList.getViewTreeObserver()
+                                                .removeOnGlobalLayoutListener(this);
+                                        assertThat(mList.isFocused()).isTrue();
+                                    }
+                                });
                     }
                 }));
     }
