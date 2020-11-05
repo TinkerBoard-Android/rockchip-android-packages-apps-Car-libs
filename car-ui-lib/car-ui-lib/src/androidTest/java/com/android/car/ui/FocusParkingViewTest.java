@@ -38,7 +38,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-/** Unit test for {@link FocusParkingView}. */
+/** Unit test for {@link FocusParkingView} not in touch mode. */
 public class FocusParkingViewTest {
 
     private static final int NUM_ITEMS = 40;
