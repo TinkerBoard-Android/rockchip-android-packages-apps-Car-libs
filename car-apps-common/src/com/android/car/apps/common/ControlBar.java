@@ -95,6 +95,8 @@ public class ControlBar extends RelativeLayout implements ExpandableControlBar {
     private ExpandCollapseCallback mExpandCollapseCallback;
     // The root of the transition animation.
     private ViewGroup mTransitionRoot;
+    // Whether this control bar has focus.
+    private boolean mHasFocus;
 
     // Default number of columns, if unspecified
     private static final int DEFAULT_COLUMNS = 3;
@@ -165,6 +167,15 @@ public class ControlBar extends RelativeLayout implements ExpandableControlBar {
         mDefaultExpandCollapseView.setContentDescription(context.getString(
                 R.string.control_bar_expand_collapse_button));
         mDefaultExpandCollapseView.setOnClickListener(v -> onExpandCollapse());
+
+        // Collapse the control bar when it is expanded and loses focus.
+        getViewTreeObserver().addOnGlobalFocusChangeListener((oldFocus, newFocus) -> {
+            boolean hasFocus = hasFocus();
+            if (mHasFocus && !hasFocus && mIsExpanded) {
+                onExpandCollapse();
+            }
+            mHasFocus = hasFocus;
+        });
     }
 
     private int getSlotIndex(@SlotPosition int slotPosition) {
