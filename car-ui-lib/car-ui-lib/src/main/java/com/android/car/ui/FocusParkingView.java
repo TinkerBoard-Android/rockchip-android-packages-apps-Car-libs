@@ -145,7 +145,7 @@ public class FocusParkingView extends View {
         } else if (isFocused()) {
             // When FocusParkingView is focused and the window just gets focused, transfer the view
             // focus to a non-FocusParkingView in the window.
-            restoreFocusInRoot();
+            restoreFocusInRoot(/* checkForTouchMode= */ true);
         }
         super.onWindowFocusChanged(hasWindowFocus);
     }
@@ -159,7 +159,7 @@ public class FocusParkingView extends View {
     public boolean performAccessibilityAction(int action, Bundle arguments) {
         switch (action) {
             case ACTION_RESTORE_DEFAULT_FOCUS:
-                return restoreFocusInRoot();
+                return restoreFocusInRoot(/* checkForTouchMode= */ false);
             case ACTION_HIDE_IME:
                 InputMethodManager inputMethodManager =
                         getContext().getSystemService(InputMethodManager.class);
@@ -179,19 +179,19 @@ public class FocusParkingView extends View {
     public boolean requestFocus(int direction, Rect previouslyFocusedRect) {
         // Find a better target to focus instead of focusing this FocusParkingView when the
         // framework wants to focus it.
-        return restoreFocusInRoot();
+        return restoreFocusInRoot(/* checkForTouchMode= */ true);
     }
 
     @Override
     public boolean restoreDefaultFocus() {
         // Find a better target to focus instead of focusing this FocusParkingView when the
         // framework wants to focus it.
-        return restoreFocusInRoot();
+        return restoreFocusInRoot(/* checkForTouchMode= */ true);
     }
 
-    private boolean restoreFocusInRoot() {
-        // Don't do anything in touch mode.
-        if (isInTouchMode()) {
+    private boolean restoreFocusInRoot(boolean checkForTouchMode) {
+        // Don't do anything in touch mode if checkForTouchMode is true.
+        if (checkForTouchMode && isInTouchMode()) {
             return false;
         }
         // The focused view was in a scrollable container and the Framework unfocused it because it
