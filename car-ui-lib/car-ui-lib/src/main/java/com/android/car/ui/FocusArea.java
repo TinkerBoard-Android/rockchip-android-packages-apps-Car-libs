@@ -668,6 +668,9 @@ public class FocusArea extends LinearLayout {
 
     @Override
     protected boolean onRequestFocusInDescendants(int direction, Rect previouslyFocusedRect) {
+        if (isInTouchMode()) {
+            return super.onRequestFocusInDescendants(direction, previouslyFocusedRect);
+        }
         return maybeAdjustFocus();
     }
 
