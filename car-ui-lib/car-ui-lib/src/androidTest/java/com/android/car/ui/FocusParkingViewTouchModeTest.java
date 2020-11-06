@@ -16,8 +16,12 @@
 
 package com.android.car.ui;
 
+import static com.android.car.ui.utils.RotaryConstants.ACTION_RESTORE_DEFAULT_FOCUS;
+
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+
+import android.view.View;
 
 import androidx.test.rule.ActivityTestRule;
 
@@ -48,10 +52,38 @@ public class FocusParkingViewTouchModeTest {
         mFpv.post(() -> {
             assertThat(mFpv.getRootView().findFocus()).isNull();
 
-            mFpv.restoreDefaultFocus();
+            boolean result = mFpv.restoreDefaultFocus();
 
+            assertWithMessage("restoreDefaultFocus returned").that(result).isFalse();
             assertWithMessage("No view should be focused")
                     .that(mFpv.getRootView().findFocus()).isNull();
+        });
+    }
+
+    @Test
+    public void testRequestFocus_doesNothing() {
+        mFpv.post(() -> {
+            assertThat(mFpv.getRootView().findFocus()).isNull();
+
+            boolean result = mFpv.requestFocus(View.FOCUS_DOWN, /* previouslyFocusedRect= */ null);
+
+            assertWithMessage("requestFocus returned").that(result).isFalse();
+            assertWithMessage("No view should be focused")
+                    .that(mFpv.getRootView().findFocus()).isNull();
+        });
+    }
+
+    @Test
+    public void testPerformActionRestoreDefaultFocus_exitsTouchMode() {
+        mFpv.post(() -> {
+            assertThat(mFpv.getRootView().findFocus()).isNull();
+
+            boolean result = mFpv.performAccessibilityAction(
+                    ACTION_RESTORE_DEFAULT_FOCUS, /* arguments= */ null);
+
+            assertWithMessage("performAccessibilityAction returned").that(result).isTrue();
+            assertWithMessage("A view should be focused")
+                    .that(mFpv.getRootView().findFocus()).isNotNull();
         });
     }
 }
