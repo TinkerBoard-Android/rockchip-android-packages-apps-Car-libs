@@ -23,7 +23,6 @@ import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
 import androidx.annotation.LayoutRes;
@@ -180,7 +179,6 @@ final class BaseLayoutController {
         }
 
         InsetsUpdater insetsUpdater = new InsetsUpdater(activity, baseLayout, contentView);
-        insetsUpdater.installListeners();
 
         return Pair.create(toolbarController, insetsUpdater);
     }
@@ -208,7 +206,7 @@ final class BaseLayoutController {
      * none of the Activity/Fragments implement {@link InsetsChangedListener}, it will set
      * padding on the content view equal to the insets.
      */
-    static final class InsetsUpdater implements ViewTreeObserver.OnGlobalLayoutListener {
+    static final class InsetsUpdater {
         // These tags mark views that should overlay the content view in the base layout.
         // OEMs should add them to views in their base layout, ie: android:tag="car_ui_left_inset"
         // Apps will then be able to draw under these views, but will be encouraged to not put
@@ -228,7 +226,6 @@ final class BaseLayoutController {
         private final View mBottomInsetView;
         private InsetsChangedListener mInsetsChangedListenerDelegate;
 
-        private boolean mInsetsDirty = true;
         @NonNull
         private Insets mInsets = new Insets();
 
@@ -259,7 +256,7 @@ final class BaseLayoutController {
                             int oldLeft, int oldTop, int oldRight, int oldBottom) -> {
                         if (left != oldLeft || top != oldTop
                                 || right != oldRight || bottom != oldBottom) {
-                            mInsetsDirty = true;
+                            recalcInsets();
                         }
                     };
 
@@ -279,17 +276,6 @@ final class BaseLayoutController {
             mContentViewContainer.addOnLayoutChangeListener(layoutChangeListener);
         }
 
-        /**
-         * Install a global layout listener, during which the insets will be recalculated and
-         * dispatched.
-         */
-        public void installListeners() {
-            // The global layout listener will run after all the individual layout change listeners
-            // so that we only updateInsets once per layout, even if multiple inset views changed
-            mContentView.getRootView().getViewTreeObserver()
-                    .addOnGlobalLayoutListener(this);
-        }
-
         @NonNull
         Insets getInsets() {
             return mInsets;
@@ -300,13 +286,9 @@ final class BaseLayoutController {
         }
 
         /**
-         * onGlobalLayout() should recalculate the amount of insets we need, and then dispatch them.
+         * Recalculate the amount of insets we need, and then dispatch them.
          */
-        @Override
-        public void onGlobalLayout() {
-            if (!mInsetsDirty) {
-                return;
-            }
+        public void recalcInsets() {
 
             // Calculate how much each inset view overlays the content view
 
@@ -339,7 +321,6 @@ final class BaseLayoutController {
             }
             Insets insets = new Insets(left, top, right, bottom);
 
-            mInsetsDirty = false;
             if (!insets.equals(mInsets)) {
                 mInsets = insets;
                 dispatchNewInsets(insets);
