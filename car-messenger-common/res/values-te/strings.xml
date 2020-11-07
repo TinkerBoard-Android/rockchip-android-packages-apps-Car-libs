@@ -29,7 +29,9 @@
     <string name="action_close_messages" msgid="7949295965012770696">"మూసివేయి"</string>
     <string name="auto_reply_failed_message" msgid="6445984971657465627">"ప్రత్యుత్తరం పంపడం సాధ్యం కాలేదు. దయచేసి మళ్లీ ప్రయత్నించండి."</string>
     <string name="auto_reply_device_disconnected" msgid="5861772755278229950">"ప్రత్యుత్తరం పంపడం సాధ్యం కాలేదు. పరికరం కనెక్ట్ కాలేదు."</string>
-    <string name="tts_sender_says" msgid="5352698006545359668">"%s చెప్పారు"</string>
+    <!-- String.format failed for translation -->
+    <!-- no translation found for tts_sender_says (5352698006545359668) -->
+    <skip />
     <string name="tts_failed_toast" msgid="1483313550894086353">"సందేశాన్ని చదవడం సాధ్యం కాలేదు."</string>
     <string name="reply_message_display_template" msgid="6348622926232346974">"\"%s\""</string>
     <string name="message_sent_notice" msgid="7172592196465284673">"%s కు ప్రత్యుత్తరం పంపబడింది"</string>
