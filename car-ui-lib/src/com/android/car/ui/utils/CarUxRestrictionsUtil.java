@@ -22,6 +22,7 @@ import android.car.drivingstate.CarUxRestrictions;
 import android.car.drivingstate.CarUxRestrictions.CarUxRestrictionsInfo;
 import android.car.drivingstate.CarUxRestrictionsManager;
 import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -34,10 +35,6 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-// This can't be in the middle of the rest of the imports on gerrit or it will
-// fail our style checks
-// copybara:insert import android.car.CarNotConnectedException;
-
 /**
  * Utility class to access Car Restriction Manager.
  *
@@ -48,10 +45,6 @@ import java.util.WeakHashMap;
 public class CarUxRestrictionsUtil {
     private static final String TAG = "CarUxRestrictionsUtil";
 
-    /* copybara:insert
-    private final Car mCarApi;
-    private CarUxRestrictionsManager mCarUxRestrictionsManager;
-    */
     @NonNull
     private CarUxRestrictions mCarUxRestrictions = getDefaultRestrictions();
 
@@ -73,36 +66,36 @@ public class CarUxRestrictionsUtil {
                     }
                 };
 
-        // copybara:strip_begin
-        Car.createCar(context.getApplicationContext(), null, Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT,
-                (Car car, boolean ready) -> {
-                    if (ready) {
-                        CarUxRestrictionsManager carUxRestrictionsManager =
-                                (CarUxRestrictionsManager) car.getCarManager(
-                                        Car.CAR_UX_RESTRICTION_SERVICE);
-                        carUxRestrictionsManager.registerListener(listener);
-                        listener.onUxRestrictionsChanged(
-                                carUxRestrictionsManager.getCurrentCarUxRestrictions());
-                    } else {
-                        Log.w(TAG, "Car service disconnected, assuming fully restricted uxr");
-                        listener.onUxRestrictionsChanged(null);
-                    }
-                });
-        /* copybara:strip_end_and_replace
-        mCarApi = Car.createCar(context.getApplicationContext());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Car.createCar(context.getApplicationContext(), null, Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT,
+                    (Car car, boolean ready) -> {
+                        if (ready) {
+                            CarUxRestrictionsManager carUxRestrictionsManager =
+                                    (CarUxRestrictionsManager) car.getCarManager(
+                                            Car.CAR_UX_RESTRICTION_SERVICE);
+                            carUxRestrictionsManager.registerListener(listener);
+                            listener.onUxRestrictionsChanged(
+                                    carUxRestrictionsManager.getCurrentCarUxRestrictions());
+                        } else {
+                            Log.w(TAG, "Car service disconnected, assuming fully restricted uxr");
+                            listener.onUxRestrictionsChanged(null);
+                        }
+                    });
+        } else {
+            Car carApi = Car.createCar(context.getApplicationContext());
 
-        try {
-            mCarUxRestrictionsManager =
-                    (CarUxRestrictionsManager) mCarApi.getCarManager(
-                            Car.CAR_UX_RESTRICTION_SERVICE);
-            mCarUxRestrictionsManager.registerListener(listener);
-            listener.onUxRestrictionsChanged(
-                    mCarUxRestrictionsManager.getCurrentCarUxRestrictions());
-        } catch (CarNotConnectedException | NullPointerException e) {
-            Log.e(TAG, "Car not connected", e);
-            // mCarUxRestrictions will be the default
+            try {
+                CarUxRestrictionsManager carUxRestrictionsManager =
+                        (CarUxRestrictionsManager) carApi.getCarManager(
+                                Car.CAR_UX_RESTRICTION_SERVICE);
+                carUxRestrictionsManager.registerListener(listener);
+                listener.onUxRestrictionsChanged(
+                        carUxRestrictionsManager.getCurrentCarUxRestrictions());
+            } catch (NullPointerException e) {
+                Log.e(TAG, "Car not connected", e);
+                // mCarUxRestrictions will be the default
+            }
         }
-        */
     }
 
     @NonNull
