@@ -26,8 +26,6 @@ import android.car.drivingstate.CarUxRestrictions;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -38,7 +36,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
-import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
@@ -79,7 +76,6 @@ public final class CarUiRecyclerView extends RecyclerView {
     private String mScrollBarClass;
     private int mScrollBarPaddingTop;
     private int mScrollBarPaddingBottom;
-    private boolean mHasScrolledToTop = false;
 
     @Nullable
     private ScrollBar mScrollBar;
@@ -112,17 +108,17 @@ public final class CarUiRecyclerView extends RecyclerView {
     private int mTopOffset;
     private int mBottomOffset;
 
-    private ViewTreeObserver.OnGlobalLayoutListener mOnGlobalLayoutListener = () -> {
-        if (!mHasScrolledToTop && getLayoutManager() != null) {
-            // Scroll to the top after the first global layout, so that
-            // we can set padding for the insets and still have the
-            // recyclerview start at the top.
-            new Handler(Objects.requireNonNull(Looper.myLooper())).post(() ->
-                    getLayoutManager().scrollToPosition(0));
-            mHasScrolledToTop = true;
+    private boolean mHasScrolled = false;
+
+    private OnScrollListener mOnScrollListener = new OnScrollListener() {
+        @Override
+        public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+            if (dx > 0 || dy > 0) {
+                mHasScrolled = true;
+                removeOnScrollListener(this);
+            }
         }
     };
-
 
     /**
      * The possible values for setScrollBarPosition. The default value is actually {@link
@@ -244,6 +240,7 @@ public final class CarUiRecyclerView extends RecyclerView {
         } else if (!isLayoutMangerSet && carUiRecyclerViewLayout == CarUiRecyclerViewLayout.GRID) {
             setLayoutManager(new GridLayoutManager(getContext(), mNumOfColumns));
         }
+        addOnScrollListener(mOnScrollListener);
 
         a.recycle();
 
@@ -342,9 +339,9 @@ public final class CarUiRecyclerView extends RecyclerView {
     protected void onRestoreInstanceState(Parcelable state) {
         super.onRestoreInstanceState(state);
 
-        // If we're restoring an existing RecyclerView, we don't want
-        // to do the initial scroll to top
-        mHasScrolledToTop = true;
+        // If we're restoring an existing RecyclerView, consider
+        // it as having already scrolled some.
+        mHasScrolled = true;
     }
 
     @Override
@@ -381,7 +378,6 @@ public final class CarUiRecyclerView extends RecyclerView {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mCarUxRestrictionsUtil.register(mListener);
-        this.getViewTreeObserver().addOnGlobalLayoutListener(mOnGlobalLayoutListener);
         if (mInstallingExtScrollBar || !mScrollBarEnabled) {
             return;
         }
@@ -472,7 +468,6 @@ public final class CarUiRecyclerView extends RecyclerView {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mCarUxRestrictionsUtil.unregister(mListener);
-        this.getViewTreeObserver().removeOnGlobalLayoutListener(mOnGlobalLayoutListener);
     }
 
     @Override
@@ -480,6 +475,13 @@ public final class CarUiRecyclerView extends RecyclerView {
         mContainerPaddingRelative = null;
         if (mScrollBarEnabled) {
             super.setPadding(0, top, 0, bottom);
+            if (!mHasScrolled) {
+                // If we haven't scrolled, and thus are still at the top of the screen,
+                // we should stay scrolled to the top after applying padding. Without this
+                // scroll, the padding will start scrolled offscreen. We need the padding
+                // to be onscreen to shift the content into a good visible range.
+                scrollToPosition(0);
+            }
             mContainerPadding = new Rect(left, 0, right, 0);
             if (mContainer != null) {
                 mContainer.setPadding(left, 0, right, 0);
@@ -495,6 +497,13 @@ public final class CarUiRecyclerView extends RecyclerView {
         mContainerPadding = null;
         if (mScrollBarEnabled) {
             super.setPaddingRelative(0, top, 0, bottom);
+            if (!mHasScrolled) {
+                // If we haven't scrolled, and thus are still at the top of the screen,
+                // we should stay scrolled to the top after applying padding. Without this
+                // scroll, the padding will start scrolled offscreen. We need the padding
+                // to be onscreen to shift the content into a good visible range.
+                scrollToPosition(0);
+            }
             mContainerPaddingRelative = new Rect(start, 0, end, 0);
             if (mContainer != null) {
                 mContainer.setPaddingRelative(start, 0, end, 0);
