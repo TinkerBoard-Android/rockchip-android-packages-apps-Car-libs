@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,37 +45,24 @@ android {
             includeAndroidResources = true
         }
     }
-
-    // This is the gradle equivalent of the libs: ["android.car"] in the Android.bp
-    // Which will be in the SDK 30 R3+
-    useLibrary 'android.car'
 }
 
 dependencies {
-    compileOnly project(':oem-apis')
-    api 'androidx.annotation:annotation:1.1.0'
-    api 'androidx.appcompat:appcompat:1.1.0'
-    api 'androidx.constraintlayout:constraintlayout:2.0.1'
-    api 'androidx.preference:preference:1.1.0'
-    api 'androidx.recyclerview:recyclerview:1.0.0'
-    api 'androidx.core:core:1.2.0'
-    implementation 'com.android.support:support-annotations:28.0.0'
-
-    testImplementation "androidx.test.ext:junit:1.1.2"
+    testImplementation "androidx.test.ext:junit:1.1.1"
     testImplementation 'org.robolectric:robolectric:4.3.1'
     testImplementation "org.mockito:mockito-core:2.19.0"
     testImplementation "com.google.truth:truth:0.29"
     testImplementation "org.testng:testng:6.9.9"
 
     androidTestImplementation 'org.hamcrest:hamcrest-library:1.3'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.3.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.2.0'
     androidTestImplementation "com.google.truth:truth:0.29"
-    androidTestImplementation "androidx.test.ext:junit:1.1.2"
+    androidTestImplementation "androidx.test.ext:junit:1.1.1"
     androidTestImplementation "org.mockito:mockito-core:2.19.0"
-    androidTestImplementation 'androidx.test:runner:1.3.0'
-    androidTestImplementation 'androidx.test:rules:1.3.0'
+    androidTestImplementation 'androidx.test:runner:1.1.0'
+    androidTestImplementation 'androidx.test:rules:1.1.0'
     // This is needed to be able to spy certain classes with Mockito
     // It's major/minor version must match Mockito's.
-    androidTestImplementation 'com.linkedin.dexmaker:dexmaker-mockito-inline:2.19.0'
+    androidTestImplementation 'com.linkedin.dexmaker:dexmaker-mockito:2.19.0'
 }
