@@ -20,6 +20,7 @@ PRODUCT_PACKAGES += \
     googlecarui-com-android-settings-intelligence \
     googlecarui-com-google-android-apps-automotive-inputmethod \
     googlecarui-com-google-android-apps-automotive-inputmethod-dev \
+    googlecarui-com-google-android-apps-automotive-templates-host \
     googlecarui-com-google-android-embedded-projection \
     googlecarui-com-google-android-gms \
     googlecarui-com-google-android-packageinstaller \
@@ -32,6 +33,7 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     googlecarui-overlayable-com-google-android-apps-automotive-inputmethod \
     googlecarui-overlayable-com-google-android-apps-automotive-inputmethod-dev \
+    googlecarui-overlayable-com-google-android-apps-automotive-templates-host \
     googlecarui-overlayable-com-google-android-embedded-projection \
     googlecarui-overlayable-com-google-android-gms \
     googlecarui-overlayable-com-google-android-packageinstaller \
