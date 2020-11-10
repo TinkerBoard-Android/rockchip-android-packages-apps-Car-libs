@@ -72,15 +72,29 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
     private static final String DIALOG_FRAGMENT_TAG =
             "com.android.car.ui.PreferenceFragment.DIALOG";
 
+    /**
+     * This method can be overridden to indicate whether or not this fragment covers the
+     * whole screen. When it returns false, the preference fragment will not attempt to change
+     * the CarUi base layout toolbar (but will still have its own toolbar and change it when using
+     * non-baselayout toolbars), and will also not take into account CarUi insets.
+     *
+     * @return Whether to PreferenceFragment takes up the whole app's space. Defaults to true.
+     */
+    protected boolean isFullScreenFragment() {
+        return true;
+    }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        ToolbarController baseLayoutToolbar = CarUi.getToolbar(getActivity());
-        if (baseLayoutToolbar != null) {
-            baseLayoutToolbar.setState(Toolbar.State.SUBPAGE);
-            if (getPreferenceScreen() != null) {
-                baseLayoutToolbar.setTitle(getPreferenceScreen().getTitle());
+        if (isFullScreenFragment()) {
+            ToolbarController baseLayoutToolbar = CarUi.getToolbar(getActivity());
+            if (baseLayoutToolbar != null) {
+                baseLayoutToolbar.setState(Toolbar.State.SUBPAGE);
+                if (getPreferenceScreen() != null) {
+                    baseLayoutToolbar.setTitle(getPreferenceScreen().getTitle());
+                }
             }
         }
 
@@ -123,6 +137,10 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
 
     @Override
     public void onCarUiInsetsChanged(@NonNull Insets insets) {
+        if (!isFullScreenFragment()) {
+            return;
+        }
+
         View view = requireView();
         FocusArea focusArea = CarUiUtils.requireViewByRefId(view, R.id.car_ui_focus_area);
         focusArea.setHighlightPadding(0, insets.getTop(), 0, insets.getBottom());
@@ -160,9 +178,10 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
         if (preference instanceof EditTextPreference) {
             f = EditTextPreferenceDialogFragment.newInstance(preference.getKey());
         } else if (preference instanceof ListPreference) {
-            f = ListPreferenceFragment.newInstance(preference.getKey());
+            f = ListPreferenceFragment.newInstance(preference.getKey(), isFullScreenFragment());
         } else if (preference instanceof MultiSelectListPreference) {
-            f = MultiSelectListPreferenceFragment.newInstance(preference.getKey());
+            f = MultiSelectListPreferenceFragment
+                    .newInstance(preference.getKey(), isFullScreenFragment());
         } else if (preference instanceof CarUiSeekBarDialogPreference) {
             f = SeekbarPreferenceDialogFragment.newInstance(preference.getKey());
         } else {
