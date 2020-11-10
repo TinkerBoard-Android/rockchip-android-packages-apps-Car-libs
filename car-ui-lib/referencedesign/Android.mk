@@ -23,6 +23,7 @@ CAR_UI_RRO_TARGETS := \
     com.android.settings.intelligence \
     com.google.android.apps.automotive.inputmethod \
     com.google.android.apps.automotive.inputmethod.dev \
+    com.google.android.apps.automotive.templates.host \
     com.google.android.embedded.projection \
     com.google.android.gms \
     com.google.android.packageinstaller \
@@ -38,6 +39,7 @@ CAR_UI_RESOURCE_DIR := $(LOCAL_PATH)/res
 CAR_UI_RRO_TARGETS := \
     com.google.android.apps.automotive.inputmethod \
     com.google.android.apps.automotive.inputmethod.dev \
+    com.google.android.apps.automotive.templates.host \
     com.google.android.embedded.projection \
     com.google.android.gms \
     com.google.android.packageinstaller \
