@@ -16,7 +16,7 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.android.car.ui.test">
-    <application android:debuggable="true" android:theme="@style/Theme.CarUi">
+    <application android:debuggable="true" android:theme="@style/Theme.CarUi.NoToolbar">
         <uses-library android:name="android.test.runner" />
         <activity android:name="com.android.car.ui.TestActivity" />
         <activity android:name="com.android.car.ui.recyclerview.CarUiRecyclerViewTestActivity" />
@@ -24,6 +24,9 @@
         <activity android:name="com.android.car.ui.FocusAreaTestActivity" />
         <activity android:name="com.android.car.ui.FocusParkingViewTestActivity" />
         <activity android:name="com.android.car.ui.preference.PreferenceTestActivity" />
+        <activity
+            android:name="com.android.car.ui.preference.NonFullscreenPreferenceFragmentTest$MyActivity"
+            android:theme="@style/Theme.CarUi.WithToolbar"/>
         <activity android:name="com.android.car.ui.utils.ViewUtilsTestActivity" />
         <activity
             android:name="com.android.car.ui.toolbar.ToolbarTestActivity"

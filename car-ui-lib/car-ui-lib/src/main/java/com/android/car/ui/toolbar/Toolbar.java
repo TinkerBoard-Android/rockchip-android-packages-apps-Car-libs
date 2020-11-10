@@ -45,7 +45,11 @@ import java.util.List;
  * {@link android.app.Activity#setActionBar(android.widget.Toolbar)} with it)
  *
  * <p>The toolbar supports a navigation button, title, tabs, search, and {@link MenuItem MenuItems}
+ *
+ * @deprecated Instead of creating this class, use Theme.CarUi.WithToolbar, and get access to it
+ *             via {@link com.android.car.ui.core.CarUi#requireToolbar(android.app.Activity)}
  */
+@Deprecated
 public final class Toolbar extends FrameLayout implements ToolbarController {
 
     /** Callback that will be issued whenever the height of toolbar is changed. */
