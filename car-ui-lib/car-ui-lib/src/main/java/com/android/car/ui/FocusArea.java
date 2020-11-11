@@ -574,9 +574,6 @@ public class FocusArea extends LinearLayout {
             success = targetFocusArea != null && targetFocusArea.focusOnDescendant();
         }
 
-        if (success) {
-            saveFocusAreaHistory(direction, this, targetFocusArea, elapsedRealtime);
-        }
         return success;
     }
 
@@ -586,14 +583,15 @@ public class FocusArea extends LinearLayout {
                 : arguments.getInt(NUDGE_DIRECTION, INVALID_DIRECTION);
     }
 
-    /** Saves bidirectional FocusArea nudge history. */
     private void saveFocusAreaHistory(int direction, @NonNull FocusArea sourceFocusArea,
             @NonNull FocusArea targetFocusArea, long elapsedRealtime) {
-        sourceFocusArea.mRotaryCache.saveFocusArea(direction, targetFocusArea, elapsedRealtime);
-
-        int oppositeDirection = getOppositeDirection(direction);
-        targetFocusArea.mRotaryCache.saveFocusArea(oppositeDirection, sourceFocusArea,
-                elapsedRealtime);
+        // Save one-way rather than two-way nudge history to avoid infinite nudge loop.
+        if (sourceFocusArea.mRotaryCache.getCachedFocusArea(direction, elapsedRealtime) == null) {
+            // Save reversed nudge history so that the users can nudge back to where they were.
+            int oppositeDirection = getOppositeDirection(direction);
+            targetFocusArea.mRotaryCache.saveFocusArea(oppositeDirection, sourceFocusArea,
+                    elapsedRealtime);
+        }
     }
 
     /** Returns the direction opposite the given {@code direction} */
