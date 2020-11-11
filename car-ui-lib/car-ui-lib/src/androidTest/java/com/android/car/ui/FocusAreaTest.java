@@ -229,6 +229,12 @@ public class FocusAreaTest {
             arguments.putInt(NUDGE_DIRECTION, FOCUS_UP);
             mFocusArea2.performAccessibilityAction(ACTION_NUDGE_TO_ANOTHER_FOCUS_AREA, arguments);
             assertThat(mButton1.isFocused()).isTrue();
+
+            // Nudge back. It should fail and the focus should stay the same because of one-way
+            // nudge history.
+            arguments.putInt(NUDGE_DIRECTION, FOCUS_DOWN);
+            mFocusArea1.performAccessibilityAction(ACTION_NUDGE_TO_ANOTHER_FOCUS_AREA, arguments);
+            assertThat(mButton1.isFocused()).isTrue();
         });
     }
 
