@@ -14,3 +14,5 @@
 -keepclasseswithmembers class * extends android.app.Activity {
   public void * (com.android.car.ui.toolbar.MenuItem);
 }
+
+-dontwarn com.android.car.ui.sharedlibrary.oemapis.**

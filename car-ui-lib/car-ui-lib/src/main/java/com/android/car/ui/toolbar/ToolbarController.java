@@ -80,14 +80,6 @@ public interface ToolbarController {
     CharSequence getSubtitle();
 
     /**
-     * Gets the {@link TabLayout} for this toolbar.
-     *
-     * @deprecated Use other tab-related functions in this interface.
-     */
-    @Deprecated
-    TabLayout getTabLayout();
-
-    /**
      * Gets the number of tabs in the toolbar. The tabs can be retrieved using
      * {@link #getTab(int)}.
      */

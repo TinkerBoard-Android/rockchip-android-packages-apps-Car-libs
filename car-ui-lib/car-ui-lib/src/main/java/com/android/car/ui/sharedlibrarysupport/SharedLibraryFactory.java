@@ -15,15 +15,29 @@
  */
 package com.android.car.ui.sharedlibrarysupport;
 
+import android.view.View;
+
+import androidx.annotation.Nullable;
+
+import com.android.car.ui.baselayout.InsetsChangedListener;
+import com.android.car.ui.toolbar.ToolbarController;
+
 /**
  * This interface contains methods to create customizable carui components.
  */
 public interface SharedLibraryFactory {
 
-    // This will have methods like the following to create components implemented by the OEM:
-    // @Nullable
-    // ToolbarController installBaseLayoutAround(
-    //         View contentView,
-    //         Consumer<InsetsOEMV1> insetsChangedListener,
-    //         boolean toolbarEnabled);
+    /**
+     * Creates the base layout, and optionally the toolbar.
+     *
+     * @param contentView The view to install the base layout around.
+     * @param insetsChangedListener A method to call when the insets change.
+     * @param toolbarEnabled Whether or not to add a toolbar to the base layout.
+     * @return A {@link ToolbarController} or null if {@code toolbarEnabled} was false.
+     */
+    @Nullable
+    ToolbarController installBaseLayoutAround(
+            View contentView,
+            InsetsChangedListener insetsChangedListener,
+            boolean toolbarEnabled);
 }

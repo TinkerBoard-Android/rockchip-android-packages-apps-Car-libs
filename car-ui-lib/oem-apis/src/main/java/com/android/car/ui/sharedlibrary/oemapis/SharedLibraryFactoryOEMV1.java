@@ -15,6 +15,12 @@
  */
 package com.android.car.ui.sharedlibrary.oemapis;
 
+import android.view.View;
+
+import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
+
+import java.util.function.Consumer;
+
 /**
  * This interface contains methods to create customizable carui components.
  *
@@ -28,10 +34,20 @@ package com.android.car.ui.sharedlibrary.oemapis;
  */
 public interface SharedLibraryFactoryOEMV1 {
 
-    // This will have methods like the following to create components implemented by the OEM:
-    // @Nullable
-    // ToolbarControllerOEMV1 installBaseLayoutAround(
-    //         View contentView,
-    //         Consumer<InsetsOEMV1> insetsChangedListener,
-    //         boolean toolbarEnabled);
+    /**
+     * Creates the base layout, and optionally the toolbar.
+     *
+     * @param contentView The view to install the base layout around.
+     * @param insetsChangedListener A method to call when the insets change.
+     * @param toolbarEnabled Whether or not to add a toolbar to the base layout.
+     * @param fullscreen Whether or not this base layout / toolbar is taking up the whole screen.
+     *                   This can be used to decide whether or not to add decorations around the
+     *                   edge of it.
+     * @return A {@link ToolbarControllerOEMV1} or null if {@code toolbarEnabled} was false.
+     */
+    ToolbarControllerOEMV1 installBaseLayoutAround(
+            View contentView,
+            Consumer<InsetsOEMV1> insetsChangedListener,
+            boolean toolbarEnabled,
+            boolean fullscreen);
 }
