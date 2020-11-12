@@ -155,6 +155,7 @@
         <item name="seekBarStyle">?android:attr/seekBarStyle</item>
 
         <!-- Button styles -->
+        <item name="android:buttonStyle">@style/Widget.CarUi.Button</item>
         <item name="buttonStyle">?android:attr/buttonStyle</item>
         <item name="buttonStyleSmall">?android:attr/buttonStyleSmall</item>
 
@@ -204,6 +205,9 @@
 
         <!-- Used by CarUiRecyclerView -->
         <item name="carUiRecyclerViewStyle">@style/Widget.CarUi.CarUiRecyclerView</item>
+
+        <!-- textAppearance -->
+        <item name="android:textAppearance">@style/TextAppearance.CarUi</item>
     </style>
 
     <!-- TODO(b/150230923) remove this when other apps are ready -->
