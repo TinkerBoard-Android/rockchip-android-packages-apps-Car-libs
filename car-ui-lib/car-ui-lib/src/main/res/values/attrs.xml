@@ -239,4 +239,12 @@
         <!-- The ID of the target FocusArea when nudging down. -->
         <attr name="nudgeDown" format="reference"/>
     </declare-styleable>
+
+    <!-- Attributes for FocusParkingView. -->
+    <declare-styleable name="FocusParkingView">
+        <!-- Whether to restore focus when the frameworks wants to focus the FocusParkingView. When
+             false, the FocusParkingView allows itself to be focused instead. This should be false
+             for the FocusParkingView in an ActivityView. The default value is true. -->
+        <attr name="shouldRestoreFocus" format="boolean"/>
+    </declare-styleable>
 </resources>

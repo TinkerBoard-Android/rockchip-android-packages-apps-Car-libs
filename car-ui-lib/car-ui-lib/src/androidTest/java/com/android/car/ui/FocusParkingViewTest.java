@@ -230,4 +230,28 @@ public class FocusParkingViewTest {
             assertThat(mFocusedByDefault.isFocused()).isTrue();
         });
     }
+
+    @Test
+    public void testRequestFocus_focusesFpvWhenShouldRestoreFocusIsFalse() {
+        mFpv.post(() -> {
+            mView1.requestFocus();
+            assertThat(mView1.isFocused()).isTrue();
+            mFpv.setShouldRestoreFocus(false);
+
+            mFpv.requestFocus();
+            assertThat(mFpv.isFocused()).isTrue();
+        });
+    }
+
+    @Test
+    public void testRestoreDefaultFocus_focusesFpvWhenShouldRestoreFocusIsFalse() {
+        mFpv.post(() -> {
+            mView1.requestFocus();
+            assertThat(mView1.isFocused()).isTrue();
+            mFpv.setShouldRestoreFocus(false);
+
+            mFpv.restoreDefaultFocus();
+            assertThat(mFpv.isFocused()).isTrue();
+        });
+    }
 }

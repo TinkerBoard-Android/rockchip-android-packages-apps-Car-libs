@@ -22,6 +22,7 @@ import static com.android.car.ui.utils.RotaryConstants.ACTION_HIDE_IME;
 import static com.android.car.ui.utils.RotaryConstants.ACTION_RESTORE_DEFAULT_FOCUS;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.AttributeSet;
@@ -76,28 +77,41 @@ public class FocusParkingView extends View {
     @Nullable
     ViewGroup mScrollableContainer;
 
+    /**
+     * Whether to restore focus when the frameworks wants to focus this view. When false, this view
+     * allows itself to be focused instead. This should be false for the {@code FocusParkingView} in
+     * an {@code ActivityView}. The default value is true.
+     */
+    private boolean mShouldRestoreFocus;
+
     public FocusParkingView(Context context) {
         super(context);
-        init();
+        init(context, /* attrs= */ null);
     }
 
     public FocusParkingView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init();
+        init(context, attrs);
     }
 
     public FocusParkingView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+        init(context, attrs);
     }
 
     public FocusParkingView(Context context, @Nullable AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init();
+        init(context, attrs);
     }
 
-    private void init() {
+    private void init(Context context, @Nullable AttributeSet attrs) {
+        if (attrs != null) {
+            TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.FocusParkingView);
+            mShouldRestoreFocus = a.getBoolean(R.styleable.FocusParkingView_shouldRestoreFocus,
+                    /* defValue= */ true);
+        }
+
         // This view is focusable, visible and enabled so it can take focus.
         setFocusable(View.FOCUSABLE);
         setVisibility(VISIBLE);
@@ -177,6 +191,9 @@ public class FocusParkingView extends View {
 
     @Override
     public boolean requestFocus(int direction, Rect previouslyFocusedRect) {
+        if (!mShouldRestoreFocus) {
+            return super.requestFocus(direction, previouslyFocusedRect);
+        }
         // Find a better target to focus instead of focusing this FocusParkingView when the
         // framework wants to focus it.
         return restoreFocusInRoot(/* checkForTouchMode= */ true);
@@ -184,9 +201,21 @@ public class FocusParkingView extends View {
 
     @Override
     public boolean restoreDefaultFocus() {
+        if (!mShouldRestoreFocus) {
+            return super.restoreDefaultFocus();
+        }
         // Find a better target to focus instead of focusing this FocusParkingView when the
         // framework wants to focus it.
         return restoreFocusInRoot(/* checkForTouchMode= */ true);
+    }
+
+    /**
+     * Sets whether this view should restore focus when the framework wants to focus this view. When
+     * set to false, this view allows itself to be focused instead. This should be set to false for
+     * the {@code FocusParkingView} in an {@code ActivityView}.  The default value is true.
+     */
+    public void setShouldRestoreFocus(boolean shouldRestoreFocus) {
+        mShouldRestoreFocus = shouldRestoreFocus;
     }
 
     private boolean restoreFocusInRoot(boolean checkForTouchMode) {
