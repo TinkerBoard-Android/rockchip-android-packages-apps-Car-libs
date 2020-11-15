@@ -18,7 +18,6 @@ package com.android.car.ui.paintbooth.currentactivity;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.IActivityTaskManager;
 import android.content.ComponentName;
 import android.os.RemoteException;
 
@@ -32,7 +31,8 @@ import java.util.Map;
  */
 class ActivityTaskManagerImpl implements ActivityTaskManager {
 
-    IActivityTaskManager mActivityTaskManager = android.app.ActivityTaskManager.getService();
+    android.app.ActivityTaskManager mActivityTaskManager =
+            android.app.ActivityTaskManager.getInstance();
 
     Map<TaskStackListener, android.app.TaskStackListener> mListenerMapping = new HashMap<>();
 
