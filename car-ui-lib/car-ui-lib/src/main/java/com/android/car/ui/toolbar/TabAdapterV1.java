@@ -24,6 +24,7 @@ import com.android.car.ui.toolbar.TabLayout.Tab;
 
 import java.util.function.Consumer;
 
+@SuppressWarnings("AndroidJdkLibsChecker")
 class TabAdapterV1 implements TabOEMV1 {
 
     private final Runnable mOnClickListener;

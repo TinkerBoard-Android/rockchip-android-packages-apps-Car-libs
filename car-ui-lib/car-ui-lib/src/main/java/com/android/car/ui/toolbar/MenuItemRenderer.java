@@ -34,7 +34,6 @@ import android.widget.TextView;
 
 import androidx.annotation.XmlRes;
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
-import androidx.core.util.Consumer;
 
 import com.android.car.ui.R;
 import com.android.car.ui.utils.CarUiUtils;
@@ -48,7 +47,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
+@SuppressWarnings("AndroidJdkLibsChecker")
 class MenuItemRenderer implements MenuItem.Listener {
 
     private static final int[] RESTRICTED_STATE = new int[] {R.attr.state_ux_restricted};

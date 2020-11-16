@@ -21,6 +21,7 @@ import android.graphics.drawable.Drawable;
 import java.util.function.Consumer;
 
 /** Interface representing a toolbar tab */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public interface TabOEMV1 {
     /** Sets the listener for when the properties of this tab change */
     void setUpdateListener(Consumer<TabOEMV1> listener);

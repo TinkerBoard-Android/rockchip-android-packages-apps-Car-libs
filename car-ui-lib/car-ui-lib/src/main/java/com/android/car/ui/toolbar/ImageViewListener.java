@@ -22,6 +22,7 @@ import android.widget.ImageView;
 
 import java.util.function.Consumer;
 
+@SuppressWarnings("AndroidJdkLibsChecker")
 final class ImageViewListener extends ImageView {
 
     private Consumer<Drawable> mImageDrawableListener;

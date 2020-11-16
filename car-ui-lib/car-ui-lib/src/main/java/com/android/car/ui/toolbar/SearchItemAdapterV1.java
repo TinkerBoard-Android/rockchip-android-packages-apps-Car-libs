@@ -21,6 +21,7 @@ import com.android.car.ui.sharedlibrary.oemapis.toolbar.SearchItemOEMV1;
 
 import java.util.function.Consumer;
 
+@SuppressWarnings("AndroidJdkLibsChecker")
 class SearchItemAdapterV1 implements SearchItemOEMV1 {
     private final CarUiImeSearchListItem mClientItem;
     SearchItemAdapterV1(CarUiImeSearchListItem item) {

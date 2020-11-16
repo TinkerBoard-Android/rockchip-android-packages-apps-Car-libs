@@ -19,6 +19,7 @@ package com.android.car.ui.sharedlibrary.oemapis.toolbar;
 import java.util.function.Consumer;
 
 /** Interface representing a search list item */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public interface SearchItemOEMV1 {
 
     /**

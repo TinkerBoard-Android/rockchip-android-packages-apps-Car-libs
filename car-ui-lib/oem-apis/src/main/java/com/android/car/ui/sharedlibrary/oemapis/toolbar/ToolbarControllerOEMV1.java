@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /** The OEM interface for a Toolbar. */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public interface ToolbarControllerOEMV1 {
 
     /** Gets the context used by the views of this toolbar */

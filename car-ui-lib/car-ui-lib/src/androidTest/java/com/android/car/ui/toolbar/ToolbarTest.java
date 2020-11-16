@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.function.Consumer;
 
 /** Unit test for {@link ToolbarController}. */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public class ToolbarTest {
 
     @Rule
