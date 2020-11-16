@@ -55,6 +55,15 @@ public final class RotaryConstants {
     public static final String ROTARY_VERTICALLY_SCROLLABLE =
             "com.android.car.ui.utils.VERTICALLY_SCROLLABLE";
 
+    /**
+     * Content description indicating that the view is a focus delegating container. When
+     * restoring focus, FocusParkingView and FocusArea will skip non-focusable views unless it's
+     * a focus delegating container. The focus delegating container can delegate focus to one of
+     * its descendants.
+     */
+    public static final String ROTARY_FOCUS_DELEGATING_CONTAINER =
+            "com.android.car.ui.utils.FOCUS_DELEGATING_CONTAINER";
+
     /** The key to store the offset of the FocusArea's left bound in the node's extras. */
     public static final String FOCUS_AREA_LEFT_BOUND_OFFSET =
             "com.android.car.ui.utils.FOCUS_AREA_LEFT_BOUND_OFFSET";
