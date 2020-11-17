@@ -373,9 +373,9 @@ public class Utils {
     public static String constructGroupConversationHeader(String senderName, String groupName,
             String delimiter, BidiFormatter bidiFormatter) {
         String formattedSenderName = bidiFormatter.unicodeWrap(senderName,
-                TextDirectionHeuristics.FIRSTSTRONG_LTR);
+                TextDirectionHeuristics.FIRSTSTRONG_LTR, /* isolate= */ true);
         String formattedGroupName = bidiFormatter.unicodeWrap(groupName,
-                TextDirectionHeuristics.LOCALE);
+                TextDirectionHeuristics.FIRSTSTRONG_LTR, /* isolate= */ true);
         String title = String.join(delimiter, formattedSenderName, formattedGroupName);
         return bidiFormatter.unicodeWrap(title, TextDirectionHeuristics.LOCALE);
     }
