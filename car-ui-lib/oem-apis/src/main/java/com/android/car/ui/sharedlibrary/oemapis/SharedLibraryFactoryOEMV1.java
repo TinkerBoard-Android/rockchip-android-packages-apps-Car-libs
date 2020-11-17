@@ -32,6 +32,7 @@ import java.util.function.Consumer;
  * shared libraries to provide an old implementation for old apps, and a newer implementation
  * for newer apps.
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public interface SharedLibraryFactoryOEMV1 {
 
     /**

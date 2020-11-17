@@ -21,6 +21,7 @@ import android.graphics.drawable.Drawable;
 import java.util.function.Consumer;
 
 /** The OEM interface of a MenuItem, which is a button in the toolbar */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public interface MenuItemOEMV1 {
 
     /** Sets a listener that will be called when any property of the MenuItem changes */

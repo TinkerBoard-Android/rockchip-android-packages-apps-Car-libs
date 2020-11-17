@@ -26,6 +26,7 @@ import java.util.function.Consumer;
  * Adapts a {@link com.android.car.ui.toolbar.MenuItem} into a
  * {@link com.android.car.ui.sharedlibrary.oemapis.toolbar.MenuItemOEMV1}
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public class MenuItemAdapterV1 implements MenuItemOEMV1 {
 
     private final MenuItem mClientMenuItem;

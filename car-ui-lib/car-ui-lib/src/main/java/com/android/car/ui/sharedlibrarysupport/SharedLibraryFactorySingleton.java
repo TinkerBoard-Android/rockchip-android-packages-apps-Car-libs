@@ -45,8 +45,9 @@ public final class SharedLibraryFactorySingleton {
 
         Object oemVersionProvider;
         try {
-            oemVersionProvider = Class.forName(
-                    "com.android.car.ui.sharedlibrary.SharedLibraryVersionProviderImpl")
+            oemVersionProvider = Class
+                    .forName("com.android.car.ui.sharedlibrary.SharedLibraryVersionProviderImpl")
+                    .getDeclaredConstructor()
                     .newInstance();
         } catch (ReflectiveOperationException e) {
             if (e instanceof ClassNotFoundException) {
@@ -96,4 +97,6 @@ public final class SharedLibraryFactorySingleton {
             return false;
         }
     }
+
+    private SharedLibraryFactorySingleton() {}
 }

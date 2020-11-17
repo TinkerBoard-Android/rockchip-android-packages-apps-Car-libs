@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import java.util.function.Consumer;
 
+@SuppressWarnings("AndroidJdkLibsChecker")
 final class TextViewListener extends TextView {
     private Consumer<CharSequence> mTextListener;
 

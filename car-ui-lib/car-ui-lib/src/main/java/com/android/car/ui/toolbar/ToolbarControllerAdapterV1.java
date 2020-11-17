@@ -48,6 +48,7 @@ import java.util.function.Function;
  * Adapts a {@link com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1}
  * into a {@link ToolbarController}
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
     private static final String TAG = ToolbarControllerAdapterV1.class.getName();
@@ -345,12 +346,15 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             mOemToolbar.setSubtitle(null);
         }
 
-        if (state == State.SEARCH) {
-            mOemToolbar.setSearchMode(ToolbarControllerOEMV1.SEARCH_MODE_SEARCH);
-        } else if (state == State.EDIT) {
-            mOemToolbar.setSearchMode(ToolbarControllerOEMV1.SEARCH_MODE_EDIT);
-        } else {
-            mOemToolbar.setSearchMode(ToolbarControllerOEMV1.SEARCH_MODE_DISABLED);
+        switch (state) {
+            case SEARCH:
+                mOemToolbar.setSearchMode(ToolbarControllerOEMV1.SEARCH_MODE_SEARCH);
+                break;
+            case EDIT:
+                mOemToolbar.setSearchMode(ToolbarControllerOEMV1.SEARCH_MODE_EDIT);
+                break;
+            default:
+                mOemToolbar.setSearchMode(ToolbarControllerOEMV1.SEARCH_MODE_DISABLED);
         }
 
         mOemToolbar.setBackButtonVisible(state != State.HOME);
