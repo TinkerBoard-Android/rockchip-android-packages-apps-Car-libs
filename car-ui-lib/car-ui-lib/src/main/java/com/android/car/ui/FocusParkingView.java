@@ -229,8 +229,13 @@ public class FocusParkingView extends View {
         if (maybeFocusOnScrollableContainer()) {
             return true;
         }
-        // Otherwise find the best target view to focus.
-        return ViewUtils.adjustFocus(getRootView(), /* currentFocus= */ null);
+        // Otherwise try to find the best target view to focus.
+        if (ViewUtils.adjustFocus(getRootView(), /* currentFocus= */ null)) {
+            return true;
+        }
+        // It failed to find a target view (e.g., all the views are not shown), so focus on this
+        // FocusParkingView as fallback.
+        return super.requestFocus(FOCUS_DOWN, /* previouslyFocusedRect= */ null);
     }
 
     private boolean maybeFocusOnScrollableContainer() {
