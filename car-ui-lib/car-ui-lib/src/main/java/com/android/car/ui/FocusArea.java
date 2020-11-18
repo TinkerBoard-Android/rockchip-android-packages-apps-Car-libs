@@ -720,6 +720,11 @@ public class FocusArea extends LinearLayout {
         mBottomOffset = bottom;
     }
 
+    /** Sets the default focus view in this FocusArea. */
+    public void setDefaultFocus(@NonNull View defaultFocus) {
+        mDefaultFocusView = defaultFocus;
+    }
+
     @VisibleForTesting
     void enableForegroundHighlight() {
         mEnableForegroundHighlight = true;
