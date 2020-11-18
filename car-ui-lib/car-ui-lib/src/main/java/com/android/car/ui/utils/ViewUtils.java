@@ -19,6 +19,7 @@ package com.android.car.ui.utils;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_FOCUS;
 
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_CONTAINER;
+import static com.android.car.ui.utils.RotaryConstants.ROTARY_FOCUS_DELEGATING_CONTAINER;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_HORIZONTALLY_SCROLLABLE;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_VERTICALLY_SCROLLABLE;
 
@@ -248,6 +249,11 @@ public final class ViewUtils {
                 || TextUtils.equals(contentDescription, ROTARY_HORIZONTALLY_SCROLLABLE);
     }
 
+    private static boolean isFocusDelegatingContainer(@NonNull View view) {
+        CharSequence contentDescription = view.getContentDescription();
+        return TextUtils.equals(contentDescription, ROTARY_FOCUS_DELEGATING_CONTAINER);
+    }
+
     /**
      * Focuses on the first {@code app:defaultFocus} view in the view tree, if any.
      *
@@ -417,7 +423,8 @@ public final class ViewUtils {
 
     /** Returns whether {@code view} can be focused. */
     private static boolean canTakeFocus(@NonNull View view) {
-        return view.isFocusable() && view.isEnabled() && view.isShown()
+        boolean focusable = view.isFocusable() || isFocusDelegatingContainer(view);
+        return focusable && view.isEnabled() && view.isShown()
                 && view.getWidth() > 0 && view.getHeight() > 0 && view.isAttachedToWindow()
                 && !(view instanceof FocusParkingView)
                 // If it's a scrollable container, it can be focused only when it has no focusable
