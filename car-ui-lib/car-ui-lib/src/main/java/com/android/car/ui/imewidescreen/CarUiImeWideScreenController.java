@@ -19,6 +19,7 @@ package com.android.car.ui.imewidescreen;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.ExtractEditText;
@@ -138,11 +139,23 @@ public class CarUiImeWideScreenController {
     // ArrayList<String>
     public static final String SEARCH_RESULT_SUB_TITLE_LIST = "search_result_sub_title_list";
     // Key used to provide the list of resource id for each primary image in search item.
-    // ArrayList<Integer>
+    // ArrayList<Integer>. If bitmap and res id both are provided than bitmap will take
+    // precedence over res id.
     public static final String SEARCH_RESULT_PRIMARY_IMAGE_RES_ID_LIST =
             "search_result_image_list";
+    // Key used to provide the list of bitmap for each primary image in search item.
+    // ArrayList<Integer>. If bitmap and res id both are provided than bitmap will take
+    // precedence over res id.
+    public static final String SEARCH_RESULT_PRIMARY_IMAGE_BITMAP_LIST =
+            "search_result_image_bitmap_list";
+    // Key used to provide the list of bitmap for each secondary image in search item.
+    // ArrayList<Integer>. If bitmap and res id both are provided than bitmap will take
+    // precedence over res id.
+    public static final String SEARCH_RESULT_SECONDARY_IMAGE_BITMAP_LIST =
+            "search_result_secondary_image_bitmap_list";
     // Key used to provide the list of id for each secondary image in search item.
-    // ArrayList<String>
+    // ArrayList<String>. If bitmap and res id both are provided than bitmap will take
+    // precedence over res id.
     public static final String SEARCH_RESULT_SECONDARY_IMAGE_ID =
             "search_result_secondary_image_id";
     // Key used to provide the list of resource id for each secondary image in search item.
@@ -388,8 +401,12 @@ public class CarUiImeWideScreenController {
         ArrayList<String> itemIdList = data.getStringArrayList(SEARCH_RESULT_ITEM_ID);
         ArrayList<String> titleList = data.getStringArrayList(SEARCH_RESULT_TITLE_LIST);
         ArrayList<String> subTitleList = data.getStringArrayList(SEARCH_RESULT_SUB_TITLE_LIST);
+        ArrayList<Bitmap> bitmapList = data.getParcelableArrayList(
+                SEARCH_RESULT_PRIMARY_IMAGE_BITMAP_LIST);
         ArrayList<Integer> primaryImageResIdList =
                 data.getIntegerArrayList(SEARCH_RESULT_PRIMARY_IMAGE_RES_ID_LIST);
+        ArrayList<Bitmap> secondaryBitmapList = data.getParcelableArrayList(
+                SEARCH_RESULT_SECONDARY_IMAGE_BITMAP_LIST);
         ArrayList<String> secondaryImageIdList =
                 data.getStringArrayList(SEARCH_RESULT_SECONDARY_IMAGE_ID);
         ArrayList<Integer> secondaryImageResIdList =
@@ -423,10 +440,16 @@ public class CarUiImeWideScreenController {
 
             if (primaryImageResIdList != null) {
                 searchItem.setPrimaryIconType(CarUiContentListItem.IconType.CONTENT);
-                searchItem.setIcon(loadDrawableFromPackage(primaryImageResIdList.get(i)));
+                if (bitmapList != null && bitmapList.get(i) != null) {
+                    searchItem.setIconBitmap(bitmapList.get(i));
+                } else {
+                    searchItem.setIcon(loadDrawableFromPackage(primaryImageResIdList.get(i)));
+                }
             }
 
-            if (secondaryImageResIdList != null && secondaryImageIdList != null) {
+            if (secondaryBitmapList != null && secondaryBitmapList.get(i) != null) {
+                searchItem.setSupplementalIconBitmap(secondaryBitmapList.get(i));
+            } else if (secondaryImageResIdList != null && secondaryImageIdList != null) {
                 searchItem.setSupplementalIcon(
                         loadDrawableFromPackage(secondaryImageResIdList.get(i)), v -> {
                             Bundle bundle = new Bundle();
