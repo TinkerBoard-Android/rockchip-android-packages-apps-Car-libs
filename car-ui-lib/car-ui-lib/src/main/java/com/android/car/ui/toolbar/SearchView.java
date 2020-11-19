@@ -18,19 +18,20 @@ package com.android.car.ui.toolbar;
 import static android.view.WindowInsets.Type.ime;
 
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.CONTENT_AREA_SURFACE_PACKAGE;
-import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_ITEM_ID;
-import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_PRIMARY_IMAGE_BITMAP_LIST;
-import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_PRIMARY_IMAGE_RES_ID_LIST;
-import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SECONDARY_IMAGE_BITMAP_LIST;
-import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SECONDARY_IMAGE_ID;
-import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SECONDARY_IMAGE_RES_ID_LIST;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_ICON_BITMAP_LIST;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_ICON_RES_ID_LIST;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_ITEM_ID_LIST;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SUB_TITLE_LIST;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SUPPLEMENTAL_ICON_BITMAP_LIST;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SUPPLEMENTAL_ICON_ID_LIST;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SUPPLEMENTAL_ICON_RES_ID_LIST;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_TITLE_LIST;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_ACTION;
 import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
@@ -298,24 +299,28 @@ public class SearchView extends ConstraintLayout {
             primaryImageResId.add(item.getIconResId());
             secondaryItemId.add(idString);
             secondaryImageResId.add(item.getSupplementalIconResId());
-            primaryImageBitmapList.add(item.getIconBitmap());
-            secondaryImageBitmapList.add(item.getSupplementalIconBitmap());
+            BitmapDrawable icon = (BitmapDrawable) item.getIcon();
+            primaryImageBitmapList.add(icon != null ? icon.getBitmap() : null);
+            BitmapDrawable supplementalIcon = (BitmapDrawable) item.getSupplementalIcon();
+            secondaryImageBitmapList.add(
+                    supplementalIcon != null ? supplementalIcon.getBitmap() : null);
 
             mIdToListItem.put(idString, item);
             id++;
         }
 
         Bundle bundle = new Bundle();
-        bundle.putStringArrayList(SEARCH_RESULT_ITEM_ID, itemIdList);
+        bundle.putStringArrayList(SEARCH_RESULT_ITEM_ID_LIST, itemIdList);
         bundle.putStringArrayList(SEARCH_RESULT_TITLE_LIST, titleList);
         bundle.putStringArrayList(SEARCH_RESULT_SUB_TITLE_LIST, subTitleList);
-        bundle.putParcelableArrayList(SEARCH_RESULT_PRIMARY_IMAGE_BITMAP_LIST,
+        bundle.putParcelableArrayList(SEARCH_RESULT_ICON_BITMAP_LIST,
                 primaryImageBitmapList);
-        bundle.putParcelableArrayList(SEARCH_RESULT_SECONDARY_IMAGE_BITMAP_LIST,
+        bundle.putParcelableArrayList(SEARCH_RESULT_SUPPLEMENTAL_ICON_BITMAP_LIST,
                 secondaryImageBitmapList);
-        bundle.putIntegerArrayList(SEARCH_RESULT_PRIMARY_IMAGE_RES_ID_LIST, primaryImageResId);
-        bundle.putStringArrayList(SEARCH_RESULT_SECONDARY_IMAGE_ID, secondaryItemId);
-        bundle.putIntegerArrayList(SEARCH_RESULT_SECONDARY_IMAGE_RES_ID_LIST, secondaryImageResId);
+        bundle.putIntegerArrayList(SEARCH_RESULT_ICON_RES_ID_LIST, primaryImageResId);
+        bundle.putStringArrayList(SEARCH_RESULT_SUPPLEMENTAL_ICON_ID_LIST, secondaryItemId);
+        bundle.putIntegerArrayList(SEARCH_RESULT_SUPPLEMENTAL_ICON_RES_ID_LIST,
+                secondaryImageResId);
         mInputMethodManager.sendAppPrivateCommand(mSearchText, WIDE_SCREEN_ACTION, bundle);
     }
 
