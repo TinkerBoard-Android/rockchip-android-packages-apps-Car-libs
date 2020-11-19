@@ -16,6 +16,8 @@
 
 package com.android.car.ui.sharedlibrary.oemapis.toolbar;
 
+import android.graphics.drawable.Drawable;
+
 import java.util.function.Consumer;
 
 /** Interface representing a search list item */
@@ -39,6 +41,12 @@ public interface SearchItemOEMV1 {
 
     /** Returns the body text of the item */
     CharSequence getBody();
+
+    /** Returns the icon of the item */
+    Drawable getIcon();
+
+    /** Returns the supplemental icon of the item */
+    Drawable getSupplementalIcon();
 
     /** Gets the on-click listener for the whole search item */
     Consumer<SearchItemOEMV1> getOnClickListener();
