@@ -19,7 +19,9 @@ import static android.view.WindowInsets.Type.ime;
 
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.CONTENT_AREA_SURFACE_PACKAGE;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_ITEM_ID;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_PRIMARY_IMAGE_BITMAP_LIST;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_PRIMARY_IMAGE_RES_ID_LIST;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SECONDARY_IMAGE_BITMAP_LIST;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SECONDARY_IMAGE_ID;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SECONDARY_IMAGE_RES_ID_LIST;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SUB_TITLE_LIST;
@@ -28,6 +30,7 @@ import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE
 import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
@@ -281,7 +284,9 @@ public class SearchView extends ConstraintLayout {
         ArrayList<String> itemIdList = new ArrayList<>();
         ArrayList<String> titleList = new ArrayList<>();
         ArrayList<String> subTitleList = new ArrayList<>();
+        ArrayList<Bitmap> primaryImageBitmapList = new ArrayList<>();
         ArrayList<Integer> primaryImageResId = new ArrayList<>();
+        ArrayList<Bitmap> secondaryImageBitmapList = new ArrayList<>();
         ArrayList<String> secondaryItemId = new ArrayList<>();
         ArrayList<Integer> secondaryImageResId = new ArrayList<>();
         int id = 0;
@@ -293,6 +298,8 @@ public class SearchView extends ConstraintLayout {
             primaryImageResId.add(item.getIconResId());
             secondaryItemId.add(idString);
             secondaryImageResId.add(item.getSupplementalIconResId());
+            primaryImageBitmapList.add(item.getIconBitmap());
+            secondaryImageBitmapList.add(item.getSupplementalIconBitmap());
 
             mIdToListItem.put(idString, item);
             id++;
@@ -302,6 +309,10 @@ public class SearchView extends ConstraintLayout {
         bundle.putStringArrayList(SEARCH_RESULT_ITEM_ID, itemIdList);
         bundle.putStringArrayList(SEARCH_RESULT_TITLE_LIST, titleList);
         bundle.putStringArrayList(SEARCH_RESULT_SUB_TITLE_LIST, subTitleList);
+        bundle.putParcelableArrayList(SEARCH_RESULT_PRIMARY_IMAGE_BITMAP_LIST,
+                primaryImageBitmapList);
+        bundle.putParcelableArrayList(SEARCH_RESULT_SECONDARY_IMAGE_BITMAP_LIST,
+                secondaryImageBitmapList);
         bundle.putIntegerArrayList(SEARCH_RESULT_PRIMARY_IMAGE_RES_ID_LIST, primaryImageResId);
         bundle.putStringArrayList(SEARCH_RESULT_SECONDARY_IMAGE_ID, secondaryItemId);
         bundle.putIntegerArrayList(SEARCH_RESULT_SECONDARY_IMAGE_RES_ID_LIST, secondaryImageResId);
