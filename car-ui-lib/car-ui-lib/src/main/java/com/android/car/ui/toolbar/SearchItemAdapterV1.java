@@ -15,6 +15,8 @@
  */
 package com.android.car.ui.toolbar;
 
+import android.graphics.drawable.Drawable;
+
 import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
 import com.android.car.ui.recyclerview.CarUiContentListItem;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.SearchItemOEMV1;
@@ -24,6 +26,7 @@ import java.util.function.Consumer;
 @SuppressWarnings("AndroidJdkLibsChecker")
 class SearchItemAdapterV1 implements SearchItemOEMV1 {
     private final CarUiImeSearchListItem mClientItem;
+
     SearchItemAdapterV1(CarUiImeSearchListItem item) {
         mClientItem = item;
     }
@@ -46,6 +49,16 @@ class SearchItemAdapterV1 implements SearchItemOEMV1 {
     @Override
     public CharSequence getBody() {
         return mClientItem.getBody();
+    }
+
+    @Override
+    public Drawable getIcon() {
+        return mClientItem.getIcon();
+    }
+
+    @Override
+    public Drawable getSupplementalIcon() {
+        return mClientItem.getSupplementalIcon();
     }
 
     @Override
