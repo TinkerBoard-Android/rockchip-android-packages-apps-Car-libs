@@ -14,13 +14,15 @@
 
 android_library {
     name: "encryption-runner",
-    min_sdk_version: "23",
+    sdk_version: "current",
+    min_sdk_version: "28",
     product_variables: {
         pdk: {
             enabled: false,
         },
     },
     static_libs: [
+      "androidx.annotation_annotation",
       "ukey2",
     ],
     srcs: [

@@ -16,7 +16,7 @@
 
 package com.android.car.connecteddevice;
 
-import android.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /** Callbacks that will be invoked during associating a new client. */
 public interface AssociationCallback {
@@ -26,10 +26,10 @@ public interface AssociationCallback {
      *
      * @param deviceName The device name to identify the car.
      */
-    void onAssociationStartSuccess(@NonNull String deviceName);
+    default void onAssociationStartSuccess(String deviceName) {}
 
     /** Invoked when IHU failed to start advertising for association. */
-    void onAssociationStartFailure();
+    default void onAssociationStartFailure() {}
 
     /**
      * Invoked when a {@link ConnectedDeviceManager.DeviceError} has been encountered in attempting
@@ -37,7 +37,7 @@ public interface AssociationCallback {
      *
      * @param error The failure indication.
      */
-    void onAssociationError(@ConnectedDeviceManager.DeviceError int error);
+    default void onAssociationError(@ConnectedDeviceManager.DeviceError int error) {}
 
     /**
      * Invoked when a verification code needs to be displayed. The user needs to confirm, and
@@ -45,12 +45,12 @@ public interface AssociationCallback {
      *
      * @param code The verification code.
      */
-    void onVerificationCodeAvailable(@NonNull String code);
+    default void onVerificationCodeAvailable(@NonNull String code) {}
 
     /**
      * Invoked when the association has completed.
      *
      * @param deviceId The id of the newly associated device.
      */
-    void onAssociationCompleted(@NonNull String deviceId);
+    default void onAssociationCompleted(@NonNull String deviceId) {}
 }

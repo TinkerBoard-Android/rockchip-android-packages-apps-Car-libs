@@ -18,8 +18,9 @@ package com.android.car.connecteddevice.util;
 
 import static com.android.car.connecteddevice.util.SafeLog.logw;
 
-import android.annotation.NonNull;
 import android.bluetooth.le.ScanResult;
+
+import androidx.annotation.NonNull;
 
 import java.math.BigInteger;
 
