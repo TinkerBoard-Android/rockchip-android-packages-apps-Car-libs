@@ -133,6 +133,11 @@ public class MenuItemAdapterV1 implements MenuItemOEMV1 {
     }
 
     @Override
+    public boolean isPrimary() {
+        return mClientMenuItem.isPrimary();
+    }
+
+    @Override
     public boolean isSearch() {
         return mClientMenuItem.isSearch();
     }

@@ -159,6 +159,30 @@ public class ToolbarActivity extends AppCompatActivity implements InsetsChangedL
             toolbar.setMenuItems(mMenuItems);
         }));
 
+        mButtons.add(Pair.create(getString(R.string.toolbar_add_bordered_text), v -> {
+            mMenuItems.add(MenuItem.builder(this)
+                    .setTitle("Baz")
+                    .setPrimary(true)
+                    .setOnClickListener(
+                            i -> Toast.makeText(this, "Clicked",
+                                    Toast.LENGTH_SHORT).show())
+                    .build());
+            toolbar.setMenuItems(mMenuItems);
+        }));
+
+        mButtons.add(Pair.create(getString(R.string.toolbar_add_bordered_icon_text), v -> {
+            mMenuItems.add(MenuItem.builder(this)
+                    .setIcon(R.drawable.ic_tracklist)
+                    .setTitle("Bar")
+                    .setPrimary(true)
+                    .setShowIconAndTitle(true)
+                    .setOnClickListener(
+                            i -> Toast.makeText(this, "Clicked",
+                                    Toast.LENGTH_SHORT).show())
+                    .build());
+            toolbar.setMenuItems(mMenuItems);
+        }));
+
         mButtons.add(Pair.create(getString(R.string.toolbar_add_untinted_icon_and_text), v -> {
             mMenuItems.add(MenuItem.builder(this)
                     .setIcon(R.drawable.ic_tracklist)
