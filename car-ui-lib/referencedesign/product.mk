@@ -23,9 +23,11 @@ PRODUCT_PACKAGES += \
     googlecarui-com-google-android-apps-automotive-templates-host \
     googlecarui-com-google-android-embedded-projection \
     googlecarui-com-google-android-gms \
+    googlecarui-com-google-android-gsf \
     googlecarui-com-google-android-packageinstaller \
     googlecarui-com-google-android-carassistant \
     googlecarui-com-google-android-tts \
+    googlecarui-com-android-managedprovisioning \
     googlecarui-com-android-vending \
 
 
@@ -36,6 +38,7 @@ PRODUCT_PACKAGES += \
     googlecarui-overlayable-com-google-android-apps-automotive-templates-host \
     googlecarui-overlayable-com-google-android-embedded-projection \
     googlecarui-overlayable-com-google-android-gms \
+    googlecarui-overlayable-com-google-android-gsf \
     googlecarui-overlayable-com-google-android-packageinstaller \
     googlecarui-overlayable-com-google-android-permissioncontroller \
     googlecarui-overlayable-com-google-android-carassistant \
