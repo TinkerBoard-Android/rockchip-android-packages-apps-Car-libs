@@ -24,7 +24,7 @@ limitations under the License.
     <string name="car_ui_toolbar_menu_item_settings_title" msgid="6694060516340354337">"Жөндөөлөр"</string>
     <string name="car_ui_toolbar_menu_item_overflow_title" msgid="771643815366812499">"Кошумча меню"</string>
     <string name="car_ui_dialog_preference_positive" msgid="1918267574135176336">"Жарайт"</string>
-    <string name="car_ui_dialog_preference_negative" msgid="4156315694902086271">"Жокко чыгаруу"</string>
+    <string name="car_ui_dialog_preference_negative" msgid="4156315694902086271">"Жок"</string>
     <string name="car_ui_preference_switch_on" msgid="5512335363135043642">"Күйүк"</string>
     <string name="car_ui_preference_switch_off" msgid="4393435896926380920">"Өчүк"</string>
     <string name="car_ui_alert_dialog_default_button" msgid="1775326289021319685">"Жабуу"</string>
