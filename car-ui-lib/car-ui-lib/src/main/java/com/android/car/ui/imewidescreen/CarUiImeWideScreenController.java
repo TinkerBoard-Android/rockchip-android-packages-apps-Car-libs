@@ -17,6 +17,8 @@
 package com.android.car.ui.imewidescreen;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -56,8 +58,8 @@ import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.utils.CarUiUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Helper class to build an IME that support widescreen mode.
@@ -93,6 +95,7 @@ import java.util.List;
 public class CarUiImeWideScreenController {
 
     private static final String TAG = "ImeWideScreenController";
+    private static final String NOT_ASTERISK_OR_CAPTURED_ASTERISK = "[^*]+|(\\*)";
 
     // Automotive wide screen mode bundle keys.
 
@@ -322,7 +325,7 @@ public class CarUiImeWideScreenController {
         if (data == null) {
             return;
         }
-        if (mAllowAppToHideContentArea || (mInputEditorInfo != null && allowPackageList().contains(
+        if (mAllowAppToHideContentArea || (mInputEditorInfo != null && isPackageAuthorized(
                 mInputEditorInfo.packageName))) {
             mImeRendersAllContent = data.getBoolean(REQUEST_RENDER_CONTENT_AREA, true);
         }
@@ -563,7 +566,7 @@ public class CarUiImeWideScreenController {
      */
     private void sendSurfaceInfo() {
         if (!mAllowAppToHideContentArea && !(mInputEditorInfo != null
-                && allowPackageList().contains(mInputEditorInfo.packageName))) {
+                && isPackageAuthorized(mInputEditorInfo.packageName))) {
             return;
         }
         int displayId = mContentAreaSurfaceView.getDisplay().getDisplayId();
@@ -651,10 +654,57 @@ public class CarUiImeWideScreenController {
         });
     }
 
-    private List<String> allowPackageList() {
+    private boolean isPackageAuthorized(String packageName) {
         String[] packages = mContext.getResources()
                 .getStringArray(R.array.car_ui_ime_wide_screen_allowed_package_list);
-        return Arrays.asList(packages);
+
+        PackageInfo packageInfo = getPackageInfo(mContext, packageName);
+        // Checks if the application of the given context is installed in the system image. I.e.
+        // if it's a bundled app.
+        if (packageInfo != null && (packageInfo.applicationInfo.flags & (ApplicationInfo.FLAG_SYSTEM
+                | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0) {
+            return true;
+        }
+
+        for (String pattern : packages) {
+            String regex = createRegexFromGlob(pattern);
+            if (packageName.matches(regex)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Return the package info for a particular package.
+     */
+    @Nullable
+    private static PackageInfo getPackageInfo(Context context,
+            String packageName) {
+        PackageManager packageManager = context.getPackageManager();
+        PackageInfo packageInfo = null;
+        try {
+            packageInfo = packageManager.getPackageInfo(
+                    packageName, /* flags= */ 0);
+        } catch (PackageManager.NameNotFoundException ex) {
+            Log.e(TAG, "package not found: " + packageName);
+        }
+        return packageInfo;
+    }
+
+    private static String createRegexFromGlob(String glob) {
+        Pattern reg = Pattern.compile(NOT_ASTERISK_OR_CAPTURED_ASTERISK);
+        Matcher m = reg.matcher(glob);
+        StringBuffer b = new StringBuffer();
+        while (m.find()) {
+            if (m.group(1) != null) {
+                m.appendReplacement(b, ".*");
+            } else {
+                m.appendReplacement(b, Matcher.quoteReplacement(m.group(0)));
+            }
+        }
+        m.appendTail(b);
+        return b.toString();
     }
 
     private void setExtractedEditTextBackground(int drawableResId) {
