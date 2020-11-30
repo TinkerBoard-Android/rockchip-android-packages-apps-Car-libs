@@ -32,6 +32,7 @@ import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import androidx.annotation.LayoutRes;
 import androidx.annotation.XmlRes;
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 
@@ -99,7 +100,10 @@ class MenuItemRenderer implements MenuItem.Listener {
 
     void createView(Consumer<View> callback) {
         AsyncLayoutInflater inflater = new AsyncLayoutInflater(mParentView.getContext());
-        inflater.inflate(R.layout.car_ui_toolbar_menu_item, mParentView, (View view, int resid,
+        @LayoutRes int layout = mMenuItem.isPrimary()
+                ? R.layout.car_ui_toolbar_menu_item_primary
+                : R.layout.car_ui_toolbar_menu_item;
+        inflater.inflate(layout, mParentView, (View view, int resid,
                 ViewGroup parent) -> {
             mView = view;
 

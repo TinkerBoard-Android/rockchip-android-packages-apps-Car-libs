@@ -19,6 +19,7 @@
     <!-- Toolbar -->
 
     <!-- Layout to be used for toolbar tabs -->
-    <item name="car_ui_toolbar_tab_item_layout" type="layout">@layout/car_ui_toolbar_tab_item</item>
-    <item name="car_ui_toolbar_tab_item_layout_flexible" type="layout">@layout/car_ui_toolbar_tab_item_flexible</item>
+    <layout name="car_ui_toolbar_tab_item_layout">@layout/car_ui_toolbar_tab_item</layout>
+    <layout name="car_ui_toolbar_tab_item_layout_flexible">@layout/car_ui_toolbar_tab_item_flexible</layout>
+    <layout name="car_ui_toolbar_menu_item_primary">@layout/car_ui_toolbar_menu_item</layout>
 </resources>

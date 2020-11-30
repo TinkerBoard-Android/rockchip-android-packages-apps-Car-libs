@@ -12,7 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.-->
-<!-- THIS FILE WAS AUTO GENERATED ON 26-Oct-2020 (13:14:37), DO NOT EDIT MANUALLY. -->
+<!-- THIS FILE WAS AUTO GENERATED ON 24-Nov-2020 (16:21:21), DO NOT EDIT MANUALLY. -->
 <resources>
   <overlayable name="car-ui-lib">
     <policy type="public">
@@ -439,6 +439,7 @@ limitations under the License.-->
       <item type="layout" name="car_ui_seekbar_dialog"/>
       <item type="layout" name="car_ui_toolbar"/>
       <item type="layout" name="car_ui_toolbar_menu_item"/>
+      <item type="layout" name="car_ui_toolbar_menu_item_primary"/>
       <item type="layout" name="car_ui_toolbar_search_view"/>
       <item type="layout" name="car_ui_toolbar_tab_item"/>
       <item type="layout" name="car_ui_toolbar_tab_item_flexible"/>

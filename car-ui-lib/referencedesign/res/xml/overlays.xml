@@ -3,6 +3,7 @@
     <item target="layout/car_ui_toolbar" value="@layout/car_ui_toolbar"/>
     <item target="layout/car_ui_toolbar_two_row" value="@layout/car_ui_toolbar_two_row"/>
     <item target="layout/car_ui_toolbar_menu_item" value="@layout/car_ui_toolbar_menu_item"/>
+    <item target="layout/car_ui_toolbar_menu_item_primary" value="@layout/car_ui_toolbar_menu_item_primary"/>
     <item target="layout/car_ui_preference_widget_seekbar" value="@layout/car_ui_preference_widget_seekbar"/>
 
     <item target="drawable/car_ui_icon_arrow_back" value="@drawable/car_ui_icon_arrow_back"/>
