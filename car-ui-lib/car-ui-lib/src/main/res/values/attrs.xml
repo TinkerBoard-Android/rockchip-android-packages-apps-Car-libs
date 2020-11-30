@@ -113,6 +113,13 @@
         <!-- Bottom offset for car ui recycler view for linear layout. -->
         <attr name="bottomOffset" format="integer" />
 
+        <!-- Whether to enable rotary scrolling. Disabled by default. With rotary scrolling enabled,
+        rotating the rotary controller will scroll rather than moving the focus when moving the
+        focus would cause a lot of scrolling. Rotary scrolling should be enabled when the recycler
+        view contains content which the user may want to see but can't interact with, either alone
+        or along with interactive (focusable) content. -->
+        <attr name="rotaryScrollEnabled" format="boolean" />
+
         <!-- Number of columns in a grid layout. -->
         <attr name="numOfColumns" format="integer" />
 
