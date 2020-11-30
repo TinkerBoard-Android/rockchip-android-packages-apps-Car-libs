@@ -52,6 +52,7 @@ import com.android.car.ui.recyclerview.decorations.grid.GridOffsetItemDecoration
 import com.android.car.ui.recyclerview.decorations.linear.LinearDividerItemDecoration;
 import com.android.car.ui.recyclerview.decorations.linear.LinearOffsetItemDecoration;
 import com.android.car.ui.recyclerview.decorations.linear.LinearOffsetItemDecoration.OffsetPosition;
+import com.android.car.ui.utils.CarUiUtils;
 import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
 import java.lang.annotation.Retention;
@@ -187,13 +188,13 @@ public final class CarUiRecyclerView extends RecyclerView {
     }
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr) {
-        initRotaryScroll();
         setClipToPadding(false);
         TypedArray a = context.obtainStyledAttributes(
                 attrs,
                 R.styleable.CarUiRecyclerView,
                 defStyleAttr,
                 R.style.Widget_CarUi_CarUiRecyclerView);
+        initRotaryScroll(a);
 
         mScrollBarEnabled = context.getResources().getBoolean(R.bool.car_ui_scrollbar_enable);
 
@@ -293,14 +294,24 @@ public final class CarUiRecyclerView extends RecyclerView {
     }
 
     /**
-     * If this view's content description is set to opt into scrolling via the rotary controller,
-     * initialize it accordingly.
+     * If this view's {@code rotaryScrollEnabled} attribute is set to true, sets the content
+     * description so that the {@code RotaryService} will treat it as a scrollable container and
+     * initializes this view accordingly.
      */
-    private void initRotaryScroll() {
-        CharSequence contentDescription = getContentDescription();
-        boolean rotaryScrollEnabled = contentDescription != null
-                && (ROTARY_HORIZONTALLY_SCROLLABLE.contentEquals(contentDescription)
-                || ROTARY_VERTICALLY_SCROLLABLE.contentEquals(contentDescription));
+    private void initRotaryScroll(@Nullable TypedArray styledAttributes) {
+        boolean rotaryScrollEnabled = styledAttributes != null && styledAttributes.getBoolean(
+                R.styleable.CarUiRecyclerView_rotaryScrollEnabled, /* defValue=*/ false);
+        if (rotaryScrollEnabled) {
+            int orientation = styledAttributes.getInt(R.styleable.RecyclerView_android_orientation,
+                    LinearLayout.VERTICAL);
+            CarUiUtils.setRotaryScrollEnabled(
+                    this, /* isVertical= */ orientation == LinearLayout.VERTICAL);
+        } else {
+            CharSequence contentDescription = getContentDescription();
+            rotaryScrollEnabled = contentDescription != null
+                    && (ROTARY_HORIZONTALLY_SCROLLABLE.contentEquals(contentDescription)
+                    || ROTARY_VERTICALLY_SCROLLABLE.contentEquals(contentDescription));
+        }
 
         // If rotary scrolling is enabled, set a generic motion event listener to convert
         // SOURCE_ROTARY_ENCODER scroll events into SOURCE_MOUSE scroll events that RecyclerView
@@ -555,7 +566,7 @@ public final class CarUiRecyclerView extends RecyclerView {
     @Override
     public void setContentDescription(CharSequence contentDescription) {
         super.setContentDescription(contentDescription);
-        initRotaryScroll();
+        initRotaryScroll(/* styledAttributes= */ null);
     }
 
     private static RuntimeException andLog(String msg, Throwable t) {
