@@ -154,6 +154,8 @@ class MenuItemRenderer implements MenuItem.Listener {
             mSwitch.setChecked(mMenuItem.isChecked());
             mSwitch.setVisibility(View.VISIBLE);
             if (mIsRotaryEnabledLayout) {
+                textContainerVisibility = View.VISIBLE;
+            } else {
                 iconContainerVisibility = View.VISIBLE;
             }
         } else if (hasText && hasIcon && textAndIcon) {
