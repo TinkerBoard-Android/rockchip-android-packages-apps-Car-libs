@@ -38,14 +38,6 @@
             android:layout_gravity="center"
             android:tint="@color/car_ui_toolbar_menu_item_icon_color"
             android:tintMode="src_in"/>
-        <com.android.car.ui.uxr.DrawableStateSwitch
-            android:id="@+id/car_ui_toolbar_menu_item_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="@null"
-            android:focusable="false"
-            android:clickable="false"/>
     </FrameLayout>
 
     <FrameLayout
@@ -55,6 +47,14 @@
         android:layout_height="wrap_content"
         android:background="?android:attr/selectableItemBackground">
         <!-- These buttons must have clickable="false" or they will steal the click events from the container -->
+        <com.android.car.ui.uxr.DrawableStateSwitch
+            android:id="@+id/car_ui_toolbar_menu_item_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@null"
+            android:focusable="false"
+            android:clickable="false"/>
         <com.android.car.ui.uxr.DrawableStateButton
             android:id="@+id/car_ui_toolbar_menu_item_text"
             style="@style/Widget.CarUi.Toolbar.TextButton"
