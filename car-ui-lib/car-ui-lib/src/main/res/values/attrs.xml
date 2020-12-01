@@ -145,6 +145,20 @@
     <declare-styleable name="CarUiTwoActionPreference">
         <!-- Determines if the secondary action is initially shown -->
         <attr name="actionShown" format="boolean"/>
+        <!-- Determines if the secondary action is initially enabled -->
+        <attr name="actionEnabled" format="boolean"/>
+    </declare-styleable>
+
+    <declare-styleable name="CarUiTwoActionTextPreference">
+        <attr name="secondaryActionStyle" format="enum">
+            <enum name="bordered" value="0"/>
+            <enum name="borderless" value="1"/>
+        </attr>
+        <attr name="secondaryActionText" format="string"/>
+    </declare-styleable>
+
+    <declare-styleable name="CarUiTwoActionIconPreference">
+        <attr name="secondaryActionIcon" format="reference"/>
     </declare-styleable>
 
     <!-- Theme attribute to specify a default style for all CarUiPreferences -->
