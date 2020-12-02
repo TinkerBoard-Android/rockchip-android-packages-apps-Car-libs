@@ -376,6 +376,7 @@ limitations under the License.-->
       <item type="layout" name="car_ui_seekbar_dialog"/>
       <item type="layout" name="car_ui_toolbar"/>
       <item type="layout" name="car_ui_toolbar_menu_item"/>
+      <item type="layout" name="car_ui_toolbar_menu_item_primary"/>
       <item type="layout" name="car_ui_toolbar_search_view"/>
       <item type="layout" name="car_ui_toolbar_tab_item"/>
       <item type="layout" name="car_ui_toolbar_tab_item_flexible"/>
