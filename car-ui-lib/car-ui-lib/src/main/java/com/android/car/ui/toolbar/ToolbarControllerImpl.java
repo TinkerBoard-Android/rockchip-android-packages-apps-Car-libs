@@ -28,6 +28,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.text.PrecomputedText;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -51,6 +52,8 @@ import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.utils.CarUiUtils;
 import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -58,6 +61,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -74,7 +78,9 @@ public final class ToolbarControllerImpl implements ToolbarController {
     private ViewGroup mNavIconContainer;
     private ViewGroup mTitleContainer;
     private TextView mTitle;
+    private CharSequence mTitleText;
     private TextView mSubtitle;
+    private CharSequence mSubtitleText;
     private ImageView mTitleLogo;
     private ViewGroup mTitleLogoContainer;
     private TabLayout mTabLayout;
@@ -222,7 +228,9 @@ public final class ToolbarControllerImpl implements ToolbarController {
      */
     @Override
     public void setTitle(@StringRes int title) {
-        mTitle.setText(title);
+        String titleText = getContext().getString(title);
+        asyncSetText(mTitle, titleText, Runnable::run);
+        mTitleText = titleText;
         setState(getState());
     }
 
@@ -233,13 +241,38 @@ public final class ToolbarControllerImpl implements ToolbarController {
      */
     @Override
     public void setTitle(CharSequence title) {
-        mTitle.setText(title);
+        asyncSetText(mTitle, title, Runnable::run);
+        mTitleText = title;
         setState(getState());
+    }
+
+    private void asyncSetText(TextView textView, CharSequence title, Executor bgExecutor) {
+        // construct precompute related parameters using the TextView that we will set the text on.
+        PrecomputedText.Params params = textView.getTextMetricsParams();
+        Reference textViewRef = new WeakReference<>(textView);
+        if (title == null) {
+            title = "";
+        }
+        CharSequence finalTitle = title;
+        bgExecutor.execute(() -> {
+            // background thread
+            TextView tv = (TextView) textViewRef.get();
+            if (tv == null) {
+                return;
+            }
+            PrecomputedText precomputedText = PrecomputedText.create(finalTitle, params);
+            tv.post(() -> {
+                // UI thread
+                TextView tvUi = (TextView) textViewRef.get();
+                if (tvUi == null) return;
+                tvUi.setText(precomputedText);
+            });
+        });
     }
 
     @Override
     public CharSequence getTitle() {
-        return mTitle.getText();
+        return mTitleText;
     }
 
     /**
@@ -248,8 +281,10 @@ public final class ToolbarControllerImpl implements ToolbarController {
      * <p>The title may not always be shown, for example with one row layout with tabs.
      */
     @Override
-    public void setSubtitle(@StringRes int title) {
-        mSubtitle.setText(title);
+    public void setSubtitle(@StringRes int subTitle) {
+        String subTitleText = getContext().getString(subTitle);
+        asyncSetText(mSubtitle, subTitleText, Runnable::run);
+        mSubtitleText = subTitleText;
         setState(getState());
     }
 
@@ -259,14 +294,15 @@ public final class ToolbarControllerImpl implements ToolbarController {
      * <p>The title may not always be shown, for example with one row layout with tabs.
      */
     @Override
-    public void setSubtitle(CharSequence title) {
-        mSubtitle.setText(title);
+    public void setSubtitle(CharSequence subTitle) {
+        asyncSetText(mSubtitle, subTitle, Runnable::run);
+        mSubtitleText = subTitle;
         setState(getState());
     }
 
     @Override
     public CharSequence getSubtitle() {
-        return mSubtitle.getText();
+        return mSubtitleText;
     }
 
     /**
@@ -346,7 +382,29 @@ public final class ToolbarControllerImpl implements ToolbarController {
      */
     @Override
     public void setLogo(@DrawableRes int resId) {
-        setLogo(resId != 0 ? getContext().getDrawable(resId) : null);
+        asyncSetLogo(resId, Runnable::run);
+    }
+
+    private void asyncSetLogo(int resId, Executor bgExecutor) {
+        if (!mShowLogo) {
+            // If no logo should be shown then we act as if we never received one.
+            return;
+        }
+        if (resId != 0) {
+            bgExecutor.execute(() -> {
+                // load resource on background thread.
+                Drawable drawable = getContext().getDrawable(resId);
+                mTitleLogo.post(() -> {
+                    // UI thread.
+                    mLogoInNavIconSpace.setImageDrawable(drawable);
+                    mTitleLogo.setImageDrawable(drawable);
+                });
+            });
+            mHasLogo = true;
+        } else {
+            mHasLogo = false;
+        }
+        setState(mState);
     }
 
     /**
@@ -794,7 +852,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
                 ? VISIBLE : GONE;
         mTitleContainer.setVisibility(visibility);
         mSubtitle.setVisibility(
-                TextUtils.isEmpty(mSubtitle.getText()) ? GONE : VISIBLE);
+                TextUtils.isEmpty(getSubtitle()) ? GONE : VISIBLE);
 
         mTabLayout.setVisibility(hasTabs ? VISIBLE : GONE);
 
