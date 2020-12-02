@@ -21,6 +21,7 @@ import static java.lang.Math.max;
 
 import android.content.res.Resources;
 import android.os.Handler;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -28,6 +29,7 @@ import android.view.animation.Interpolator;
 
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.OrientationHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -262,13 +264,93 @@ class DefaultScrollBar implements ScrollBar {
                 .start();
     }
 
+    private boolean mIsAdapterChangeObserverRegistered = false;
+    @Nullable
+    private RecyclerView.Adapter mCurrentAdapter;
     private final RecyclerView.OnScrollListener mRecyclerViewOnScrollListener =
             new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                     updatePaginationButtons();
+                    cacheChildrenHeight(recyclerView.getLayoutManager());
+                    if (mCurrentAdapter != recyclerView.getAdapter()) {
+                        mIsAdapterChangeObserverRegistered = false;
+                        if (mCurrentAdapter != null) {
+                            mCurrentAdapter.unregisterAdapterDataObserver(mAdapterChangeObserver);
+                        }
+                    }
+                    if (!mIsAdapterChangeObserverRegistered
+                            && recyclerView.getAdapter() != null) {
+                        mIsAdapterChangeObserverRegistered = true;
+                        mCurrentAdapter = recyclerView.getAdapter();
+                        mCurrentAdapter.registerAdapterDataObserver(mAdapterChangeObserver);
+                    }
                 }
             };
+    private final SparseArray<Integer> mChildHeightByAdapterPosition = new SparseArray();
+
+    private final RecyclerView.AdapterDataObserver mAdapterChangeObserver =
+            new RecyclerView.AdapterDataObserver() {
+                @Override
+                public void onChanged() {
+                    clearCachedHeights();
+                }
+                @Override
+                public void onItemRangeChanged(int positionStart, int itemCount, Object payload) {
+                    clearCachedHeights();
+                }
+                @Override
+                public void onItemRangeChanged(int positionStart, int itemCount) {
+                    clearCachedHeights();
+                }
+                @Override
+                public void onItemRangeInserted(int positionStart, int itemCount) {
+                    clearCachedHeights();
+                }
+                @Override
+                public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+                    clearCachedHeights();
+                }
+                @Override
+                public void onItemRangeRemoved(int positionStart, int itemCount) {
+                    clearCachedHeights();
+                }
+            };
+
+    private void clearCachedHeights() {
+        mChildHeightByAdapterPosition.clear();
+        cacheChildrenHeight(mRecyclerView.getLayoutManager());
+    }
+
+    private void cacheChildrenHeight(RecyclerView.LayoutManager layoutManager) {
+        for (int i = 0; i < layoutManager.getChildCount(); i++) {
+            View child = layoutManager.getChildAt(i);
+            int childPosition = layoutManager.getPosition(child);
+            if (mChildHeightByAdapterPosition.indexOfKey(childPosition) < 0) {
+                mChildHeightByAdapterPosition.put(childPosition, child.getHeight());
+            }
+        }
+    }
+
+    private int estimateNextPositionScrollUp(int currentPos, int scrollDistance,
+            OrientationHelper orientationHelper) {
+        int nextPos = 0;
+        int distance = 0;
+        for (int i = currentPos - 1; i >= 0; i--) {
+            if (mChildHeightByAdapterPosition.indexOfKey(i) < 0) {
+                // Use the average height estimate when there is not enough data
+                nextPos = mSnapHelper.estimateNextPositionDiffForScrollDistance(orientationHelper,
+                        -scrollDistance);
+                break;
+            }
+            if ((distance + mChildHeightByAdapterPosition.get(i)) > Math.abs(scrollDistance)) {
+                nextPos = i - currentPos + 1;
+                break;
+            }
+            distance += mChildHeightByAdapterPosition.get(i);
+        }
+        return nextPos;
+    }
 
     private OrientationHelper getOrientationHelper(RecyclerView.LayoutManager layoutManager) {
         if (mOrientationHelper == null || mOrientationHelper.getLayoutManager() != layoutManager) {
@@ -297,52 +379,38 @@ class DefaultScrollBar implements ScrollBar {
         OrientationHelper orientationHelper = getOrientationHelper(layoutManager);
         int screenSize = orientationHelper.getTotalSpace();
         int scrollDistance = screenSize;
-        boolean isPageUpOverLongItem;
-        // The iteration order matters. In case where there are 2 items longer than screen size, we
-        // want to focus on upcoming view.
-        for (int i = 0; i < layoutManager.getChildCount(); i++) {
-            /*
-             * We treat child View longer than screen size differently:
-             * 1) When it enters screen, next pageUp will align its bottom with parent bottom;
-             * 2) When it leaves screen, next pageUp will align its top with parent top.
-             */
-            View child = layoutManager.getChildAt(i);
-            if (child.getHeight() > screenSize) {
-                if (orientationHelper.getDecoratedEnd(child) < screenSize) {
-                    // Child view bottom is entering screen. Align its bottom with parent bottom.
-                    scrollDistance = screenSize - orientationHelper.getDecoratedEnd(child);
-                } else if (-screenSize < orientationHelper.getDecoratedStart(child)
-                        && orientationHelper.getDecoratedStart(child) < 0) {
-                    // Child view top is about to enter screen - its distance to parent top
-                    // is less than a full scroll. Align child top with parent top.
-                    scrollDistance = Math.abs(orientationHelper.getDecoratedStart(child));
-                }
 
-                // There can be two items that are longer than the screen. We stop at the first one.
-                // This is affected by the iteration order.
-                // Distance should always be positive. Negate its value to scroll up.
-                mRecyclerView.smoothScrollBy(0, -scrollDistance);
-                return;
-            }
-        }
-
-        int nextPos = mSnapHelper.estimateNextPositionDiffForScrollDistance(orientationHelper,
-                -scrollDistance);
-        View currentPosView = getFirstFullyVisibleChild(orientationHelper);
+        View currentPosView = getFirstMostVisibleChild(orientationHelper);
         int currentPos = currentPosView != null ? mRecyclerView.getLayoutManager().getPosition(
                 currentPosView) : 0;
-        mRecyclerView.smoothScrollToPosition(Math.max(0, currentPos + nextPos));
+        int nextPos = estimateNextPositionScrollUp(currentPos,
+                scrollDistance - Math.max(0, orientationHelper.getStartAfterPadding()
+                        - orientationHelper.getDecoratedStart(currentPosView)), orientationHelper);
+        if (nextPos == 0) {
+            // Distance should always be positive. Negate its value to scroll up.
+            mRecyclerView.smoothScrollBy(0, -scrollDistance);
+        } else {
+            mRecyclerView.smoothScrollToPosition(Math.max(0, currentPos + nextPos));
+        }
     }
 
-    private View getFirstFullyVisibleChild(OrientationHelper helper) {
-        for (int i = 0; i < getRecyclerView().getChildCount(); i++) {
-            View child = getRecyclerView().getChildAt(i);
-            if (CarUiSnapHelper.getPercentageVisible(child, helper) == 1f) {
-                return getRecyclerView().getChildAt(i);
+    private View getFirstMostVisibleChild(OrientationHelper helper) {
+        float mostVisiblePercent = 0;
+        View mostVisibleView = null;
+
+        for (int i = 0; i < getRecyclerView().getLayoutManager().getChildCount(); i++) {
+            View child = getRecyclerView().getLayoutManager().getChildAt(i);
+            float visiblePercentage = CarUiSnapHelper.getPercentageVisible(child, helper);
+            if (visiblePercentage == 1f) {
+                mostVisibleView = child;
+                break;
+            } else if (visiblePercentage > mostVisiblePercent) {
+                mostVisiblePercent = visiblePercentage;
+                mostVisibleView = child;
             }
         }
 
-        return null;
+        return mostVisibleView;
     }
 
     /**
@@ -363,43 +431,46 @@ class DefaultScrollBar implements ScrollBar {
         int screenSize = orientationHelper.getTotalSpace();
         int scrollDistance = screenSize;
 
-        // If the last item is partially visible, page down should bring it to the top.
-        View lastChild = layoutManager.getChildAt(layoutManager.getChildCount() - 1);
-        if (layoutManager.isViewPartiallyVisible(lastChild,
-                /* completelyVisible= */ false, /* acceptEndPointInclusion= */ false)) {
-            scrollDistance = orientationHelper.getDecoratedStart(lastChild)
-                    - orientationHelper.getStartAfterPadding();
-            if (scrollDistance <= 0) {
-                // - Scroll value is zero if the top of last item is aligned with top of the screen;
-                // - Scroll value can be negative if the child is longer than the screen size and
-                //   the visible area of the screen does not show the start of the child.
-                // Scroll to the next screen in both cases.
-                scrollDistance = screenSize;
-            }
+        View currentPosView = getFirstMostVisibleChild(orientationHelper);
+
+        // If current view is partially visible and bottom of the view is below visible area of
+        // the recyclerview either scroll down one page (screenSize) or enough to align the bottom
+        // of the view with the bottom of the recyclerview. Note that this will not cause a snap,
+        // because the current view is already snapped to the top or it wouldn't be the most
+        // visible view.
+        if (layoutManager.isViewPartiallyVisible(currentPosView,
+                /* completelyVisible= */ false, /* acceptEndPointInclusion= */ false)
+                        && orientationHelper.getDecoratedEnd(currentPosView)
+                                > orientationHelper.getEndAfterPadding()) {
+            scrollDistance = Math.min(screenSize,
+                    orientationHelper.getDecoratedEnd(currentPosView)
+                            - orientationHelper.getEndAfterPadding());
         }
 
-        // The iteration order matters. In case where there are 2 items longer than screen size, we
-        // want to focus on upcoming view (the one at the bottom of screen).
+        // Iterate over the childview (bottom to top) and stop when we find the first
+        // view that we can snap to and the scroll size is less than max scroll size (screenSize)
         for (int i = layoutManager.getChildCount() - 1; i >= 0; i--) {
-            /* We treat child View longer than screen size differently:
-             * 1) When it enters screen, next pageDown will align its top with parent top;
-             * 2) When it leaves screen, next pageDown will align its bottom with parent bottom.
-             */
             View child = layoutManager.getChildAt(i);
-            if (child.getHeight() > screenSize) {
-                if (orientationHelper.getDecoratedStart(child)
-                        - orientationHelper.getStartAfterPadding() > 0) {
-                    // Child view top is entering screen. Align its top with parent top.
-                    scrollDistance = orientationHelper.getDecoratedStart(lastChild)
+
+            // Ignore the child if it's above the currentview, as scrolldown will only move down.
+            // Note that in case of gridview, child will not be the same as the currentview.
+            if (orientationHelper.getDecoratedStart(child)
+                    <= orientationHelper.getDecoratedStart(currentPosView)) {
+                break;
+            }
+
+            // Ignore the child if the scroll distance is bigger than the max scroll size
+            if (orientationHelper.getDecoratedStart(child)
+                    - orientationHelper.getStartAfterPadding() <= screenSize) {
+                // If the child is already fully visible we can scroll even further.
+                if (orientationHelper.getDecoratedEnd(child)
+                        <= orientationHelper.getEndAfterPadding()) {
+                    scrollDistance = orientationHelper.getDecoratedEnd(child)
                             - orientationHelper.getStartAfterPadding();
-                } else if (screenSize < orientationHelper.getDecoratedEnd(child)
-                        && orientationHelper.getDecoratedEnd(child) < 2 * screenSize) {
-                    // Child view bottom is about to enter screen - its distance to parent bottom
-                    // is less than a full scroll. Align child bottom with parent bottom.
-                    scrollDistance = orientationHelper.getDecoratedEnd(child) - screenSize;
+                } else {
+                    scrollDistance = orientationHelper.getDecoratedStart(child)
+                            - orientationHelper.getStartAfterPadding();
                 }
-                // There can be two items that are longer than the screen. We stop at the first one.
-                // This is affected by the iteration order.
                 break;
             }
         }
