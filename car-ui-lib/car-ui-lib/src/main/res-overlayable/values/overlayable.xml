@@ -313,13 +313,17 @@ limitations under the License.-->
       <item type="id" name="action_widget_container"/>
       <item type="id" name="avatar_icon"/>
       <item type="id" name="body"/>
-      <item type="id" name="carUiImeWideScreenInputArea"/>
-      <item type="id" name="carUiWideScreenInputArea"/>
       <item type="id" name="car_ui_alert_icon"/>
       <item type="id" name="car_ui_alert_subtitle"/>
       <item type="id" name="car_ui_alert_title"/>
       <item type="id" name="car_ui_base_layout_content_container"/>
+      <item type="id" name="car_ui_closeKeyboard"/>
+      <item type="id" name="car_ui_contentAreaAutomotive"/>
       <item type="id" name="car_ui_focus_area"/>
+      <item type="id" name="car_ui_fullscreenArea"/>
+      <item type="id" name="car_ui_imeWideScreenInputArea"/>
+      <item type="id" name="car_ui_inputExtractActionAutomotive"/>
+      <item type="id" name="car_ui_inputExtractEditTextContainer"/>
       <item type="id" name="car_ui_list_item_end_guideline"/>
       <item type="id" name="car_ui_list_item_start_guideline"/>
       <item type="id" name="car_ui_list_limiting_message"/>
@@ -363,17 +367,19 @@ limitations under the License.-->
       <item type="id" name="car_ui_toolbar_title_logo"/>
       <item type="id" name="car_ui_toolbar_title_logo_container"/>
       <item type="id" name="car_ui_toolbar_top_guideline"/>
+      <item type="id" name="car_ui_wideScreenClearData"/>
+      <item type="id" name="car_ui_wideScreenDescription"/>
+      <item type="id" name="car_ui_wideScreenDescriptionTitle"/>
+      <item type="id" name="car_ui_wideScreenError"/>
+      <item type="id" name="car_ui_wideScreenErrorMessage"/>
+      <item type="id" name="car_ui_wideScreenExtractedTextIcon"/>
+      <item type="id" name="car_ui_wideScreenInputArea"/>
+      <item type="id" name="car_ui_wideScreenSearchResultList"/>
       <item type="id" name="checkbox_widget"/>
-      <item type="id" name="closeKeyboard"/>
       <item type="id" name="container"/>
-      <item type="id" name="contentAreaAutomotive"/>
       <item type="id" name="content_icon"/>
-      <item type="id" name="fullscreenArea"/>
       <item type="id" name="icon"/>
       <item type="id" name="icon_container"/>
-      <item type="id" name="inputExtractActionAutomotive"/>
-      <item type="id" name="inputExtractEditText"/>
-      <item type="id" name="inputExtractEditTextContainer"/>
       <item type="id" name="list"/>
       <item type="id" name="nested_recycler_view_layout"/>
       <item type="id" name="radio_button"/>
@@ -396,17 +402,6 @@ limitations under the License.-->
       <item type="id" name="title_template"/>
       <item type="id" name="toolbar"/>
       <item type="id" name="touch_interceptor"/>
-      <item type="id" name="wideScreenClearData"/>
-      <item type="id" name="wideScreenDescription"/>
-      <item type="id" name="wideScreenDescriptionTitle"/>
-      <item type="id" name="wideScreenError"/>
-      <item type="id" name="wideScreenErrorMessage"/>
-      <item type="id" name="wideScreenExtractedTextIcon"/>
-      <item type="id" name="wideScreenSearchItemPrimaryImageView"/>
-      <item type="id" name="wideScreenSearchItemSecondaryImageView"/>
-      <item type="id" name="wideScreenSearchItemSubTitle"/>
-      <item type="id" name="wideScreenSearchItemTitle"/>
-      <item type="id" name="wideScreenSearchResultList"/>
       <item type="integer" name="car_ui_default_max_string_length"/>
       <item type="integer" name="car_ui_focus_area_history_cache_type"/>
       <item type="integer" name="car_ui_focus_area_history_expiration_period_ms"/>
