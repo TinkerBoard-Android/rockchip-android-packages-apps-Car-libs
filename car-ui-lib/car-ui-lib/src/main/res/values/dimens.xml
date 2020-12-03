@@ -212,4 +212,39 @@
     <dimen name="car_ui_rotary_focus_stroke_width">8dp</dimen>
     <dimen name="car_ui_rotary_focus_pressed_stroke_width">4dp</dimen>
 
+    <!-- IME wide screen -->
+    <dimen name="car_ui_ime_wide_screen_keyboard_width">1250dp</dimen>
+    <dimen name="car_ui_ime_wide_screen_keyboard_area_padding_start">36dp</dimen>
+    <dimen name="car_ui_ime_wide_screen_keyboard_area_padding_end">36dp</dimen>
+    <dimen name="car_ui_ime_wide_screen_keyboard_area_padding_bottom">40dp</dimen>
+    <dimen name="car_ui_ime_wide_screen_input_area_height">96dp</dimen>
+    <dimen name="car_ui_ime_wide_screen_input_area_margin_top">56dp</dimen>
+    <dimen name="car_ui_ime_wide_screen_input_padding_start">36dp</dimen>
+    <dimen name="car_ui_ime_wide_screen_input_edit_text_padding_left">68dp</dimen>
+    <dimen name="car_ui_ime_wide_screen_input_edit_text_padding_right">0dp</dimen>
+    <dimen name="car_ui_ime_wide_screen_input_edit_text_size">68dp</dimen>
+    <dimen name="car_ui_ime_wide_screen_error_text_padding_start">68dp</dimen>
+    <dimen name="car_ui_ime_wide_screen_error_text_size">24dp</dimen>
+
+    <dimen name="car_ui_ime_wide_screen_divider_width">5dp</dimen>
+
+    <dimen name="car_ui_ime_wide_screen_recycler_view_padding_top">100dp</dimen>
+    <dimen name="car_ui_ime_wide_screen_description_title_margin_top">190dp</dimen>
+    <dimen name="car_ui_ime_wide_screen_description_title_padding_left">36dp</dimen>
+    <dimen name="car_ui_ime_wide_screen_description_title_text_size">44dp</dimen>
+    <dimen name="car_ui_ime_wide_screen_description_text_size">32dp</dimen>
+    <dimen name="car_ui_ime_wide_screen_description_padding_top">16dp</dimen>
+    <dimen name="car_ui_ime_wide_screen_action_button_text_size">32dp</dimen>
+    <dimen name="car_ui_ime_wide_screen_action_button_margin_bottom">40dp</dimen>
+    <dimen name="car_ui_ime_wide_screen_action_button_margin_left">36dp</dimen>
+    <dimen name="car_ui_ime_wide_screen_action_button_height">88dp</dimen>
+
+    <dimen name="car_ui_ime_wide_search_item_icon_size">116dp</dimen>
+    <dimen name="car_ui_ime_wide_search_item_title_text_size">32dp</dimen>
+    <dimen name="car_ui_ime_wide_search_item_title_padding_left">24dp</dimen>
+    <dimen name="car_ui_ime_wide_search_item_title_padding_top">22dp</dimen>
+    <dimen name="car_ui_ime_wide_search_item_sub_title_padding_left">24dp</dimen>
+    <dimen name="car_ui_ime_wide_search_item_sub_title_padding_top">22dp</dimen>
+    <dimen name="car_ui_ime_wide_search_item_sub_title_text_size">24dp</dimen>
+    <dimen name="car_ui_ime_wide_search_item_secondary_image_padding_left">36dp</dimen>
 </resources>
