@@ -191,6 +191,11 @@ public class CarUiListItemActivity extends Activity implements InsetsChangedList
 
         item = new CarUiContentListItem(CarUiContentListItem.Action.ICON);
         item.setTitle("Supplemental icon with listener");
+        item.setPrimaryIconType(CarUiContentListItem.IconType.CONTENT);
+        item.setIcon(getDrawable(R.drawable.ic_launcher));
+        item.setBody("body");
+        item.setOnItemClickedListener(v -> Toast.makeText(context, "Clicked item",
+                Toast.LENGTH_SHORT).show());
         item.setSupplementalIcon(getDrawable(R.drawable.ic_launcher),
                 v -> Toast.makeText(context, "Clicked supplemental icon",
                         Toast.LENGTH_SHORT).show());
