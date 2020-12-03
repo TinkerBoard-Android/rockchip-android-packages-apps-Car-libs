@@ -20,8 +20,8 @@ import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.CONT
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.CONTENT_AREA_SURFACE_HEIGHT;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.CONTENT_AREA_SURFACE_HOST_TOKEN;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.CONTENT_AREA_SURFACE_WIDTH;
-import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_ITEM_ID;
-import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SECONDARY_IMAGE_ID;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_ITEM_ID_LIST;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SUPPLEMENTAL_ICON_ID_LIST;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_CLEAR_DATA_ACTION;
 
 import android.content.Context;
@@ -74,16 +74,16 @@ class CarUiEditText extends EditText {
             return false;
         }
 
-        if (data.getString(SEARCH_RESULT_ITEM_ID) != null) {
+        if (data.getString(SEARCH_RESULT_ITEM_ID_LIST) != null) {
             for (PrivateImeCommandCallback listener : mPrivateImeCommandCallback) {
-                listener.onItemClicked(data.getString(SEARCH_RESULT_ITEM_ID));
+                listener.onItemClicked(data.getString(SEARCH_RESULT_ITEM_ID_LIST));
             }
         }
 
-        if (data.getString(SEARCH_RESULT_SECONDARY_IMAGE_ID) != null) {
+        if (data.getString(SEARCH_RESULT_SUPPLEMENTAL_ICON_ID_LIST) != null) {
             for (PrivateImeCommandCallback listener : mPrivateImeCommandCallback) {
                 listener.onSecondaryImageClicked(
-                        data.getString(SEARCH_RESULT_SECONDARY_IMAGE_ID));
+                        data.getString(SEARCH_RESULT_SUPPLEMENTAL_ICON_ID_LIST));
             }
         }
 

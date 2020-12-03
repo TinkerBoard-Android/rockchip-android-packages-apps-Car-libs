@@ -16,6 +16,11 @@
 
 package com.android.car.ui.imewidescreen;
 
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+
+import androidx.annotation.Nullable;
+
 import com.android.car.ui.recyclerview.CarUiContentListItem;
 import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 
@@ -35,6 +40,37 @@ public class CarUiImeSearchListItem extends CarUiContentListItem {
     public CarUiImeSearchListItem(Action action) {
         super(action);
     }
+
+    /**
+     * Sets the icon of the item. Icon must be a BitmapDrawable.
+     *
+     * @param icon the icon to display.
+     */
+    @Override
+    public void setIcon(@Nullable Drawable icon) {
+        if (icon instanceof BitmapDrawable || icon == null) {
+            super.setIcon(icon);
+            return;
+        }
+        throw new RuntimeException("icon should be of type BitmapDrawable");
+    }
+
+    /**
+     * Sets supplemental icon to be displayed in a list item. Icon must be a BitmapDrawable.
+     *
+     * @param icon     the Drawable to set as the icon, or null to clear the content.
+     * @param listener the callback that is invoked when the icon is clicked.
+     */
+    @Override
+    public void setSupplementalIcon(@Nullable Drawable icon,
+            @Nullable OnClickListener listener) {
+        if (icon instanceof BitmapDrawable || icon == null) {
+            super.setSupplementalIcon(icon, listener);
+            return;
+        }
+        throw new RuntimeException("icon should be of type BitmapDrawable");
+    }
+
 
     /**
      * Returns the icons resource of the item.

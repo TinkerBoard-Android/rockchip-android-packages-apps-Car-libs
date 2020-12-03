@@ -16,7 +16,6 @@
 
 package com.android.car.ui.recyclerview;
 
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 
 import androidx.annotation.NonNull;
@@ -102,10 +101,8 @@ public class CarUiContentListItem extends CarUiListItem {
     }
 
     private Drawable mIcon;
-    private Bitmap mIconBitmap;
     @Nullable
     private Drawable mSupplementalIcon;
-    private Bitmap mSupplementalIconBitmap;
     private CharSequence mTitle;
     private CharSequence mBody;
     private final Action mAction;
@@ -173,23 +170,6 @@ public class CarUiContentListItem extends CarUiListItem {
      */
     public void setIcon(@Nullable Drawable icon) {
         mIcon = icon;
-    }
-
-    /**
-     * Returns the bitmap of the icon if provided.
-     */
-    @Nullable
-    public Bitmap getIconBitmap() {
-        return mIconBitmap;
-    }
-
-    /**
-     * Sets the bitmap of the icon.
-     *
-     * @param iconBitmap the bitmap of icon to display.
-     */
-    public void setIconBitmap(Bitmap iconBitmap) {
-        mIconBitmap = iconBitmap;
     }
 
     /**
@@ -290,24 +270,6 @@ public class CarUiContentListItem extends CarUiListItem {
      */
     public Action getAction() {
         return mAction;
-    }
-
-
-    /**
-     * Returns the bitmap of the supplemental icon if provided.
-     */
-    @Nullable
-    public Bitmap getSupplementalIconBitmap() {
-        return mSupplementalIconBitmap;
-    }
-
-    /**
-     * Sets the bitmap of the supplemental icon.
-     *
-     * @param supplementalIconBitmap the bitmap of icon to display.
-     */
-    public void setSupplementalIconBitmap(Bitmap supplementalIconBitmap) {
-        mSupplementalIconBitmap = supplementalIconBitmap;
     }
 
     /**

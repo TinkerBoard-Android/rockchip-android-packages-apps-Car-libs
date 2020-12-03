@@ -22,11 +22,11 @@ import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.ADD_
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.ADD_DESC_TO_CONTENT_AREA;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.ADD_ERROR_DESC_TO_INPUT_AREA;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.REQUEST_RENDER_CONTENT_AREA;
-import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_ITEM_ID;
-import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_PRIMARY_IMAGE_RES_ID_LIST;
-import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SECONDARY_IMAGE_ID;
-import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SECONDARY_IMAGE_RES_ID_LIST;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_ICON_RES_ID_LIST;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_ITEM_ID_LIST;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SUB_TITLE_LIST;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SUPPLEMENTAL_ICON_ID_LIST;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SUPPLEMENTAL_ICON_RES_ID_LIST;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_TITLE_LIST;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_ACTION;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_EXTRACTED_TEXT_ICON_RES_ID;
@@ -257,18 +257,19 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
 
                 bundle.putStringArrayList(SEARCH_RESULT_TITLE_LIST, mTitleList);
                 bundle.putStringArrayList(SEARCH_RESULT_SUB_TITLE_LIST, mSubTitleList);
-                bundle.putIntegerArrayList(SEARCH_RESULT_PRIMARY_IMAGE_RES_ID_LIST,
+                bundle.putIntegerArrayList(SEARCH_RESULT_ICON_RES_ID_LIST,
                         mPrimaryImageResId);
                 mInputMethodManager.sendAppPrivateCommand(view, WIDE_SCREEN_ACTION, bundle);
             }
         });
 
-        bundle.putStringArrayList(SEARCH_RESULT_ITEM_ID, mItemIdList);
+        bundle.putStringArrayList(SEARCH_RESULT_ITEM_ID_LIST, mItemIdList);
         bundle.putStringArrayList(SEARCH_RESULT_TITLE_LIST, mTitleList);
         bundle.putStringArrayList(SEARCH_RESULT_SUB_TITLE_LIST, mSubTitleList);
-        bundle.putStringArrayList(SEARCH_RESULT_SECONDARY_IMAGE_ID, mSecondaryItemId);
-        bundle.putIntegerArrayList(SEARCH_RESULT_PRIMARY_IMAGE_RES_ID_LIST, mPrimaryImageResId);
-        bundle.putIntegerArrayList(SEARCH_RESULT_SECONDARY_IMAGE_RES_ID_LIST, mSecondaryImageResId);
+        bundle.putStringArrayList(SEARCH_RESULT_SUPPLEMENTAL_ICON_ID_LIST, mSecondaryItemId);
+        bundle.putIntegerArrayList(SEARCH_RESULT_ICON_RES_ID_LIST, mPrimaryImageResId);
+        bundle.putIntegerArrayList(SEARCH_RESULT_SUPPLEMENTAL_ICON_RES_ID_LIST,
+                mSecondaryImageResId);
         mInputMethodManager.sendAppPrivateCommand(view, WIDE_SCREEN_ACTION, bundle);
     }
 
