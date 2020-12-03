@@ -41,19 +41,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.car.ui.CarUiEditText;
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.core.CarUi;
 import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
 import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.recyclerview.CarUiContentListItem;
-import com.android.car.ui.recyclerview.CarUiListItem;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.MenuItem;
 import com.android.car.ui.toolbar.Toolbar;
@@ -106,16 +105,22 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
                     return false;
                 });
 
+        CarUiContentListItem.OnClickListener mainClickListener = i ->
+                Toast.makeText(this, "Item clicked!", Toast.LENGTH_SHORT).show();
+
+        CarUiContentListItem.OnClickListener secondaryClickListener = i ->
+                Toast.makeText(this, "Item's secondary action clicked!", Toast.LENGTH_SHORT).show();
+
         final int[] count = {1};
         CarUiImeSearchListItem item = new CarUiImeSearchListItem(CarUiContentListItem.Action.ICON);
-        item.setItemId("Item Id" + count[0]);
         item.setTitle("Title " + count[0]);
         item.setBody("Sub title " + count[0]);
         item.setIconResId(R.drawable.ic_launcher);
-        item.setSupplementalIconId("Image Id " + count[0]);
         item.setSupplementalIconResId(R.drawable.ic_launcher);
+        item.setSupplementalIcon(getDrawable(R.drawable.ic_launcher), secondaryClickListener);
+        item.setOnItemClickedListener(mainClickListener);
 
-        List<CarUiListItem> searchItems = new ArrayList<>();
+        List<CarUiImeSearchListItem> searchItems = new ArrayList<>();
 
         searchItems.add(item);
 
@@ -126,12 +131,12 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
             count[0]++;
             CarUiImeSearchListItem item1 = new CarUiImeSearchListItem(
                     CarUiContentListItem.Action.ICON);
-            item1.setItemId("Item Id" + count[0]);
             item1.setTitle("Title " + count[0]);
             item1.setBody("Sub title " + count[0]);
             item1.setIconResId(R.drawable.ic_launcher);
-            item1.setSupplementalIconId("Image Id " + count[0]);
             item1.setSupplementalIconResId(R.drawable.ic_launcher);
+            item1.setSupplementalIcon(getDrawable(R.drawable.ic_launcher), secondaryClickListener);
+            item1.setOnItemClickedListener(mainClickListener);
             searchItems.add(item1);
 
             toolbar.setSearchItemsForWideScreen(searchItems);
@@ -281,22 +286,11 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
 
     private static class ViewHolder extends RecyclerView.ViewHolder {
 
-        private final CarUiEditText mEditText;
+        private final EditText mEditText;
 
         ViewHolder(View itemView) {
             super(itemView);
             mEditText = itemView.requireViewById(R.id.edit_text);
-            mEditText.registerOnPrivateImeCommandListener(
-                    new CarUiEditText.PrivateImeCommandCallback() {
-
-                        @Override
-                        public void onItemClicked(String itemId) {
-                        }
-
-                        @Override
-                        public void onSecondaryImageClicked(String secondaryImageId) {
-                        }
-                    });
         }
 
         public void bind(CharSequence title, View.OnFocusChangeListener listener) {

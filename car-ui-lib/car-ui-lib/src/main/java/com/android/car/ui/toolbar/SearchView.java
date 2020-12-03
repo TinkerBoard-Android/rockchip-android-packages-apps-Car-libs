@@ -28,6 +28,7 @@ import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -44,7 +45,6 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.android.car.ui.CarUiEditText;
 import com.android.car.ui.R;
 import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
 import com.android.car.ui.recyclerview.CarUiContentListItem;
@@ -52,7 +52,9 @@ import com.android.car.ui.recyclerview.CarUiListItem;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -66,7 +68,9 @@ public class SearchView extends ConstraintLayout {
     private final int mStartPaddingWithoutIcon;
     private final int mStartPadding;
     private final int mEndPadding;
-    private List<CarUiListItem> mWideScreenSearchItemList = new ArrayList<>();
+    private List<? extends CarUiImeSearchListItem> mWideScreenSearchItemList = new ArrayList<>();
+    private final Map<String, CarUiImeSearchListItem> mIdToListItem = new HashMap<>();
+
     private Set<Toolbar.OnSearchListener> mSearchListeners = Collections.emptySet();
     private Set<Toolbar.OnSearchCompletedListener> mSearchCompletedListeners =
             Collections.emptySet();
@@ -145,12 +149,46 @@ public class SearchView extends ConstraintLayout {
             }
             return false;
         });
+
+        if (mSearchText instanceof CarUiEditText) {
+            ((CarUiEditText) mSearchText).registerOnPrivateImeCommandListener(
+                    new CarUiEditText.PrivateImeCommandCallback() {
+                        @Override
+                        public void onItemClicked(String itemId) {
+                            CarUiImeSearchListItem item = mIdToListItem.get(itemId);
+                            if (item != null) {
+                                CarUiContentListItem.OnClickListener listener =
+                                        item.getOnClickListener();
+                                if (listener != null) {
+                                    listener.onClick(item);
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onSecondaryImageClicked(String secondaryImageId) {
+                            CarUiImeSearchListItem item = mIdToListItem.get(secondaryImageId);
+                            if (item != null) {
+                                CarUiContentListItem.OnClickListener listener =
+                                        item.getSupplementalIconOnClickListener();
+                                if (listener != null) {
+                                    listener.onClick(item);
+                                }
+                            }
+                        }
+                    });
+        }
     }
 
     /**
      * Apply window inset listener to the search container.
      */
     void installWindowInsetsListener(View searchContainer) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            // WindowInsets.isVisible() is only available on R or above
+            return;
+        }
+
         searchContainer.getRootView().setOnApplyWindowInsetsListener((v, insets) -> {
             if (insets.isVisible(ime())) {
                 displaySearchWideScreen();
@@ -193,16 +231,15 @@ public class SearchView extends ConstraintLayout {
     }
 
     /**
-     * Adds a listener for the search text changing.
-     * See also {@link #unregisterOnSearchListener(Toolbar.OnSearchListener)}
+     * Sets a listener for the search text changing.
      */
     public void setSearchListeners(Set<Toolbar.OnSearchListener> listeners) {
         mSearchListeners = listeners;
     }
 
     /**
-     * Removes a search listener.
-     * See also {@link #registerOnSearchListener(Toolbar.OnSearchListener)}
+     * Sets a listener for the user completing their search, for example by clicking the
+     * enter/search button on the keyboard.
      */
     public void setSearchCompletedListeners(Set<Toolbar.OnSearchCompletedListener> listeners) {
         mSearchCompletedListeners = listeners;
@@ -212,12 +249,13 @@ public class SearchView extends ConstraintLayout {
      * Sets list of search item {@link CarUiListItem} to be displayed in the IMS
      * template.
      */
-    public void setSearchItemsForWideScreen(List<CarUiListItem> searchItems) {
-        mWideScreenSearchItemList = searchItems;
+    public void setSearchItemsForWideScreen(List<? extends CarUiImeSearchListItem> searchItems) {
+        mWideScreenSearchItemList = new ArrayList<>(searchItems);
         displaySearchWideScreen();
     }
 
     private void displaySearchWideScreen() {
+        mIdToListItem.clear();
         if (mWideScreenSearchItemList.isEmpty()) {
             return;
         }
@@ -227,17 +265,18 @@ public class SearchView extends ConstraintLayout {
         ArrayList<Integer> primaryImageResId = new ArrayList<>();
         ArrayList<String> secondaryItemId = new ArrayList<>();
         ArrayList<Integer> secondaryImageResId = new ArrayList<>();
-        for (CarUiListItem listItem : mWideScreenSearchItemList) {
-            if (listItem instanceof CarUiContentListItem) {
-                CarUiImeSearchListItem item = (CarUiImeSearchListItem) listItem;
-                itemIdList.add(item.getItemId() != null ? item.getItemId().toString() : null);
-                titleList.add(item.getTitle() != null ? item.getTitle().toString() : null);
-                subTitleList.add(item.getBody() != null ? item.getBody().toString() : null);
-                primaryImageResId.add(item.getIconResId());
-                secondaryItemId.add(item.getSupplementalIconId() != null
-                        ? item.getSupplementalIconId().toString() : null);
-                secondaryImageResId.add(item.getSupplementalIconResId());
-            }
+        int id = 0;
+        for (CarUiImeSearchListItem item : mWideScreenSearchItemList) {
+            String idString = String.valueOf(id);
+            itemIdList.add(idString);
+            titleList.add(item.getTitle() != null ? item.getTitle().toString() : null);
+            subTitleList.add(item.getBody() != null ? item.getBody().toString() : null);
+            primaryImageResId.add(item.getIconResId());
+            secondaryItemId.add(idString);
+            secondaryImageResId.add(item.getSupplementalIconResId());
+
+            mIdToListItem.put(idString, item);
+            id++;
         }
 
         Bundle bundle = new Bundle();
@@ -251,49 +290,12 @@ public class SearchView extends ConstraintLayout {
     }
 
     /**
-     * Registers a new {@link CarUiEditText.PrivateImeCommandCallback} to the list of
-     * listeners.
-     */
-    public void registerOnPrivateImeCommandListener(
-            CarUiEditText.PrivateImeCommandCallback listener) {
-        if (mSearchText instanceof CarUiEditText) {
-            ((CarUiEditText) mSearchText).registerOnPrivateImeCommandListener(listener);
-        }
-    }
-
-    /**
-     * Unregisters an existing {@link CarUiEditText.PrivateImeCommandCallback} from the list
-     * of listeners.
-     */
-    public boolean unregisterOnPrivateImeCommandListener(
-            CarUiEditText.PrivateImeCommandCallback listener) {
-        if (mSearchText instanceof CarUiEditText) {
-            return ((CarUiEditText) mSearchText).unregisterOnPrivateImeCommandListener(listener);
-        }
-        return false;
-    }
-
-    /**
-     * Sets the search hint.
-     *
-     * @param resId A string resource id of the search hint.
-     */
-    public void setHint(int resId) {
-        mSearchText.setHint(resId);
-    }
-
-    /**
      * Sets the search hint
      *
      * @param hint A CharSequence of the search hint.
      */
     public void setHint(CharSequence hint) {
         mSearchText.setHint(hint);
-    }
-
-    /** Gets the search hint */
-    public CharSequence getHint() {
-        return mSearchText.getHint();
     }
 
     /**
