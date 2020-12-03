@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright 2019 The Android Open Source Project
+  ~ Copyright (C) 2020 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,14 +14,16 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android">
     <com.android.car.ui.CarUiEditText
-              android:id="@+id/textbox"
-              android:layout_width="match_parent"
-              android:layout_height="@dimen/car_ui_dialog_edittext_height"
-              android:layout_marginTop="@dimen/car_ui_dialog_edittext_margin_top"
-              android:layout_marginBottom="@dimen/car_ui_dialog_edittext_margin_bottom"
-              android:layout_marginStart="@dimen/car_ui_dialog_edittext_margin_start"
-              android:layout_marginEnd="@dimen/car_ui_dialog_edittext_margin_end"/>
-</FrameLayout>
+        android:id="@+id/edit_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:text="Edit Text Box"/>
+</RelativeLayout>

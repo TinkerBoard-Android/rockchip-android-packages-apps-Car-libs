@@ -24,6 +24,9 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.annotation.XmlRes;
 
+import com.android.car.ui.CarUiEditText;
+import com.android.car.ui.recyclerview.CarUiListItem;
+
 import java.util.List;
 
 /**
@@ -255,8 +258,10 @@ public interface ToolbarController {
      */
     void registerToolbarHeightChangeListener(Toolbar.OnHeightChangedListener listener);
 
-    /** Unregisters an existing {@link Toolbar.OnHeightChangedListener} from the list of
-     * listeners. */
+    /**
+     * Unregisters an existing {@link Toolbar.OnHeightChangedListener} from the list of
+     * listeners.
+     */
     boolean unregisterToolbarHeightChangeListener(Toolbar.OnHeightChangedListener listener);
 
     /** Registers a new {@link Toolbar.OnTabSelectedListener} to the list of listeners. */
@@ -271,11 +276,32 @@ public interface ToolbarController {
     /** Unregisters an existing {@link Toolbar.OnSearchListener} from the list of listeners. */
     boolean unregisterOnSearchListener(Toolbar.OnSearchListener listener);
 
+    /**
+     * Registers a new {@link CarUiEditText.PrivateImeCommandCallback} to the list of
+     * listeners.
+     */
+    void registerOnPrivateImeCommandListener(CarUiEditText.PrivateImeCommandCallback listener);
+
+    /**
+     * Unregisters an existing {@link CarUiEditText.PrivateImeCommandCallback} from the list
+     * of listeners.
+     */
+    boolean unregisterOnPrivateImeCommandListener(
+            CarUiEditText.PrivateImeCommandCallback listener);
+
+    /**
+     * Sets list of search item {@link CarUiListItem} to be displayed in the IMS
+     * template.
+     */
+    void setSearchItemsForWideScreen(List<CarUiListItem> searchItems);
+
     /** Registers a new {@link Toolbar.OnSearchCompletedListener} to the list of listeners. */
     void registerOnSearchCompletedListener(Toolbar.OnSearchCompletedListener listener);
 
-    /** Unregisters an existing {@link Toolbar.OnSearchCompletedListener} from the list of
-     * listeners. */
+    /**
+     * Unregisters an existing {@link Toolbar.OnSearchCompletedListener} from the list of
+     * listeners.
+     */
     boolean unregisterOnSearchCompletedListener(Toolbar.OnSearchCompletedListener listener);
 
     /** Registers a new {@link Toolbar.OnBackListener} to the list of listeners. */
