@@ -192,7 +192,7 @@ public class SearchView extends ConstraintLayout {
                     }
                 });
             }
-            return insets;
+            return v.onApplyWindowInsets(insets);
         });
     }
 
