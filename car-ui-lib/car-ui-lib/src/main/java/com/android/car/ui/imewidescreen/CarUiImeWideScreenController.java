@@ -23,11 +23,16 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.ExtractEditText;
 import android.inputmethodservice.InputMethodService;
+import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.SurfaceControlViewHost.SurfacePackage;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -64,9 +69,9 @@ import java.util.List;
  *      <li>return {@link #onEvaluateFullscreenMode(boolean)} from
  *      {@link InputMethodService#onEvaluateFullscreenMode()}</li>
  *      <li>return the view created by
- *      {@link #createWideScreenImeView(View, Context, InputMethodService)}
+ *      {@link #createWideScreenImeView(View)}
  *      from {@link InputMethodService#onCreateInputView()}</li>
- *      <li>{@link #onComputeInsets(InputMethodService.Insets, View)} should be called from
+ *      <li>{@link #onComputeInsets(InputMethodService.Insets) should be called from
  *      {@link InputMethodService#onComputeInsets(InputMethodService.Insets)}</li>
  *      <li>{@link #onAppPrivateCommand(String, Bundle) should be called from {
  *      @link InputMethodService#onAppPrivateCommand(String, Bundle)}}</li>
@@ -144,9 +149,20 @@ public class CarUiImeWideScreenController {
     // ArrayList<Integer>
     public static final String SEARCH_RESULT_SECONDARY_IMAGE_RES_ID_LIST =
             "search_result_image_list";
+    // key used to provide the surface package information by the application to the IME. IME
+    // will send the surface info each time its being displayed.
+    public static final String CONTENT_AREA_SURFACE_PACKAGE = "content_area_surface_package";
+    // key to provide the host token of surface view by IME to the application.
+    public static final String CONTENT_AREA_SURFACE_HOST_TOKEN = "content_area_surface_host_token";
+    // key to provide the display id of surface view by IME to the application.
+    public static final String CONTENT_AREA_SURFACE_DISPLAY_ID = "content_area_surface_display_id";
+    // key to provide the height of surface view by IME to the application.
+    public static final String CONTENT_AREA_SURFACE_HEIGHT = "content_area_surface_height";
+    // key to provide the width of surface view by IME to the application.
+    public static final String CONTENT_AREA_SURFACE_WIDTH = "content_area_surface_width";
 
     private View mRootView;
-    private Context mContext;
+    private final Context mContext;
     @Nullable
     private View mExtractActionAutomotive;
     @NonNull
@@ -154,7 +170,8 @@ public class CarUiImeWideScreenController {
     // whether to render the content area for automotive when in wide screen mode.
     private boolean mImeRendersAllContent = true;
     private boolean mAllowAppToHideContentArea;
-    private ArrayList<CarUiListItem> mAutomotiveSearchItems = new ArrayList<>();
+    @Nullable
+    private ArrayList<CarUiListItem> mAutomotiveSearchItems;
     @NonNull
     private TextView mWideScreenDescriptionTitle;
     @NonNull
@@ -180,8 +197,10 @@ public class CarUiImeWideScreenController {
     @NonNull
     private View mFullscreenArea;
     @NonNull
+    private SurfaceView mContentAreaSurfaceView;
+    @NonNull
     private FrameLayout mInputExtractEditTextContainer;
-    private InputMethodService mInputMethodService;
+    private final InputMethodService mInputMethodService;
 
     public CarUiImeWideScreenController(@NonNull Context context, @NonNull InputMethodService ims) {
         mContext = context;
@@ -209,6 +228,8 @@ public class CarUiImeWideScreenController {
                 mContext.getResources().getBoolean(
                         R.bool.car_ui_ime_wide_screen_allow_app_hide_content_area);
 
+        mContentAreaSurfaceView = mRootView.requireViewById(R.id.car_ui_ime_surface);
+        mContentAreaSurfaceView.setZOrderOnTop(true);
         mWideScreenDescriptionTitle =
                 mRootView.requireViewById(R.id.car_ui_wideScreenDescriptionTitle);
         mWideScreenDescription = mRootView.requireViewById(R.id.car_ui_wideScreenDescription);
@@ -281,13 +302,25 @@ public class CarUiImeWideScreenController {
      * @param data   Any data to include with the command.
      */
     public void onAppPrivateCommand(String action, Bundle data) {
-        if (!isWideScreenMode() || data == null || !WIDE_SCREEN_ACTION.equals(action)) {
+        if (!isWideScreenMode() || !WIDE_SCREEN_ACTION.equals(action)) {
             return;
         }
         resetAutomotiveWideScreenViews();
+        if (data == null) {
+            return;
+        }
         if (mAllowAppToHideContentArea || (mInputEditorInfo != null && allowPackageList().contains(
                 mInputEditorInfo.packageName))) {
             mImeRendersAllContent = data.getBoolean(REQUEST_RENDER_CONTENT_AREA, true);
+        }
+
+        if (data.getParcelable(CONTENT_AREA_SURFACE_PACKAGE) != null
+                && Build.VERSION.SDK_INT >= VERSION_CODES.R) {
+            SurfacePackage surfacePackage = (SurfacePackage) data.getParcelable(
+                    CONTENT_AREA_SURFACE_PACKAGE);
+            mContentAreaSurfaceView.setChildSurfacePackage(surfacePackage);
+            mContentAreaSurfaceView.setVisibility(View.VISIBLE);
+            mContentAreaAutomotive.setVisibility(View.GONE);
         }
 
         String discTitle = data.getString(ADD_DESC_TITLE_TO_CONTENT_AREA);
@@ -337,7 +370,7 @@ public class CarUiImeWideScreenController {
         if (mExtractActionAutomotive != null) {
             mExtractActionAutomotive.setVisibility(View.VISIBLE);
         }
-        if (!mAutomotiveSearchItems.isEmpty()) {
+        if (mAutomotiveSearchItems != null) {
             mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
             mRecyclerView.setVerticalScrollBarEnabled(true);
             mRecyclerView.setVerticalScrollbarPosition(View.SCROLLBAR_POSITION_LEFT);
@@ -352,7 +385,6 @@ public class CarUiImeWideScreenController {
     }
 
     private void loadSearchItems(Bundle data) {
-        mAutomotiveSearchItems = new ArrayList<>();
         ArrayList<String> itemIdList = data.getStringArrayList(SEARCH_RESULT_ITEM_ID);
         ArrayList<String> titleList = data.getStringArrayList(SEARCH_RESULT_TITLE_LIST);
         ArrayList<String> subTitleList = data.getStringArrayList(SEARCH_RESULT_SUB_TITLE_LIST);
@@ -365,6 +397,7 @@ public class CarUiImeWideScreenController {
         if (itemIdList == null) {
             return;
         }
+        mAutomotiveSearchItems = new ArrayList<>();
         for (int i = 0; i < itemIdList.size(); i++) {
             int index = i;
             CarUiImeSearchListItem searchItem;
@@ -494,6 +527,40 @@ public class CarUiImeWideScreenController {
         if (hasLabel) {
             intiExtractAction(textForImeAction);
         }
+
+        sendSurfaceInfo();
+    }
+
+    /**
+     * Sends the information for surface view to the application on which they can draw on. This
+     * information will ONLY be sent if OEM allows an application to hide the content area and let
+     * it draw its own content.
+     */
+    private void sendSurfaceInfo() {
+        if (!mAllowAppToHideContentArea && !(mInputEditorInfo != null
+                && allowPackageList().contains(mInputEditorInfo.packageName))) {
+            return;
+        }
+        int displayId = mContentAreaSurfaceView.getDisplay().getDisplayId();
+        IBinder hostToken = mContentAreaSurfaceView.getHostToken();
+
+        Bundle bundle = new Bundle();
+        bundle.putBinder(CONTENT_AREA_SURFACE_HOST_TOKEN, hostToken);
+        bundle.putInt(CONTENT_AREA_SURFACE_DISPLAY_ID, displayId);
+        bundle.putInt(CONTENT_AREA_SURFACE_HEIGHT,
+                mContentAreaSurfaceView.getHeight() + getNavBarHeight());
+        bundle.putInt(CONTENT_AREA_SURFACE_WIDTH, mContentAreaSurfaceView.getWidth());
+
+        mInputConnection.performPrivateCommand(WIDE_SCREEN_ACTION, bundle);
+    }
+
+    private int getNavBarHeight() {
+        Resources resources = mContext.getResources();
+        int resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            return resources.getDimensionPixelSize(resourceId);
+        }
+        return 0;
     }
 
     /**
@@ -560,8 +627,8 @@ public class CarUiImeWideScreenController {
     }
 
     private List<String> allowPackageList() {
-        String value = mContext.getString(R.string.car_ui_ime_wide_screen_allowed_package_list);
-        String[] packages = value.split(",");
+        String[] packages = mContext.getResources()
+                .getStringArray(R.array.car_ui_ime_wide_screen_allowed_package_list);
         return Arrays.asList(packages);
     }
 
@@ -617,6 +684,7 @@ public class CarUiImeWideScreenController {
 
     private void resetAutomotiveWideScreenViews() {
         mWideScreenDescriptionTitle.setVisibility(View.GONE);
+        mContentAreaSurfaceView.setVisibility(View.GONE);
         mWideScreenErrorMessage.setVisibility(View.GONE);
         mRecyclerView.setVisibility(View.GONE);
         mWideScreenDescription.setVisibility(View.GONE);
@@ -629,6 +697,7 @@ public class CarUiImeWideScreenController {
         if (mExtractActionAutomotive != null) {
             mExtractActionAutomotive.setVisibility(View.GONE);
         }
+        mContentAreaAutomotive.setVisibility(View.VISIBLE);
         mContentAreaAutomotive.setBackground(
                 mContext.getDrawable(R.drawable.car_ui_ime_wide_screen_no_content_background));
         setExtractedEditTextBackground(R.drawable.car_ui_ime_wide_screen_input_area_tint_color);

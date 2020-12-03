@@ -70,7 +70,8 @@ limitations under the License.
     should be separated by a ",". For example, "com.package1,com.package2,com.package3" will allow
     packages "com.package1", "com.package2" and "com.package3" to hide the content area.
     -->
-    <string name="car_ui_ime_wide_screen_allowed_package_list" translatable="false"></string>
+    <string-array name="car_ui_ime_wide_screen_allowed_package_list" translatable="false">
+    </string-array>
 
     <!-- Name of system property used to determine when wide screen mode is used. -->
     <string name="car_ui_ime_wide_screen_system_property_name" translatable="false">

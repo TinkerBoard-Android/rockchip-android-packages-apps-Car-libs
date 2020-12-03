@@ -24,6 +24,7 @@
     <item type="id" name="car_ui_wideScreenInputArea"/>
     <item type="id" name="car_ui_imeWideScreenInputArea"/>
     <item type="id" name="car_ui_closeKeyboard"/>
+    <item type="id" name="car_ui_ime_surface"/>
     <item type="id" name="car_ui_fullscreenArea"/>
     <item type="id" name="car_ui_wideScreenErrorMessage"/>
     <item type="id" name="car_ui_contentAreaAutomotive"/>
