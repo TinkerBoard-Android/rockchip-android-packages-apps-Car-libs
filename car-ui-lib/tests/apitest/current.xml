@@ -311,6 +311,7 @@
   <public type="layout" name="car_ui_seekbar_dialog"/>
   <public type="layout" name="car_ui_toolbar"/>
   <public type="layout" name="car_ui_toolbar_menu_item"/>
+  <public type="layout" name="car_ui_toolbar_menu_item_primary"/>
   <public type="layout" name="car_ui_toolbar_search_view"/>
   <public type="layout" name="car_ui_toolbar_tab_item"/>
   <public type="layout" name="car_ui_toolbar_tab_item_flexible"/>
