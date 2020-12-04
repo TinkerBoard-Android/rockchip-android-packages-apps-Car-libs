@@ -72,6 +72,12 @@
         android:exported="false"
         android:parentActivityName=".MainActivity"/>
     <activity
+        android:name=".widescreenime.WideScreenImeActivity"
+        android:windowSoftInputMode="stateHidden|adjustNothing"
+        android:exported="false"
+        android:parentActivityName=".MainActivity">
+    </activity>
+    <activity
         android:name=".toolbar.ToolbarActivity"
         android:exported="false"
         android:parentActivityName=".MainActivity">

@@ -16,8 +16,8 @@
 
 package com.android.car.ui.recyclerview;
 
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -102,8 +102,10 @@ public class CarUiContentListItem extends CarUiListItem {
     }
 
     private Drawable mIcon;
+    private Bitmap mIconBitmap;
     @Nullable
     private Drawable mSupplementalIcon;
+    private Bitmap mSupplementalIconBitmap;
     private CharSequence mTitle;
     private CharSequence mBody;
     private final Action mAction;
@@ -114,7 +116,7 @@ public class CarUiContentListItem extends CarUiListItem {
     private boolean mIsActivated;
     private OnClickListener mOnClickListener;
     private OnCheckedChangeListener mOnCheckedChangeListener;
-    private View.OnClickListener mSupplementalIconOnClickListener;
+    private OnClickListener mSupplementalIconOnClickListener;
 
 
     public CarUiContentListItem(Action action) {
@@ -171,6 +173,23 @@ public class CarUiContentListItem extends CarUiListItem {
      */
     public void setIcon(@Nullable Drawable icon) {
         mIcon = icon;
+    }
+
+    /**
+     * Returns the bitmap of the icon if provided.
+     */
+    @Nullable
+    public Bitmap getIconBitmap() {
+        return mIconBitmap;
+    }
+
+    /**
+     * Sets the bitmap of the icon.
+     *
+     * @param iconBitmap the bitmap of icon to display.
+     */
+    public void setIconBitmap(Bitmap iconBitmap) {
+        mIconBitmap = iconBitmap;
     }
 
     /**
@@ -273,6 +292,24 @@ public class CarUiContentListItem extends CarUiListItem {
         return mAction;
     }
 
+
+    /**
+     * Returns the bitmap of the supplemental icon if provided.
+     */
+    @Nullable
+    public Bitmap getSupplementalIconBitmap() {
+        return mSupplementalIconBitmap;
+    }
+
+    /**
+     * Sets the bitmap of the supplemental icon.
+     *
+     * @param supplementalIconBitmap the bitmap of icon to display.
+     */
+    public void setSupplementalIconBitmap(Bitmap supplementalIconBitmap) {
+        mSupplementalIconBitmap = supplementalIconBitmap;
+    }
+
     /**
      * Returns the supplemental icon for the item.
      */
@@ -301,7 +338,7 @@ public class CarUiContentListItem extends CarUiListItem {
      * @param listener the callback that is invoked when the icon is clicked.
      */
     public void setSupplementalIcon(@Nullable Drawable icon,
-            @Nullable View.OnClickListener listener) {
+            @Nullable OnClickListener listener) {
         if (mAction != Action.ICON) {
             throw new IllegalStateException(
                     "Cannot set supplemental icon on list item that does not have an action of "
@@ -313,7 +350,7 @@ public class CarUiContentListItem extends CarUiListItem {
     }
 
     @Nullable
-    public View.OnClickListener getSupplementalIconOnClickListener() {
+    public OnClickListener getSupplementalIconOnClickListener() {
         return mSupplementalIconOnClickListener;
     }
 

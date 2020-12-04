@@ -21,6 +21,7 @@ import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
 import static com.android.car.ui.utils.CarUiUtils.findViewByRefId;
+import static com.android.car.ui.utils.CarUiUtils.getBooleanSystemProperty;
 import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
 import android.app.Activity;
@@ -43,6 +44,7 @@ import androidx.annotation.XmlRes;
 
 import com.android.car.ui.AlertDialogBuilder;
 import com.android.car.ui.R;
+import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
 import com.android.car.ui.recyclerview.CarUiContentListItem;
 import com.android.car.ui.recyclerview.CarUiListItem;
 import com.android.car.ui.recyclerview.CarUiListItemAdapter;
@@ -50,6 +52,7 @@ import com.android.car.ui.utils.CarUiUtils;
 import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -111,7 +114,9 @@ public final class ToolbarControllerImpl implements ToolbarController {
     private AlertDialog mOverflowDialog;
     private boolean mNavIconSpaceReserved;
     private boolean mLogoFillsNavIconSpace;
+    private View mViewForContentAreaInWideScreenMode;
     private boolean mShowLogo;
+    private List<? extends CarUiImeSearchListItem> mSearchItems;
     private final ProgressBarController mProgressBar;
     private final MenuItem.Listener mOverflowItemListener = item -> {
         updateOverflowDialog(item);
@@ -266,6 +271,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
 
     /**
      * Gets the {@link TabLayout} for this toolbar.
+     *
      * @deprecated Use other tab-related functions in the ToolbarController interface.
      */
     @Deprecated
@@ -712,6 +718,15 @@ public final class ToolbarControllerImpl implements ToolbarController {
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT);
             mSearchViewContainer.addView(searchView, layoutParams);
+            if (canShowSearchResultsView()) {
+                searchView.setViewToImeWideScreenSurface(mViewForContentAreaInWideScreenMode);
+            }
+
+            searchView.installWindowInsetsListener(mSearchViewContainer);
+
+            if (mSearchItems != null) {
+                searchView.setSearchItemsForWideScreen(mSearchItems);
+            }
 
             mSearchView = searchView;
         }
@@ -809,12 +824,93 @@ public final class ToolbarControllerImpl implements ToolbarController {
         mOverflowButton.setVisible(showButtons && countVisibleOverflowItems() > 0);
     }
 
+    /**
+     * Return the list of package names allowed to hide the content area in wide screen IME.
+     */
+    private List<String> allowPackageList(Context context) {
+        String[] packages = context.getResources()
+                .getStringArray(R.array.car_ui_ime_wide_screen_allowed_package_list);
+        return Arrays.asList(packages);
+    }
+
+    /**
+     * Returns true if the toolbar can display search result items. One example of this is when the
+     * system is configured to display search items in the IME instead of in the app.
+     */
+    @Override
+    public boolean canShowSearchResultItems() {
+        return isWideScreenMode(mContext);
+    }
+
+    /**
+     * Returns whether or not system is running in a wide screen mode.
+     */
+    private static boolean isWideScreenMode(Context context) {
+        return getBooleanSystemProperty(context.getResources(),
+                R.string.car_ui_ime_wide_screen_system_property_name, false);
+    }
+
+    /**
+     * Returns true if the app is allowed to set search results view.
+     */
+    @Override
+    public boolean canShowSearchResultsView() {
+        boolean allowAppsToHideContentArea = mContext.getResources().getBoolean(
+                R.bool.car_ui_ime_wide_screen_allow_app_hide_content_area);
+        return isWideScreenMode(mContext) && (allowPackageList(mContext).contains(
+                mContext.getPackageName()) || allowAppsToHideContentArea);
+    }
+
+    /**
+     * Add a view within a container that will animate with the wide screen IME to display search
+     * results.
+     *
+     * <p>Note: Apps can only call this method if the package name is allowed via OEM to render
+     * their view.  To check if the application have the permission to do so or not first call
+     * {@link #canShowSearchResultsView()}. If the app is not allowed this method will throw an
+     * {@link IllegalStateException}
+     *
+     * @param view to be added in the container.
+     */
+    @Override
+    public void setSearchResultsView(View view) {
+        if (!canShowSearchResultsView()) {
+            throw new IllegalStateException(
+                    "not allowed to add view to wide screen IME, package name: "
+                            + mContext.getPackageName());
+        }
+
+        if (mSearchView != null) {
+            mSearchView.setViewToImeWideScreenSurface(view);
+        }
+
+        mViewForContentAreaInWideScreenMode = view;
+    }
+
+    /**
+     * Sets list of search item {@link CarUiListItem} to be displayed in the IMS
+     * template. This method should be called when system is running in a wide screen mode. Apps
+     * can check that by using {@link #canShowSearchResultItems()}
+     * Else, this method will throw an {@link IllegalStateException}
+     */
+    @Override
+    public void setSearchResultItems(List<? extends CarUiImeSearchListItem> searchItems) {
+        if (!canShowSearchResultItems()) {
+            throw new IllegalStateException(
+                    "system not in wide screen mode, not allowed to set search result items ");
+        }
+        mSearchItems = searchItems;
+        if (mSearchView != null) {
+            mSearchView.setSearchItemsForWideScreen(searchItems);
+        }
+    }
+
+
     /** Gets the current {@link Toolbar.State} of the toolbar. */
     @Override
     public Toolbar.State getState() {
         return mState;
     }
-
 
     /**
      * Registers a new {@link Toolbar.OnHeightChangedListener} to the list of listeners. Register a
