@@ -30,6 +30,10 @@ import com.android.car.ui.utils.CarUiUtils;
 /**
  * A preference which can perform two actions. The secondary action is shown by default.
  * {@link #showAction(boolean)} may be used to manually set the visibility of the action.
+ *
+ * @deprecated This preference relies on the use of custom views. Use
+ *             {@link CarUiTwoActionTextPreference}, {@link CarUiTwoActionSwitchPreference}, or
+ *             {@link CarUiTwoActionIconPreference} instead.
  */
 public class CarUiTwoActionPreference extends CarUiPreference {
 

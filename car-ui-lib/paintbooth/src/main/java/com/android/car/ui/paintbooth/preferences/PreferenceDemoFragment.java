@@ -18,9 +18,18 @@ package com.android.car.ui.paintbooth.preferences;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.preference.Preference;
+
 import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.preference.CarUiPreference;
+import com.android.car.ui.preference.CarUiTwoActionBasePreference;
+import com.android.car.ui.preference.CarUiTwoActionIconPreference;
+import com.android.car.ui.preference.CarUiTwoActionSwitchPreference;
+import com.android.car.ui.preference.CarUiTwoActionTextPreference;
 import com.android.car.ui.preference.PreferenceFragment;
+
+import java.util.Objects;
 
 /**
  * Fragment to load preferences
@@ -31,18 +40,52 @@ public class PreferenceDemoFragment extends PreferenceFragment {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         // Load the preferences from an XML resource
         setPreferencesFromResource(R.xml.preference_samples, rootKey);
-        CarUiPreference preferenceDisabledWithoutRipple = findPreference(
+        CarUiPreference preferenceDisabledWithoutRipple = requirePreference(
                 "preference_disabled_without_ripple");
         preferenceDisabledWithoutRipple.setEnabled(false);
         preferenceDisabledWithoutRipple.setMessageToShowWhenDisabledPreferenceClicked(
                 "I am disabled because...");
         preferenceDisabledWithoutRipple.setShouldShowRippleOnDisabledPreference(false);
 
-        CarUiPreference preferenceDisabledWithRipple = findPreference(
+        CarUiPreference preferenceDisabledWithRipple = requirePreference(
                 "preference_disabled_with_ripple");
         preferenceDisabledWithRipple.setEnabled(false);
         preferenceDisabledWithRipple.setMessageToShowWhenDisabledPreferenceClicked(
                 "I am disabled because...");
         preferenceDisabledWithRipple.setShouldShowRippleOnDisabledPreference(true);
+
+        setupTwoActionPreferenceClickListeners(requirePreference("twoactiontext"));
+        setupTwoActionPreferenceClickListeners(requirePreference("twoactiontextborderless"));
+        setupTwoActionPreferenceClickListeners(requirePreference("twoactionicon"));
+        setupTwoActionPreferenceClickListeners(requirePreference("twoactionswitch"));
+    }
+
+    private void setupTwoActionPreferenceClickListeners(CarUiTwoActionBasePreference preference) {
+        if (preference instanceof CarUiTwoActionSwitchPreference) {
+            ((CarUiTwoActionSwitchPreference) preference).setOnSecondaryActionClickListener(
+                    (selected) -> preference.setSecondaryActionEnabled(false));
+        } else if (preference instanceof CarUiTwoActionTextPreference) {
+            ((CarUiTwoActionTextPreference) preference).setOnSecondaryActionClickListener(
+                    () -> preference.setSecondaryActionEnabled(false));
+        } else {
+            ((CarUiTwoActionIconPreference) preference).setOnSecondaryActionClickListener(
+                    () -> preference.setSecondaryActionEnabled(false));
+        }
+
+        preference.setOnPreferenceClickListener((pref) -> {
+            if (!preference.isSecondaryActionEnabled()) {
+                preference.setSecondaryActionEnabled(true);
+            } else {
+                preference.setSecondaryActionVisible(
+                        !preference.isSecondaryActionVisible());
+            }
+            return true;
+        });
+    }
+
+    @NonNull
+    private <T extends Preference> T requirePreference(CharSequence key) {
+        T pref = findPreference(key);
+        return Objects.requireNonNull(pref);
     }
 }
