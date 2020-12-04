@@ -29,6 +29,7 @@ import androidx.fragment.app.Fragment;
 import androidx.preference.DialogPreference;
 import androidx.preference.Preference;
 
+import com.android.car.ui.FocusArea;
 import com.android.car.ui.R;
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
@@ -107,6 +108,12 @@ public class MultiSelectListPreferenceFragment extends Fragment implements Inset
                     int oldHeight = recyclerView.getPaddingTop();
                     recyclerView.setPadding(0, newHeight, 0, 0);
                     recyclerView.scrollBy(0, oldHeight - newHeight);
+
+                    FocusArea focusArea = view.findViewById(R.id.car_ui_focus_area);
+                    if (focusArea != null) {
+                        focusArea.setHighlightPadding(0, newHeight, 0, 0);
+                        focusArea.setBoundsOffset(0, newHeight, 0, 0);
+                    }
                 });
             }
         }
@@ -221,5 +228,10 @@ public class MultiSelectListPreferenceFragment extends Fragment implements Inset
         CarUiUtils.requireViewByRefId(view, R.id.list)
                 .setPadding(0, insets.getTop(), 0, insets.getBottom());
         view.setPadding(insets.getLeft(), 0, insets.getRight(), 0);
+        FocusArea focusArea = view.findViewById(R.id.car_ui_focus_area);
+        if (focusArea != null) {
+            focusArea.setHighlightPadding(0, insets.getTop(), 0, insets.getBottom());
+            focusArea.setBoundsOffset(0, insets.getTop(), 0, insets.getBottom());
+        }
     }
 }
