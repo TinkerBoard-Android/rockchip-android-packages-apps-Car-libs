@@ -17,10 +17,13 @@
 package com.android.car.ui.imewidescreen;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.ExtractEditText;
 import android.inputmethodservice.InputMethodService;
@@ -51,13 +54,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.R;
 import com.android.car.ui.recyclerview.CarUiContentListItem;
-import com.android.car.ui.recyclerview.CarUiListItem;
 import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.utils.CarUiUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Helper class to build an IME that support widescreen mode.
@@ -93,6 +95,7 @@ import java.util.List;
 public class CarUiImeWideScreenController {
 
     private static final String TAG = "ImeWideScreenController";
+    private static final String NOT_ASTERISK_OR_CAPTURED_ASTERISK = "[^*]+|(\\*)";
 
     // Automotive wide screen mode bundle keys.
 
@@ -131,7 +134,7 @@ public class CarUiImeWideScreenController {
 
     // Key used to provide list of unique id for each item. This same id will be sent back to
     // the application when the item is clicked. Value format is ArrayList<String>
-    public static final String SEARCH_RESULT_ITEM_ID = "search_result_item_id";
+    public static final String SEARCH_RESULT_ITEM_ID_LIST = "search_result_item_id_list";
     // Key used to provide the list of titles for each search item. Value format is
     // ArrayList<String>
     public static final String SEARCH_RESULT_TITLE_LIST = "search_result_title_list";
@@ -141,27 +144,27 @@ public class CarUiImeWideScreenController {
     // Key used to provide the list of resource id for each primary image in search item.
     // ArrayList<Integer>. If bitmap and res id both are provided than bitmap will take
     // precedence over res id.
-    public static final String SEARCH_RESULT_PRIMARY_IMAGE_RES_ID_LIST =
-            "search_result_image_list";
+    public static final String SEARCH_RESULT_ICON_RES_ID_LIST =
+            "search_result_icon_res_id_list";
     // Key used to provide the list of bitmap for each primary image in search item.
     // ArrayList<Integer>. If bitmap and res id both are provided than bitmap will take
     // precedence over res id.
-    public static final String SEARCH_RESULT_PRIMARY_IMAGE_BITMAP_LIST =
-            "search_result_image_bitmap_list";
+    public static final String SEARCH_RESULT_ICON_BITMAP_LIST =
+            "search_result_icon_bitmap_list";
     // Key used to provide the list of bitmap for each secondary image in search item.
     // ArrayList<Integer>. If bitmap and res id both are provided than bitmap will take
     // precedence over res id.
-    public static final String SEARCH_RESULT_SECONDARY_IMAGE_BITMAP_LIST =
-            "search_result_secondary_image_bitmap_list";
+    public static final String SEARCH_RESULT_SUPPLEMENTAL_ICON_BITMAP_LIST =
+            "search_result_supplemental_icon_bitmap_list";
     // Key used to provide the list of id for each secondary image in search item.
     // ArrayList<String>. If bitmap and res id both are provided than bitmap will take
     // precedence over res id.
-    public static final String SEARCH_RESULT_SECONDARY_IMAGE_ID =
-            "search_result_secondary_image_id";
+    public static final String SEARCH_RESULT_SUPPLEMENTAL_ICON_ID_LIST =
+            "search_result_supplemental_icon_id_list";
     // Key used to provide the list of resource id for each secondary image in search item.
     // ArrayList<Integer>
-    public static final String SEARCH_RESULT_SECONDARY_IMAGE_RES_ID_LIST =
-            "search_result_image_list";
+    public static final String SEARCH_RESULT_SUPPLEMENTAL_ICON_RES_ID_LIST =
+            "search_result_supplemental_icon_res_id_list";
     // key used to provide the surface package information by the application to the IME. IME
     // will send the surface info each time its being displayed.
     public static final String CONTENT_AREA_SURFACE_PACKAGE = "content_area_surface_package";
@@ -184,7 +187,7 @@ public class CarUiImeWideScreenController {
     private boolean mImeRendersAllContent = true;
     private boolean mAllowAppToHideContentArea;
     @Nullable
-    private ArrayList<CarUiListItem> mAutomotiveSearchItems;
+    private ArrayList<CarUiContentListItem> mAutomotiveSearchItems;
     @NonNull
     private TextView mWideScreenDescriptionTitle;
     @NonNull
@@ -322,7 +325,7 @@ public class CarUiImeWideScreenController {
         if (data == null) {
             return;
         }
-        if (mAllowAppToHideContentArea || (mInputEditorInfo != null && allowPackageList().contains(
+        if (mAllowAppToHideContentArea || (mInputEditorInfo != null && isPackageAuthorized(
                 mInputEditorInfo.packageName))) {
             mImeRendersAllContent = data.getBoolean(REQUEST_RENDER_CONTENT_AREA, true);
         }
@@ -398,35 +401,35 @@ public class CarUiImeWideScreenController {
     }
 
     private void loadSearchItems(Bundle data) {
-        ArrayList<String> itemIdList = data.getStringArrayList(SEARCH_RESULT_ITEM_ID);
+        ArrayList<String> itemIdList = data.getStringArrayList(SEARCH_RESULT_ITEM_ID_LIST);
         ArrayList<String> titleList = data.getStringArrayList(SEARCH_RESULT_TITLE_LIST);
         ArrayList<String> subTitleList = data.getStringArrayList(SEARCH_RESULT_SUB_TITLE_LIST);
         ArrayList<Bitmap> bitmapList = data.getParcelableArrayList(
-                SEARCH_RESULT_PRIMARY_IMAGE_BITMAP_LIST);
+                SEARCH_RESULT_ICON_BITMAP_LIST);
         ArrayList<Integer> primaryImageResIdList =
-                data.getIntegerArrayList(SEARCH_RESULT_PRIMARY_IMAGE_RES_ID_LIST);
+                data.getIntegerArrayList(SEARCH_RESULT_ICON_RES_ID_LIST);
         ArrayList<Bitmap> secondaryBitmapList = data.getParcelableArrayList(
-                SEARCH_RESULT_SECONDARY_IMAGE_BITMAP_LIST);
+                SEARCH_RESULT_SUPPLEMENTAL_ICON_BITMAP_LIST);
         ArrayList<String> secondaryImageIdList =
-                data.getStringArrayList(SEARCH_RESULT_SECONDARY_IMAGE_ID);
+                data.getStringArrayList(SEARCH_RESULT_SUPPLEMENTAL_ICON_ID_LIST);
         ArrayList<Integer> secondaryImageResIdList =
-                data.getIntegerArrayList(SEARCH_RESULT_SECONDARY_IMAGE_RES_ID_LIST);
+                data.getIntegerArrayList(SEARCH_RESULT_SUPPLEMENTAL_ICON_RES_ID_LIST);
         if (itemIdList == null) {
             return;
         }
         mAutomotiveSearchItems = new ArrayList<>();
         for (int i = 0; i < itemIdList.size(); i++) {
             int index = i;
-            CarUiImeSearchListItem searchItem;
+            CarUiContentListItem searchItem;
             if (secondaryImageIdList == null) {
-                searchItem = new CarUiImeSearchListItem(CarUiContentListItem.Action.NONE);
+                searchItem = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
             } else {
-                searchItem = new CarUiImeSearchListItem(CarUiContentListItem.Action.ICON);
+                searchItem = new CarUiContentListItem(CarUiContentListItem.Action.ICON);
             }
 
             searchItem.setOnItemClickedListener(v -> {
                 Bundle bundle = new Bundle();
-                bundle.putString(SEARCH_RESULT_ITEM_ID, itemIdList.get(index));
+                bundle.putString(SEARCH_RESULT_ITEM_ID_LIST, itemIdList.get(index));
                 mInputConnection.performPrivateCommand(WIDE_SCREEN_ACTION, bundle);
             });
 
@@ -441,19 +444,21 @@ public class CarUiImeWideScreenController {
             if (primaryImageResIdList != null) {
                 searchItem.setPrimaryIconType(CarUiContentListItem.IconType.CONTENT);
                 if (bitmapList != null && bitmapList.get(i) != null) {
-                    searchItem.setIconBitmap(bitmapList.get(i));
+                    searchItem.setIcon(
+                            new BitmapDrawable(mContext.getResources(), bitmapList.get(i)));
                 } else {
                     searchItem.setIcon(loadDrawableFromPackage(primaryImageResIdList.get(i)));
                 }
             }
 
             if (secondaryBitmapList != null && secondaryBitmapList.get(i) != null) {
-                searchItem.setSupplementalIconBitmap(secondaryBitmapList.get(i));
+                searchItem.setSupplementalIcon(
+                        new BitmapDrawable(mContext.getResources(), secondaryBitmapList.get(i)));
             } else if (secondaryImageResIdList != null && secondaryImageIdList != null) {
                 searchItem.setSupplementalIcon(
                         loadDrawableFromPackage(secondaryImageResIdList.get(i)), v -> {
                             Bundle bundle = new Bundle();
-                            bundle.putString(SEARCH_RESULT_SECONDARY_IMAGE_ID,
+                            bundle.putString(SEARCH_RESULT_SUPPLEMENTAL_ICON_ID_LIST,
                                     secondaryImageIdList.get(index));
                             mInputConnection.performPrivateCommand(WIDE_SCREEN_ACTION, bundle);
                         });
@@ -561,7 +566,7 @@ public class CarUiImeWideScreenController {
      */
     private void sendSurfaceInfo() {
         if (!mAllowAppToHideContentArea && !(mInputEditorInfo != null
-                && allowPackageList().contains(mInputEditorInfo.packageName))) {
+                && isPackageAuthorized(mInputEditorInfo.packageName))) {
             return;
         }
         int displayId = mContentAreaSurfaceView.getDisplay().getDisplayId();
@@ -649,10 +654,57 @@ public class CarUiImeWideScreenController {
         });
     }
 
-    private List<String> allowPackageList() {
+    private boolean isPackageAuthorized(String packageName) {
         String[] packages = mContext.getResources()
                 .getStringArray(R.array.car_ui_ime_wide_screen_allowed_package_list);
-        return Arrays.asList(packages);
+
+        PackageInfo packageInfo = getPackageInfo(mContext, packageName);
+        // Checks if the application of the given context is installed in the system image. I.e.
+        // if it's a bundled app.
+        if (packageInfo != null && (packageInfo.applicationInfo.flags & (ApplicationInfo.FLAG_SYSTEM
+                | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0) {
+            return true;
+        }
+
+        for (String pattern : packages) {
+            String regex = createRegexFromGlob(pattern);
+            if (packageName.matches(regex)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Return the package info for a particular package.
+     */
+    @Nullable
+    private static PackageInfo getPackageInfo(Context context,
+            String packageName) {
+        PackageManager packageManager = context.getPackageManager();
+        PackageInfo packageInfo = null;
+        try {
+            packageInfo = packageManager.getPackageInfo(
+                    packageName, /* flags= */ 0);
+        } catch (PackageManager.NameNotFoundException ex) {
+            Log.e(TAG, "package not found: " + packageName);
+        }
+        return packageInfo;
+    }
+
+    private static String createRegexFromGlob(String glob) {
+        Pattern reg = Pattern.compile(NOT_ASTERISK_OR_CAPTURED_ASTERISK);
+        Matcher m = reg.matcher(glob);
+        StringBuffer b = new StringBuffer();
+        while (m.find()) {
+            if (m.group(1) != null) {
+                m.appendReplacement(b, ".*");
+            } else {
+                m.appendReplacement(b, Matcher.quoteReplacement(m.group(0)));
+            }
+        }
+        m.appendTail(b);
+        return b.toString();
     }
 
     private void setExtractedEditTextBackground(int drawableResId) {

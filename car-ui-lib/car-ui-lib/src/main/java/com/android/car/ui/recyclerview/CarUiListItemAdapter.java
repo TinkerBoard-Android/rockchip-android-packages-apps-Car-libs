@@ -18,7 +18,6 @@ package com.android.car.ui.recyclerview;
 
 import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -193,10 +192,6 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
             CharSequence title = item.getTitle();
             CharSequence body = item.getBody();
             Drawable icon = item.getIcon();
-            Bitmap iconBitmap = null;
-            if (icon == null) {
-                iconBitmap = item.getIconBitmap();
-            }
 
             if (!TextUtils.isEmpty(title)) {
                 mTitle.setText(title);
@@ -216,33 +211,21 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
             mContentIcon.setVisibility(View.GONE);
             mAvatarIcon.setVisibility(View.GONE);
 
-            if (icon != null || iconBitmap != null) {
+            if (icon != null) {
                 mIconContainer.setVisibility(View.VISIBLE);
 
                 switch (item.getPrimaryIconType()) {
                     case CONTENT:
                         mContentIcon.setVisibility(View.VISIBLE);
-                        if (icon != null) {
-                            mContentIcon.setImageDrawable(icon);
-                        } else {
-                            mContentIcon.setImageBitmap(iconBitmap);
-                        }
+                        mContentIcon.setImageDrawable(icon);
                         break;
                     case STANDARD:
                         mIcon.setVisibility(View.VISIBLE);
-                        if (icon != null) {
-                            mIcon.setImageDrawable(icon);
-                        } else {
-                            mIcon.setImageBitmap(iconBitmap);
-                        }
+                        mIcon.setImageDrawable(icon);
                         break;
                     case AVATAR:
                         mAvatarIcon.setVisibility(View.VISIBLE);
-                        if (icon != null) {
-                            mAvatarIcon.setImageDrawable(icon);
-                        } else {
-                            mAvatarIcon.setImageBitmap(iconBitmap);
-                        }
+                        mAvatarIcon.setImageDrawable(icon);
                         mAvatarIcon.setClipToOutline(true);
                         break;
                 }
@@ -299,11 +282,7 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
                     break;
                 case ICON:
                     mSupplementalIcon.setVisibility(View.VISIBLE);
-                    if (item.getSupplementalIcon() != null) {
-                        mSupplementalIcon.setImageDrawable(item.getSupplementalIcon());
-                    } else {
-                        mSupplementalIcon.setImageBitmap(item.getSupplementalIconBitmap());
-                    }
+                    mSupplementalIcon.setImageDrawable(item.getSupplementalIcon());
 
                     mActionContainer.setVisibility(View.VISIBLE);
 
