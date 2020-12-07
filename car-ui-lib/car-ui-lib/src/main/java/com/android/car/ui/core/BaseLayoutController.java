@@ -117,11 +117,11 @@ public final class BaseLayoutController {
                 requireViewByRefId(activity.getWindow().getDecorView(), android.R.id.content);
 
         mInsetsUpdater = new InsetsUpdater(activity, contentView);
-        mToolbarController = SharedLibraryFactorySingleton.get().installBaseLayoutAround(
-                contentView,
-                mInsetsUpdater,
-                toolbarEnabled);
-
+        mToolbarController = SharedLibraryFactorySingleton.get(activity)
+                .installBaseLayoutAround(
+                        contentView,
+                        mInsetsUpdater,
+                        toolbarEnabled);
     }
 
     /**

@@ -140,7 +140,7 @@ public class CarUi {
             View view,
             InsetsChangedListener insetsChangedListener,
             boolean hasToolbar) {
-        return SharedLibraryFactorySingleton.get()
+        return SharedLibraryFactorySingleton.get(view.getContext())
                 .installBaseLayoutAround(view, insetsChangedListener, hasToolbar);
     }
 

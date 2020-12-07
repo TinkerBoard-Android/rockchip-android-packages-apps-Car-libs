@@ -16,6 +16,7 @@
 package com.android.car.ui.sharedlibrarysupport;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.util.Log;
 
 import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryFactoryOEMV1;
@@ -38,7 +39,7 @@ public final class SharedLibraryFactorySingleton {
      * of the shared library to use.
      */
     @SuppressLint("PrivateApi") // suppresses warning on Class.forName()
-    public static SharedLibraryFactory get() {
+    public static SharedLibraryFactory get(Context context) {
         if (sInstance != null) {
             return sInstance;
         }
@@ -74,7 +75,8 @@ public final class SharedLibraryFactorySingleton {
             return sInstance;
         }
 
-        Object factory = versionProvider.getSharedLibraryFactory(1);
+        Object factory =
+                versionProvider.getSharedLibraryFactory(1, context.getApplicationContext());
         // Add new factories in an if-else chain here, in descending version order so that
         // higher versions are preferred.
         if (classExists(OEMAPIS_PREFIX + "SharedLibraryFactoryOEMV1")

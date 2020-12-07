@@ -15,6 +15,8 @@
  */
 package com.android.car.ui.sharedlibrarysupport;
 
+import android.content.Context;
+
 import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryVersionProviderOEMV1;
 
 /**
@@ -32,7 +34,7 @@ final class SharedLibraryVersionProviderAdapterV1 implements SharedLibraryVersio
     }
 
     @Override
-    public Object getSharedLibraryFactory(int maxVersion) {
-        return mOemProvider.getSharedLibraryFactory(maxVersion);
+    public Object getSharedLibraryFactory(int maxVersion, Context context) {
+        return mOemProvider.getSharedLibraryFactory(maxVersion, context);
     }
 }

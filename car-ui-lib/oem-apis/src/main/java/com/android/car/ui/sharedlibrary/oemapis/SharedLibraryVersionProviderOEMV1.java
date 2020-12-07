@@ -15,6 +15,8 @@
  */
 package com.android.car.ui.sharedlibrary.oemapis;
 
+import android.content.Context;
+
 /**
  * An interface for objects that support providing a list a supported versions of
  * {@link SharedLibraryFactoryOEMV1} to the app. See {@link #getSharedLibraryFactory(int)}}
@@ -35,8 +37,10 @@ public interface SharedLibraryVersionProviderOEMV1 {
      *
      * @param maxVersion The maximum version of {@link SharedLibraryFactoryOEMV1} supported by the
      *                   app.
+     * @param context Used for making a classloader for the oem sharedlibrary
+     *
      * @return An object implementing {@link SharedLibraryFactoryOEMV1} for a version <=
      *         {@code maxVersion}.
      */
-    Object getSharedLibraryFactory(int maxVersion);
+    Object getSharedLibraryFactory(int maxVersion, Context context);
 }
