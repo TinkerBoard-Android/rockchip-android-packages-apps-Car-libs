@@ -17,29 +17,28 @@ package com.android.car.ui.toolbar;
 
 import static android.view.WindowInsets.Type.ime;
 
+import static com.android.car.ui.core.SearchResultsProvider.CONTENT;
+import static com.android.car.ui.core.SearchResultsProvider.SEARCH_RESULTS_PROVIDER;
+import static com.android.car.ui.core.SearchResultsProvider.SEARCH_RESULTS_TABLE_NAME;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.CONTENT_AREA_SURFACE_PACKAGE;
-import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_ICON_BITMAP_LIST;
-import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_ICON_RES_ID_LIST;
-import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_ITEM_ID_LIST;
-import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SUB_TITLE_LIST;
-import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SUPPLEMENTAL_ICON_BITMAP_LIST;
-import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SUPPLEMENTAL_ICON_ID_LIST;
-import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SUPPLEMENTAL_ICON_RES_ID_LIST;
-import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_TITLE_LIST;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_ACTION;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_SEARCH_RESULTS;
 import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Parcel;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -59,6 +58,7 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.android.car.ui.R;
+import com.android.car.ui.core.SearchResultsProvider;
 import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
 import com.android.car.ui.recyclerview.CarUiContentListItem;
 import com.android.car.ui.recyclerview.CarUiListItem;
@@ -269,7 +269,13 @@ public class SearchView extends ConstraintLayout {
     }
 
     private void displaySearchWideScreen() {
+        String url = CONTENT + getContext().getPackageName() + SEARCH_RESULTS_PROVIDER + "/"
+                + SEARCH_RESULTS_TABLE_NAME;
+        Uri contentUri = Uri.parse(url);
         mIdToListItem.clear();
+        // clear the table.
+        getContext().getContentResolver().delete(contentUri, null, null);
+
         // mWideScreenImeContentAreaView will only be set when running in widescreen mode and
         // apps allowed by OEMs are trying to set their own view. In that case we did not want to
         // send the information to IME for templatized solution.
@@ -282,46 +288,38 @@ public class SearchView extends ConstraintLayout {
             return;
         }
 
-        ArrayList<String> itemIdList = new ArrayList<>();
-        ArrayList<String> titleList = new ArrayList<>();
-        ArrayList<String> subTitleList = new ArrayList<>();
-        ArrayList<Bitmap> primaryImageBitmapList = new ArrayList<>();
-        ArrayList<Integer> primaryImageResId = new ArrayList<>();
-        ArrayList<Bitmap> secondaryImageBitmapList = new ArrayList<>();
-        ArrayList<String> secondaryItemId = new ArrayList<>();
-        ArrayList<Integer> secondaryImageResId = new ArrayList<>();
         int id = 0;
-        for (CarUiImeSearchListItem item : mWideScreenSearchItemList) {
-            String idString = String.valueOf(id);
-            itemIdList.add(idString);
-            titleList.add(item.getTitle() != null ? item.getTitle().toString() : null);
-            subTitleList.add(item.getBody() != null ? item.getBody().toString() : null);
-            primaryImageResId.add(item.getIconResId());
-            secondaryItemId.add(idString);
-            secondaryImageResId.add(item.getSupplementalIconResId());
-            BitmapDrawable icon = (BitmapDrawable) item.getIcon();
-            primaryImageBitmapList.add(icon != null ? icon.getBitmap() : null);
-            BitmapDrawable supplementalIcon = (BitmapDrawable) item.getSupplementalIcon();
-            secondaryImageBitmapList.add(
-                    supplementalIcon != null ? supplementalIcon.getBitmap() : null);
 
+        for (CarUiImeSearchListItem item : mWideScreenSearchItemList) {
+            ContentValues values = new ContentValues();
+            String idString = String.valueOf(id);
+            values.put(SearchResultsProvider.ITEM_ID, id);
+            values.put(SearchResultsProvider.SECONDARY_IMAGE_ID, id);
+            BitmapDrawable icon = (BitmapDrawable) item.getIcon();
+            values.put(SearchResultsProvider.PRIMARY_IMAGE_BLOB,
+                    icon != null ? bitmapToByteArray(icon.getBitmap()) : null);
+            BitmapDrawable supplementalIcon = (BitmapDrawable) item.getSupplementalIcon();
+            values.put(SearchResultsProvider.SECONDARY_IMAGE_BLOB,
+                    supplementalIcon != null ? bitmapToByteArray(supplementalIcon.getBitmap())
+                            : null);
+            values.put(SearchResultsProvider.TITLE,
+                    item.getTitle() != null ? item.getTitle().toString() : null);
+            values.put(SearchResultsProvider.SUBTITLE,
+                    item.getBody() != null ? item.getBody().toString() : null);
+            getContext().getContentResolver().insert(contentUri, values);
             mIdToListItem.put(idString, item);
             id++;
         }
+        mInputMethodManager.sendAppPrivateCommand(mSearchText, WIDE_SCREEN_SEARCH_RESULTS,
+                new Bundle());
+    }
 
-        Bundle bundle = new Bundle();
-        bundle.putStringArrayList(SEARCH_RESULT_ITEM_ID_LIST, itemIdList);
-        bundle.putStringArrayList(SEARCH_RESULT_TITLE_LIST, titleList);
-        bundle.putStringArrayList(SEARCH_RESULT_SUB_TITLE_LIST, subTitleList);
-        bundle.putParcelableArrayList(SEARCH_RESULT_ICON_BITMAP_LIST,
-                primaryImageBitmapList);
-        bundle.putParcelableArrayList(SEARCH_RESULT_SUPPLEMENTAL_ICON_BITMAP_LIST,
-                secondaryImageBitmapList);
-        bundle.putIntegerArrayList(SEARCH_RESULT_ICON_RES_ID_LIST, primaryImageResId);
-        bundle.putStringArrayList(SEARCH_RESULT_SUPPLEMENTAL_ICON_ID_LIST, secondaryItemId);
-        bundle.putIntegerArrayList(SEARCH_RESULT_SUPPLEMENTAL_ICON_RES_ID_LIST,
-                secondaryImageResId);
-        mInputMethodManager.sendAppPrivateCommand(mSearchText, WIDE_SCREEN_ACTION, bundle);
+    private byte[] bitmapToByteArray(Bitmap bitmap) {
+        Parcel parcel = Parcel.obtain();
+        bitmap.writeToParcel(parcel, 0);
+        byte[] bytes = parcel.marshall();
+        parcel.recycle();
+        return bytes;
     }
 
     /**
