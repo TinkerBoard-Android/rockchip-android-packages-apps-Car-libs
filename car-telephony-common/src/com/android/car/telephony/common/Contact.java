@@ -364,7 +364,7 @@ public class Contact implements Parcelable, Comparable<Contact> {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof Contact && mLookupKey.equals(((Contact) obj).mLookupKey)
-                && mAccountName.equals(((Contact) obj).mAccountName);
+                && TextUtils.equals(((Contact) obj).mAccountName, mAccountName);
     }
 
     @Override
@@ -447,6 +447,17 @@ public class Contact implements Parcelable, Comparable<Contact> {
         }
 
         return mInitials;
+    }
+
+    /**
+     * Returns the initials of the contact's name based on display order.
+     */
+    public String getInitialsBasedOnDisplayOrder(boolean startWithFirstName) {
+        if (startWithFirstName) {
+            return TelecomUtils.getInitials(mDisplayName, mDisplayNameAlt);
+        } else {
+            return TelecomUtils.getInitials(mDisplayNameAlt, mDisplayName);
+        }
     }
 
     /**

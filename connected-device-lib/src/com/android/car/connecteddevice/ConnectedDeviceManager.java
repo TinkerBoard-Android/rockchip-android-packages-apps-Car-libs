@@ -22,29 +22,25 @@ import static com.android.car.connecteddevice.util.SafeLog.logw;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-import android.annotation.CallbackExecutor;
-import android.annotation.IntDef;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.content.Context;
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
-import com.android.car.connecteddevice.ble.BleCentralManager;
-import com.android.car.connecteddevice.ble.BlePeripheralManager;
-import com.android.car.connecteddevice.ble.CarBleCentralManager;
-import com.android.car.connecteddevice.ble.CarBleManager;
-import com.android.car.connecteddevice.ble.CarBlePeripheralManager;
-import com.android.car.connecteddevice.ble.DeviceMessage;
+import com.android.car.connecteddevice.connection.CarBluetoothManager;
+import com.android.car.connecteddevice.connection.DeviceMessage;
 import com.android.car.connecteddevice.model.AssociatedDevice;
 import com.android.car.connecteddevice.model.ConnectedDevice;
+import com.android.car.connecteddevice.model.OobEligibleDevice;
+import com.android.car.connecteddevice.oob.BluetoothRfcommChannel;
+import com.android.car.connecteddevice.oob.OobChannel;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage;
 import com.android.car.connecteddevice.storage.ConnectedDeviceStorage.AssociatedDeviceCallback;
 import com.android.car.connecteddevice.util.ByteUtils;
 import com.android.car.connecteddevice.util.EventLog;
 import com.android.car.connecteddevice.util.ThreadSafeCallbacks;
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -73,15 +69,9 @@ public class ConnectedDeviceManager {
     // Subtracting 2 bytes used by header, we have 8 bytes for device name.
     private static final int DEVICE_NAME_LENGTH_LIMIT = 8;
 
-    // The mac address randomly rotates every 7-15 minutes. To be safe, we will rotate our
-    // reconnect advertisement every 6 minutes to avoid crossing a rotation.
-    private static final Duration MAX_ADVERTISEMENT_DURATION = Duration.ofMinutes(6);
-
     private final ConnectedDeviceStorage mStorage;
 
-    private final CarBleCentralManager mCentralManager;
-
-    private final CarBlePeripheralManager mPeripheralManager;
+    private final CarBluetoothManager mCarBluetoothManager;
 
     private final ThreadSafeCallbacks<DeviceAssociationCallback> mDeviceAssociationCallbacks =
             new ThreadSafeCallbacks<>();
@@ -97,7 +87,7 @@ public class ConnectedDeviceManager {
             new ConcurrentHashMap<>();
 
     // deviceId -> device
-    private final Map<String, InternalConnectedDevice> mConnectedDevices =
+    private final Map<String, ConnectedDevice> mConnectedDevices =
             new ConcurrentHashMap<>();
 
     // recipientId -> (deviceId -> message bytes)
@@ -120,22 +110,23 @@ public class ConnectedDeviceManager {
 
     private MessageDeliveryDelegate mMessageDeliveryDelegate;
 
+    private OobChannel mOobChannel;
+
     @Retention(SOURCE)
-    @IntDef(prefix = { "DEVICE_ERROR_" },
-            value = {
-                    DEVICE_ERROR_INVALID_HANDSHAKE,
-                    DEVICE_ERROR_INVALID_MSG,
-                    DEVICE_ERROR_INVALID_DEVICE_ID,
-                    DEVICE_ERROR_INVALID_VERIFICATION,
-                    DEVICE_ERROR_INVALID_CHANNEL_STATE,
-                    DEVICE_ERROR_INVALID_ENCRYPTION_KEY,
-                    DEVICE_ERROR_STORAGE_FAILURE,
-                    DEVICE_ERROR_INVALID_SECURITY_KEY,
-                    DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED,
-                    DEVICE_ERROR_UNEXPECTED_DISCONNECTION
-            }
-    )
+    @IntDef({
+            DEVICE_ERROR_INVALID_HANDSHAKE,
+            DEVICE_ERROR_INVALID_MSG,
+            DEVICE_ERROR_INVALID_DEVICE_ID,
+            DEVICE_ERROR_INVALID_VERIFICATION,
+            DEVICE_ERROR_INVALID_CHANNEL_STATE,
+            DEVICE_ERROR_INVALID_ENCRYPTION_KEY,
+            DEVICE_ERROR_STORAGE_FAILURE,
+            DEVICE_ERROR_INVALID_SECURITY_KEY,
+            DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED,
+            DEVICE_ERROR_UNEXPECTED_DISCONNECTION
+    })
     public @interface DeviceError {}
+
     public static final int DEVICE_ERROR_INVALID_HANDSHAKE = 0;
     public static final int DEVICE_ERROR_INVALID_MSG = 1;
     public static final int DEVICE_ERROR_INVALID_DEVICE_ID = 2;
@@ -147,53 +138,15 @@ public class ConnectedDeviceManager {
     public static final int DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED = 8;
     public static final int DEVICE_ERROR_UNEXPECTED_DISCONNECTION = 9;
 
-    public ConnectedDeviceManager(@NonNull Context context) {
-        this(context, new ConnectedDeviceStorage(context), new BleCentralManager(context),
-                new BlePeripheralManager(context),
-                UUID.fromString(context.getString(R.string.car_service_uuid)),
-                UUID.fromString(context.getString(R.string.car_association_service_uuid)),
-                UUID.fromString(context.getString(R.string.car_reconnect_service_uuid)),
-                UUID.fromString(context.getString(R.string.car_reconnect_data_uuid)),
-                context.getString(R.string.car_bg_mask),
-                UUID.fromString(context.getString(R.string.car_secure_write_uuid)),
-                UUID.fromString(context.getString(R.string.car_secure_read_uuid)),
-                context.getResources().getInteger(R.integer.car_default_mtu_size));
-    }
-
-    private ConnectedDeviceManager(
-            @NonNull Context context,
-            @NonNull ConnectedDeviceStorage storage,
-            @NonNull BleCentralManager bleCentralManager,
-            @NonNull BlePeripheralManager blePeripheralManager,
-            @NonNull UUID serviceUuid,
-            @NonNull UUID associationServiceUuid,
-            @NonNull UUID reconnectServiceUuid,
-            @NonNull UUID reconnectDataUuid,
-            @NonNull String bgMask,
-            @NonNull UUID writeCharacteristicUuid,
-            @NonNull UUID readCharacteristicUuid,
-            int defaultMtuSize) {
-        this(storage,
-                new CarBleCentralManager(context, bleCentralManager, storage, serviceUuid, bgMask,
-                        writeCharacteristicUuid, readCharacteristicUuid),
-                new CarBlePeripheralManager(blePeripheralManager, storage, associationServiceUuid,
-                        reconnectServiceUuid, reconnectDataUuid, writeCharacteristicUuid,
-                        readCharacteristicUuid, MAX_ADVERTISEMENT_DURATION, defaultMtuSize));
-    }
-
-    @VisibleForTesting
-    ConnectedDeviceManager(
-            @NonNull ConnectedDeviceStorage storage,
-            @NonNull CarBleCentralManager centralManager,
-            @NonNull CarBlePeripheralManager peripheralManager) {
+    public ConnectedDeviceManager(@NonNull CarBluetoothManager carBluetoothManager,
+            @NonNull ConnectedDeviceStorage storage) {
         Executor callbackExecutor = Executors.newSingleThreadExecutor();
         mStorage = storage;
-        mCentralManager = centralManager;
-        mPeripheralManager = peripheralManager;
-        mCentralManager.registerCallback(generateCarBleCallback(centralManager), callbackExecutor);
-        mPeripheralManager.registerCallback(generateCarBleCallback(peripheralManager),
+        mCarBluetoothManager = carBluetoothManager;
+        mCarBluetoothManager.registerCallback(generateCarBleCallback(carBluetoothManager),
                 callbackExecutor);
         mStorage.setAssociatedDeviceCallback(mAssociatedDeviceCallback);
+        logd(TAG, "ConnectedDeviceManager created successfully.");
     }
 
     /**
@@ -207,29 +160,32 @@ public class ConnectedDeviceManager {
             logd(TAG, "Starting ConnectedDeviceManager.");
             EventLog.onConnectedDeviceManagerStarted();
         }
-        // TODO (b/141312136) Start central manager
-        mPeripheralManager.start();
+        mCarBluetoothManager.start();
         connectToActiveUserDevice();
     }
 
     /** Reset internal processes and disconnect any active connections. */
     public void reset() {
         logd(TAG, "Resetting ConnectedDeviceManager.");
-        for (InternalConnectedDevice device : mConnectedDevices.values()) {
-            removeConnectedDevice(device.mConnectedDevice.getDeviceId(), device.mCarBleManager);
+        for (ConnectedDevice device : mConnectedDevices.values()) {
+            removeConnectedDevice(device.getDeviceId());
         }
-        mPeripheralManager.stop();
-        // TODO (b/141312136) Stop central manager
+        mCarBluetoothManager.stop();
         mIsConnectingToUserDevice.set(false);
+        if (mOobChannel != null) {
+            mOobChannel.interrupt();
+            mOobChannel = null;
+        }
+        mAssociationCallback = null;
     }
 
     /** Returns {@link List<ConnectedDevice>} of devices currently connected. */
     @NonNull
     public List<ConnectedDevice> getActiveUserConnectedDevices() {
         List<ConnectedDevice> activeUserConnectedDevices = new ArrayList<>();
-        for (InternalConnectedDevice device : mConnectedDevices.values()) {
-            if (device.mConnectedDevice.isAssociatedWithActiveUser()) {
-                activeUserConnectedDevices.add(device.mConnectedDevice);
+        for (ConnectedDevice device : mConnectedDevices.values()) {
+            if (device.isAssociatedWithActiveUser()) {
+                activeUserConnectedDevices.add(device);
             }
         }
         logd(TAG, "Returned " + activeUserConnectedDevices.size() + " active user devices.");
@@ -243,7 +199,7 @@ public class ConnectedDeviceManager {
      * @param executor {@link Executor} to execute triggers on.
      */
     public void registerDeviceAssociationCallback(@NonNull DeviceAssociationCallback callback,
-            @NonNull @CallbackExecutor Executor executor) {
+            @NonNull Executor executor) {
         mDeviceAssociationCallbacks.add(callback, executor);
     }
 
@@ -264,7 +220,7 @@ public class ConnectedDeviceManager {
      * @param executor {@link Executor} to execute triggers on.
      */
     public void registerActiveUserConnectionCallback(@NonNull ConnectionCallback callback,
-            @NonNull @CallbackExecutor Executor executor) {
+            @NonNull Executor executor) {
         mActiveUserConnectionCallbacks.add(callback, executor);
     }
 
@@ -289,7 +245,8 @@ public class ConnectedDeviceManager {
 
     private void connectToActiveUserDeviceInternal() {
         try {
-            if (mIsConnectingToUserDevice.get()) {
+            boolean isLockAcquired = mIsConnectingToUserDevice.compareAndSet(false, true);
+            if (!isLockAcquired) {
                 logd(TAG, "A request has already been made to connect to this user's device. "
                         + "Ignoring redundant request.");
                 return;
@@ -297,6 +254,7 @@ public class ConnectedDeviceManager {
             List<AssociatedDevice> userDevices = mStorage.getActiveUserAssociatedDevices();
             if (userDevices.isEmpty()) {
                 logw(TAG, "No devices associated with active user. Ignoring.");
+                mIsConnectingToUserDevice.set(false);
                 return;
             }
 
@@ -305,16 +263,17 @@ public class ConnectedDeviceManager {
             AssociatedDevice userDevice = userDevices.get(0);
             if (!userDevice.isConnectionEnabled()) {
                 logd(TAG, "Connection is disabled on device " + userDevice + ".");
+                mIsConnectingToUserDevice.set(false);
                 return;
             }
             if (mConnectedDevices.containsKey(userDevice.getDeviceId())) {
                 logd(TAG, "Device has already been connected. No need to attempt connection "
                         + "again.");
+                mIsConnectingToUserDevice.set(false);
                 return;
             }
             EventLog.onStartDeviceSearchStarted();
-            mIsConnectingToUserDevice.set(true);
-            mPeripheralManager.connectToDevice(UUID.fromString(userDevice.getDeviceId()));
+            mCarBluetoothManager.connectToDevice(UUID.fromString(userDevice.getDeviceId()));
         } catch (Exception e) {
             loge(TAG, "Exception while attempting connection with active user's device.", e);
         }
@@ -329,9 +288,42 @@ public class ConnectedDeviceManager {
         mAssociationCallback = callback;
         Executors.defaultThreadFactory().newThread(() -> {
             logd(TAG, "Received request to start association.");
-            mPeripheralManager.startAssociation(getNameForAssociation(),
+            mCarBluetoothManager.startAssociation(getNameForAssociation(),
                     mInternalAssociationCallback);
         }).start();
+    }
+
+    /**
+     * Start association with an out of band device.
+     *
+     * @param device   The out of band eligible device.
+     * @param callback Callback for association events.
+     */
+    public void startOutOfBandAssociation(@NonNull OobEligibleDevice device,
+            @NonNull AssociationCallback callback) {
+        logd(TAG, "Received request to start out of band association.");
+        mAssociationCallback = callback;
+        mOobChannel = new BluetoothRfcommChannel();
+        mOobChannel.completeOobDataExchange(device, new OobChannel.Callback() {
+            @Override
+            public void onOobExchangeSuccess() {
+                logd(TAG, "Out of band exchange succeeded. Proceeding to association with device.");
+                Executors.defaultThreadFactory().newThread(() -> {
+                    mCarBluetoothManager.startOutOfBandAssociation(
+                            getNameForAssociation(),
+                            mOobChannel, mInternalAssociationCallback);
+                }).start();
+            }
+
+            @Override
+            public void onOobExchangeFailure() {
+                loge(TAG, "Out of band exchange failed.");
+                mInternalAssociationCallback.onAssociationError(
+                        DEVICE_ERROR_INVALID_ENCRYPTION_KEY);
+                mOobChannel = null;
+                mAssociationCallback = null;
+            }
+        });
     }
 
     /** Stop the association with any device. */
@@ -340,8 +332,13 @@ public class ConnectedDeviceManager {
             logd(TAG, "Stop association called with unrecognized callback. Ignoring.");
             return;
         }
+        logd(TAG, "Stopping association.");
         mAssociationCallback = null;
-        mPeripheralManager.stopAssociation(mInternalAssociationCallback);
+        mCarBluetoothManager.stopAssociation();
+        if (mOobChannel != null) {
+            mOobChannel.interrupt();
+        }
+        mOobChannel = null;
     }
 
     /**
@@ -356,7 +353,7 @@ public class ConnectedDeviceManager {
 
     /** Notify that the user has accepted a pairing code or any out-of-band confirmation. */
     public void notifyOutOfBandAccepted() {
-        mPeripheralManager.notifyOutOfBandAccepted();
+        mCarBluetoothManager.notifyOutOfBandAccepted();
     }
 
     /**
@@ -378,6 +375,7 @@ public class ConnectedDeviceManager {
         logd(TAG, "enableAssociatedDeviceConnection() called on " + deviceId);
         mStorage.updateAssociatedDeviceConnectionEnabled(deviceId,
                 /* isConnectionEnabled= */ true);
+
         connectToActiveUserDevice();
     }
 
@@ -394,23 +392,23 @@ public class ConnectedDeviceManager {
     }
 
     private void disconnectDevice(String deviceId) {
-        InternalConnectedDevice device = mConnectedDevices.get(deviceId);
+        ConnectedDevice device = mConnectedDevices.get(deviceId);
         if (device != null) {
-            device.mCarBleManager.disconnectDevice(deviceId);
-            removeConnectedDevice(deviceId, device.mCarBleManager);
+            mCarBluetoothManager.disconnectDevice(deviceId);
+            removeConnectedDevice(deviceId);
         }
     }
 
     /**
      * Register a callback for a specific device and recipient.
      *
-     * @param device {@link ConnectedDevice} to register triggers on.
+     * @param device      {@link ConnectedDevice} to register triggers on.
      * @param recipientId {@link UUID} to register as recipient of.
-     * @param callback {@link DeviceCallback} to register.
-     * @param executor {@link Executor} on which to execute callback.
+     * @param callback    {@link DeviceCallback} to register.
+     * @param executor    {@link Executor} on which to execute callback.
      */
     public void registerDeviceCallback(@NonNull ConnectedDevice device, @NonNull UUID recipientId,
-            @NonNull DeviceCallback callback, @NonNull @CallbackExecutor Executor executor) {
+            @NonNull DeviceCallback callback, @NonNull Executor executor) {
         if (isRecipientBlacklisted(recipientId)) {
             notifyOfBlacklisting(device, recipientId, callback, executor);
             return;
@@ -419,7 +417,7 @@ public class ConnectedDeviceManager {
                 + recipientId);
         String deviceId = device.getDeviceId();
         Map<UUID, ThreadSafeCallbacks<DeviceCallback>> recipientCallbacks =
-                mDeviceCallbacks.computeIfAbsent(deviceId, key -> new HashMap<>());
+                mDeviceCallbacks.computeIfAbsent(deviceId, key -> new ConcurrentHashMap<>());
 
         // Device already has a callback registered with this recipient UUID. For the
         // protection of the user, this UUID is now blacklisted from future subscriptions
@@ -474,9 +472,9 @@ public class ConnectedDeviceManager {
      * registered.
      *
      * @param recipientId Recipient's id
-     * @param deviceId Device id
+     * @param deviceId    Device id
      * @return The missed {@code byte[]} messages, or {@code null} if no messages were
-     *         missed.
+     * missed.
      */
     @Nullable
     private List<byte[]> popMissedMessages(@NonNull UUID recipientId, @NonNull String deviceId) {
@@ -491,9 +489,9 @@ public class ConnectedDeviceManager {
     /**
      * Unregister callback from device events.
      *
-     * @param device {@link ConnectedDevice} callback was registered on.
+     * @param device      {@link ConnectedDevice} callback was registered on.
      * @param recipientId {@link UUID} callback was registered under.
-     * @param callback {@link DeviceCallback} to unregister.
+     * @param callback    {@link DeviceCallback} to unregister.
      */
     public void unregisterDeviceCallback(@NonNull ConnectedDevice device,
             @NonNull UUID recipientId, @NonNull DeviceCallback callback) {
@@ -519,9 +517,9 @@ public class ConnectedDeviceManager {
     /**
      * Securely send message to a device.
      *
-     * @param device {@link ConnectedDevice} to send the message to.
+     * @param device      {@link ConnectedDevice} to send the message to.
      * @param recipientId Recipient {@link UUID}.
-     * @param message Message to send.
+     * @param message     Message to send.
      * @throws IllegalStateException Secure channel has not been established.
      */
     public void sendMessageSecurely(@NonNull ConnectedDevice device, @NonNull UUID recipientId,
@@ -532,9 +530,9 @@ public class ConnectedDeviceManager {
     /**
      * Send an unencrypted message to a device.
      *
-     * @param device {@link ConnectedDevice} to send the message to.
+     * @param device      {@link ConnectedDevice} to send the message to.
      * @param recipientId Recipient {@link UUID}.
-     * @param message Message to send.
+     * @param message     Message to send.
      */
     public void sendMessageUnsecurely(@NonNull ConnectedDevice device, @NonNull UUID recipientId,
             @NonNull byte[] message) {
@@ -548,19 +546,19 @@ public class ConnectedDeviceManager {
                 + " containing " + message.length + ". Message will be sent securely: "
                 + isEncrypted + ".");
 
-        InternalConnectedDevice connectedDevice = mConnectedDevices.get(deviceId);
+        ConnectedDevice connectedDevice = mConnectedDevices.get(deviceId);
         if (connectedDevice == null) {
             loge(TAG, "Attempted to send message to unknown device " + deviceId + ". Ignoring.");
             return;
         }
 
-        if (isEncrypted && !connectedDevice.mConnectedDevice.hasSecureChannel()) {
+        if (isEncrypted && !connectedDevice.hasSecureChannel()) {
             throw new IllegalStateException("Cannot send a message securely to device that has not "
                     + "established a secure channel.");
         }
 
-        connectedDevice.mCarBleManager.sendMessage(deviceId,
-                new DeviceMessage(recipientId, isEncrypted, message));
+        mCarBluetoothManager.sendMessage(deviceId, new DeviceMessage(recipientId, isEncrypted,
+                message));
     }
 
     private boolean isRecipientBlacklisted(UUID recipientId) {
@@ -581,11 +579,11 @@ public class ConnectedDeviceManager {
             return;
         }
 
-        InternalConnectedDevice connectedDevice = mConnectedDevices.get(deviceId);
+        ConnectedDevice connectedDevice = mConnectedDevices.get(deviceId);
         if (connectedDevice != null) {
             recipientCallbacks.get(recipientId).invoke(
                     callback ->
-                            callback.onDeviceError(connectedDevice.mConnectedDevice,
+                            callback.onDeviceError(connectedDevice,
                                     DEVICE_ERROR_INSECURE_RECIPIENT_ID_DETECTED)
             );
         }
@@ -595,7 +593,7 @@ public class ConnectedDeviceManager {
     }
 
     @VisibleForTesting
-    void addConnectedDevice(@NonNull String deviceId, @NonNull CarBleManager bleManager) {
+    void addConnectedDevice(@NonNull String deviceId) {
         if (mConnectedDevices.containsKey(deviceId)) {
             // Device already connected. No-op until secure channel established.
             return;
@@ -608,30 +606,24 @@ public class ConnectedDeviceManager {
                 /* hasSecureChannel= */ false
         );
 
-        mConnectedDevices.put(deviceId, new InternalConnectedDevice(connectedDevice, bleManager));
+        mConnectedDevices.put(deviceId, connectedDevice);
         invokeConnectionCallbacks(connectedDevice.isAssociatedWithActiveUser(),
                 callback -> callback.onDeviceConnected(connectedDevice));
     }
 
     @VisibleForTesting
-    void removeConnectedDevice(@NonNull String deviceId, @NonNull CarBleManager bleManager) {
-        logd(TAG, "Device " + deviceId + " disconnected from manager " + bleManager);
-        InternalConnectedDevice connectedDevice = getConnectedDeviceForManager(deviceId,
-                bleManager);
-
-        // If disconnect happened on peripheral, open for future requests to connect.
-        if (bleManager == mPeripheralManager) {
-            mIsConnectingToUserDevice.set(false);
-        }
-
+    void removeConnectedDevice(@NonNull String deviceId) {
+        logd(TAG, "Device " + deviceId + " disconnected.");
+        ConnectedDevice connectedDevice = mConnectedDevices.get(deviceId);
+        mIsConnectingToUserDevice.set(false);
         if (connectedDevice == null) {
             return;
         }
 
         mConnectedDevices.remove(deviceId);
-        boolean isAssociated = connectedDevice.mConnectedDevice.isAssociatedWithActiveUser();
+        boolean isAssociated = connectedDevice.isAssociatedWithActiveUser();
         invokeConnectionCallbacks(isAssociated,
-                callback -> callback.onDeviceDisconnected(connectedDevice.mConnectedDevice));
+                callback -> callback.onDeviceDisconnected(connectedDevice));
 
         if (isAssociated || mConnectedDevices.isEmpty()) {
             // Try to regain connection to active user's device.
@@ -640,25 +632,23 @@ public class ConnectedDeviceManager {
     }
 
     @VisibleForTesting
-    void onSecureChannelEstablished(@NonNull String deviceId,
-            @NonNull CarBleManager bleManager) {
+    void onSecureChannelEstablished(@NonNull String deviceId) {
         if (mConnectedDevices.get(deviceId) == null) {
             loge(TAG, "Secure channel established on unknown device " + deviceId + ".");
             return;
         }
-        ConnectedDevice connectedDevice = mConnectedDevices.get(deviceId).mConnectedDevice;
+        ConnectedDevice connectedDevice = mConnectedDevices.get(deviceId);
         ConnectedDevice updatedConnectedDevice = new ConnectedDevice(connectedDevice.getDeviceId(),
                 connectedDevice.getDeviceName(), connectedDevice.isAssociatedWithActiveUser(),
                 /* hasSecureChannel= */ true);
 
-        boolean notifyCallbacks = getConnectedDeviceForManager(deviceId, bleManager) != null;
+        boolean notifyCallbacks = mConnectedDevices.get(deviceId) != null;
 
         // TODO (b/143088482) Implement interrupt
         // Ignore if central already holds the active device connection and interrupt the
         // connection.
 
-        mConnectedDevices.put(deviceId,
-                new InternalConnectedDevice(updatedConnectedDevice, bleManager));
+        mConnectedDevices.put(deviceId, updatedConnectedDevice);
         logd(TAG, "Secure channel established to " + deviceId + " . Notifying callbacks: "
                 + notifyCallbacks + ".");
         if (notifyCallbacks) {
@@ -673,7 +663,7 @@ public class ConnectedDeviceManager {
                 + message.getRecipient() + " containing " + message.getMessage().length
                 + " bytes.");
 
-        InternalConnectedDevice connectedDevice = mConnectedDevices.get(deviceId);
+        ConnectedDevice connectedDevice = mConnectedDevices.get(deviceId);
         if (connectedDevice == null) {
             logw(TAG, "Received message from unknown device " + deviceId + "or to unknown "
                     + "recipient " + message.getRecipient() + ".");
@@ -681,8 +671,7 @@ public class ConnectedDeviceManager {
         }
 
         if (mMessageDeliveryDelegate != null
-                && !mMessageDeliveryDelegate.shouldDeliverMessageForDevice(
-                        connectedDevice.mConnectedDevice)) {
+                && !mMessageDeliveryDelegate.shouldDeliverMessageForDevice(connectedDevice)) {
             logw(TAG, "The message delegate has rejected this message. It will not be "
                     + "delivered to the intended recipient.");
             return;
@@ -703,55 +692,41 @@ public class ConnectedDeviceManager {
         }
 
         recipientCallbacks.invoke(
-                callback -> callback.onMessageReceived(connectedDevice.mConnectedDevice,
-                        message.getMessage()));
+                callback -> callback.onMessageReceived(connectedDevice, message.getMessage()));
     }
 
     @VisibleForTesting
     void deviceErrorOccurred(@NonNull String deviceId) {
-        InternalConnectedDevice connectedDevice = mConnectedDevices.get(deviceId);
+        ConnectedDevice connectedDevice = mConnectedDevices.get(deviceId);
         if (connectedDevice == null) {
             logw(TAG, "Failed to establish secure channel on unknown device " + deviceId + ".");
             return;
         }
 
-        notifyAllDeviceCallbacks(deviceId,
-                callback -> callback.onDeviceError(connectedDevice.mConnectedDevice,
+        notifyAllDeviceCallbacks(deviceId, callback -> callback.onDeviceError(connectedDevice,
                         DEVICE_ERROR_INVALID_SECURITY_KEY));
     }
 
     @VisibleForTesting
     void onAssociationCompleted(@NonNull String deviceId) {
-        InternalConnectedDevice connectedDevice =
-                getConnectedDeviceForManager(deviceId, mPeripheralManager);
+        ConnectedDevice connectedDevice = mConnectedDevices.get(deviceId);
         if (connectedDevice == null) {
             return;
         }
 
         // The previous device is now obsolete and should be replaced with a new one properly
         // reflecting the state of belonging to the active user and notify features.
-        if (connectedDevice.mConnectedDevice.isAssociatedWithActiveUser()) {
+        if (connectedDevice.isAssociatedWithActiveUser()) {
             // Device was already marked as belonging to active user. No need to reissue callbacks.
             return;
         }
-        removeConnectedDevice(deviceId, mPeripheralManager);
-        addConnectedDevice(deviceId, mPeripheralManager);
+        removeConnectedDevice(deviceId);
+        addConnectedDevice(deviceId);
     }
 
     @NonNull
     private List<String> getActiveUserDeviceIds() {
         return mStorage.getActiveUserAssociatedDeviceIds();
-    }
-
-    @Nullable
-    private InternalConnectedDevice getConnectedDeviceForManager(@NonNull String deviceId,
-            @NonNull CarBleManager bleManager) {
-        InternalConnectedDevice connectedDevice = mConnectedDevices.get(deviceId);
-        if (connectedDevice != null && connectedDevice.mCarBleManager == bleManager) {
-            return connectedDevice;
-        }
-
-        return null;
     }
 
     private void invokeConnectionCallbacks(boolean belongsToActiveUser,
@@ -792,23 +767,24 @@ public class ConnectedDeviceManager {
     }
 
     @NonNull
-    private CarBleManager.Callback generateCarBleCallback(@NonNull CarBleManager carBleManager) {
-        return new CarBleManager.Callback() {
+    private CarBluetoothManager.Callback generateCarBleCallback(
+            @NonNull CarBluetoothManager carBluetoothManager) {
+        return new CarBluetoothManager.Callback() {
             @Override
             public void onDeviceConnected(String deviceId) {
                 EventLog.onDeviceIdReceived();
-                addConnectedDevice(deviceId, carBleManager);
+                addConnectedDevice(deviceId);
             }
 
             @Override
             public void onDeviceDisconnected(String deviceId) {
-                removeConnectedDevice(deviceId, carBleManager);
+                removeConnectedDevice(deviceId);
             }
 
             @Override
             public void onSecureChannelEstablished(String deviceId) {
                 EventLog.onSecureChannelEstablished();
-                ConnectedDeviceManager.this.onSecureChannelEstablished(deviceId, carBleManager);
+                ConnectedDeviceManager.this.onSecureChannelEstablished(deviceId);
             }
 
             @Override
@@ -863,26 +839,25 @@ public class ConnectedDeviceManager {
 
     private final AssociatedDeviceCallback mAssociatedDeviceCallback =
             new AssociatedDeviceCallback() {
-        @Override
-        public void onAssociatedDeviceAdded(
-                AssociatedDevice device) {
-            mDeviceAssociationCallbacks.invoke(callback ->
-                    callback.onAssociatedDeviceAdded(device));
-        }
+                @Override
+                public void onAssociatedDeviceAdded(AssociatedDevice device) {
+                    mDeviceAssociationCallbacks.invoke(callback ->
+                            callback.onAssociatedDeviceAdded(device));
+                }
 
-        @Override
-        public void onAssociatedDeviceRemoved(AssociatedDevice device) {
-            mDeviceAssociationCallbacks.invoke(callback ->
-                    callback.onAssociatedDeviceRemoved(device));
-            logd(TAG, "Successfully removed associated device " + device + ".");
-        }
+                @Override
+                public void onAssociatedDeviceRemoved(AssociatedDevice device) {
+                    mDeviceAssociationCallbacks.invoke(callback ->
+                            callback.onAssociatedDeviceRemoved(device));
+                    logd(TAG, "Successfully removed associated device " + device + ".");
+                }
 
-        @Override
-        public void onAssociatedDeviceUpdated(AssociatedDevice device) {
-            mDeviceAssociationCallbacks.invoke(callback ->
-                    callback.onAssociatedDeviceUpdated(device));
-        }
-    };
+                @Override
+                public void onAssociatedDeviceUpdated(AssociatedDevice device) {
+                    mDeviceAssociationCallbacks.invoke(callback ->
+                            callback.onAssociatedDeviceUpdated(device));
+                }
+            };
 
     /** Callback for triggered connection events from {@link ConnectedDeviceManager}. */
     public interface ConnectionCallback {
@@ -926,16 +901,5 @@ public class ConnectedDeviceManager {
 
         /** Indicate whether a message should be delivered for the specified device. */
         boolean shouldDeliverMessageForDevice(@NonNull ConnectedDevice device);
-    }
-
-    private static class InternalConnectedDevice {
-        private final ConnectedDevice mConnectedDevice;
-        private final CarBleManager mCarBleManager;
-
-        InternalConnectedDevice(@NonNull ConnectedDevice connectedDevice,
-                @NonNull CarBleManager carBleManager) {
-            mConnectedDevice = connectedDevice;
-            mCarBleManager = carBleManager;
-        }
     }
 }

@@ -27,8 +27,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Icon;
-import android.location.Country;
-import android.location.CountryDetector;
 import android.net.Uri;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
@@ -69,6 +67,14 @@ public class TelecomUtils {
     private static final String TAG = "CD.TelecomUtils";
     private static final int PII_STRING_LENGTH = 4;
     private static final String COUNTRY_US = "US";
+    /**
+     * A reference to keep track of the soring method of sorting by the contact's first name.
+     */
+    public static final Integer SORT_BY_FIRST_NAME = 1;
+    /**
+     * A reference to keep track of the soring method of sorting by the contact's last name.
+     */
+    public static final Integer SORT_BY_LAST_NAME = 2;
 
     private static String sVoicemailNumber;
     private static TelephonyManager sTelephonyManager;
@@ -138,22 +144,7 @@ public class TelecomUtils {
      * @return The ISO 3166-1 two letters country code of the country the user is in.
      */
     private static String getCurrentCountryIso(Context context, Locale locale) {
-        String countryIso = null;
-        CountryDetector detector = (CountryDetector) context.getSystemService(
-                Context.COUNTRY_DETECTOR);
-        if (detector != null) {
-            Country country = detector.detectCountry();
-            if (country != null) {
-                countryIso = country.getCountryIso();
-            } else {
-                L.e(TAG, "CountryDetector.detectCountry() returned null.");
-            }
-        }
-        if (countryIso == null) {
-            countryIso = locale.getCountry();
-            L.w(TAG, "No CountryDetector; falling back to countryIso based on locale: "
-                    + countryIso);
-        }
+        String countryIso = locale.getCountry();
         if (countryIso == null || countryIso.length() != 2) {
             L.w(TAG, "Invalid locale, falling back to US");
             countryIso = COUNTRY_US;
@@ -391,26 +382,48 @@ public class TelecomUtils {
     /**
      * Sets a Contact avatar onto the provided {@code icon}. The first letter or both letters of the
      * contact's initials.
+     *
+     * @param sortMethod can be either {@link #SORT_BY_FIRST_NAME} or {@link #SORT_BY_LAST_NAME}.
      */
     public static void setContactBitmapAsync(
             Context context,
             @Nullable final ImageView icon,
-            @Nullable final Contact contact) {
-        setContactBitmapAsync(context, icon, contact, null);
+            @Nullable final Contact contact,
+            Integer sortMethod) {
+        setContactBitmapAsync(context, icon, contact, null, sortMethod);
     }
 
     /**
      * Sets a Contact avatar onto the provided {@code icon}. The first letter or both letters of the
-     * contact's initials or {@code fallbackDisplayName} will be used as a fallback resource if
-     * avatar loading fails.
+     * contact's initials. Will start with first name by default.
      */
     public static void setContactBitmapAsync(
             Context context,
             @Nullable final ImageView icon,
             @Nullable final Contact contact,
             @Nullable final String fallbackDisplayName) {
+        setContactBitmapAsync(context, icon, contact, fallbackDisplayName, SORT_BY_FIRST_NAME);
+    }
+
+    /**
+     * Sets a Contact avatar onto the provided {@code icon}. The first letter or both letters of the
+     * contact's initials or {@code fallbackDisplayName} will be used as a fallback resource if
+     * avatar loading fails.
+     *
+     * @param sortMethod can be either {@link #SORT_BY_FIRST_NAME} or {@link #SORT_BY_LAST_NAME}. If
+     *                   the value is {@link #SORT_BY_FIRST_NAME}, the name and initials order will
+     *                   be first name first. Otherwise, the order will be last name first.
+     */
+    public static void setContactBitmapAsync(
+            Context context,
+            @Nullable final ImageView icon,
+            @Nullable final Contact contact,
+            @Nullable final String fallbackDisplayName,
+            Integer sortMethod) {
         Uri avatarUri = contact != null ? contact.getAvatarUri() : null;
-        String initials = contact != null ? contact.getInitials()
+        boolean startWithFirstName = isSortByFirstName(sortMethod);
+        String initials = contact != null
+                ? contact.getInitialsBasedOnDisplayOrder(startWithFirstName)
                 : (fallbackDisplayName == null ? null : getInitials(fallbackDisplayName, null));
         String identifier = contact == null ? fallbackDisplayName : contact.getDisplayName();
 
@@ -589,7 +602,7 @@ public class TelecomUtils {
     private static Uri makeResourceUri(Context context, int resourceId) {
         return new Uri.Builder()
                 .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-                .encodedAuthority(context.getBasePackageName())
+                .encodedAuthority(context.getPackageName())
                 .appendEncodedPath(String.valueOf(resourceId))
                 .build();
     }
@@ -602,5 +615,13 @@ public class TelecomUtils {
         String piiString = String.valueOf(pii);
         return piiString.length() >= PII_STRING_LENGTH ? "*" + piiString.substring(
                 piiString.length() - PII_STRING_LENGTH) : piiString;
+    }
+
+    /**
+     * Returns true if contacts are sorted by their first names. Returns false if they are sorted by
+     * last names.
+     */
+    public static boolean isSortByFirstName(Integer sortMethod) {
+        return SORT_BY_FIRST_NAME.equals(sortMethod);
     }
 }
