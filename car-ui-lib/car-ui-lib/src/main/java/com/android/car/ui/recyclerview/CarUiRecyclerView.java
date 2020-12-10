@@ -569,6 +569,16 @@ public final class CarUiRecyclerView extends RecyclerView {
         initRotaryScroll(/* styledAttributes= */ null);
     }
 
+    @Override
+    public void setAdapter(@Nullable Adapter adapter) {
+        if (mScrollBar != null) {
+            // Make sure this is called before super so that scrollbar can get a reference to
+            // the adapter using RecyclerView#getAdapter()
+            mScrollBar.adapterChanged(adapter);
+        }
+        super.setAdapter(adapter);
+    }
+
     private static RuntimeException andLog(String msg, Throwable t) {
         Log.e(TAG, msg, t);
         throw new RuntimeException(msg, t);
