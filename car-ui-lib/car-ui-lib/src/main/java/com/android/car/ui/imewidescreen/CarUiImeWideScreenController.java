@@ -328,6 +328,11 @@ public class CarUiImeWideScreenController {
         if (mAllowAppToHideContentArea || (mInputEditorInfo != null && isPackageAuthorized(
                 mInputEditorInfo.packageName))) {
             mImeRendersAllContent = data.getBoolean(REQUEST_RENDER_CONTENT_AREA, true);
+            if (!mImeRendersAllContent) {
+                mContentAreaAutomotive.setVisibility(View.GONE);
+            } else {
+                mContentAreaAutomotive.setVisibility(View.VISIBLE);
+            }
         }
 
         if (data.getParcelable(CONTENT_AREA_SURFACE_PACKAGE) != null
@@ -499,11 +504,6 @@ public class CarUiImeWideScreenController {
         } else {
             mFullscreenArea.setVisibility(View.VISIBLE);
         }
-        if (!mImeRendersAllContent) {
-            mContentAreaAutomotive.setVisibility(View.GONE);
-        } else {
-            mContentAreaAutomotive.setVisibility(View.VISIBLE);
-        }
 
         // This view is rendered by the framework when IME is in full screen mode. For more info
         // see {@link #onEvaluateFullscreenMode}
@@ -565,8 +565,8 @@ public class CarUiImeWideScreenController {
      * it draw its own content.
      */
     private void sendSurfaceInfo() {
-        if (!mAllowAppToHideContentArea && !(mInputEditorInfo != null
-                && isPackageAuthorized(mInputEditorInfo.packageName))) {
+        if (!mAllowAppToHideContentArea && mContentAreaSurfaceView.getDisplay() == null && !(
+                mInputEditorInfo != null && isPackageAuthorized(mInputEditorInfo.packageName))) {
             return;
         }
         int displayId = mContentAreaSurfaceView.getDisplay().getDisplayId();
@@ -779,7 +779,7 @@ public class CarUiImeWideScreenController {
         mImeRendersAllContent = true;
         mIsExtractIconProvidedByApp = false;
         mExtractViewHidden = false;
-        mAutomotiveSearchItems = new ArrayList<>();
+        mAutomotiveSearchItems = null;
     }
 
     /**
