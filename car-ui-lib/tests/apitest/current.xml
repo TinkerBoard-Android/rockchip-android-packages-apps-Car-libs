@@ -19,6 +19,7 @@
   <public type="bool" name="car_ui_preference_show_chevron"/>
   <public type="bool" name="car_ui_scrollbar_enable"/>
   <public type="bool" name="car_ui_toolbar_logo_fills_nav_icon_space"/>
+  <public type="bool" name="car_ui_toolbar_menuitem_individual_click_listeners"/>
   <public type="bool" name="car_ui_toolbar_nav_icon_reserve_space"/>
   <public type="bool" name="car_ui_toolbar_show_logo"/>
   <public type="bool" name="car_ui_toolbar_tab_flexible_layout"/>
@@ -282,7 +283,6 @@
   <public type="id" name="car_ui_toolbar_menu_item_icon_container"/>
   <public type="id" name="car_ui_toolbar_menu_item_switch"/>
   <public type="id" name="car_ui_toolbar_menu_item_text"/>
-  <public type="id" name="car_ui_toolbar_menu_item_text_container"/>
   <public type="id" name="car_ui_toolbar_menu_item_text_with_icon"/>
   <public type="id" name="car_ui_toolbar_menu_items_container"/>
   <public type="id" name="car_ui_toolbar_nav_icon"/>
