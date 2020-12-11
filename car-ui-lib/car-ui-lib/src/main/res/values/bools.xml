@@ -30,6 +30,8 @@
          row, replacing the title -->
     <bool name="car_ui_toolbar_tabs_on_second_row">false</bool>
 
+    <bool name="car_ui_toolbar_menuitem_individual_click_listeners">false</bool>
+
     <!-- CarUiRecyclerView -->
 
     <!-- Whether to display the Scroll Bar or not. Defaults to true. If this is set to false,

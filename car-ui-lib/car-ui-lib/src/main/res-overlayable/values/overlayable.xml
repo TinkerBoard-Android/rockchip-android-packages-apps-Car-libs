@@ -84,6 +84,7 @@ limitations under the License.-->
       <item type="bool" name="car_ui_preference_show_chevron"/>
       <item type="bool" name="car_ui_scrollbar_enable"/>
       <item type="bool" name="car_ui_toolbar_logo_fills_nav_icon_space"/>
+      <item type="bool" name="car_ui_toolbar_menuitem_individual_click_listeners"/>
       <item type="bool" name="car_ui_toolbar_nav_icon_reserve_space"/>
       <item type="bool" name="car_ui_toolbar_show_logo"/>
       <item type="bool" name="car_ui_toolbar_tab_flexible_layout"/>
@@ -352,7 +353,6 @@ limitations under the License.-->
       <item type="id" name="car_ui_toolbar_menu_item_icon_container"/>
       <item type="id" name="car_ui_toolbar_menu_item_switch"/>
       <item type="id" name="car_ui_toolbar_menu_item_text"/>
-      <item type="id" name="car_ui_toolbar_menu_item_text_container"/>
       <item type="id" name="car_ui_toolbar_menu_item_text_with_icon"/>
       <item type="id" name="car_ui_toolbar_menu_items_container"/>
       <item type="id" name="car_ui_toolbar_nav_icon"/>

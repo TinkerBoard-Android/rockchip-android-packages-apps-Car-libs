@@ -65,12 +65,9 @@ class MenuItemRenderer implements MenuItem.Listener {
     private View mIconContainer;
     private ImageView mIconView;
     private Switch mSwitch;
-    private View mTextContainer;
     private TextView mTextView;
     private TextView mTextWithIconView;
-
-    /** Whether the layout file supports rotary mode. */
-    private boolean mIsRotaryEnabledLayout;
+    private boolean mIndividualClickListeners;
 
     MenuItemRenderer(MenuItem item, ViewGroup parentView) {
         mMenuItem = item;
@@ -111,13 +108,11 @@ class MenuItemRenderer implements MenuItem.Listener {
                     requireViewByRefId(mView, R.id.car_ui_toolbar_menu_item_icon_container);
             mIconView = requireViewByRefId(mView, R.id.car_ui_toolbar_menu_item_icon);
             mSwitch = requireViewByRefId(mView, R.id.car_ui_toolbar_menu_item_switch);
-            // mTextContainer is only available in rotary enabled layout.
-            mTextContainer =
-                    CarUiUtils.findViewByRefId(mView, R.id.car_ui_toolbar_menu_item_text_container);
-            mIsRotaryEnabledLayout = mTextContainer != null;
             mTextView = requireViewByRefId(mView, R.id.car_ui_toolbar_menu_item_text);
             mTextWithIconView =
                     requireViewByRefId(mView, R.id.car_ui_toolbar_menu_item_text_with_icon);
+            mIndividualClickListeners = mView.getContext().getResources()
+                    .getBoolean(R.bool.car_ui_toolbar_menuitem_individual_click_listeners);
 
             updateView();
             callback.accept(mView);
@@ -145,38 +140,31 @@ class MenuItemRenderer implements MenuItem.Listener {
         mView.setVisibility(View.VISIBLE);
         mView.setContentDescription(mMenuItem.getTitle());
 
-        int iconContainerVisibility = View.GONE;
-        int textContainerVisibility = View.GONE;
-        mTextView.setVisibility(View.GONE);
-        mTextWithIconView.setVisibility(View.GONE);
-        mSwitch.setVisibility(View.GONE);
+        View clickTarget;
         if (checkable) {
             mSwitch.setChecked(mMenuItem.isChecked());
-            mSwitch.setVisibility(View.VISIBLE);
-            if (mIsRotaryEnabledLayout) {
-                textContainerVisibility = View.VISIBLE;
-            } else {
-                iconContainerVisibility = View.VISIBLE;
-            }
+            clickTarget = mSwitch;
         } else if (hasText && hasIcon && textAndIcon) {
             mMenuItem.getIcon().setBounds(0, 0, mMenuItemIconSize, mMenuItemIconSize);
             mTextWithIconView.setCompoundDrawables(mMenuItem.getIcon(), null, null, null);
             mTextWithIconView.setText(mMenuItem.getTitle());
-            mTextWithIconView.setVisibility(View.VISIBLE);
-            textContainerVisibility = View.VISIBLE;
+            clickTarget = mTextWithIconView;
         } else if (hasIcon) {
             mIconView.setImageDrawable(mMenuItem.getIcon());
-            iconContainerVisibility = View.VISIBLE;
+            clickTarget = mIconContainer;
         } else { // hasText will be true
             mTextView.setText(mMenuItem.getTitle());
-            mTextView.setVisibility(View.VISIBLE);
-            textContainerVisibility = View.VISIBLE;
+            clickTarget = mTextView;
         }
-        // Unlike other views, we should only update the visibility of mIconContainer and
-        // mTextContainer once, otherwise rotary focus might break.
-        mIconContainer.setVisibility(iconContainerVisibility);
-        if (mTextContainer != null) {
-            mTextContainer.setVisibility(textContainerVisibility);
+
+        mIconContainer.setVisibility(clickTarget == mIconContainer ? View.VISIBLE : View.GONE);
+        mTextView.setVisibility(clickTarget == mTextView ? View.VISIBLE : View.GONE);
+        mTextWithIconView.setVisibility(clickTarget == mTextWithIconView
+                ? View.VISIBLE : View.GONE);
+        mSwitch.setVisibility(clickTarget == mSwitch ? View.VISIBLE : View.GONE);
+
+        if (!mIndividualClickListeners) {
+            clickTarget = mView;
         }
 
         if (!mMenuItem.isTinted() && hasIcon) {
@@ -186,19 +174,13 @@ class MenuItemRenderer implements MenuItem.Listener {
         recursiveSetEnabledAndDrawableState(mView);
         mView.setActivated(mMenuItem.isActivated());
 
-        View clickTarget = null;
-        if (mIsRotaryEnabledLayout) {
-            clickTarget = iconContainerVisibility == View.VISIBLE ? mIconContainer : mTextContainer;
-        } else {
-            clickTarget = mView;
-        }
         if (mMenuItem.getOnClickListener() != null
                 || mMenuItem.isCheckable()
                 || mMenuItem.isActivatable()) {
             clickTarget.setOnClickListener(v -> mMenuItem.performClick());
-        } else {
-            clickTarget.setOnClickListener(null);
-            clickTarget.setClickable(false);
+        } else if (clickTarget == mView) {
+            mView.setOnClickListener(null);
+            mView.setClickable(false);
         }
     }
 

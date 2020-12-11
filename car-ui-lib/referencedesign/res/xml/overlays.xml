@@ -50,6 +50,7 @@
     <item target="bool/car_ui_toolbar_logo_fills_nav_icon_space" value="@bool/car_ui_toolbar_logo_fills_nav_icon_space" />
     <item target="bool/car_ui_toolbar_tab_flexible_layout" value="@bool/car_ui_toolbar_tab_flexible_layout" />
     <item target="bool/car_ui_toolbar_tabs_on_second_row" value="@bool/car_ui_toolbar_tabs_on_second_row" />
+    <item target="bool/car_ui_toolbar_menuitem_individual_click_listeners" value="@bool/car_ui_toolbar_menuitem_individual_click_listeners" />
 
     <item target="id/car_ui_toolbar_background" value="@id/car_ui_toolbar_background" />
     <item target="id/car_ui_toolbar_nav_icon_container" value="@id/car_ui_toolbar_nav_icon_container" />
@@ -68,7 +69,6 @@
     <item target="id/car_ui_toolbar_menu_item_icon_container" value="@id/car_ui_toolbar_menu_item_icon_container"/>
     <item target="id/car_ui_toolbar_menu_item_icon" value="@id/car_ui_toolbar_menu_item_icon"/>
     <item target="id/car_ui_toolbar_menu_item_switch" value="@id/car_ui_toolbar_menu_item_switch"/>
-    <item target="id/car_ui_toolbar_menu_item_text_container" value="@id/car_ui_toolbar_menu_item_text_container"/>
     <item target="id/car_ui_toolbar_menu_item_text" value="@id/car_ui_toolbar_menu_item_text"/>
     <item target="id/car_ui_toolbar_menu_item_text_with_icon" value="@id/car_ui_toolbar_menu_item_text_with_icon"/>
     <item target="id/seekbar" value="@id/seekbar"/>
