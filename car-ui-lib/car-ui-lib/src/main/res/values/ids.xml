@@ -17,9 +17,6 @@
     <!-- Id used for the search button when using Toolbar.createSearch() method -->
     <item name="search" type="id"/>
 
-    <!-- Id used for in car_ui_toolbar_menu_item.xml -->
-    <item name="car_ui_toolbar_menu_item_text_container" type="id"/>
-
     <!-- WideScreen Keyboard IDs-->
     <item type="id" name="car_ui_wideScreenInputArea"/>
     <item type="id" name="car_ui_imeWideScreenInputArea"/>
