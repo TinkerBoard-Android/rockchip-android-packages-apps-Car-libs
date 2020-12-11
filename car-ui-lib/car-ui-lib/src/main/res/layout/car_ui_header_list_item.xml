@@ -29,32 +29,27 @@
         android:orientation="vertical"
         app:layout_constraintGuide_begin="@dimen/car_ui_list_item_header_start_inset" />
 
-    <!-- Use nested layout as a workaround for a regression in constraintlayout where chains not
-    are not rendered correctly when the tail is gone (b/168627311).-->
-    <LinearLayout
+    <TextView
+        android:id="@+id/title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/car_ui_header_list_item_text_start_margin"
+        android:textAppearance="@style/TextAppearance.CarUi.ListItem.Header"
+        app:layout_constraintBottom_toTopOf="@+id/body"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/car_ui_list_item_start_guideline"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <TextView
+        android:id="@+id/body"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/car_ui_list_item_text_no_icon_start_margin"
+        android:textAppearance="@style/TextAppearance.CarUi.ListItem.Body"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@id/car_ui_list_item_start_guideline"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/car_ui_header_list_item_text_start_margin"
-            android:textDirection="locale"
-            android:textAppearance="@style/TextAppearance.CarUi.ListItem.Header" />
-
-        <TextView
-            android:id="@+id/body"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/car_ui_list_item_text_no_icon_start_margin"
-            android:textDirection="locale"
-            android:textAppearance="@style/TextAppearance.CarUi.ListItem.Body" />
-    </LinearLayout>
+        app:layout_constraintTop_toBottomOf="@+id/title" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
