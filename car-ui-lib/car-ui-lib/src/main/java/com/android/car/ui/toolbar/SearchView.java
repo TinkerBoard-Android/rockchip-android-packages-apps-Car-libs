@@ -132,7 +132,13 @@ public class SearchView extends ConstraintLayout {
         mIcon = requireViewByRefId(this, R.id.car_ui_toolbar_search_icon);
         mCloseIcon = requireViewByRefId(this, R.id.car_ui_toolbar_search_close);
 
-        mCloseIcon.setOnClickListener(view -> mSearchText.getText().clear());
+        mCloseIcon.setOnClickListener(view -> {
+            if (view.isFocused()) {
+                mSearchText.requestFocus();
+                mInputMethodManager.showSoftInput(mSearchText, 0);
+            }
+            mSearchText.getText().clear();
+        });
         mCloseIcon.setVisibility(View.GONE);
 
         mStartPaddingWithoutIcon = mSearchText.getPaddingStart();
@@ -144,11 +150,11 @@ public class SearchView extends ConstraintLayout {
         mSearchText.setSaveEnabled(false);
         mSearchText.setPaddingRelative(mStartPadding, 0, mEndPadding, 0);
 
+        mSearchText.setOnClickListener((view) -> mInputMethodManager.showSoftInput(view, 0));
+
         mSearchText.setOnFocusChangeListener(
                 (view, hasFocus) -> {
-                    if (hasFocus) {
-                        mInputMethodManager.showSoftInput(view, 0);
-                    } else {
+                    if (!hasFocus) {
                         mInputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
                     }
                 });
@@ -240,6 +246,7 @@ public class SearchView extends ConstraintLayout {
             boolean hasQuery = mSearchText.getText().length() > 0;
             mCloseIcon.setVisibility(hasQuery ? View.VISIBLE : View.GONE);
             mSearchText.requestFocus();
+            mInputMethodManager.showSoftInput(mSearchText, 0);
         }
         mWasShown = isShown;
     }
