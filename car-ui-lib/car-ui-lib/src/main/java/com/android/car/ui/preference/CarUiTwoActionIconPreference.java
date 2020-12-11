@@ -99,11 +99,11 @@ public class CarUiTwoActionIconPreference extends CarUiTwoActionBasePreference {
 
         holder.itemView.setFocusable(false);
         holder.itemView.setClickable(false);
-        firstActionContainer.setOnClickListener(isEnabled()
+        firstActionContainer.setOnClickListener(isEnabled() && isSelectable()
                 ? this::performClickUnrestricted
                 : null);
-        firstActionContainer.setClickable(isEnabled());
-        firstActionContainer.setFocusable(isEnabled());
+        firstActionContainer.setClickable(isEnabled() && isSelectable());
+        firstActionContainer.setFocusable(isEnabled() && isSelectable());
 
         secondActionContainer.setVisibility(mSecondaryActionVisible ? View.VISIBLE : View.GONE);
         secondaryButton.setEnabled(mSecondaryActionEnabled);
