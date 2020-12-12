@@ -133,6 +133,22 @@ class DefaultScrollBar implements ScrollBar {
                 mScrollView.getPaddingRight(), paddingEnd);
     }
 
+    @Override
+    public void adapterChanged(@Nullable RecyclerView.Adapter adapter) {
+        try {
+            if (mRecyclerView.getAdapter() != null) {
+                mRecyclerView.getAdapter().unregisterAdapterDataObserver(mAdapterChangeObserver);
+            }
+            if (adapter != null) {
+                adapter.registerAdapterDataObserver(mAdapterChangeObserver);
+            }
+        } catch (IllegalStateException e) {
+            // adapter is already registered. and we're trying to register again.
+            // or adapter was not registered and we're trying to unregister again.
+            // ignore.
+        }
+    }
+
     /**
      * Sets whether or not the up button on the scroll bar is clickable.
      *
@@ -262,27 +278,12 @@ class DefaultScrollBar implements ScrollBar {
                 .start();
     }
 
-    private boolean mIsAdapterChangeObserverRegistered = false;
-    @Nullable
-    private RecyclerView.Adapter mCurrentAdapter;
     private final RecyclerView.OnScrollListener mRecyclerViewOnScrollListener =
             new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                     updatePaginationButtons();
                     cacheChildrenHeight(recyclerView.getLayoutManager());
-                    if (mCurrentAdapter != recyclerView.getAdapter()) {
-                        mIsAdapterChangeObserverRegistered = false;
-                        if (mCurrentAdapter != null) {
-                            mCurrentAdapter.unregisterAdapterDataObserver(mAdapterChangeObserver);
-                        }
-                    }
-                    if (!mIsAdapterChangeObserverRegistered
-                            && recyclerView.getAdapter() != null) {
-                        mIsAdapterChangeObserverRegistered = true;
-                        mCurrentAdapter = recyclerView.getAdapter();
-                        mCurrentAdapter.registerAdapterDataObserver(mAdapterChangeObserver);
-                    }
                 }
             };
     private final SparseArray<Integer> mChildHeightByAdapterPosition = new SparseArray();
@@ -320,7 +321,10 @@ class DefaultScrollBar implements ScrollBar {
         cacheChildrenHeight(mRecyclerView.getLayoutManager());
     }
 
-    private void cacheChildrenHeight(RecyclerView.LayoutManager layoutManager) {
+    private void cacheChildrenHeight(@Nullable RecyclerView.LayoutManager layoutManager) {
+        if (layoutManager == null) {
+            return;
+        }
         for (int i = 0; i < layoutManager.getChildCount(); i++) {
             View child = layoutManager.getChildAt(i);
             int childPosition = layoutManager.getPosition(child);
