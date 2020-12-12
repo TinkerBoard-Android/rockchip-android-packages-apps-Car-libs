@@ -39,4 +39,9 @@ public interface ScrollBar {
 
     /** Sets the padding of the scrollbar, relative to the padding of the RecyclerView. */
     void setPadding(int paddingStart, int paddingEnd);
+
+    /**
+     * Called when recyclerview's setAdapter is called.
+     */
+    void adapterChanged(RecyclerView.Adapter adapter);
 }
