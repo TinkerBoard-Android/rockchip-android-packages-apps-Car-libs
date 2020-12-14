@@ -34,12 +34,6 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    sourceSets {
-        main {
-            manifest.srcFile 'AndroidManifest-gradle.xml'
-        }
-    }
-
     testOptions {
         unitTests {
             includeAndroidResources = true

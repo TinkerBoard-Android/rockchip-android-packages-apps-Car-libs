@@ -13,33 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.google.car.ui.sharedlibrary;
 
-// Library-level build file
+import android.content.Context;
 
-apply plugin: 'com.android.library'
+import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryVersionProviderOEMV1;
 
-android {
-    compileSdkVersion 30
+/**
+ * An implementation of {@link SharedLibraryVersionProviderOEMV1} for the reference design
+ * shared library.
+ */
+public class SharedLibraryVersionProviderImpl implements SharedLibraryVersionProviderOEMV1 {
 
-    defaultConfig {
-        minSdkVersion 28
-        targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
+    @Override
+    public Object getSharedLibraryFactory(int maxVersion, Context context) {
+        return new SharedLibraryFactoryImpl();
     }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    sourceSets {
-        main {
-            manifest.srcFile 'AndroidManifest-gradle.xml'
-        }
-    }
-}
-
-dependencies {
-    implementation project(':oem-apis')
 }

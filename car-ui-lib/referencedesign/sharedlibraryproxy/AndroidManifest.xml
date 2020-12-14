@@ -16,10 +16,13 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.car.ui.sharedlibrary">
-  <uses-sdk
-      android:minSdkVersion="28"
-      android:targetSdkVersion="30"/>
+          package="com.google.car.ui.sharedlibrary.proxy">
+  <queries>
+      <!-- Can't use @string, it throws compile errors -->
+      <!-- This should match with the value in SharedLibraryVersionProviderImpl.java -->
+      <!-- To be changed by OEMs with the real sharedlibrary packagename -->
+      <package android:name="com.google.car.ui.sharedlibrary" />
+  </queries>
   <application>
       <library android:name="com.android.car.ui.sharedlibrary"/>
   </application>
