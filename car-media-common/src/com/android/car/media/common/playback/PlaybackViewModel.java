@@ -16,8 +16,6 @@
 
 package com.android.car.media.common.playback;
 
-import static android.car.media.CarMediaManager.MEDIA_SOURCE_MODE_PLAYBACK;
-
 import static androidx.lifecycle.Transformations.switchMap;
 
 import static com.android.car.arch.common.LiveDataFunctions.dataOf;
@@ -70,7 +68,7 @@ import java.util.stream.Collectors;
  * Observes changes to the provided MediaController to expose playback state and metadata
  * observables.
  * <p>
- * PlaybackViewModel is a singleton tied to the application to provide a single source of truth.
+ * PlaybackViewModel is a "singleton" tied to the application to provide a single source of truth.
  */
 public class PlaybackViewModel extends AndroidViewModel {
     private static final String TAG = "PlaybackViewModel";
@@ -81,15 +79,7 @@ public class PlaybackViewModel extends AndroidViewModel {
 
     private static PlaybackViewModel[] sInstances = new PlaybackViewModel[2];
 
-    /**
-     * Returns the PlaybackViewModel singleton tied to the application.
-     * @deprecated should use get(Application application, int mode) instead
-     */
-    public static PlaybackViewModel get(@NonNull Application application) {
-        return get(application, MEDIA_SOURCE_MODE_PLAYBACK);
-    }
-
-    /** Returns the PlaybackViewModel singleton tied to the application. */
+    /** Returns the PlaybackViewModel "singleton" tied to the application for the given mode. */
     public static PlaybackViewModel get(@NonNull Application application, int mode) {
         if (sInstances[mode] == null) {
             sInstances[mode] = new PlaybackViewModel(application, mode);

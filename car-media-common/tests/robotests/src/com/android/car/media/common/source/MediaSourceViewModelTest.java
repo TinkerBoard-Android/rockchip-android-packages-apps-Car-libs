@@ -50,6 +50,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
 
+
 @RunWith(RobolectricTestRunner.class)
 public class MediaSourceViewModelTest {
 
@@ -129,32 +130,35 @@ public class MediaSourceViewModelTest {
 
     @Test
     public void testGetMediaController_connectedBrowser() {
-        CaptureObserver<MediaBrowserCompat> observer = new CaptureObserver<>();
+        CaptureObserver<BrowsingState> observer = new CaptureObserver<>();
         mMediaSource = newFakeMediaSource("test", "test");
         when(mMediaBrowser.isConnected()).thenReturn(true);
         initializeViewModel();
 
         mViewModel.getBrowserCallback().onBrowserConnectionChanged(
                 new BrowsingState(mMediaSource, mMediaBrowser, ConnectionStatus.CONNECTED));
-        mViewModel.getConnectedMediaBrowser().observe(mLifecycleOwner, observer);
+        mViewModel.getBrowsingState().observe(mLifecycleOwner, observer);
 
-        assertThat(observer.getObservedValue()).isSameInstanceAs(mMediaBrowser);
+        BrowsingState browsingState = observer.getObservedValue();
+        assertThat(browsingState.mBrowser).isSameInstanceAs(mMediaBrowser);
+        assertThat(browsingState.mConnectionStatus).isEqualTo(ConnectionStatus.CONNECTED);
         assertThat(mRequestedSource).isEqualTo(mMediaSource);
     }
 
     @Test
     public void testGetMediaController_noActiveSession_notConnected() {
-        CaptureObserver<MediaBrowserCompat> observer = new CaptureObserver<>();
+        CaptureObserver<BrowsingState> observer = new CaptureObserver<>();
         mMediaSource = newFakeMediaSource("test", "test");
         when(mMediaBrowser.isConnected()).thenReturn(false);
         initializeViewModel();
 
         mViewModel.getBrowserCallback().onBrowserConnectionChanged(
                 new BrowsingState(mMediaSource, mMediaBrowser, ConnectionStatus.REJECTED));
-        mViewModel.getConnectedMediaBrowser().observe(mLifecycleOwner, observer);
+        mViewModel.getBrowsingState().observe(mLifecycleOwner, observer);
 
-        assertThat(observer.hasBeenNotified()).isTrue();
-        assertThat(observer.getObservedValue()).isNull();
+        BrowsingState browsingState = observer.getObservedValue();
+        assertThat(browsingState.mBrowser).isSameInstanceAs(mMediaBrowser);
+        assertThat(browsingState.mConnectionStatus).isEqualTo(ConnectionStatus.REJECTED);
         assertThat(mRequestedSource).isEqualTo(mMediaSource);
     }
 }
