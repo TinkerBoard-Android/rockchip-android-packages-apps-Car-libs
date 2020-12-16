@@ -18,7 +18,7 @@ java_library {
 
     min_sdk_version: "28",
     target_sdk_version: "30",
-    sdk_version: "30",
+    sdk_version: "current",
 
     optimize: {
         enabled: false,

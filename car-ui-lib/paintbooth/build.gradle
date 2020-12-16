@@ -33,7 +33,6 @@ android {
 
     sourceSets {
         main {
-            manifest.srcFile 'AndroidManifest-gradle.xml'
             java {
                 filter.excludes = [
                         "com/android/car/ui/paintbooth/overlays/OverlayManagerImpl.java",

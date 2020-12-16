@@ -34,12 +34,6 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    sourceSets {
-        main {
-            manifest.srcFile 'AndroidManifest-gradle.xml'
-        }
-    }
-
     testOptions {
         unitTests {
             includeAndroidResources = true
@@ -47,7 +41,6 @@ android {
     }
 
     // This is the gradle equivalent of the libs: ["android.car"] in the Android.bp
-    // Which will be in the SDK 30 R3+
     useLibrary 'android.car'
 }
 
