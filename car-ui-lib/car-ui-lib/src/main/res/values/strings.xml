@@ -77,9 +77,4 @@ limitations under the License.
     <string name="car_ui_ime_wide_screen_system_property_name" translatable="false">
         ro.build.automotive.ime.wide_screen.enabled
     </string>
-
-    <!--  TODO(b/175214581): STOPSHIP use proper sentence and remove translatable=false -->
-    <!--  Warn user that device is owned and managed by an enterprise (like a car rental company) [CHAR_LIMIT=50] -->
-    <string name="car_ui_managed_device_message" translatable="false">This device is managed by an enterprise</string>
-
 </resources>
