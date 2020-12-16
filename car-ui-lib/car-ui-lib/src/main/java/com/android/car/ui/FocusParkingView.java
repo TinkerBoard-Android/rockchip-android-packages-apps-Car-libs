@@ -28,7 +28,8 @@ import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalFocusChangeListener;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.Nullable;
@@ -84,6 +85,13 @@ public class FocusParkingView extends View {
      */
     private boolean mShouldRestoreFocus;
 
+    private final OnGlobalFocusChangeListener mFocusChangeListener =
+            (oldFocus, newFocus) -> {
+                // Keep track of the focused view so that we can recover focus when it's removed.
+                mFocusedView = newFocus instanceof FocusParkingView ? null : newFocus;
+                mScrollableContainer = ViewUtils.getAncestorScrollableContainer(mFocusedView);
+            };
+
     public FocusParkingView(Context context) {
         super(context);
         init(context, /* attrs= */ null);
@@ -126,12 +134,6 @@ public class FocusParkingView extends View {
 
         // Prevent Android from drawing the default focus highlight for this view when it's focused.
         setDefaultFocusHighlightEnabled(false);
-
-        // Keep track of the focused view so that we can recover focus when it's removed.
-        getViewTreeObserver().addOnGlobalFocusChangeListener((oldFocus, newFocus) -> {
-            mFocusedView = newFocus instanceof FocusParkingView ? null : newFocus;
-            mScrollableContainer = ViewUtils.getAncestorScrollableContainer(mFocusedView);
-        });
     }
 
     @Override
@@ -140,6 +142,18 @@ public class FocusParkingView extends View {
         // file (match_parent, wrap_content, 100dp, 0dp, etc). Small size is to ensure it has little
         // impact on the layout, non-zero size is to ensure it can take focus.
         setMeasuredDimension(1, 1);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        getViewTreeObserver().addOnGlobalFocusChangeListener(mFocusChangeListener);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        getViewTreeObserver().removeOnGlobalFocusChangeListener(mFocusChangeListener);
+        super.onDetachedFromWindow();
     }
 
     @Override
@@ -256,7 +270,7 @@ public class FocusParkingView extends View {
                     // layout is not ready. So wait until its layout is ready then dispatch the
                     // event.
                     getViewTreeObserver().addOnGlobalLayoutListener(
-                            new ViewTreeObserver.OnGlobalLayoutListener() {
+                            new OnGlobalLayoutListener() {
                                 @Override
                                 public void onGlobalLayout() {
                                     // At this point the layout is complete and the dimensions of
