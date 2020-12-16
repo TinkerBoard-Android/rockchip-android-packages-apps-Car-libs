@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- THIS FILE WAS AUTO GENERATED ON 11-Dec-2020 (10:20:00), DO NOT EDIT MANUALLY. -->
+<!-- THIS FILE WAS AUTO GENERATED ON 01-Dec-2020 (18:07:12), DO NOT EDIT MANUALLY. -->
 <resources>
   <public type="array" name="car_ui_ime_wide_screen_allowed_package_list"/>
   <public type="attr" name="CarUiToolbarStyle"/>
@@ -399,7 +399,6 @@
   <public type="string" name="car_ui_ellipsis"/>
   <public type="string" name="car_ui_ime_wide_screen_system_property_name"/>
   <public type="string" name="car_ui_installer_process_name"/>
-  <public type="string" name="car_ui_managed_device_message"/>
   <public type="string" name="car_ui_preference_switch_off"/>
   <public type="string" name="car_ui_preference_switch_on"/>
   <public type="string" name="car_ui_restricted_while_driving"/>
