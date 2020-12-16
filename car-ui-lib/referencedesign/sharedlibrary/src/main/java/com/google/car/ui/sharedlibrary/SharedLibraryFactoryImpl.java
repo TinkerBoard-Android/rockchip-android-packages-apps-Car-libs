@@ -24,6 +24,8 @@ import com.android.car.ui.sharedlibrary.oemapis.recyclerview.RecyclerViewAttribu
 import com.android.car.ui.sharedlibrary.oemapis.recyclerview.RecyclerViewOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
 
+import com.google.car.ui.sharedlibrary.toolbar.BaseLayoutInstaller;
+
 import java.util.function.Consumer;
 
 /**
@@ -32,13 +34,19 @@ import java.util.function.Consumer;
  */
 public class SharedLibraryFactoryImpl implements SharedLibraryFactoryOEMV1 {
 
+    private final Context mSharedLibraryContext;
+
+    public SharedLibraryFactoryImpl(Context sharedLibraryContext) {
+        mSharedLibraryContext = sharedLibraryContext;
+    }
+
     @Override
     public ToolbarControllerOEMV1 installBaseLayoutAround(View contentView,
             Consumer<InsetsOEMV1> insetsChangedListener, boolean toolbarEnabled,
             boolean fullscreen) {
 
-        // TODO
-        return null;
+        return BaseLayoutInstaller.installBaseLayoutAround(mSharedLibraryContext,
+                contentView, insetsChangedListener, toolbarEnabled, fullscreen);
     }
 
     @Override

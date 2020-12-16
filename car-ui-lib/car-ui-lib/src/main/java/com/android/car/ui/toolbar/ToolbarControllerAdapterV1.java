@@ -22,6 +22,7 @@ import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.View;
 
+import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -195,8 +196,12 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     }
 
     @Override
-    public void setLogo(int resId) {
-        setLogo(mContext.getDrawable(resId));
+    public void setLogo(@IdRes int resId) {
+        if (resId == 0) {
+            setLogo(null);
+        } else {
+            setLogo(mContext.getDrawable(resId));
+        }
     }
 
     @Override
