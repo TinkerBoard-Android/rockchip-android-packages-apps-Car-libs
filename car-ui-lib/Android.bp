@@ -15,8 +15,11 @@
 
 android_library {
     name: "car-ui-lib",
-    sdk_version: "system_current",
+
+    sdk_version: "current",
     min_sdk_version: "28",
+    target_sdk_version: "30",
+
     srcs: ["car-ui-lib/src/main/java/**/*.java"],
     manifest: "car-ui-lib/AndroidManifest.xml",
     resource_dirs: ["car-ui-lib/src/main/res"],
@@ -44,8 +47,11 @@ android_library {
 // User this if your project includes overlayable.xml
 android_library {
     name: "car-ui-lib-overlayable",
-    sdk_version: "system_current",
+
+    sdk_version: "current",
     min_sdk_version: "28",
+    target_sdk_version: "30",
+
     manifest: "car-ui-lib/AndroidManifest.xml",
     resource_dirs: [
         "car-ui-lib/src/main/res-overlayable"
@@ -63,8 +69,11 @@ android_library {
 
 android_library {
     name: "car-ui-lib-testing-support",
-    sdk_version: "system_current",
+
+    sdk_version: "current",
     min_sdk_version: "28",
+    target_sdk_version: "30",
+
     manifest: "car-ui-lib/AndroidManifest.xml",
     srcs: [
         "tests/baselayouttests/src/**/*.java",
@@ -85,7 +94,7 @@ android_test {
     libs: [
         "android.test.runner",
         "android.test.base",
-        "android.car"
+        "android.car-stubs"
     ],
     manifest: "car-ui-lib/src/androidTest/AndroidManifest.xml",
     resource_dirs: ["car-ui-lib/src/androidTest/res"],
@@ -113,32 +122,29 @@ android_test {
 
 android_app {
     name: "PaintBooth",
-    srcs: [
-    	"paintbooth/src/**/*.java",
-    	"paintbooth/src/**/*.kt",
-    ],
-    required: ["allowed_privapp_com.android.car.ui.paintbooth"],
+
     manifest: "paintbooth/AndroidManifest.xml",
-    resource_dirs: ["paintbooth/src/main/res", "paintbooth/src/main/res-public"],
+    srcs: [
+        "paintbooth/src/**/*.java",
+        "paintbooth/src/**/*.kt",
+    ],
+    resource_dirs: [
+        "paintbooth/src/main/res",
+        "paintbooth/src/main/res-public"
+    ],
+
+    required: ["allowed_privapp_com.android.car.ui.paintbooth"],
+
+    libs: ["android.car-stubs"],
+    static_libs: [
+        "car-ui-lib",
+        "guava",
+        "gson-prebuilt-jar",
+    ],
+
     platform_apis: true,
     certificate: "platform",
     privileged: true,
-    static_libs: [
-        "car-ui-lib",
-        "android.car.userlib",
-	"guava",
-	"gson-prebuilt-jar",
-    ],
-    optimize: {
-        enabled: false,
-    },
-    dex_preopt: {
-        enabled: false,
-    },
-    product_variables: {
-        pdk: {
-            enabled: false,
-        },
-    },
+
     export_package_resources: true,
 }
