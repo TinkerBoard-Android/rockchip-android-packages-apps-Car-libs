@@ -19,7 +19,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <plurals name="notification_new_message" formatted="false" msgid="1631343923556571689">
       <item quantity="one">%d nouveau message</item>
-      <item quantity="many">%d new messages</item>
       <item quantity="other">%d nouveaux messages</item>
     </plurals>
     <string name="action_play" msgid="1884580550634079470">"Lire"</string>
