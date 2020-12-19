@@ -1,7 +1,5 @@
 <resources>
-    <style name="TextAppearance.CarUi.Widget" parent="android:TextAppearance.DeviceDefault.Widget">
-        <item name="android:textAlignment">viewStart</item>
-    </style>
+    <style name="TextAppearance.CarUi.Widget" parent="android:TextAppearance.DeviceDefault.Widget"/>
 
     <style name="TextAppearance.CarUi.Widget.Toolbar"/>
 

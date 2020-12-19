@@ -39,8 +39,7 @@
     </style>
 
     <style name="Widget.CarUi.Toolbar.ProgressBar"
-           parent="@android:style/Widget.DeviceDefault.ProgressBar.Horizontal">
-    </style>
+           parent="@android:style/Widget.DeviceDefault.ProgressBar.Horizontal"/>
 
     <style name="Widget.CarUi.Toolbar.NavIcon">
         <item name="android:tint">@color/car_ui_toolbar_nav_icon_color</item>
@@ -247,7 +246,6 @@
 
     <style name="TextAppearance.CarUi" parent="android:TextAppearance.DeviceDefault">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:textAlignment">viewStart</item>
     </style>
 
     <style name="TextAppearance.CarUi.Body1">
@@ -290,9 +288,7 @@
     <style name="TextAppearance.CarUi.AlertDialog.Title" parent="TextAppearance.CarUi.Body3"/>
     <style name="TextAppearance.CarUi.AlertDialog.Subtitle" parent="TextAppearance.CarUi.Sub3"/>
 
-    <style name="TextAppearance.CarUi.Widget" parent="android:TextAppearance.DeviceDefault.Widget">
-        <item name="android:textAlignment">viewStart</item>
-    </style>
+    <style name="TextAppearance.CarUi.Widget" parent="android:TextAppearance.DeviceDefault.Widget"/>
 
     <style name="TextAppearance.CarUi.Widget.Toolbar"/>
 
