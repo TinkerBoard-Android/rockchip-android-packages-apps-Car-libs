@@ -49,6 +49,10 @@ android {
     // This is the gradle equivalent of the libs: ["android.car"] in the Android.bp
     // Which will be in the SDK 30 R3+
     useLibrary 'android.car'
+
+    useLibrary 'android.test.runner'
+    useLibrary 'android.test.base'
+    useLibrary 'android.test.mock'
 }
 
 dependencies {
