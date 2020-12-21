@@ -17,10 +17,18 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.android.car.ui">
-    <application>
+
+   <application>
         <provider
             android:name="com.android.car.ui.core.CarUiInstaller"
             android:authorities="${applicationId}.CarUiInstaller"
             android:exported="false"/>
+
+        <provider
+            android:name="com.android.car.ui.core.SearchResultsProvider"
+            android:authorities="${applicationId}.SearchResultsProvider"
+            android:exported="true"
+            android:process="@string/car_ui_installer_process_name"
+            android:readPermission="com.android.car.ui.READ_SEARCH_RESULTS"/>
     </application>
 </manifest>
