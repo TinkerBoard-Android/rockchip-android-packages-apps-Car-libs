@@ -33,6 +33,7 @@
             android:name="com.android.car.ui.core.SearchResultsProvider"
             android:authorities="${applicationId}.SearchResultsProvider"
             android:exported="true"
-            android:process="@string/car_ui_installer_process_name"/>
+            android:process="@string/car_ui_installer_process_name"
+            android:readPermission="com.android.car.ui.READ_SEARCH_RESULTS"/>
     </application>
 </manifest>
