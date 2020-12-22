@@ -35,6 +35,7 @@ import com.android.car.ui.utils.CarUiUtils;
  *             {@link CarUiTwoActionTextPreference}, {@link CarUiTwoActionSwitchPreference}, or
  *             {@link CarUiTwoActionIconPreference} instead.
  */
+@Deprecated
 public class CarUiTwoActionPreference extends CarUiPreference {
 
     private boolean mIsActionShown;
