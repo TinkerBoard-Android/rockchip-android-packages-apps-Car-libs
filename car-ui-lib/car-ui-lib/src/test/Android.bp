@@ -24,4 +24,3 @@ android_app {
     libs: ["android.car"],
     static_libs: ["car-ui-lib"],
 }
-

@@ -17,7 +17,4 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="should.not.matter.because.sta_tic.library">
-    <uses-sdk
-        android:minSdkVersion="28"
-        android:targetSdkVersion="30" />
 </manifest>
