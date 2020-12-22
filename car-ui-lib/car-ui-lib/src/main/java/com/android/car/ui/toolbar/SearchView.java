@@ -86,6 +86,7 @@ public class SearchView extends ConstraintLayout {
     private final Handler mHandler = new Handler(Looper.getMainLooper());
 
     private SurfaceControlViewHost mSurfaceControlViewHost;
+    private Uri mContentUri;
     private int mSurfaceHeight;
     private int mSurfaceWidth;
     private List<? extends CarUiImeSearchListItem> mWideScreenSearchItemList;
@@ -278,10 +279,10 @@ public class SearchView extends ConstraintLayout {
     private void displaySearchWideScreen() {
         String url = CONTENT + getContext().getPackageName() + SEARCH_RESULTS_PROVIDER + "/"
                 + SEARCH_RESULTS_TABLE_NAME;
-        Uri contentUri = Uri.parse(url);
+        mContentUri = Uri.parse(url);
         mIdToListItem.clear();
         // clear the table.
-        getContext().getContentResolver().delete(contentUri, null, null);
+        getContext().getContentResolver().delete(mContentUri, null, null);
 
         // mWideScreenImeContentAreaView will only be set when running in widescreen mode and
         // apps allowed by OEMs are trying to set their own view. In that case we did not want to
@@ -313,7 +314,7 @@ public class SearchView extends ConstraintLayout {
                     item.getTitle() != null ? item.getTitle().toString() : null);
             values.put(SearchResultsProvider.SUBTITLE,
                     item.getBody() != null ? item.getBody().toString() : null);
-            getContext().getContentResolver().insert(contentUri, values);
+            getContext().getContentResolver().insert(mContentUri, values);
             mIdToListItem.put(idString, item);
             id++;
         }
@@ -453,6 +454,13 @@ public class SearchView extends ConstraintLayout {
                     mSurfaceControlViewHost.getSurfacePackage());
             mInputMethodManager.sendAppPrivateCommand(mSearchText,
                     WIDE_SCREEN_ACTION, bundle);
+        }
+
+        @Override
+        public void onPostLoadSearchResults() {
+            if (mContentUri != null) {
+                getContext().getContentResolver().delete(mContentUri, null, null);
+            }
         }
     }
 }
