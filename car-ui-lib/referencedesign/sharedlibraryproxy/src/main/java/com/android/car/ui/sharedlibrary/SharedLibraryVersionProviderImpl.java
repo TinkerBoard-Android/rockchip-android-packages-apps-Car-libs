@@ -18,12 +18,15 @@ package com.android.car.ui.sharedlibrary;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
 import android.content.res.loader.ResourcesLoader;
 import android.content.res.loader.ResourcesProvider;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.text.TextUtils;
+import android.util.Log;
+import android.util.SparseArray;
 
 import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryVersionProviderOEMV1;
 
@@ -31,6 +34,8 @@ import dalvik.system.PathClassLoader;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -50,6 +55,8 @@ import java.util.List;
  * access the app's classes, this does not produce the same version conflict mentioned before.
  */
 public final class SharedLibraryVersionProviderImpl implements SharedLibraryVersionProviderOEMV1 {
+
+    private static final String TAG = "carui";
     // This should match with the package name in the <queries/> in the manifest.
     private static final String OEM_SHAREDLIB_PACKAGENAME =
             "com.google.car.ui.sharedlibrary";
@@ -62,14 +69,16 @@ public final class SharedLibraryVersionProviderImpl implements SharedLibraryVers
     @Override
     public synchronized Object getSharedLibraryFactory(int maxVersion, Context context) {
         ApplicationInfo appInfo = getApplicationInfo(context, OEM_SHAREDLIB_PACKAGENAME);
+        ClassLoader cl = getClassLoader(appInfo);
+
         if (!sHasInjectedResources) {
-            injectResources(context, appInfo);
+            injectResources(cl, context, appInfo);
             sHasInjectedResources = true;
         }
 
         try {
             if (mOEMVersionProvider == null) {
-                mOEMVersionProvider = getClassLoader(appInfo)
+                mOEMVersionProvider = cl
                         .loadClass(OEM_SHAREDLIB_PACKAGENAME + ".SharedLibraryVersionProviderImpl")
                         .getDeclaredConstructor()
                         .newInstance();
@@ -88,7 +97,7 @@ public final class SharedLibraryVersionProviderImpl implements SharedLibraryVers
      * Injects the resources belonging to the {@link ApplicationInfo} into the provided
      * {@link Context}.
      */
-    private static void injectResources(Context context, ApplicationInfo appInfo) {
+    private static void injectResources(ClassLoader cl, Context context, ApplicationInfo appInfo) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             // TODO(b/175649937): Add a solution for P/Q.
             throw new UnsupportedOperationException(
@@ -102,9 +111,59 @@ public final class SharedLibraryVersionProviderImpl implements SharedLibraryVers
                     ResourcesProvider.loadFromApk(
                             ParcelFileDescriptor.open(apk, ParcelFileDescriptor.MODE_READ_ONLY)));
             context.getResources().addLoaders(rl);
-        } catch (IOException e) {
+
+            Class<?> assetManagerClazz = AssetManager.class;
+            Method getAssignedPackageIdentifiers =
+                    assetManagerClazz.getDeclaredMethod("getAssignedPackageIdentifiers");
+            getAssignedPackageIdentifiers.setAccessible(true);
+            SparseArray<String> packageIdentifiers =
+                    (SparseArray<String>) getAssignedPackageIdentifiers
+                            .invoke(context.getResources().getAssets());
+            for (int i = 0; i < packageIdentifiers.size(); i++) {
+                if (OEM_SHAREDLIB_PACKAGENAME.equals(packageIdentifiers.valueAt(i))) {
+                    rewriteRValues(cl, packageIdentifiers.valueAt(i), packageIdentifiers.keyAt(i));
+                    break;
+                }
+            }
+        } catch (IOException | ReflectiveOperationException | SecurityException e) {
             throw new RuntimeException("Unable to load shared library resources", e);
         }
+    }
+
+    /**
+     * Exact copy from {@link LoadedApk}
+     */
+    private static void rewriteRValues(ClassLoader cl, String packageName, int id) {
+        final Class<?> rClazz;
+        try {
+            rClazz = cl.loadClass(packageName + ".R");
+        } catch (ClassNotFoundException e) {
+            // This is not necessarily an error, as some packages do not ship with resources
+            // (or they do not need rewriting).
+            Log.i(TAG, "No resource references to update in package " + packageName);
+            return;
+        }
+
+        final Method callback;
+        try {
+            callback = rClazz.getMethod("onResourcesLoaded", int.class);
+        } catch (NoSuchMethodException e) {
+            // No rewriting to be done.
+            return;
+        }
+
+        Throwable cause;
+        try {
+            callback.invoke(null, id);
+            return;
+        } catch (IllegalAccessException e) {
+            cause = e;
+        } catch (InvocationTargetException e) {
+            cause = e.getCause();
+        }
+
+        throw new RuntimeException("Failed to rewrite resource references for " + packageName,
+                cause);
     }
 
     private static ApplicationInfo getApplicationInfo(Context context, String packageName) {
