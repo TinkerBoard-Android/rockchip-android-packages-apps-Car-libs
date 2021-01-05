@@ -94,6 +94,7 @@ android_test {
         "android.test.runner",
         "android.test.base",
         "android.car-stubs",
+        "android.test.mock.stubs"
     ],
     manifest: "car-ui-lib/src/androidTest/AndroidManifest.xml",
     resource_dirs: ["car-ui-lib/src/androidTest/res"],
