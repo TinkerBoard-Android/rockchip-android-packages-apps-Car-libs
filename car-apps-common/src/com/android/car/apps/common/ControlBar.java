@@ -32,6 +32,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.ViewTreeObserver.OnGlobalFocusChangeListener;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -103,6 +104,17 @@ public class ControlBar extends RelativeLayout implements ExpandableControlBar {
     // Weight for the spacers used between buttons
     private static final float SPACERS_WEIGHT = 1f;
 
+    private final OnGlobalFocusChangeListener mFocusChangeListener =
+            (oldFocus, newFocus) -> {
+                // Collapse the control bar when it is expanded and loses focus.
+                boolean hasFocus = hasFocus();
+                if (mHasFocus && !hasFocus && mIsExpanded) {
+                    onExpandCollapse();
+                }
+                mHasFocus = hasFocus;
+            };
+
+
     public ControlBar(Context context) {
         super(context);
         init(context, null, 0, 0);
@@ -167,19 +179,22 @@ public class ControlBar extends RelativeLayout implements ExpandableControlBar {
         mDefaultExpandCollapseView.setContentDescription(context.getString(
                 R.string.control_bar_expand_collapse_button));
         mDefaultExpandCollapseView.setOnClickListener(v -> onExpandCollapse());
-
-        // Collapse the control bar when it is expanded and loses focus.
-        getViewTreeObserver().addOnGlobalFocusChangeListener((oldFocus, newFocus) -> {
-            boolean hasFocus = hasFocus();
-            if (mHasFocus && !hasFocus && mIsExpanded) {
-                onExpandCollapse();
-            }
-            mHasFocus = hasFocus;
-        });
     }
 
     private int getSlotIndex(@SlotPosition int slotPosition) {
         return CarControlBar.getSlotIndex(slotPosition, mNumColumns);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        getViewTreeObserver().addOnGlobalFocusChangeListener(mFocusChangeListener);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        getViewTreeObserver().removeOnGlobalFocusChangeListener(mFocusChangeListener);
+        super.onDetachedFromWindow();
     }
 
     @Override
