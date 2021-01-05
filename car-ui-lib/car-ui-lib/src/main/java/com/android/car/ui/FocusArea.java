@@ -41,6 +41,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver.OnGlobalFocusChangeListener;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.LinearLayout;
 
@@ -193,6 +194,16 @@ public class FocusArea extends LinearLayout {
     /** The focused view in this FocusArea, if any. */
     private View mFocusedView;
 
+    private final OnGlobalFocusChangeListener mFocusChangeListener =
+            (oldFocus, newFocus) -> {
+                boolean hasFocus = hasFocus();
+                saveFocusHistory(hasFocus);
+                maybeUpdatePreviousFocusArea(hasFocus, oldFocus);
+                maybeClearFocusAreaHistory(hasFocus, oldFocus);
+                maybeUpdateFocusAreaHighlight(hasFocus);
+                mHasFocus = hasFocus;
+            };
+
     public FocusArea(Context context) {
         super(context);
         init(context, null);
@@ -249,21 +260,7 @@ public class FocusArea extends LinearLayout {
         // should enable it since we override these methods.
         setWillNotDraw(false);
 
-        registerFocusChangeListener();
-
         initAttrs(context, attrs);
-    }
-
-    private void registerFocusChangeListener() {
-        getViewTreeObserver().addOnGlobalFocusChangeListener(
-                (oldFocus, newFocus) -> {
-                    boolean hasFocus = hasFocus();
-                    saveFocusHistory(hasFocus);
-                    maybeUpdatePreviousFocusArea(hasFocus, oldFocus);
-                    maybeClearFocusAreaHistory(hasFocus, oldFocus);
-                    maybeUpdateFocusAreaHighlight(hasFocus);
-                    mHasFocus = hasFocus;
-                });
     }
 
     private void saveFocusHistory(boolean hasFocus) {
@@ -456,6 +453,18 @@ public class FocusArea extends LinearLayout {
             mLeftOffset = mRightOffset;
             mRightOffset = temp;
         }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        getViewTreeObserver().addOnGlobalFocusChangeListener(mFocusChangeListener);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        getViewTreeObserver().removeOnGlobalFocusChangeListener(mFocusChangeListener);
+        super.onDetachedFromWindow();
     }
 
     @Override
