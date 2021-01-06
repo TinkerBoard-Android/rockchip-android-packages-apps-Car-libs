@@ -58,6 +58,7 @@ class RotaryCache {
     /** A record of when a View was focused. */
     private static class FocusHistory {
         /** The focused view. */
+        @NonNull
         final View mFocusedView;
         /** The {@link SystemClock#uptimeMillis} when this history was recorded. */
         final long mTimestamp;
@@ -69,14 +70,14 @@ class RotaryCache {
     }
 
     /** Cache of focused view. */
-    private static class FocusCache {
+    static class FocusCache {
         /** The cache type. */
         @CacheType
         final int mCacheType;
         /** How many milliseconds before the entry in the cache expires. */
         long mExpirationPeriodMs;
         /** The record of focused view. */
-        @NonNull
+        @Nullable
         FocusHistory mFocusHistory;
 
         FocusCache(@CacheType int cacheType, final long expirationPeriodMs) {
@@ -93,11 +94,13 @@ class RotaryCache {
             return isValidHistory(elapsedRealtime) ? mFocusHistory.mFocusedView : null;
         }
 
-        void setFocusedView(@NonNull View focusedView, long elapsedRealtime) {
+        void setFocusedView(@Nullable View focusedView, long elapsedRealtime) {
             if (mCacheType == CACHE_TYPE_DISABLED) {
                 return;
             }
-            mFocusHistory = new FocusHistory(focusedView, elapsedRealtime);
+            mFocusHistory = focusedView != null
+                    ? new FocusHistory(focusedView, elapsedRealtime)
+                    : null;
         }
 
         boolean isValidHistory(long elapsedRealtime) {
