@@ -226,7 +226,7 @@ class DefaultScrollBar implements ScrollBar {
         // Sets the size of the thumb and request a redraw if needed.
         ViewGroup.LayoutParams lp = mScrollThumb.getLayoutParams();
 
-        if (lp.height != thumbLength) {
+        if (lp.height != thumbLength || thumbLength < mScrollThumb.getHeight()) {
             lp.height = thumbLength;
             mScrollThumb.requestLayout();
         }
