@@ -25,8 +25,6 @@ import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_LEFT_BOUND_OFF
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_RIGHT_BOUND_OFFSET;
 import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_TOP_BOUND_OFFSET;
 import static com.android.car.ui.utils.RotaryConstants.NUDGE_DIRECTION;
-import static com.android.car.ui.utils.ViewUtils.NO_FOCUS;
-import static com.android.car.ui.utils.ViewUtils.REGULAR_FOCUS;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -138,8 +136,8 @@ public class FocusArea extends LinearLayout {
     private View mDefaultFocusView;
 
     /**
-     * Whether to focus on the {@code app:defaultFocus} view when nudging to the FocusArea, even if
-     * there was another view in the FocusArea focused before.
+     * Whether to focus on the default focus view when nudging to the FocusArea, even if there was
+     * another view in the FocusArea focused before.
      */
     private boolean mDefaultFocusOverridesHistory;
 
@@ -264,11 +262,16 @@ public class FocusArea extends LinearLayout {
     }
 
     private void saveFocusHistory(boolean hasFocus) {
+        // Save focus history and clear mFocusedView if focus is leaving this FocusArea.
         if (!hasFocus) {
-            mRotaryCache.saveFocusedView(mFocusedView, SystemClock.uptimeMillis());
-            mFocusedView = null;
+            if (mHasFocus) {
+                mRotaryCache.saveFocusedView(mFocusedView, SystemClock.uptimeMillis());
+                mFocusedView = null;
+            }
             return;
         }
+
+        // Update mFocusedView if a view inside this FocusArea is focused.
         View v = getFocusedChild();
         while (v != null) {
             if (v.isFocused()) {
@@ -514,22 +517,8 @@ public class FocusArea extends LinearLayout {
     }
 
     private boolean focusOnDescendant() {
-        if (mDefaultFocusOverridesHistory) {
-            // Check mDefaultFocus before last focused view.
-            if (focusDefaultFocusView() || focusOnLastFocusedView()) {
-                return true;
-            }
-        } else {
-            // Check last focused view before mDefaultFocus.
-            if (focusOnLastFocusedView() || focusDefaultFocusView()) {
-                return true;
-            }
-        }
-        return focusOnFirstFocusableView();
-    }
-
-    private boolean focusDefaultFocusView() {
-        return ViewUtils.adjustFocus(this, /* currentLevel= */ REGULAR_FOCUS);
+        View lastFocusedView = mRotaryCache.getFocusedView(SystemClock.uptimeMillis());
+        return ViewUtils.adjustFocus(this, lastFocusedView, mDefaultFocusOverridesHistory);
     }
 
     /**
@@ -539,15 +528,6 @@ public class FocusArea extends LinearLayout {
      */
     public View getDefaultFocusView() {
         return mDefaultFocusView;
-    }
-
-    private boolean focusOnLastFocusedView() {
-        View lastFocusedView = mRotaryCache.getFocusedView(SystemClock.uptimeMillis());
-        return ViewUtils.requestFocus(lastFocusedView);
-    }
-
-    private boolean focusOnFirstFocusableView() {
-        return ViewUtils.adjustFocus(this, /* currentLevel= */ NO_FOCUS);
     }
 
     private boolean nudgeToShortcutView(Bundle arguments) {
