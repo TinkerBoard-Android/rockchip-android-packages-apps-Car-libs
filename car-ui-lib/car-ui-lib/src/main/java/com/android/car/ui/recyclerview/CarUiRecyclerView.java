@@ -77,7 +77,6 @@ public final class CarUiRecyclerView extends RecyclerView {
     private String mScrollBarClass;
     private int mScrollBarPaddingTop;
     private int mScrollBarPaddingBottom;
-
     @Nullable
     private ScrollBar mScrollBar;
 
@@ -101,7 +100,7 @@ public final class CarUiRecyclerView extends RecyclerView {
     @Nullable
     private Rect mContainerPaddingRelative;
     @Nullable
-    private LinearLayout mContainer;
+    private ViewGroup mContainer;
 
     // Set to true when when styled attributes are read and initialized.
     private boolean mIsInitialized;
@@ -249,7 +248,7 @@ public final class CarUiRecyclerView extends RecyclerView {
             return;
         }
 
-        mContainer = new LinearLayout(getContext());
+        mContainer = new FrameLayout(getContext());
 
         setVerticalScrollBarEnabled(false);
         setHorizontalScrollBarEnabled(false);
