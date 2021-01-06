@@ -395,7 +395,7 @@ public class CarUiImeWideScreenController {
             Log.w(TAG, "Result can't be loaded, input InputEditorInfo not available ");
             return;
         }
-        String url = CONTENT + mInputEditorInfo.packageName + SEARCH_RESULTS_PROVIDER;
+        String url = CONTENT + getPackageName(mInputEditorInfo) + SEARCH_RESULTS_PROVIDER;
         Uri contentUrl = Uri.parse(url);
         ContentResolver cr = mContext.getContentResolver();
         Cursor c = cr.query(contentUrl, null, null, null, null);
@@ -692,6 +692,16 @@ public class CarUiImeWideScreenController {
     @VisibleForTesting
     void setExtractEditText(ExtractEditText editText) {
         mExtractEditText = editText;
+    }
+
+    @VisibleForTesting
+    void setEditorInfo(EditorInfo editorInfo) {
+        mInputEditorInfo = editorInfo;
+    }
+
+    @VisibleForTesting
+    String getPackageName(EditorInfo editorInfo) {
+        return editorInfo.packageName;
     }
 
     /**
