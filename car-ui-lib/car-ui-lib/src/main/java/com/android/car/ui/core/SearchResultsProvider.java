@@ -96,7 +96,6 @@ public class SearchResultsProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        getContext().getContentResolver().notifyChange(uri, null);
         mSearchResults.clear();
         return 0;
     }

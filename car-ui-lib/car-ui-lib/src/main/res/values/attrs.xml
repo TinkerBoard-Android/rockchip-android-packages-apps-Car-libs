@@ -130,6 +130,9 @@
             <!-- grid layout -->
             <enum name="grid" value="1" />
         </attr>
+
+        <!-- car ui recyclerview orientation -->
+        <attr name="android:orientation" />
     </declare-styleable>
 
     <declare-styleable name="CarUiPreference">
