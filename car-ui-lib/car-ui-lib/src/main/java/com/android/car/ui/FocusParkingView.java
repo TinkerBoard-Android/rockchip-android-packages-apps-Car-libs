@@ -22,13 +22,16 @@ import static com.android.car.ui.utils.RotaryConstants.ACTION_HIDE_IME;
 import static com.android.car.ui.utils.RotaryConstants.ACTION_RESTORE_DEFAULT_FOCUS;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalFocusChangeListener;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.Nullable;
@@ -73,6 +76,9 @@ public class FocusParkingView extends View {
     @Nullable
     private View mFocusedView;
 
+    /** The cache to save the previously focused view. */
+    private RotaryCache.FocusCache mFocusCache;
+
     /** The scrollable container that contains the {@link #mFocusedView}, if any. */
     @Nullable
     ViewGroup mScrollableContainer;
@@ -83,6 +89,20 @@ public class FocusParkingView extends View {
      * an {@code ActivityView}. The default value is true.
      */
     private boolean mShouldRestoreFocus;
+
+    /**
+     * Whether to focus on the default focus view when nudging to the explicit focus area containing
+     * this FocusParkingView, even if there was another view in the explicit focus area focused
+     * before.
+     */
+    private boolean mDefaultFocusOverridesHistory;
+
+    private final OnGlobalFocusChangeListener mFocusChangeListener =
+            (oldFocus, newFocus) -> {
+                // Keep track of the focused view so that we can recover focus when it's removed.
+                mFocusedView = newFocus instanceof FocusParkingView ? null : newFocus;
+                mScrollableContainer = ViewUtils.getAncestorScrollableContainer(mFocusedView);
+            };
 
     public FocusParkingView(Context context) {
         super(context);
@@ -129,9 +149,26 @@ public class FocusParkingView extends View {
 
         // Keep track of the focused view so that we can recover focus when it's removed.
         getViewTreeObserver().addOnGlobalFocusChangeListener((oldFocus, newFocus) -> {
-            mFocusedView = newFocus instanceof FocusParkingView ? null : newFocus;
-            mScrollableContainer = ViewUtils.getAncestorScrollableContainer(mFocusedView);
+            View focusedView = newFocus instanceof FocusParkingView ? null : newFocus;
+            updateFocusedView(focusedView);
         });
+
+        Resources resources = getResources();
+        @RotaryCache.CacheType
+        int focusHistoryCacheType = resources.getInteger(R.integer.car_ui_focus_history_cache_type);
+        int focusHistoryExpirationPeriodMs =
+                resources.getInteger(R.integer.car_ui_focus_history_expiration_period_ms);
+        mFocusCache =
+                new RotaryCache.FocusCache(focusHistoryCacheType, focusHistoryExpirationPeriodMs);
+
+        mDefaultFocusOverridesHistory = resources.getBoolean(
+                R.bool.car_ui_focus_area_default_focus_overrides_history);
+    }
+
+    private void updateFocusedView(@Nullable View focusedView) {
+        mFocusCache.setFocusedView(mFocusedView, SystemClock.uptimeMillis());
+        mFocusedView = focusedView;
+        mScrollableContainer = ViewUtils.getAncestorScrollableContainer(focusedView);
     }
 
     @Override
@@ -140,6 +177,18 @@ public class FocusParkingView extends View {
         // file (match_parent, wrap_content, 100dp, 0dp, etc). Small size is to ensure it has little
         // impact on the layout, non-zero size is to ensure it can take focus.
         setMeasuredDimension(1, 1);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        getViewTreeObserver().addOnGlobalFocusChangeListener(mFocusChangeListener);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        getViewTreeObserver().removeOnGlobalFocusChangeListener(mFocusChangeListener);
+        super.onDetachedFromWindow();
     }
 
     @Override
@@ -154,12 +203,11 @@ public class FocusParkingView extends View {
 
             // OnGlobalFocusChangeListener won't be triggered when the window lost focus, so reset
             // the focused view here.
-            mFocusedView = null;
-            mScrollableContainer = null;
+            updateFocusedView(null);
         } else if (isFocused()) {
             // When FocusParkingView is focused and the window just gets focused, transfer the view
             // focus to a non-FocusParkingView in the window.
-            restoreFocusInRoot(/* checkForTouchMode= */ true);
+            restoreFocusInRoot(/* checkForTouchMode= */ true, /* checkFocusHistory= */ false);
         }
         super.onWindowFocusChanged(hasWindowFocus);
     }
@@ -173,7 +221,8 @@ public class FocusParkingView extends View {
     public boolean performAccessibilityAction(int action, Bundle arguments) {
         switch (action) {
             case ACTION_RESTORE_DEFAULT_FOCUS:
-                return restoreFocusInRoot(/* checkForTouchMode= */ false);
+                return restoreFocusInRoot(
+                        /* checkForTouchMode= */ false, /* checkFocusHistory= */ true);
             case ACTION_HIDE_IME:
                 InputMethodManager inputMethodManager =
                         getContext().getSystemService(InputMethodManager.class);
@@ -196,7 +245,7 @@ public class FocusParkingView extends View {
         }
         // Find a better target to focus instead of focusing this FocusParkingView when the
         // framework wants to focus it.
-        return restoreFocusInRoot(/* checkForTouchMode= */ true);
+        return restoreFocusInRoot(/* checkForTouchMode= */ true, /* checkFocusHistory= */ false);
     }
 
     @Override
@@ -206,7 +255,7 @@ public class FocusParkingView extends View {
         }
         // Find a better target to focus instead of focusing this FocusParkingView when the
         // framework wants to focus it.
-        return restoreFocusInRoot(/* checkForTouchMode= */ true);
+        return restoreFocusInRoot(/* checkForTouchMode= */ true, /* checkFocusHistory= */ false);
     }
 
     /**
@@ -218,7 +267,7 @@ public class FocusParkingView extends View {
         mShouldRestoreFocus = shouldRestoreFocus;
     }
 
-    private boolean restoreFocusInRoot(boolean checkForTouchMode) {
+    private boolean restoreFocusInRoot(boolean checkForTouchMode, boolean checkFocusHistory) {
         // Don't do anything in touch mode if checkForTouchMode is true.
         if (checkForTouchMode && isInTouchMode()) {
             return false;
@@ -229,10 +278,16 @@ public class FocusParkingView extends View {
         if (maybeFocusOnScrollableContainer()) {
             return true;
         }
+
         // Otherwise try to find the best target view to focus.
-        if (ViewUtils.adjustFocus(getRootView(), /* currentFocus= */ null)) {
+        View cachedFocusedView = checkFocusHistory
+                ? mFocusCache.getFocusedView(SystemClock.uptimeMillis())
+                : null;
+        if (ViewUtils.adjustFocus(
+                getRootView(), cachedFocusedView, mDefaultFocusOverridesHistory)) {
             return true;
         }
+
         // It failed to find a target view (e.g., all the views are not shown), so focus on this
         // FocusParkingView as fallback.
         return super.requestFocus(FOCUS_DOWN, /* previouslyFocusedRect= */ null);
@@ -256,7 +311,7 @@ public class FocusParkingView extends View {
                     // layout is not ready. So wait until its layout is ready then dispatch the
                     // event.
                     getViewTreeObserver().addOnGlobalLayoutListener(
-                            new ViewTreeObserver.OnGlobalLayoutListener() {
+                            new OnGlobalLayoutListener() {
                                 @Override
                                 public void onGlobalLayout() {
                                     // At this point the layout is complete and the dimensions of
