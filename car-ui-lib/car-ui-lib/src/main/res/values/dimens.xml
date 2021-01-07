@@ -247,4 +247,10 @@
     <dimen name="car_ui_ime_wide_search_item_sub_title_padding_top">22dp</dimen>
     <dimen name="car_ui_ime_wide_search_item_sub_title_text_size">24dp</dimen>
     <dimen name="car_ui_ime_wide_search_item_secondary_image_padding_left">36dp</dimen>
+
+    <!-- Padding towards the end of the input field. We have an overlay on top
+     of input text field that displays the clear and the error icon. This
+     padding is needed so that the icon does not overlap the input field. The
+     padding is calculated by 24dp + car_ui_primary_icon_size (44dp). -->
+    <dimen name="car_ui_ime_wide_screen_input_area_padding_end">68dp</dimen>
 </resources>

@@ -50,28 +50,34 @@ public final class ViewUtils {
     /**
      * No view is focused, the focused view is not shown, or the focused view is a FocusParkingView.
      */
-    public static final int NO_FOCUS = 1;
+    @VisibleForTesting
+    static final int NO_FOCUS = 1;
 
     /** A scrollable container is focused. */
-    public static final int SCROLLABLE_CONTAINER_FOCUS = 2;
+    @VisibleForTesting
+    static final int SCROLLABLE_CONTAINER_FOCUS = 2;
 
     /**
      * A regular view is focused. A regular View is a View that is neither a FocusParkingView nor a
      * scrollable container.
      */
-    public static final int REGULAR_FOCUS = 3;
+    @VisibleForTesting
+    static final int REGULAR_FOCUS = 3;
 
     /**
      * An implicit default focus view (i.e., the first focusable item in a scrollable container) is
      * focused.
      */
-    public static final int IMPLICIT_DEFAULT_FOCUS = 4;
+    @VisibleForTesting
+    static final int IMPLICIT_DEFAULT_FOCUS = 4;
 
     /** The {@code app:defaultFocus} view is focused. */
-    public static final int DEFAULT_FOCUS = 5;
+    @VisibleForTesting
+    static final int DEFAULT_FOCUS = 5;
 
     /** The {@code android:focusedByDefault} view is focused. */
-    public static final int FOCUSED_BY_DEFAULT = 6;
+    @VisibleForTesting
+    static final int FOCUSED_BY_DEFAULT = 6;
 
     /**
      * Focus level of a view. When adjusting the focus, the view with the highest focus level will
@@ -80,7 +86,7 @@ public final class ViewUtils {
     @IntDef(flag = true, value = {NO_FOCUS, SCROLLABLE_CONTAINER_FOCUS, REGULAR_FOCUS,
             IMPLICIT_DEFAULT_FOCUS, DEFAULT_FOCUS, FOCUSED_BY_DEFAULT})
     @Retention(RetentionPolicy.SOURCE)
-    public @interface FocusLevel {
+    private @interface FocusLevel {
     }
 
     /** This is a utility class. */
@@ -158,8 +164,9 @@ public final class ViewUtils {
      * @return whether the view is focused
      */
     public static boolean adjustFocus(@NonNull View root, @Nullable View currentFocus) {
-        @FocusLevel int level = getFocusLevel(currentFocus);
-        return adjustFocus(root, level);
+        @FocusLevel int currentLevel = getFocusLevel(currentFocus);
+        return adjustFocus(root, currentLevel, /* cachedFocusedView= */ null,
+                /* defaultFocusOverridesHistory= */ false);
     }
 
     /**
@@ -168,7 +175,42 @@ public final class ViewUtils {
      *
      * @return whether the view is focused
      */
-    public static boolean adjustFocus(@NonNull View root, @FocusLevel int currentLevel) {
+    @VisibleForTesting
+    static boolean adjustFocus(@NonNull View root, @FocusLevel int currentLevel) {
+        return adjustFocus(root, currentLevel, /* cachedFocusedView= */ null,
+                /* defaultFocusOverridesHistory= */ false);
+    }
+
+    /**
+     * Searches the {@code root}'s descendants for a view with the highest {@link FocusLevel} and
+     * focuses on it or the {@code cachedFocusedView}.
+     *
+     * @return whether the view is focused
+     */
+    public static boolean adjustFocus(@NonNull View root,
+            @Nullable View cachedFocusedView,
+            boolean defaultFocusOverridesHistory) {
+        return adjustFocus(root, NO_FOCUS, cachedFocusedView, defaultFocusOverridesHistory);
+    }
+
+    /**
+     * Searches the {@code root}'s descendants for a view with the highest {@link FocusLevel}. If
+     * the view's FocusLevel is higher than {@code currentLevel}, focuses on the view or {@code
+     * cachedFocusedView}.
+     *
+     * @return whether the view is focused
+     */
+    private static boolean adjustFocus(@NonNull View root,
+            @FocusLevel int currentLevel,
+            @Nullable View cachedFocusedView,
+            boolean defaultFocusOverridesHistory) {
+        // If the previously focused view has higher priority than the default focus, try to focus
+        // on the previously focused view.
+        if (!defaultFocusOverridesHistory && requestFocus(cachedFocusedView)) {
+            return true;
+        }
+
+        // Try to focus on the default focus view.
         if (currentLevel < FOCUSED_BY_DEFAULT && focusOnFocusedByDefaultView(root)) {
             return true;
         }
@@ -178,6 +220,14 @@ public final class ViewUtils {
         if (currentLevel < IMPLICIT_DEFAULT_FOCUS && focusOnImplicitDefaultFocusView(root)) {
             return true;
         }
+
+        // If the previously focused view has lower priority than the default focus, try to focus
+        // on the previously focused view.
+        if (defaultFocusOverridesHistory && requestFocus(cachedFocusedView)) {
+            return true;
+        }
+
+        // Try to focus on other views with low focus levels.
         if (currentLevel < REGULAR_FOCUS && focusOnFirstRegularView(root)) {
             return true;
         }

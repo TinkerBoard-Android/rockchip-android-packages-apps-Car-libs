@@ -62,6 +62,7 @@
                     android:scrollbars="vertical"
                     android:gravity="left|center"
                     android:backgroundTint="@drawable/car_ui_ime_wide_screen_input_area_tint_color"
+                    android:paddingEnd="@dimen/car_ui_ime_wide_screen_input_area_padding_end"
                     android:minLines="1"
                     android:inputType="text"/>
 

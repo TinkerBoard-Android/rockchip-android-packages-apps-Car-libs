@@ -19,59 +19,95 @@ package com.android.car.ui.imewidescreen;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.assertThat;
+import static androidx.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
+import static com.android.car.ui.core.SearchResultsProvider.ITEM_ID;
+import static com.android.car.ui.core.SearchResultsProvider.SECONDARY_IMAGE_ID;
+import static com.android.car.ui.core.SearchResultsProvider.SUBTITLE;
+import static com.android.car.ui.core.SearchResultsProvider.TITLE;
+import static com.android.car.ui.core.SearchResultsProviderTest.AUTHORITY;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.ADD_DESC_TITLE_TO_CONTENT_AREA;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.ADD_DESC_TO_CONTENT_AREA;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.ADD_ERROR_DESC_TO_INPUT_AREA;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.CONTENT_AREA_SURFACE_PACKAGE;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.REQUEST_RENDER_CONTENT_AREA;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_ACTION;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_SEARCH_RESULTS;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenTestActivity.sCarUiImeWideScreenController;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import android.app.Dialog;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.inputmethodservice.ExtractEditText;
 import android.inputmethodservice.InputMethodService;
 import android.inputmethodservice.InputMethodService.Insets;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.SurfaceControlViewHost;
 import android.view.View;
 import android.view.Window;
+import android.view.inputmethod.EditorInfo;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.test.InstrumentationRegistry;
 import androidx.test.core.app.ApplicationProvider;
+import androidx.test.espresso.matcher.BoundedMatcher;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.rule.ActivityTestRule;
 
 import com.android.car.ui.test.R;
 
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 /**
  * Unit tests for {@link CarUiImeWideScreenController}.
  */
+@RunWith(AndroidJUnit4.class)
 public class CarUiImeWideScreenControllerTest {
 
-    private Context mContext = ApplicationProvider.getApplicationContext();
+    private final Context mContext = ApplicationProvider.getApplicationContext();
 
     @Mock
-    Context mMockContext;
+    private EditorInfo mEditorInfoMock;
 
     @Mock
-    InputMethodService mInputMethodService;
+    private SurfaceControlViewHost.SurfacePackage mSurfacePackageMock;
 
     @Mock
-    Dialog mDialog;
+    private InputMethodService mInputMethodService;
 
     @Mock
-    Window mWindow;
+    private Dialog mDialog;
+
+    @Mock
+    private Window mWindow;
 
     private CarUiImeWideScreenTestActivity mActivity;
 
@@ -103,6 +139,7 @@ public class CarUiImeWideScreenControllerTest {
         onView(withId(R.id.car_ui_wideScreenErrorMessage)).check(matches(not(isDisplayed())));
         onView(withId(R.id.car_ui_wideScreenError)).check(matches(not(isDisplayed())));
         onView(withId(R.id.car_ui_contentAreaAutomotive)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.car_ui_ime_surface)).check(matches(not(isDisplayed())));
 
         onView(withId(R.id.car_ui_wideScreenExtractedTextIcon)).check(matches(isDisplayed()));
         onView(withId(R.id.car_ui_wideScreenClearData)).check(matches(isDisplayed()));
@@ -158,6 +195,123 @@ public class CarUiImeWideScreenControllerTest {
                 is(InputMethodService.Insets.TOUCHABLE_INSETS_REGION));
         assertThat(outInsets.contentTopInsets, is(200));
         assertThat(outInsets.visibleTopInsets, is(200));
+    }
+
+    @Test
+    public void onAppPrivateCommand_shouldShowTitleAndDesc() {
+        when(mInputMethodService.getWindow()).thenReturn(mDialog);
+        when(mDialog.getWindow()).thenReturn(mWindow);
+
+        sCarUiImeWideScreenController.setExtractEditText(new ExtractEditText(mContext));
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            Bundle bundle = new Bundle();
+            bundle.putString(ADD_DESC_TITLE_TO_CONTENT_AREA, "Title");
+            bundle.putString(ADD_DESC_TO_CONTENT_AREA, "Description");
+            sCarUiImeWideScreenController.onAppPrivateCommand(WIDE_SCREEN_ACTION, bundle);
+        });
+
+        onView(withId(R.id.car_ui_wideScreenDescriptionTitle)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_wideScreenDescriptionTitle)).check(
+                matches(withText(containsString("Title"))));
+
+        onView(withId(R.id.car_ui_wideScreenDescription)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_wideScreenDescription)).check(
+                matches(withText(containsString("Description"))));
+    }
+
+    @Test
+    public void onAppPrivateCommand_shouldShowErrorMessage() {
+        when(mInputMethodService.getWindow()).thenReturn(mDialog);
+        when(mDialog.getWindow()).thenReturn(mWindow);
+
+        sCarUiImeWideScreenController.setExtractEditText(new ExtractEditText(mContext));
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            Bundle bundle = new Bundle();
+            bundle.putString(ADD_ERROR_DESC_TO_INPUT_AREA, "Error Message");
+            sCarUiImeWideScreenController.onAppPrivateCommand(WIDE_SCREEN_ACTION, bundle);
+        });
+
+        onView(withId(R.id.car_ui_wideScreenErrorMessage)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_wideScreenErrorMessage)).check(
+                matches(withText(containsString("Error Message"))));
+        onView(withId(R.id.car_ui_wideScreenError)).check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void onAppPrivateCommand_shouldShowSearchResults() {
+        ContentResolver cr = ApplicationProvider.getApplicationContext().getContentResolver();
+        cr.insert(Uri.parse(AUTHORITY), getRecord());
+
+        when(mInputMethodService.getWindow()).thenReturn(mDialog);
+        when(mDialog.getWindow()).thenReturn(mWindow);
+
+        sCarUiImeWideScreenController.setExtractEditText(new ExtractEditText(mContext));
+        sCarUiImeWideScreenController.setEditorInfo(mEditorInfoMock);
+
+        CarUiImeWideScreenController spy = Mockito.spy(sCarUiImeWideScreenController);
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            doReturn("com.android.car.ui.test").when(spy).getPackageName(ArgumentMatchers.any());
+            Bundle bundle = new Bundle();
+            spy.onAppPrivateCommand(WIDE_SCREEN_SEARCH_RESULTS, bundle);
+        });
+
+        onView(withId(R.id.car_ui_wideScreenSearchResultList)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_wideScreenSearchResultList))
+                .check(matches(atPosition(0, hasDescendant(withText("Title")))));
+        onView(withId(R.id.car_ui_wideScreenSearchResultList))
+                .check(matches(atPosition(0, hasDescendant(withText("SubTitle")))));
+    }
+
+    @Test
+    public void onAppPrivateCommand_shouldShowSurfaceView() {
+        when(mInputMethodService.getWindow()).thenReturn(mDialog);
+        when(mDialog.getWindow()).thenReturn(mWindow);
+
+        sCarUiImeWideScreenController.setExtractEditText(new ExtractEditText(mContext));
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(CONTENT_AREA_SURFACE_PACKAGE, mSurfacePackageMock);
+            sCarUiImeWideScreenController.onAppPrivateCommand(WIDE_SCREEN_ACTION, bundle);
+        });
+
+        onView(withId(R.id.car_ui_ime_surface)).check(matches(isDisplayed()));
+    }
+
+    private static ContentValues getRecord() {
+        ContentValues values = new ContentValues();
+        int id = 1;
+        values.put(ITEM_ID, id);
+        values.put(SECONDARY_IMAGE_ID, id);
+        values.put(TITLE, "Title");
+        values.put(SUBTITLE, "SubTitle");
+        return values;
+    }
+
+    private static Matcher<View> atPosition(final int position,
+            @NonNull final Matcher<View> itemMatcher) {
+        checkNotNull(itemMatcher);
+        return new BoundedMatcher<View, RecyclerView>(RecyclerView.class) {
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("has item at position " + position + ": ");
+                itemMatcher.describeTo(description);
+            }
+
+            @Override
+            protected boolean matchesSafely(final RecyclerView view) {
+                RecyclerView.ViewHolder viewHolder = view.findViewHolderForAdapterPosition(
+                        position);
+                if (viewHolder == null) {
+                    // has no item on such position
+                    return false;
+                }
+                return itemMatcher.matches(viewHolder.itemView);
+            }
+        };
     }
 
     private CarUiImeWideScreenController getController() {
