@@ -541,7 +541,9 @@ public final class CarUiRecyclerView extends RecyclerView {
     }
 
     /**
-     * Sets divider item decoration for linear layout.
+     * Sets divider item decoration for linear layout. This should be called after the call to
+     * {@link #setLayoutManager(LayoutManager)}  has been completed. If called before that could
+     * result in unexpected behavior.
      */
     public void setLinearDividerItemDecoration(boolean enableDividers) {
         if (enableDividers) {
@@ -552,7 +554,9 @@ public final class CarUiRecyclerView extends RecyclerView {
     }
 
     /**
-     * Sets divider item decoration for grid layout.
+     * Sets divider item decoration for grid layout. This should be called after the call to
+     * {@link #setLayoutManager(LayoutManager)}  has been completed. If called before that could
+     * result in unexpected behavior.
      */
     public void setGridDividerItemDecoration(boolean enableDividers) {
         if (enableDividers) {
