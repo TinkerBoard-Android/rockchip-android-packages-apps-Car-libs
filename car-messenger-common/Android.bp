@@ -34,7 +34,6 @@ android_library {
         "car-apps-common",
         "car-messenger-protos",
         "car-telephony-common",
-        "connected-device-protos",
         "libphonenumber",
     ],
 }
