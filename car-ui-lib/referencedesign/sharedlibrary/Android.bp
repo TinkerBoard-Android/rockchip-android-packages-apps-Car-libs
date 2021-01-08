@@ -9,9 +9,7 @@ android_app {
     srcs: ["src/main/java/**/*.java"],
     resource_dirs: ["src/main/res"],
 
-    aaptflags: ["--shared-lib"],
-
-    libs: ["car-ui-lib-oem-apis"],
+    static_libs: ["car-ui-lib-oem-apis"],
 
     optimize: {
         enabled: false,

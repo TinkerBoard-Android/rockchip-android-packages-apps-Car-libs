@@ -408,6 +408,7 @@
   <public type="string" name="car_ui_scrollbar_page_down_button"/>
   <public type="string" name="car_ui_scrollbar_page_up_button"/>
   <public type="string" name="car_ui_scrolling_limited_message"/>
+  <public type="string" name="car_ui_shared_library_package_system_property_name"/>
   <public type="string" name="car_ui_toolbar_default_search_hint"/>
   <public type="string" name="car_ui_toolbar_menu_item_overflow_title"/>
   <public type="string" name="car_ui_toolbar_menu_item_search_title"/>

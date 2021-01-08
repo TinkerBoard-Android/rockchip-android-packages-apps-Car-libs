@@ -17,10 +17,15 @@ package com.android.car.ui.sharedlibrarysupport;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.car.ui.CarUiAppComponentFactory;
+import com.android.car.ui.R;
 import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryFactoryOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryVersionProviderOEMV1;
+import com.android.car.ui.utils.CarUiUtils;
 
 /**
  * This is a singleton that contains a {@link SharedLibraryFactory}. That SharedLibraryFactory
@@ -28,6 +33,7 @@ import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryVersionProviderOEMV
  */
 public final class SharedLibraryFactorySingleton {
 
+    private static final String TAG = "carui";
     private static final CharSequence OEMAPIS_PREFIX = "com.android.car.ui.sharedlibrary.oemapis.";
     private static SharedLibraryFactory sInstance;
 
@@ -44,6 +50,35 @@ public final class SharedLibraryFactorySingleton {
             return sInstance;
         }
 
+        if (CarUiAppComponentFactory.sModifiableClassLoader == null) {
+            Log.w(TAG, "CarUiAppComponentFactory not initialized! "
+                    + "Did you add it to your AndroidManifest.xml? " + context.getPackageName());
+            sInstance = new SharedLibraryFactoryStub();
+            return sInstance;
+        }
+
+        String sharedLibPackageName = CarUiUtils.getSystemProperty(context.getResources(),
+                R.string.car_ui_shared_library_package_system_property_name);
+
+        if (TextUtils.isEmpty(sharedLibPackageName)) {
+            sInstance = new SharedLibraryFactoryStub();
+            return sInstance;
+        }
+
+        Context sharedLibraryContext;
+        try {
+            sharedLibraryContext = context.createPackageContext(
+                    sharedLibPackageName,
+                    Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Could not load CarUi shared library", e);
+            sInstance = new SharedLibraryFactoryStub();
+            return sInstance;
+        }
+
+        CarUiAppComponentFactory.sModifiableClassLoader
+                .addAdditionalClassLoader(sharedLibraryContext.getClassLoader());
+
         Object oemVersionProvider;
         try {
             oemVersionProvider = Class
@@ -52,9 +87,9 @@ public final class SharedLibraryFactorySingleton {
                     .newInstance();
         } catch (ReflectiveOperationException e) {
             if (e instanceof ClassNotFoundException) {
-                Log.i("carui", "SharedLibraryVersionProviderImpl not found.");
+                Log.i(TAG, "SharedLibraryVersionProviderImpl not found.");
             } else {
-                Log.e("carui", "SharedLibraryVersionProviderImpl could not be instantiated!");
+                Log.e(TAG, "SharedLibraryVersionProviderImpl could not be instantiated!", e);
             }
             sInstance = new SharedLibraryFactoryStub();
             return sInstance;
@@ -68,7 +103,7 @@ public final class SharedLibraryFactorySingleton {
             versionProvider = new SharedLibraryVersionProviderAdapterV1(
                     (SharedLibraryVersionProviderOEMV1) oemVersionProvider);
         } else {
-            Log.e("carui", "SharedLibraryVersionProviderImpl was not instanceof any known "
+            Log.e(TAG, "SharedLibraryVersionProviderImpl was not instanceof any known "
                     + "versions of SharedLibraryVersionProviderOEMV#.");
 
             sInstance = new SharedLibraryFactoryStub();
@@ -76,14 +111,14 @@ public final class SharedLibraryFactorySingleton {
         }
 
         Object factory =
-                versionProvider.getSharedLibraryFactory(1, context.getApplicationContext());
+                versionProvider.getSharedLibraryFactory(1, sharedLibraryContext);
         // Add new factories in an if-else chain here, in descending version order so that
         // higher versions are preferred.
         if (classExists(OEMAPIS_PREFIX + "SharedLibraryFactoryOEMV1")
                 && factory instanceof SharedLibraryFactoryOEMV1) {
             sInstance = new SharedLibraryFactoryAdapterV1((SharedLibraryFactoryOEMV1) factory);
         } else {
-            Log.e("carui", "SharedLibraryVersionProvider found, but did not provide a"
+            Log.e(TAG, "SharedLibraryVersionProvider found, but did not provide a"
                     + " factory implementing any known interfaces!");
             sInstance = new SharedLibraryFactoryStub();
         }
