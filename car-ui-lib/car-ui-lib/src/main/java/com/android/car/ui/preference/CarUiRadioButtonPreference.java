@@ -20,6 +20,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.RadioButton;
 
+import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceViewHolder;
 import androidx.preference.TwoStatePreference;
 
@@ -36,18 +37,18 @@ public class CarUiRadioButtonPreference extends TwoStatePreference {
     }
 
     public CarUiRadioButtonPreference(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init();
+        this(context, attrs, defStyleAttr, /* defStyleRes= */ 0);
     }
 
     public CarUiRadioButtonPreference(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init();
+        // Reusing preferenceStyle since there is no separate style for TwoStatePreference or
+        // CarUiRadioButtonPreference.
+        this(context, attrs, TypedArrayUtils.getAttr(context, R.attr.preferenceStyle,
+                android.R.attr.preferenceStyle));
     }
 
     public CarUiRadioButtonPreference(Context context) {
-        super(context);
-        init();
+        this(context, /* attrs= */ null);
     }
 
     private void init() {
