@@ -16,9 +16,12 @@
 
 package com.android.car.ui.paintbooth.widgets;
 
+import static com.android.car.ui.core.CarUi.requireCarUiComponentById;
+
 import android.app.Activity;
 import android.os.Bundle;
 
+import com.android.car.ui.button.CarUiButton;
 import com.android.car.ui.core.CarUi;
 import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.toolbar.Toolbar;
@@ -36,5 +39,13 @@ public class WidgetActivity extends Activity {
         ToolbarController toolbar = CarUi.requireToolbar(this);
         toolbar.setTitle(getTitle());
         toolbar.setState(Toolbar.State.SUBPAGE);
+
+        CarUiButton button = requireCarUiComponentById(
+                getWindow().getDecorView(), R.id.car_ui_button);
+        StringBuilder title = new StringBuilder("Hello, world!");
+        button.setOnClickListener(b -> {
+            title.append("!");
+            b.setTitle(title.toString());
+        });
     }
 }

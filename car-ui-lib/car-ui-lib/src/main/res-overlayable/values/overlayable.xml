@@ -322,6 +322,7 @@ limitations under the License.-->
       <item type="id" name="car_ui_alert_title"/>
       <item type="id" name="car_ui_base_layout_content_container"/>
       <item type="id" name="car_ui_closeKeyboard"/>
+      <item type="id" name="car_ui_component_reference"/>
       <item type="id" name="car_ui_contentAreaAutomotive"/>
       <item type="id" name="car_ui_divider"/>
       <item type="id" name="car_ui_first_action_container"/>

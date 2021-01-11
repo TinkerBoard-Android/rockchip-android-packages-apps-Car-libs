@@ -268,4 +268,22 @@
              for the FocusParkingView in an ActivityView. The default value is true. -->
         <attr name="shouldRestoreFocus" format="boolean"/>
     </declare-styleable>
+
+    <declare-styleable name="CarUiButton">
+        <attr name="android:id"/>
+        <attr name="android:enabled"/>
+        <attr name="carUiButtonSize" format="enum">
+            <enum name="small" value="0"/>
+            <enum name="medium" value="1"/>
+            <enum name="large" value="2"/>
+        </attr>
+        <attr name="carUiButtonTitle" format="string"/>
+        <attr name="carUiButtonIcon" format="reference"/>
+        <attr name="carUiButtonColorScheme" format="enum">
+            <enum name="basic" value="0"/>
+            <enum name="warning" value="1"/>
+            <enum name="error" value="2"/>
+        </attr>
+        <attr name="carUiButtonBorderless" format="boolean"/>
+    </declare-styleable>
 </resources>

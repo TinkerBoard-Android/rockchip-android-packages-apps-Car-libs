@@ -257,6 +257,7 @@
   <public type="id" name="car_ui_alert_title"/>
   <public type="id" name="car_ui_base_layout_content_container"/>
   <public type="id" name="car_ui_closeKeyboard"/>
+  <public type="id" name="car_ui_component_reference"/>
   <public type="id" name="car_ui_contentAreaAutomotive"/>
   <public type="id" name="car_ui_divider"/>
   <public type="id" name="car_ui_first_action_container"/>

@@ -27,10 +27,12 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.car.ui.CarUiLayoutInflaterFactory;
 import com.android.car.ui.baselayout.Insets;
 
 import java.lang.reflect.Method;
@@ -54,6 +56,9 @@ public class CarUiInstaller extends ContentProvider {
             Build.TYPE.toLowerCase(Locale.ROOT).contains("debug")
                     || Build.TYPE.toLowerCase(Locale.ROOT).equals("eng");
 
+    private final CarUiLayoutInflaterFactory mLayoutInflaterFactory =
+            new CarUiLayoutInflaterFactory();
+
     @Override
     public boolean onCreate() {
         Context context = getContext();
@@ -68,6 +73,20 @@ public class CarUiInstaller extends ContentProvider {
                 new Application.ActivityLifecycleCallbacks() {
                     private Insets mInsets = null;
                     private boolean mIsActivityStartedForFirstTime = false;
+
+                    @Override
+                    public void onActivityPreCreated(Activity activity,
+                            Bundle savedInstanceState) {
+                        LayoutInflater layoutInflater = LayoutInflater.from(activity);
+
+                        if (layoutInflater.getFactory() == null) {
+                            layoutInflater.setFactory2(mLayoutInflaterFactory);
+                        } else if (!(layoutInflater.getFactory()
+                                instanceof CarUiLayoutInflaterFactory)) {
+                            throw new AssertionError(layoutInflater.getFactory()
+                                    + " must extend CarUiLayoutInflater");
+                        }
+                    }
 
                     @Override
                     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {

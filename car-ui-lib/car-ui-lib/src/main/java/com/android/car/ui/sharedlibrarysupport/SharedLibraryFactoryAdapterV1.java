@@ -15,12 +15,16 @@
  */
 package com.android.car.ui.sharedlibrarysupport;
 
+import android.content.Context;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
+import com.android.car.ui.button.CarUiButton;
+import com.android.car.ui.button.CarUiButtonAttributes;
 import com.android.car.ui.sharedlibrary.oemapis.InsetsOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryFactoryOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
@@ -35,6 +39,7 @@ import com.android.car.ui.toolbar.ToolbarControllerAdapterV1;
 public final class SharedLibraryFactoryAdapterV1 implements SharedLibraryFactory {
 
     SharedLibraryFactoryOEMV1 mOem;
+    SharedLibraryFactoryStub mFactoryStub = new SharedLibraryFactoryStub();
 
     public SharedLibraryFactoryAdapterV1(SharedLibraryFactoryOEMV1 oem) {
         mOem = oem;
@@ -50,10 +55,16 @@ public final class SharedLibraryFactoryAdapterV1 implements SharedLibraryFactory
                 insets -> insetsChangedListener.onCarUiInsetsChanged(adaptInsets(insets)),
                 toolbarEnabled, true);
 
-        if (toolbar == null) {
-            return null;
-        }
-        return new ToolbarControllerAdapterV1(toolbar);
+        return toolbar != null
+                ? new ToolbarControllerAdapterV1(toolbar)
+                : null;
+    }
+
+    @NonNull
+    @Override
+    public CarUiButton createButton(Context context, @Nullable CarUiButtonAttributes attrs) {
+        // TODO(b/172345817) Create OEM APIs for this and call them from here
+        return mFactoryStub.createButton(context, attrs);
     }
 
     private Insets adaptInsets(InsetsOEMV1 insetsOEM) {

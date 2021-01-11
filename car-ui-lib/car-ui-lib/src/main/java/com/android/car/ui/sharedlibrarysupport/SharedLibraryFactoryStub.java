@@ -18,6 +18,7 @@ package com.android.car.ui.sharedlibrarysupport;
 import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,6 +33,9 @@ import androidx.fragment.app.Fragment;
 import com.android.car.ui.R;
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
+import com.android.car.ui.button.CarUiButton;
+import com.android.car.ui.button.CarUiButtonAttributes;
+import com.android.car.ui.button.CarUiButtonImpl;
 import com.android.car.ui.toolbar.ToolbarController;
 import com.android.car.ui.toolbar.ToolbarControllerImpl;
 
@@ -85,6 +89,12 @@ final class SharedLibraryFactoryStub implements SharedLibraryFactory {
         insetsUpdater.replaceInsetsChangedListenerWith(insetsChangedListener);
 
         return toolbarController;
+    }
+
+    @NonNull
+    @Override
+    public CarUiButton createButton(Context context, @Nullable CarUiButtonAttributes attrs) {
+        return new CarUiButtonImpl(context, attrs);
     }
 
     /**

@@ -17,6 +17,9 @@
     <!-- Id used for the search button when using Toolbar.createSearch() method -->
     <item name="search" type="id"/>
 
+    <!-- Id used as a tag on views to store their CarUi component objects. -->
+    <item type="id" name="car_ui_component_reference"/>
+
     <!-- WideScreen Keyboard IDs-->
     <item type="id" name="car_ui_wideScreenInputArea"/>
     <item type="id" name="car_ui_imeWideScreenInputArea"/>

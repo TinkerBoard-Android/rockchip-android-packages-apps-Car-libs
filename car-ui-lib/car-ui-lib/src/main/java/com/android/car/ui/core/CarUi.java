@@ -21,12 +21,14 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.car.ui.R;
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
 import com.android.car.ui.toolbar.ToolbarController;
 
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 /**
  * Public interface for general CarUi static functions.
@@ -35,6 +37,35 @@ public class CarUi {
 
     /** Prevent instantiating this class */
     private CarUi() {}
+
+    /**
+     * Gets a CarUi component, such as {@link com.android.car.ui.button.CarUiButton}, from the
+     * view hierarchy. The interfaces for these components don't extend View, so you can't
+     * get them through findViewById().
+     *
+     * @param view The parent view. Its descendants will be searched for the component.
+     * @param id The id of the component.
+     * @param <T> The resulting type of the component, such as
+     *            {@link com.android.car.ui.button.CarUiButton}
+     * @return The component found, or null.
+     */
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public static <T> T findCarUiComponentById(View view, int id) {
+        View componentView = view.findViewById(id);
+        return componentView != null
+                ? (T) componentView.getTag(R.id.car_ui_component_reference)
+                : null;
+    }
+
+    /**
+     * Same as {@link #findCarUiComponentById(View, int)}, but will throw an exception
+     * if the result is null.
+     */
+    @NonNull
+    public static <T> T requireCarUiComponentById(View view, int id) {
+        return Objects.requireNonNull(findCarUiComponentById(view, id));
+    }
 
     /**
      * Gets the {@link ToolbarController} for an activity. Requires that the Activity uses
