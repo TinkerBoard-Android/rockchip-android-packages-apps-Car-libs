@@ -204,6 +204,22 @@ public class ViewUtilsTest {
     }
 
     @Test
+    public void testFindImplicitDefaultFocusView_selectedItem_inFocusArea() {
+        mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        View selectedItem = mList5.getLayoutManager().findViewByPosition(1);
+                        selectedItem.setSelected(true);
+                        View implicitDefaultFocus =
+                                ViewUtils.findImplicitDefaultFocusView(mFocusArea5);
+                        assertThat(implicitDefaultFocus).isEqualTo(selectedItem);
+                    }
+                }));
+    }
+
+    @Test
     public void testFindFirstFocusableDescendant() {
         mRoot.post(() -> {
             mFocusArea2.setFocusable(true);
@@ -281,6 +297,20 @@ public class ViewUtilsTest {
                         mFocusArea5.setVisibility(INVISIBLE);
                         View firstItem = mList5.getLayoutManager().findViewByPosition(0);
                         assertThat(ViewUtils.isImplicitDefaultFocusView(firstItem)).isFalse();
+                    }
+                }));
+    }
+
+    @Test
+    public void testIsImplicitDefaultFocusView_selectedItem() {
+        mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        View selectedItem = mList5.getLayoutManager().findViewByPosition(1);
+                        selectedItem.setSelected(true);
+                        assertThat(ViewUtils.isImplicitDefaultFocusView(selectedItem)).isTrue();
                     }
                 }));
     }
