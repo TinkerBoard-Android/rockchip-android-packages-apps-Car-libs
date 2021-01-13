@@ -44,6 +44,8 @@
     <bool name="car_ui_preference_show_chevron">false</bool>
     <!-- whether list preference should be shown in full screen or as a dialog -->
     <bool name="car_ui_preference_list_show_full_screen">true</bool>
+    <!-- Whether list and multi-select preference selection changes should propagate instantly -->
+    <bool name="car_ui_preference_list_instant_change_callback">false</bool>
 
     <!-- List items -->
 
