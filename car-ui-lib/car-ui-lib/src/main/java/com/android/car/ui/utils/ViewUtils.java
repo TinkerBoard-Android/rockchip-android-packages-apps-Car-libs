@@ -65,8 +65,8 @@ public final class ViewUtils {
     static final int REGULAR_FOCUS = 3;
 
     /**
-     * An implicit default focus view (i.e., the first focusable item in a scrollable container) is
-     * focused.
+     * An implicit default focus view (i.e., the selected item or the first focusable item in a
+     * scrollable container) is focused.
      */
     @VisibleForTesting
     static final int IMPLICIT_DEFAULT_FOCUS = 4;
@@ -265,8 +265,8 @@ public final class ViewUtils {
     }
 
     /**
-     * Returns whether the {@code view} is an implicit default focus view, i.e., the first focusable
-     * item in a rotary container.
+     * Returns whether the {@code view} is an implicit default focus view, i.e., the selected
+     * item or the first focusable item in a rotary container.
      */
     @VisibleForTesting
     static boolean isImplicitDefaultFocusView(@NonNull View view) {
@@ -283,7 +283,8 @@ public final class ViewUtils {
         if (rotaryContainer == null) {
             return false;
         }
-        return findFirstFocusableDescendant(rotaryContainer) == view;
+        return findFirstSelectedFocusableDescendant(rotaryContainer) == view
+                || findFirstFocusableDescendant(rotaryContainer) == view;
     }
 
     private static boolean isRotaryContainer(@NonNull View view) {
@@ -408,15 +409,21 @@ public final class ViewUtils {
 
     /**
      * Searches the {@code view} and its descendants in depth first order, and returns the first
-     * implicit default focus view, i.e., the first focusable item in the first rotary container.
-     * Returns null if not found.
+     * implicit default focus view, i.e., the selected item or the first focusable item in the
+     * first rotary container. Returns null if not found.
      */
     @VisibleForTesting
     @Nullable
     static View findImplicitDefaultFocusView(@NonNull View view) {
         View rotaryContainer = findRotaryContainer(view);
-        return rotaryContainer == null
-                ? null
+        if (rotaryContainer == null) {
+            return null;
+        }
+
+        View selectedItem = findFirstSelectedFocusableDescendant(rotaryContainer);
+
+        return selectedItem != null
+                ? selectedItem
                 : findFirstFocusableDescendant(rotaryContainer);
     }
 
@@ -429,6 +436,18 @@ public final class ViewUtils {
     static View findFirstFocusableDescendant(@NonNull View view) {
         return depthFirstSearch(view,
                 /* targetPredicate= */ v -> v != view && canTakeFocus(v),
+                /* skipPredicate= */ v -> !v.isShown());
+    }
+
+    /**
+     * Searches the {@code view}'s descendants in depth first order, and returns the first view
+     * that is selected and can take focus, or null if not found.
+     */
+    @VisibleForTesting
+    @Nullable
+    static View findFirstSelectedFocusableDescendant(@NonNull View view) {
+        return depthFirstSearch(view,
+                /* targetPredicate= */ v -> v != view && v.isSelected() && canTakeFocus(v),
                 /* skipPredicate= */ v -> !v.isShown());
     }
 
