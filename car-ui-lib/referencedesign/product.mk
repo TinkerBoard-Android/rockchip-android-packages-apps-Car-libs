@@ -12,6 +12,7 @@ PRODUCT_COPY_FILES += \
 # Include generated RROs
 PRODUCT_PACKAGES += \
     googlecarui-com-android-car-ui-paintbooth \
+    googlecarui-com-google-android-car-ui-paintbooth \
     googlecarui-com-android-car-rotaryplayground \
     googlecarui-com-android-car-themeplayground \
     googlecarui-com-android-car-carlauncher \
