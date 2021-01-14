@@ -69,6 +69,7 @@ public class CarAssistUtils {
 
     private final Context mContext;
     private final AssistUtils mAssistUtils;
+    @Nullable
     private final FallbackAssistant mFallbackAssistant;
     private final String mErrorMessage;
     private final boolean mIsFallbackAssistantEnabled;
@@ -106,10 +107,11 @@ public class CarAssistUtils {
     public CarAssistUtils(Context context) {
         mContext = context;
         mAssistUtils = new AssistUtils(context);
-        mFallbackAssistant = new FallbackAssistant(context);
         mErrorMessage = context.getString(R.string.assist_action_failed_toast);
+
         mIsFallbackAssistantEnabled =
                 context.getResources().getBoolean(R.bool.config_enableFallbackAssistant);
+        mFallbackAssistant = mIsFallbackAssistantEnabled ? new FallbackAssistant(context) : null;
     }
 
     /**
@@ -117,6 +119,13 @@ public class CarAssistUtils {
      */
     public boolean hasActiveAssistant() {
         return mAssistUtils.getActiveServiceComponentName() != null;
+    }
+
+    /**
+     * Returns {@code true} if the fallback assistant is enabled.
+     */
+    public boolean isFallbackAssistantEnabled() {
+        return mIsFallbackAssistantEnabled;
     }
 
     /**
@@ -384,6 +393,10 @@ public class CarAssistUtils {
 
     private void handleFallback(StatusBarNotification sbn, String action,
             ActionRequestCallback callback) {
+        if (mFallbackAssistant == null) {
+            return;
+        }
+
         FallbackAssistant.Listener listener = new FallbackAssistant.Listener() {
             @Override
             public void onMessageRead(boolean hasError) {
