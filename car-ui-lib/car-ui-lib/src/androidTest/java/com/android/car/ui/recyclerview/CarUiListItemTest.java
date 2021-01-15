@@ -95,6 +95,23 @@ public class CarUiListItemTest {
     }
 
     @Test
+    public void testItemVisibility_withChevron() {
+        List<CarUiListItem> items = new ArrayList<>();
+
+        CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.CHEVRON);
+        item.setTitle("Test item with chevron");
+        items.add(item);
+
+        mCarUiRecyclerView.post(
+                () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items)));
+
+        onView(withId(R.id.title)).check(matches(isDisplayed()));
+        onView(withId(R.id.body)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.icon_container)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.action_container)).check(matches(isDisplayed()));
+    }
+
+    @Test
     public void testItemVisibility_withTitle_withBodyAndIcon() {
         List<CarUiListItem> items = new ArrayList<>();
 

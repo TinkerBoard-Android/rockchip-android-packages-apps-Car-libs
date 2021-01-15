@@ -203,6 +203,11 @@ public class CarUiListItemActivity extends Activity implements InsetsChangedList
         item.setChecked(true);
         mData.add(item);
 
+        item = new CarUiContentListItem(CarUiContentListItem.Action.CHEVRON);
+        item.setTitle(getString(R.string.item_with_chevron));
+        item.setBody(getString(R.string.test_body));
+        mData.add(item);
+
         return mData;
     }
 
