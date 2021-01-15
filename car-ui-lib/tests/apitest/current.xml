@@ -15,6 +15,7 @@
   <public type="bool" name="car_ui_ime_wide_screen_aligned_left"/>
   <public type="bool" name="car_ui_ime_wide_screen_allow_app_hide_content_area"/>
   <public type="bool" name="car_ui_list_item_single_line_title"/>
+  <public type="bool" name="car_ui_preference_list_instant_change_callback"/>
   <public type="bool" name="car_ui_preference_list_show_full_screen"/>
   <public type="bool" name="car_ui_preference_show_chevron"/>
   <public type="bool" name="car_ui_scrollbar_enable"/>
