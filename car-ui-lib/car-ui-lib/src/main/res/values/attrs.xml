@@ -149,6 +149,14 @@
         <attr name="actionEnabled" format="boolean"/>
     </declare-styleable>
 
+    <declare-styleable name="CarUiTwoActionBasePreference">
+        <!-- All of these are disallowed -->
+        <attr name="layout" format="reference"/>
+        <attr name="android:layout" format="reference"/>
+        <attr name="widgetLayout" format="reference"/>
+        <attr name="android:widgetLayout" format="reference"/>
+    </declare-styleable>
+
     <declare-styleable name="CarUiTwoActionTextPreference">
         <attr name="secondaryActionStyle" format="enum">
             <enum name="bordered" value="0"/>
