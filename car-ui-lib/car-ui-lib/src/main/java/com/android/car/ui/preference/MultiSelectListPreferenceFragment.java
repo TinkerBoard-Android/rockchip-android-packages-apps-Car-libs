@@ -59,6 +59,7 @@ public class MultiSelectListPreferenceFragment extends Fragment implements Inset
     private Set<String> mNewValues;
     private ToolbarController mToolbar;
     private boolean mFullScreen;
+    private boolean mUseInstantPreferenceChangeCallback;
 
     /**
      * Returns a new instance of {@link MultiSelectListPreferenceFragment} for the {@link
@@ -91,6 +92,8 @@ public class MultiSelectListPreferenceFragment extends Fragment implements Inset
         super.onViewCreated(view, savedInstanceState);
         final CarUiRecyclerView recyclerView = CarUiUtils.requireViewByRefId(view, R.id.list);
         mFullScreen = requireArguments().getBoolean(ARG_FULLSCREEN, true);
+        mUseInstantPreferenceChangeCallback =
+                getResources().getBoolean(R.bool.car_ui_preference_list_instant_change_callback);
         mToolbar = mFullScreen ? CarUi.getToolbar(requireActivity()) : null;
 
         // TODO(b/150230923) remove the code for the old toolbar height change when apps are ready
@@ -158,6 +161,10 @@ public class MultiSelectListPreferenceFragment extends Fragment implements Inset
                 } else {
                     mNewValues.remove(entryValue);
                 }
+
+                if (mUseInstantPreferenceChangeCallback) {
+                    updatePreference();
+                }
             });
 
             listItems.add(item);
@@ -179,7 +186,9 @@ public class MultiSelectListPreferenceFragment extends Fragment implements Inset
     @Override
     public void onStop() {
         super.onStop();
-        updatePreference();
+        if (!mUseInstantPreferenceChangeCallback) {
+            updatePreference();
+        }
     }
 
     private void updatePreference() {

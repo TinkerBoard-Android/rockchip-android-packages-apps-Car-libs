@@ -58,6 +58,7 @@ public class ListPreferenceFragment extends Fragment implements InsetsChangedLis
     private CarUiContentListItem mSelectedItem;
     private int mSelectedIndex = -1;
     private boolean mFullScreen;
+    private boolean mUseInstantPreferenceChangeCallback;
 
     /**
      * Returns a new instance of {@link ListPreferenceFragment} for the {@link ListPreference} with
@@ -90,6 +91,8 @@ public class ListPreferenceFragment extends Fragment implements InsetsChangedLis
         super.onViewCreated(view, savedInstanceState);
         final CarUiRecyclerView carUiRecyclerView = CarUiUtils.requireViewByRefId(view, R.id.list);
         mFullScreen = requireArguments().getBoolean(ARG_FULLSCREEN, true);
+        mUseInstantPreferenceChangeCallback =
+                getResources().getBoolean(R.bool.car_ui_preference_list_instant_change_callback);
         ToolbarController toolbar = mFullScreen ? CarUi.getToolbar(getActivity()) : null;
 
         // TODO(b/150230923) remove the code for the old toolbar height change when apps are ready
@@ -153,12 +156,21 @@ public class ListPreferenceFragment extends Fragment implements InsetsChangedLis
             }
 
             item.setOnCheckedChangeListener((listItem, isChecked) -> {
+                if (!isChecked) {
+                    // Previously selected item is unchecked now, no further processing is needed.
+                    return;
+                }
+
                 if (mSelectedItem != null) {
                     mSelectedItem.setChecked(false);
                     adapter.notifyItemChanged(listItems.indexOf(mSelectedItem));
                 }
                 mSelectedItem = listItem;
                 mSelectedIndex = listItems.indexOf(mSelectedItem);
+
+                if (mUseInstantPreferenceChangeCallback) {
+                    updatePreference();
+                }
             });
 
             listItems.add(item);
@@ -179,7 +191,10 @@ public class ListPreferenceFragment extends Fragment implements InsetsChangedLis
     @Override
     public void onStop() {
         super.onStop();
-        updatePreference();
+
+        if (!mUseInstantPreferenceChangeCallback) {
+            updatePreference();
+        }
     }
 
     private void updatePreference() {
