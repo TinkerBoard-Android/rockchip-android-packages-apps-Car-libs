@@ -330,4 +330,18 @@ public final class CarUiUtils {
         drawable.draw(canvas);
         return bitmap;
     }
+
+    /**
+     * Exact copy from Androidx.TypedArrayUtils class
+     * @return The resource ID value in the {@code context} specified by {@code attr}. If it does
+     * not exist, {@code fallbackAttr}.
+     */
+    public static int getAttr(@NonNull Context context, int attr, int fallbackAttr) {
+        TypedValue value = new TypedValue();
+        context.getTheme().resolveAttribute(attr, value, true);
+        if (value.resourceId != 0) {
+            return attr;
+        }
+        return fallbackAttr;
+    }
 }

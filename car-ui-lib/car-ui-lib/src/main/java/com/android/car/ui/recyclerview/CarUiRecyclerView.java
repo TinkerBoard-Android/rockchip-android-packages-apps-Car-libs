@@ -301,8 +301,9 @@ public final class CarUiRecyclerView extends RecyclerView {
         boolean rotaryScrollEnabled = styledAttributes != null && styledAttributes.getBoolean(
                 R.styleable.CarUiRecyclerView_rotaryScrollEnabled, /* defValue=*/ false);
         if (rotaryScrollEnabled) {
-            int orientation = styledAttributes.getInt(R.styleable.RecyclerView_android_orientation,
-                    LinearLayout.VERTICAL);
+            int orientation = styledAttributes
+                    .getInt(R.styleable.CarUiRecyclerView_android_orientation,
+                            LinearLayout.VERTICAL);
             CarUiUtils.setRotaryScrollEnabled(
                     this, /* isVertical= */ orientation == LinearLayout.VERTICAL);
         } else {

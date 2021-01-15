@@ -69,6 +69,7 @@ limitations under the License.-->
       <item type="attr" name="layout_goneMarginStart"/>
       <item type="attr" name="layout_goneMarginTop"/>
       <item type="attr" name="layout_optimizationLevel"/>
+      <item type="attr" name="preferenceStyle"/>
       <item type="attr" name="state_ux_restricted"/>
       <item type="attr" name="title"/>
       <item type="bool" name="car_ui_alert_dialog_force_dismiss_button"/>

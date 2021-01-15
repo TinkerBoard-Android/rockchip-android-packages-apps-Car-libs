@@ -161,6 +161,9 @@
         <attr name="secondaryActionIcon" format="reference"/>
     </declare-styleable>
 
+    <!-- Adding AndroidX attr here, because it doesn't compile on google3 -->
+    <attr name="preferenceStyle" format="reference"/>
+
     <!-- Theme attribute to specify a default style for all CarUiPreferences -->
     <attr name="carUiPreferenceStyle" format="reference" />
 

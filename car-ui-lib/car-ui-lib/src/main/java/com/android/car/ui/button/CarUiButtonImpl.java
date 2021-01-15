@@ -34,6 +34,7 @@ import java.util.function.Consumer;
  * implementation when present.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY)
+@SuppressWarnings("AndroidJdkLibsChecker")
 public class CarUiButtonImpl extends FrameLayout implements CarUiButton {
     private TextView mTextView;
 

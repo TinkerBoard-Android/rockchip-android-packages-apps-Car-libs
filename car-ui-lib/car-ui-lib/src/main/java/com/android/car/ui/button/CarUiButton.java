@@ -36,6 +36,7 @@ import java.util.function.Consumer;
  * CarUiButton to the layout file, you can use
  * {@link com.android.car.ui.core.CarUi#requireCarUiComponentById(View, int)}} to get access to it.
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public interface CarUiButton {
 
     /**
