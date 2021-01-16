@@ -23,7 +23,12 @@ buildscript {
 
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.1'
+        // Before upgrading this version, make sure you can close android
+        // studio, run git clean -fxd, and then reopen this folder in android
+        // studio and have it work. Sometimes android studio's built in gradle
+        // wrapper seems to lag behind the version required by the android
+        // plugin.
+        classpath 'com.android.tools.build:gradle:4.0.2'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
