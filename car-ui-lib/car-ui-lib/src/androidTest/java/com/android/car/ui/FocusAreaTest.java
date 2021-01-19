@@ -344,7 +344,6 @@ public class FocusAreaTest {
             RotaryCache cache =
                     new RotaryCache(CACHE_TYPE_NEVER_EXPIRE, 0, CACHE_TYPE_NEVER_EXPIRE, 0);
             mFocusArea2.setRotaryCache(cache);
-            mFocusArea2.setDefaultFocusOverridesHistory(false);
 
             mView2.requestFocus();
             assertThat(mView2.isFocused()).isTrue();
