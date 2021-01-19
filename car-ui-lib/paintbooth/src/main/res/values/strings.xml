@@ -14,7 +14,9 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<resources>
+<resources
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation">
   <!-- Application name [CHAR LIMIT=30] -->
   <string name="app_name" translatable="false">Paint Booth (Gerrit)</string>
 
@@ -26,6 +28,8 @@
 
   <!-- Preferences page title [CHAR_LIMIT=13] -->
   <string name="preferences_screen_title">Settings</string>
+
+  <string name="split_preference_screen_message">This area is used for some other content</string>
 
   <!--This section is for basic attributes -->
   <eat-comment/>

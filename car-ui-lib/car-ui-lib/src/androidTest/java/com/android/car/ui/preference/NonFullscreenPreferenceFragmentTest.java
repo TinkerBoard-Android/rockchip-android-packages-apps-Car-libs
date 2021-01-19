@@ -36,6 +36,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.preference.ListPreference;
 import androidx.preference.MultiSelectListPreference;
 import androidx.preference.PreferenceScreen;
@@ -136,6 +137,7 @@ public class NonFullscreenPreferenceFragmentTest {
         protected void onCreate(@Nullable Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
+            CarUi.replaceInsetsChangedListenerWith(this, this);
             ToolbarController toolbar = CarUi.requireToolbar(this);
             toolbar.setTitle(TOOLBAR_DEFAULT_TEXT);
 
@@ -153,8 +155,13 @@ public class NonFullscreenPreferenceFragmentTest {
             if (!mIsFullScreen) {
                 requireViewById(android.R.id.content).setPadding(insets.getLeft(), insets.getTop(),
                         insets.getRight(), insets.getBottom());
+                // Don't pass insets to fragment
             } else {
-                // No-op marker for the preference fragment to handle it
+                for (Fragment fragment : getSupportFragmentManager().getFragments()) {
+                    if (fragment instanceof InsetsChangedListener) {
+                        ((InsetsChangedListener) fragment).onCarUiInsetsChanged(insets);
+                    }
+                }
             }
         }
     }
@@ -193,8 +200,21 @@ public class NonFullscreenPreferenceFragmentTest {
         }
 
         @Override
-        protected boolean isFullScreenFragment() {
-            return mIsFullScreen;
+        public ToolbarController getPreferenceToolbar(@NonNull Fragment fragment) {
+            if (mIsFullScreen) {
+                return super.getPreferenceToolbar(fragment);
+            } else {
+                return null;
+            }
+        }
+
+        @Override
+        public Insets getPreferenceInsets(@NonNull Fragment fragment) {
+            if (mIsFullScreen) {
+                return super.getPreferenceInsets(fragment);
+            } else {
+                return null;
+            }
         }
     }
 }

@@ -67,6 +67,7 @@
             app:layout_goneMarginStart="0dp"
             android:textAlignment="viewStart"
             android:textAppearance="@style/TextAppearance.CarUi.PreferenceSummary"
+            android:maxLines="2"
             app:layout_constraintStart_toEndOf="@android:id/icon"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@android:id/title"
