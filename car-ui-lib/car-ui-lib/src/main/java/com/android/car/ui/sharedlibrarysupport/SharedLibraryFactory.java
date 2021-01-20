@@ -16,6 +16,7 @@
 package com.android.car.ui.sharedlibrarysupport;
 
 import android.content.Context;
+import android.util.AttributeSet;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -24,6 +25,7 @@ import androidx.annotation.Nullable;
 import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.button.CarUiButton;
 import com.android.car.ui.button.CarUiButtonAttributes;
+import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.ToolbarController;
 
 /**
@@ -56,4 +58,11 @@ public interface SharedLibraryFactory {
     CarUiButton createButton(
             Context context,
             @Nullable CarUiButtonAttributes attrs);
+
+    /**
+     * Creates an instance of CarUiRecyclerView
+     * @param context
+     * @param attrs
+     */
+    CarUiRecyclerView createRecyclerView(Context context, AttributeSet attrs);
 }

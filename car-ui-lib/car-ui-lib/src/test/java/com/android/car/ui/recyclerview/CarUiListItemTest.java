@@ -53,7 +53,7 @@ public class CarUiListItemTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mContext = RuntimeEnvironment.application;
-        mListView = new CarUiRecyclerView(mContext);
+        mListView = new CarUiRecyclerViewImpl(mContext);
     }
 
     private CarUiListItemAdapter.ListItemViewHolder getListItemViewHolderAtPosition(int position) {
