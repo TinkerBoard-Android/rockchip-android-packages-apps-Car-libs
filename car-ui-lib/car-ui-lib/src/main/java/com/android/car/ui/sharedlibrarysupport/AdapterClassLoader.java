@@ -17,74 +17,67 @@ package com.android.car.ui.sharedlibrarysupport;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RestrictTo;
-
-import com.android.car.ui.CarUiAppComponentFactory;
 
 import dalvik.system.PathClassLoader;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
+import java.util.regex.Pattern;
 
 /**
- * This is a {@link PathClassLoader} that you can also call
- * {@link #addAdditionalClassLoader(ClassLoader)} on. This will add another classloader
- * that will be searched after the classes in this classloader have been searched, but before
- * the parent classloader is searched.
+ * This is a {@link PathClassLoader} that you can pass an additional classloaders to the
+ * constructor. That will be searched after the classes in this classloader have been searched,
+ * but before the parent classloader is searched. The first classloader in the list of
+ * classloaders is set as the parent classloader.
  *
  * Much of the code is copied from {@link dalvik.system.DelegateLastClassLoader}.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY)
-public class ModifiableClassLoader extends PathClassLoader {
+class AdapterClassLoader extends PathClassLoader {
 
     private final boolean mDelegateResourceLoading;
-    private final Set<ClassLoader> mAdditionalClassLoaders = new HashSet<>();
+    @Nullable
+    private final ClassLoader mAdditionalClassLoader;
+
+    private final Pattern mPattern =
+            Pattern.compile("^com\\.android\\.car\\.ui\\..*AdapterV[0-9]+$");
 
     /**
-     * Equivalent to calling {@link #ModifiableClassLoader(String, String, ClassLoader, boolean)}
+     * Equivalent to calling {@link #AdapterClassLoader(String, String, ClassLoader, boolean)}
      * with {@code librarySearchPath = null, delegateResourceLoading = true}.
      */
-    public ModifiableClassLoader(String dexPath, ClassLoader parent) {
-        this(dexPath, null, parent, true);
+    AdapterClassLoader(String dexPath, @Nullable ClassLoader parent,
+            @Nullable ClassLoader additionalClassloader) {
+        this(dexPath, null, parent, additionalClassloader, true);
     }
 
     /**
-     * Equivalent to calling {@link #ModifiableClassLoader(String, String, ClassLoader, boolean)}
+     * Equivalent to calling {@link #AdapterClassLoader(String, String, ClassLoader, boolean)}
      * with {@code delegateResourceLoading = true}.
      */
-    public ModifiableClassLoader(String dexPath, String librarySearchPath, ClassLoader parent) {
-        this(dexPath, librarySearchPath, parent, true);
-    }
-
-    /**
-     * Adds another classloader that will be searched after the classes in this classloader
-     * are searched, but before the parent classloader is searched.
-     *
-     * Make sure to add your classloader before trying to load any classes from it, or
-     * else they will be cached as not found.
-     */
-    public void addAdditionalClassLoader(ClassLoader classLoader) {
-        mAdditionalClassLoaders.add(classLoader);
+    AdapterClassLoader(String dexPath, String librarySearchPath, @Nullable ClassLoader parent,
+            @Nullable ClassLoader additionalClassloader) {
+        this(dexPath, librarySearchPath, parent, additionalClassloader, true);
     }
 
     /**
      * See {@link dalvik.system.DelegateLastClassLoader#DelegateLastClassLoader
-     * (String, String, ClassLoader, boolean)}.
+     * (String, String, List<ClassLoader>, boolean)}.
      */
-    public ModifiableClassLoader(@NonNull String dexPath, @Nullable String librarySearchPath,
-            @Nullable ClassLoader parent, boolean delegateResourceLoading) {
+    AdapterClassLoader(@NonNull String dexPath, @Nullable String librarySearchPath,
+            @Nullable ClassLoader parent, @Nullable ClassLoader additionalClassloader,
+                boolean delegateResourceLoading) {
         super(dexPath, librarySearchPath, parent);
         this.mDelegateResourceLoading = delegateResourceLoading;
+        mAdditionalClassLoader = additionalClassloader;
     }
 
     /**
      * A copy from {@link dalvik.system.DelegateLastClassLoader}, but with changes
      * to support loading classloaders added via {@link #addAdditionalClassLoader(ClassLoader)}.
      *
-     * If ModifiableClassLoader or {@link CarUiAppComponentFactory} are loaded, loading them
+     * If AdapterClassLoader are loaded, loading them
      * from this classloader will be skipped and instead they'll be loaded from the parent
      * classloader, so that they are not duplicated.
      */
@@ -104,10 +97,9 @@ public class ModifiableClassLoader extends PathClassLoader {
 
         ClassNotFoundException fromSuper = null;
 
-        // Load CarUiAppComponentFactory and ModifiableClassLoader from the parent classloader,
-        // because we need to get the copy of it that was actually used as a factory.
-        if (!CarUiAppComponentFactory.class.getName().equals(name)
-                && !ModifiableClassLoader.class.getName().equals(name)) {
+        // Only load adapters classed, and OemApiUtil class from this classloader.
+        if (OemApiUtil.class.getName().equals(name)
+                        || (name != null && mPattern.matcher(name).matches())) {
             // Next, check whether the class in question is present in the dexPath that this
             // classloader operates on, or its shared libraries.
             try {
@@ -115,13 +107,14 @@ public class ModifiableClassLoader extends PathClassLoader {
             } catch (ClassNotFoundException ex) {
                 fromSuper = ex;
             }
+        }
 
-            // Next, check any additional classloaders that were registered later.
-            for (ClassLoader classLoader : mAdditionalClassLoaders) {
-                try {
-                    return classLoader.loadClass(name);
-                } catch (ClassNotFoundException ignored) {
-                }
+        // Loading OEM-APIs
+        // Next, check any additional classloaders.
+        if (mAdditionalClassLoader != null) {
+            try {
+                return mAdditionalClassLoader.loadClass(name);
+            } catch (ClassNotFoundException ignored) {
             }
         }
 

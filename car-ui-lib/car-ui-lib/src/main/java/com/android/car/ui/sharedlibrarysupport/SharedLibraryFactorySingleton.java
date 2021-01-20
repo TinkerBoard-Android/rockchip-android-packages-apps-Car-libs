@@ -17,15 +17,23 @@ package com.android.car.ui.sharedlibrarysupport;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
+import android.os.Process;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.android.car.ui.CarUiAppComponentFactory;
+import androidx.annotation.NonNull;
+
 import com.android.car.ui.R;
-import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryFactoryOEMV1;
-import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryVersionProviderOEMV1;
 import com.android.car.ui.utils.CarUiUtils;
+
+import java.io.File;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * This is a singleton that contains a {@link SharedLibraryFactory}. That SharedLibraryFactory
@@ -50,13 +58,6 @@ public final class SharedLibraryFactorySingleton {
             return sInstance;
         }
 
-        if (CarUiAppComponentFactory.sModifiableClassLoader == null) {
-            Log.w(TAG, "CarUiAppComponentFactory not initialized! "
-                    + "Did you add it to your AndroidManifest.xml? " + context.getPackageName());
-            sInstance = new SharedLibraryFactoryStub();
-            return sInstance;
-        }
-
         String sharedLibPackageName = CarUiUtils.getSystemProperty(context.getResources(),
                 R.string.car_ui_shared_library_package_system_property_name);
 
@@ -76,50 +77,27 @@ public final class SharedLibraryFactorySingleton {
             return sInstance;
         }
 
-        CarUiAppComponentFactory.sModifiableClassLoader
-                .addAdditionalClassLoader(sharedLibraryContext.getClassLoader());
+        AdapterClassLoader adapterClassLoader =
+                instantiateClassLoader(context.getApplicationInfo(),
+                        SharedLibraryFactorySingleton.class.getClassLoader(),
+                        sharedLibraryContext.getClassLoader());
 
-        Object oemVersionProvider;
         try {
-            oemVersionProvider = Class
-                    .forName("com.android.car.ui.sharedlibrary.SharedLibraryVersionProviderImpl")
-                    .getDeclaredConstructor()
-                    .newInstance();
+            Class<?> oemApiUtilClass = adapterClassLoader
+                    .loadClass("com.android.car.ui.sharedlibrarysupport.OemApiUtil");
+            Method getSharedLibraryFactoryMethod =
+                    oemApiUtilClass.getDeclaredMethod("getSharedLibraryFactory", Context.class);
+            getSharedLibraryFactoryMethod.setAccessible(true);
+            sInstance = (SharedLibraryFactory) getSharedLibraryFactoryMethod
+                    .invoke(null, sharedLibraryContext);
         } catch (ReflectiveOperationException e) {
-            if (e instanceof ClassNotFoundException) {
-                Log.i(TAG, "SharedLibraryVersionProviderImpl not found.");
-            } else {
-                Log.e(TAG, "SharedLibraryVersionProviderImpl could not be instantiated!", e);
-            }
+            Log.e(TAG, "Could not load CarUi shared library", e);
             sInstance = new SharedLibraryFactoryStub();
             return sInstance;
         }
 
-        // Add new version providers in an if-else chain here, in descending version order so that
-        // higher versions are preferred.
-        SharedLibraryVersionProvider versionProvider = null;
-        if (classExists(OEMAPIS_PREFIX + "SharedLibraryVersionProviderOEMV1")
-                && oemVersionProvider instanceof SharedLibraryVersionProviderOEMV1) {
-            versionProvider = new SharedLibraryVersionProviderAdapterV1(
-                    (SharedLibraryVersionProviderOEMV1) oemVersionProvider);
-        } else {
-            Log.e(TAG, "SharedLibraryVersionProviderImpl was not instanceof any known "
-                    + "versions of SharedLibraryVersionProviderOEMV#.");
-
-            sInstance = new SharedLibraryFactoryStub();
-            return sInstance;
-        }
-
-        Object factory =
-                versionProvider.getSharedLibraryFactory(1, sharedLibraryContext);
-        // Add new factories in an if-else chain here, in descending version order so that
-        // higher versions are preferred.
-        if (classExists(OEMAPIS_PREFIX + "SharedLibraryFactoryOEMV1")
-                && factory instanceof SharedLibraryFactoryOEMV1) {
-            sInstance = new SharedLibraryFactoryAdapterV1((SharedLibraryFactoryOEMV1) factory);
-        } else {
-            Log.e(TAG, "SharedLibraryVersionProvider found, but did not provide a"
-                    + " factory implementing any known interfaces!");
+        if (sInstance == null) {
+            Log.e(TAG, "Could not load CarUi shared library");
             sInstance = new SharedLibraryFactoryStub();
         }
 
@@ -136,4 +114,45 @@ public final class SharedLibraryFactorySingleton {
     }
 
     private SharedLibraryFactorySingleton() {}
+
+    @NonNull
+    private static AdapterClassLoader instantiateClassLoader(@NonNull ApplicationInfo appInfo,
+            @NonNull ClassLoader parent, @NonNull ClassLoader sharedlibraryClassLoader) {
+        // All this apk loading code is copied from another Google app
+        List<String> libraryPaths = new ArrayList<>(3);
+        if (appInfo.nativeLibraryDir != null) {
+            libraryPaths.add(appInfo.nativeLibraryDir);
+        }
+        if ((appInfo.flags & ApplicationInfo.FLAG_EXTRACT_NATIVE_LIBS) == 0) {
+            for (String abi : getSupportedAbisForCurrentRuntime()) {
+                libraryPaths.add(appInfo.sourceDir + "!/lib/" + abi);
+            }
+        }
+
+        String flatLibraryPaths = (libraryPaths.size() == 0
+                ? null : TextUtils.join(File.pathSeparator, libraryPaths));
+
+        String apkPaths = appInfo.sourceDir;
+        if (appInfo.sharedLibraryFiles != null && appInfo.sharedLibraryFiles.length > 0) {
+            // Unless you pass PackageManager.GET_SHARED_LIBRARY_FILES this will always be null
+            // HOWEVER, if you running on a device with F5 active, the module's dex files are
+            // always listed in ApplicationInfo.sharedLibraryFiles and should be included in
+            // the classpath.
+            apkPaths +=
+                    File.pathSeparator + TextUtils.join(File.pathSeparator,
+                            appInfo.sharedLibraryFiles);
+        }
+
+        return new AdapterClassLoader(apkPaths, flatLibraryPaths, parent, sharedlibraryClassLoader);
+    }
+
+    private static List<String> getSupportedAbisForCurrentRuntime() {
+        List<String> abis = new ArrayList<>();
+        if (Process.is64Bit()) {
+            Collections.addAll(abis, Build.SUPPORTED_64_BIT_ABIS);
+        } else {
+            Collections.addAll(abis, Build.SUPPORTED_32_BIT_ABIS);
+        }
+        return abis;
+    }
 }

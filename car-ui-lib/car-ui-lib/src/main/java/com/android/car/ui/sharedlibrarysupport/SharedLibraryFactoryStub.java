@@ -28,6 +28,7 @@ import android.widget.FrameLayout;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
 import androidx.fragment.app.Fragment;
 
 import com.android.car.ui.R;
@@ -44,7 +45,8 @@ import com.android.car.ui.toolbar.ToolbarControllerImpl;
  * shared library installed on the system. It delegates to the static library implementation
  * of the necessary components.
  */
-final class SharedLibraryFactoryStub implements SharedLibraryFactory {
+@RestrictTo(RestrictTo.Scope.LIBRARY)
+public final class SharedLibraryFactoryStub implements SharedLibraryFactory {
     @Nullable
     @Override
     public ToolbarController installBaseLayoutAround(View contentView,

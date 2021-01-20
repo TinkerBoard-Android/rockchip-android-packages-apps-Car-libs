@@ -4,7 +4,8 @@
 PRODUCT_PACKAGES += \
     car-ui-lib-sharedlibrary \
 
-PRODUCT_PRODUCT_PROPERTIES += ro.build.automotive.car.ui.shared.library.package.name=com.google.car.ui.sharedlibrary
+# Keep commented out until we're ready to ship oem components.
+# PRODUCT_PRODUCT_PROPERTIES += ro.build.automotive.car.ui.shared.library.package.name=com.google.car.ui.sharedlibrary
 
 PRODUCT_COPY_FILES += \
     packages/apps/Car/libs/car-ui-lib/referencedesign/car-ui-lib-preinstalled-packages.xml:system/etc/sysconfig/car-ui-lib-preinstalled-packages.xml \
