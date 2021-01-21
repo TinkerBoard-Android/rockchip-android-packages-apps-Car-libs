@@ -138,8 +138,8 @@
     <declare-styleable name="CarUiPreference">
         <!-- Toggle for showing chevron -->
         <attr name="showChevron" format="boolean" />
-        <!-- Show ripple when disabled preference is clicked -->
-        <attr name="showRippleOnDisabledPreference" format="boolean" />
+        <!-- Display this preference as ux restricted. -->
+        <attr name="car_ui_ux_restricted" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="CarUiTwoActionPreference">

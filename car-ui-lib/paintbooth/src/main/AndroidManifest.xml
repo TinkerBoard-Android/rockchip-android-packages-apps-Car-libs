@@ -48,6 +48,7 @@
         <action android:name="android.intent.action.MAIN"/>
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
+      <meta-data android:name="distractionOptimized" android:value="true"/>
     </activity>
 
     <activity
@@ -65,7 +66,9 @@
     <activity
         android:name=".preferences.PreferenceActivity"
         android:exported="false"
-        android:parentActivityName=".MainActivity"/>
+        android:parentActivityName=".MainActivity">
+      <meta-data android:name="distractionOptimized" android:value="true"/>
+    </activity>
     <activity
         android:name=".preferences.SplitPreferenceActivity"
         android:exported="false"

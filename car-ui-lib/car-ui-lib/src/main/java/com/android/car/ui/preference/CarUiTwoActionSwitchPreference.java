@@ -24,10 +24,12 @@ import android.view.View;
 import android.widget.Switch;
 
 import androidx.annotation.Nullable;
-import androidx.core.util.Consumer;
+import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
 import com.android.car.ui.R;
+
+import java.util.function.Consumer;
 
 /**
  * A preference that has a switch that can be toggled independently of pressing the main
@@ -65,10 +67,19 @@ public class CarUiTwoActionSwitchPreference extends CarUiTwoActionBasePreference
 
     @Override
     protected void performSecondaryActionClickInternal() {
-        mSecondaryActionChecked = !mSecondaryActionChecked;
-        notifyChanged();
-        if (mSecondaryActionOnClickListener != null) {
-            mSecondaryActionOnClickListener.accept(mSecondaryActionChecked);
+        if (isSecondaryActionEnabled()) {
+            if (isUxRestricted()) {
+                Consumer<Preference> restrictedListener = getOnClickWhileRestrictedListener();
+                if (restrictedListener != null) {
+                    restrictedListener.accept(this);
+                }
+            } else {
+                mSecondaryActionChecked = !mSecondaryActionChecked;
+                notifyChanged();
+                if (mSecondaryActionOnClickListener != null) {
+                    mSecondaryActionOnClickListener.accept(mSecondaryActionChecked);
+                }
+            }
         }
     }
 
@@ -87,19 +98,17 @@ public class CarUiTwoActionSwitchPreference extends CarUiTwoActionBasePreference
 
         holder.itemView.setFocusable(false);
         holder.itemView.setClickable(false);
-        firstActionContainer.setOnClickListener(isEnabled() && isSelectable()
-                ? this::performClickUnrestricted
-                : null);
-        firstActionContainer.setClickable(isEnabled() && isSelectable());
-        firstActionContainer.setFocusable(isEnabled() && isSelectable());
+        firstActionContainer.setOnClickListener(this::performClick);
+        firstActionContainer.setEnabled(isEnabled() || isUxRestricted());
+        firstActionContainer.setFocusable(isEnabled() || isUxRestricted());
 
         secondActionContainer.setVisibility(mSecondaryActionVisible ? View.VISIBLE : View.GONE);
-        secondaryAction.setEnabled(mSecondaryActionEnabled);
         s.setChecked(mSecondaryActionChecked);
-        s.setEnabled(mSecondaryActionEnabled);
+        s.setEnabled(isSecondaryActionEnabled());
 
         secondaryAction.setOnClickListener(v -> performSecondaryActionClickInternal());
-        secondaryAction.setFocusable(mSecondaryActionEnabled);
+        secondaryAction.setEnabled(isSecondaryActionEnabled() || isUxRestricted());
+        secondaryAction.setFocusable(isSecondaryActionEnabled() || isUxRestricted());
     }
 
     /**

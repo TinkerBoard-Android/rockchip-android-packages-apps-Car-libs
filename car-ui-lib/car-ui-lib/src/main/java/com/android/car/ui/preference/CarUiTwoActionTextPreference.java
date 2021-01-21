@@ -26,9 +26,12 @@ import android.widget.Button;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
 import com.android.car.ui.R;
+
+import java.util.function.Consumer;
 
 /**
  * A preference that has a text button that can be pressed independently of pressing the main
@@ -82,8 +85,15 @@ public class CarUiTwoActionTextPreference extends CarUiTwoActionBasePreference {
 
     @Override
     protected void performSecondaryActionClickInternal() {
-        if (mSecondaryActionOnClickListener != null) {
-            mSecondaryActionOnClickListener.run();
+        if (isSecondaryActionEnabled()) {
+            if (isUxRestricted()) {
+                Consumer<Preference> restrictedListener = getOnClickWhileRestrictedListener();
+                if (restrictedListener != null) {
+                    restrictedListener.accept(this);
+                }
+            } else if (mSecondaryActionOnClickListener != null) {
+                mSecondaryActionOnClickListener.run();
+            }
         }
     }
 
@@ -100,19 +110,15 @@ public class CarUiTwoActionTextPreference extends CarUiTwoActionBasePreference {
 
         holder.itemView.setFocusable(false);
         holder.itemView.setClickable(false);
-        firstActionContainer.setOnClickListener(isEnabled() && isSelectable()
-                ? this::performClickUnrestricted
-                : null);
-        firstActionContainer.setClickable(isEnabled() && isSelectable());
-        firstActionContainer.setFocusable(isEnabled() && isSelectable());
+        firstActionContainer.setOnClickListener(this::performClick);
+        firstActionContainer.setEnabled(isEnabled());
+        firstActionContainer.setFocusable(isEnabled());
 
         secondActionContainer.setVisibility(mSecondaryActionVisible ? View.VISIBLE : View.GONE);
-        secondaryButton.setEnabled(mSecondaryActionEnabled);
         secondaryButton.setText(mSecondaryActionText);
-        secondaryButton.setOnClickListener(mSecondaryActionOnClickListener != null
-                ? v -> performSecondaryActionClickInternal()
-                : null);
-        secondaryButton.setFocusable(mSecondaryActionEnabled);
+        secondaryButton.setOnClickListener(v -> performSecondaryActionClickInternal());
+        secondaryButton.setEnabled(isSecondaryActionEnabled());
+        secondaryButton.setFocusable(isSecondaryActionEnabled());
     }
 
     @Nullable
@@ -122,6 +128,7 @@ public class CarUiTwoActionTextPreference extends CarUiTwoActionBasePreference {
 
     /**
      * Sets the title of the secondary action button.
+     *
      * @param title The text to display on the secondary action.
      */
     public void setSecondaryActionText(@Nullable CharSequence title) {
@@ -131,6 +138,7 @@ public class CarUiTwoActionTextPreference extends CarUiTwoActionBasePreference {
 
     /**
      * Sets the title of the secondary action button.
+     *
      * @param resid A string resource of the text to display on the secondary action.
      */
     public void setSecondaryActionText(@StringRes int resid) {

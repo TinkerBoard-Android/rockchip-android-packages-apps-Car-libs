@@ -18,97 +18,94 @@ package com.android.car.ui.preference;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.view.View;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 import androidx.preference.SwitchPreference;
 
 import com.android.car.ui.R;
-import com.android.car.ui.utils.CarUiUtils;
+import com.android.car.ui.utils.ViewUtils;
+
+import java.util.function.Consumer;
 
 /**
- * This class extends the base {@link SwitchPreference} class. Adds the functionality to show
- * message when preference is disabled.
+ * This class is the same as the base {@link SwitchPreference} class, except it implements
+ * {@link UxRestrictablePreference}
  */
 public class CarUiSwitchPreference extends SwitchPreference implements DisabledPreferenceCallback {
 
-    private String mMessageToShowWhenDisabledPreferenceClicked;
-
-    private boolean mShouldShowRippleOnDisabledPreference;
-    private Drawable mBackground;
-    private View mPreference;
-    private Context mContext;
+    private Consumer<Preference> mRestrictedClickListener;
+    private boolean mUxRestricted = false;
 
     public CarUiSwitchPreference(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init(context, attrs);
+        init(attrs);
     }
 
     public CarUiSwitchPreference(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(context, attrs);
+        init(attrs);
     }
 
     public CarUiSwitchPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context, attrs);
+        init(attrs);
     }
 
     public CarUiSwitchPreference(Context context) {
         super(context);
-        init(context, null);
+        init(null);
     }
 
-    private void init(Context context, AttributeSet attrs) {
-        mContext = context;
-        TypedArray preferenceAttributes = getContext().obtainStyledAttributes(attrs,
-                R.styleable.CarUiPreference);
-        mShouldShowRippleOnDisabledPreference = preferenceAttributes.getBoolean(
-                R.styleable.CarUiPreference_showRippleOnDisabledPreference, false);
-        preferenceAttributes.recycle();
+    private void init(AttributeSet attrs) {
+        TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.CarUiPreference);
+        mUxRestricted = a.getBoolean(R.styleable.CarUiPreference_car_ui_ux_restricted, false);
+        a.recycle();
     }
 
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
-        mPreference = holder.itemView;
-        mBackground = CarUiUtils.setPreferenceViewEnabled(isEnabled(), holder.itemView, mBackground,
-                mShouldShowRippleOnDisabledPreference);
+
+        ViewUtils.makeAllViewsUxRestricted(holder.itemView, isUxRestricted());
     }
 
-    /**
-     * This is similar to {@link Preference#performClick()} with the only difference that we do not
-     * return when view is not enabled.
-     */
     @Override
     @SuppressWarnings("RestrictTo")
     public void performClick() {
-        if (isEnabled()) {
+        if ((isEnabled() || isSelectable()) && isUxRestricted()) {
+            if (mRestrictedClickListener != null) {
+                mRestrictedClickListener.accept(this);
+            }
+        } else {
             super.performClick();
-        } else if (mMessageToShowWhenDisabledPreferenceClicked != null
-                && !mMessageToShowWhenDisabledPreferenceClicked.isEmpty()) {
-            Toast.makeText(mContext, mMessageToShowWhenDisabledPreferenceClicked,
-                    Toast.LENGTH_LONG).show();
         }
     }
 
-    /**
-     * Sets the ripple on the disabled preference.
-     */
     @Override
-    public void setShouldShowRippleOnDisabledPreference(boolean showRipple) {
-        mShouldShowRippleOnDisabledPreference = showRipple;
-        CarUiUtils.updateRippleStateOnDisabledPreference(isEnabled(),
-                mShouldShowRippleOnDisabledPreference, mBackground, mPreference);
+    public void setUxRestricted(boolean restricted) {
+        if (mUxRestricted != restricted) {
+            mUxRestricted = restricted;
+            notifyChanged();
+        }
     }
 
     @Override
-    public void setMessageToShowWhenDisabledPreferenceClicked(@NonNull String message) {
-        mMessageToShowWhenDisabledPreferenceClicked = message;
+    public boolean isUxRestricted() {
+        return mUxRestricted;
+    }
+
+    @Override
+    public void setOnClickWhileRestrictedListener(@Nullable Consumer<Preference> listener) {
+        mRestrictedClickListener = listener;
+    }
+
+    @Nullable
+    @Override
+    public Consumer<Preference> getOnClickWhileRestrictedListener() {
+        return mRestrictedClickListener;
     }
 }

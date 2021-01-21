@@ -28,16 +28,6 @@
             android:title="@string/title_basic_preference"/>
 
         <Preference
-            android:key="preference_disabled_without_ripple"
-            android:summary="Without ripple"
-            android:title="@string/title_basic_preference"/>
-
-        <Preference
-            android:key="preference_disabled_with_ripple"
-            android:summary="With ripple"
-            android:title="@string/title_basic_preference"/>
-
-        <Preference
             android:key="stylized"
             android:dependency="preference"
             android:summary="@string/summary_stylish_preference"
@@ -89,7 +79,7 @@
 
         <com.android.car.ui.preference.CarUiTwoActionPreference
             android:key="twoaction"
-            android:summary="@string/summary_twoaction_preference"
+            android:summary="@string/summary_deprecated_twoaction_preference"
             android:title="@string/title_twoaction_preference"
             android:widgetLayout="@layout/details_preference_widget"/>
 

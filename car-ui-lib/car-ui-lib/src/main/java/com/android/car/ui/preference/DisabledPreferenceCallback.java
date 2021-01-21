@@ -16,20 +16,28 @@
 
 package com.android.car.ui.preference;
 
+import android.text.TextUtils;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 
 /**
  * Interface for preferences to handle clicks when its disabled.
+ *
+ * @deprecated use {@link UxRestrictablePreference} instead
  */
-public interface DisabledPreferenceCallback {
-
-    /**
-     * Sets if the ripple effect should be shown on disabled preference.
-     */
-    default void setShouldShowRippleOnDisabledPreference(boolean showRipple) {}
+@Deprecated
+public interface DisabledPreferenceCallback extends UxRestrictablePreference {
 
     /**
      * Sets the message to be displayed when the disabled preference is clicked.
+     *
+     * @deprecated Use {@link UxRestrictablePreference#setUxRestricted(boolean)} instead.
      */
-    default void setMessageToShowWhenDisabledPreferenceClicked(@NonNull String message) {}
+    @Deprecated
+    default void setMessageToShowWhenDisabledPreferenceClicked(@NonNull String message) {
+        setUxRestricted(!TextUtils.isEmpty(message));
+        setOnClickWhileRestrictedListener(preference ->
+                Toast.makeText(preference.getContext(), message, Toast.LENGTH_LONG).show());
+    }
 }

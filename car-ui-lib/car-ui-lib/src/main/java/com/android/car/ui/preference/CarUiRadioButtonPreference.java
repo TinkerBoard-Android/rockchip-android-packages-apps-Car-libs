@@ -20,14 +20,23 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.RadioButton;
 
+import androidx.annotation.Nullable;
+import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 import androidx.preference.TwoStatePreference;
 
 import com.android.car.ui.R;
 import com.android.car.ui.utils.CarUiUtils;
+import com.android.car.ui.utils.ViewUtils;
+
+import java.util.function.Consumer;
 
 /** A preference which shows a radio button at the start of the preference. */
-public class CarUiRadioButtonPreference extends TwoStatePreference {
+public class CarUiRadioButtonPreference extends TwoStatePreference
+        implements UxRestrictablePreference {
+
+    private Consumer<Preference> mRestrictedClickListener;
+    private boolean mUxRestricted = false;
 
     public CarUiRadioButtonPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
@@ -56,11 +65,49 @@ public class CarUiRadioButtonPreference extends TwoStatePreference {
     }
 
     @Override
+    @SuppressWarnings("RestrictTo")
+    public void performClick() {
+        if ((isEnabled() || isSelectable()) && isUxRestricted()) {
+            if (mRestrictedClickListener != null) {
+                mRestrictedClickListener.accept(this);
+            }
+        } else {
+            super.performClick();
+        }
+    }
+
+    @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
 
         RadioButton radioButton = (RadioButton) CarUiUtils.findViewByRefId(holder.itemView,
                 R.id.radio_button);
         radioButton.setChecked(isChecked());
+
+        ViewUtils.makeAllViewsUxRestricted(holder.itemView, mUxRestricted);
+    }
+
+    @Override
+    public void setUxRestricted(boolean restricted) {
+        if (restricted != mUxRestricted) {
+            mUxRestricted = restricted;
+            notifyChanged();
+        }
+    }
+
+    @Override
+    public boolean isUxRestricted() {
+        return mUxRestricted;
+    }
+
+    @Override
+    public void setOnClickWhileRestrictedListener(@Nullable Consumer<Preference> listener) {
+        mRestrictedClickListener = listener;
+    }
+
+    @Nullable
+    @Override
+    public Consumer<Preference> getOnClickWhileRestrictedListener() {
+        return mRestrictedClickListener;
     }
 }
