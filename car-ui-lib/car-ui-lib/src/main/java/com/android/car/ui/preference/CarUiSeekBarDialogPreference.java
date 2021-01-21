@@ -25,13 +25,18 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.preference.DialogPreference;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceViewHolder;
 
 import com.android.car.ui.R;
 import com.android.car.ui.utils.CarUiUtils;
+import com.android.car.ui.utils.ViewUtils;
+
+import java.util.function.Consumer;
 
 /** A class implements some basic methods of a seekbar dialog preference. */
 public class CarUiSeekBarDialogPreference extends DialogPreference
-        implements DialogFragmentCallbacks {
+        implements DialogFragmentCallbacks, UxRestrictablePreference {
 
     private int mSeekBarProgress;
     private SeekBar mSeekBar;
@@ -50,6 +55,9 @@ public class CarUiSeekBarDialogPreference extends DialogPreference
 
     private SeekBar.OnSeekBarChangeListener mOnSeekBarChangeListener;
     private int mMaxProgress = 100;
+
+    private Consumer<Preference> mRestrictedClickListener;
+    private boolean mUxRestricted = false;
 
     public CarUiSeekBarDialogPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
@@ -264,5 +272,48 @@ public class CarUiSeekBarDialogPreference extends DialogPreference
             mSeekBar.setMax(maxProgress);
         }
         mMaxProgress = maxProgress;
+    }
+
+    @Override
+    public void onBindViewHolder(PreferenceViewHolder holder) {
+        super.onBindViewHolder(holder);
+
+        ViewUtils.makeAllViewsUxRestricted(holder.itemView, isUxRestricted());
+    }
+
+    @Override
+    @SuppressWarnings("RestrictTo")
+    public void performClick() {
+        if ((isEnabled() || isSelectable()) && isUxRestricted()) {
+            if (mRestrictedClickListener != null) {
+                mRestrictedClickListener.accept(this);
+            }
+        } else {
+            super.performClick();
+        }
+    }
+
+    @Override
+    public void setUxRestricted(boolean restricted) {
+        if (restricted != mUxRestricted) {
+            mUxRestricted = restricted;
+            notifyChanged();
+        }
+    }
+
+    @Override
+    public boolean isUxRestricted() {
+        return mUxRestricted;
+    }
+
+    @Override
+    public void setOnClickWhileRestrictedListener(@Nullable Consumer<Preference> listener) {
+        mRestrictedClickListener = listener;
+    }
+
+    @Nullable
+    @Override
+    public Consumer<Preference> getOnClickWhileRestrictedListener() {
+        return mRestrictedClickListener;
     }
 }

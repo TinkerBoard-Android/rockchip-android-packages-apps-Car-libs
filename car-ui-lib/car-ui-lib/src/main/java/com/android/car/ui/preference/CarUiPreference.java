@@ -18,36 +18,31 @@ package com.android.car.ui.preference;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.view.View;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
 import com.android.car.ui.R;
-import com.android.car.ui.utils.CarUiUtils;
+import com.android.car.ui.utils.ViewUtils;
+
+import java.util.function.Consumer;
 
 /**
  * This class extends the base {@link Preference} class. Adds the support to add a drawable icon to
  * the preference if there is one of fragment, intent or onPreferenceClickListener set.
  */
 public class CarUiPreference extends Preference implements DisabledPreferenceCallback {
-
-    private Context mContext;
     private boolean mShowChevron;
-    private String mMessageToShowWhenDisabledPreferenceClicked;
 
-    private boolean mShouldShowRippleOnDisabledPreference;
-    private Drawable mBackground;
-    private View mPreference;
+    private Consumer<Preference> mRestrictedClickListener;
+    private boolean mUxRestricted = false;
 
     public CarUiPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init(context, attrs, defStyleAttr, defStyleRes);
+        init(attrs, defStyleAttr, defStyleRes);
     }
 
     public CarUiPreference(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -62,9 +57,7 @@ public class CarUiPreference extends Preference implements DisabledPreferenceCal
         this(context, null);
     }
 
-    public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        mContext = context;
-
+    private void init(AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         TypedArray a = getContext().obtainStyledAttributes(
                 attrs,
                 R.styleable.CarUiPreference,
@@ -72,27 +65,23 @@ public class CarUiPreference extends Preference implements DisabledPreferenceCal
                 defStyleRes);
 
         mShowChevron = a.getBoolean(R.styleable.CarUiPreference_showChevron, true);
-        mShouldShowRippleOnDisabledPreference = a.getBoolean(
-                R.styleable.CarUiPreference_showRippleOnDisabledPreference, false);
+        mUxRestricted = a.getBoolean(R.styleable.CarUiPreference_car_ui_ux_restricted, false);
 
         a.recycle();
     }
 
-
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
-        boolean viewEnabled = isEnabled();
-        mPreference = holder.itemView;
-        mBackground = CarUiUtils.setPreferenceViewEnabled(viewEnabled, holder.itemView, mBackground,
-                mShouldShowRippleOnDisabledPreference);
+
+        ViewUtils.makeAllViewsUxRestricted(holder.itemView, isUxRestricted());
     }
 
     @Override
     public void onAttached() {
         super.onAttached();
 
-        boolean allowChevron = mContext.getResources().getBoolean(
+        boolean allowChevron = getContext().getResources().getBoolean(
                 R.bool.car_ui_preference_show_chevron);
 
         if (!allowChevron || !mShowChevron) {
@@ -105,29 +94,15 @@ public class CarUiPreference extends Preference implements DisabledPreferenceCal
         }
     }
 
-    /**
-     * An exact copy of {@link androidx.preference.Preference#performClick(View)}
-     * This method was added here because super.performClick(View) is not open
-     * for app usage.
-     */
-    @SuppressWarnings("RestrictTo")
-    void performClickUnrestricted(View v) {
-        performClick();
-    }
-
-    /**
-     * This is similar to {@link Preference#performClick()} with the only difference that we do not
-     * return when view is not enabled.
-     */
     @Override
     @SuppressWarnings("RestrictTo")
     public void performClick() {
-        if (isEnabled()) {
+        if ((isEnabled() || isSelectable()) && isUxRestricted()) {
+            if (mRestrictedClickListener != null) {
+                mRestrictedClickListener.accept(this);
+            }
+        } else {
             super.performClick();
-        } else if (mMessageToShowWhenDisabledPreferenceClicked != null
-                && !mMessageToShowWhenDisabledPreferenceClicked.isEmpty()) {
-            Toast.makeText(mContext, mMessageToShowWhenDisabledPreferenceClicked,
-                    Toast.LENGTH_LONG).show();
         }
     }
 
@@ -135,18 +110,25 @@ public class CarUiPreference extends Preference implements DisabledPreferenceCal
         mShowChevron = showChevron;
     }
 
-    /**
-     * Sets the ripple on the disabled preference.
-     */
     @Override
-    public void setShouldShowRippleOnDisabledPreference(boolean showRipple) {
-        mShouldShowRippleOnDisabledPreference = showRipple;
-        CarUiUtils.updateRippleStateOnDisabledPreference(isEnabled(),
-                mShouldShowRippleOnDisabledPreference, mBackground, mPreference);
+    public boolean isUxRestricted() {
+        return mUxRestricted;
     }
 
     @Override
-    public void setMessageToShowWhenDisabledPreferenceClicked(@NonNull String message) {
-        mMessageToShowWhenDisabledPreferenceClicked = message;
+    public void setOnClickWhileRestrictedListener(@Nullable Consumer<Preference> listener) {
+        mRestrictedClickListener = listener;
+    }
+
+    @Nullable
+    @Override
+    public Consumer<Preference> getOnClickWhileRestrictedListener() {
+        return mRestrictedClickListener;
+    }
+
+    @Override
+    public void setUxRestricted(boolean restricted) {
+        mUxRestricted = restricted;
+        notifyChanged();
     }
 }

@@ -19,37 +19,41 @@ package com.android.car.ui.preference;
 import android.content.Context;
 import android.util.AttributeSet;
 
+import androidx.annotation.Nullable;
 import androidx.preference.MultiSelectListPreference;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceViewHolder;
 
 import com.android.car.ui.R;
+import com.android.car.ui.utils.ViewUtils;
+
+import java.util.function.Consumer;
 
 /**
  * This class extends the base {@link CarUiMultiSelectListPreference} class. Adds the drawable icon
  * to the preference.
  */
-public class CarUiMultiSelectListPreference extends MultiSelectListPreference {
+public class CarUiMultiSelectListPreference extends MultiSelectListPreference
+        implements UxRestrictablePreference {
 
-    private final Context mContext;
+    private Consumer<Preference> mRestrictedClickListener;
+    private boolean mUxRestricted = false;
 
     public CarUiMultiSelectListPreference(Context context) {
         super(context);
-        mContext = context;
     }
 
     public CarUiMultiSelectListPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mContext = context;
     }
 
     public CarUiMultiSelectListPreference(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        mContext = context;
     }
 
     public CarUiMultiSelectListPreference(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mContext = context;
     }
 
     /**
@@ -65,7 +69,7 @@ public class CarUiMultiSelectListPreference extends MultiSelectListPreference {
     public void onAttached() {
         super.onAttached();
 
-        boolean showChevron = mContext.getResources().getBoolean(
+        boolean showChevron = getContext().getResources().getBoolean(
                 R.bool.car_ui_preference_show_chevron);
 
         if (!showChevron) {
@@ -73,5 +77,48 @@ public class CarUiMultiSelectListPreference extends MultiSelectListPreference {
         }
 
         setWidgetLayoutResource(R.layout.car_ui_preference_chevron);
+    }
+
+    @Override
+    public void onBindViewHolder(PreferenceViewHolder holder) {
+        super.onBindViewHolder(holder);
+
+        ViewUtils.makeAllViewsUxRestricted(holder.itemView, isUxRestricted());
+    }
+
+    @Override
+    @SuppressWarnings("RestrictTo")
+    public void performClick() {
+        if ((isEnabled() || isSelectable()) && isUxRestricted()) {
+            if (mRestrictedClickListener != null) {
+                mRestrictedClickListener.accept(this);
+            }
+        } else {
+            super.performClick();
+        }
+    }
+
+    @Override
+    public void setUxRestricted(boolean restricted) {
+        if (restricted != mUxRestricted) {
+            mUxRestricted = restricted;
+            notifyChanged();
+        }
+    }
+
+    @Override
+    public boolean isUxRestricted() {
+        return mUxRestricted;
+    }
+
+    @Override
+    public void setOnClickWhileRestrictedListener(@Nullable Consumer<Preference> listener) {
+        mRestrictedClickListener = listener;
+    }
+
+    @Nullable
+    @Override
+    public Consumer<Preference> getOnClickWhileRestrictedListener() {
+        return mRestrictedClickListener;
     }
 }

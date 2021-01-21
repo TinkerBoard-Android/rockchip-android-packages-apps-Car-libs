@@ -133,11 +133,11 @@ android_app {
     platform_apis: true,
     certificate: "platform",
     privileged: true,
+    libs: ["android.car-stubs"],
     static_libs: [
         "car-ui-lib",
-        "android.car.userlib",
-	"guava",
-	"gson-prebuilt-jar",
+        "guava",
+        "gson-prebuilt-jar",
     ],
     optimize: {
         enabled: false,
