@@ -43,6 +43,7 @@ import com.android.car.ui.paintbooth.currentactivity.CurrentActivityService;
 import com.android.car.ui.paintbooth.dialogs.DialogsActivity;
 import com.android.car.ui.paintbooth.overlays.OverlayActivity;
 import com.android.car.ui.paintbooth.preferences.PreferenceActivity;
+import com.android.car.ui.paintbooth.preferences.SplitPreferenceActivity;
 import com.android.car.ui.paintbooth.toolbar.NoCarUiToolbarActivity;
 import com.android.car.ui.paintbooth.toolbar.OldToolbarActivity;
 import com.android.car.ui.paintbooth.toolbar.ToolbarActivity;
@@ -72,6 +73,7 @@ public class MainActivity extends Activity implements InsetsChangedListener {
             new ActivityElement("List sample", CarUiRecyclerViewActivity.class),
             new ActivityElement("Grid sample", GridCarUiRecyclerViewActivity.class),
             new ActivityElement("Preferences sample", PreferenceActivity.class),
+            new ActivityElement("Split preferences sample", SplitPreferenceActivity.class),
             new ActivityElement("Overlays", OverlayActivity.class),
             new ActivityElement("Toolbar sample", ToolbarActivity.class),
             new ActivityElement("Old toolbar sample", OldToolbarActivity.class),
