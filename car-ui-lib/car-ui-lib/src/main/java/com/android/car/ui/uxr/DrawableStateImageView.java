@@ -17,30 +17,30 @@ package com.android.car.ui.uxr;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.Button;
+import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 
 /**
- * A {@link Button} that implements {@link DrawableStateView}, for allowing additional states
+ * A {@link ImageView} that implements {@link DrawableStateView}, for allowing additional states
  * such as ux restriction.
  */
-public class DrawableStateButton extends Button implements DrawableStateView {
+public class DrawableStateImageView extends ImageView implements DrawableStateView {
     private DrawableStateUtil mUtil;
 
-    public DrawableStateButton(Context context) {
+    public DrawableStateImageView(Context context) {
         super(context);
     }
 
-    public DrawableStateButton(Context context, @Nullable AttributeSet attrs) {
+    public DrawableStateImageView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public DrawableStateButton(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public DrawableStateImageView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
-    public DrawableStateButton(
+    public DrawableStateImageView(
             Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
