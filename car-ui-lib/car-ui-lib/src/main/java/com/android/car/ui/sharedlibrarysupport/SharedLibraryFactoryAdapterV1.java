@@ -58,7 +58,7 @@ public final class SharedLibraryFactoryAdapterV1 implements SharedLibraryFactory
                 toolbarEnabled, true);
 
         return toolbar != null
-                ? new ToolbarControllerAdapterV1(toolbar)
+                ? new ToolbarControllerAdapterV1(contentView.getContext(), toolbar)
                 : null;
     }
 

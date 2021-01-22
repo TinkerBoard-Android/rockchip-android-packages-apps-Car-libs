@@ -17,4 +17,12 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.google.car.ui.sharedlibrary">
+    <application>
+        <activity android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.car.ui.intent.action.SHARED_LIBRARY"/>
+            </intent-filter>
+        </activity>
+    </application>
 </manifest>

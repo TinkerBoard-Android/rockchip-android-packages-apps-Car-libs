@@ -17,6 +17,11 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.android.car.ui">
+    <queries>
+        <intent>
+            <action android:name="com.android.car.ui.intent.action.SHARED_LIBRARY"/>
+        </intent>
+    </queries>
     <application>
         <provider
             android:name="com.android.car.ui.core.CarUiInstaller"
@@ -24,11 +29,6 @@
             android:directBootAware="true"
             android:exported="false"
             android:process="@string/car_ui_installer_process_name"/>
-        <!-- Commented out until we're ready to ship the shared library feature -->
-        <!-- <uses-library
-            android:name="com.android.car.ui.sharedlibrary"
-            android:required="false"/> -->
-
         <provider
             android:name="com.android.car.ui.core.SearchResultsProvider"
             android:authorities="${applicationId}.SearchResultsProvider"

@@ -16,3 +16,6 @@
 }
 
 -dontwarn com.android.car.ui.sharedlibrary.oemapis.**
+
+# requried for accessing oem apis
+-keep class com.android.car.ui.sharedlibrarysupport.OemApiUtil {*;}
