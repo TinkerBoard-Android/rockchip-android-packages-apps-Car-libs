@@ -20,9 +20,6 @@ import androidx.annotation.Nullable;
 
 import dalvik.system.PathClassLoader;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -32,11 +29,11 @@ import java.util.regex.Pattern;
  * but before the parent classloader is searched. The first classloader in the list of
  * classloaders is set as the parent classloader.
  *
- * Much of the code is copied from {@link dalvik.system.DelegateLastClassLoader}.
+ * Much of the code is copied from {@link dalvik.system.DelegateLastClassLoader}. However,
+ * note that resource loading is not implemented the same way just because we didn't need it.
  */
 class AdapterClassLoader extends PathClassLoader {
 
-    private final boolean mDelegateResourceLoading;
     @Nullable
     private final ClassLoader mAdditionalClassLoader;
 
@@ -69,7 +66,6 @@ class AdapterClassLoader extends PathClassLoader {
             @Nullable ClassLoader parent, @Nullable ClassLoader additionalClassloader,
                 boolean delegateResourceLoading) {
         super(dexPath, librarySearchPath, parent);
-        this.mDelegateResourceLoading = delegateResourceLoading;
         mAdditionalClassLoader = additionalClassloader;
     }
 
@@ -131,44 +127,5 @@ class AdapterClassLoader extends PathClassLoader {
             }
             throw fromSuper;
         }
-    }
-
-    /**
-     * A direct copy from {@link dalvik.system.DelegateLastClassLoader}.
-     */
-    @Override
-    public URL getResource(String name) {
-        // The lookup order we use here is the same as for classes.
-
-        URL resource = Object.class.getClassLoader().getResource(name);
-        if (resource != null) {
-            return resource;
-        }
-
-        resource = findResource(name);
-        if (resource != null) {
-            return resource;
-        }
-
-        if (mDelegateResourceLoading) {
-            final ClassLoader cl = getParent();
-            return (cl == null) ? null : cl.getResource(name);
-        }
-        return null;
-    }
-
-    /**
-     * A direct copy from {@link dalvik.system.DelegateLastClassLoader}.
-     */
-    @Override
-    public Enumeration<URL> getResources(String name) throws IOException {
-        @SuppressWarnings("unchecked")
-        final Enumeration<URL>[] resources = (Enumeration<URL>[]) new Enumeration<?>[] {
-                Object.class.getClassLoader().getResources(name),
-                findResources(name),
-                (getParent() == null || !mDelegateResourceLoading)
-                        ? null : getParent().getResources(name) };
-
-        return new CompoundEnumeration<>(resources);
     }
 }
