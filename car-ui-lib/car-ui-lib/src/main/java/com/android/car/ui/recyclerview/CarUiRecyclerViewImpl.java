@@ -314,6 +314,7 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
     /**
      * Sets the number of columns in which grid needs to be divided.
      */
+    @Override
     public void setNumOfColumns(int numberOfColumns) {
         mNumOfColumns = numberOfColumns;
         if (mTopOffsetItemDecorationGrid != null) {
@@ -324,6 +325,10 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
         }
     }
 
+    /**
+     * Changes the visibility of the entire container. If the container is not present i.e scrollbar
+     * is not visible then the visibility or Recyclerview is changed.
+     */
     @Override
     public void setVisibility(int visibility) {
         super.setVisibility(visibility);
@@ -477,6 +482,7 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
      * Sets the scrollbar's padding top and bottom. This padding is applied in addition to the
      * padding of the RecyclerView.
      */
+    @Override
     public void setScrollBarPadding(int paddingTop, int paddingBottom) {
         if (mScrollBarEnabled) {
             mScrollBarPaddingTop = paddingTop;
@@ -494,6 +500,7 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
      * {@link #setLayoutManager(LayoutManager)}  has been completed. If called before that could
      * result in unexpected behavior.
      */
+    @Override
     public void setLinearDividerItemDecoration(boolean enableDividers) {
         if (enableDividers) {
             addItemDecoration(mDividerItemDecorationLinear);
@@ -507,6 +514,7 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
      * {@link #setLayoutManager(LayoutManager)}  has been completed. If called before that could
      * result in unexpected behavior.
      */
+    @Override
     public void setGridDividerItemDecoration(boolean enableDividers) {
         if (enableDividers) {
             addItemDecoration(mDividerItemDecorationGrid);
