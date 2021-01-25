@@ -6,6 +6,7 @@ CAR_UI_RRO_MANIFEST_FILE := $(LOCAL_PATH)/AndroidManifest.xml
 CAR_UI_RESOURCE_DIR := $(LOCAL_PATH)/res
 CAR_UI_RRO_TARGETS := \
     com.android.car.ui.paintbooth \
+    com.google.android.car.ui.paintbooth \
     com.android.car.rotaryplayground \
     com.android.car.themeplayground \
     com.android.car.carlauncher \

@@ -15,8 +15,11 @@
  */
 package com.android.car.ui.sharedlibrary.oemapis;
 
+import android.content.Context;
 import android.view.View;
 
+import com.android.car.ui.sharedlibrary.oemapis.recyclerview.RecyclerViewAttributesOEMV1;
+import com.android.car.ui.sharedlibrary.oemapis.recyclerview.RecyclerViewOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
 
 import java.util.function.Consumer;
@@ -51,4 +54,11 @@ public interface SharedLibraryFactoryOEMV1 {
             Consumer<InsetsOEMV1> insetsChangedListener,
             boolean toolbarEnabled,
             boolean fullscreen);
+
+    /**
+     * Creates an instance of CarUiRecyclerView
+     * @param context
+     * @param attrs
+     */
+    RecyclerViewOEMV1 createRecyclerView(Context context, RecyclerViewAttributesOEMV1 attrs);
 }

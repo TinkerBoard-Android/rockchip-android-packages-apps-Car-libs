@@ -234,8 +234,6 @@ public class FocusArea extends LinearLayout {
         mBackgroundHighlight = resources.getDrawable(
                 R.drawable.car_ui_focus_area_background_highlight, getContext().getTheme());
 
-        mDefaultFocusOverridesHistory = resources.getBoolean(
-                R.bool.car_ui_focus_area_default_focus_overrides_history);
         mClearFocusAreaHistoryWhenRotating = resources.getBoolean(
                 R.bool.car_ui_clear_focus_area_history_when_rotating);
 
@@ -425,6 +423,9 @@ public class FocusArea extends LinearLayout {
                     a.getResourceId(R.styleable.FocusArea_nudgeUp, View.NO_ID));
             mSpecifiedNudgeIdMap.put(FOCUS_DOWN,
                     a.getResourceId(R.styleable.FocusArea_nudgeDown, View.NO_ID));
+
+            mDefaultFocusOverridesHistory = a.getBoolean(
+                    R.styleable.FocusArea_defaultFocusOverridesHistory, false);
         } finally {
             a.recycle();
         }

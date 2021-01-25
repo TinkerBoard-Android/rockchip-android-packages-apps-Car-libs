@@ -33,9 +33,9 @@
     <!-- Preferences -->
 
     <!-- Overlayable drawable to use for the preference chevron when preference is enabled -->
-    <item name="car_ui_preference_icon_chevron_enabled" type="drawable">@null</item>
+    <item name="car_ui_preference_icon_chevron_enabled" type="drawable">@drawable/car_ui_icon_chevron</item>
     <!-- Overlayable drawable to use for the preference chevron when preference is disabled -->
-    <item name="car_ui_preference_icon_chevron_disabled" type="drawable">@null</item>
+    <item name="car_ui_preference_icon_chevron_disabled" type="drawable">@android:color/transparent</item>
 
     <!-- IME wide screen -->
 

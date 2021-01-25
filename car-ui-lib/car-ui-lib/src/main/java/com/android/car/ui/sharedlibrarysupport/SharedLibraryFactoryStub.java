@@ -18,7 +18,9 @@ package com.android.car.ui.sharedlibrarysupport;
 import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Build;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,11 +29,17 @@ import android.widget.FrameLayout;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
 import androidx.fragment.app.Fragment;
 
 import com.android.car.ui.R;
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
+import com.android.car.ui.button.CarUiButton;
+import com.android.car.ui.button.CarUiButtonAttributes;
+import com.android.car.ui.button.CarUiButtonImpl;
+import com.android.car.ui.recyclerview.CarUiRecyclerView;
+import com.android.car.ui.recyclerview.CarUiRecyclerViewImpl;
 import com.android.car.ui.toolbar.ToolbarController;
 import com.android.car.ui.toolbar.ToolbarControllerImpl;
 
@@ -40,7 +48,8 @@ import com.android.car.ui.toolbar.ToolbarControllerImpl;
  * shared library installed on the system. It delegates to the static library implementation
  * of the necessary components.
  */
-final class SharedLibraryFactoryStub implements SharedLibraryFactory {
+@RestrictTo(RestrictTo.Scope.LIBRARY)
+public final class SharedLibraryFactoryStub implements SharedLibraryFactory {
     @Nullable
     @Override
     public ToolbarController installBaseLayoutAround(View contentView,
@@ -85,6 +94,12 @@ final class SharedLibraryFactoryStub implements SharedLibraryFactory {
         insetsUpdater.replaceInsetsChangedListenerWith(insetsChangedListener);
 
         return toolbarController;
+    }
+
+    @NonNull
+    @Override
+    public CarUiButton createButton(Context context, @Nullable CarUiButtonAttributes attrs) {
+        return new CarUiButtonImpl(context, attrs);
     }
 
     /**
@@ -249,5 +264,10 @@ final class SharedLibraryFactoryStub implements SharedLibraryFactory {
             v.getLocationOnScreen(position);
             return position[1] + v.getHeight();
         }
+    }
+
+    @Override
+    public CarUiRecyclerView createRecyclerView(Context context, AttributeSet attrs) {
+        return new CarUiRecyclerViewImpl(context, attrs);
     }
 }

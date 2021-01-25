@@ -67,6 +67,10 @@
         android:exported="false"
         android:parentActivityName=".MainActivity"/>
     <activity
+        android:name=".preferences.SplitPreferenceActivity"
+        android:exported="false"
+        android:parentActivityName=".MainActivity"/>
+    <activity
         android:name=".widescreenime.WideScreenImeActivity"
         android:windowSoftInputMode="stateHidden|adjustNothing"
         android:exported="false"

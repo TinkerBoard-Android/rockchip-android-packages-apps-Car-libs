@@ -91,8 +91,9 @@ public class CarUiRecyclerViewTest {
 
     @Test
     public void init_shouldHaveGridLayout() {
-        mCarUiRecyclerView = new CarUiRecyclerView(mContext,
-                Robolectric.buildAttributeSet().addAttribute(R.attr.layoutStyle, "grid").build());
+        mCarUiRecyclerView = new CarUiRecyclerViewImpl(mContext,
+                        Robolectric.buildAttributeSet()
+                                        .addAttribute(R.attr.layoutStyle, "grid").build());
         assertThat(mCarUiRecyclerView.getLayoutManager()).isInstanceOf(
                 GridLayoutManager.class);
     }

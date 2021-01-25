@@ -15,12 +15,18 @@
  */
 package com.android.car.ui.sharedlibrarysupport;
 
+import android.content.Context;
+import android.util.AttributeSet;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
+import com.android.car.ui.button.CarUiButton;
+import com.android.car.ui.button.CarUiButtonAttributes;
+import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.sharedlibrary.oemapis.InsetsOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryFactoryOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
@@ -35,6 +41,7 @@ import com.android.car.ui.toolbar.ToolbarControllerAdapterV1;
 public final class SharedLibraryFactoryAdapterV1 implements SharedLibraryFactory {
 
     SharedLibraryFactoryOEMV1 mOem;
+    SharedLibraryFactoryStub mFactoryStub = new SharedLibraryFactoryStub();
 
     public SharedLibraryFactoryAdapterV1(SharedLibraryFactoryOEMV1 oem) {
         mOem = oem;
@@ -50,14 +57,26 @@ public final class SharedLibraryFactoryAdapterV1 implements SharedLibraryFactory
                 insets -> insetsChangedListener.onCarUiInsetsChanged(adaptInsets(insets)),
                 toolbarEnabled, true);
 
-        if (toolbar == null) {
-            return null;
-        }
-        return new ToolbarControllerAdapterV1(toolbar);
+        return toolbar != null
+                ? new ToolbarControllerAdapterV1(contentView.getContext(), toolbar)
+                : null;
+    }
+
+    @NonNull
+    @Override
+    public CarUiButton createButton(Context context, @Nullable CarUiButtonAttributes attrs) {
+        // TODO(b/172345817) Create OEM APIs for this and call them from here
+        return mFactoryStub.createButton(context, attrs);
     }
 
     private Insets adaptInsets(InsetsOEMV1 insetsOEM) {
         return new Insets(insetsOEM.getLeft(), insetsOEM.getTop(),
                 insetsOEM.getRight(), insetsOEM.getBottom());
+    }
+
+    @Override
+    public CarUiRecyclerView createRecyclerView(Context context, AttributeSet attrs) {
+        // TODO(b/177687696): implement the adapter
+        return mFactoryStub.createRecyclerView(context, attrs);
     }
 }

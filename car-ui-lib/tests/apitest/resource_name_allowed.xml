@@ -57,4 +57,5 @@ limitations under the License.-->
     <item type="id" name="seek_bar_text_top"/>
     <item type="id" name="switch_widget"/>
     <item type="id" name="supplemental_icon"/>
+    <item type="attr" name="preferenceStyle"/>
 </resources>

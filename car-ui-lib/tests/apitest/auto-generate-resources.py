@@ -42,7 +42,7 @@ See the License for the specific language governing permissions and
 limitations under the License.""" % (datetime.today().strftime("%Y"))
 
 
-AUTOGENERATION_NOTICE_STR = """ THIS FILE WAS AUTO GENERATED ON %s, DO NOT EDIT MANUALLY. """ % (datetime.today().strftime('%d-%b-%Y (%H:%M:%S)'))
+AUTOGENERATION_NOTICE_STR = """ THIS FILE WAS AUTO GENERATED, DO NOT EDIT MANUALLY. """
 
 """
 Script used to update the 'current.xml' file. This is being used as part of pre-submits to

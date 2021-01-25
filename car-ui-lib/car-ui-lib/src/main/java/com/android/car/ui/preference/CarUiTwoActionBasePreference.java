@@ -63,13 +63,14 @@ public abstract class CarUiTwoActionBasePreference extends CarUiPreference {
     protected void init(@Nullable AttributeSet attrs) {
         setShowChevron(false);
 
-        TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.Preference);
+        TypedArray a = getContext()
+                .obtainStyledAttributes(attrs, R.styleable.CarUiTwoActionBasePreference);
         try {
             disallowResourceIds(a,
-                    R.styleable.Preference_layout,
-                    R.styleable.Preference_android_layout,
-                    R.styleable.Preference_widgetLayout,
-                    R.styleable.Preference_android_widgetLayout);
+                    R.styleable.CarUiTwoActionBasePreference_layout,
+                    R.styleable.CarUiTwoActionBasePreference_android_layout,
+                    R.styleable.CarUiTwoActionBasePreference_widgetLayout,
+                    R.styleable.CarUiTwoActionBasePreference_android_widgetLayout);
         } finally {
             a.recycle();
         }

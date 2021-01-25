@@ -38,7 +38,6 @@ import androidx.preference.PreferenceGroup;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreference;
 import androidx.preference.TwoStatePreference;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.FocusArea;
 import com.android.car.ui.R;
@@ -56,6 +55,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * A PreferenceFragmentCompat is the entry point to using the Preference library.
@@ -72,64 +72,106 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
     private static final String DIALOG_FRAGMENT_TAG =
             "com.android.car.ui.PreferenceFragment.DIALOG";
 
-    /**
-     * This method can be overridden to indicate whether or not this fragment covers the
-     * whole screen. When it returns false, the preference fragment will not attempt to change
-     * the CarUi base layout toolbar (but will still have its own toolbar and change it when using
-     * non-baselayout toolbars), and will also not take into account CarUi insets.
-     *
-     * @return Whether to PreferenceFragment takes up the whole app's space. Defaults to true.
-     */
-    protected boolean isFullScreenFragment() {
-        return true;
-    }
+    private final Map<Fragment, Insets> mLegacyInsets = new WeakHashMap<>();
+    private final Map<Fragment, Toolbar.OnHeightChangedListener> mLegacyHeightListeners =
+            new WeakHashMap<>();
+    private boolean mLayoutHasToolbar = false;
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        if (isFullScreenFragment()) {
-            ToolbarController baseLayoutToolbar = CarUi.getToolbar(getActivity());
-            if (baseLayoutToolbar != null) {
-                baseLayoutToolbar.setState(Toolbar.State.SUBPAGE);
-                if (getPreferenceScreen() != null) {
-                    baseLayoutToolbar.setTitle(getPreferenceScreen().getTitle());
-                }
-            }
+        ToolbarController toolbar = getPreferenceToolbar(this);
+        if (toolbar != null) {
+            setupToolbar(toolbar);
+        }
+    }
+
+    /**
+     * Sets up what the toolbar should display when on this PreferenceFragment.
+     *
+     * This can be overridden in subclasses to customize the toolbar. By default it puts a back
+     * button on the toolbar, and sets its title to the {@link PreferenceScreen PreferenceScreen's}
+     * title.
+     *
+     * @param toolbar The toolbar from {@link #getPreferenceToolbar(Fragment)}, where the Fragment
+     *                passed to getToolbar() is this fragment.
+     */
+    protected void setupToolbar(@NonNull ToolbarController toolbar) {
+        toolbar.setState(Toolbar.State.SUBPAGE);
+        PreferenceScreen preferenceScreen = getPreferenceScreen();
+        if (preferenceScreen != null) {
+            toolbar.setTitle(preferenceScreen.getTitle());
+        } else {
+            toolbar.setTitle(null);
+        }
+    }
+
+    /**
+     * Gets the toolbar for the given fragment. The fragment can be either this PreferenceFragment,
+     * or one of the fragments that are created from it such as {@link ListPreferenceFragment}.
+     *
+     * This can be overridden by subclasses to have the fragments use a different toolbar than
+     * the ones built into them.
+     *
+     * @see #getPreferenceInsets(Fragment)
+     * @param fragment The fragment to get a toolbar for. Either this fragment, or one of the
+     *                 fragments that it launches.
+     */
+    @Nullable
+    protected ToolbarController getPreferenceToolbar(@NonNull Fragment fragment) {
+        ToolbarController baseLayoutToolbar = CarUi.getToolbar(getActivity());
+        if (baseLayoutToolbar != null) {
+            return baseLayoutToolbar;
         }
 
         // TODO(b/150230923) remove the code for the old toolbar height change when apps are ready
-        final RecyclerView recyclerView = CarUiUtils.findViewByRefId(view, R.id.recycler_view);
-        final Toolbar toolbar = CarUiUtils.findViewByRefId(view, R.id.toolbar);
-        if (recyclerView == null || toolbar == null) {
-            return;
-        }
+        View view = fragment.getView();
+        if (view != null) {
+            final Toolbar toolbar = CarUiUtils.findViewByRefId(view, R.id.toolbar);
+            if (toolbar != null) {
+                // Cache the height listeners so we don't end up re-registering multiple of them
+                // When getToolbar() is called multiple times
+                Toolbar.OnHeightChangedListener heightListener = mLegacyHeightListeners
+                        .computeIfAbsent(fragment, fragment1 -> newHeight -> {
+                            Insets insets = new Insets(0, newHeight, 0, 0);
+                            mLegacyInsets.put(fragment1, insets);
+                            if (fragment1 instanceof InsetsChangedListener) {
+                                ((InsetsChangedListener) fragment1).onCarUiInsetsChanged(insets);
+                            }
+                        });
+                toolbar.registerToolbarHeightChangeListener(heightListener);
+                mLegacyInsets.put(fragment, new Insets(0, toolbar.getHeight(), 0, 0));
+                mLayoutHasToolbar = true;
 
-        recyclerView.setPadding(0, toolbar.getHeight(), 0, 0);
-        toolbar.registerToolbarHeightChangeListener(newHeight -> {
-            if (recyclerView.getPaddingTop() == newHeight) {
-                return;
+                return toolbar;
             }
-
-            int oldHeight = recyclerView.getPaddingTop();
-            recyclerView.setPadding(0, newHeight, 0, 0);
-            recyclerView.scrollBy(0, oldHeight - newHeight);
-
-            FocusArea focusArea = CarUiUtils.requireViewByRefId(view, R.id.car_ui_focus_area);
-            focusArea.setHighlightPadding(0, newHeight, 0, 0);
-            focusArea.setBoundsOffset(0, newHeight, 0, 0);
-        });
-
-        recyclerView.setClipToPadding(false);
-        if (getPreferenceScreen() != null) {
-            toolbar.setTitle(getPreferenceScreen().getTitle());
         }
+
+        return null;
+    }
+
+    /**
+     * Gets the {@link Insets} for the given fragment. The fragment can be either this
+     * PreferenceFragment, or one of the fragments that are created from it such as
+     * {@link ListPreferenceFragment}.
+     *
+     * This can be overridden by subclasses to have the fragments use different insets than
+     * the ones built into them.
+     *
+     * @see #getPreferenceToolbar(Fragment)
+     * @param fragment The fragment to get insets for. Either this fragment, or one of the
+     *                 fragments that it launches.
+     */
+    @Nullable
+    protected Insets getPreferenceInsets(@NonNull Fragment fragment) {
+        return mLegacyInsets.getOrDefault(fragment, CarUi.getInsets(getActivity()));
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        Insets insets = CarUi.getInsets(getActivity());
+        Insets insets = getPreferenceInsets(this);
         if (insets != null) {
             onCarUiInsetsChanged(insets);
         }
@@ -137,10 +179,6 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
 
     @Override
     public void onCarUiInsetsChanged(@NonNull Insets insets) {
-        if (!isFullScreenFragment()) {
-            return;
-        }
-
         View view = requireView();
         FocusArea focusArea = CarUiUtils.requireViewByRefId(view, R.id.car_ui_focus_area);
         focusArea.setHighlightPadding(0, insets.getTop(), 0, insets.getBottom());
@@ -178,10 +216,10 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
         if (preference instanceof EditTextPreference) {
             f = EditTextPreferenceDialogFragment.newInstance(preference.getKey());
         } else if (preference instanceof ListPreference) {
-            f = ListPreferenceFragment.newInstance(preference.getKey(), isFullScreenFragment());
+            f = ListPreferenceFragment.newInstance(preference.getKey(), mLayoutHasToolbar);
         } else if (preference instanceof MultiSelectListPreference) {
             f = MultiSelectListPreferenceFragment
-                    .newInstance(preference.getKey(), isFullScreenFragment());
+                    .newInstance(preference.getKey(), mLayoutHasToolbar);
         } else if (preference instanceof CarUiSeekBarDialogPreference) {
             f = SeekbarPreferenceDialogFragment.newInstance(preference.getKey());
         } else {

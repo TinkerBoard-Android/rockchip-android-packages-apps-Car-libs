@@ -149,6 +149,14 @@
         <attr name="actionEnabled" format="boolean"/>
     </declare-styleable>
 
+    <declare-styleable name="CarUiTwoActionBasePreference">
+        <!-- All of these are disallowed -->
+        <attr name="layout" format="reference"/>
+        <attr name="android:layout" format="reference"/>
+        <attr name="widgetLayout" format="reference"/>
+        <attr name="android:widgetLayout" format="reference"/>
+    </declare-styleable>
+
     <declare-styleable name="CarUiTwoActionTextPreference">
         <attr name="secondaryActionStyle" format="enum">
             <enum name="bordered" value="0"/>
@@ -160,6 +168,9 @@
     <declare-styleable name="CarUiTwoActionIconPreference">
         <attr name="secondaryActionIcon" format="reference"/>
     </declare-styleable>
+
+    <!-- Adding AndroidX attr here, because it doesn't compile on google3 -->
+    <attr name="preferenceStyle" format="reference"/>
 
     <!-- Theme attribute to specify a default style for all CarUiPreferences -->
     <attr name="carUiPreferenceStyle" format="reference" />
@@ -178,24 +189,29 @@
                  view. The target view is chosen in the following order:
                    1. the "android:focusedByDefault" view, if any
                    2. the "app:defaultFocus" view, if any
-                   3. the first focusable item in a scrollable container, if any
-                   4. previously focused view, if any and the cache is not stale
-                   5. the first focusable view, if any
-                 Note that 4 will be prioritized over 1&2&3 when
-                 car_ui_focus_area_default_focus_overrides_history is false.
+                   3. the selected item in a scrollable container, if any
+                   4. the first focusable item in a scrollable container, if any
+                   5. previously focused view, if any and the cache is not stale
+                   6. the first focusable view, if any
+                 Note that 5 will be prioritized over 1, 2, 3, and 4 when
+                 "app:defaultFocusOverridesHistory" is true.
              (2) When it needs to initialize the focus (such as when a window is opened), it will
                  search for a view in the window and focus on it. The view is chosen in the
                  following order:
                    1. the first "android:focusedByDefault" view, if any
                    2. the first "app:defaultFocus" view, if any
-                   3. the first focusable item in a scrollable container, if any
-                   4. the first focusable view that is not a FocusParkingView, if any
+                   3. the selected item in a scrollable container, if any
+                   4. the first focusable item in a scrollable container, if any
+                   5. the first focusable view that is not a FocusParkingView, if any
              If there is only one FocusArea that needs to set default focus, you can use either
              "app:defaultFocus" or "android:focusedByDefault". If there are more than one, you
              should use "android:focusedByDefault" in the primary FocusArea, and use
              "app:defaultFocus" in other FocusAreas. -->
-
         <attr name="defaultFocus" format="reference"/>
+
+        <!-- Whether to focus on the default focus view when nudging to the FocusArea, even if there
+             was another view in the FocusArea focused before. -->
+        <attr name="defaultFocusOverridesHistory" format="boolean"/>
 
         <!-- The paddings of FocusArea highlight. It does't impact the paddings on its child views,
              or vice versa. -->
@@ -267,5 +283,23 @@
              false, the FocusParkingView allows itself to be focused instead. This should be false
              for the FocusParkingView in an ActivityView. The default value is true. -->
         <attr name="shouldRestoreFocus" format="boolean"/>
+    </declare-styleable>
+
+    <declare-styleable name="CarUiButton">
+        <attr name="android:id"/>
+        <attr name="android:enabled"/>
+        <attr name="carUiButtonSize" format="enum">
+            <enum name="small" value="0"/>
+            <enum name="medium" value="1"/>
+            <enum name="large" value="2"/>
+        </attr>
+        <attr name="carUiButtonTitle" format="string"/>
+        <attr name="carUiButtonIcon" format="reference"/>
+        <attr name="carUiButtonColorScheme" format="enum">
+            <enum name="basic" value="0"/>
+            <enum name="warning" value="1"/>
+            <enum name="error" value="2"/>
+        </attr>
+        <attr name="carUiButtonBorderless" format="boolean"/>
     </declare-styleable>
 </resources>

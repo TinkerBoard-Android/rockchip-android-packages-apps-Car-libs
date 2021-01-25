@@ -44,6 +44,8 @@
     <bool name="car_ui_preference_show_chevron">false</bool>
     <!-- whether list preference should be shown in full screen or as a dialog -->
     <bool name="car_ui_preference_list_show_full_screen">true</bool>
+    <!-- Whether list and multi-select preference selection changes should propagate instantly -->
+    <bool name="car_ui_preference_list_instant_change_callback">false</bool>
 
     <!-- List items -->
 
@@ -57,8 +59,7 @@
     <!-- Whether to draw highlight (car_ui_focus_area_background_highlight) on top of the FocusArea
          but behind its children when the FocusArea's descendant gets focused. -->
     <bool name="car_ui_enable_focus_area_background_highlight">false</bool>
-    <!-- Whether to focus on the default focus view when nudging to the FocusArea, even if there
-         was another view focused in the FocusArea. -->
+    <!-- Deprecated. -->
     <bool name="car_ui_focus_area_default_focus_overrides_history">false</bool>
     <!-- Whether to clear FocusArea history when the user rotates the rotary controller. -->
     <bool name="car_ui_clear_focus_area_history_when_rotating">true</bool>

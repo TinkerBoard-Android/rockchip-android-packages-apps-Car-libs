@@ -21,12 +21,14 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.car.ui.R;
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
 import com.android.car.ui.toolbar.ToolbarController;
 
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 /**
  * Public interface for general CarUi static functions.
@@ -37,13 +39,42 @@ public class CarUi {
     private CarUi() {}
 
     /**
+     * Gets a CarUi component, such as {@link com.android.car.ui.button.CarUiButton}, from the
+     * view hierarchy. The interfaces for these components don't extend View, so you can't
+     * get them through findViewById().
+     *
+     * @param view The parent view. Its descendants will be searched for the component.
+     * @param id The id of the component.
+     * @param <T> The resulting type of the component, such as
+     *            {@link com.android.car.ui.button.CarUiButton}
+     * @return The component found, or null.
+     */
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public static <T> T findCarUiComponentById(View view, int id) {
+        View componentView = view.findViewById(id);
+        return componentView != null
+                ? (T) componentView.getTag(R.id.car_ui_component_reference)
+                : null;
+    }
+
+    /**
+     * Same as {@link #findCarUiComponentById(View, int)}, but will throw an exception
+     * if the result is null.
+     */
+    @NonNull
+    public static <T> T requireCarUiComponentById(View view, int id) {
+        return Objects.requireNonNull(findCarUiComponentById(view, id));
+    }
+
+    /**
      * Gets the {@link ToolbarController} for an activity. Requires that the Activity uses
      * Theme.CarUi.WithToolbar, or otherwise sets carUiBaseLayout and carUiToolbar to true.
      *
      * See also: {@link #requireToolbar(Activity)}
      */
     @Nullable
-    public static ToolbarController getToolbar(Activity activity) {
+    public static ToolbarController getToolbar(@Nullable Activity activity) {
         BaseLayoutController controller = getBaseLayoutController(activity);
         if (controller != null) {
             return controller.getToolbarController();
@@ -60,7 +91,7 @@ public class CarUi {
      * @throws IllegalArgumentException When the CarUi Toolbar cannot be found.
      */
     @NonNull
-    public static ToolbarController requireToolbar(Activity activity) {
+    public static ToolbarController requireToolbar(@NonNull Activity activity) {
         ToolbarController result = getToolbar(activity);
         if (result == null) {
             throw new IllegalArgumentException("Activity " + activity
@@ -91,7 +122,7 @@ public class CarUi {
      * will automatically be applied to your Activity's content view.
      */
     @Nullable
-    public static Insets getInsets(Activity activity) {
+    public static Insets getInsets(@Nullable Activity activity) {
         BaseLayoutController controller = getBaseLayoutController(activity);
         if (controller != null) {
             return controller.getInsets();
@@ -110,7 +141,7 @@ public class CarUi {
      * @throws IllegalArgumentException When the activity is not using base layouts.
      */
     @NonNull
-    public static Insets requireInsets(Activity activity) {
+    public static Insets requireInsets(@NonNull Activity activity) {
         Insets result = getInsets(activity);
         if (result == null) {
             throw new IllegalArgumentException("Activity " + activity
@@ -144,7 +175,11 @@ public class CarUi {
                 .installBaseLayoutAround(view, insetsChangedListener, hasToolbar);
     }
 
-    /* package */ static BaseLayoutController getBaseLayoutController(Activity activity) {
+    /* package */ static BaseLayoutController getBaseLayoutController(@Nullable Activity activity) {
+        if (activity == null) {
+            return null;
+        }
+
         if (activity.getClassLoader().equals(CarUi.class.getClassLoader())) {
             return BaseLayoutController.getBaseLayout(activity);
         } else {

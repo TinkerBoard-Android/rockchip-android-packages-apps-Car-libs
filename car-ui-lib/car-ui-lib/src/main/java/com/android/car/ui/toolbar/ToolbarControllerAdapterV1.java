@@ -68,10 +68,12 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     private final Set<OnSearchCompletedListener> mOnSearchCompletedListeners = new HashSet<>();
     private final ProgressBarControllerAdapterV1 mProgressBar;
 
-    public ToolbarControllerAdapterV1(@NonNull ToolbarControllerOEMV1 oemToolbar) {
+    public ToolbarControllerAdapterV1(
+            @NonNull Context context,
+            @NonNull ToolbarControllerOEMV1 oemToolbar) {
         mOemToolbar = oemToolbar;
         mProgressBar = new ProgressBarControllerAdapterV1(mOemToolbar.getProgressBar());
-        mContext = oemToolbar.getContext();
+        mContext = context;
 
         Activity activity = CarUiUtils.getActivity(mContext);
 

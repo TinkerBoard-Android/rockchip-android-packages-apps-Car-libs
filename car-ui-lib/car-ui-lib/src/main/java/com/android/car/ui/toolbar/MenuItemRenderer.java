@@ -191,7 +191,7 @@ class MenuItemRenderer implements MenuItem.Listener {
         if (view instanceof ImageView) {
             ((ImageView) view).setImageState(drawableState, true);
         } else if (view instanceof DrawableStateView) {
-            ((DrawableStateView) view).setDrawableState(drawableState);
+            ((DrawableStateView) view).setExtraDrawableState(drawableState, null);
         }
 
         if (view instanceof ViewGroup) {
