@@ -61,8 +61,8 @@ public interface SharedLibraryFactory {
 
     /**
      * Creates an instance of CarUiRecyclerView
-     * @param context
-     * @param attrs
+     * @param context The visual context to create views with.
+     * @param attrs An object containing initial attributes for the button.
      */
     CarUiRecyclerView createRecyclerView(Context context, AttributeSet attrs);
 }

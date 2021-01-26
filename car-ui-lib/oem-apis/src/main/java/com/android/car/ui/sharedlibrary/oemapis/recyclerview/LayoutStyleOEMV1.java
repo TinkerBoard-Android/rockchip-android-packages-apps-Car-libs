@@ -20,12 +20,12 @@ package com.android.car.ui.sharedlibrary.oemapis.recyclerview;
  */
 public interface LayoutStyleOEMV1 {
 
-    /** @return number of recyclerview columns */
+    /** Returns number of recyclerview columns */
     int getNumOfColumns();
 
-    /** @return linear vs grid */
+    /** Returns linear vs grid */
     int getLayoutStyle();
 
-    /** @return layout direction 0 for VERTICAL, 1 for HORIZONTAL */
+    /** Returns layout direction 0 for VERTICAL, 1 for HORIZONTAL */
     int getOrientation();
 }
