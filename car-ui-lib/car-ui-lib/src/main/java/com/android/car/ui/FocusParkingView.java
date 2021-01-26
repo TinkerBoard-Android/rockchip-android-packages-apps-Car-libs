@@ -100,8 +100,8 @@ public class FocusParkingView extends View {
     private final OnGlobalFocusChangeListener mFocusChangeListener =
             (oldFocus, newFocus) -> {
                 // Keep track of the focused view so that we can recover focus when it's removed.
-                mFocusedView = newFocus instanceof FocusParkingView ? null : newFocus;
-                mScrollableContainer = ViewUtils.getAncestorScrollableContainer(mFocusedView);
+                View focusedView = newFocus instanceof FocusParkingView ? null : newFocus;
+                updateFocusedView(focusedView);
             };
 
     public FocusParkingView(Context context) {
@@ -146,12 +146,6 @@ public class FocusParkingView extends View {
 
         // Prevent Android from drawing the default focus highlight for this view when it's focused.
         setDefaultFocusHighlightEnabled(false);
-
-        // Keep track of the focused view so that we can recover focus when it's removed.
-        getViewTreeObserver().addOnGlobalFocusChangeListener((oldFocus, newFocus) -> {
-            View focusedView = newFocus instanceof FocusParkingView ? null : newFocus;
-            updateFocusedView(focusedView);
-        });
 
         Resources resources = getResources();
         @RotaryCache.CacheType
