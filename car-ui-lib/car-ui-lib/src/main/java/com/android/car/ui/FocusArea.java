@@ -36,6 +36,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.FocusFinder;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -158,6 +159,9 @@ public class FocusArea extends LinearLayout {
 
     /** Map of specified nudge target FocusAreas. */
     private Map<Integer, FocusArea> mSpecifiedNudgeFocusAreaMap;
+
+    /** Whether wrap-around is enabled. */
+    private boolean mWrapAround;
 
     /**
      * Cache of focus history and nudge history of the rotary controller.
@@ -426,6 +430,8 @@ public class FocusArea extends LinearLayout {
 
             mDefaultFocusOverridesHistory = a.getBoolean(
                     R.styleable.FocusArea_defaultFocusOverridesHistory, false);
+
+            mWrapAround = a.getBoolean(R.styleable.FocusArea_wrapAround, false);
         } finally {
             a.recycle();
         }
@@ -710,9 +716,28 @@ public class FocusArea extends LinearLayout {
         mBottomOffset = bottom;
     }
 
+    /** Sets whether wrap-around is enabled for this FocusArea. */
+    public void setWrapAround(boolean wrapAround) {
+        mWrapAround = wrapAround;
+    }
+
     /** Sets the default focus view in this FocusArea. */
     public void setDefaultFocus(@NonNull View defaultFocus) {
         mDefaultFocusView = defaultFocus;
+    }
+
+    /**
+     * @inheritDoc
+     * <p>
+     * When {@link #mWrapAround} is true, the search is restricted to descendants of this
+     * {@link FocusArea}.
+     */
+    @Override
+    public View focusSearch(View focused, int direction) {
+        if (mWrapAround) {
+            return FocusFinder.getInstance().findNextFocus(/* root= */ this, focused, direction);
+        }
+        return super.focusSearch(focused, direction);
     }
 
     @VisibleForTesting
