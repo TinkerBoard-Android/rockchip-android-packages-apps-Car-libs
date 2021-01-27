@@ -97,7 +97,7 @@ public final class CarUiRecyclerView extends RecyclerView implements
     private int mContainerVisibility = View.VISIBLE;
     private Rect mContainerPadding;
     private Rect mContainerPaddingRelative;
-    private LinearLayout mContainer;
+    private ViewGroup mContainer;
 
     // Set to true when when styled attributes are read and initialized.
     private boolean mIsInitialized;
@@ -240,7 +240,7 @@ public final class CarUiRecyclerView extends RecyclerView implements
             return;
         }
 
-        mContainer = new LinearLayout(getContext());
+        mContainer = new FrameLayout(getContext());
 
         setVerticalScrollBarEnabled(false);
         setHorizontalScrollBarEnabled(false);
