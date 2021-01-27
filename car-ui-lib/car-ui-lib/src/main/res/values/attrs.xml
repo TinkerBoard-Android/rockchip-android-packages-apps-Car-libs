@@ -275,6 +275,11 @@
         <attr name="nudgeUp" format="reference"/>
         <!-- The ID of the target FocusArea when nudging down. -->
         <attr name="nudgeDown" format="reference"/>
+
+        <!-- Whether rotation wraps around. When true, rotation wraps around, staying within the
+             FocusArea, when it reaches the first or last focusable view in the FocusArea. When
+             false, rotation does nothing in this case. -->
+        <attr name="wrapAround" format="boolean"/>
     </declare-styleable>
 
     <!-- Attributes for FocusParkingView. -->

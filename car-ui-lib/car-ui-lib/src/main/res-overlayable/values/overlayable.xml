@@ -275,6 +275,7 @@ limitations under the License.-->
       <item type="drawable" name="car_ui_focus_area_foreground_highlight"/>
       <item type="drawable" name="car_ui_icon_add"/>
       <item type="drawable" name="car_ui_icon_arrow_back"/>
+      <item type="drawable" name="car_ui_icon_chevron"/>
       <item type="drawable" name="car_ui_icon_close"/>
       <item type="drawable" name="car_ui_icon_delete"/>
       <item type="drawable" name="car_ui_icon_down"/>

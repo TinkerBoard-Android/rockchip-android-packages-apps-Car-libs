@@ -20,27 +20,27 @@ package com.android.car.ui.sharedlibrary.oemapis.recyclerview;
  */
 public interface RecyclerViewAttributesOEMV1 {
 
-    /** @return Id of the view set in the layout */
+    /** Returns Id of the view set in the layout */
     int getId();
 
-    /** @return if dividers should be enabled or not */
+    /** Returns if dividers should be enabled or not */
     boolean enableDivider();
 
-    /** @return top offset */
+    /** Returns top offset */
     int getTopOffset();
 
-    /** @return bottom offset */
+    /** Returns bottom offset */
     int getBottomOffset();
 
-    /** @return left offset */
+    /** Returns left offset */
     int getLeftOffset();
 
-    /** @return right offset */
+    /** Returns right offset */
     int getRightOffset();
 
-    /** @return if rotary scroll is enabled */
+    /** Returns if rotary scroll is enabled */
     boolean isRotaryScrollEnabled();
 
-    /** @return layout style set in xml */
+    /** Returns layout style set in xml */
     LayoutStyleOEMV1 getLayoutStyle();
 }
