@@ -35,6 +35,7 @@ import static com.android.car.ui.utils.RotaryConstants.FOCUS_AREA_TOP_BOUND_OFFS
 import static com.android.car.ui.utils.RotaryConstants.NUDGE_DIRECTION;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.os.Bundle;
 import android.view.View;
@@ -66,6 +67,7 @@ public class FocusAreaTest {
     private TestFocusArea mFocusArea2;
     private TestFocusArea mFocusArea3;
     private TestFocusArea mFocusArea4;
+    private TestFocusArea mFocusArea5;
     private FocusParkingView mFpv;
     private View mView1;
     private Button mButton1;
@@ -74,6 +76,8 @@ public class FocusAreaTest {
     private View mView3;
     private View mNudgeShortcut3;
     private View mView4;
+    private View mView5;
+    private Button mButton5;
 
     @Before
     public void setUp() {
@@ -82,6 +86,7 @@ public class FocusAreaTest {
         mFocusArea2 = mActivity.findViewById(R.id.focus_area2);
         mFocusArea3 = mActivity.findViewById(R.id.focus_area3);
         mFocusArea4 = mActivity.findViewById(R.id.focus_area4);
+        mFocusArea5 = mActivity.findViewById(R.id.focus_area5);
         mFpv = mActivity.findViewById(R.id.fpv);
         mView1 = mActivity.findViewById(R.id.view1);
         mButton1 = mActivity.findViewById(R.id.button1);
@@ -90,6 +95,8 @@ public class FocusAreaTest {
         mView3 = mActivity.findViewById(R.id.view3);
         mNudgeShortcut3 = mActivity.findViewById(R.id.nudge_shortcut3);
         mView4 = mActivity.findViewById(R.id.view4);
+        mView5 = mActivity.findViewById(R.id.view5);
+        mButton5 = mActivity.findViewById(R.id.button5);
     }
 
     @Test
@@ -503,6 +510,44 @@ public class FocusAreaTest {
             // Nudge up, and it should focus on app bar.
             mFocusArea2.performAccessibilityAction(ACTION_NUDGE_TO_ANOTHER_FOCUS_AREA, arguments);
             assertThat(mView1.isFocused()).isTrue();
+        });
+    }
+
+    @Test
+    public void testWrapAround() {
+        mFocusArea1.post(() -> {
+            mView5.requestFocus();
+            assertThat(mView5.isFocused()).isTrue();
+
+            View focusSearch = mView5.focusSearch(View.FOCUS_FORWARD);
+
+            assertWithMessage("Forward wrap-around").that(focusSearch).isEqualTo(mButton5);
+
+            mButton5.requestFocus();
+            assertThat(mButton5.isFocused()).isTrue();
+
+            focusSearch = mButton5.focusSearch(View.FOCUS_BACKWARD);
+
+            assertWithMessage("Backward wrap-around").that(focusSearch).isEqualTo(mView5);
+        });
+    }
+
+    @Test
+    public void testNoWrapAround() {
+        mFocusArea1.post(() -> {
+            mButton1.requestFocus();
+            assertThat(mButton1.isFocused()).isTrue();
+
+            View focusSearch = mButton1.focusSearch(View.FOCUS_FORWARD);
+
+            assertWithMessage("Forward wrap-around").that(focusSearch).isNotEqualTo(mView1);
+
+            mView1.requestFocus();
+            assertThat(mView1.isFocused()).isTrue();
+
+            focusSearch = mView1.focusSearch(View.FOCUS_BACKWARD);
+
+            assertWithMessage("Backward wrap-around").that(focusSearch).isNotEqualTo(mButton1);
         });
     }
 
