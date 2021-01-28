@@ -30,6 +30,7 @@ import android.view.animation.Interpolator;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.OrientationHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -502,7 +503,33 @@ class DefaultScrollBar implements ScrollBar {
         if ((isAtStart && isAtEnd) || layoutManager == null || layoutManager.getItemCount() == 0) {
             mScrollView.setVisibility(View.INVISIBLE);
         } else {
-            mScrollView.setVisibility(View.VISIBLE);
+            OrientationHelper orientationHelper = getOrientationHelper(layoutManager);
+            int screenSize = orientationHelper.getTotalSpace();
+            int touchTargetSize = (int) getRecyclerView().getContext().getResources()
+                    .getDimension(R.dimen.car_ui_touch_target_size);
+            ConstraintLayout.LayoutParams upButtonLayoutParam =
+                    (ConstraintLayout.LayoutParams) mUpButton.getLayoutParams();
+            int upButtonMargin = upButtonLayoutParam.topMargin
+                    + upButtonLayoutParam.bottomMargin;
+            ConstraintLayout.LayoutParams downButtonLayoutParam =
+                    (ConstraintLayout.LayoutParams) mDownButton.getLayoutParams();
+            int downButtonMargin = downButtonLayoutParam.topMargin
+                    + downButtonLayoutParam.bottomMargin;
+            int margin = upButtonMargin + downButtonMargin;
+            if (screenSize < 2 * touchTargetSize + margin) {
+                mScrollView.setVisibility(View.INVISIBLE);
+            } else {
+                ConstraintLayout.LayoutParams trackLayoutParam =
+                        (ConstraintLayout.LayoutParams) mScrollTrack.getLayoutParams();
+                int trackMargin = trackLayoutParam.topMargin
+                        + trackLayoutParam.bottomMargin;
+                margin += trackMargin;
+                if (screenSize < 3 * touchTargetSize + margin) {
+                    mScrollTrack.setVisibility(View.INVISIBLE);
+                    mScrollThumb.setVisibility(View.INVISIBLE);
+                }
+                mScrollView.setVisibility(View.VISIBLE);
+            }
         }
 
         if (layoutManager == null) {
