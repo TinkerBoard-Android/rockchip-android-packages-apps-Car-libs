@@ -60,9 +60,11 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -919,6 +921,108 @@ public class CarUiRecyclerViewTest {
         ViewGroup recyclerViewContainer = (ViewGroup) carUiRecyclerView.getParent().getParent();
 
         assertThat(carUiRecyclerView.animate(), is(equalTo(recyclerViewContainer.animate())));
+    }
+
+    @Test
+    public void testScrollbarVisibility_tooSmallHeight() {
+        doReturn(true).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
+
+        // Set to anything less than 2 * (minTouchSize + margin)
+        // minTouchSize = R.dimen.car_ui_touch_target_size
+        // margin is button up top margin or button down bottom margin
+        int recyclerviewHeight = 1;
+
+        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerView(mTestableContext);
+
+        ViewGroup container = mActivity.findViewById(R.id.test_container);
+        container.post(() -> {
+            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(-1, recyclerviewHeight);
+            container.addView(carUiRecyclerView, lp);
+            carUiRecyclerView.setAdapter(new TestAdapter(100));
+        });
+
+        onView(withId(R.id.car_ui_scroll_bar)).check(matches(not(isDisplayed())));
+
+        OrientationHelper orientationHelper =
+                OrientationHelper.createVerticalHelper(carUiRecyclerView.getLayoutManager());
+        int screenHeight = orientationHelper.getTotalSpace();
+
+        assertEquals(recyclerviewHeight, screenHeight);
+    }
+
+    @Test
+    public void testScrollbarVisibility_justEnoughToShowOnlyButtons() {
+        doReturn(true).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
+
+        // R.dimen.car_ui_touch_target_size
+        float minTouchSize = mTestableResources.getDimension(R.dimen.car_ui_touch_target_size);
+        // This value is hardcoded to 15dp in the layout.
+        int margin = (int) dpToPixel(mTestableContext, 15)
+                + (int) mTestableResources.getDimension(R.dimen.car_ui_scrollbar_separator_margin);
+        // Set to 2 * (minTouchSize + margin)
+        int recyclerviewHeight = 2 * (int) (minTouchSize + margin);
+
+        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerView(mTestableContext);
+
+        ViewGroup container = mActivity.findViewById(R.id.test_container);
+        container.post(() -> {
+            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(-1, recyclerviewHeight);
+            container.addView(carUiRecyclerView, lp);
+            carUiRecyclerView.setAdapter(new TestAdapter(100));
+        });
+
+        onView(withId(R.id.car_ui_scroll_bar)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_scrollbar_thumb)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.car_ui_scrollbar_track)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.car_ui_scrollbar_page_down)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_scrollbar_page_up)).check(matches(isDisplayed()));
+
+        OrientationHelper orientationHelper =
+                OrientationHelper.createVerticalHelper(carUiRecyclerView.getLayoutManager());
+        int screenHeight = orientationHelper.getTotalSpace();
+
+        assertEquals(recyclerviewHeight, screenHeight);
+    }
+
+    @Test
+    public void testScrollbarVisibility_enoughToShowEverything() {
+        doReturn(true).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
+
+        // R.dimen.car_ui_touch_target_size
+        float minTouchSize = mTestableResources.getDimension(R.dimen.car_ui_touch_target_size);
+        // This value is hardcoded to 15dp in the layout.
+        int margin = (int) dpToPixel(mTestableContext, 15)
+                + (int) mTestableResources.getDimension(R.dimen.car_ui_scrollbar_separator_margin);
+        // Set to anything greater or equal to 3 * minTouchSize + 2 * margin
+        int recyclerviewHeight = 3 * (int) minTouchSize + 2 * (int) margin;
+
+        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerView(mTestableContext);
+
+        ViewGroup container = mActivity.findViewById(R.id.test_container);
+        container.post(() -> {
+            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(-1, recyclerviewHeight);
+            container.addView(carUiRecyclerView, lp);
+            carUiRecyclerView.setAdapter(new TestAdapter(100));
+        });
+
+        onView(withId(R.id.car_ui_scroll_bar)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_scrollbar_thumb)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_scrollbar_track)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_scrollbar_page_down)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_scrollbar_page_up)).check(matches(isDisplayed()));
+
+        OrientationHelper orientationHelper =
+                OrientationHelper.createVerticalHelper(carUiRecyclerView.getLayoutManager());
+        int screenHeight = orientationHelper.getTotalSpace();
+
+        assertEquals(recyclerviewHeight, screenHeight);
+    }
+
+    private static float dpToPixel(Context context, int dp) {
+        return TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                dp,
+                context.getResources().getDisplayMetrics());
     }
 
     /**
