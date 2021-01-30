@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,26 +17,26 @@ package com.android.car.ui.uxr;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
 /**
- * A {@link ImageView} that implements {@link DrawableStateView}, for allowing additional states
- * such as ux restriction.
+ * A {@link TextView} that implements {@link DrawableStateView}, for allowing additional
+ * states such as ux restriction.
  */
-public class DrawableStateImageView extends ImageView implements DrawableStateView {
+public class DrawableStateTextView extends TextView implements DrawableStateView {
     private DrawableStateUtil mUtil;
 
-    public DrawableStateImageView(Context context) {
+    public DrawableStateTextView(Context context) {
         super(context);
     }
 
-    public DrawableStateImageView(Context context, @Nullable AttributeSet attrs) {
+    public DrawableStateTextView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public DrawableStateImageView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public DrawableStateTextView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 

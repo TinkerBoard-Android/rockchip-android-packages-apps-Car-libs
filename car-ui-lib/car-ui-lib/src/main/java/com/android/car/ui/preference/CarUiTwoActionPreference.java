@@ -100,7 +100,7 @@ public class CarUiTwoActionPreference extends CarUiPreference {
         View widgetFrame = CarUiUtils.findViewByRefId(holder.itemView, android.R.id.widget_frame);
         holder.itemView.setFocusable(!mIsActionShown);
         containerWithoutWidget.setOnClickListener(
-                mIsActionShown ? this::performClickUnrestricted : null);
+                mIsActionShown ? this::performClick : null);
         containerWithoutWidget.setClickable(mIsActionShown);
         containerWithoutWidget.setFocusable(mIsActionShown);
         actionContainer.setVisibility(mIsActionShown ? View.VISIBLE : View.GONE);

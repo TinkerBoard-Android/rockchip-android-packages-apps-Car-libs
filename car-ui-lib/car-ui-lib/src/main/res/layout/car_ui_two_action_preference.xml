@@ -22,7 +22,7 @@
     android:background="@android:color/transparent"
     android:gravity="center_vertical"
     android:minHeight="?android:attr/listPreferredItemHeightSmall">
-    <LinearLayout
+    <com.android.car.ui.uxr.DrawableStateLinearLayout
         android:id="@+id/car_ui_preference_container_without_widget"
         android:layout_width="0dp"
         android:layout_height="match_parent"
@@ -44,20 +44,20 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:orientation="vertical">
-            <TextView
+            <com.android.car.ui.uxr.DrawableStateTextView
                 android:id="@android:id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:singleLine="true"
                 android:textAppearance="@style/TextAppearance.CarUi.PreferenceTitle"/>
-            <TextView
+            <com.android.car.ui.uxr.DrawableStateTextView
                 android:id="@android:id/summary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/TextAppearance.CarUi.PreferenceSummary"/>
         </LinearLayout>
-    </LinearLayout>
+    </com.android.car.ui.uxr.DrawableStateLinearLayout>
     <LinearLayout
         android:id="@+id/action_widget_container"
         android:layout_width="wrap_content"
@@ -69,7 +69,7 @@
             android:layout_marginTop="@dimen/car_ui_preference_content_margin_top"
             style="@style/Preference.CarUi.Divider"/>
         <!-- Preference should place its actual preference widget here. -->
-        <FrameLayout
+        <com.android.car.ui.uxr.DrawableStateFrameLayout
             android:id="@android:id/widget_frame"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"

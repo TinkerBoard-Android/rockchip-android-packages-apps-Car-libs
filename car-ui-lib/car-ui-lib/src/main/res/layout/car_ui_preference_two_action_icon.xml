@@ -23,7 +23,7 @@
     android:minHeight="?android:attr/listPreferredItemHeightSmall"
     android:tag="carUiPreference">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.android.car.ui.uxr.DrawableStateConstraintLayout
         android:id="@+id/car_ui_first_action_container"
         android:layout_height="0dp"
         android:layout_width="0dp"
@@ -34,7 +34,7 @@
         app:layout_constraintEnd_toStartOf="@id/car_ui_second_action_container"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
-        <ImageView
+        <com.android.car.ui.uxr.DrawableStateImageView
             style="@style/Preference.CarUi.Icon"
             android:id="@android:id/icon"
             android:layout_width="@dimen/car_ui_preference_icon_size"
@@ -44,7 +44,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"/>
 
-        <TextView
+        <com.android.car.ui.uxr.DrawableStateTextView
             android:id="@android:id/title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -59,7 +59,7 @@
             app:layout_constraintBottom_toTopOf="@android:id/summary"
             app:layout_constraintVertical_chainStyle="packed"/>
 
-        <TextView
+        <com.android.car.ui.uxr.DrawableStateTextView
             android:id="@android:id/summary"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -72,7 +72,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@android:id/title"
             app:layout_constraintBottom_toBottomOf="parent"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.android.car.ui.uxr.DrawableStateConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/car_ui_second_action_container"
@@ -95,7 +95,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             style="@style/Preference.CarUi.Divider"/>
 
-        <FrameLayout
+        <com.android.car.ui.uxr.DrawableStateFrameLayout
             android:id="@+id/car_ui_secondary_action"
             android:layout_width="?android:attr/listPreferredItemHeightSmall"
             android:layout_height="match_parent"
@@ -106,14 +106,14 @@
             app:layout_constraintEnd_toStartOf="@android:id/widget_frame"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent">
-            <ImageView
+            <com.android.car.ui.uxr.DrawableStateImageView
                 android:id="@+id/car_ui_secondary_action_concrete"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_gravity="center"
                 android:tintMode="src_in"
-                android:tint="?android:attr/textColorPrimary"/>
-        </FrameLayout>
+                android:tint="@color/car_ui_text_color_primary"/>
+        </com.android.car.ui.uxr.DrawableStateFrameLayout>
 
         <!-- The widget frame is required for androidx preferences, but we won't use it. -->
         <FrameLayout

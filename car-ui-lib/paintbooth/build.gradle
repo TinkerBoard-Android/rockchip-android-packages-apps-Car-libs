@@ -41,6 +41,9 @@ android {
             }
         }
     }
+
+    // This is the gradle equivalent of the libs: ["android.car"] in the Android.bp
+    useLibrary 'android.car'
 }
 
 dependencies {

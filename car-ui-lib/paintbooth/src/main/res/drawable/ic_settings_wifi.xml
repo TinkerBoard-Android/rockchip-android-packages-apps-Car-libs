@@ -16,12 +16,9 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="64dp"
     android:height="64dp"
-    android:viewportWidth="64"
-    android:viewportHeight="64">
+    android:viewportWidth="24"
+    android:viewportHeight="24">
   <path
-      android:pathData="M36.87,39.05a7,7 0,1 1,-9.901 9.9,7 7,0 0,1 9.901,-9.9zM14.243,26.323c9.763,-9.764 25.593,-9.764 35.355,0M53.84,22.08C41.735,9.972 22.106,9.972 10,22.08M18.486,30.565c7.42,-7.42 19.449,-7.42 26.869,0M22.728,34.808c5.077,-5.077 13.308,-5.077 18.385,0"
-      android:strokeWidth="2"
-      android:fillColor="#00000000"
-      android:fillType="evenOdd"
-      android:strokeColor="#FFF"/>
+      android:pathData="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"
+      android:fillColor="@color/car_ui_text_color_primary"/>
 </vector>

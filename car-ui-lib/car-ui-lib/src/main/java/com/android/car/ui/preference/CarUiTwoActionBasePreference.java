@@ -92,11 +92,12 @@ public abstract class CarUiTwoActionBasePreference extends CarUiPreference {
      * Returns whether or not the secondary action is enabled.
      */
     public boolean isSecondaryActionEnabled() {
-        return mSecondaryActionEnabled;
+        return mSecondaryActionEnabled && isEnabled();
     }
 
     /**
-     * Sets whether or not the secondary action is enabled.
+     * Sets whether or not the secondary action is enabled. This is secondary to the overall
+     * {@link #setEnabled(boolean)} of the preference
      */
     public void setSecondaryActionEnabled(boolean enabled) {
         mSecondaryActionEnabled = enabled;
