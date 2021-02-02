@@ -49,4 +49,9 @@ public interface PrivateImeCommandCallback {
      * content area.
      */
     void onSurfaceInfo(int displayId, IBinder binder, int height, int width);
+
+    /**
+     * Called when the search results are read and displayed from the content provider by IME.
+     */
+    void onPostLoadSearchResults();
 }
