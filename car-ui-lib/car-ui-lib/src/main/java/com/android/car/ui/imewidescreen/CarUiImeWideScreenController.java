@@ -112,6 +112,8 @@ public class CarUiImeWideScreenController {
     // Action name of action that will be used by IMS to notify the application to clear the data
     // in the EditText.
     public static final String WIDE_SCREEN_CLEAR_DATA_ACTION = "automotive_wide_screen_clear_data";
+    public static final String WIDE_SCREEN_POST_LOAD_SEARCH_RESULTS_ACTION =
+            "automotive_wide_screen_post_load_search_results";
     // Action name used by applications to notify that new search results are available.
     public static final String WIDE_SCREEN_SEARCH_RESULTS = "wide_screen_search_results";
     // Key to provide the resource id for the icon that will be displayed in the input area. If
@@ -439,8 +441,7 @@ public class CarUiImeWideScreenController {
                 mAutomotiveSearchItems.add(searchItem);
             } while (c.moveToNext());
         }
-        // delete the results.
-        cr.delete(contentUrl, null, null);
+        mInputConnection.performPrivateCommand(WIDE_SCREEN_POST_LOAD_SEARCH_RESULTS_ACTION, null);
     }
 
     private static Parcel byteArrayToParcel(byte[] bytes) {
