@@ -16,47 +16,71 @@
 
 package com.android.car.messenger.common;
 
+import static java.util.Arrays.stream;
+
 import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.app.RemoteInput;
-import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.Person;
+import androidx.core.graphics.drawable.IconCompat;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
  * A generic conversation model that holds messaging conversation metadata.
  */
-public final class Conversation implements Parcelable {
-    @NonNull private final String mId;
-    @NonNull private final Person mUser;
-    @Nullable private final String mConversationTitle;
-    @Nullable private final Icon mConversationIcon;
-    @NonNull private final List<Message> mMessages;
-    @NonNull private final List<Person> mParticipants;
-    @Nullable private final List<ConversationAction> mActions;
+public final class Conversation {
+    private static final String KEY_ID = "id";
+    private static final String KEY_USER = "user";
+    private static final String KEY_TITLE = "title";
+    private static final String KEY_MESSAGES = "messages";
+    private static final String KEY_PARTICIPANTS = "participants";
+    private static final String KEY_ICON = "icon";
+    private static final String KEY_ACTIONS = "actions";
+    private static final String KEY_UNREAD_COUNT = "unread_count";
+    private static final String KEY_IS_MUTED = "is_muted";
+    private static final String KEY_EXTRAS = "extras";
+
+    private static final String TAG = "CMC.Conversation";
+
+    @NonNull
+    private final String mId;
+    @NonNull
+    private final Person mUser;
+    @Nullable
+    private final String mConversationTitle;
+    @Nullable
+    private final IconCompat mConversationIcon;
+    @NonNull
+    private final List<Message> mMessages;
+    @NonNull
+    private final List<Person> mParticipants;
+    @Nullable
+    private final List<ConversationAction> mActions;
 
     private final int mUnreadCount;
     private final boolean mIsMuted;
-    @NonNull private final Bundle mExtras;
+    @NonNull
+    private final Bundle mExtras;
 
     public Conversation(
             @NonNull String id,
             @NonNull Person user,
             @Nullable String conversationTitle,
-            @Nullable Icon conversationIcon,
+            @Nullable IconCompat conversationIcon,
             @NonNull List<Message> messages,
             @NonNull List<Person> participants,
             @Nullable List<ConversationAction> actions,
@@ -76,55 +100,80 @@ public final class Conversation implements Parcelable {
         mExtras = (extras == null) ? new Bundle() : extras;
     }
 
-    public Conversation(Parcel in) {
-        mId = in.readString();
-        mUser = Person.fromBundle(in.readParcelable(Bundle.class.getClassLoader()));
-        mConversationTitle = in.readString();
-        mConversationIcon = in.readParcelable(Icon.class.getClassLoader());
-        mMessages = in.createTypedArrayList(Message.CREATOR);
-        mParticipants = in.createTypedArrayList(Bundle.CREATOR)
-            .stream()
-            .map(Person::fromBundle)
-            .collect(Collectors.toList());
-        mActions = in.createTypedArrayList(ConversationAction.CREATOR);
-        mUnreadCount = in.readInt();
-        mIsMuted = in.readByte() != 0;
-        mExtras = in.readBundle();
+    /**
+     * Useful method for saving as a parcelable and transferring across processes
+     */
+    @NonNull
+    public Bundle toBundle() {
+        Bundle bundle = new Bundle();
+        bundle.putString(KEY_ID, mId);
+        bundle.putBundle(KEY_USER, mUser.toBundle());
+        if (mConversationTitle != null) {
+            bundle.putString(KEY_TITLE, mConversationTitle);
+        }
+        if (mConversationIcon != null) {
+            bundle.putBundle(KEY_ICON, mConversationIcon.toBundle());
+        }
+        bundle.putParcelableArray(KEY_MESSAGES, Message.getBundleArrayForMessages(mMessages));
+        Bundle[] participantBundle =
+                mParticipants.stream().map(Person::toBundle).toArray(Bundle[]::new);
+        bundle.putParcelableArray(KEY_PARTICIPANTS, participantBundle);
+        if (mActions != null) {
+            bundle.putParcelableArray(
+                    KEY_ACTIONS,
+                    ConversationAction.getBundleArrayForAction(mActions));
+        }
+        bundle.putInt(KEY_UNREAD_COUNT, mUnreadCount);
+        bundle.putBoolean(KEY_IS_MUTED, mIsMuted);
+        bundle.putBundle(KEY_EXTRAS, mExtras);
+        return bundle;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mId);
-        dest.writeParcelable(mUser.toBundle(), flags);
-        dest.writeString(mConversationTitle);
-        dest.writeParcelable(mConversationIcon, flags);
-        dest.writeTypedList(mMessages);
-        dest.writeTypedList(mParticipants.stream()
-                .map(Person::toBundle)
-                .collect(Collectors.toList())
+    /**
+     * Creates a {@link Conversation} from the given Bundle.
+     */
+    @Nullable
+    public static Conversation fromBundle(@Nullable Bundle bundle) {
+        if (bundle == null) {
+            return null;
+        }
+        if (bundle.getString(KEY_ID) == null
+                || bundle.getBundle(KEY_USER) == null
+                || bundle.getParcelableArray(KEY_MESSAGES) == null
+                || bundle.getParcelableArray(KEY_PARTICIPANTS) == null
+        ) {
+            return null;
+        }
+        List<Person> participants =
+                stream(bundle.getParcelableArray(KEY_PARTICIPANTS))
+                        .map(
+                                personBundle ->
+                                        personBundle instanceof Bundle
+                                                ? Person.fromBundle((Bundle) personBundle)
+                                                : null)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+
+        Bundle iconBundle = bundle.getBundle(KEY_ICON);
+        IconCompat icon = iconBundle == null
+                ? null : IconCompat.createFromBundle(iconBundle);
+        return new Conversation(
+                Objects.requireNonNull(bundle.getString(KEY_ID)),
+                Person.fromBundle(Objects.requireNonNull(bundle.getBundle(KEY_USER))),
+                bundle.getString(KEY_TITLE),
+                icon,
+                Message.getMessagesFromBundleArray(
+                        Objects.requireNonNull(bundle.getParcelableArray(KEY_MESSAGES))),
+                participants,
+                ConversationAction.getActionsFromBundleArray(
+                        bundle.getParcelableArray(KEY_ACTIONS)
+                ),
+                bundle.getInt(KEY_UNREAD_COUNT),
+                bundle.getBoolean(KEY_IS_MUTED),
+                bundle.getBundle(KEY_EXTRAS)
         );
-        dest.writeTypedList(mActions);
-        dest.writeInt(mUnreadCount);
-        dest.writeByte((byte) (mIsMuted ? 1 : 0));
-        dest.writeBundle(mExtras);
+
     }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public static final Creator<Conversation> CREATOR = new Creator<Conversation>() {
-        @Override
-        public Conversation createFromParcel(Parcel in) {
-            return new Conversation(in);
-        }
-
-        @Override
-        public Conversation[] newArray(int size) {
-            return new Conversation[size];
-        }
-    };
 
     /**
      * Gets the unique identifier for this conversation
@@ -136,7 +185,7 @@ public final class Conversation implements Parcelable {
 
     /**
      * Gets the current user for this conversation.
-     *
+     * <p>
      * The user receives inbound messages and sends outbound messages from the messaging
      * app/device.
      */
@@ -158,16 +207,15 @@ public final class Conversation implements Parcelable {
     /**
      * Gets conversation icon.
      *
-     * @return null if conversation icon is not set, or {@link Icon} if set
+     * @return null if conversation icon is not set, or {@link IconCompat} if set
      */
     @Nullable
-    public Icon getConversationIcon() {
+    public IconCompat getConversationIcon() {
         return mConversationIcon;
     }
 
     /**
      * Gets the list of messages conveyed by this conversation.
-     *
      */
     @NonNull
     public List<Message> getMessages() {
@@ -202,24 +250,25 @@ public final class Conversation implements Parcelable {
     }
 
     /**
-     * Gets if the conversation should be muted based on the user's preference.
-     * This is useful when posting a notification.
+     * Gets if the conversation should be muted based on the user's preference. This is useful when
+     * posting a notification.
      */
     public boolean isMuted() {
         return mIsMuted;
     }
 
     /**
-     * Gets the extras for the conversation.
-     * This can be used to hold additional data on the conversation.
+     * Gets the extras for the conversation. This can be used to hold additional data on the
+     * conversation.
      */
     @NonNull
     public Bundle getExtras() {
         return mExtras;
     }
 
-    /** Creates and returns a new {@link Conversation.Builder}
-     * initialized with this Conversation's data
+    /**
+     * Creates and returns a new {@link Conversation.Builder} initialized with this Conversation's
+     * data
      */
     @NonNull
     public Conversation.Builder toBuilder() {
@@ -230,19 +279,28 @@ public final class Conversation implements Parcelable {
      * Builder class for {@link Conversation} objects.
      */
     public static class Builder {
-        @NonNull private final String mId;
-        @NonNull private final Person mUser;
-        @Nullable private String mConversationTitle;
-        @Nullable private Icon mConversationIcon;
-        @NonNull private List<Message> mMessages;
-        @NonNull private List<Person> mParticipants;
-        @Nullable private List<ConversationAction> mActions;
+        @NonNull
+        private final String mId;
+        @NonNull
+        private final Person mUser;
+        @Nullable
+        private String mConversationTitle;
+        @Nullable
+        private IconCompat mConversationIcon;
+        @NonNull
+        private List<Message> mMessages;
+        @NonNull
+        private List<Person> mParticipants;
+        @Nullable
+        private List<ConversationAction> mActions;
         private int mUnreadCount;
         private boolean mIsMuted;
-        @NonNull private Bundle mExtras;
+        @NonNull
+        private Bundle mExtras;
 
         /**
          * Constructs a new builder from a {@link Conversation}?
+         *
          * @param conversation the conversation containing the data to initialize builder with
          */
         private Builder(@NonNull Conversation conversation) {
@@ -311,8 +369,9 @@ public final class Conversation implements Parcelable {
         }
 
         /**
-         * Sets conversation title which would be used when displaying the name of the conversation.
-         *
+         * Sets conversation title which would be used when displaying the name of the
+         * conversation.
+         * <p>
          * This could be the sender name for a 1-1 message, or an appended string of participants
          * name for a group message, or a nickname for the group.
          *
@@ -328,14 +387,13 @@ public final class Conversation implements Parcelable {
         /**
          * Sets conversation icon for display purposes
          *
-         * @param conversationIcon This could be the sender icon for a 1-1 message or a collage
-         *                         of participants' icons for a group message, or an icon the user
-         *                         uploaded as the
-         *                         conversation icon.
+         * @param conversationIcon This could be the sender icon for a 1-1 message or a collage of
+         *                         participants' icons for a group message, or an icon the user
+         *                         uploaded as the conversation icon.
          * @return This object for method chaining.
          */
         @NonNull
-        public Builder setConversationIcon(@Nullable Icon conversationIcon) {
+        public Builder setConversationIcon(@Nullable IconCompat conversationIcon) {
             mConversationIcon = conversationIcon;
             return this;
         }
@@ -352,8 +410,8 @@ public final class Conversation implements Parcelable {
         }
 
         /**
-         * Sets if this conversation should be muted per user's request
-         * A muted conversation may not post notifications for instance.
+         * Sets if this conversation should be muted per user's request A muted conversation may not
+         * post notifications for instance.
          *
          * @return This object for method chaining.
          */
@@ -383,16 +441,16 @@ public final class Conversation implements Parcelable {
         @NonNull
         public Conversation build() {
             return new Conversation(
-                mId,
-                mUser,
-                mConversationTitle,
-                mConversationIcon,
-                mMessages,
-                mParticipants,
-                mActions,
-                mUnreadCount,
-                mIsMuted,
-                mExtras
+                    mId,
+                    mUser,
+                    mConversationTitle,
+                    mConversationIcon,
+                    mMessages,
+                    mParticipants,
+                    mActions,
+                    mUnreadCount,
+                    mIsMuted,
+                    mExtras
             );
         }
     }
@@ -400,16 +458,29 @@ public final class Conversation implements Parcelable {
     /**
      * A class representing the metadata for a conversation message.
      */
-    public static final class Message implements Parcelable {
-        @NonNull private final String mText;
-        private final long mTimestamp;
-        @Nullable private final Person mPerson;
-        @MessageStatus private int mMessageStatus;
-        @MessageType private int mMessageType;
+    public static final class Message {
+        private static final String KEY_TEXT = "text";
+        private static final String KEY_TIMESTAMP = "time";
+        private static final String KEY_SENDER = "sender";
+        private static final String KEY_DATA_MIME_TYPE = "type";
+        private static final String KEY_DATA_URI = "uri";
 
-        @NonNull private Bundle mExtras = new Bundle();
-        @Nullable private String mDataMimeType;
-        @Nullable private Uri mDataUri;
+        @NonNull
+        private final String mText;
+        private final long mTimestamp;
+        @Nullable
+        private final Person mPerson;
+        @MessageStatus
+        private int mMessageStatus;
+        @MessageType
+        private int mMessageType;
+
+        @NonNull
+        private final Bundle mExtras = new Bundle();
+        @Nullable
+        private String mDataMimeType;
+        @Nullable
+        private Uri mDataUri;
 
         /**
          * Creates a new {@link Message} with the given text, timestamp, and sender.
@@ -417,9 +488,8 @@ public final class Conversation implements Parcelable {
          * @param text      A {@link String} to be displayed as the message content
          * @param timestamp Time at which the message arrived in ms since Unix epoch
          * @param person    A {@link Person} whose {@link Person#getName()} value is used as the
-         *                  display name for the sender. For messages by
-         *                  the current user, this should be identical to
-         *                  {@link Conversation#getUser()}
+         *                  display name for the sender. For messages by the current user, this
+         *                  should be identical to {@link Conversation#getUser()}
          */
         public Message(@NonNull String text, long timestamp, @Nullable Person person) {
             mText = text;
@@ -427,51 +497,76 @@ public final class Conversation implements Parcelable {
             mPerson = person;
         }
 
-        public Message(Parcel in) {
-            mText = in.readString();
-            mTimestamp = in.readLong();
-            Bundle mPersonBundle = in.readParcelable(Bundle.class.getClassLoader());
-            mPerson = mPersonBundle == null ? null : Person.fromBundle(mPersonBundle);
-            mMessageStatus = in.readInt();
-            mMessageType = in.readInt();
-            mExtras = in.readParcelable(Bundle.class.getClassLoader());
-            mDataMimeType = in.readString();
-            mDataUri = in.readParcelable(Uri.class.getClassLoader());
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(mText);
-            dest.writeLong(mTimestamp);
-            dest.writeParcelable(mPerson == null ? null : mPerson.toBundle(), flags);
-            dest.writeInt(mMessageStatus);
-            dest.writeInt(mMessageType);
-            dest.writeBundle(mExtras);
-            dest.writeString(mDataMimeType);
-            dest.writeParcelable(mDataUri, flags);
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        public static final Creator<Message> CREATOR = new Creator<Message>() {
-            @Override
-            public Message createFromParcel(Parcel in) {
-                return new Message(in);
+        private Bundle toBundle() {
+            Bundle bundle = new Bundle();
+            bundle.putString(KEY_TEXT, mText);
+            bundle.putLong(KEY_TIMESTAMP, mTimestamp);
+            if (mPerson != null) {
+                bundle.putBundle(KEY_SENDER, mPerson.toBundle());
             }
-
-            @Override
-            public Message[] newArray(int size) {
-                return new Message[size];
+            if (mDataMimeType != null) {
+                bundle.putString(KEY_DATA_MIME_TYPE, mDataMimeType);
             }
-        };
+            if (mDataUri != null) {
+                bundle.putParcelable(KEY_DATA_URI, mDataUri);
+            }
+            return bundle;
+        }
+
+        private static Bundle[] getBundleArrayForMessages(List<Message> messages) {
+            int size = messages.size();
+            Bundle[] bundles = new Bundle[size];
+            for (int i = 0; i < size; i++) {
+                bundles[i] = messages.get(i).toBundle();
+            }
+            return bundles;
+        }
+
+        private static List<Message> getMessagesFromBundleArray(Parcelable[] bundles) {
+            List<Message> messages = new ArrayList<>(bundles.length);
+            for (Parcelable element : bundles) {
+                if (element instanceof Bundle) {
+                    Message message = getMessageFromBundle((Bundle) element);
+                    if (message != null) {
+                        messages.add(message);
+                    }
+                }
+            }
+            return messages;
+        }
+
+        @Nullable
+        private static Message getMessageFromBundle(Bundle bundle) {
+            if (!bundle.containsKey(KEY_TEXT)
+                    || !bundle.containsKey(KEY_TIMESTAMP)
+                    || !bundle.containsKey(KEY_SENDER)
+            ) {
+                return null;
+            }
+            Message message = new Message(
+                    Objects.requireNonNull(bundle.getString(KEY_TEXT)),
+                    bundle.getLong(KEY_TIMESTAMP),
+                    Person.fromBundle(Objects.requireNonNull(bundle.getBundle(KEY_SENDER))
+                    )
+            );
+            if (bundle.containsKey(KEY_DATA_MIME_TYPE)
+                    && bundle.containsKey(KEY_DATA_URI)) {
+                try {
+                    message.setData(
+                            Objects.requireNonNull(bundle.getString(KEY_DATA_MIME_TYPE)),
+                            Objects.requireNonNull(bundle.getParcelable(KEY_DATA_URI))
+                    );
+                } catch (ClassCastException e) {
+                    Log.w(TAG, "Failed to set Data Type/Uri");
+                }
+            }
+            return message;
+        }
 
         /**
-         * Sets a binary blob of data and an associated MIME type for a message. In the case
-         * where the platform doesn't support the MIME type, the original text provided in the
-         * constructor will be used.
+         * Sets a binary blob of data and an associated MIME type for a message. In the case where
+         * the platform doesn't support the MIME type, the original text provided in the constructor
+         * will be used.
          *
          * @param dataMimeType The MIME type of the content.
          * @param dataUri      The uri containing the content whose type is given by the MIME type.
@@ -484,7 +579,9 @@ public final class Conversation implements Parcelable {
             return this;
         }
 
-        /** Sets the message status for a message. */
+        /**
+         * Sets the message status for a message.
+         */
         @NonNull
         public Message setMessageStatus(@MessageStatus int messageStatus) {
             mMessageStatus = messageStatus;
@@ -503,52 +600,64 @@ public final class Conversation implements Parcelable {
         }
 
         /**
-         * Get the text to be used for this message, or the fallback text if a type and content
-         * Uri have been set
+         * Get the text to be used for this message, or the fallback text if a type and content Uri
+         * have been set
          */
         @NonNull
         public String getText() {
             return mText;
         }
 
-        /** Get the time at which this message arrived in ms since Unix epoch. */
+        /**
+         * Get the time at which this message arrived in ms since Unix epoch.
+         */
         public long getTimestamp() {
             return mTimestamp;
         }
 
-        /** Gets the message status for this message */
+        /**
+         * Gets the message status for this message
+         */
         @MessageStatus
         public int getMessageStatus() {
             return mMessageStatus;
         }
 
-        /** Get the message type for this message */
+        /**
+         * Get the message type for this message
+         */
         @MessageType
         public int getMessageType() {
             return mMessageType;
         }
 
-        /** Get the extras Bundle for this message. */
+        /**
+         * Get the extras Bundle for this message.
+         */
         @NonNull
         public Bundle getExtras() {
             return mExtras;
         }
 
-        /** Returns the {@link Person} sender of this message. */
+        /**
+         * Returns the {@link Person} sender of this message.
+         */
         @Nullable
         public Person getPerson() {
             return mPerson;
         }
 
-        /** Get the MIME type of the data pointed to by the URI. */
+        /**
+         * Get the MIME type of the data pointed to by the URI.
+         */
         @Nullable
         public String getDataMimeType() {
             return mDataMimeType;
         }
 
         /**
-         * Get the Uri pointing to the content of the message. Can be null, in which case
-         * {@see #getText()} is used.
+         * Get the Uri pointing to the content of the message. Can be null, in which case {@see
+         * #getText()} is used.
          */
         @Nullable
         public Uri getDataUri() {
@@ -559,10 +668,10 @@ public final class Conversation implements Parcelable {
          * Indicates the message status of the message.
          */
         @IntDef(value = {
-            MessageStatus.MESSAGE_STATUS_NONE,
-            MessageStatus.MESSAGE_STATUS_UNREAD,
-            MessageStatus.MESSAGE_STATUS_SEEN,
-            MessageStatus.MESSAGE_STATUS_READ,
+                MessageStatus.MESSAGE_STATUS_NONE,
+                MessageStatus.MESSAGE_STATUS_UNREAD,
+                MessageStatus.MESSAGE_STATUS_SEEN,
+                MessageStatus.MESSAGE_STATUS_READ,
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface MessageStatus {
@@ -577,8 +686,8 @@ public final class Conversation implements Parcelable {
             int MESSAGE_STATUS_UNREAD = 1;
 
             /**
-             * {@code MessageStatus}: Message is seen; The "seen" flag determines
-             * whether we need to show a notification.
+             * {@code MessageStatus}: Message is seen; The "seen" flag determines whether we need to
+             * show a notification.
              */
             int MESSAGE_STATUS_SEEN = 2;
 
@@ -593,51 +702,73 @@ public final class Conversation implements Parcelable {
          * Indicates the message status of the message.
          */
         @IntDef(value = {
-            MessageType.MESSAGE_TYPE_ALL,
-            MessageType.MESSAGE_TYPE_INBOX,
-            MessageType.MESSAGE_TYPE_SENT,
-            MessageType.MESSAGE_TYPE_DRAFT,
-            MessageType.MESSAGE_TYPE_FAILED,
-            MessageType.MESSAGE_TYPE_OUTBOX,
-            MessageType.MESSAGE_TYPE_QUEUED
+                MessageType.MESSAGE_TYPE_ALL,
+                MessageType.MESSAGE_TYPE_INBOX,
+                MessageType.MESSAGE_TYPE_SENT,
+                MessageType.MESSAGE_TYPE_DRAFT,
+                MessageType.MESSAGE_TYPE_FAILED,
+                MessageType.MESSAGE_TYPE_OUTBOX,
+                MessageType.MESSAGE_TYPE_QUEUED
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface MessageType {
 
-            /** Message type: all messages. */
+            /**
+             * Message type: all messages.
+             */
             int MESSAGE_TYPE_ALL = 0;
 
-            /** Message type: inbox. */
+            /**
+             * Message type: inbox.
+             */
             int MESSAGE_TYPE_INBOX = 1;
 
-            /** Message type: sent messages. */
+            /**
+             * Message type: sent messages.
+             */
             int MESSAGE_TYPE_SENT = 2;
 
-            /** Message type: drafts. */
+            /**
+             * Message type: drafts.
+             */
             int MESSAGE_TYPE_DRAFT = 3;
 
-            /** Message type: outbox. */
+            /**
+             * Message type: outbox.
+             */
             int MESSAGE_TYPE_OUTBOX = 4;
 
-            /** Message type: failed outgoing message. */
+            /**
+             * Message type: failed outgoing message.
+             */
             int MESSAGE_TYPE_FAILED = 5;
 
-            /** Message type: queued to send later. */
+            /**
+             * Message type: queued to send later.
+             */
             int MESSAGE_TYPE_QUEUED = 6;
         }
     }
 
     /**
-     * {@link ConversationAction} provides the actions for this conversation.
-     * The semantic action indicates the type of action represented.
-     * The remote action holds the pending intent to be fired
-     * The remote input holds a key by which responses can be filled into.
+     * {@link ConversationAction} provides the actions for this conversation. The semantic action
+     * indicates the type of action represented. The remote action holds the pending intent to be
+     * fired The remote input holds a key by which responses can be filled into.
      */
-    public static class ConversationAction implements Parcelable {
-        @ActionType private final int mActionType;
-        @NonNull private final RemoteAction mRemoteAction;
-        @Nullable private final RemoteInput mRemoteInput;
-        @NonNull private final Bundle mExtras = new Bundle();
+    public static class ConversationAction {
+        private static final String KEY_TYPE = "type";
+        private static final String KEY_REMOTE_ACTION = "remote_action";
+        private static final String KEY_REMOTE_INPUT = "remote_input";
+        private static final String KEY_EXTRAS = "extras";
+
+        @ActionType
+        private final int mActionType;
+        @NonNull
+        private final RemoteAction mRemoteAction;
+        @Nullable
+        private final RemoteInput mRemoteInput;
+        @NonNull
+        private final Bundle mExtras = new Bundle();
 
         public ConversationAction(
                 @ActionType int actionType,
@@ -648,38 +779,58 @@ public final class Conversation implements Parcelable {
             mRemoteInput = remoteInput;
         }
 
-        protected ConversationAction(Parcel in) {
-            mActionType = in.readInt();
-            mRemoteAction = in.readParcelable(RemoteAction.class.getClassLoader());
-            mRemoteInput = in.readParcelable(RemoteInput.class.getClassLoader());
-            mExtras.putAll(in.readBundle());
+        private static Bundle[] getBundleArrayForAction(List<ConversationAction> actions) {
+            int size = actions.size();
+            Bundle[] bundles = new Bundle[size];
+            for (int i = 0; i < size; i++) {
+                bundles[i] = actions.get(i).toBundle();
+            }
+            return bundles;
         }
 
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(mActionType);
-            dest.writeParcelable(mRemoteAction, flags);
-            dest.writeParcelable(mRemoteInput, flags);
-            dest.writeBundle(mExtras);
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        public static final Creator<ConversationAction> CREATOR =
-                new Creator<ConversationAction>() {
-                    @Override
-                    public ConversationAction createFromParcel(Parcel in) {
-                        return new ConversationAction(in);
+        @Nullable
+        private static List<ConversationAction> getActionsFromBundleArray(
+                @Nullable Parcelable[] bundles
+        ) {
+            if (bundles == null) {
+                return null;
+            }
+            List<ConversationAction> actions = new ArrayList<>(bundles.length);
+            for (Parcelable element : bundles) {
+                if (element instanceof Bundle) {
+                    ConversationAction action = fromBundle((Bundle) element);
+                    if (action != null) {
+                        actions.add(action);
                     }
+                }
+            }
+            return actions;
+        }
 
-                    @Override
-                    public ConversationAction[] newArray(int size) {
-                        return new ConversationAction[size];
-                    }
-                };
+        private Bundle toBundle() {
+            Bundle bundle = new Bundle();
+            bundle.putInt(KEY_TYPE, mActionType);
+            bundle.putParcelable(KEY_REMOTE_ACTION, mRemoteAction);
+            bundle.putParcelable(KEY_REMOTE_INPUT, mRemoteInput);
+            bundle.putBundle(KEY_EXTRAS, mExtras);
+            return bundle;
+        }
+
+        @Nullable
+        private static ConversationAction fromBundle(@Nullable Bundle bundle) {
+            if (bundle == null
+                    || !bundle.containsKey(KEY_REMOTE_ACTION)
+            ) {
+                return null;
+            }
+            ConversationAction action = new ConversationAction(
+                    bundle.getInt(KEY_TYPE),
+                    bundle.getParcelable(KEY_REMOTE_ACTION),
+                    bundle.getParcelable(KEY_REMOTE_INPUT)
+            );
+            action.getExtras().putAll(bundle.getBundle(KEY_EXTRAS));
+            return action;
+        }
 
         @ActionType
         public int getActionType() {
@@ -703,19 +854,19 @@ public final class Conversation implements Parcelable {
 
         /**
          * Provides meaning to an {@link ConversationAction} that hints at what the associated
-         * {@link PendingIntent} will do. For example, an {@link ConversationAction} with a
-         * {@link PendingIntent} that replies to a text message may have the
-         * {@link #ACTION_TYPE_REPLY} {@code ActionType} set within it.
+         * {@link PendingIntent} will do. For example, an {@link ConversationAction} with a {@link
+         * PendingIntent} that replies to a text message may have the {@link #ACTION_TYPE_REPLY}
+         * {@code ActionType} set within it.
          */
         @IntDef(value = {
-            ActionType.ACTION_TYPE_NONE,
-            ActionType.ACTION_TYPE_REPLY,
-            ActionType.ACTION_TYPE_MARK_AS_READ,
-            ActionType.ACTION_TYPE_MARK_AS_UNREAD,
-            ActionType.ACTION_TYPE_DELETE,
-            ActionType.ACTION_TYPE_ARCHIVE,
-            ActionType.ACTION_TYPE_MUTE,
-            ActionType.ACTION_TYPE_UNMUTE
+                ActionType.ACTION_TYPE_NONE,
+                ActionType.ACTION_TYPE_REPLY,
+                ActionType.ACTION_TYPE_MARK_AS_READ,
+                ActionType.ACTION_TYPE_MARK_AS_UNREAD,
+                ActionType.ACTION_TYPE_DELETE,
+                ActionType.ACTION_TYPE_ARCHIVE,
+                ActionType.ACTION_TYPE_MUTE,
+                ActionType.ACTION_TYPE_UNMUTE
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface ActionType {
@@ -726,8 +877,8 @@ public final class Conversation implements Parcelable {
             int ACTION_TYPE_NONE = 0;
 
             /**
-             * {@code ActionType}: Reply to a conversation, chat, group, or wherever replies
-             * may be appropriate.
+             * {@code ActionType}: Reply to a conversation, chat, group, or wherever replies may be
+             * appropriate.
              */
             int ACTION_TYPE_REPLY = 1;
 
@@ -747,8 +898,8 @@ public final class Conversation implements Parcelable {
             int ACTION_TYPE_DELETE = 4;
 
             /**
-             * {@code ActionType}: Archive the content associated with the conversation. This
-             * could mean hiding a conversation, or placing it in an archived list.
+             * {@code ActionType}: Archive the content associated with the conversation. This could
+             * mean hiding a conversation, or placing it in an archived list.
              */
             int ACTION_TYPE_ARCHIVE = 5;
 
@@ -759,8 +910,8 @@ public final class Conversation implements Parcelable {
             int ACTION_TYPE_MUTE = 6;
 
             /**
-             * {@code ActionType}: Unmute the content associated with the conversation.
-             * This could mean un-silencing a conversation or currently playing media.
+             * {@code ActionType}: Unmute the content associated with the conversation. This could
+             * mean un-silencing a conversation or currently playing media.
              */
             int ACTION_TYPE_UNMUTE = 7;
         }
