@@ -112,6 +112,8 @@ public class CarUiImeWideScreenController {
     // Action name of action that will be used by IMS to notify the application to clear the data
     // in the EditText.
     public static final String WIDE_SCREEN_CLEAR_DATA_ACTION = "automotive_wide_screen_clear_data";
+    public static final String WIDE_SCREEN_POST_LOAD_SEARCH_RESULTS_ACTION =
+            "automotive_wide_screen_post_load_search_results";
     // Action name used by applications to notify that new search results are available.
     public static final String WIDE_SCREEN_SEARCH_RESULTS = "wide_screen_search_results";
     // Key to provide the resource id for the icon that will be displayed in the input area. If
@@ -398,49 +400,54 @@ public class CarUiImeWideScreenController {
         String url = CONTENT + getPackageName(mInputEditorInfo) + SEARCH_RESULTS_PROVIDER;
         Uri contentUrl = Uri.parse(url);
         ContentResolver cr = mContext.getContentResolver();
-        Cursor c = cr.query(contentUrl, null, null, null, null);
-        mAutomotiveSearchItems = new ArrayList<>();
-        if (c != null && c.moveToFirst()) {
-            do {
-                CarUiContentListItem searchItem = new CarUiContentListItem(
-                        CarUiContentListItem.Action.ICON);
-                searchItem.setOnItemClickedListener(v -> {
-                    Bundle bundle = new Bundle();
-                    bundle.putString(SEARCH_RESULT_ITEM_ID_LIST,
-                            c.getString(c.getColumnIndex(SearchResultsProvider.ITEM_ID)));
-                    mInputConnection.performPrivateCommand(WIDE_SCREEN_ACTION, bundle);
-                });
-                searchItem.setTitle(c.getString(c.getColumnIndex(SearchResultsProvider.TITLE)));
-                searchItem.setBody(c.getString(c.getColumnIndex(SearchResultsProvider.SUBTITLE)));
-                searchItem.setPrimaryIconType(CarUiContentListItem.IconType.CONTENT);
-                byte[] primaryBlob = c.getBlob(
-                        c.getColumnIndex(SearchResultsProvider.PRIMARY_IMAGE_BLOB));
-                if (primaryBlob != null) {
-                    Bitmap primaryBitmap = Bitmap.CREATOR.createFromParcel(
-                            byteArrayToParcel(primaryBlob));
-                    searchItem.setIcon(
-                            new BitmapDrawable(mContext.getResources(), primaryBitmap));
-                }
-                byte[] secondaryBlob = c.getBlob(
-                        c.getColumnIndex(SearchResultsProvider.SECONDARY_IMAGE_BLOB));
+        try (Cursor c = cr.query(contentUrl, null, null, null, null)) {
+            mAutomotiveSearchItems = new ArrayList<>();
+            if (c != null && c.moveToFirst()) {
+                do {
+                    CarUiContentListItem searchItem = new CarUiContentListItem(
+                            CarUiContentListItem.Action.ICON);
+                    String itemId = c.getString(c.getColumnIndex(SearchResultsProvider.ITEM_ID));
+                    searchItem.setOnItemClickedListener(v -> {
+                        Bundle bundle = new Bundle();
+                        bundle.putString(SEARCH_RESULT_ITEM_ID_LIST, itemId);
+                        mInputConnection.performPrivateCommand(WIDE_SCREEN_ACTION, bundle);
+                    });
+                    searchItem.setTitle(c.getString(
+                            c.getColumnIndex(SearchResultsProvider.TITLE)));
+                    searchItem.setBody(c.getString(
+                            c.getColumnIndex(SearchResultsProvider.SUBTITLE)));
+                    searchItem.setPrimaryIconType(CarUiContentListItem.IconType.CONTENT);
+                    byte[] primaryBlob = c.getBlob(
+                            c.getColumnIndex(
+                                    SearchResultsProvider.PRIMARY_IMAGE_BLOB));
+                    if (primaryBlob != null) {
+                        Bitmap primaryBitmap = Bitmap.CREATOR.createFromParcel(
+                                byteArrayToParcel(primaryBlob));
+                        searchItem.setIcon(
+                                new BitmapDrawable(mContext.getResources(), primaryBitmap));
+                    }
+                    byte[] secondaryBlob = c.getBlob(
+                            c.getColumnIndex(
+                                    SearchResultsProvider.SECONDARY_IMAGE_BLOB));
 
-                if (secondaryBlob != null) {
-                    Bitmap secondaryBitmap = Bitmap.CREATOR.createFromParcel(
-                            byteArrayToParcel(secondaryBlob));
-                    searchItem.setSupplementalIcon(
-                            new BitmapDrawable(mContext.getResources(), secondaryBitmap), v -> {
-                                Bundle bundle = new Bundle();
-                                bundle.putString(SEARCH_RESULT_SUPPLEMENTAL_ICON_ID_LIST,
-                                        c.getString(c.getColumnIndex(
-                                                SearchResultsProvider.SECONDARY_IMAGE_ID)));
-                                mInputConnection.performPrivateCommand(WIDE_SCREEN_ACTION, bundle);
-                            });
-                }
-                mAutomotiveSearchItems.add(searchItem);
-            } while (c.moveToNext());
+                    if (secondaryBlob != null) {
+                        Bitmap secondaryBitmap = Bitmap.CREATOR.createFromParcel(
+                                byteArrayToParcel(secondaryBlob));
+                        searchItem.setSupplementalIcon(
+                                new BitmapDrawable(mContext.getResources(), secondaryBitmap), v -> {
+                                    Bundle bundle = new Bundle();
+                                    bundle.putString(SEARCH_RESULT_SUPPLEMENTAL_ICON_ID_LIST,
+                                            c.getString(c.getColumnIndex(
+                                                    SearchResultsProvider.SECONDARY_IMAGE_ID)));
+                                    mInputConnection.performPrivateCommand(WIDE_SCREEN_ACTION,
+                                            bundle);
+                                });
+                    }
+                    mAutomotiveSearchItems.add(searchItem);
+                } while (c.moveToNext());
+            }
         }
-        // delete the results.
-        cr.delete(contentUrl, null, null);
+        mInputConnection.performPrivateCommand(WIDE_SCREEN_POST_LOAD_SEARCH_RESULTS_ACTION, null);
     }
 
     private static Parcel byteArrayToParcel(byte[] bytes) {
