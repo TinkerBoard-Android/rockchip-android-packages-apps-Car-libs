@@ -23,6 +23,7 @@ import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.CONT
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_ITEM_ID_LIST;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SUPPLEMENTAL_ICON_ID_LIST;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_CLEAR_DATA_ACTION;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_POST_LOAD_SEARCH_RESULTS_ACTION;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -68,6 +69,12 @@ class CarUiEditText extends EditText {
         if (WIDE_SCREEN_CLEAR_DATA_ACTION.equals(action)) {
             // clear the text.
             setText("");
+        }
+
+        if (WIDE_SCREEN_POST_LOAD_SEARCH_RESULTS_ACTION.equals(action)) {
+            for (PrivateImeCommandCallback listener : mPrivateImeCommandCallback) {
+                listener.onPostLoadSearchResults();
+            }
         }
 
         if (data == null || mPrivateImeCommandCallback == null) {
