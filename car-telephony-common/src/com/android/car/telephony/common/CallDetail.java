@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.telecom.Call;
 import android.telecom.DisconnectCause;
 import android.telecom.GatewayInfo;
+import android.telecom.PhoneAccountHandle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,15 +34,17 @@ public class CallDetail {
     private final Uri mGatewayInfoOriginalAddress;
     private final long mConnectTimeMillis;
     private final boolean mIsConference;
+    private final PhoneAccountHandle mPhoneAccountHandle;
 
     private CallDetail(String number, CharSequence disconnectCause,
                        Uri gatewayInfoOriginalAddress, long connectTimeMillis,
-                       boolean isConference) {
+                       boolean isConference, PhoneAccountHandle phoneAccountHandle) {
         mNumber = number;
         mDisconnectCause = disconnectCause;
         mGatewayInfoOriginalAddress = gatewayInfoOriginalAddress;
-        this.mConnectTimeMillis = connectTimeMillis;
+        mConnectTimeMillis = connectTimeMillis;
         mIsConference = isConference;
+        mPhoneAccountHandle = phoneAccountHandle;
     }
 
     /**
@@ -50,7 +53,7 @@ public class CallDetail {
     public static CallDetail fromTelecomCallDetail(@Nullable Call.Details callDetail) {
         return new CallDetail(getNumber(callDetail), getDisconnectCause(callDetail),
                 getGatewayInfoOriginalAddress(callDetail), getConnectTimeMillis(callDetail),
-                isConferenceCall(callDetail));
+                isConferenceCall(callDetail), getPhoneAccountHandle(callDetail));
     }
 
     /**
@@ -91,6 +94,12 @@ public class CallDetail {
         return mIsConference;
     }
 
+    /** Returns the {@link PhoneAccountHandle} for this call. */
+    @Nullable
+    public PhoneAccountHandle getPhoneAccountHandle() {
+        return mPhoneAccountHandle;
+    }
+
     private static String getNumber(Call.Details callDetail) {
         String number = "";
         if (callDetail == null) {
@@ -129,5 +138,10 @@ public class CallDetail {
 
     private static boolean isConferenceCall(Call.Details callDetail) {
         return callDetail != null && callDetail.hasProperty(Call.Details.PROPERTY_CONFERENCE);
+    }
+
+    @Nullable
+    private static PhoneAccountHandle getPhoneAccountHandle(Call.Details callDetail) {
+        return callDetail == null ? null : callDetail.getAccountHandle();
     }
 }
