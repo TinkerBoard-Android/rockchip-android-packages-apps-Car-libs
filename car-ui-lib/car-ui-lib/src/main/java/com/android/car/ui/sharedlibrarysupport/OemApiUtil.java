@@ -23,14 +23,31 @@ import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryVersionProviderOEMV
 
 /**
  * Helper class for accessing oem-apis without reflection.
- * Load this class only via AdapterClassLoader.
+ *
+ * Because this class creates adapters, and adapters implement OEM APIs, this class cannot
+ * be created with the app's classloader. You must use {@link AdapterClassLoader} to load it
+ * so that both the app and shared library's classes can be loaded from this class.
  */
 final class OemApiUtil {
 
     private static final String TAG = "carui";
 
-    static SharedLibraryFactory getSharedLibraryFactory(Context sharedLibraryContext) {
-        SharedLibraryFactory oemSharedLibraryFactory = null;
+    /**
+     * Given a shared library's context, return it's implementation of {@link SharedLibraryFactory}.
+     *
+     * This is done by asking the shared library's {@link SharedLibraryVersionProvider} for a
+     * factory object, and checking if it's instanceof each version of
+     * {@link SharedLibraryFactoryOEMV1}, casting to the correct one when found.
+     *
+     * @param sharedLibraryContext The shared library's context. This context will return
+     *                             the shared library's classloader from
+     *                             {@link Context#getClassLoader()}.
+     * @param appPackageName The package name of the application. This is passed to the shared
+     *                       library so that it can provide unique customizations per-app.
+     * @return A {@link SharedLibraryFactory}
+     */
+    static SharedLibraryFactory getSharedLibraryFactory(
+            Context sharedLibraryContext, String appPackageName) {
 
         Object oemVersionProvider = null;
         try {
@@ -49,18 +66,19 @@ final class OemApiUtil {
         SharedLibraryVersionProvider versionProvider = null;
         if (oemVersionProvider instanceof SharedLibraryVersionProviderOEMV1) {
             versionProvider = new SharedLibraryVersionProviderAdapterV1(
-                        (SharedLibraryVersionProviderOEMV1) oemVersionProvider);
+                    (SharedLibraryVersionProviderOEMV1) oemVersionProvider);
         } else {
             Log.e(TAG, "SharedLibraryVersionProviderImpl was not instanceof any known "
                     + "versions of SharedLibraryVersionProviderOEMV#.");
         }
 
+        SharedLibraryFactory oemSharedLibraryFactory = null;
         if (versionProvider != null) {
-            Object factory =
-                    versionProvider.getSharedLibraryFactory(1, sharedLibraryContext);
+            Object factory = versionProvider.getSharedLibraryFactory(
+                    1, sharedLibraryContext, appPackageName);
             if (factory instanceof SharedLibraryFactoryOEMV1) {
                 oemSharedLibraryFactory = new SharedLibraryFactoryAdapterV1(
-                            (SharedLibraryFactoryOEMV1) factory);
+                        (SharedLibraryFactoryOEMV1) factory);
             } else {
                 Log.e(TAG, "SharedLibraryVersionProvider found, but did not provide a"
                         + " factory implementing any known interfaces!");

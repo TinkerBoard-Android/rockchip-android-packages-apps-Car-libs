@@ -15,9 +15,11 @@
  */
 package com.android.car.ui.sharedlibrarysupport;
 
-import android.annotation.SuppressLint;
+import static java.util.Objects.requireNonNull;
+
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Process;
@@ -34,6 +36,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This is a singleton that contains a {@link SharedLibraryFactory}. That SharedLibraryFactory
@@ -42,7 +45,6 @@ import java.util.List;
 public final class SharedLibraryFactorySingleton {
 
     private static final String TAG = "carui";
-    private static final CharSequence OEMAPIS_PREFIX = "com.android.car.ui.sharedlibrary.oemapis.";
     private static SharedLibraryFactory sInstance;
 
     /**
@@ -52,7 +54,6 @@ public final class SharedLibraryFactorySingleton {
      * to check for the existence of a shared library, and resolving the appropriate version
      * of the shared library to use.
      */
-    @SuppressLint("PrivateApi") // suppresses warning on Class.forName()
     public static SharedLibraryFactory get(Context context) {
         if (sInstance != null) {
             return sInstance;
@@ -66,30 +67,55 @@ public final class SharedLibraryFactorySingleton {
             return sInstance;
         }
 
+        PackageInfo sharedLibPackageInfo;
+        try {
+            sharedLibPackageInfo = context.getPackageManager()
+                    .getPackageInfo(sharedLibPackageName, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Could not load CarUi shared library, package "
+                    + sharedLibPackageName + " was not found.");
+            sInstance = new SharedLibraryFactoryStub();
+            return sInstance;
+        }
+
+        Context applicationContext = context.getApplicationContext();
+        if (applicationContext instanceof SharedLibraryConfigProvider) {
+            Set<SharedLibrarySpecifier> deniedPackages =
+                    ((SharedLibraryConfigProvider) applicationContext).getSharedLibraryDenyList();
+            if (deniedPackages != null && deniedPackages.stream()
+                    .anyMatch(specs -> specs.matches(sharedLibPackageInfo))) {
+                Log.i(TAG, "Package " + context.getPackageName()
+                        + " denied loading shared library " + sharedLibPackageName);
+                sInstance = new SharedLibraryFactoryStub();
+                return sInstance;
+            }
+        }
+
         Context sharedLibraryContext;
         try {
             sharedLibraryContext = context.createPackageContext(
                     sharedLibPackageName,
                     Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "Could not load CarUi shared library", e);
+            Log.e(TAG, "Could not load CarUi shared library, package "
+                    + sharedLibPackageName + " was not found.");
             sInstance = new SharedLibraryFactoryStub();
             return sInstance;
         }
 
         AdapterClassLoader adapterClassLoader =
                 instantiateClassLoader(context.getApplicationInfo(),
-                        SharedLibraryFactorySingleton.class.getClassLoader(),
+                        requireNonNull(SharedLibraryFactorySingleton.class.getClassLoader()),
                         sharedLibraryContext.getClassLoader());
 
         try {
             Class<?> oemApiUtilClass = adapterClassLoader
                     .loadClass("com.android.car.ui.sharedlibrarysupport.OemApiUtil");
-            Method getSharedLibraryFactoryMethod =
-                    oemApiUtilClass.getDeclaredMethod("getSharedLibraryFactory", Context.class);
+            Method getSharedLibraryFactoryMethod = oemApiUtilClass.getDeclaredMethod(
+                    "getSharedLibraryFactory", Context.class, String.class);
             getSharedLibraryFactoryMethod.setAccessible(true);
             sInstance = (SharedLibraryFactory) getSharedLibraryFactoryMethod
-                    .invoke(null, sharedLibraryContext);
+                    .invoke(null, sharedLibraryContext, context.getPackageName());
         } catch (ReflectiveOperationException e) {
             Log.e(TAG, "Could not load CarUi shared library", e);
             sInstance = new SharedLibraryFactoryStub();
@@ -99,18 +125,14 @@ public final class SharedLibraryFactorySingleton {
         if (sInstance == null) {
             Log.e(TAG, "Could not load CarUi shared library");
             sInstance = new SharedLibraryFactoryStub();
+            return sInstance;
         }
+
+        Log.i(TAG, "Loaded shared library " + sharedLibPackageName
+                + " version " + sharedLibPackageInfo.getLongVersionCode()
+                + " for package " + context.getPackageName());
 
         return sInstance;
-    }
-
-    private static boolean classExists(String className) {
-        try {
-            Class.forName(className);
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
     }
 
     private SharedLibraryFactorySingleton() {}

@@ -34,7 +34,7 @@ final class SharedLibraryVersionProviderAdapterV1 implements SharedLibraryVersio
     }
 
     @Override
-    public Object getSharedLibraryFactory(int maxVersion, Context context) {
-        return mOemProvider.getSharedLibraryFactory(maxVersion, context);
+    public Object getSharedLibraryFactory(int maxVersion, Context context, String packageName) {
+        return mOemProvider.getSharedLibraryFactory(maxVersion, context, packageName);
     }
 }
