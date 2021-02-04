@@ -16,8 +16,7 @@
 
 package com.android.car.ui.preference;
 
-import android.text.TextUtils;
-import android.widget.Toast;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -36,8 +35,7 @@ public interface DisabledPreferenceCallback extends UxRestrictablePreference {
      */
     @Deprecated
     default void setMessageToShowWhenDisabledPreferenceClicked(@NonNull String message) {
-        setUxRestricted(!TextUtils.isEmpty(message));
-        setOnClickWhileRestrictedListener(preference ->
-                Toast.makeText(preference.getContext(), message, Toast.LENGTH_LONG).show());
+        Log.w("carui",
+                "setMessageToShowWhenDisabledPreferenceClicked is deprecated, and does nothing!");
     }
 }

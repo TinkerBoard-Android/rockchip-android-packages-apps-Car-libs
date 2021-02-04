@@ -515,7 +515,17 @@ public final class ViewUtils {
     public static void makeAllViewsUxRestricted(@Nullable View view, boolean restricted) {
         if (view instanceof DrawableStateView) {
             if (sRestrictedState == null) {
-                sRestrictedState = new int[] { R.attr.state_ux_restricted };
+                int androidStateUxRestricted = view.getResources()
+                            .getIdentifier("state_ux_restricted", "attr", "android");
+
+                if (androidStateUxRestricted == 0) {
+                    sRestrictedState = new int[] { R.attr.state_ux_restricted };
+                } else {
+                    sRestrictedState = new int[] {
+                        R.attr.state_ux_restricted,
+                        androidStateUxRestricted
+                    };
+                }
             }
 
             ((DrawableStateView) view).setExtraDrawableState(
