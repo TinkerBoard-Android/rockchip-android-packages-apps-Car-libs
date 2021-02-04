@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,26 +17,27 @@ package com.android.car.ui.uxr;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.Button;
 
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 /**
- * A {@link Button} that implements {@link DrawableStateView}, for allowing additional states
- * such as ux restriction.
+ * A {@link ConstraintLayout} that implements {@link DrawableStateView}, for allowing additional
+ * states such as ux restriction.
  */
-public class DrawableStateButton extends Button implements DrawableStateView {
+public class DrawableStateConstraintLayout extends ConstraintLayout implements DrawableStateView {
     private DrawableStateUtil mUtil;
 
-    public DrawableStateButton(Context context) {
+    public DrawableStateConstraintLayout(Context context) {
         super(context);
     }
 
-    public DrawableStateButton(Context context, @Nullable AttributeSet attrs) {
+    public DrawableStateConstraintLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public DrawableStateButton(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public DrawableStateConstraintLayout(Context context,
+            @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
