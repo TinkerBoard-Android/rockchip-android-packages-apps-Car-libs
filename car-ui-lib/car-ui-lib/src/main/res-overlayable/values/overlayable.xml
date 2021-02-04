@@ -323,6 +323,8 @@ limitations under the License.-->
       <item type="id" name="car_ui_base_layout_content_container"/>
       <item type="id" name="car_ui_closeKeyboard"/>
       <item type="id" name="car_ui_contentAreaAutomotive"/>
+      <item type="id" name="car_ui_divider"/>
+      <item type="id" name="car_ui_first_action_container"/>
       <item type="id" name="car_ui_focus_area"/>
       <item type="id" name="car_ui_fullscreenArea"/>
       <item type="id" name="car_ui_imeWideScreenInputArea"/>
@@ -340,6 +342,9 @@ limitations under the License.-->
       <item type="id" name="car_ui_scrollbar_page_up"/>
       <item type="id" name="car_ui_scrollbar_thumb"/>
       <item type="id" name="car_ui_scrollbar_track"/>
+      <item type="id" name="car_ui_second_action_container"/>
+      <item type="id" name="car_ui_secondary_action"/>
+      <item type="id" name="car_ui_secondary_action_concrete"/>
       <item type="id" name="car_ui_toolbar"/>
       <item type="id" name="car_ui_toolbar_background"/>
       <item type="id" name="car_ui_toolbar_bottom_guideline"/>
@@ -432,6 +437,10 @@ limitations under the License.-->
       <item type="layout" name="car_ui_preference_dropdown"/>
       <item type="layout" name="car_ui_preference_fragment"/>
       <item type="layout" name="car_ui_preference_fragment_with_toolbar"/>
+      <item type="layout" name="car_ui_preference_two_action_icon"/>
+      <item type="layout" name="car_ui_preference_two_action_switch"/>
+      <item type="layout" name="car_ui_preference_two_action_text"/>
+      <item type="layout" name="car_ui_preference_two_action_text_borderless"/>
       <item type="layout" name="car_ui_preference_widget_checkbox"/>
       <item type="layout" name="car_ui_preference_widget_seekbar"/>
       <item type="layout" name="car_ui_preference_widget_switch"/>

@@ -258,6 +258,8 @@
   <public type="id" name="car_ui_base_layout_content_container"/>
   <public type="id" name="car_ui_closeKeyboard"/>
   <public type="id" name="car_ui_contentAreaAutomotive"/>
+  <public type="id" name="car_ui_divider"/>
+  <public type="id" name="car_ui_first_action_container"/>
   <public type="id" name="car_ui_focus_area"/>
   <public type="id" name="car_ui_fullscreenArea"/>
   <public type="id" name="car_ui_imeWideScreenInputArea"/>
@@ -275,6 +277,9 @@
   <public type="id" name="car_ui_scrollbar_page_up"/>
   <public type="id" name="car_ui_scrollbar_thumb"/>
   <public type="id" name="car_ui_scrollbar_track"/>
+  <public type="id" name="car_ui_second_action_container"/>
+  <public type="id" name="car_ui_secondary_action"/>
+  <public type="id" name="car_ui_secondary_action_concrete"/>
   <public type="id" name="car_ui_toolbar"/>
   <public type="id" name="car_ui_toolbar_background"/>
   <public type="id" name="car_ui_toolbar_bottom_guideline"/>
@@ -367,6 +372,10 @@
   <public type="layout" name="car_ui_preference_dropdown"/>
   <public type="layout" name="car_ui_preference_fragment"/>
   <public type="layout" name="car_ui_preference_fragment_with_toolbar"/>
+  <public type="layout" name="car_ui_preference_two_action_icon"/>
+  <public type="layout" name="car_ui_preference_two_action_switch"/>
+  <public type="layout" name="car_ui_preference_two_action_text"/>
+  <public type="layout" name="car_ui_preference_two_action_text_borderless"/>
   <public type="layout" name="car_ui_preference_widget_checkbox"/>
   <public type="layout" name="car_ui_preference_widget_seekbar"/>
   <public type="layout" name="car_ui_preference_widget_switch"/>
