@@ -21,6 +21,8 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.car.ui.R;
@@ -615,8 +617,13 @@ public class MenuItem {
         NEVER
     }
 
-    /** Listener for {@link Toolbar} to update when this MenuItem changes */
-    interface Listener {
+    /**
+     * Listener for {@link Toolbar} to update when this MenuItem changes.
+     *
+     * Do not use from client apps, for car-ui-lib internal use only.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY)
+    public interface Listener {
         /** Called when the MenuItem is changed. For use only by {@link Toolbar} */
         void onMenuItemChanged(MenuItem item);
     }
@@ -625,8 +632,11 @@ public class MenuItem {
      * Sets a listener for changes to this MenuItem. Note that the MenuItem will only hold
      * weak references to the Listener, so that the listener is not held if the MenuItem
      * outlives the toolbar.
+     *
+     * Do not use from client apps, for car-ui-lib internal use only.
      */
-    void setListener(Listener listener) {
+    @RestrictTo(RestrictTo.Scope.LIBRARY)
+    public void setListener(@Nullable Listener listener) {
         mListener = new WeakReference<>(listener);
     }
 }

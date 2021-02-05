@@ -29,6 +29,6 @@ public class SharedLibraryVersionProviderImpl implements SharedLibraryVersionPro
 
     @Override
     public Object getSharedLibraryFactory(int maxVersion, Context context) {
-        return new SharedLibraryFactoryImpl();
+        return new SharedLibraryFactoryImpl(context);
     }
 }

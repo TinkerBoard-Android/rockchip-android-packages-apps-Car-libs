@@ -22,7 +22,5 @@ include ':oem-apis'
 project(':oem-apis').projectDir = new File('./oem-apis')
 include ':shared-library'
 project(':shared-library').projectDir = new File('./referencedesign/sharedlibrary')
-include ':shared-library-proxy'
-project(':shared-library-proxy').projectDir = new File('./referencedesign/sharedlibraryproxy')
 
 rootProject.name='Chassis'
