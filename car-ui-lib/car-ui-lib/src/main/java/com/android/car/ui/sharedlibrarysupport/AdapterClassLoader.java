@@ -38,7 +38,7 @@ class AdapterClassLoader extends PathClassLoader {
     private final ClassLoader mAdditionalClassLoader;
 
     private final Pattern mPattern =
-            Pattern.compile("^com\\.android\\.car\\.ui\\..*AdapterV[0-9]+$");
+            Pattern.compile("^com\\.android\\.car\\.ui\\..*AdapterV[0-9]+(\\$.*)?$");
 
     /**
      * Equivalent to calling {@link #AdapterClassLoader(String, String, ClassLoader, boolean)}
@@ -94,8 +94,8 @@ class AdapterClassLoader extends PathClassLoader {
         ClassNotFoundException fromSuper = null;
 
         // Only load adapters classed, and OemApiUtil class from this classloader.
-        if (OemApiUtil.class.getName().equals(name)
-                        || (name != null && mPattern.matcher(name).matches())) {
+        if (name != null && (OemApiUtil.class.getName().equals(name)
+                        || mPattern.matcher(name).matches() || name.contains("Lambda"))) {
             // Next, check whether the class in question is present in the dexPath that this
             // classloader operates on, or its shared libraries.
             try {

@@ -9,7 +9,16 @@ android_app {
     srcs: ["src/main/java/**/*.java"],
     resource_dirs: ["src/main/res"],
 
-    static_libs: ["car-ui-lib-oem-apis"],
+    static_libs: [
+        "car-ui-lib-oem-apis",
+        "androidx.annotation_annotation",
+        "androidx.appcompat_appcompat",
+        "androidx-constraintlayout_constraintlayout",
+        "androidx.preference_preference",
+        "androidx.recyclerview_recyclerview",
+        "androidx-constraintlayout_constraintlayout-solver",
+        "androidx.asynclayoutinflater_asynclayoutinflater",
+    ],
 
     optimize: {
         enabled: false,
