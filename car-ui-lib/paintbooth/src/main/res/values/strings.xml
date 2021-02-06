@@ -63,6 +63,8 @@
   <string name="title_twoaction_preference">TwoAction preference</string>
   <!-- Summary of a two action preference [CHAR_LIMIT=70]-->
   <string name="summary_twoaction_preference">A widget should be visible on the right</string>
+  <!-- Summary of the deprecated two action preference [CHAR_LIMIT=70]-->
+  <string name="summary_deprecated_twoaction_preference">The deprecated version of TwoActionPreference</string>
 
   <!-- Title of a checkbox preference [CHAR_LIMIT=31]-->
   <string name="title_checkbox_preference">Checkbox preference</string>

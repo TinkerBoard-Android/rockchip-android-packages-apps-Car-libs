@@ -35,6 +35,7 @@
 
         <item name="selectableItemBackground">?android:attr/selectableItemBackground</item>
         <item name="selectableItemBackgroundBorderless">?android:attr/selectableItemBackgroundBorderless</item>
+        <item name="android:borderlessButtonStyle">@style/Widget.CarUi.Button.Borderless.Colored</item>
         <item name="borderlessButtonStyle">?android:attr/borderlessButtonStyle</item>
         <item name="homeAsUpIndicator">?android:attr/homeAsUpIndicator</item>
 

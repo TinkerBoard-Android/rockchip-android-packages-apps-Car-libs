@@ -35,6 +35,8 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.car.ui.FocusArea;
 import com.android.car.ui.FocusParkingView;
+import com.android.car.ui.R;
+import com.android.car.ui.uxr.DrawableStateView;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -46,6 +48,8 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 public final class ViewUtils {
+
+    private static int[] sRestrictedState;
 
     /**
      * No view is focused, the focused view is not shown, or the focused view is a FocusParkingView.
@@ -499,5 +503,40 @@ public final class ViewUtils {
                 // If it's a scrollable container, it can be focused only when it has no focusable
                 // descendants. We focus on it so that the rotary controller can scroll it.
                 && (!isScrollableContainer(view) || findFirstFocusableDescendant(view) == null);
+    }
+
+    /**
+     * Traverses the view hierarchy, and whenever it sees a {@link DrawableStateView}, adds
+     * state_ux_restricted to it.
+     *
+     * Note that this will remove any other drawable states added by other calls to
+     * {@link DrawableStateView#setExtraDrawableState(int[], int[])}
+     */
+    public static void makeAllViewsUxRestricted(@Nullable View view, boolean restricted) {
+        if (view instanceof DrawableStateView) {
+            if (sRestrictedState == null) {
+                int androidStateUxRestricted = view.getResources()
+                            .getIdentifier("state_ux_restricted", "attr", "android");
+
+                if (androidStateUxRestricted == 0) {
+                    sRestrictedState = new int[] { R.attr.state_ux_restricted };
+                } else {
+                    sRestrictedState = new int[] {
+                        R.attr.state_ux_restricted,
+                        androidStateUxRestricted
+                    };
+                }
+            }
+
+            ((DrawableStateView) view).setExtraDrawableState(
+                    restricted ? sRestrictedState : null, null);
+        }
+
+        if (view instanceof ViewGroup) {
+            ViewGroup vg = (ViewGroup) view;
+            for (int i = 0; i < vg.getChildCount(); i++) {
+                makeAllViewsUxRestricted(vg.getChildAt(i), restricted);
+            }
+        }
     }
 }

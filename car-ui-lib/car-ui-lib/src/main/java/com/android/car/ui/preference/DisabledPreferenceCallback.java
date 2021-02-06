@@ -16,20 +16,26 @@
 
 package com.android.car.ui.preference;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 /**
  * Interface for preferences to handle clicks when its disabled.
+ *
+ * @deprecated use {@link UxRestrictablePreference} instead
  */
-public interface DisabledPreferenceCallback {
-
-    /**
-     * Sets if the ripple effect should be shown on disabled preference.
-     */
-    default void setShouldShowRippleOnDisabledPreference(boolean showRipple) {}
+@Deprecated
+public interface DisabledPreferenceCallback extends UxRestrictablePreference {
 
     /**
      * Sets the message to be displayed when the disabled preference is clicked.
+     *
+     * @deprecated Use {@link UxRestrictablePreference#setUxRestricted(boolean)} instead.
      */
-    default void setMessageToShowWhenDisabledPreferenceClicked(@NonNull String message) {}
+    @Deprecated
+    default void setMessageToShowWhenDisabledPreferenceClicked(@NonNull String message) {
+        Log.w("carui",
+                "setMessageToShowWhenDisabledPreferenceClicked is deprecated, and does nothing!");
+    }
 }

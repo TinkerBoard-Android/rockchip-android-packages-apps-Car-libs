@@ -15,14 +15,22 @@
  */
 package com.android.car.ui.uxr;
 
+import androidx.annotation.Nullable;
+
 /**
- * An Interface to expose a view's drawable state.
+ * An Interface to manipulate a view's drawable state.
  *
- * <p>Used by {@link com.android.car.ui.toolbar.Toolbar Toolbar's}
- * {@link com.android.car.ui.toolbar.MenuItem MenuItems} to make the views display if they are ux
- * restricted.
+ * <p>Used by {@link com.android.car.ui.toolbar.MenuItem MenuItems} to make the views display
+ * if they are ux restricted.
  */
 public interface DrawableStateView {
-    /** Sets the drawable state. This should merge with existing drawable states */
-    void setDrawableState(int[] state);
+    /**
+     * Sets the drawable state. This should merge with existing drawable states
+     *
+     * @param stateToAdd An array of drawable states to add to the view's drawable state, along
+     *                   with any drawable state that would normally be there.
+     * @param stateToRemove An array of drawable states to remove from what would normally be
+     *                      used to display the view.
+     */
+    void setExtraDrawableState(@Nullable int[] stateToAdd, @Nullable int[] stateToRemove);
 }

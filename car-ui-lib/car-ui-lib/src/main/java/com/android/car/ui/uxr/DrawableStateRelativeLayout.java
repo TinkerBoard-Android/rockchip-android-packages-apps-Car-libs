@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,26 +17,27 @@ package com.android.car.ui.uxr;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.Button;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.Nullable;
 
 /**
- * A {@link Button} that implements {@link DrawableStateView}, for allowing additional states
- * such as ux restriction.
+ * A {@link RelativeLayout} that implements {@link DrawableStateView}, for allowing additional
+ * states such as ux restriction.
  */
-public class DrawableStateButton extends Button implements DrawableStateView {
+public class DrawableStateRelativeLayout extends RelativeLayout implements DrawableStateView {
     private DrawableStateUtil mUtil;
 
-    public DrawableStateButton(Context context) {
+    public DrawableStateRelativeLayout(Context context) {
         super(context);
     }
 
-    public DrawableStateButton(Context context, @Nullable AttributeSet attrs) {
+    public DrawableStateRelativeLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public DrawableStateButton(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public DrawableStateRelativeLayout(Context context,
+            @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 

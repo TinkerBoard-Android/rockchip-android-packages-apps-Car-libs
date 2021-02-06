@@ -26,7 +26,7 @@ import androidx.annotation.Nullable;
  * such as ux restriction.
  */
 public class DrawableStateSwitch extends Switch implements DrawableStateView {
-    private int[] mState;
+    private DrawableStateUtil mUtil;
 
     public DrawableStateSwitch(Context context) {
         super(context);
@@ -46,18 +46,18 @@ public class DrawableStateSwitch extends Switch implements DrawableStateView {
     }
 
     @Override
-    public void setDrawableState(int[] state) {
-        mState = state;
-        refreshDrawableState();
+    public void setExtraDrawableState(@Nullable int[] stateToAdd, @Nullable int[] stateToRemove) {
+        if (mUtil == null) {
+            mUtil = new DrawableStateUtil(this);
+        }
+        mUtil.setExtraDrawableState(stateToAdd, stateToRemove);
     }
 
     @Override
     public int[] onCreateDrawableState(int extraSpace) {
-        if (mState == null) {
-            return super.onCreateDrawableState(extraSpace);
-        } else {
-            return mergeDrawableStates(
-                    super.onCreateDrawableState(extraSpace + mState.length), mState);
+        if (mUtil == null) {
+            mUtil = new DrawableStateUtil(this);
         }
+        return mUtil.onCreateDrawableState(extraSpace, space -> super.onCreateDrawableState(space));
     }
 }
