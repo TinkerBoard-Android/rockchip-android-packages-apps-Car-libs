@@ -16,6 +16,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- TODO: for internal TODOs, expand theme/style to leaf resources as necessary -->
     <style name="Theme.CarUi" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+        <item name="viewInflaterClass">com.android.car.ui.CarUiLayoutInflaterFactory</item>
+
         <!-- TODO(b/150230923) change to true when other apps are ready -->
         <item name="carUiBaseLayout">false</item>
         <item name="carUiToolbar">false</item>

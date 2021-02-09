@@ -31,6 +31,7 @@ import android.view.LayoutInflater;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.car.ui.CarUiLayoutInflaterFactory;
 import com.android.car.ui.baselayout.Insets;
@@ -56,9 +57,6 @@ public class CarUiInstaller extends ContentProvider {
             Build.TYPE.toLowerCase(Locale.ROOT).contains("debug")
                     || Build.TYPE.toLowerCase(Locale.ROOT).equals("eng");
 
-    private final CarUiLayoutInflaterFactory mLayoutInflaterFactory =
-            new CarUiLayoutInflaterFactory();
-
     @Override
     public boolean onCreate() {
         Context context = getContext();
@@ -75,21 +73,19 @@ public class CarUiInstaller extends ContentProvider {
                     private boolean mIsActivityStartedForFirstTime = false;
 
                     @Override
-                    public void onActivityPreCreated(Activity activity,
-                            Bundle savedInstanceState) {
-                        LayoutInflater layoutInflater = LayoutInflater.from(activity);
-
-                        if (layoutInflater.getFactory() == null) {
-                            layoutInflater.setFactory2(mLayoutInflaterFactory);
-                        } else if (!(layoutInflater.getFactory()
-                                instanceof CarUiLayoutInflaterFactory)) {
-                            throw new AssertionError(layoutInflater.getFactory()
-                                    + " must extend CarUiLayoutInflater");
-                        }
-                    }
-
-                    @Override
                     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+                        // For {@link AppCompatActivity} activities our layout inflater
+                        // factory is instantiated via viewInflaterClass attribute.
+                        LayoutInflater layoutInflater = LayoutInflater.from(activity);
+                        if (layoutInflater.getFactory2() == null) {
+                            layoutInflater.setFactory2(new CarUiLayoutInflaterFactory());
+                        } else if (!(layoutInflater.getFactory2()
+                                instanceof CarUiLayoutInflaterFactory)
+                                        && !(activity instanceof AppCompatActivity)) {
+                            throw new AssertionError(layoutInflater.getFactory()
+                                    + " must extend CarUiLayoutInflaterFactory");
+                        }
+
                         if (activity.getClassLoader()
                                 .equals(CarUiInstaller.class.getClassLoader())) {
                             BaseLayoutController.build(activity);
