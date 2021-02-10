@@ -161,30 +161,34 @@ public class FocusParkingViewTest {
         );
     }
 
-    @Test
-    public void testRestoreFocusInRoot_recyclerViewItemScrolledOffScreen() {
-        mList.post(() -> mList.getViewTreeObserver().addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        mList.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        View firstItem = mList.getLayoutManager().findViewByPosition(0);
-                        firstItem.requestFocus();
-                        assertThat(firstItem.isFocused()).isTrue();
-
-                        mList.scrollToPosition(NUM_ITEMS - 1);
-                        mList.getViewTreeObserver().addOnGlobalLayoutListener(
-                                new ViewTreeObserver.OnGlobalLayoutListener() {
-                                    @Override
-                                    public void onGlobalLayout() {
-                                        mList.getViewTreeObserver()
-                                                .removeOnGlobalLayoutListener(this);
-                                        assertThat(mList.isFocused()).isTrue();
-                                    }
-                                });
-                    }
-                }));
-    }
+    // TODO(b/179734335) Reenable this test, and remove the asserts inside of layout listeners.
+    // When an assert fails inside of a layout listener, it causes a whole bunch of tests in the
+    // test suite to fail with "test did not run due to instrumentation issue.
+    // See run level error for reason.", making it hard to debug.
+//    @Test
+//    public void testRestoreFocusInRoot_recyclerViewItemScrolledOffScreen() {
+//        mList.post(() -> mList.getViewTreeObserver().addOnGlobalLayoutListener(
+//                new ViewTreeObserver.OnGlobalLayoutListener() {
+//                    @Override
+//                    public void onGlobalLayout() {
+//                        mList.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+//                        View firstItem = mList.getLayoutManager().findViewByPosition(0);
+//                        firstItem.requestFocus();
+//                        assertThat(firstItem.isFocused()).isTrue();
+//
+//                        mList.scrollToPosition(NUM_ITEMS - 1);
+//                        mList.getViewTreeObserver().addOnGlobalLayoutListener(
+//                                new ViewTreeObserver.OnGlobalLayoutListener() {
+//                                    @Override
+//                                    public void onGlobalLayout() {
+//                                        mList.getViewTreeObserver()
+//                                                .removeOnGlobalLayoutListener(this);
+//                                        assertThat(mList.isFocused()).isTrue();
+//                                    }
+//                                });
+//                    }
+//                }));
+//    }
 
     @Test
     public void testRestoreFocusInRoot_focusedViewRemoved() {

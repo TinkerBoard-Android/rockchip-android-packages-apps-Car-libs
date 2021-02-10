@@ -19,7 +19,9 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatViewInflater;
 
 import com.android.car.ui.button.CarUiButton;
 import com.android.car.ui.button.CarUiButtonAttributes;
@@ -28,9 +30,30 @@ import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
 
 /**
  * A custom {@link LayoutInflater.Factory2} that will create CarUi components such as
- * {@link CarUiButton}.
+ * {@link CarUiButton}. It extends AppCompatViewInflater so that it can still let
+ * AppCompat components be created correctly.
  */
-public final class CarUiLayoutInflaterFactory implements LayoutInflater.Factory2 {
+public class CarUiLayoutInflaterFactory extends AppCompatViewInflater
+        implements LayoutInflater.Factory2 {
+
+    @Nullable
+    protected View createView(Context context, String name, AttributeSet attrs) {
+        View view = null;
+
+        if (CarUiButton.class.getSimpleName().equals(name)) {
+            CarUiButton controller = SharedLibraryFactorySingleton.get(context).createButton(
+                    context, CarUiButtonAttributes.fromAttributeSet(context, attrs));
+            view = controller.getView();
+            if (view != null) {
+                view.setTag(R.id.car_ui_component_reference, controller);
+            }
+        } else if (CarUiRecyclerView.class.getName().equals(name)) {
+            view = SharedLibraryFactorySingleton.get(context)
+                    .createRecyclerView(context, attrs);
+        }
+
+        return view;
+    }
 
     @Override
     public View onCreateView(String name, Context context, AttributeSet attrs) {
@@ -40,25 +63,7 @@ public final class CarUiLayoutInflaterFactory implements LayoutInflater.Factory2
 
     @Override
     public View onCreateView(View parent, String name, Context context,
-            AttributeSet attributeSet) {
-        View view = null;
-
-        if (CarUiButton.class.getSimpleName().equals(name)) {
-            CarUiButton controller = SharedLibraryFactorySingleton.get(context).createButton(
-                    context, CarUiButtonAttributes.fromAttributeSet(context, attributeSet));
-            view = controller.getView();
-            if (view != null) {
-                view.setTag(R.id.car_ui_component_reference, controller);
-            }
-        } else if (CarUiRecyclerView.class.getName().equals(name)) {
-            view = SharedLibraryFactorySingleton.get(context)
-                    .createRecyclerView(context, attributeSet);
-        }
-
-        if (view != null && parent instanceof ViewGroup) {
-            view.setLayoutParams(((ViewGroup) parent).generateLayoutParams(attributeSet));
-        }
-
-        return view;
+            AttributeSet attrs) {
+        return createView(context, name, attrs);
     }
 }
