@@ -22,10 +22,10 @@ import android.widget.TextView;
 import java.util.function.Consumer;
 
 @SuppressWarnings("AndroidJdkLibsChecker")
-final class TextViewListener extends TextView {
+public final class TextViewListener extends TextView {
     private Consumer<CharSequence> mTextListener;
 
-    TextViewListener(Context context) {
+    public TextViewListener(Context context) {
         super(context);
     }
 

@@ -86,7 +86,7 @@
                 android:textAppearance="?android:attr/textAppearanceSmall"/>
         </LinearLayout>
 
-        <LinearLayout
+        <com.google.car.ui.sharedlibrary.toolbar.TabLayout
             android:id="@+id/toolbar_tabs"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
@@ -94,7 +94,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/toolbar_menu_items_container"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toEndOf="@+id/toolbar_title_logo_container"
+            app:layout_constraintStart_toEndOf="@+id/toolbar_title_logo"
             app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
