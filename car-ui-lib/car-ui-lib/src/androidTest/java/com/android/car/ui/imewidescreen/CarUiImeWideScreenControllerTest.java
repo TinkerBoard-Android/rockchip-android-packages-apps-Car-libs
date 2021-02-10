@@ -62,6 +62,7 @@ import android.view.SurfaceControlViewHost;
 import android.view.View;
 import android.view.Window;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
@@ -96,6 +97,9 @@ public class CarUiImeWideScreenControllerTest {
 
     @Mock
     private EditorInfo mEditorInfoMock;
+
+    @Mock
+    private InputConnection mInputConnection;
 
     @Mock
     private SurfaceControlViewHost.SurfacePackage mSurfacePackageMock;
@@ -249,6 +253,7 @@ public class CarUiImeWideScreenControllerTest {
 
         sCarUiImeWideScreenController.setExtractEditText(new ExtractEditText(mContext));
         sCarUiImeWideScreenController.setEditorInfo(mEditorInfoMock);
+        sCarUiImeWideScreenController.setInputConnection(mInputConnection);
 
         CarUiImeWideScreenController spy = Mockito.spy(sCarUiImeWideScreenController);
 
