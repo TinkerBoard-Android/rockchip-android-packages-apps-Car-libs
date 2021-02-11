@@ -17,18 +17,44 @@
 package com.android.car.arch.common;
 
 /**
- * Class that holds data with a loading state.
+ * Class that holds data with a loading state, and optionally the previous version of the data.
  *
  * @param <T> the output data type
  */
 public class FutureData<T> {
 
     private final boolean mIsLoading;
+    private final T mPastData;
     private final T mData;
 
+    /** Returns an instance with a null data value and loading set to true. */
+    public static <T> FutureData<T> newLoadingData() {
+        return new FutureData<>(true, null);
+    }
+
+    /** Returns a loaded instance with the given data value. */
+    public static <T> FutureData<T> newLoadedData(T data) {
+        return new FutureData<>(false, data);
+    }
+
+    /** Returns a loaded instance with the given previous and current data values. */
+    public static <T> FutureData<T> newLoadedData(T oldData, T newData) {
+        return new FutureData<>(false, oldData, newData);
+    }
+
+    /**
+     * This should become private.
+     * @deprecated Use {@link #newLoadingData}, and {@link #newLoadedData} instead.
+     */
+    @Deprecated
     public FutureData(boolean isLoading, T data) {
+        this(isLoading, null, data);
+    }
+
+    private FutureData(boolean isLoading, T oldData, T newData) {
         mIsLoading = isLoading;
-        mData = data;
+        mPastData = oldData;
+        mData = newData;
     }
 
     /**
@@ -43,5 +69,10 @@ public class FutureData<T> {
      */
     public T getData() {
         return mData;
+    }
+
+    /** If done loading, returns the previous version of the data, otherwise null. */
+    public T getPastData() {
+        return mPastData;
     }
 }
