@@ -31,7 +31,7 @@ import android.view.LayoutInflater;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import com.android.car.ui.CarUiLayoutInflaterFactory;
 import com.android.car.ui.baselayout.Insets;
@@ -67,6 +67,7 @@ public class CarUiInstaller extends ContentProvider {
         Log.i(TAG, "CarUiInstaller started for " + context.getPackageName());
 
         Application application = (Application) context.getApplicationContext();
+        injectLayoutInflaterFactory(application);
         application.registerActivityLifecycleCallbacks(
                 new Application.ActivityLifecycleCallbacks() {
                     private Insets mInsets = null;
@@ -74,17 +75,7 @@ public class CarUiInstaller extends ContentProvider {
 
                     @Override
                     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-                        // For {@link AppCompatActivity} activities our layout inflater
-                        // factory is instantiated via viewInflaterClass attribute.
-                        LayoutInflater layoutInflater = LayoutInflater.from(activity);
-                        if (layoutInflater.getFactory2() == null) {
-                            layoutInflater.setFactory2(new CarUiLayoutInflaterFactory());
-                        } else if (!(layoutInflater.getFactory2()
-                                instanceof CarUiLayoutInflaterFactory)
-                                        && !(activity instanceof AppCompatActivity)) {
-                            throw new AssertionError(layoutInflater.getFactory()
-                                    + " must extend CarUiLayoutInflaterFactory");
-                        }
+                        injectLayoutInflaterFactory(activity);
 
                         if (activity.getClassLoader()
                                 .equals(CarUiInstaller.class.getClassLoader())) {
@@ -207,6 +198,21 @@ public class CarUiInstaller extends ContentProvider {
             method.invoke(null, activity);
         } catch (ReflectiveOperationException | SecurityException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private static void injectLayoutInflaterFactory(Context context) {
+        // For {@link AppCompatActivity} activities our layout inflater
+        // factory is instantiated via viewInflaterClass attribute.
+        LayoutInflater layoutInflater = LayoutInflater.from(context);
+        if (layoutInflater.getFactory2() == null) {
+            layoutInflater.setFactory2(new CarUiLayoutInflaterFactory());
+        } else if (!(layoutInflater.getFactory2()
+                instanceof CarUiLayoutInflaterFactory)
+                        && !(layoutInflater.getFactory2()
+                                instanceof AppCompatDelegate)) {
+            throw new AssertionError(layoutInflater.getFactory2()
+                    + " must extend CarUiLayoutInflaterFactory");
         }
     }
 }

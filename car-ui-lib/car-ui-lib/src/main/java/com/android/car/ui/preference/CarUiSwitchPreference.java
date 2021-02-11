@@ -34,6 +34,7 @@ import java.util.function.Consumer;
  * This class is the same as the base {@link SwitchPreference} class, except it implements
  * {@link UxRestrictablePreference}
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public class CarUiSwitchPreference extends SwitchPreference implements DisabledPreferenceCallback {
 
     private Consumer<Preference> mRestrictedClickListener;

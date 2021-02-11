@@ -40,6 +40,7 @@ import java.util.function.Consumer;
  * A preference that has an icon button that can be pressed independently of pressing the main
  * body of the preference.
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public class CarUiTwoActionIconPreference extends CarUiTwoActionBasePreference {
     @Nullable
     protected Runnable mSecondaryActionOnClickListener;
@@ -109,7 +110,7 @@ public class CarUiTwoActionIconPreference extends CarUiTwoActionBasePreference {
 
         holder.itemView.setFocusable(false);
         holder.itemView.setClickable(false);
-        firstActionContainer.setOnClickListener(this::performClick);
+        firstActionContainer.setOnClickListener(this::performClickUnrestricted);
         firstActionContainer.setEnabled(isEnabled());
         firstActionContainer.setFocusable(isEnabled());
 

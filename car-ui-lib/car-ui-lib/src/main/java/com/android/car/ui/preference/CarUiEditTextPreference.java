@@ -36,6 +36,7 @@ import java.util.function.Consumer;
  * This class extends the base {@link EditTextPreference} class. Adds the drawable icon to
  * the preference.
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public class CarUiEditTextPreference extends EditTextPreference
         implements UxRestrictablePreference {
 

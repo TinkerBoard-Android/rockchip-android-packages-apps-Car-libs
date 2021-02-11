@@ -32,6 +32,7 @@ import com.android.car.ui.utils.ViewUtils;
 import java.util.function.Consumer;
 
 /** A preference which shows a radio button at the start of the preference. */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public class CarUiRadioButtonPreference extends TwoStatePreference
         implements UxRestrictablePreference {
 

@@ -87,4 +87,6 @@ final class OemApiUtil {
 
         return oemSharedLibraryFactory;
     }
+
+    private OemApiUtil() {}
 }

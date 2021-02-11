@@ -52,6 +52,7 @@ import com.android.car.ui.recyclerview.decorations.linear.LinearOffsetItemDecora
 import com.android.car.ui.utils.CarUiUtils;
 import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
+import java.lang.reflect.Constructor;
 import java.util.Objects;
 
 /**
@@ -413,7 +414,9 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
             throw andLog("Error loading scroll bar component: " + mScrollBarClass, t);
         }
         try {
-            mScrollBar = (ScrollBar) cls.getDeclaredConstructor().newInstance();
+            Constructor<?> cnst = cls.getDeclaredConstructor();
+            cnst.setAccessible(true);
+            mScrollBar = (ScrollBar) cnst.newInstance();
         } catch (Throwable t) {
             throw andLog("Error creating scroll bar component: " + mScrollBarClass, t);
         }

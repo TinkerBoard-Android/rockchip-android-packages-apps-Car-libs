@@ -41,6 +41,14 @@ public abstract class CarUiRecyclerView extends RecyclerView {
     /**
      * Use this method to create an instance of CarUiRecyclerView at runtime.
      */
+    public static CarUiRecyclerView create(Context context) {
+        return SharedLibraryFactorySingleton.get(context)
+                .createRecyclerView(context, null);
+    }
+
+    /**
+     * Use this method to create an instance of CarUiRecyclerView at runtime.
+     */
     public static CarUiRecyclerView create(Context context, AttributeSet attributeSet) {
         return SharedLibraryFactorySingleton.get(context)
                 .createRecyclerView(context, attributeSet);

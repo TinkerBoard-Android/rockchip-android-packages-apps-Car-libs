@@ -33,6 +33,7 @@ import com.google.car.ui.sharedlibrary.R;
 import java.util.List;
 import java.util.function.Consumer;
 
+@SuppressWarnings("AndroidJdkLibsChecker")
 class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
 
     private final Context mContext;

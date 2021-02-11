@@ -35,7 +35,7 @@ import java.util.Objects;
  * the RecyclerView is scrolling vertically; it is defined as the left (or right if RTL) if the
  * RecyclerView is scrolling horizontally.
  */
-public class CarUiSnapHelper extends LinearSnapHelper {
+/* package */ class CarUiSnapHelper extends LinearSnapHelper {
     /**
      * The percentage of a View that needs to be completely visible for it to be a viable snap
      * target.
