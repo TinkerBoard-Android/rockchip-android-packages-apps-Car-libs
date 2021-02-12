@@ -448,12 +448,7 @@ public class CarUiImeWideScreenController {
             }
         }
 
-        // TODO(b/179733973) This null check was added for a test. Redo the test to properly
-        // initialize mInputConnection first.
-        if (mInputConnection != null) {
-            mInputConnection.performPrivateCommand(WIDE_SCREEN_POST_LOAD_SEARCH_RESULTS_ACTION,
-                    null);
-        }
+        mInputConnection.performPrivateCommand(WIDE_SCREEN_POST_LOAD_SEARCH_RESULTS_ACTION, null);
     }
 
     private static Parcel byteArrayToParcel(byte[] bytes) {
@@ -710,6 +705,11 @@ public class CarUiImeWideScreenController {
     @VisibleForTesting
     void setEditorInfo(EditorInfo editorInfo) {
         mInputEditorInfo = editorInfo;
+    }
+
+    @VisibleForTesting
+    void setInputConnection(InputConnection inputConnection) {
+        mInputConnection = inputConnection;
     }
 
     @VisibleForTesting
