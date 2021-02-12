@@ -13,22 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.car.ui.sharedlibrary;
+package com.android.car.ui.sharedlibrarysupport;
 
-import android.content.Context;
-
-import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryVersionProviderOEMV1;
-
-import com.google.car.ui.sharedlibrary.SharedLibraryFactoryImpl;
+import java.util.Set;
 
 /**
- * An implementation of {@link SharedLibraryVersionProviderOEMV1} for the reference design
- * shared library.
+ * This interface can be implemented on an app's {@link android.app.Application} class
+ * in order to provide additional options to consider when loading the shared library.
  */
-public class SharedLibraryVersionProviderImpl implements SharedLibraryVersionProviderOEMV1 {
+public interface SharedLibraryConfigProvider {
 
-    @Override
-    public Object getSharedLibraryFactory(int maxVersion, Context context, String packageName) {
-        return new SharedLibraryFactoryImpl(context);
-    }
+    /**
+     * Returns a set of {@link SharedLibrarySpecifier SharedLibrarySpecifiers}. If a shared library
+     * is in this set, it will not be loaded. The fallback implementation in the static version of
+     * car-ui-lib will be used instead.
+     */
+    Set<SharedLibrarySpecifier> getSharedLibraryDenyList();
 }

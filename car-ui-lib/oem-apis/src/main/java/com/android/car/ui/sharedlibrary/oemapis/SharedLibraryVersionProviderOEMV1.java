@@ -37,10 +37,13 @@ public interface SharedLibraryVersionProviderOEMV1 {
      *
      * @param maxVersion The maximum version of {@link SharedLibraryFactoryOEMV1} supported by the
      *                   app.
-     * @param context Used for making a classloader for the oem sharedlibrary
+     * @param context The shared library's context. It uses the shared library's classloader,
+     *                so layout inflaters created from it can use views defined in the shared lib.
+     * @param packageName The package name of the app creating the shared library. Can be used
+     *                    to provide per-app customizations.
      *
      * @return An object implementing {@link SharedLibraryFactoryOEMV1} for a version <=
      *         {@code maxVersion}.
      */
-    Object getSharedLibraryFactory(int maxVersion, Context context);
+    Object getSharedLibraryFactory(int maxVersion, Context context, String packageName);
 }
