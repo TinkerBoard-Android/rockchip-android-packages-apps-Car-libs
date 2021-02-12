@@ -93,12 +93,6 @@ public interface ToolbarControllerOEMV1 {
      */
     void setSearchMode(int searchMode);
 
-    /** Sets whether or not to show MenuItems while the search bar is open */
-    void setShowMenuItemsWhileSearching(boolean showMenuItemsWhileSearching);
-
-    /** Returns whether or not to MenuItems are shown while the search bar is open */
-    boolean isShowingMenuItemsWhileSearching();
-
     /**
      * Returns true if the toolbar can display search result items. One example of this is when the
      * system is configured to display search items in the IME instead of in the app.

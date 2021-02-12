@@ -18,6 +18,8 @@ package com.android.car.ui.toolbar;
 
 import static com.android.car.ui.utils.CarUiUtils.charSequenceToString;
 
+import static java.util.stream.Collectors.toList;
+
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -68,6 +70,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     private final Set<OnSearchCompletedListener> mOnSearchCompletedListeners = new HashSet<>();
     private final ProgressBarControllerAdapterV1 mProgressBar;
     private String mSearchHint;
+    private List<MenuItem> mClientMenuItems = Collections.emptyList();
 
     public ToolbarControllerAdapterV1(
             @NonNull Context context,
@@ -294,26 +297,23 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
     @Override
     public void setMenuItems(@Nullable List<MenuItem> items) {
-        setMenuItemsInternal(items);
+        mClientMenuItems = items;
+        update(mAdapterState.copy()
+                .setMenuItems(convertList(items, MenuItemAdapterV1::new))
+                .build());
     }
 
     @Override
     public List<MenuItem> setMenuItems(int resId) {
-        //TODO(b/175624230) MenuItemRenderer cannot be reached from this classloader
-        //List<MenuItem> menuItems = MenuItemRenderer.readMenuItemList(mContext, resId);
-        //setMenuItemsInternal(menuItems);
-        //return menuItems;
-        return Collections.emptyList();
-    }
-
-    private void setMenuItemsInternal(@Nullable List<MenuItem> items) {
-        mOemToolbar.setMenuItems(convertList(items, MenuItemAdapterV1::new));
+        List<MenuItem> menuItems = MenuItemXmlParserUtil.readMenuItemList(mContext, resId);
+        setMenuItems(menuItems);
+        return menuItems;
     }
 
     @NonNull
     @Override
     public List<MenuItem> getMenuItems() {
-        return Collections.emptyList();
+        return mClientMenuItems;
     }
 
     @Nullable
@@ -341,12 +341,12 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
     @Override
     public void setShowMenuItemsWhileSearching(boolean showMenuItems) {
-        mOemToolbar.setShowMenuItemsWhileSearching(showMenuItems);
+        update(mAdapterState.copy().setShowMenuItemsWhileSearching(showMenuItems).build());
     }
 
     @Override
     public boolean getShowMenuItemsWhileSearching() {
-        return mOemToolbar.isShowingMenuItemsWhileSearching();
+        return mAdapterState.getShowMenuItemsWhileSearching();
     }
 
     @Override
@@ -431,6 +431,17 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
         } else if (newAdapterState.hasTabs()
                 && newAdapterState.getSelectedTab() != oldAdapterState.getSelectedTab()) {
             mOemToolbar.selectTab(newAdapterState.getSelectedTab());
+        }
+
+        boolean gainingMenuItem = newAdapterState.hasMenuItems() && !oldAdapterState.hasMenuItems();
+        boolean losingMenuItems = !newAdapterState.hasMenuItems() && oldAdapterState.hasMenuItems();
+        if (gainingMenuItem) {
+            mOemToolbar.setMenuItems(newAdapterState.getShownMenuItems());
+        } else if (losingMenuItems) {
+            mOemToolbar.setMenuItems(Collections.emptyList());
+        } else if (newAdapterState.hasMenuItems() && !Objects.equals(
+                newAdapterState.getShownMenuItems(), oldAdapterState.getShownMenuItems())) {
+            mOemToolbar.setMenuItems(newAdapterState.getShownMenuItems());
         }
     }
 
@@ -538,10 +549,13 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
         private final boolean mShowTabsInSubpage;
         @NonNull
         private final List<TabAdapterV1> mTabs;
+        @NonNull
+        private final List<MenuItemAdapterV1> mMenuItems;
         private final int mSelectedTab;
         private final String mTitle;
         private final String mSubtitle;
         private final Drawable mLogo;
+        private final boolean mShowMenuItemsWhileSearching;
         private final boolean mTabsDirty;
         private final boolean mLogoDirty;
 
@@ -549,10 +563,12 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             mState = State.HOME;
             mShowTabsInSubpage = false;
             mTabs = Collections.emptyList();
+            mMenuItems = Collections.emptyList();
             mSelectedTab = -1;
             mTitle = null;
             mSubtitle = null;
             mLogo = null;
+            mShowMenuItemsWhileSearching = false;
             mTabsDirty = false;
             mLogoDirty = false;
         }
@@ -561,10 +577,12 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             mState = builder.mState;
             mShowTabsInSubpage = builder.mShowTabsInSubpage;
             mTabs = builder.mTabs;
+            mMenuItems = builder.mMenuItems;
             mSelectedTab = builder.mSelectedTab;
             mTitle = builder.mTitle;
             mSubtitle = builder.mSubtitle;
             mLogo = builder.mLogo;
+            mShowMenuItemsWhileSearching = builder.mShowMenuItemsWhileSearching;
             mTabsDirty = builder.mTabsDirty;
             mLogoDirty = builder.mLogoDirty;
         }
@@ -584,6 +602,11 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
         public int getSelectedTab() {
             return mSelectedTab;
+        }
+
+        @NonNull
+        public List<MenuItemAdapterV1> getMenuItems() {
+            return mMenuItems;
         }
 
         public String getTitle() {
@@ -606,6 +629,10 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             return mLogoDirty;
         }
 
+        public boolean getShowMenuItemsWhileSearching() {
+            return mShowMenuItemsWhileSearching;
+        }
+
         private boolean hasLogo() {
             State state = getState();
             return (state == State.HOME || state == State.SUBPAGE) && getLogo() != null;
@@ -620,6 +647,23 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             State state = getState();
             return (state == State.HOME || (state == State.SUBPAGE && getShowTabsInSubpage()))
                     && !getTabs().isEmpty();
+        }
+
+        private boolean hasMenuItems() {
+            return getShownMenuItems().size() > 0;
+        }
+
+        private List<MenuItemAdapterV1> getShownMenuItems() {
+            State state = getState();
+            if (state == State.EDIT) {
+                return mShowMenuItemsWhileSearching ? mMenuItems : Collections.emptyList();
+            } else if (state == State.SEARCH) {
+                return mShowMenuItemsWhileSearching
+                        ? mMenuItems.stream().filter(i -> !i.isSearch()).collect(toList())
+                        : Collections.emptyList();
+            } else {
+                return mMenuItems;
+            }
         }
 
         private boolean hasBackButton() {
@@ -637,10 +681,13 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             private boolean mShowTabsInSubpage;
             @NonNull
             private List<TabAdapterV1> mTabs;
+            @NonNull
+            private List<MenuItemAdapterV1> mMenuItems;
             private int mSelectedTab;
             private String mTitle;
             private String mSubtitle;
             private Drawable mLogo;
+            private boolean mShowMenuItemsWhileSearching;
             private boolean mTabsDirty = false;
             private boolean mLogoDirty = false;
 
@@ -649,6 +696,8 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
                 mState = state.getState();
                 mShowTabsInSubpage = state.getShowTabsInSubpage();
                 mTabs = state.getTabs();
+                mMenuItems = state.getMenuItems();
+                mShowMenuItemsWhileSearching = state.getShowMenuItemsWhileSearching();
                 mSelectedTab = state.getSelectedTab();
                 mTitle = state.getTitle();
                 mSubtitle = state.getSubtitle();
@@ -727,6 +776,26 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
                     mLogo = logo;
                     mWasChanged = true;
                     mLogoDirty = true;
+                }
+                return this;
+            }
+
+            public Builder setShowMenuItemsWhileSearching(boolean showMenuItemsWhileSearching) {
+                if (mShowMenuItemsWhileSearching != showMenuItemsWhileSearching) {
+                    mShowMenuItemsWhileSearching = showMenuItemsWhileSearching;
+                    mWasChanged = true;
+                }
+                return this;
+            }
+
+            public Builder setMenuItems(List<MenuItemAdapterV1> menuItems) {
+                if (menuItems == null) {
+                    menuItems = Collections.emptyList();
+                }
+
+                if (!Objects.equals(mMenuItems, menuItems)) {
+                    mMenuItems = menuItems;
+                    mWasChanged = true;
                 }
                 return this;
             }

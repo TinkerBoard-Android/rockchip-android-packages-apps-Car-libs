@@ -67,12 +67,23 @@ public class MenuItem {
     private CharSequence mTitle;
     private Drawable mIcon;
     private OnClickListener mOnClickListener;
-    private DisplayBehavior mDisplayBehavior;
+    private final DisplayBehavior mDisplayBehavior;
     private int mUxRestrictions;
     private boolean mIsEnabled;
     private boolean mIsChecked;
     private boolean mIsVisible;
     private boolean mIsActivated;
+
+    @SuppressWarnings("FieldCanBeLocal") // Used with weak references
+    private final CarUxRestrictionsUtil.OnUxRestrictionsChangedListener mUxRestrictionsListener =
+            uxRestrictions -> {
+                boolean wasRestricted = isRestricted();
+                mCurrentRestrictions = uxRestrictions;
+
+                if (isRestricted() != wasRestricted) {
+                    update();
+                }
+            };
 
     private MenuItem(Builder builder) {
         mContext = builder.mContext;
@@ -93,7 +104,7 @@ public class MenuItem {
         mIsPrimary = builder.mIsPrimary;
         mUxRestrictions = builder.mUxRestrictions;
 
-        mCurrentRestrictions = CarUxRestrictionsUtil.getInstance(mContext).getCurrentRestrictions();
+        CarUxRestrictionsUtil.getInstance(mContext).register(mUxRestrictionsListener);
     }
 
     private void update() {
@@ -240,16 +251,7 @@ public class MenuItem {
         update();
     }
 
-    /* package */ void setCarUxRestrictions(CarUxRestrictions restrictions) {
-        boolean wasRestricted = isRestricted();
-        mCurrentRestrictions = restrictions;
-
-        if (isRestricted() != wasRestricted) {
-            update();
-        }
-    }
-
-    /* package */ boolean isRestricted() {
+    public boolean isRestricted() {
         return CarUxRestrictionsUtil.isRestricted(mUxRestrictions, mCurrentRestrictions);
     }
 
@@ -311,8 +313,8 @@ public class MenuItem {
         return mIsPrimary;
     }
 
-    /** Returns if this is the search MenuItem, which has special behavior when searching */
-    boolean isSearch() {
+    /** Returns if this is the search MenuItem, which is not shown while searching */
+    public boolean isSearch() {
         return mIsSearch;
     }
 

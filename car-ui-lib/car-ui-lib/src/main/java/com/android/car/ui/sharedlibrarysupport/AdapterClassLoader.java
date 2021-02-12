@@ -20,7 +20,6 @@ import androidx.annotation.Nullable;
 
 import dalvik.system.PathClassLoader;
 
-import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -37,20 +36,23 @@ class AdapterClassLoader extends PathClassLoader {
     @Nullable
     private final ClassLoader mAdditionalClassLoader;
 
-    private final Pattern mPattern =
-            Pattern.compile("^com\\.android\\.car\\.ui\\..*AdapterV[0-9]+(\\$.*)?$");
+    private final Pattern mPattern = Pattern.compile(
+            "^com\\.android\\.car\\.ui\\..*AdapterV[0-9]+(\\$.*)?$"
+            + "|Lambda"
+            + "|^" + Pattern.quote(OemApiUtil.class.getName()) + "$");
 
     /**
-     * Equivalent to calling {@link #AdapterClassLoader(String, String, ClassLoader, boolean)}
+     * Equivalent to calling {@link #AdapterClassLoader(String, String, ClassLoader, ClassLoader)}
      * with {@code librarySearchPath = null, delegateResourceLoading = true}.
      */
     AdapterClassLoader(String dexPath, @Nullable ClassLoader parent,
             @Nullable ClassLoader additionalClassloader) {
-        this(dexPath, null, parent, additionalClassloader, true);
+        this(dexPath, null, parent, additionalClassloader);
     }
 
     /**
-     * Equivalent to calling {@link #AdapterClassLoader(String, String, ClassLoader, boolean)}
+     * Equivalent to calling
+     * {@link #AdapterClassLoader(String, String, ClassLoader, ClassLoader, boolean)}
      * with {@code delegateResourceLoading = true}.
      */
     AdapterClassLoader(String dexPath, String librarySearchPath, @Nullable ClassLoader parent,
@@ -70,8 +72,8 @@ class AdapterClassLoader extends PathClassLoader {
     }
 
     /**
-     * A copy from {@link dalvik.system.DelegateLastClassLoader}, but with changes
-     * to support loading classloaders added via {@link #addAdditionalClassLoader(ClassLoader)}.
+     * A copy from {@link dalvik.system.DelegateLastClassLoader}, but uses both {@code parent}
+     * and {@code additionalClassLoader} from the constructor as parent classloaders.
      *
      * If AdapterClassLoader are loaded, loading them
      * from this classloader will be skipped and instead they'll be loaded from the parent
@@ -94,9 +96,8 @@ class AdapterClassLoader extends PathClassLoader {
 
         ClassNotFoundException fromSuper = null;
 
-        // Only load adapters classed, and OemApiUtil class from this classloader.
-        if (name != null && (OemApiUtil.class.getName().equals(name)
-                        || mPattern.matcher(name).matches() || name.contains("Lambda"))) {
+        // Only load adapter classes and certain util classes in this classloader.
+        if (name != null && mPattern.matcher(name).find()) {
             // Next, check whether the class in question is present in the dexPath that this
             // classloader operates on, or its shared libraries.
             try {
