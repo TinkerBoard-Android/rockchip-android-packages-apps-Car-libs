@@ -408,6 +408,15 @@ public final class CarUiRecyclerView extends RecyclerView {
      * the recycler view was set with the same layout params.
      */
     private void installExternalScrollBar() {
+        if (mContainer.getParent() != null) {
+            // We've already installed the parent container.
+            // onAttachToWindow() can be called multiple times, but on the second time
+            // we will crash if we try to add mContainer as a child of a view again while
+            // it already has a parent.
+            return;
+        }
+
+        mContainer.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(getContext());
         inflater.inflate(R.layout.car_ui_recycler_view, mContainer, true);
         mContainer.setVisibility(mContainerVisibility);
