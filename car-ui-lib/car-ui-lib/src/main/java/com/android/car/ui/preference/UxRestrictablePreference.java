@@ -26,6 +26,7 @@ import java.util.function.Consumer;
  * A ux restricted preference will be displayed differently to indicate such, and will
  * display a toast message informing the user they cannot click it when they try to.
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public interface UxRestrictablePreference {
 
     /** Sets this preference as ux restricted or not */

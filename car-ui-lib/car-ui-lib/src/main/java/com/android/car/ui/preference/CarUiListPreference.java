@@ -33,6 +33,7 @@ import java.util.function.Consumer;
  * This class extends the base {@link ListPreference} class. Adds the drawable icon to
  * the preference.
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public class CarUiListPreference extends ListPreference implements UxRestrictablePreference {
 
     private Consumer<Preference> mRestrictedClickListener;

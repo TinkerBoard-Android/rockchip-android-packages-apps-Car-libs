@@ -32,6 +32,7 @@ import java.util.function.Consumer;
  * An implementation of {@link SharedLibraryFactoryImpl} for creating the reference design
  * car-ui-lib components.
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public class SharedLibraryFactoryImpl implements SharedLibraryFactoryOEMV1 {
 
     private final Context mSharedLibraryContext;

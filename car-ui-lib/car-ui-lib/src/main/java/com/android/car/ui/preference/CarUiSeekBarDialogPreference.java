@@ -35,6 +35,7 @@ import com.android.car.ui.utils.ViewUtils;
 import java.util.function.Consumer;
 
 /** A class implements some basic methods of a seekbar dialog preference. */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public class CarUiSeekBarDialogPreference extends DialogPreference
         implements DialogFragmentCallbacks, UxRestrictablePreference {
 

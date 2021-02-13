@@ -33,6 +33,7 @@ import java.util.function.Consumer;
  * A helper class for implementing installBaseLayoutAround from
  * {@link com.android.car.ui.sharedlibrary.oemapis.SharedLibraryFactoryOEMV1}
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public class BaseLayoutInstaller {
     /**
      * Implementation of installBaseLayoutAround from
