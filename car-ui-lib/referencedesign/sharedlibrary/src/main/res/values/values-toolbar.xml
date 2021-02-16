@@ -3,4 +3,14 @@
     <dimen name="toolbar_margin">112dp</dimen>
     <dimen name="toolbar_row_height">96dp</dimen>
     <dimen name="toolbar_menu_item_icon_ripple_radius">48dp</dimen>
+
+    <style name="TextAppearance.CarUi.Widget.Toolbar.Tab" parent="TextAppearance.CarUi.Body3">
+        <item name="android:textColor">@color/toolbar_tab_item_selector</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textFontWeight">400</item>
+    </style>
+
+    <style name="TextAppearance.CarUi.Widget.Toolbar.Tab.Selected">
+        <item name="android:textFontWeight">500</item>
+    </style>
 </resources>

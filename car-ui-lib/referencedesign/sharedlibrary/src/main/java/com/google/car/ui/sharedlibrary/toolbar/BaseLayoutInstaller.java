@@ -64,7 +64,8 @@ public class BaseLayoutInstaller {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
 
-        ToolbarControllerOEMV1 toolbarController = new ToolbarControllerImpl(baseLayout);
+        ToolbarControllerOEMV1 toolbarController = new ToolbarControllerImpl(
+                baseLayout, sharedLibraryContext);
 
         InsetsUpdater updater = new InsetsUpdater(baseLayout, contentView);
         updater.replaceInsetsChangedListenerWith(insetsChangedListener);
