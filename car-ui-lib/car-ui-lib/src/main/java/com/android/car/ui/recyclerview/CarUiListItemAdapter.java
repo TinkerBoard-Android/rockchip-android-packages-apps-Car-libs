@@ -170,22 +170,25 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         ListItemViewHolder(@NonNull View itemView) {
             super(itemView);
-            mTitle = requireViewByRefId(itemView, R.id.title);
-            mBody = requireViewByRefId(itemView, R.id.body);
-            mIcon = requireViewByRefId(itemView, R.id.icon);
-            mContentIcon = requireViewByRefId(itemView, R.id.content_icon);
-            mAvatarIcon = requireViewByRefId(itemView, R.id.avatar_icon);
-            mIconContainer = requireViewByRefId(itemView, R.id.icon_container);
-            mActionContainer = requireViewByRefId(itemView, R.id.action_container);
-            mActionDivider = requireViewByRefId(itemView, R.id.action_divider);
-            mSwitch = requireViewByRefId(itemView, R.id.switch_widget);
-            mCheckBox = requireViewByRefId(itemView, R.id.checkbox_widget);
-            mRadioButton = requireViewByRefId(itemView, R.id.radio_button_widget);
-            mSupplementalIcon = requireViewByRefId(itemView, R.id.supplemental_icon);
-            mReducedTouchInterceptor = requireViewByRefId(itemView, R.id.reduced_touch_interceptor);
-            mTouchInterceptor = requireViewByRefId(itemView, R.id.touch_interceptor);
+            mTitle = requireViewByRefId(itemView, R.id.car_ui_list_item_title);
+            mBody = requireViewByRefId(itemView, R.id.car_ui_list_item_body);
+            mIcon = requireViewByRefId(itemView, R.id.car_ui_list_item_icon);
+            mContentIcon = requireViewByRefId(itemView, R.id.car_ui_list_item_content_icon);
+            mAvatarIcon = requireViewByRefId(itemView, R.id.car_ui_list_item_avatar_icon);
+            mIconContainer = requireViewByRefId(itemView, R.id.car_ui_list_item_icon_container);
+            mActionContainer = requireViewByRefId(itemView, R.id.car_ui_list_item_action_container);
+            mActionDivider = requireViewByRefId(itemView, R.id.car_ui_list_item_action_divider);
+            mSwitch = requireViewByRefId(itemView, R.id.car_ui_list_item_switch_widget);
+            mCheckBox = requireViewByRefId(itemView, R.id.car_ui_list_item_checkbox_widget);
+            mRadioButton = requireViewByRefId(itemView, R.id.car_ui_list_item_radio_button_widget);
+            mSupplementalIcon = requireViewByRefId(itemView,
+                    R.id.car_ui_list_item_supplemental_icon);
+            mReducedTouchInterceptor = requireViewByRefId(itemView,
+                    R.id.car_ui_list_item_reduced_touch_interceptor);
+            mTouchInterceptor = requireViewByRefId(itemView,
+                    R.id.car_ui_list_item_touch_interceptor);
             mActionContainerTouchInterceptor = requireViewByRefId(itemView,
-                    R.id.action_container_touch_interceptor);
+                    R.id.car_ui_list_item_action_container_touch_interceptor);
         }
 
         void bind(@NonNull CarUiContentListItem item) {
@@ -371,8 +374,8 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         HeaderViewHolder(@NonNull View itemView) {
             super(itemView);
-            mTitle = requireViewByRefId(itemView, R.id.title);
-            mBody = requireViewByRefId(itemView, R.id.body);
+            mTitle = requireViewByRefId(itemView, R.id.car_ui_list_item_title);
+            mBody = requireViewByRefId(itemView, R.id.car_ui_list_item_body);
         }
 
         private void bind(@NonNull CarUiHeaderListItem item) {
