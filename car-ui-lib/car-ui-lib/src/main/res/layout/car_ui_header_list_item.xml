@@ -30,20 +30,20 @@
         app:layout_constraintGuide_begin="@dimen/car_ui_list_item_header_start_inset" />
 
     <TextView
-        android:id="@+id/title"
+        android:id="@+id/car_ui_list_item_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/car_ui_header_list_item_text_start_margin"
         android:textAppearance="@style/TextAppearance.CarUi.ListItem.Header"
         android:textAlignment="viewStart"
-        app:layout_constraintBottom_toTopOf="@+id/body"
+        app:layout_constraintBottom_toTopOf="@+id/car_ui_list_item_body"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@id/car_ui_list_item_start_guideline"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
-        android:id="@+id/body"
+        android:id="@+id/car_ui_list_item_body"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/car_ui_list_item_text_no_icon_start_margin"
@@ -52,6 +52,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@id/car_ui_list_item_start_guideline"
-        app:layout_constraintTop_toBottomOf="@+id/title" />
+        app:layout_constraintTop_toBottomOf="@+id/car_ui_list_item_title" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
