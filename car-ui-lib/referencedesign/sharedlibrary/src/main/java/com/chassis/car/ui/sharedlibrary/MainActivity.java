@@ -13,22 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.car.ui.sharedlibrary;
+package com.chassis.car.ui.sharedlibrary;
 
-import android.content.Context;
-
-import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryVersionProviderOEMV1;
-
-import com.chassis.car.ui.sharedlibrary.SharedLibraryFactoryImpl;
+import android.app.Activity;
 
 /**
- * An implementation of {@link SharedLibraryVersionProviderOEMV1} for the reference design
- * shared library.
+ * A blank activity. It's only purpose is for responding to the
+ * {@code com.android.car.ui.intent.action.SHARED_LIBRARY} intent.
  */
-public class SharedLibraryVersionProviderImpl implements SharedLibraryVersionProviderOEMV1 {
-
-    @Override
-    public Object getSharedLibraryFactory(int maxVersion, Context context, String packageName) {
-        return new SharedLibraryFactoryImpl(context);
-    }
+public class MainActivity extends Activity {
 }

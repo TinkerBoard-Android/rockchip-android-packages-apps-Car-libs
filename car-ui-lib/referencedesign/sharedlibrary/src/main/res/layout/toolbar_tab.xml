@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -14,7 +15,8 @@
         android:layout_height="36dp"
         android:scaleType="fitCenter"
         android:tint="@color/toolbar_tab_item_selector"
-        android:tintMode="src_in" />
+        android:tintMode="src_in"
+        tools:ignore="UseAppTint" />
     <TextView
         android:id="@+id/car_ui_toolbar_tab_item_text"
         android:layout_width="135dp"

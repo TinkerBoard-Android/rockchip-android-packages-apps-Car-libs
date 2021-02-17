@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:background="#E0000000"
         android:tag="shared_lib_top_inset">
-        <com.google.car.ui.sharedlibrary.toolbar.ClickBlockingView
+        <com.chassis.car.ui.sharedlibrary.toolbar.ClickBlockingView
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -97,7 +97,7 @@
                 android:textAppearance="?android:attr/textAppearanceSmall"/>
         </LinearLayout>
 
-        <com.google.car.ui.sharedlibrary.toolbar.TabLayout
+        <com.chassis.car.ui.sharedlibrary.toolbar.TabLayout
             android:id="@+id/toolbar_tabs"
             android:layout_width="0dp"
             android:layout_height="@dimen/toolbar_row_height"
