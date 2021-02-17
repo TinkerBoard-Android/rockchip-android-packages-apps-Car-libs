@@ -64,7 +64,7 @@ public interface MenuItemOEMV1 {
     boolean isActivated();
 
     /** Gets the title of this MenuItem. */
-    CharSequence getTitle();
+    String getTitle();
 
     /**
      * Returns if this MenuItem is restricted due to the current driving restrictions and driving
