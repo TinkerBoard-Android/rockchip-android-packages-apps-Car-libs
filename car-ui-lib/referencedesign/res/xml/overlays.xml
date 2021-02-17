@@ -9,7 +9,6 @@
     <item target="drawable/car_ui_icon_arrow_back" value="@drawable/car_ui_icon_arrow_back"/>
     <item target="drawable/car_ui_toolbar_menu_item_icon_ripple" value="@drawable/car_ui_toolbar_menu_item_icon_ripple"/>
     <item target="drawable/car_ui_toolbar_menu_item_icon_background" value="@drawable/car_ui_toolbar_menu_item_icon_background"/>
-    <item target="drawable/car_ui_toolbar_menu_item_icon_background" value="@drawable/car_ui_toolbar_menu_item_icon_background"/>
 
     <item target="style/Widget.CarUi" value="@style/Widget.CarUi"/>
     <item target="style/Widget.CarUi.Toolbar" value="@style/Widget.CarUi.Toolbar"/>
@@ -96,10 +95,10 @@
     <item target="attr/layout_constraintBottom_toBottomOf" value="@attr/layout_constraintBottom_toBottomOf"/>
     <item target="attr/layout_constraintHorizontal_bias" value="@attr/layout_constraintHorizontal_bias"/>
     <item target="attr/layout_goneMarginLeft" value="@attr/layout_goneMarginLeft"/>
-    <item target="attr/layout_goneMarginLeft" value="@attr/layout_goneMarginRight"/>
-    <item target="attr/layout_goneMarginLeft" value="@attr/layout_goneMarginTop"/>
-    <item target="attr/layout_goneMarginLeft" value="@attr/layout_goneMarginBottom"/>
-    <item target="attr/layout_goneMarginLeft" value="@attr/layout_goneMarginStart"/>
-    <item target="attr/layout_goneMarginLeft" value="@attr/layout_goneMarginEnd"/>
+    <item target="attr/layout_goneMarginRight" value="@attr/layout_goneMarginRight"/>
+    <item target="attr/layout_goneMarginTop" value="@attr/layout_goneMarginTop"/>
+    <item target="attr/layout_goneMarginBottom" value="@attr/layout_goneMarginBottom"/>
+    <item target="attr/layout_goneMarginStart" value="@attr/layout_goneMarginStart"/>
+    <item target="attr/layout_goneMarginEnd" value="@attr/layout_goneMarginEnd"/>
     <item target="attr/state_ux_restricted" value="@attr/state_ux_restricted"/>
 </overlay>

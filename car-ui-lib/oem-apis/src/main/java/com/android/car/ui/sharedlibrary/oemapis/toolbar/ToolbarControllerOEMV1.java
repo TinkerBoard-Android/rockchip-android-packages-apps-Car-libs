@@ -16,7 +16,6 @@
 
 package com.android.car.ui.sharedlibrary.oemapis.toolbar;
 
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 
@@ -26,9 +25,6 @@ import java.util.function.Consumer;
 /** The OEM interface for a Toolbar. */
 @SuppressWarnings("AndroidJdkLibsChecker")
 public interface ToolbarControllerOEMV1 {
-
-    /** Gets the context used by the views of this toolbar */
-    Context getContext();
 
     /**
      * Sets the title of the toolbar to a CharSequence.
@@ -59,8 +55,9 @@ public interface ToolbarControllerOEMV1 {
      * or else the list could be modified from the app when the toolbar wasn't expecting it.
      *
      * @param tabs Nullable. Must not be mutated. List of tabs to show.
+     * @param selectedTab The index of the tab that is initially selected.
      */
-    void setTabs(List<? extends TabOEMV1> tabs);
+    void setTabs(List<? extends TabOEMV1> tabs, int selectedTab);
 
     /**
      * Selects a tab added to this toolbar. See

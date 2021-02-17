@@ -30,19 +30,21 @@ import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
 
 import com.google.car.ui.sharedlibrary.R;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
 @SuppressWarnings("AndroidJdkLibsChecker")
 class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
 
-    private final Context mContext;
+    private final Context mSharedLibraryContext;
     private final ImageView mBackButtonView;
     private final TextView mTitleView;
     private final TextView mSubtitleView;
     private final ImageView mLogo;
     private final ImageView mLogoInNavIconSpace;
     private final ProgressBarController mProgressBar;
+    private final TabLayout mTabContainer;
 
     private Runnable mBackListener;
     private int mNavButtonMode = ToolbarControllerOEMV1.NAV_BUTTON_MODE_BACK;
@@ -50,9 +52,8 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     private boolean mBackButtonVisible = false;
     private boolean mHasLogo = false;
 
-    ToolbarControllerImpl(View view) {
-        mContext = view.getContext();
-
+    ToolbarControllerImpl(View view, Context sharedLibraryContext) {
+        mSharedLibraryContext = sharedLibraryContext;
         mBackButtonView = view.requireViewById(R.id.toolbar_nav_icon);
         mTitleView = view.requireViewById(R.id.toolbar_title);
         mSubtitleView = view.requireViewById(R.id.toolbar_subtitle);
@@ -60,11 +61,7 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
         mLogoInNavIconSpace = view.requireViewById(R.id.toolbar_logo);
         mProgressBar = new ProgressBarController(
                 view.requireViewById(R.id.toolbar_progress_bar));
-    }
-
-    @Override
-    public Context getContext() {
-        return mContext;
+        mTabContainer = view.requireViewById(R.id.toolbar_tabs);
     }
 
     @Override
@@ -72,8 +69,6 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
         boolean hadTitle = !TextUtils.isEmpty(getTitle());
         mTitleView.setText(title);
         boolean hasTitle = !TextUtils.isEmpty(getTitle());
-
-        setVisible(mTitleView, hasTitle);
 
         if (hadTitle != hasTitle) {
             update();
@@ -91,8 +86,6 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
         mSubtitleView.setText(title);
         boolean hasSubtitle = !TextUtils.isEmpty(getSubtitle());
 
-        setVisible(mSubtitleView, hasSubtitle);
-
         if (hadSubtitle != hasSubtitle) {
             update();
         }
@@ -104,13 +97,23 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     }
 
     @Override
-    public void setTabs(List<? extends TabOEMV1> tabs) {
+    public void setTabs(List<? extends TabOEMV1> tabs, int selectedTab) {
+        if (tabs == null) {
+            tabs = Collections.emptyList();
+        }
 
+        boolean hadTabs = mTabContainer.hasTabs();
+        mTabContainer.setTabs(tabs, selectedTab);
+        boolean hasTabs = mTabContainer.hasTabs();
+
+        if (hadTabs != hasTabs) {
+            update();
+        }
     }
 
     @Override
     public void selectTab(int position) {
-
+        mTabContainer.selectTab(position);
     }
 
     @Override
@@ -254,6 +257,10 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
         setVisible(mBackButtonView, mBackButtonVisible);
         setVisible(mLogoInNavIconSpace, mHasLogo && !mBackButtonVisible);
         setVisible(mLogo, mHasLogo && mBackButtonVisible);
+        boolean hasTabs = mTabContainer.hasTabs();
+        setVisible(mTabContainer, hasTabs);
+        setVisible(mTitleView, !TextUtils.isEmpty(getTitle()) && !hasTabs);
+        setVisible(mSubtitleView, !TextUtils.isEmpty(getSubtitle()) && !hasTabs);
     }
 
     private static void setVisible(View view, boolean visible) {

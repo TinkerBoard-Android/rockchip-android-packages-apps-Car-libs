@@ -23,11 +23,11 @@ import android.widget.ImageView;
 import java.util.function.Consumer;
 
 @SuppressWarnings("AndroidJdkLibsChecker")
-final class ImageViewListener extends ImageView {
+public final class ImageViewListener extends ImageView {
 
     private Consumer<Drawable> mImageDrawableListener;
 
-    ImageViewListener(Context context) {
+    public ImageViewListener(Context context) {
         super(context);
     }
 

@@ -35,22 +35,12 @@ class TabAdapterV1 implements TabOEMV1 {
 
     TabAdapterV1(Context context, Tab clientTab, Runnable onClickListener) {
         ImageViewListener imageView = new ImageViewListener(context);
-        imageView.setImageDrawableListener(drawable -> {
-            mIcon = drawable;
-            if (mUpdateListener != null) {
-                mUpdateListener.accept(this);
-            }
-        });
-        clientTab.bindIcon(imageView);
+        imageView.setImageDrawableListener(this::setIcon);
+        clientTab.bindIconPublic(imageView);
 
         TextViewListener textView = new TextViewListener(context);
-        textView.setTextListener(text -> {
-            mText = text;
-            if (mUpdateListener != null) {
-                mUpdateListener.accept(this);
-            }
-        });
-        clientTab.bindText(textView);
+        textView.setTextListener(this::setTitle);
+        clientTab.bindTextPublic(textView);
 
         mOnClickListener = onClickListener;
         mClientTab = clientTab;
@@ -70,9 +60,23 @@ class TabAdapterV1 implements TabOEMV1 {
         return mText;
     }
 
+    public void setTitle(CharSequence title) {
+        mText = title;
+        if (mUpdateListener != null) {
+            mUpdateListener.accept(this);
+        }
+    }
+
     @Override
     public Drawable getIcon() {
         return mIcon;
+    }
+
+    public void setIcon(Drawable icon) {
+        mIcon = icon;
+        if (mUpdateListener != null) {
+            mUpdateListener.accept(this);
+        }
     }
 
     @Override

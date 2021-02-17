@@ -295,9 +295,25 @@ public class TabLayout extends LinearLayout {
             textView.setText(mText);
         }
 
+        /**
+         * Do not use, this method is here for the shared library adapters, which cannot
+         * call the protected version due to being in a different classloader.
+         */
+        public final void bindTextPublic(TextView textView) {
+            bindText(textView);
+        }
+
         /** Set icon drawable. TODO(b/139444064): revise this api.*/
         protected void bindIcon(ImageView imageView) {
             imageView.setImageDrawable(mIcon);
+        }
+
+        /**
+         * Do not use, this method is here for the shared library adapters, which cannot
+         * call the protected version due to being in a different classloader.
+         */
+        public final void bindIconPublic(ImageView imageView) {
+            bindIcon(imageView);
         }
     }
 }
