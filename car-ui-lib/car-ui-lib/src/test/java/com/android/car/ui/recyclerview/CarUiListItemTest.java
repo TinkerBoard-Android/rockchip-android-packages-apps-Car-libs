@@ -62,15 +62,18 @@ public class CarUiListItemTest {
     }
 
     private View getListItemTitleAtPosition(int position) {
-        return getListItemViewHolderAtPosition(position).itemView.findViewById(R.id.title);
+        return getListItemViewHolderAtPosition(position).itemView
+                .findViewById(R.id.car_ui_list_item_title);
     }
 
     private View getListItemBodyAtPosition(int position) {
-        return getListItemViewHolderAtPosition(position).itemView.findViewById(R.id.body);
+        return getListItemViewHolderAtPosition(position).itemView
+                .findViewById(R.id.car_ui_list_item_body);
     }
 
     private View getListItemIconContainerAtPosition(int position) {
-        return getListItemViewHolderAtPosition(position).itemView.findViewById(R.id.icon_container);
+        return getListItemViewHolderAtPosition(position).itemView
+                .findViewById(R.id.car_ui_list_item_icon_container);
     }
 
     private View getListItemActionContainerAtPosition(int position) {
@@ -79,12 +82,13 @@ public class CarUiListItemTest {
     }
 
     private Switch getListItemSwitchAtPosition(int position) {
-        return getListItemViewHolderAtPosition(position).itemView.findViewById(R.id.switch_widget);
+        return getListItemViewHolderAtPosition(position).itemView
+                .findViewById(R.id.car_ui_list_item_switch_widget);
     }
 
     private CheckBox getListItemCheckBoxAtPosition(int position) {
         return getListItemViewHolderAtPosition(position)
-                .itemView.findViewById(R.id.checkbox_widget);
+                .itemView.findViewById(R.id.car_ui_list_item_checkbox_widget);
     }
 
     private View getListItemIconAtPosition(int position) {
@@ -97,11 +101,13 @@ public class CarUiListItemTest {
     }
 
     private TextView getHeaderViewHolderTitleAtPosition(int position) {
-        return getHeaderViewHolderAtPosition(position).itemView.findViewById(R.id.title);
+        return getHeaderViewHolderAtPosition(position).itemView
+                .findViewById(R.id.car_ui_list_item_title);
     }
 
     private TextView getHeaderViewHolderBodyAtPosition(int position) {
-        return getHeaderViewHolderAtPosition(position).itemView.findViewById(R.id.body);
+        return getHeaderViewHolderAtPosition(position).itemView
+                .findViewById(R.id.car_ui_list_item_body);
     }
 
     private void updateRecyclerViewAdapter(CarUiListItemAdapter adapter) {

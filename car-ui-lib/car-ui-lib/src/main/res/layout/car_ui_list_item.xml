@@ -26,7 +26,7 @@
     <!-- The following touch interceptor views are sized to encompass the specific sub-sections of
     the list item view to easily control the bounds of a background ripple effects. -->
     <View
-        android:id="@+id/touch_interceptor"
+        android:id="@+id/car_ui_list_item_touch_interceptor"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@drawable/car_ui_list_item_background"
@@ -38,14 +38,14 @@
 
     <!-- This touch interceptor does not include the action container -->
     <View
-        android:id="@+id/reduced_touch_interceptor"
+        android:id="@+id/car_ui_list_item_reduced_touch_interceptor"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@drawable/car_ui_list_item_background"
         android:clickable="true"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/action_container"
+        app:layout_constraintEnd_toStartOf="@id/car_ui_list_item_action_container"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -57,7 +57,7 @@
         app:layout_constraintGuide_begin="@dimen/car_ui_list_item_start_inset" />
 
     <FrameLayout
-        android:id="@+id/icon_container"
+        android:id="@+id/car_ui_list_item_icon_container"
         android:layout_width="@dimen/car_ui_list_item_icon_container_width"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -65,7 +65,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
-            android:id="@+id/icon"
+            android:id="@+id/car_ui_list_item_icon"
             android:layout_width="@dimen/car_ui_list_item_icon_size"
             android:layout_height="@dimen/car_ui_list_item_icon_size"
             android:layout_gravity="center"
@@ -73,7 +73,7 @@
             android:scaleType="fitXY" />
 
         <ImageView
-            android:id="@+id/content_icon"
+            android:id="@+id/car_ui_list_item_content_icon"
             android:layout_width="@dimen/car_ui_list_item_content_icon_width"
             android:layout_height="@dimen/car_ui_list_item_content_icon_height"
             android:layout_gravity="center"
@@ -81,7 +81,7 @@
             android:scaleType="fitXY" />
 
         <ImageView
-            android:id="@+id/avatar_icon"
+            android:id="@+id/car_ui_list_item_avatar_icon"
             android:background="@drawable/car_ui_list_item_avatar_icon_outline"
             android:layout_width="@dimen/car_ui_list_item_avatar_icon_width"
             android:layout_height="@dimen/car_ui_list_item_avatar_icon_height"
@@ -91,47 +91,47 @@
     </FrameLayout>
 
     <TextView
-        android:id="@+id/title"
+        android:id="@+id/car_ui_list_item_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/car_ui_list_item_text_start_margin"
         android:singleLine="@bool/car_ui_list_item_single_line_title"
         android:textAppearance="@style/TextAppearance.CarUi.ListItem"
         android:textAlignment="viewStart"
-        app:layout_constraintBottom_toTopOf="@+id/body"
-        app:layout_constraintEnd_toStartOf="@+id/action_container"
-        app:layout_constraintStart_toEndOf="@+id/icon_container"
+        app:layout_constraintBottom_toTopOf="@+id/car_ui_list_item_body"
+        app:layout_constraintEnd_toStartOf="@+id/car_ui_list_item_action_container"
+        app:layout_constraintStart_toEndOf="@+id/car_ui_list_item_icon_container"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
         app:layout_goneMarginStart="@dimen/car_ui_list_item_text_no_icon_start_margin" />
     <TextView
-        android:id="@+id/body"
+        android:id="@+id/car_ui_list_item_body"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/car_ui_list_item_text_start_margin"
         android:textAppearance="@style/TextAppearance.CarUi.ListItem.Body"
         android:textAlignment="viewStart"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/action_container"
-        app:layout_constraintStart_toEndOf="@+id/icon_container"
-        app:layout_constraintTop_toBottomOf="@+id/title"
+        app:layout_constraintEnd_toStartOf="@+id/car_ui_list_item_action_container"
+        app:layout_constraintStart_toEndOf="@+id/car_ui_list_item_icon_container"
+        app:layout_constraintTop_toBottomOf="@+id/car_ui_list_item_title"
         app:layout_goneMarginStart="@dimen/car_ui_list_item_text_no_icon_start_margin" />
 
     <!-- This touch interceptor is sized and positioned to encompass the action container   -->
     <View
-        android:id="@+id/action_container_touch_interceptor"
+        android:id="@+id/car_ui_list_item_action_container_touch_interceptor"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@drawable/car_ui_list_item_background"
         android:clickable="true"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/action_container"
-        app:layout_constraintEnd_toEndOf="@id/action_container"
-        app:layout_constraintStart_toStartOf="@id/action_container"
-        app:layout_constraintTop_toTopOf="@id/action_container" />
+        app:layout_constraintBottom_toBottomOf="@id/car_ui_list_item_action_container"
+        app:layout_constraintEnd_toEndOf="@id/car_ui_list_item_action_container"
+        app:layout_constraintStart_toStartOf="@id/car_ui_list_item_action_container"
+        app:layout_constraintTop_toTopOf="@id/car_ui_list_item_action_container" />
 
     <FrameLayout
-        android:id="@+id/action_container"
+        android:id="@+id/car_ui_list_item_action_container"
         android:layout_width="wrap_content"
         android:minWidth="@dimen/car_ui_list_item_icon_container_width"
         android:layout_height="0dp"
@@ -140,14 +140,14 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <View
-            android:id="@+id/action_divider"
+            android:id="@+id/car_ui_list_item_action_divider"
             android:layout_width="@dimen/car_ui_list_item_action_divider_width"
             android:layout_height="@dimen/car_ui_list_item_action_divider_height"
             android:layout_gravity="start|center_vertical"
             android:background="@drawable/car_ui_list_item_divider" />
 
         <Switch
-            android:id="@+id/switch_widget"
+            android:id="@+id/car_ui_list_item_switch_widget"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -155,7 +155,7 @@
             android:focusable="false" />
 
         <CheckBox
-            android:id="@+id/checkbox_widget"
+            android:id="@+id/car_ui_list_item_checkbox_widget"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -163,7 +163,7 @@
             android:focusable="false" />
 
         <RadioButton
-            android:id="@+id/radio_button_widget"
+            android:id="@+id/car_ui_list_item_radio_button_widget"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -171,7 +171,7 @@
             android:focusable="false" />
 
         <ImageView
-            android:id="@+id/supplemental_icon"
+            android:id="@+id/car_ui_list_item_supplemental_icon"
             android:layout_width="@dimen/car_ui_list_item_supplemental_icon_size"
             android:layout_height="@dimen/car_ui_list_item_supplemental_icon_size"
             android:layout_gravity="center"

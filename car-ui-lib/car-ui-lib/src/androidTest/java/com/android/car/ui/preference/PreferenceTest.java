@@ -85,15 +85,20 @@ public class PreferenceTest {
         mActivity.setOnPreferenceChangeListener("list", mockListener);
 
         // Check that no option is initially selected.
-        onView(withIndex(withId(R.id.radio_button_widget), 1)).check(matches(isNotChecked()));
-        onView(withIndex(withId(R.id.radio_button_widget), 2)).check(matches(isNotChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 1))
+                .check(matches(isNotChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 2))
+                .check(matches(isNotChecked()));
 
         // Select first option.
         onView(withText(mEntries[0])).perform(click());
         // Check that first option is selected.
-        onView(withIndex(withId(R.id.radio_button_widget), 0)).check(matches(isChecked()));
-        onView(withIndex(withId(R.id.radio_button_widget), 1)).check(matches(isNotChecked()));
-        onView(withIndex(withId(R.id.radio_button_widget), 2)).check(matches(isNotChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 0))
+                .check(matches(isChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 1))
+                .check(matches(isNotChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 2))
+                .check(matches(isNotChecked()));
 
         // Press back to save selection.
         onView(withId(R.id.car_ui_toolbar_nav_icon)).perform(click());
@@ -103,16 +108,22 @@ public class PreferenceTest {
         onView(withText(R.string.title_list_preference)).perform(click());
 
         // Check that first option is selected.
-        onView(withIndex(withId(R.id.radio_button_widget), 0)).check(matches(isChecked()));
-        onView(withIndex(withId(R.id.radio_button_widget), 1)).check(matches(isNotChecked()));
-        onView(withIndex(withId(R.id.radio_button_widget), 2)).check(matches(isNotChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 0))
+                .check(matches(isChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 1))
+                .check(matches(isNotChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 2))
+                .check(matches(isNotChecked()));
 
         // Select second option.
         onView(withText(mEntries[1])).perform(click());
         // Check that second option is selected.
-        onView(withIndex(withId(R.id.radio_button_widget), 0)).check(matches(isNotChecked()));
-        onView(withIndex(withId(R.id.radio_button_widget), 1)).check(matches(isChecked()));
-        onView(withIndex(withId(R.id.radio_button_widget), 2)).check(matches(isNotChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 0))
+                .check(matches(isNotChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 1))
+                .check(matches(isChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 2))
+                .check(matches(isNotChecked()));
 
         // Press back to save selection.
         onView(withId(R.id.car_ui_toolbar_nav_icon)).perform(click());
@@ -122,9 +133,12 @@ public class PreferenceTest {
         onView(withText(R.string.title_list_preference)).perform(click());
 
         // Check that second option is selected.
-        onView(withIndex(withId(R.id.radio_button_widget), 0)).check(matches(isNotChecked()));
-        onView(withIndex(withId(R.id.radio_button_widget), 1)).check(matches(isChecked()));
-        onView(withIndex(withId(R.id.radio_button_widget), 2)).check(matches(isNotChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 0))
+                .check(matches(isNotChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 1))
+                .check(matches(isChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 2))
+                .check(matches(isNotChecked()));
     }
 
     @Test
@@ -141,18 +155,24 @@ public class PreferenceTest {
         mActivity.setOnPreferenceChangeListener("multi_select_list", mockListener);
 
         // Check that no option is initially selected.
-        onView(withIndex(withId(R.id.checkbox_widget), 0)).check(matches(isNotChecked()));
-        onView(withIndex(withId(R.id.checkbox_widget), 1)).check(matches(isNotChecked()));
-        onView(withIndex(withId(R.id.checkbox_widget), 2)).check(matches(isNotChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_checkbox_widget), 0))
+                .check(matches(isNotChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_checkbox_widget), 1))
+                .check(matches(isNotChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_checkbox_widget), 2))
+                .check(matches(isNotChecked()));
 
         // Select options 1 and 3.
         onView(withText(mEntries[0])).perform(click());
         onView(withText(mEntries[2])).perform(click());
 
         // Check that selections are correctly reflected.
-        onView(withIndex(withId(R.id.checkbox_widget), 0)).check(matches(isChecked()));
-        onView(withIndex(withId(R.id.checkbox_widget), 1)).check(matches(isNotChecked()));
-        onView(withIndex(withId(R.id.checkbox_widget), 2)).check(matches(isChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_checkbox_widget), 0))
+                .check(matches(isChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_checkbox_widget), 1))
+                .check(matches(isNotChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_checkbox_widget), 2))
+                .check(matches(isChecked()));
 
         // Press back to save selection.
         onView(withId(R.id.car_ui_toolbar_nav_icon)).perform(click());
@@ -166,9 +186,12 @@ public class PreferenceTest {
         onView(withText(R.string.title_multi_list_preference)).perform(click());
 
         // Check that selections are correctly reflected.
-        onView(withIndex(withId(R.id.checkbox_widget), 0)).check(matches(isChecked()));
-        onView(withIndex(withId(R.id.checkbox_widget), 1)).check(matches(isNotChecked()));
-        onView(withIndex(withId(R.id.checkbox_widget), 2)).check(matches(isChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_checkbox_widget), 0))
+                .check(matches(isChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_checkbox_widget), 1))
+                .check(matches(isNotChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_checkbox_widget), 2))
+                .check(matches(isChecked()));
     }
 
     @Test
@@ -277,16 +300,22 @@ public class PreferenceTest {
         mActivity.setOnPreferenceChangeListener("dropdown", mockListener);
 
         // Check that first option is initially selected.
-        onView(withIndex(withId(R.id.radio_button_widget), 0)).check(matches(isChecked()));
-        onView(withIndex(withId(R.id.radio_button_widget), 1)).check(matches(isNotChecked()));
-        onView(withIndex(withId(R.id.radio_button_widget), 2)).check(matches(isNotChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 0))
+                .check(matches(isChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 1))
+                .check(matches(isNotChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 2))
+                .check(matches(isNotChecked()));
 
         // Select third option.
         onView(withText(mEntries[2])).perform(click());
         // Check that first option is selected.
-        onView(withIndex(withId(R.id.radio_button_widget), 0)).check(matches(isNotChecked()));
-        onView(withIndex(withId(R.id.radio_button_widget), 1)).check(matches(isNotChecked()));
-        onView(withIndex(withId(R.id.radio_button_widget), 2)).check(matches(isChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 0))
+                .check(matches(isNotChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 1))
+                .check(matches(isNotChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 2))
+                .check(matches(isChecked()));
 
         // Press back to save selection.
         onView(withId(R.id.car_ui_toolbar_nav_icon)).perform(click());
@@ -296,9 +325,12 @@ public class PreferenceTest {
         onView(withText(R.string.title_dropdown_preference)).perform(click());
 
         // Check that first option is selected.
-        onView(withIndex(withId(R.id.radio_button_widget), 0)).check(matches(isNotChecked()));
-        onView(withIndex(withId(R.id.radio_button_widget), 1)).check(matches(isNotChecked()));
-        onView(withIndex(withId(R.id.radio_button_widget), 2)).check(matches(isChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 0))
+                .check(matches(isNotChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 1))
+                .check(matches(isNotChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 2))
+                .check(matches(isChecked()));
     }
 
     @Test
