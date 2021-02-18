@@ -248,12 +248,7 @@
   <public type="drawable" name="car_ui_toolbar_menu_item_icon_ripple"/>
   <public type="drawable" name="car_ui_toolbar_search_close_icon"/>
   <public type="drawable" name="car_ui_toolbar_search_search_icon"/>
-  <public type="id" name="action_container"/>
-  <public type="id" name="action_container_touch_interceptor"/>
-  <public type="id" name="action_divider"/>
   <public type="id" name="action_widget_container"/>
-  <public type="id" name="avatar_icon"/>
-  <public type="id" name="body"/>
   <public type="id" name="car_ui_alert_icon"/>
   <public type="id" name="car_ui_alert_subtitle"/>
   <public type="id" name="car_ui_alert_title"/>
@@ -269,8 +264,23 @@
   <public type="id" name="car_ui_ime_surface"/>
   <public type="id" name="car_ui_inputExtractActionAutomotive"/>
   <public type="id" name="car_ui_inputExtractEditTextContainer"/>
+  <public type="id" name="car_ui_list_item_action_container"/>
+  <public type="id" name="car_ui_list_item_action_container_touch_interceptor"/>
+  <public type="id" name="car_ui_list_item_action_divider"/>
+  <public type="id" name="car_ui_list_item_avatar_icon"/>
+  <public type="id" name="car_ui_list_item_body"/>
+  <public type="id" name="car_ui_list_item_checkbox_widget"/>
+  <public type="id" name="car_ui_list_item_content_icon"/>
   <public type="id" name="car_ui_list_item_end_guideline"/>
+  <public type="id" name="car_ui_list_item_icon"/>
+  <public type="id" name="car_ui_list_item_icon_container"/>
+  <public type="id" name="car_ui_list_item_radio_button_widget"/>
+  <public type="id" name="car_ui_list_item_reduced_touch_interceptor"/>
   <public type="id" name="car_ui_list_item_start_guideline"/>
+  <public type="id" name="car_ui_list_item_supplemental_icon"/>
+  <public type="id" name="car_ui_list_item_switch_widget"/>
+  <public type="id" name="car_ui_list_item_title"/>
+  <public type="id" name="car_ui_list_item_touch_interceptor"/>
   <public type="id" name="car_ui_list_limiting_message"/>
   <public type="id" name="car_ui_preference_container_without_widget"/>
   <public type="id" name="car_ui_preference_fragment_container"/>
@@ -322,17 +332,11 @@
   <public type="id" name="car_ui_wideScreenExtractedTextIcon"/>
   <public type="id" name="car_ui_wideScreenInputArea"/>
   <public type="id" name="car_ui_wideScreenSearchResultList"/>
-  <public type="id" name="checkbox_widget"/>
   <public type="id" name="container"/>
-  <public type="id" name="content_icon"/>
-  <public type="id" name="icon"/>
-  <public type="id" name="icon_container"/>
   <public type="id" name="list"/>
   <public type="id" name="nested_recycler_view_layout"/>
   <public type="id" name="radio_button"/>
-  <public type="id" name="radio_button_widget"/>
   <public type="id" name="recycler_view"/>
-  <public type="id" name="reduced_touch_interceptor"/>
   <public type="id" name="search"/>
   <public type="id" name="seek_bar"/>
   <public type="id" name="seek_bar_text_left"/>
@@ -341,13 +345,9 @@
   <public type="id" name="seekbar"/>
   <public type="id" name="seekbar_value"/>
   <public type="id" name="spinner"/>
-  <public type="id" name="supplemental_icon"/>
-  <public type="id" name="switch_widget"/>
   <public type="id" name="textbox"/>
-  <public type="id" name="title"/>
   <public type="id" name="title_template"/>
   <public type="id" name="toolbar"/>
-  <public type="id" name="touch_interceptor"/>
   <public type="integer" name="car_ui_default_max_string_length"/>
   <public type="integer" name="car_ui_focus_area_history_cache_type"/>
   <public type="integer" name="car_ui_focus_area_history_expiration_period_ms"/>

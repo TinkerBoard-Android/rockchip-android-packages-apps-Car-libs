@@ -313,12 +313,7 @@ limitations under the License.-->
       <item type="drawable" name="car_ui_toolbar_menu_item_icon_ripple"/>
       <item type="drawable" name="car_ui_toolbar_search_close_icon"/>
       <item type="drawable" name="car_ui_toolbar_search_search_icon"/>
-      <item type="id" name="action_container"/>
-      <item type="id" name="action_container_touch_interceptor"/>
-      <item type="id" name="action_divider"/>
       <item type="id" name="action_widget_container"/>
-      <item type="id" name="avatar_icon"/>
-      <item type="id" name="body"/>
       <item type="id" name="car_ui_alert_icon"/>
       <item type="id" name="car_ui_alert_subtitle"/>
       <item type="id" name="car_ui_alert_title"/>
@@ -334,8 +329,23 @@ limitations under the License.-->
       <item type="id" name="car_ui_ime_surface"/>
       <item type="id" name="car_ui_inputExtractActionAutomotive"/>
       <item type="id" name="car_ui_inputExtractEditTextContainer"/>
+      <item type="id" name="car_ui_list_item_action_container"/>
+      <item type="id" name="car_ui_list_item_action_container_touch_interceptor"/>
+      <item type="id" name="car_ui_list_item_action_divider"/>
+      <item type="id" name="car_ui_list_item_avatar_icon"/>
+      <item type="id" name="car_ui_list_item_body"/>
+      <item type="id" name="car_ui_list_item_checkbox_widget"/>
+      <item type="id" name="car_ui_list_item_content_icon"/>
       <item type="id" name="car_ui_list_item_end_guideline"/>
+      <item type="id" name="car_ui_list_item_icon"/>
+      <item type="id" name="car_ui_list_item_icon_container"/>
+      <item type="id" name="car_ui_list_item_radio_button_widget"/>
+      <item type="id" name="car_ui_list_item_reduced_touch_interceptor"/>
       <item type="id" name="car_ui_list_item_start_guideline"/>
+      <item type="id" name="car_ui_list_item_supplemental_icon"/>
+      <item type="id" name="car_ui_list_item_switch_widget"/>
+      <item type="id" name="car_ui_list_item_title"/>
+      <item type="id" name="car_ui_list_item_touch_interceptor"/>
       <item type="id" name="car_ui_list_limiting_message"/>
       <item type="id" name="car_ui_preference_container_without_widget"/>
       <item type="id" name="car_ui_preference_fragment_container"/>
@@ -387,17 +397,11 @@ limitations under the License.-->
       <item type="id" name="car_ui_wideScreenExtractedTextIcon"/>
       <item type="id" name="car_ui_wideScreenInputArea"/>
       <item type="id" name="car_ui_wideScreenSearchResultList"/>
-      <item type="id" name="checkbox_widget"/>
       <item type="id" name="container"/>
-      <item type="id" name="content_icon"/>
-      <item type="id" name="icon"/>
-      <item type="id" name="icon_container"/>
       <item type="id" name="list"/>
       <item type="id" name="nested_recycler_view_layout"/>
       <item type="id" name="radio_button"/>
-      <item type="id" name="radio_button_widget"/>
       <item type="id" name="recycler_view"/>
-      <item type="id" name="reduced_touch_interceptor"/>
       <item type="id" name="search"/>
       <item type="id" name="seek_bar"/>
       <item type="id" name="seek_bar_text_left"/>
@@ -406,13 +410,9 @@ limitations under the License.-->
       <item type="id" name="seekbar"/>
       <item type="id" name="seekbar_value"/>
       <item type="id" name="spinner"/>
-      <item type="id" name="supplemental_icon"/>
-      <item type="id" name="switch_widget"/>
       <item type="id" name="textbox"/>
-      <item type="id" name="title"/>
       <item type="id" name="title_template"/>
       <item type="id" name="toolbar"/>
-      <item type="id" name="touch_interceptor"/>
       <item type="integer" name="car_ui_default_max_string_length"/>
       <item type="integer" name="car_ui_focus_area_history_cache_type"/>
       <item type="integer" name="car_ui_focus_area_history_expiration_period_ms"/>
