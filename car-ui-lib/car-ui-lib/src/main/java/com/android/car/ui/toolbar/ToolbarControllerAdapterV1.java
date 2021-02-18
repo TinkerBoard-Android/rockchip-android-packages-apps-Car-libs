@@ -618,9 +618,8 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
         private boolean hasTabs() {
             State state = getState();
-            return (state == State.HOME
-                    || state == State.SUBPAGE && getShowTabsInSubpage())
-                    && getTabs().size() > 0;
+            return (state == State.HOME || (state == State.SUBPAGE && getShowTabsInSubpage()))
+                    && !getTabs().isEmpty();
         }
 
         private boolean hasBackButton() {

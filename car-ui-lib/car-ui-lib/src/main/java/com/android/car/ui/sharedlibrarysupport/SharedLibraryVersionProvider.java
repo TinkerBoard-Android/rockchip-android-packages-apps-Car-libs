@@ -19,8 +19,8 @@ import android.content.Context;
 
 /**
  * An interface for objects that support providing a list a supported versions of
- * {@link SharedLibraryFactory} to the app. See {@link #getSharedLibraryFactory(int, Context)}}
- * for more information.
+ * {@link SharedLibraryFactory} to the app. See
+ * {@link #getSharedLibraryFactory(int, Context, String)}} for more information.
  *
  * Do not use from client apps, for car-ui-lib internal use only.
  */

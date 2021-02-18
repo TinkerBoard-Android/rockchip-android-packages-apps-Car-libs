@@ -261,7 +261,12 @@ public final class ToolbarControllerImpl implements ToolbarController {
                 // UI thread
                 TextView tvUi = (TextView) textViewRef.get();
                 if (tvUi == null) return;
-                tvUi.setText(precomputedText);
+                try {
+                    tvUi.setTextMetricsParams(precomputedText.getParams());
+                    tvUi.setText(precomputedText);
+                } catch (IllegalArgumentException e) {
+                    tvUi.setText(title);
+                }
             });
         });
     }

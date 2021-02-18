@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
  * A {@link Application} subclass that implements {@link SharedLibraryConfigProvider},
  * allowing PaintBooth to disable the shared library.
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public class PaintBoothApplication extends Application implements SharedLibraryConfigProvider {
     public static final String SHARED_PREFERENCES_FILE = "paintbooth_shared_prefs";
     public static final String SHARED_PREFERENCES_SHARED_LIB_DENYLIST =
