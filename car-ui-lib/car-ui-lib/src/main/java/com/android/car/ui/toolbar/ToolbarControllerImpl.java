@@ -77,7 +77,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
     private ViewGroup mNavIconContainer;
     private ViewGroup mTitleContainer;
     private TextView mTitle;
-    private CharSequence mTitleText;
+    private CharSequence mTitleText = "";
     private TextView mSubtitle;
     private CharSequence mSubtitleText;
     private ImageView mTitleLogo;
@@ -228,8 +228,8 @@ public final class ToolbarControllerImpl implements ToolbarController {
     @Override
     public void setTitle(@StringRes int title) {
         String titleText = getContext().getString(title);
-        asyncSetText(mTitle, titleText, Runnable::run);
-        mTitleText = titleText;
+        mTitleText = titleText == null ? "" : titleText;
+        asyncSetText(mTitle, mTitleText, Runnable::run);
         setState(getState());
     }
 
@@ -240,23 +240,22 @@ public final class ToolbarControllerImpl implements ToolbarController {
      */
     @Override
     public void setTitle(CharSequence title) {
-        asyncSetText(mTitle, title, Runnable::run);
-        mTitleText = title;
+        mTitleText = title == null ? "" : title;
+        asyncSetText(mTitle, mTitleText, Runnable::run);
         setState(getState());
     }
 
-    private void asyncSetText(TextView textView, CharSequence title, Executor bgExecutor) {
+    private void asyncSetText(TextView textView, @NonNull CharSequence title, Executor bgExecutor) {
         // construct precompute related parameters using the TextView that we will set the text on.
         PrecomputedText.Params params = textView.getTextMetricsParams();
         WeakReference<TextView> textViewRef = new WeakReference<>(textView);
-        CharSequence finalTitle = title == null ? "" : title;
         bgExecutor.execute(() -> {
             // background thread
             TextView tv = (TextView) textViewRef.get();
             if (tv == null) {
                 return;
             }
-            PrecomputedText precomputedText = PrecomputedText.create(finalTitle, params);
+            PrecomputedText precomputedText = PrecomputedText.create(title, params);
             tv.post(() -> {
                 // UI thread
                 TextView tvUi = (TextView) textViewRef.get();

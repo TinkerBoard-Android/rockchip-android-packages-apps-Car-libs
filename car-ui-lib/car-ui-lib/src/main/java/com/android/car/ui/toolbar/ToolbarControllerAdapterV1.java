@@ -587,7 +587,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
         }
 
         public String getTitle() {
-            return mTitle;
+            return mTitle == null ? "" : mTitle;
         }
 
         public String getSubtitle() {

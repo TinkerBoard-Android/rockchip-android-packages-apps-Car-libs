@@ -19,3 +19,8 @@
 
 # requried for accessing oem apis
 -keep class com.android.car.ui.sharedlibrarysupport.OemApiUtil {*;}
+
+
+# Required for AppCompat instantiating our layout inflater factory,
+# Otherwise it will be obfuscated and the reference to it in xml won't match
+-keep class com.android.car.ui.CarUiLayoutInflaterFactory {*;}
