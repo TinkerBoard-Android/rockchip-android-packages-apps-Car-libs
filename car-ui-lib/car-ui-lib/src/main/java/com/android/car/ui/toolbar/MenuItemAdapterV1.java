@@ -16,6 +16,8 @@
 
 package com.android.car.ui.toolbar;
 
+import static com.android.car.ui.utils.CarUiUtils.charSequenceToString;
+
 import android.graphics.drawable.Drawable;
 
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.MenuItemOEMV1;
@@ -96,8 +98,8 @@ public class MenuItemAdapterV1 implements MenuItemOEMV1 {
     }
 
     @Override
-    public CharSequence getTitle() {
-        return mClientMenuItem.getTitle();
+    public String getTitle() {
+        return charSequenceToString(mClientMenuItem.getTitle());
     }
 
     @Override

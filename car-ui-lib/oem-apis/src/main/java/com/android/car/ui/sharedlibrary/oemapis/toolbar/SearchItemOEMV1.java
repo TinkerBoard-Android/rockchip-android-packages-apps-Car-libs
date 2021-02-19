@@ -37,10 +37,10 @@ public interface SearchItemOEMV1 {
     int getSupplementalIconResId();
 
     /** Returns the title of the item. */
-    CharSequence getTitle();
+    String getTitle();
 
     /** Returns the body text of the item */
-    CharSequence getBody();
+    String getBody();
 
     /** Returns the icon of the item */
     Drawable getIcon();

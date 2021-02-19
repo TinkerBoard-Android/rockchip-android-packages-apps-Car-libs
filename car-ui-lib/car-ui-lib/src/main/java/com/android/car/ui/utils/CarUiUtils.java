@@ -278,4 +278,14 @@ public final class CarUiUtils {
         }
         return fallbackAttr;
     }
+
+    /**
+     * Converts a {@link CharSequence} to a {@link String}.
+     *
+     * This is the same as calling {@link CharSequence#toString()}, except it will handle
+     * null CharSequences, returning a null string.
+     */
+    public static String charSequenceToString(@Nullable CharSequence charSequence) {
+        return charSequence == null ? null : charSequence.toString();
+    }
 }

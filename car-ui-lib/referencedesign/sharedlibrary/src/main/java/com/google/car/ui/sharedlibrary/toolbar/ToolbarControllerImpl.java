@@ -65,7 +65,7 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     }
 
     @Override
-    public void setTitle(CharSequence title) {
+    public void setTitle(String title) {
         boolean hadTitle = !TextUtils.isEmpty(getTitle());
         mTitleView.setText(title);
         boolean hasTitle = !TextUtils.isEmpty(getTitle());
@@ -75,13 +75,12 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
         }
     }
 
-    @Override
-    public CharSequence getTitle() {
+    private CharSequence getTitle() {
         return mTitleView.getText();
     }
 
     @Override
-    public void setSubtitle(CharSequence title) {
+    public void setSubtitle(String title) {
         boolean hadSubtitle = !TextUtils.isEmpty(getSubtitle());
         mSubtitleView.setText(title);
         boolean hasSubtitle = !TextUtils.isEmpty(getSubtitle());
@@ -91,8 +90,7 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
         }
     }
 
-    @Override
-    public CharSequence getSubtitle() {
+    private CharSequence getSubtitle() {
         return mSubtitleView.getText();
     }
 
@@ -129,13 +127,8 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     }
 
     @Override
-    public void setSearchHint(CharSequence hint) {
+    public void setSearchHint(String hint) {
 
-    }
-
-    @Override
-    public CharSequence getSearchHint() {
-        return null;
     }
 
     @Override
@@ -163,7 +156,7 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     }
 
     @Override
-    public void setSearchQuery(CharSequence query) {
+    public void setSearchQuery(String query) {
 
     }
 
@@ -234,7 +227,7 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     }
 
     @Override
-    public void setSearchListener(Consumer<CharSequence> listener) {
+    public void setSearchListener(Consumer<String> listener) {
 
     }
 
