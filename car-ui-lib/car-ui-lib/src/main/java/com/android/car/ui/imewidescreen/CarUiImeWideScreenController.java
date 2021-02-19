@@ -408,9 +408,7 @@ public class CarUiImeWideScreenController {
                             CarUiContentListItem.Action.ICON);
                     String itemId = c.getString(c.getColumnIndex(SearchResultsProvider.ITEM_ID));
                     searchItem.setOnItemClickedListener(v -> {
-                        Bundle bundle = new Bundle();
-                        bundle.putString(SEARCH_RESULT_ITEM_ID_LIST, itemId);
-                        mInputConnection.performPrivateCommand(WIDE_SCREEN_ACTION, bundle);
+                        onItemClicked(itemId);
                     });
                     searchItem.setTitle(c.getString(
                             c.getColumnIndex(SearchResultsProvider.TITLE)));
@@ -449,6 +447,12 @@ public class CarUiImeWideScreenController {
         }
 
         mInputConnection.performPrivateCommand(WIDE_SCREEN_POST_LOAD_SEARCH_RESULTS_ACTION, null);
+    }
+
+    void onItemClicked(String itemId) {
+        Bundle bundle = new Bundle();
+        bundle.putString(SEARCH_RESULT_ITEM_ID_LIST, itemId);
+        mInputConnection.performPrivateCommand(WIDE_SCREEN_ACTION, bundle);
     }
 
     private static Parcel byteArrayToParcel(byte[] bytes) {

@@ -121,7 +121,8 @@ public final class BaseLayoutController {
                 .installBaseLayoutAround(
                         contentView,
                         mInsetsUpdater,
-                        toolbarEnabled);
+                        toolbarEnabled,
+                        true);
     }
 
     /**
