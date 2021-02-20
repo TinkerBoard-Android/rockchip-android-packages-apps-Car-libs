@@ -17,14 +17,14 @@ package com.android.car.ui.sharedlibrarysupport;
 
 import android.content.Context;
 
-import androidx.annotation.RestrictTo;
-
 /**
  * An interface for objects that support providing a list a supported versions of
- * {@link SharedLibraryFactory} to the app. See {@link #getSharedLibraryFactory(int, Context)}}
- * for more information.
+ * {@link SharedLibraryFactory} to the app. See
+ * {@link #getSharedLibraryFactory(int, Context, String)}} for more information.
+ *
+ * Do not use from client apps, for car-ui-lib internal use only.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY)
+//TODO(b/179092760) Find a way to prevent apps from using this
 public interface SharedLibraryVersionProvider {
     /**
      * Returns an object that implements {@link SharedLibraryFactory} or a later version.

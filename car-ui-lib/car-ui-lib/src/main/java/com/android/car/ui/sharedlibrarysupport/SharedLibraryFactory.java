@@ -39,13 +39,17 @@ public interface SharedLibraryFactory {
      * @param contentView The view to install the base layout around.
      * @param insetsChangedListener A method to call when the insets change.
      * @param toolbarEnabled Whether or not to add a toolbar to the base layout.
+     * @param fullscreen A hint specifying whether this view we're installing around takes up
+     *                   the whole screen or not. Used to know if putting decorations around
+     *                   the edges is appropriate.
      * @return A {@link ToolbarController} or null if {@code toolbarEnabled} was false.
      */
     @Nullable
     ToolbarController installBaseLayoutAround(
             View contentView,
             InsetsChangedListener insetsChangedListener,
-            boolean toolbarEnabled);
+            boolean toolbarEnabled,
+            boolean fullscreen);
 
     /**
      * Creates a {@link CarUiButton}.

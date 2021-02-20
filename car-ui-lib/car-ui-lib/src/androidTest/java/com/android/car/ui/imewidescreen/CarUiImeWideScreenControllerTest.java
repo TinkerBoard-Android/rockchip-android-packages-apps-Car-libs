@@ -17,6 +17,7 @@
 package com.android.car.ui.imewidescreen;
 
 import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.assertThat;
 import static androidx.test.espresso.matcher.ViewMatchers.hasDescendant;
@@ -45,7 +46,10 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Dialog;
@@ -69,6 +73,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.core.app.ApplicationProvider;
+import androidx.test.espresso.contrib.RecyclerViewActions;
 import androidx.test.espresso.matcher.BoundedMatcher;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.rule.ActivityTestRule;
@@ -259,6 +264,7 @@ public class CarUiImeWideScreenControllerTest {
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             doReturn("com.android.car.ui.test").when(spy).getPackageName(ArgumentMatchers.any());
+            doNothing().when(spy).onItemClicked(ArgumentMatchers.any());
             Bundle bundle = new Bundle();
             spy.onAppPrivateCommand(WIDE_SCREEN_SEARCH_RESULTS, bundle);
         });
@@ -268,6 +274,11 @@ public class CarUiImeWideScreenControllerTest {
                 .check(matches(atPosition(0, hasDescendant(withText("Title")))));
         onView(withId(R.id.car_ui_wideScreenSearchResultList))
                 .check(matches(atPosition(0, hasDescendant(withText("SubTitle")))));
+        onView(withId(R.id.car_ui_wideScreenSearchResultList))
+                .perform(RecyclerViewActions.actionOnItem(hasDescendant(withText("Title")),
+                        click()));
+
+        verify(spy, times(1)).onItemClicked("1");
     }
 
     @Test

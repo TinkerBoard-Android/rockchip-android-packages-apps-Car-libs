@@ -89,6 +89,7 @@ class AdapterClassLoader extends PathClassLoader {
         try {
             return Object.class.getClassLoader().loadClass(name);
         } catch (ClassNotFoundException ignored) {
+            // It's fine, just continue
         }
 
         ClassNotFoundException fromSuper = null;
@@ -111,6 +112,7 @@ class AdapterClassLoader extends PathClassLoader {
             try {
                 return mAdditionalClassLoader.loadClass(name);
             } catch (ClassNotFoundException ignored) {
+                // It's fine, just continue
             }
         }
 

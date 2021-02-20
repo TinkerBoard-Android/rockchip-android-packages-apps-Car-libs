@@ -27,28 +27,18 @@ import java.util.function.Consumer;
 public interface ToolbarControllerOEMV1 {
 
     /**
-     * Sets the title of the toolbar to a CharSequence.
+     * Sets the title of the toolbar to a String.
      *
      * <p>The title may not always be shown, for example with one row layout with tabs.
      */
-    void setTitle(CharSequence title);
+    void setTitle(String title);
 
     /**
-     * Gets the current toolbar title.
-     */
-    CharSequence getTitle();
-
-    /**
-     * Sets the subtitle of the toolbar to a CharSequence.
+     * Sets the subtitle of the toolbar to a String.
      *
      * <p>The title may not always be shown, for example with one row layout with tabs.
      */
-    void setSubtitle(CharSequence title);
-
-    /**
-     * Gets the current toolbar subtitle.
-     */
-    CharSequence getSubtitle();
+    void setSubtitle(String title);
 
     /**
      * Sets the tab to be shown. The implementation must copy the list once it's passed in,
@@ -61,7 +51,7 @@ public interface ToolbarControllerOEMV1 {
 
     /**
      * Selects a tab added to this toolbar. See
-     * {@link #setTabs(List)}.
+     * {@link #setTabs(List, int)}.
      */
     void selectTab(int position);
 
@@ -72,10 +62,7 @@ public interface ToolbarControllerOEMV1 {
     void setLogo(Drawable drawable);
 
     /** Sets the hint for the search bar. */
-    void setSearchHint(CharSequence hint);
-
-    /** Gets the search hint */
-    CharSequence getSearchHint();
+    void setSearchHint(String hint);
 
     /** Sets whether or not to display the back button */
     void setBackButtonVisible(boolean visible);
@@ -94,7 +81,7 @@ public interface ToolbarControllerOEMV1 {
     /**
      * Sets the search query.
      */
-    void setSearchQuery(CharSequence query);
+    void setSearchQuery(String query);
 
     int SEARCH_MODE_DISABLED = 0;
     int SEARCH_MODE_SEARCH = 1;
@@ -176,12 +163,12 @@ public interface ToolbarControllerOEMV1 {
     List<? extends MenuItemOEMV1> getMenuItems();
 
     /**
-     * Sets a {@link Consumer<CharSequence>} to be called whenever the text in the search box
+     * Sets a {@link Consumer<String>} to be called whenever the text in the search box
      * changes.
      *
      * Must accept {@code null} to unset the listener.
      */
-    void setSearchListener(Consumer<CharSequence> listener);
+    void setSearchListener(Consumer<String> listener);
 
     /**
      * Sets a {@link Runnable} to be called whenever the user indicates that they're done searching.

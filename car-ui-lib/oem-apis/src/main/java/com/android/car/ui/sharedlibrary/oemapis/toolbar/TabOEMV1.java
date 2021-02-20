@@ -26,7 +26,7 @@ public interface TabOEMV1 {
     /** Sets the listener for when the properties of this tab change */
     void setUpdateListener(Consumer<TabOEMV1> listener);
     /** Gets the title of the tab */
-    CharSequence getTitle();
+    String getTitle();
     /** Gets the icon of the tab. The icon may be tinted to match the theme of the toolbar */
     Drawable getIcon();
     /** Gets the function to call when the tab is selected */

@@ -25,15 +25,16 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RestrictTo;
 
 import java.util.function.Consumer;
 
 /**
  * Static implementation of {@link CarUiButton}. Will be swapped out for a shared library
  * implementation when present.
+ *
+ * Do not use this from client apps, for car-ui-lib internal use only.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY)
+//TODO(b/179092760) Find a way to prevent apps from using this
 @SuppressWarnings("AndroidJdkLibsChecker")
 public class CarUiButtonImpl extends FrameLayout implements CarUiButton {
     private TextView mTextView;

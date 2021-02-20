@@ -52,10 +52,11 @@ public final class SharedLibraryFactoryAdapterV1 implements SharedLibraryFactory
     public ToolbarController installBaseLayoutAround(
             View contentView,
             InsetsChangedListener insetsChangedListener,
-            boolean toolbarEnabled) {
+            boolean toolbarEnabled,
+            boolean fullscreen) {
         ToolbarControllerOEMV1 toolbar = mOem.installBaseLayoutAround(contentView,
                 insets -> insetsChangedListener.onCarUiInsetsChanged(adaptInsets(insets)),
-                toolbarEnabled, true);
+                toolbarEnabled, fullscreen);
 
         return toolbar != null
                 ? new ToolbarControllerAdapterV1(contentView.getContext(), toolbar)

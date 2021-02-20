@@ -29,7 +29,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.inputmethodservice.ExtractEditText;
 import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
@@ -408,9 +407,7 @@ public class CarUiImeWideScreenController {
                             CarUiContentListItem.Action.ICON);
                     String itemId = c.getString(c.getColumnIndex(SearchResultsProvider.ITEM_ID));
                     searchItem.setOnItemClickedListener(v -> {
-                        Bundle bundle = new Bundle();
-                        bundle.putString(SEARCH_RESULT_ITEM_ID_LIST, itemId);
-                        mInputConnection.performPrivateCommand(WIDE_SCREEN_ACTION, bundle);
+                        onItemClicked(itemId);
                     });
                     searchItem.setTitle(c.getString(
                             c.getColumnIndex(SearchResultsProvider.TITLE)));
@@ -449,6 +446,12 @@ public class CarUiImeWideScreenController {
         }
 
         mInputConnection.performPrivateCommand(WIDE_SCREEN_POST_LOAD_SEARCH_RESULTS_ACTION, null);
+    }
+
+    void onItemClicked(String itemId) {
+        Bundle bundle = new Bundle();
+        bundle.putString(SEARCH_RESULT_ITEM_ID_LIST, itemId);
+        mInputConnection.performPrivateCommand(WIDE_SCREEN_ACTION, bundle);
     }
 
     private static Parcel byteArrayToParcel(byte[] bytes) {
@@ -789,19 +792,5 @@ public class CarUiImeWideScreenController {
     public boolean isWideScreenMode() {
         return CarUiUtils.getBooleanSystemProperty(mContext.getResources(),
                 R.string.car_ui_ime_wide_screen_system_property_name, false);
-    }
-
-    private Drawable loadDrawableFromPackage(int resId) {
-        try {
-            if (mInputEditorInfo != null) {
-                return mContext.createPackageContext(mInputEditorInfo.packageName, 0)
-                        .getDrawable(resId);
-            }
-        } catch (PackageManager.NameNotFoundException ex) {
-            Log.e(TAG, "loadDrawableFromPackage: package name not found: ", ex);
-        } catch (Resources.NotFoundException ex) {
-            Log.w(TAG, "loadDrawableFromPackage: resource not found with id " + resId, ex);
-        }
-        return null;
     }
 }

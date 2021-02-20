@@ -40,15 +40,17 @@ def get_package_name(args):
     """Generates a package name for the quickrro.
 
     The name is quickrro.<hash>. The hash is based on
-    all of the inputs to the RRO. (package to overlay and resources)
+    all of the inputs to the RRO. (package/targetName to overlay and resources)
     The hash will be entirely lowercase/uppercase letters, since
     android package names can't have numbers."""
-    hash = None
+    hash = sha1(args.package)
+    if args.target_name:
+        hash.update(args.target_name)
+
     if args.resources is not None:
         args.resources.sort()
-        hash = sha1(''.join(args.resources) + args.package)
+        hash.update(''.join(args.resources))
     else:
-        hash = sha1(args.package)
         for root, dirs, files in os.walk(args.dir):
             for file in files:
                 path = os.path.join(root, file)
@@ -194,7 +196,10 @@ def build(args, package_name):
         f.write('          package="' + package_name + '">\n')
         f.write('    <application android:hasCode="false"/>\n')
         f.write('    <overlay android:priority="99"\n')
-        f.write('             android:targetPackage="' + args.package + '"/>\n')
+        f.write('             android:targetPackage="' + args.package + '"\n')
+        if args.target_name is not None:
+            f.write('             android:targetName="' + args.target_name + '"\n')
+        f.write('             />\n')
         f.write('</manifest>\n')
 
     run_command(['aapt2', 'compile', '-o', os.path.join(root_folder, 'compiled.zip'),
@@ -245,6 +250,8 @@ def main():
                         help='res folder rro')
     parser.add_argument('-p', '--package', default='com.android.car.ui.paintbooth',
                         help='The package to override. Defaults to paintbooth.')
+    parser.add_argument('-t', '--target-name',
+                        help='The name of the overlayable entry to RRO, if any.')
     parser.add_argument('--uninstall-all', action='store_true',
                         help='Uninstall all RROs created by this script')
     parser.add_argument('-I',

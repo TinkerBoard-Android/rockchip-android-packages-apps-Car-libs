@@ -15,6 +15,8 @@
  */
 package com.android.car.ui.toolbar;
 
+import static com.android.car.ui.utils.CarUiUtils.charSequenceToString;
+
 import android.graphics.drawable.Drawable;
 
 import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
@@ -42,13 +44,13 @@ class SearchItemAdapterV1 implements SearchItemOEMV1 {
     }
 
     @Override
-    public CharSequence getTitle() {
-        return mClientItem.getTitle();
+    public String getTitle() {
+        return charSequenceToString(mClientItem.getTitle());
     }
 
     @Override
-    public CharSequence getBody() {
-        return mClientItem.getBody();
+    public String getBody() {
+        return charSequenceToString(mClientItem.getBody());
     }
 
     @Override

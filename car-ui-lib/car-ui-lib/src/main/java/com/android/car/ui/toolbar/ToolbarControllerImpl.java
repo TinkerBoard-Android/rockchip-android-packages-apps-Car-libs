@@ -52,7 +52,6 @@ import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.utils.CarUiUtils;
 import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
-import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -249,11 +248,8 @@ public final class ToolbarControllerImpl implements ToolbarController {
     private void asyncSetText(TextView textView, CharSequence title, Executor bgExecutor) {
         // construct precompute related parameters using the TextView that we will set the text on.
         PrecomputedText.Params params = textView.getTextMetricsParams();
-        Reference textViewRef = new WeakReference<>(textView);
-        if (title == null) {
-            title = "";
-        }
-        CharSequence finalTitle = title;
+        WeakReference<TextView> textViewRef = new WeakReference<>(textView);
+        CharSequence finalTitle = title == null ? "" : title;
         bgExecutor.execute(() -> {
             // background thread
             TextView tv = (TextView) textViewRef.get();
@@ -265,7 +261,12 @@ public final class ToolbarControllerImpl implements ToolbarController {
                 // UI thread
                 TextView tvUi = (TextView) textViewRef.get();
                 if (tvUi == null) return;
-                tvUi.setText(precomputedText);
+                try {
+                    tvUi.setTextMetricsParams(precomputedText.getParams());
+                    tvUi.setText(precomputedText);
+                } catch (IllegalArgumentException e) {
+                    tvUi.setText(title);
+                }
             });
         });
     }

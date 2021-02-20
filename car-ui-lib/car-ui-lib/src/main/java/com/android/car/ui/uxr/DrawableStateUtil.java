@@ -28,6 +28,7 @@ import java.util.function.Function;
  * To use, subclass a view and forward it's {@link View#onCreateDrawableState(int)} and
  * {@link DrawableStateView#setExtraDrawableState(int[], int[])} methods to this object.
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 class DrawableStateUtil implements DrawableStateView {
 
     private final View mView;

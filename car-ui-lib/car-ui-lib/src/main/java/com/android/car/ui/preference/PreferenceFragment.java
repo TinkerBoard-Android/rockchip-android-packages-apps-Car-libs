@@ -65,6 +65,7 @@ import java.util.WeakHashMap;
  * {@link #setPreferenceScreen(PreferenceScreen)}. These include the preference viewId,
  * defaultValue, and enabled state.
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public abstract class PreferenceFragment extends PreferenceFragmentCompat implements
         InsetsChangedListener {
 

@@ -16,6 +16,8 @@
 
 package com.android.car.ui.toolbar;
 
+import static com.android.car.ui.utils.CarUiUtils.charSequenceToString;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 
@@ -30,7 +32,7 @@ class TabAdapterV1 implements TabOEMV1 {
     private final Runnable mOnClickListener;
     private final Tab mClientTab;
     private Drawable mIcon;
-    private CharSequence mText;
+    private String mText;
     private Consumer<TabOEMV1> mUpdateListener;
 
     TabAdapterV1(Context context, Tab clientTab, Runnable onClickListener) {
@@ -56,12 +58,12 @@ class TabAdapterV1 implements TabOEMV1 {
     }
 
     @Override
-    public CharSequence getTitle() {
+    public String getTitle() {
         return mText;
     }
 
     public void setTitle(CharSequence title) {
-        mText = title;
+        mText = charSequenceToString(title);
         if (mUpdateListener != null) {
             mUpdateListener.accept(this);
         }

@@ -42,6 +42,7 @@ import java.util.Set;
  * This is a singleton that contains a {@link SharedLibraryFactory}. That SharedLibraryFactory
  * is used to create UI components that we want to be customizable by the OEM.
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public final class SharedLibraryFactorySingleton {
 
     private static final String TAG = "carui";

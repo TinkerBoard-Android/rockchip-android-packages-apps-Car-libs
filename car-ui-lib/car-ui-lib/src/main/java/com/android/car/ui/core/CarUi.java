@@ -162,6 +162,8 @@ public class CarUi {
      * When using this method, you can't use the other activity-based methods.
      * ({@link #requireToolbar(Activity)}, {@link #requireInsets(Activity)}, ect.)
      *
+     * @see #installBaseLayoutAround(View, InsetsChangedListener, boolean, boolean)
+     *
      * @param view The view to wrap inside a base layout.
      * @param hasToolbar if there should be a toolbar in the base layout.
      * @return The {@link ToolbarController}, which will be null if hasToolbar is false.
@@ -171,8 +173,34 @@ public class CarUi {
             View view,
             InsetsChangedListener insetsChangedListener,
             boolean hasToolbar) {
+        return installBaseLayoutAround(view, insetsChangedListener, hasToolbar, true);
+    }
+
+    /**
+     * Most apps should not use this method, but instead rely on CarUi automatically
+     * installing the base layout into their activities. See {@link #requireToolbar(Activity)}.
+     *
+     * This method installs the base layout *around* the provided view. As a result, this view
+     * must have a parent ViewGroup.
+     *
+     * When using this method, you can't use the other activity-based methods.
+     * ({@link #requireToolbar(Activity)}, {@link #requireInsets(Activity)}, ect.)
+     *
+     * @param view The view to wrap inside a base layout.
+     * @param hasToolbar if there should be a toolbar in the base layout.
+     * @param fullscreen A hint specifying whether this view we're installing around takes up
+     *                   the whole screen or not. Used to know if putting decorations around
+     *                   the edges is appropriate.
+     * @return The {@link ToolbarController}, which will be null if hasToolbar is false.
+     */
+    @Nullable
+    public static ToolbarController installBaseLayoutAround(
+            View view,
+            InsetsChangedListener insetsChangedListener,
+            boolean hasToolbar,
+            boolean fullscreen) {
         return SharedLibraryFactorySingleton.get(view.getContext())
-                .installBaseLayoutAround(view, insetsChangedListener, hasToolbar);
+                .installBaseLayoutAround(view, insetsChangedListener, hasToolbar, fullscreen);
     }
 
     /* package */ static BaseLayoutController getBaseLayoutController(@Nullable Activity activity) {

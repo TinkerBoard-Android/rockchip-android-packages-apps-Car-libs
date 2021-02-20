@@ -16,6 +16,8 @@
 
 package com.android.car.ui.toolbar;
 
+import static com.android.car.ui.utils.CarUiUtils.charSequenceToString;
+
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -65,6 +67,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     private final Set<OnSearchListener> mOnSearchListeners = new HashSet<>();
     private final Set<OnSearchCompletedListener> mOnSearchCompletedListeners = new HashSet<>();
     private final ProgressBarControllerAdapterV1 mProgressBar;
+    private String mSearchHint;
 
     public ToolbarControllerAdapterV1(
             @NonNull Context context,
@@ -87,7 +90,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
         oemToolbar.setSearchListener(query -> {
             for (OnSearchListener listener : mOnSearchListeners) {
-                listener.onSearch(query.toString());
+                listener.onSearch(query);
             }
         });
         oemToolbar.setSearchCompletedListener(() -> {
@@ -110,7 +113,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
     @Override
     public void setTitle(CharSequence title) {
-        update(mAdapterState.copy().setTitle(title).build());
+        update(mAdapterState.copy().setTitle(charSequenceToString(title)).build());
     }
 
     @Override
@@ -125,7 +128,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
     @Override
     public void setSubtitle(CharSequence subtitle) {
-        update(mAdapterState.copy().setSubtitle(subtitle).build());
+        update(mAdapterState.copy().setSubtitle(charSequenceToString(subtitle)).build());
     }
 
     @Override
@@ -232,12 +235,13 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
     @Override
     public void setSearchHint(CharSequence hint) {
-        mOemToolbar.setSearchHint(hint);
+        mSearchHint = charSequenceToString(hint);
+        mOemToolbar.setSearchHint(mSearchHint);
     }
 
     @Override
     public CharSequence getSearchHint() {
-        return mOemToolbar.getSearchHint();
+        return mSearchHint;
     }
 
     @Override
@@ -535,8 +539,8 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
         @NonNull
         private final List<TabAdapterV1> mTabs;
         private final int mSelectedTab;
-        private final CharSequence mTitle;
-        private final CharSequence mSubtitle;
+        private final String mTitle;
+        private final String mSubtitle;
         private final Drawable mLogo;
         private final boolean mTabsDirty;
         private final boolean mLogoDirty;
@@ -582,11 +586,11 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             return mSelectedTab;
         }
 
-        public CharSequence getTitle() {
+        public String getTitle() {
             return mTitle;
         }
 
-        public CharSequence getSubtitle() {
+        public String getSubtitle() {
             return mSubtitle;
         }
 
@@ -614,9 +618,8 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
         private boolean hasTabs() {
             State state = getState();
-            return (state == State.HOME
-                    || state == State.SUBPAGE && getShowTabsInSubpage())
-                    && getTabs().size() > 0;
+            return (state == State.HOME || (state == State.SUBPAGE && getShowTabsInSubpage()))
+                    && !getTabs().isEmpty();
         }
 
         private boolean hasBackButton() {
@@ -635,8 +638,8 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             @NonNull
             private List<TabAdapterV1> mTabs;
             private int mSelectedTab;
-            private CharSequence mTitle;
-            private CharSequence mSubtitle;
+            private String mTitle;
+            private String mSubtitle;
             private Drawable mLogo;
             private boolean mTabsDirty = false;
             private boolean mLogoDirty = false;
@@ -703,7 +706,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
                 return this;
             }
 
-            public Builder setTitle(CharSequence title) {
+            public Builder setTitle(String title) {
                 if (!Objects.equals(mTitle, title)) {
                     mTitle = title;
                     mWasChanged = true;
@@ -711,7 +714,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
                 return this;
             }
 
-            public Builder setSubtitle(CharSequence subtitle) {
+            public Builder setSubtitle(String subtitle) {
                 if (!Objects.equals(mSubtitle, subtitle)) {
                     mSubtitle = subtitle;
                     mWasChanged = true;
