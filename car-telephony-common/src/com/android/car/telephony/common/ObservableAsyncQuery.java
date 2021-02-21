@@ -50,9 +50,9 @@ public class ObservableAsyncQuery {
 
     private AsyncQueryHandler mAsyncQueryHandler;
     private QueryParam.Provider mQueryParamProvider;
-    private Cursor mCurrentCursor;
     private OnQueryFinishedListener mOnQueryFinishedListener;
     private ContentObserver mContentObserver;
+    private ContentResolver mContentResolver;
     private boolean mIsActive = false;
     private int mToken;
 
@@ -65,6 +65,7 @@ public class ObservableAsyncQuery {
             @NonNull ContentResolver cr,
             @NonNull OnQueryFinishedListener listener) {
         mAsyncQueryHandler = new AsyncQueryHandlerImpl(this, cr);
+        mContentResolver = cr;
         mContentObserver = new ContentObserver(mAsyncQueryHandler) {
             @Override
             public void onChange(boolean selfChange) {
@@ -83,6 +84,7 @@ public class ObservableAsyncQuery {
     public void startQuery() {
         L.d(TAG, "startQuery");
         mAsyncQueryHandler.cancelOperation(mToken); // Cancel the query task.
+        mContentResolver.unregisterContentObserver(mContentObserver);
 
         mToken++;
         QueryParam queryParam = mQueryParamProvider.getQueryParam();
@@ -95,6 +97,7 @@ public class ObservableAsyncQuery {
                     queryParam.mSelection,
                     queryParam.mSelectionArgs,
                     queryParam.mOrderBy);
+            mContentResolver.registerContentObserver(queryParam.mUri, false, mContentObserver);
         } else {
             mOnQueryFinishedListener.onQueryFinished(null);
         }
@@ -109,7 +112,7 @@ public class ObservableAsyncQuery {
     public void stopQuery() {
         L.d(TAG, "stopQuery");
         mIsActive = false;
-        cleanupCursorIfNecessary();
+        mContentResolver.unregisterContentObserver(mContentObserver);
         mAsyncQueryHandler.cancelOperation(mToken); // Cancel the query task.
     }
 
@@ -118,21 +121,9 @@ public class ObservableAsyncQuery {
             return;
         }
         L.d(TAG, "onQueryComplete");
-        cleanupCursorIfNecessary();
-        if (cursor != null) {
-            cursor.registerContentObserver(mContentObserver);
-            mCurrentCursor = cursor;
-        }
         if (mOnQueryFinishedListener != null) {
             mOnQueryFinishedListener.onQueryFinished(cursor);
         }
-    }
-
-    protected void cleanupCursorIfNecessary() {
-        if (mCurrentCursor != null) {
-            mCurrentCursor.unregisterContentObserver(mContentObserver);
-        }
-        mCurrentCursor = null;
     }
 
     private static class AsyncQueryHandlerImpl extends AsyncQueryHandler {

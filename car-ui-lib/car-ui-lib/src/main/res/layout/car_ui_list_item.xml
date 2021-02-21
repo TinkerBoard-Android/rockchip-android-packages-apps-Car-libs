@@ -109,12 +109,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="@bool/car_ui_list_item_single_line_title"
+            android:textDirection="locale"
             android:textAppearance="@style/TextAppearance.CarUi.ListItem" />
 
         <TextView
             android:id="@+id/body"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textDirection="locale"
             android:textAppearance="@style/TextAppearance.CarUi.ListItem.Body" />
     </LinearLayout>
 

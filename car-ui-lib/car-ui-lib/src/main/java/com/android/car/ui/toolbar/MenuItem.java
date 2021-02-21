@@ -54,6 +54,7 @@ public class MenuItem {
     private final boolean mIsSearch;
     private final boolean mShowIconAndTitle;
     private final boolean mIsTinted;
+    private final boolean mIsPrimary;
     @CarUxRestrictions.CarUxRestrictionsInfo
 
     private int mId;
@@ -88,6 +89,7 @@ public class MenuItem {
         mIsSearch = builder.mIsSearch;
         mShowIconAndTitle = builder.mShowIconAndTitle;
         mIsTinted = builder.mIsTinted;
+        mIsPrimary = builder.mIsPrimary;
         mUxRestrictions = builder.mUxRestrictions;
 
         mCurrentRestrictions = CarUxRestrictionsUtil.getInstance(mContext).getCurrentRestrictions();
@@ -300,6 +302,14 @@ public class MenuItem {
                 : mContext.getDrawable(resId));
     }
 
+    /**
+     * Returns if this MenuItem is a primary MenuItem, which means it should be visually
+     * distinct to indicate that.
+     */
+    public boolean isPrimary() {
+        return mIsPrimary;
+    }
+
     /** Returns if this is the search MenuItem, which has special behavior when searching */
     boolean isSearch() {
         return mIsSearch;
@@ -329,6 +339,7 @@ public class MenuItem {
         private boolean mIsActivated = false;
         private boolean mIsSearch = false;
         private boolean mIsSettings = false;
+        private boolean mIsPrimary = false;
         @CarUxRestrictions.CarUxRestrictionsInfo
         private int mUxRestrictions = CarUxRestrictions.UX_RESTRICTIONS_BASELINE;
 
@@ -504,6 +515,14 @@ public class MenuItem {
         public Builder setChecked(boolean checked) {
             setCheckable();
             mIsChecked = checked;
+            return this;
+        }
+
+        /**
+         * Sets whether the MenuItem is primary. This is just a visual change.
+         */
+        public Builder setPrimary(boolean primary) {
+            mIsPrimary = primary;
             return this;
         }
 

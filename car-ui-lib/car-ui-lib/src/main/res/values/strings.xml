@@ -39,9 +39,11 @@ limitations under the License.
     <string name="car_ui_toolbar_menu_item_overflow_title">Overflow</string>
 
     <!-- Positive option for a preference dialog. [CHAR_LIMIT=30] -->
-    <string name="car_ui_dialog_preference_positive" translatable="false">@android:string/ok</string>
+    <string name="car_ui_dialog_preference_positive" translatable="false">@android:string/ok
+    </string>
     <!-- Negative option for a preference dialog. [CHAR_LIMIT=30] -->
-    <string name="car_ui_dialog_preference_negative" translatable="false">@android:string/cancel</string>
+    <string name="car_ui_dialog_preference_negative" translatable="false">@android:string/cancel
+    </string>
     <!-- Text to show when a preference switch is on. [CHAR_LIMIT=30] -->
     <string name="car_ui_preference_switch_on">On</string>
     <!-- Text to show when a preference switch is off. [CHAR_LIMIT=30] -->
@@ -61,4 +63,18 @@ limitations under the License.
     <!-- Clients should override this value instead of changing the process name -->
     <!-- from manifest file. -->
     <string name="car_ui_installer_process_name" translatable="false"></string>
+
+    <!--
+    List of packages allowed to hide the content area in wide screen mode when
+    bool/car_ui_ime_wide_screen_allow_app_hide_content_area is set to false. Each package name
+    should be separated by a ",". For example, "com.package1,com.package2,com.package3" will allow
+    packages "com.package1", "com.package2" and "com.package3" to hide the content area.
+    -->
+    <string-array name="car_ui_ime_wide_screen_allowed_package_list" translatable="false">
+    </string-array>
+
+    <!-- Name of system property used to determine when wide screen mode is used. -->
+    <string name="car_ui_ime_wide_screen_system_property_name" translatable="false">
+        ro.build.automotive.ime.wide_screen.enabled
+    </string>
 </resources>

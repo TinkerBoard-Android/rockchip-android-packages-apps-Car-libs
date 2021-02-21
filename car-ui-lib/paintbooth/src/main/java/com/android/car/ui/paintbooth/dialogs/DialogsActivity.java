@@ -18,6 +18,7 @@ package com.android.car.ui.paintbooth.dialogs;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Pair;
@@ -35,6 +36,8 @@ import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.core.CarUi;
 import com.android.car.ui.paintbooth.R;
+import com.android.car.ui.recyclerview.CarUiContentListItem;
+import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.recyclerview.CarUiRadioButtonListItem;
 import com.android.car.ui.recyclerview.CarUiRadioButtonListItemAdapter;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
@@ -83,6 +86,8 @@ public class DialogsActivity extends Activity implements InsetsChangedListener {
                 v -> showDialogWithLongSubtitleAndIcon()));
         mButtons.add(Pair.create(R.string.dialog_show_single_choice,
                 v -> showDialogWithSingleChoiceItems()));
+        mButtons.add(Pair.create(R.string.dialog_show_list_items_without_default_button,
+                v -> showDialogWithListItemsWithoutDefaultButton()));
         mButtons.add(Pair.create(R.string.dialog_show_permission_dialog,
                 v -> showPermissionDialog()));
         mButtons.add(Pair.create(R.string.dialog_show_multi_permission_dialog,
@@ -142,6 +147,7 @@ public class DialogsActivity extends Activity implements InsetsChangedListener {
         new AlertDialogBuilder(this)
                 .setTitle("Standard Alert Dialog")
                 .setEditBox("Edit me please", null, null)
+                .setEditTextTitleAndDescForWideScreen("title", "desc from app")
                 .setPositiveButton("OK", (dialogInterface, i) -> {
                 })
                 .show();
@@ -196,6 +202,35 @@ public class DialogsActivity extends Activity implements InsetsChangedListener {
                 .setTitle("Select one option.")
                 .setSubtitle("Ony one option may be selected at a time")
                 .setSingleChoiceItems(new CarUiRadioButtonListItemAdapter(data), null)
+                .show();
+    }
+
+
+    private void showDialogWithListItemsWithoutDefaultButton() {
+        ArrayList<CarUiContentListItem> data = new ArrayList<>();
+        AlertDialog[] dialog = new AlertDialog[1];
+
+        CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
+        item.setTitle("First item");
+        item.setOnItemClickedListener(i -> dialog[0].dismiss());
+        data.add(item);
+
+
+        item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
+        item.setTitle("Second item");
+        item.setOnItemClickedListener(i -> dialog[0].dismiss());
+        data.add(item);
+
+        item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
+        item.setTitle("Third item");
+        item.setOnItemClickedListener(i -> dialog[0].dismiss());
+        data.add(item);
+
+        dialog[0] = new AlertDialogBuilder(this)
+                .setTitle("Select one option.")
+                .setSubtitle("Ony one option may be selected at a time")
+                .setAdapter(new CarUiListItemAdapter(data))
+                .setAllowDismissButton(false)
                 .show();
     }
 

@@ -22,6 +22,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.FrameLayout;
 
 import androidx.annotation.DrawableRes;
@@ -31,6 +32,8 @@ import androidx.annotation.StringRes;
 import androidx.annotation.XmlRes;
 
 import com.android.car.ui.R;
+import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
+import com.android.car.ui.recyclerview.CarUiListItem;
 
 import java.util.List;
 
@@ -42,8 +45,12 @@ import java.util.List;
  * {@link android.app.Activity#setActionBar(android.widget.Toolbar)} with it)
  *
  * <p>The toolbar supports a navigation button, title, tabs, search, and {@link MenuItem MenuItems}
+ *
+ * @deprecated Instead of creating this class, use Theme.CarUi.WithToolbar, and get access to it
+ *             via {@link com.android.car.ui.core.CarUi#requireToolbar(android.app.Activity)}
  */
-public class Toolbar extends FrameLayout implements ToolbarController {
+@Deprecated
+public final class Toolbar extends FrameLayout implements ToolbarController {
 
     /** Callback that will be issued whenever the height of toolbar is changed. */
     public interface OnHeightChangedListener {
@@ -268,10 +275,30 @@ public class Toolbar extends FrameLayout implements ToolbarController {
 
     /**
      * Gets the {@link TabLayout} for this toolbar.
+     *
+     * @deprecated Use other tab-related functions in the ToolbarController interface.
      */
+    @Deprecated
     @Override
     public TabLayout getTabLayout() {
         return mController.getTabLayout();
+    }
+
+    /**
+     * Gets the number of tabs in the toolbar. The tabs can be retrieved using
+     * {@link #getTab(int)}.
+     */
+    @Override
+    public int getTabCount() {
+        return mController.getTabCount();
+    }
+
+    /**
+     * Gets the index of the tab.
+     */
+    @Override
+    public int getTabPosition(TabLayout.Tab tab) {
+        return mController.getTabPosition(tab);
     }
 
     /**
@@ -626,6 +653,50 @@ public class Toolbar extends FrameLayout implements ToolbarController {
     @Override
     public boolean unregisterOnSearchListener(OnSearchListener listener) {
         return mController.unregisterOnSearchListener(listener);
+    }
+
+    /**
+     * Returns true if the toolbar can display search result items. One example of this is when the
+     * system is configured to display search items in the IME instead of in the app.
+     */
+    @Override
+    public boolean canShowSearchResultItems() {
+        return mController.canShowSearchResultItems();
+    }
+
+    /**
+     * Returns true if the app is allowed to set search results view.
+     */
+    @Override
+    public boolean canShowSearchResultsView() {
+        return mController.canShowSearchResultsView();
+    }
+
+    /**
+     * Add a view within a container that will animate with the wide screen IME to display search
+     * results.
+     *
+     * <p>Note: Apps can only call this method if the package name is allowed via OEM to render
+     * their view.  To check if the application have the permission to do so or not first call
+     * {@link #canShowSearchResultsView()}. If the app is not allowed this method will throw an
+     * {@link IllegalStateException}
+     *
+     * @param view to be added in the container.
+     */
+    @Override
+    public void setSearchResultsView(View view) {
+        mController.setSearchResultsView(view);
+    }
+
+    /**
+     * Sets list of search item {@link CarUiListItem} to be displayed in the IMS
+     * template. This method should be called when system is running in a wide screen mode. Apps
+     * can check that by using {@link #canShowSearchResultItems()}
+     * Else, this method will throw an {@link IllegalStateException}
+     */
+    @Override
+    public void setSearchResultItems(List<? extends CarUiImeSearchListItem> searchItems) {
+        mController.setSearchResultItems(searchItems);
     }
 
     /** Registers a new {@link OnSearchCompletedListener} to the list of listeners. */

@@ -19,6 +19,7 @@ import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
 import android.content.res.Resources;
 import android.os.Handler;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -26,6 +27,7 @@ import android.view.animation.Interpolator;
 
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.OrientationHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -35,8 +37,8 @@ import com.android.car.ui.utils.CarUiUtils;
 /**
  * The default scroll bar widget for the {@link CarUiRecyclerView}.
  *
- * <p>Inspired by {@link androidx.car.widget.PagedListView}. Most pagination and scrolling logic has
- * been ported from the PLV with minor updates.
+ * <p>Inspired by {@link androidx.car.widget.PagedListView}. Most pagination and scrolling logic
+ * has been ported from the PLV with minor updates.
  */
 class DefaultScrollBar implements ScrollBar {
 
@@ -59,6 +61,9 @@ class DefaultScrollBar implements ScrollBar {
 
     private OrientationHelper mOrientationHelper;
 
+    private OnContinuousScrollListener mPageUpOnContinuousScrollListener;
+    private OnContinuousScrollListener mPageDownOnContinuousScrollListener;
+
     @Override
     public void initialize(RecyclerView rv, View scrollView) {
         mRecyclerView = rv;
@@ -77,14 +82,17 @@ class DefaultScrollBar implements ScrollBar {
         mUpButton = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_page_up);
         View.OnClickListener paginateUpButtonOnClickListener = v -> pageUp();
         mUpButton.setOnClickListener(paginateUpButtonOnClickListener);
-        mUpButton.setOnTouchListener(
-                new OnContinuousScrollListener(rv.getContext(), paginateUpButtonOnClickListener));
+        mPageUpOnContinuousScrollListener = new OnContinuousScrollListener(rv.getContext(),
+                paginateUpButtonOnClickListener);
+        mUpButton.setOnTouchListener(mPageUpOnContinuousScrollListener);
+
 
         mDownButton = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_page_down);
         View.OnClickListener paginateDownButtonOnClickListener = v -> pageDown();
         mDownButton.setOnClickListener(paginateDownButtonOnClickListener);
-        mDownButton.setOnTouchListener(
-                new OnContinuousScrollListener(rv.getContext(), paginateDownButtonOnClickListener));
+        mPageDownOnContinuousScrollListener = new OnContinuousScrollListener(rv.getContext(),
+                paginateDownButtonOnClickListener);
+        mDownButton.setOnTouchListener(mPageDownOnContinuousScrollListener);
 
         mScrollTrack = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_track);
         mScrollThumb = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_thumb);
@@ -125,12 +133,35 @@ class DefaultScrollBar implements ScrollBar {
                 mScrollView.getPaddingRight(), paddingEnd);
     }
 
+    @Override
+    public void adapterChanged(@Nullable RecyclerView.Adapter adapter) {
+        try {
+            if (mRecyclerView.getAdapter() != null) {
+                mRecyclerView.getAdapter().unregisterAdapterDataObserver(mAdapterChangeObserver);
+            }
+            if (adapter != null) {
+                adapter.registerAdapterDataObserver(mAdapterChangeObserver);
+            }
+        } catch (IllegalStateException e) {
+            // adapter is already registered. and we're trying to register again.
+            // or adapter was not registered and we're trying to unregister again.
+            // ignore.
+        }
+    }
+
     /**
      * Sets whether or not the up button on the scroll bar is clickable.
      *
      * @param enabled {@code true} if the up button is enabled.
      */
     private void setUpEnabled(boolean enabled) {
+        // If the button is held down the button is disabled, the MotionEvent.ACTION_UP event on
+        // button release will not be sent to cancel pending scrolls. Manually cancel any pending
+        // scroll.
+        if (!enabled) {
+            mPageUpOnContinuousScrollListener.cancelPendingScroll();
+        }
+
         mUpButton.setEnabled(enabled);
         mUpButton.setAlpha(enabled ? 1f : mButtonDisabledAlpha);
     }
@@ -141,6 +172,13 @@ class DefaultScrollBar implements ScrollBar {
      * @param enabled {@code true} if the down button is enabled.
      */
     private void setDownEnabled(boolean enabled) {
+        // If the button is held down the button is disabled, the MotionEvent.ACTION_UP event on
+        // button release will not be sent to cancel pending scrolls. Manually cancel any pending
+        // scroll.
+        if (!enabled) {
+            mPageDownOnContinuousScrollListener.cancelPendingScroll();
+        }
+
         mDownButton.setEnabled(enabled);
         mDownButton.setAlpha(enabled ? 1f : mButtonDisabledAlpha);
     }
@@ -160,10 +198,9 @@ class DefaultScrollBar implements ScrollBar {
      * where the thumb should be; and finally, extent is the size of the thumb.
      *
      * <p>These values can be expressed in arbitrary units, so long as they share the same units.
-     * The
-     * values should also be positive.
+     * The values should also be positive.
      *
-     * @param range The range of the scrollbar's thumb
+     * @param range  The range of the scrollbar's thumb
      * @param offset The offset of the scrollbar's thumb
      * @param extent The extent of the scrollbar's thumb
      */
@@ -199,7 +236,7 @@ class DefaultScrollBar implements ScrollBar {
      * Calculates and returns how big the scroll bar thumb should be based on the given range and
      * extent.
      *
-     * @param range The total amount of space the scroll bar is allowed to roam over.
+     * @param range  The total amount of space the scroll bar is allowed to roam over.
      * @param extent The amount of space that the scroll bar takes up relative to the range.
      * @return The height of the scroll bar thumb in pixels.
      */
@@ -213,9 +250,9 @@ class DefaultScrollBar implements ScrollBar {
      * Calculates and returns how much the scroll thumb should be offset from the top of where it
      * has been laid out.
      *
-     * @param range The total amount of space the scroll bar is allowed to roam over.
-     * @param offset The amount the scroll bar should be offset, expressed in the same units as
-     * the given range.
+     * @param range       The total amount of space the scroll bar is allowed to roam over.
+     * @param offset      The amount the scroll bar should be offset, expressed in the same units as
+     *                    the given range.
      * @param thumbLength The current length of the thumb in pixels.
      * @return The amount the thumb should be offset in pixels.
      */
@@ -230,7 +267,9 @@ class DefaultScrollBar implements ScrollBar {
                 : mScrollTrack.getHeight() - thumbLength);
     }
 
-    /** Moves the given view to the specified 'y' position. */
+    /**
+     * Moves the given view to the specified 'y' position.
+     */
     private void moveY(final View view, float newPosition) {
         view.animate()
                 .y(newPosition)
@@ -244,8 +283,76 @@ class DefaultScrollBar implements ScrollBar {
                 @Override
                 public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                     updatePaginationButtons();
+                    cacheChildrenHeight(recyclerView.getLayoutManager());
                 }
             };
+    private final SparseArray<Integer> mChildHeightByAdapterPosition = new SparseArray();
+
+    private final RecyclerView.AdapterDataObserver mAdapterChangeObserver =
+            new RecyclerView.AdapterDataObserver() {
+                @Override
+                public void onChanged() {
+                    clearCachedHeights();
+                }
+                @Override
+                public void onItemRangeChanged(int positionStart, int itemCount, Object payload) {
+                    clearCachedHeights();
+                }
+                @Override
+                public void onItemRangeChanged(int positionStart, int itemCount) {
+                    clearCachedHeights();
+                }
+                @Override
+                public void onItemRangeInserted(int positionStart, int itemCount) {
+                    clearCachedHeights();
+                }
+                @Override
+                public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+                    clearCachedHeights();
+                }
+                @Override
+                public void onItemRangeRemoved(int positionStart, int itemCount) {
+                    clearCachedHeights();
+                }
+            };
+
+    private void clearCachedHeights() {
+        mChildHeightByAdapterPosition.clear();
+        cacheChildrenHeight(mRecyclerView.getLayoutManager());
+    }
+
+    private void cacheChildrenHeight(@Nullable RecyclerView.LayoutManager layoutManager) {
+        if (layoutManager == null) {
+            return;
+        }
+        for (int i = 0; i < layoutManager.getChildCount(); i++) {
+            View child = layoutManager.getChildAt(i);
+            int childPosition = layoutManager.getPosition(child);
+            if (mChildHeightByAdapterPosition.indexOfKey(childPosition) < 0) {
+                mChildHeightByAdapterPosition.put(childPosition, child.getHeight());
+            }
+        }
+    }
+
+    private int estimateNextPositionScrollUp(int currentPos, int scrollDistance,
+            OrientationHelper orientationHelper) {
+        int nextPos = 0;
+        int distance = 0;
+        for (int i = currentPos - 1; i >= 0; i--) {
+            if (mChildHeightByAdapterPosition.indexOfKey(i) < 0) {
+                // Use the average height estimate when there is not enough data
+                nextPos = mSnapHelper.estimateNextPositionDiffForScrollDistance(orientationHelper,
+                        -scrollDistance);
+                break;
+            }
+            if ((distance + mChildHeightByAdapterPosition.get(i)) > Math.abs(scrollDistance)) {
+                nextPos = i - currentPos + 1;
+                break;
+            }
+            distance += mChildHeightByAdapterPosition.get(i);
+        }
+        return nextPos;
+    }
 
     private OrientationHelper getOrientationHelper(RecyclerView.LayoutManager layoutManager) {
         if (mOrientationHelper == null || mOrientationHelper.getLayoutManager() != layoutManager) {
@@ -260,49 +367,52 @@ class DefaultScrollBar implements ScrollBar {
      * {@code CarUiRecyclerView}.
      *
      * <p>The resulting first item in the list will be snapped to so that it is completely visible.
-     * If
-     * this is not possible due to the first item being taller than the containing {@code
+     * If this is not possible due to the first item being taller than the containing {@code
      * CarUiRecyclerView}, then the snapping will not occur.
      */
     void pageUp() {
         int currentOffset = getRecyclerView().computeVerticalScrollOffset();
-        if (getRecyclerView().getLayoutManager() == null
-                || getRecyclerView().getChildCount() == 0
-                || currentOffset == 0) {
+        RecyclerView.LayoutManager layoutManager = getRecyclerView().getLayoutManager();
+        if (layoutManager == null || layoutManager.getChildCount() == 0 || currentOffset == 0) {
             return;
         }
 
         // Use OrientationHelper to calculate scroll distance in order to match snapping behavior.
-        OrientationHelper orientationHelper =
-                getOrientationHelper(getRecyclerView().getLayoutManager());
+        OrientationHelper orientationHelper = getOrientationHelper(layoutManager);
         int screenSize = orientationHelper.getTotalSpace();
         int scrollDistance = screenSize;
-        // The iteration order matters. In case where there are 2 items longer than screen size, we
-        // want to focus on upcoming view.
-        for (int i = 0; i < getRecyclerView().getChildCount(); i++) {
-            /*
-             * We treat child View longer than screen size differently:
-             * 1) When it enters screen, next pageUp will align its bottom with parent bottom;
-             * 2) When it leaves screen, next pageUp will align its top with parent top.
-             */
-            View child = getRecyclerView().getChildAt(i);
-            if (child.getHeight() > screenSize) {
-                if (orientationHelper.getDecoratedEnd(child) < screenSize) {
-                    // Child view bottom is entering screen. Align its bottom with parent bottom.
-                    scrollDistance = screenSize - orientationHelper.getDecoratedEnd(child);
-                } else if (-screenSize < orientationHelper.getDecoratedStart(child)
-                        && orientationHelper.getDecoratedStart(child) < 0) {
-                    // Child view top is about to enter screen - its distance to parent top
-                    // is less than a full scroll. Align child top with parent top.
-                    scrollDistance = Math.abs(orientationHelper.getDecoratedStart(child));
-                }
-                // There can be two items that are longer than the screen. We stop at the first one.
-                // This is affected by the iteration order.
+
+        View currentPosView = getFirstMostVisibleChild(orientationHelper);
+        int currentPos = currentPosView != null ? mRecyclerView.getLayoutManager().getPosition(
+                currentPosView) : 0;
+        int nextPos = estimateNextPositionScrollUp(currentPos,
+                scrollDistance - Math.max(0, orientationHelper.getStartAfterPadding()
+                        - orientationHelper.getDecoratedStart(currentPosView)), orientationHelper);
+        if (nextPos == 0) {
+            // Distance should always be positive. Negate its value to scroll up.
+            mRecyclerView.smoothScrollBy(0, -scrollDistance);
+        } else {
+            mRecyclerView.smoothScrollToPosition(Math.max(0, currentPos + nextPos));
+        }
+    }
+
+    private View getFirstMostVisibleChild(OrientationHelper helper) {
+        float mostVisiblePercent = 0;
+        View mostVisibleView = null;
+
+        for (int i = 0; i < getRecyclerView().getLayoutManager().getChildCount(); i++) {
+            View child = getRecyclerView().getLayoutManager().getChildAt(i);
+            float visiblePercentage = CarUiSnapHelper.getPercentageVisible(child, helper);
+            if (visiblePercentage == 1f) {
+                mostVisibleView = child;
                 break;
+            } else if (visiblePercentage > mostVisiblePercent) {
+                mostVisiblePercent = visiblePercentage;
+                mostVisibleView = child;
             }
         }
-        // Distance should always be positive. Negate its value to scroll up.
-        mRecyclerView.smoothScrollBy(0, -scrollDistance);
+
+        return mostVisibleView;
     }
 
     /**
@@ -314,53 +424,55 @@ class DefaultScrollBar implements ScrollBar {
      * scrolled the length of a page, but not snapped to.
      */
     void pageDown() {
-        if (getRecyclerView().getLayoutManager() == null
-                || getRecyclerView().getChildCount() == 0) {
+        RecyclerView.LayoutManager layoutManager = getRecyclerView().getLayoutManager();
+        if (layoutManager == null || layoutManager.getChildCount() == 0) {
             return;
         }
 
-        OrientationHelper orientationHelper =
-                getOrientationHelper(getRecyclerView().getLayoutManager());
+        OrientationHelper orientationHelper = getOrientationHelper(layoutManager);
         int screenSize = orientationHelper.getTotalSpace();
         int scrollDistance = screenSize;
 
-        // If the last item is partially visible, page down should bring it to the top.
-        View lastChild = getRecyclerView().getChildAt(getRecyclerView().getChildCount() - 1);
-        if (getRecyclerView().getLayoutManager().isViewPartiallyVisible(lastChild,
-                /* completelyVisible= */ false, /* acceptEndPointInclusion= */ false)) {
-            scrollDistance = orientationHelper.getDecoratedStart(lastChild)
-                    - orientationHelper.getStartAfterPadding();
-            if (scrollDistance <= 0) {
-                // - Scroll value is zero if the top of last item is aligned with top of the screen;
-                // - Scroll value can be negative if the child is longer than the screen size and
-                //   the visible area of the screen does not show the start of the child.
-                // Scroll to the next screen in both cases.
-                scrollDistance = screenSize;
-            }
+        View currentPosView = getFirstMostVisibleChild(orientationHelper);
+
+        // If current view is partially visible and bottom of the view is below visible area of
+        // the recyclerview either scroll down one page (screenSize) or enough to align the bottom
+        // of the view with the bottom of the recyclerview. Note that this will not cause a snap,
+        // because the current view is already snapped to the top or it wouldn't be the most
+        // visible view.
+        if (layoutManager.isViewPartiallyVisible(currentPosView,
+                /* completelyVisible= */ false, /* acceptEndPointInclusion= */ false)
+                        && orientationHelper.getDecoratedEnd(currentPosView)
+                                > orientationHelper.getEndAfterPadding()) {
+            scrollDistance = Math.min(screenSize,
+                    orientationHelper.getDecoratedEnd(currentPosView)
+                            - orientationHelper.getEndAfterPadding());
         }
 
-        // The iteration order matters. In case where there are 2 items longer than screen size, we
-        // want to focus on upcoming view (the one at the bottom of screen).
-        for (int i = getRecyclerView().getChildCount() - 1; i >= 0; i--) {
-            /* We treat child View longer than screen size differently:
-             * 1) When it enters screen, next pageDown will align its top with parent top;
-             * 2) When it leaves screen, next pageDown will align its bottom with parent bottom.
-             */
-            View child = getRecyclerView().getChildAt(i);
-            if (child.getHeight() > screenSize) {
-                if (orientationHelper.getDecoratedStart(child)
-                        - orientationHelper.getStartAfterPadding() > 0) {
-                    // Child view top is entering screen. Align its top with parent top.
-                    scrollDistance = orientationHelper.getDecoratedStart(lastChild)
+        // Iterate over the childview (bottom to top) and stop when we find the first
+        // view that we can snap to and the scroll size is less than max scroll size (screenSize)
+        for (int i = layoutManager.getChildCount() - 1; i >= 0; i--) {
+            View child = layoutManager.getChildAt(i);
+
+            // Ignore the child if it's above the currentview, as scrolldown will only move down.
+            // Note that in case of gridview, child will not be the same as the currentview.
+            if (orientationHelper.getDecoratedStart(child)
+                    <= orientationHelper.getDecoratedStart(currentPosView)) {
+                break;
+            }
+
+            // Ignore the child if the scroll distance is bigger than the max scroll size
+            if (orientationHelper.getDecoratedStart(child)
+                    - orientationHelper.getStartAfterPadding() <= screenSize) {
+                // If the child is already fully visible we can scroll even further.
+                if (orientationHelper.getDecoratedEnd(child)
+                        <= orientationHelper.getEndAfterPadding()) {
+                    scrollDistance = orientationHelper.getDecoratedEnd(child)
                             - orientationHelper.getStartAfterPadding();
-                } else if (screenSize < orientationHelper.getDecoratedEnd(child)
-                        && orientationHelper.getDecoratedEnd(child) < 2 * screenSize) {
-                    // Child view bottom is about to enter screen - its distance to parent bottom
-                    // is less than a full scroll. Align child bottom with parent bottom.
-                    scrollDistance = orientationHelper.getDecoratedEnd(child) - screenSize;
+                } else {
+                    scrollDistance = orientationHelper.getDecoratedStart(child)
+                            - orientationHelper.getStartAfterPadding();
                 }
-                // There can be two items that are longer than the screen. We stop at the first one.
-                // This is affected by the iteration order.
                 break;
             }
         }
@@ -371,12 +483,9 @@ class DefaultScrollBar implements ScrollBar {
     /**
      * Determines if scrollbar should be visible or not and shows/hides it accordingly. If this is
      * being called as a result of adapter changes, it should be called after the new layout has
-     * been
-     * calculated because the method of determining scrollbar visibility uses the current layout.
-     * If
-     * this is called after an adapter change but before the new layout, the visibility
-     * determination
-     * may not be correct.
+     * been calculated because the method of determining scrollbar visibility uses the current
+     * layout. If this is called after an adapter change but before the new layout, the visibility
+     * determination may not be correct.
      */
     private void updatePaginationButtons() {
 
@@ -387,6 +496,7 @@ class DefaultScrollBar implements ScrollBar {
         // enable/disable the button before the view is shown. So there is no flicker.
         setUpEnabled(!isAtStart);
         setDownEnabled(!isAtEnd);
+
         if ((isAtStart && isAtEnd) || layoutManager == null || layoutManager.getItemCount() == 0) {
             mScrollView.setVisibility(View.INVISIBLE);
         } else {
@@ -412,12 +522,16 @@ class DefaultScrollBar implements ScrollBar {
         mScrollView.invalidate();
     }
 
-    /** Returns {@code true} if the RecyclerView is completely displaying the first item. */
+    /**
+     * Returns {@code true} if the RecyclerView is completely displaying the first item.
+     */
     boolean isAtStart() {
         return mSnapHelper.isAtStart(getRecyclerView().getLayoutManager());
     }
 
-    /** Returns {@code true} if the RecyclerView is completely displaying the last item. */
+    /**
+     * Returns {@code true} if the RecyclerView is completely displaying the last item.
+     */
     boolean isAtEnd() {
         return mSnapHelper.isAtEnd(getRecyclerView().getLayoutManager());
     }

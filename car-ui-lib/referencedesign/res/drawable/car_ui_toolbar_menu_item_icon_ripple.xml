@@ -17,6 +17,15 @@
   ~
  -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true" android:state_pressed="true">
+        <shape android:shape="oval">
+            <solid android:color="#8A94CBFF"/>
+            <stroke android:width="4dp"
+                    android:color="#94CBFF"/>
+            <size android:width="48dp"
+                  android:height="48dp"/>
+        </shape>
+    </item>
     <item android:state_focused="true">
         <shape android:shape="oval">
             <solid android:color="#3D94CBFF"/>
