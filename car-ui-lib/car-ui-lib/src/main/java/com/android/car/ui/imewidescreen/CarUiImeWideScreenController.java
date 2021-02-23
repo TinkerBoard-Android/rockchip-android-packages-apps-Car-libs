@@ -540,7 +540,9 @@ public class CarUiImeWideScreenController {
             intiExtractAction(textForImeAction);
         }
 
-        sendSurfaceInfo();
+        if (mContentAreaSurfaceView.getVisibility() == View.GONE) {
+            sendSurfaceInfo();
+        }
     }
 
     /**
