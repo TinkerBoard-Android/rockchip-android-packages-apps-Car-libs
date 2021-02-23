@@ -184,6 +184,10 @@ public class MediaItemsRepository {
 
     private void onMediaBrowsingStateChanged(BrowsingState newBrowsingState) {
         mBrowsingState = newBrowsingState;
+        if (mBrowsingState == null) {
+            Log.e(TAG, "Null browsing state (no media source!)");
+            return;
+        }
         mBrowsingStateLiveData.setValue(mBrowsingState);
         switch (mBrowsingState.mConnectionStatus) {
             case CONNECTING:
