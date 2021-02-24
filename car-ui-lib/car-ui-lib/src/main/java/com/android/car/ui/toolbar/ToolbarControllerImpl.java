@@ -77,8 +77,10 @@ public final class ToolbarControllerImpl implements ToolbarController {
     private ViewGroup mNavIconContainer;
     private ViewGroup mTitleContainer;
     private TextView mTitle;
+    @NonNull
     private CharSequence mTitleText = "";
     private TextView mSubtitle;
+    @Nullable
     private CharSequence mSubtitleText;
     private ImageView mTitleLogo;
     private ViewGroup mTitleLogoContainer;
@@ -283,8 +285,8 @@ public final class ToolbarControllerImpl implements ToolbarController {
     @Override
     public void setSubtitle(@StringRes int subTitle) {
         String subTitleText = getContext().getString(subTitle);
-        asyncSetText(mSubtitle, subTitleText, Runnable::run);
         mSubtitleText = subTitleText;
+        asyncSetText(mSubtitle, subTitleText == null ? "" : subTitleText, Runnable::run);
         setState(getState());
     }
 
@@ -295,8 +297,8 @@ public final class ToolbarControllerImpl implements ToolbarController {
      */
     @Override
     public void setSubtitle(CharSequence subTitle) {
-        asyncSetText(mSubtitle, subTitle, Runnable::run);
         mSubtitleText = subTitle;
+        asyncSetText(mSubtitle, subTitle == null ? "" : subTitle, Runnable::run);
         setState(getState());
     }
 
