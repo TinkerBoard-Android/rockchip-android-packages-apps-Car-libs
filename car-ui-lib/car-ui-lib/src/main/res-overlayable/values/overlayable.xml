@@ -122,6 +122,8 @@ limitations under the License.-->
       <item type="color" name="car_ui_toolbar_tab_item_selector"/>
       <item type="color" name="car_ui_toolbar_tab_selected_color"/>
       <item type="color" name="car_ui_toolbar_tab_unselected_color"/>
+      <item type="dimen" name="car_ui_app_styled_dialog_height"/>
+      <item type="dimen" name="car_ui_app_styled_dialog_width"/>
       <item type="dimen" name="car_ui_body1_size"/>
       <item type="dimen" name="car_ui_body2_size"/>
       <item type="dimen" name="car_ui_body3_size"/>
@@ -270,6 +272,7 @@ limitations under the License.-->
       <item type="dimen" name="car_ui_touch_target_width"/>
       <item type="dimen" name="wrap_content"/>
       <item type="drawable" name="car_ui_activity_background"/>
+      <item type="drawable" name="car_ui_app_styled_view_background"/>
       <item type="drawable" name="car_ui_divider"/>
       <item type="drawable" name="car_ui_focus_area_background_highlight"/>
       <item type="drawable" name="car_ui_focus_area_foreground_highlight"/>
@@ -317,6 +320,9 @@ limitations under the License.-->
       <item type="id" name="car_ui_alert_icon"/>
       <item type="id" name="car_ui_alert_subtitle"/>
       <item type="id" name="car_ui_alert_title"/>
+      <item type="id" name="car_ui_app_styled_content"/>
+      <item type="id" name="car_ui_app_styled_item"/>
+      <item type="id" name="car_ui_app_styled_view_icon_close"/>
       <item type="id" name="car_ui_base_layout_content_container"/>
       <item type="id" name="car_ui_closeKeyboard"/>
       <item type="id" name="car_ui_component_reference"/>
@@ -423,6 +429,8 @@ limitations under the License.-->
       <item type="layout" name="car_ui_alert_dialog_edit_text"/>
       <item type="layout" name="car_ui_alert_dialog_list"/>
       <item type="layout" name="car_ui_alert_dialog_title_with_subtitle"/>
+      <item type="layout" name="car_ui_app_styled_view"/>
+      <item type="layout" name="car_ui_app_styled_view_item"/>
       <item type="layout" name="car_ui_base_layout"/>
       <item type="layout" name="car_ui_base_layout_toolbar"/>
       <item type="layout" name="car_ui_base_layout_toolbar_legacy"/>
