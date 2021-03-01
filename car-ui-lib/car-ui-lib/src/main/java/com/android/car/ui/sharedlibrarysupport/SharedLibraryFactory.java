@@ -22,6 +22,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.car.ui.appstyledview.AppStyledViewController;
 import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.button.CarUiButton;
 import com.android.car.ui.button.CarUiButtonAttributes;
@@ -63,8 +64,17 @@ public interface SharedLibraryFactory {
             Context context,
             @Nullable CarUiButtonAttributes attrs);
 
+
+    /**
+     * Creates a app styled view.
+     *
+     * @return the view used for app styled view.
+     */
+    AppStyledViewController createAppStyledView();
+
     /**
      * Creates an instance of CarUiRecyclerView
+     *
      * @param context The visual context to create views with.
      * @param attrs An object containing initial attributes for the button.
      */

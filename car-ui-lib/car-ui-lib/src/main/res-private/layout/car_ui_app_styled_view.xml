@@ -26,7 +26,8 @@
       android:id="@+id/car_ui_app_styled_view_icon_close"
       android:layout_width="@dimen/car_ui_toolbar_nav_icon_size"
       android:layout_height="@dimen/car_ui_toolbar_nav_icon_size"
-      android:src="@drawable/car_ui_icon_close"
+      android:src="@drawable/car_ui_icon_arrow_back"
+      android:layout_marginStart="30dp"
       android:background="@drawable/car_ui_toolbar_menu_item_icon_ripple"
       app:layout_constraintStart_toStartOf="parent"
       />
