@@ -16,6 +16,10 @@
 //###########################################################
 // CarUi lib just for Robolectric test target.     #
 //###########################################################
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
 android_app {
     name: "CarUiRobolectricTestApp",
     resource_dirs: ["res"],
@@ -24,4 +28,3 @@ android_app {
     libs: ["android.car"],
     static_libs: ["car-ui-lib"],
 }
-
