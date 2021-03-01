@@ -225,11 +225,6 @@
     <style name="PreferenceFragment.CarUi">
         <item name="android:divider">?android:attr/listDivider</item>
         <!-- TODO(b/150230923) change this to car_ui_preference_fragment -->
-        <item name="android:layout">@layout/car_ui_preference_fragment_with_toolbar</item>
-    </style>
-
-    <!-- TODO(b/150230923) remove this when other apps are ready -->
-    <style name="PreferenceFragment.CarUi.WithToolbar">
         <item name="android:layout">@layout/car_ui_preference_fragment</item>
     </style>
 

@@ -55,7 +55,6 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 /**
  * A PreferenceFragmentCompat is the entry point to using the Preference library.
@@ -72,11 +71,6 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
     private static final String TAG = "CarUiPreferenceFragment";
     private static final String DIALOG_FRAGMENT_TAG =
             "com.android.car.ui.PreferenceFragment.DIALOG";
-
-    private final Map<Fragment, Insets> mLegacyInsets = new WeakHashMap<>();
-    private final Map<Fragment, Toolbar.OnHeightChangedListener> mLegacyHeightListeners =
-            new WeakHashMap<>();
-    private boolean mLayoutHasToolbar = false;
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -112,8 +106,7 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
      * Gets the toolbar for the given fragment. The fragment can be either this PreferenceFragment,
      * or one of the fragments that are created from it such as {@link ListPreferenceFragment}.
      *
-     * This can be overridden by subclasses to have the fragments use a different toolbar than
-     * the ones built into them.
+     * This can be overridden by subclasses to have the fragments use a different toolbar.
      *
      * @see #getPreferenceInsets(Fragment)
      * @param fragment The fragment to get a toolbar for. Either this fragment, or one of the
@@ -121,35 +114,7 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
      */
     @Nullable
     protected ToolbarController getPreferenceToolbar(@NonNull Fragment fragment) {
-        ToolbarController baseLayoutToolbar = CarUi.getToolbar(getActivity());
-        if (baseLayoutToolbar != null) {
-            return baseLayoutToolbar;
-        }
-
-        // TODO(b/150230923) remove the code for the old toolbar height change when apps are ready
-        View view = fragment.getView();
-        if (view != null) {
-            final Toolbar toolbar = CarUiUtils.findViewByRefId(view, R.id.toolbar);
-            if (toolbar != null) {
-                // Cache the height listeners so we don't end up re-registering multiple of them
-                // When getToolbar() is called multiple times
-                Toolbar.OnHeightChangedListener heightListener = mLegacyHeightListeners
-                        .computeIfAbsent(fragment, fragment1 -> newHeight -> {
-                            Insets insets = new Insets(0, newHeight, 0, 0);
-                            mLegacyInsets.put(fragment1, insets);
-                            if (fragment1 instanceof InsetsChangedListener) {
-                                ((InsetsChangedListener) fragment1).onCarUiInsetsChanged(insets);
-                            }
-                        });
-                toolbar.registerToolbarHeightChangeListener(heightListener);
-                mLegacyInsets.put(fragment, new Insets(0, toolbar.getHeight(), 0, 0));
-                mLayoutHasToolbar = true;
-
-                return toolbar;
-            }
-        }
-
-        return null;
+        return CarUi.getToolbar(getActivity());
     }
 
     /**
@@ -157,8 +122,7 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
      * PreferenceFragment, or one of the fragments that are created from it such as
      * {@link ListPreferenceFragment}.
      *
-     * This can be overridden by subclasses to have the fragments use different insets than
-     * the ones built into them.
+     * This can be overridden by subclasses to have the fragments use different insets.
      *
      * @see #getPreferenceToolbar(Fragment)
      * @param fragment The fragment to get insets for. Either this fragment, or one of the
@@ -166,7 +130,7 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
      */
     @Nullable
     protected Insets getPreferenceInsets(@NonNull Fragment fragment) {
-        return mLegacyInsets.getOrDefault(fragment, CarUi.getInsets(getActivity()));
+        return CarUi.getInsets(getActivity());
     }
 
     @Override
@@ -217,10 +181,9 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
         if (preference instanceof EditTextPreference) {
             f = EditTextPreferenceDialogFragment.newInstance(preference.getKey());
         } else if (preference instanceof ListPreference) {
-            f = ListPreferenceFragment.newInstance(preference.getKey(), mLayoutHasToolbar);
+            f = ListPreferenceFragment.newInstance(preference.getKey());
         } else if (preference instanceof MultiSelectListPreference) {
-            f = MultiSelectListPreferenceFragment
-                    .newInstance(preference.getKey(), mLayoutHasToolbar);
+            f = MultiSelectListPreferenceFragment.newInstance(preference.getKey());
         } else if (preference instanceof CarUiSeekBarDialogPreference) {
             f = SeekbarPreferenceDialogFragment.newInstance(preference.getKey());
         } else {
