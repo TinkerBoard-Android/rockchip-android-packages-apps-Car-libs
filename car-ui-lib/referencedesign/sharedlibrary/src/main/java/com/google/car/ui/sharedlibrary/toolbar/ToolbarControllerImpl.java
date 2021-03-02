@@ -19,7 +19,9 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.MenuItemOEMV1;
@@ -33,6 +35,8 @@ import com.google.car.ui.sharedlibrary.R;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SuppressWarnings("AndroidJdkLibsChecker")
 class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
@@ -45,14 +49,17 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     private final ImageView mLogoInNavIconSpace;
     private final ProgressBarController mProgressBar;
     private final TabLayout mTabContainer;
+    private final ViewGroup mMenuItemsContainer;
 
     private Runnable mBackListener;
     private int mNavButtonMode = ToolbarControllerOEMV1.NAV_BUTTON_MODE_BACK;
 
     private boolean mBackButtonVisible = false;
     private boolean mHasLogo = false;
+    private int mSearchMode = ToolbarControllerOEMV1.SEARCH_MODE_DISABLED;
+    private final OverflowMenuItem mOverflowMenuItem;
 
-    ToolbarControllerImpl(View view, Context sharedLibraryContext) {
+    ToolbarControllerImpl(View view, Context sharedLibraryContext, Context activityContext) {
         mSharedLibraryContext = sharedLibraryContext;
         mBackButtonView = view.requireViewById(R.id.toolbar_nav_icon);
         mTitleView = view.requireViewById(R.id.toolbar_title);
@@ -62,6 +69,8 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
         mProgressBar = new ProgressBarController(
                 view.requireViewById(R.id.toolbar_progress_bar));
         mTabContainer = view.requireViewById(R.id.toolbar_tabs);
+        mMenuItemsContainer = view.requireViewById(R.id.toolbar_menu_items_container);
+        mOverflowMenuItem = new OverflowMenuItem(sharedLibraryContext, activityContext);
     }
 
     @Override
@@ -162,17 +171,10 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
 
     @Override
     public void setSearchMode(int searchMode) {
-
-    }
-
-    @Override
-    public void setShowMenuItemsWhileSearching(boolean showMenuItemsWhileSearching) {
-
-    }
-
-    @Override
-    public boolean isShowingMenuItemsWhileSearching() {
-        return false;
+        if (mSearchMode != searchMode) {
+            mSearchMode = searchMode;
+            update();
+        }
     }
 
     @Override
@@ -217,8 +219,31 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     }
 
     @Override
-    public void setMenuItems(List<? extends MenuItemOEMV1> items) {
+    public void setMenuItems(List<? extends MenuItemOEMV1> menuItems) {
+        if (menuItems == null) {
+            menuItems = Collections.emptyList();
+        }
 
+        List<? extends MenuItemOEMV1> overflowMenuItems = menuItems.stream()
+                .filter(i -> i.getDisplayBehavior() != MenuItemOEMV1.DISPLAY_BEHAVIOR_ALWAYS)
+                .collect(Collectors.toList());
+
+        List<? extends MenuItemOEMV1> regularMenuItems = Stream.concat(
+                menuItems.stream().filter(
+                        i -> i.getDisplayBehavior() == MenuItemOEMV1.DISPLAY_BEHAVIOR_ALWAYS),
+                Stream.of(mOverflowMenuItem))
+                .collect(Collectors.toList());
+
+        mOverflowMenuItem.setOverflowMenuItems(overflowMenuItems);
+
+        mMenuItemsContainer.removeAllViews();
+        for (MenuItemOEMV1 menuItem : regularMenuItems) {
+            MenuItemView menuItemView = new MenuItemView(mSharedLibraryContext, menuItem);
+            mMenuItemsContainer.addView(menuItemView,
+                    new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT));
+        }
     }
 
     @Override

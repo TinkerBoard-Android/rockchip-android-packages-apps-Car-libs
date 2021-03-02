@@ -102,9 +102,10 @@ public interface MenuItemOEMV1 {
     /** Gets the current Icon */
     Drawable getIcon();
 
-    /** Returns if this MenuItem is a primary one, which should be visually different */
+    /**
+     * Returns if this MenuItem is a primary one, which should be visually different.
+     *
+     * This value will not change, even after an update was triggered.
+     */
     boolean isPrimary();
-
-    /** Returns if this is the search MenuItem, which has special behavior when searching */
-    boolean isSearch();
 }

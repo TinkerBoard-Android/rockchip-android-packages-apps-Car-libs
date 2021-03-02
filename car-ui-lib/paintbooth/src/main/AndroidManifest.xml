@@ -57,6 +57,10 @@
         android:exported="false"
         android:parentActivityName=".MainActivity"/>
     <activity
+        android:name=".appstyledview.AppStyledViewSampleActivity"
+        android:exported="false"
+        android:parentActivityName=".MainActivity"/>
+    <activity
         android:name=".caruirecyclerview.CarUiRecyclerViewActivity"
         android:exported="false"
         android:parentActivityName=".MainActivity"/>

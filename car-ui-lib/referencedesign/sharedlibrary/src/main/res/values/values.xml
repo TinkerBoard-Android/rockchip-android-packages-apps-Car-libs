@@ -17,6 +17,8 @@
 <resources>
     <attr name="state_ux_restricted"/>
     <color name="ripple_color">#27ffffff</color>
+    <dimen name="touch_target_size">76dp</dimen>
+    <dimen name="primary_icon_size">44dp</dimen>
 
     <style name="TextAppearance.CarUi" parent="android:TextAppearance.DeviceDefault">
         <item name="android:textColor">?android:attr/textColorPrimary</item>

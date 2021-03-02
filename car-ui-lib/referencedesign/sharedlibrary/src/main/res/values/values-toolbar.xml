@@ -13,4 +13,18 @@
     <style name="TextAppearance.CarUi.Widget.Toolbar.Tab.Selected">
         <item name="android:textFontWeight">500</item>
     </style>
+
+    <style name="Toolbar.MenuItem.Text"
+        parent="android:Widget.Material.Button">
+        <item name="android:textSize">26sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:maxWidth">350dp</item>
+    </style>
+
+    <style name="Toolbar.MenuItem.Text.Borderless"
+        parent="android:Widget.Material.Button.Borderless.Colored">
+        <item name="android:textSize">26sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:maxWidth">350dp</item>
+    </style>
 </resources>

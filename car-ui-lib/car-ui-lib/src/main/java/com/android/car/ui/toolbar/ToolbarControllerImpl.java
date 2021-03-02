@@ -50,7 +50,6 @@ import com.android.car.ui.recyclerview.CarUiContentListItem;
 import com.android.car.ui.recyclerview.CarUiListItem;
 import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.utils.CarUiUtils;
-import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -77,8 +76,10 @@ public final class ToolbarControllerImpl implements ToolbarController {
     private ViewGroup mNavIconContainer;
     private ViewGroup mTitleContainer;
     private TextView mTitle;
+    @NonNull
     private CharSequence mTitleText = "";
     private TextView mSubtitle;
+    @Nullable
     private CharSequence mSubtitleText;
     private ImageView mTitleLogo;
     private ViewGroup mTitleLogoContainer;
@@ -127,15 +128,6 @@ public final class ToolbarControllerImpl implements ToolbarController {
         updateOverflowDialog(item);
         setState(getState());
     };
-
-    // Despite the warning, this has to be a field so it's not garbage-collected.
-    // The only other reference to it is a weak reference
-    private final CarUxRestrictionsUtil.OnUxRestrictionsChangedListener
-            mOnUxRestrictionsChangedListener = restrictions -> {
-                for (MenuItemRenderer renderer : mMenuItemRenderers) {
-                    renderer.setCarUxRestrictions(restrictions);
-                }
-            };
 
 
     public ToolbarControllerImpl(View view) {
@@ -202,10 +194,6 @@ public final class ToolbarControllerImpl implements ToolbarController {
         setBackgroundShown(true);
 
         mOverflowAdapter = new CarUiListItemAdapter(mUiOverflowItems);
-
-        // This holds weak references so we don't need to unregister later
-        CarUxRestrictionsUtil.getInstance(getContext())
-                .register(mOnUxRestrictionsChangedListener);
     }
 
     private Context getContext() {
@@ -283,8 +271,8 @@ public final class ToolbarControllerImpl implements ToolbarController {
     @Override
     public void setSubtitle(@StringRes int subTitle) {
         String subTitleText = getContext().getString(subTitle);
-        asyncSetText(mSubtitle, subTitleText, Runnable::run);
         mSubtitleText = subTitleText;
+        asyncSetText(mSubtitle, subTitleText == null ? "" : subTitleText, Runnable::run);
         setState(getState());
     }
 
@@ -295,8 +283,8 @@ public final class ToolbarControllerImpl implements ToolbarController {
      */
     @Override
     public void setSubtitle(CharSequence subTitle) {
-        asyncSetText(mSubtitle, subTitle, Runnable::run);
         mSubtitleText = subTitle;
+        asyncSetText(mSubtitle, subTitle == null ? "" : subTitle, Runnable::run);
         setState(getState());
     }
 
@@ -623,7 +611,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
         }
 
         mMenuItemsXmlId = resId;
-        List<MenuItem> menuItems = MenuItemRenderer.readMenuItemList(getContext(), resId);
+        List<MenuItem> menuItems = MenuItemXmlParserUtil.readMenuItemList(getContext(), resId);
         setMenuItemsInternal(menuItems);
         return menuItems;
     }
