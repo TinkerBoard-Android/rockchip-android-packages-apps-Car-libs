@@ -129,11 +129,10 @@ public class TelecomUtils {
         }
 
         String countryIso = getCurrentCountryIsoFromLocale(context);
-        L.d(TAG, "PhoneNumberUtils.formatNumberToE16, number: "
-                    + piiLog(number) + ", country: " + countryIso);
+        L.d(TAG, "PhoneNumberUtils.formatNumber, number: " + piiLog(number)
+                + ", country: " + countryIso);
 
-        String e164 = PhoneNumberUtils.formatNumberToE164(number, countryIso);
-        String formattedNumber = PhoneNumberUtils.formatNumber(number, e164, countryIso);
+        String formattedNumber = PhoneNumberUtils.formatNumber(number, countryIso);
         formattedNumber = TextUtils.isEmpty(formattedNumber) ? number : formattedNumber;
         L.d(TAG, "getFormattedNumber, result: " + piiLog(formattedNumber));
 
@@ -509,6 +508,24 @@ public class TelecomUtils {
      * valid, it will mark all new missed call log as read.
      */
     public static void markCallLogAsRead(Context context, String phoneNumberString) {
+        markCallLogAsRead(context, CallLog.Calls.NUMBER, phoneNumberString);
+    }
+
+    /**
+     * Mark missed call log matching given call log id as read. If phone number string is not
+     * valid, it will mark all new missed call log as read.
+     */
+    public static void markCallLogAsRead(Context context, long callLogId) {
+        markCallLogAsRead(context, CallLog.Calls._ID,
+                callLogId < 0 ? null : String.valueOf(callLogId));
+    }
+
+    /**
+     * Mark missed call log matching given column name and selection argument as read. If the column
+     * name or the selection argument is not valid, mark all new missed call log as read.
+     */
+    private static void markCallLogAsRead(Context context, String columnName,
+            String selectionArg) {
         if (context.checkSelfPermission(Manifest.permission.WRITE_CALL_LOG)
                 != PackageManager.PERMISSION_GRANTED) {
             L.w(TAG, "Missing WRITE_CALL_LOG permission; not marking missed calls as read.");
@@ -525,21 +542,22 @@ public class TelecomUtils {
         where.append(CallLog.Calls.TYPE);
         where.append(" = ?");
         selectionArgs.add(Integer.toString(CallLog.Calls.MISSED_TYPE));
-        if (!TextUtils.isEmpty(phoneNumberString)) {
+        if (!TextUtils.isEmpty(columnName) && !TextUtils.isEmpty(selectionArg)) {
             where.append(" AND ");
-            where.append(CallLog.Calls.NUMBER);
+            where.append(columnName);
             where.append(" = ?");
-            selectionArgs.add(phoneNumberString);
+            selectionArgs.add(selectionArg);
         }
         String[] selectionArgsArray = new String[0];
         try {
-            context
-                    .getContentResolver()
-                    .update(
-                            CallLog.Calls.CONTENT_URI,
-                            contentValues,
-                            where.toString(),
-                            selectionArgs.toArray(selectionArgsArray));
+            ContentResolver contentResolver = context.getContentResolver();
+            contentResolver.update(
+                    CallLog.Calls.CONTENT_URI,
+                    contentValues,
+                    where.toString(),
+                    selectionArgs.toArray(selectionArgsArray));
+            // #update doesn't notify change any more. Notify change to rerun query from database.
+            contentResolver.notifyChange(CallLog.Calls.CONTENT_URI, null);
         } catch (IllegalArgumentException e) {
             L.e(TAG, "markCallLogAsRead failed", e);
         }

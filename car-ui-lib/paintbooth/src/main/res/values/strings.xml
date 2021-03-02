@@ -180,6 +180,13 @@
   <!-- Text for add icon text button [CHAR_LIMIT=45]-->
   <string name="toolbar_add_icon_text">MenuItem: Add icon and text</string>
 
+
+  <!-- Text for add text button [CHAR_LIMIT=30]-->
+  <string name="toolbar_add_bordered_text">MenuItem: Add bordered text</string>
+
+  <!-- Text for add icon text button [CHAR_LIMIT=45]-->
+  <string name="toolbar_add_bordered_icon_text">MenuItem: Add bordered icon and text</string>
+
   <!-- Text for add untined icon and text button [CHAR_LIMIT=60]-->
   <string name="toolbar_add_untinted_icon_and_text">MenuItem: Add untinted icon and text</string>
 
@@ -269,6 +276,9 @@
 
   <!-- Text to show Dialog with single choice items-->
   <string name="dialog_show_single_choice">Show with single choice items</string>
+
+  <!-- Text to show a dialog with single choice items and no default button [CHAR_LIMIT=200] -->
+  <string name="dialog_show_list_items_without_default_button">Show with single choice items and no default button</string>
 
   <!-- Text to show a permission Dialog [CHAR_LIMIT=50] -->
   <string name="dialog_show_permission_dialog">Show permission dialog</string>

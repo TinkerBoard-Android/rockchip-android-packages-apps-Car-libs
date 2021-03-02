@@ -46,6 +46,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/car_ui_header_list_item_text_start_margin"
+            android:textDirection="locale"
             android:textAppearance="@style/TextAppearance.CarUi.ListItem.Header" />
 
         <TextView
@@ -53,6 +54,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/car_ui_list_item_text_no_icon_start_margin"
+            android:textDirection="locale"
             android:textAppearance="@style/TextAppearance.CarUi.ListItem.Body" />
     </LinearLayout>
 

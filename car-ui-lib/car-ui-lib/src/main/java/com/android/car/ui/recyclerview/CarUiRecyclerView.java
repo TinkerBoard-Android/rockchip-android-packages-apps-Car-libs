@@ -16,6 +16,7 @@
 package com.android.car.ui.recyclerview;
 
 import static com.android.car.ui.utils.CarUiUtils.findViewByRefId;
+import static com.android.car.ui.utils.RotaryConstants.ROTARY_CONTAINER;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_HORIZONTALLY_SCROLLABLE;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_VERTICALLY_SCROLLABLE;
 
@@ -25,8 +26,6 @@ import android.car.drivingstate.CarUxRestrictions;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -36,7 +35,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
+import android.view.ViewPropertyAnimator;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
@@ -53,15 +52,16 @@ import com.android.car.ui.recyclerview.decorations.grid.GridOffsetItemDecoration
 import com.android.car.ui.recyclerview.decorations.linear.LinearDividerItemDecoration;
 import com.android.car.ui.recyclerview.decorations.linear.LinearOffsetItemDecoration;
 import com.android.car.ui.recyclerview.decorations.linear.LinearOffsetItemDecoration.OffsetPosition;
+import com.android.car.ui.utils.CarUiUtils;
 import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
 import java.lang.annotation.Retention;
 import java.util.Objects;
 
 /**
- * View that extends a {@link RecyclerView} and wraps itself into a {@link LinearLayout} which
- * could potentially include a scrollbar that has page up and down arrows. Interaction with this
- * view is similar to a {@code RecyclerView} as it takes the same adapter and the layout manager.
+ * View that extends a {@link RecyclerView} and wraps itself into a {@link LinearLayout} which could
+ * potentially include a scrollbar that has page up and down arrows. Interaction with this view is
+ * similar to a {@code RecyclerView} as it takes the same adapter and the layout manager.
  */
 public final class CarUiRecyclerView extends RecyclerView {
 
@@ -77,22 +77,21 @@ public final class CarUiRecyclerView extends RecyclerView {
     private String mScrollBarClass;
     private int mScrollBarPaddingTop;
     private int mScrollBarPaddingBottom;
-    private boolean mHasScrolledToTop = false;
 
     @Nullable
     private ScrollBar mScrollBar;
 
-    @NonNull
+    @Nullable
     private GridOffsetItemDecoration mTopOffsetItemDecorationGrid;
-    @NonNull
+    @Nullable
     private GridOffsetItemDecoration mBottomOffsetItemDecorationGrid;
-    @NonNull
+    @Nullable
     private RecyclerView.ItemDecoration mTopOffsetItemDecorationLinear;
-    @NonNull
+    @Nullable
     private RecyclerView.ItemDecoration mBottomOffsetItemDecorationLinear;
-    @NonNull
+    @Nullable
     private GridDividerItemDecoration mDividerItemDecorationGrid;
-    @NonNull
+    @Nullable
     private RecyclerView.ItemDecoration mDividerItemDecorationLinear;
     private int mNumOfColumns;
     private boolean mInstallingExtScrollBar = false;
@@ -104,21 +103,23 @@ public final class CarUiRecyclerView extends RecyclerView {
     @Nullable
     private LinearLayout mContainer;
 
+    // Set to true when when styled attributes are read and initialized.
+    private boolean mIsInitialized;
     private boolean mEnableDividers;
     private int mTopOffset;
     private int mBottomOffset;
 
-    private ViewTreeObserver.OnGlobalLayoutListener mOnGlobalLayoutListener = () -> {
-        if (!mHasScrolledToTop && getLayoutManager() != null) {
-            // Scroll to the top after the first global layout, so that
-            // we can set padding for the insets and still have the
-            // recyclerview start at the top.
-            new Handler(Objects.requireNonNull(Looper.myLooper())).post(() ->
-                    getLayoutManager().scrollToPosition(0));
-            mHasScrolledToTop = true;
+    private boolean mHasScrolled = false;
+
+    private OnScrollListener mOnScrollListener = new OnScrollListener() {
+        @Override
+        public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+            if (dx > 0 || dy > 0) {
+                mHasScrolled = true;
+                removeOnScrollListener(this);
+            }
         }
     };
-
 
     /**
      * The possible values for setScrollBarPosition. The default value is actually {@link
@@ -131,13 +132,15 @@ public final class CarUiRecyclerView extends RecyclerView {
     @Retention(SOURCE)
     public @interface CarUiRecyclerViewLayout {
         /**
-         * Arranges items either horizontally in a single row or vertically in a single column.
-         * This is default.
+         * Arranges items either horizontally in a single row or vertically in a single column. This
+         * is default.
          */
         int LINEAR = 0;
 
-        /** Arranges items in a Grid. */
-        int GRID = 2;
+        /**
+         * Arranges items in a Grid.
+         */
+        int GRID = 1;
     }
 
     /**
@@ -164,8 +167,7 @@ public final class CarUiRecyclerView extends RecyclerView {
 
         /**
          * Sets the maximum number of items available in the adapter. A value less than '0' means
-         * the
-         * list should not be capped.
+         * the list should not be capped.
          */
         void setMaxItems(int maxItems);
     }
@@ -186,13 +188,13 @@ public final class CarUiRecyclerView extends RecyclerView {
     }
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr) {
-        initRotaryScroll(context, attrs, defStyleAttr);
         setClipToPadding(false);
         TypedArray a = context.obtainStyledAttributes(
                 attrs,
                 R.styleable.CarUiRecyclerView,
                 defStyleAttr,
                 R.style.Widget_CarUi_CarUiRecyclerView);
+        initRotaryScroll(a);
 
         mScrollBarEnabled = context.getResources().getBoolean(R.bool.car_ui_scrollbar_enable);
 
@@ -229,18 +231,25 @@ public final class CarUiRecyclerView extends RecyclerView {
         mBottomOffsetItemDecorationGrid =
                 new GridOffsetItemDecoration(mBottomOffset, mNumOfColumns,
                         OffsetPosition.END);
-        if (carUiRecyclerViewLayout == CarUiRecyclerViewLayout.LINEAR) {
+
+        mIsInitialized = true;
+
+        // Check if a layout manager has already been set via XML
+        boolean isLayoutMangerSet = getLayoutManager() != null;
+        if (!isLayoutMangerSet && carUiRecyclerViewLayout == CarUiRecyclerViewLayout.LINEAR) {
             setLayoutManager(new LinearLayoutManager(getContext()));
-        } else {
+        } else if (!isLayoutMangerSet && carUiRecyclerViewLayout == CarUiRecyclerViewLayout.GRID) {
             setLayoutManager(new GridLayoutManager(getContext(), mNumOfColumns));
         }
+        addOnScrollListener(mOnScrollListener);
 
         a.recycle();
-
 
         if (!mScrollBarEnabled) {
             return;
         }
+
+        mContainer = new LinearLayout(getContext());
 
         setVerticalScrollBarEnabled(false);
         setHorizontalScrollBarEnabled(false);
@@ -249,59 +258,65 @@ public final class CarUiRecyclerView extends RecyclerView {
     }
 
     @Override
-    public void setLayoutManager(@Nullable LayoutManager layout) {
-        addItemDecorations(layout);
-        super.setLayoutManager(layout);
+    public void setLayoutManager(@Nullable LayoutManager layoutManager) {
+        // Cannot setup item decorations before stylized attributes have been read.
+        if (mIsInitialized) {
+            addItemDecorations(layoutManager);
+        }
+        super.setLayoutManager(layoutManager);
     }
 
-    private void addItemDecorations(LayoutManager layout) {
-        // remove existing Item decorations
-        removeItemDecoration(mDividerItemDecorationGrid);
-        removeItemDecoration(mTopOffsetItemDecorationGrid);
-        removeItemDecoration(mBottomOffsetItemDecorationGrid);
-        removeItemDecoration(mDividerItemDecorationLinear);
-        removeItemDecoration(mTopOffsetItemDecorationLinear);
-        removeItemDecoration(mBottomOffsetItemDecorationLinear);
+    // This method should not be invoked before item decorations are initialized by the #init()
+    // method.
+    private void addItemDecorations(LayoutManager layoutManager) {
+        // remove existing Item decorations.
+        removeItemDecoration(Objects.requireNonNull(mDividerItemDecorationGrid));
+        removeItemDecoration(Objects.requireNonNull(mTopOffsetItemDecorationGrid));
+        removeItemDecoration(Objects.requireNonNull(mBottomOffsetItemDecorationGrid));
+        removeItemDecoration(Objects.requireNonNull(mDividerItemDecorationLinear));
+        removeItemDecoration(Objects.requireNonNull(mTopOffsetItemDecorationLinear));
+        removeItemDecoration(Objects.requireNonNull(mBottomOffsetItemDecorationLinear));
 
-        if (layout instanceof GridLayoutManager) {
+        if (layoutManager instanceof GridLayoutManager) {
             if (mEnableDividers) {
-                addItemDecoration(mDividerItemDecorationGrid);
+                addItemDecoration(Objects.requireNonNull(mDividerItemDecorationGrid));
             }
-            addItemDecoration(mTopOffsetItemDecorationGrid);
-            addItemDecoration(mBottomOffsetItemDecorationGrid);
-            setNumOfColumns(((GridLayoutManager) layout).getSpanCount());
+            addItemDecoration(Objects.requireNonNull(mTopOffsetItemDecorationGrid));
+            addItemDecoration(Objects.requireNonNull(mBottomOffsetItemDecorationGrid));
+            setNumOfColumns(((GridLayoutManager) layoutManager).getSpanCount());
         } else {
             if (mEnableDividers) {
-                addItemDecoration(mDividerItemDecorationLinear);
+                addItemDecoration(Objects.requireNonNull(mDividerItemDecorationLinear));
             }
-            addItemDecoration(mTopOffsetItemDecorationLinear);
-            addItemDecoration(mBottomOffsetItemDecorationLinear);
+            addItemDecoration(Objects.requireNonNull(mTopOffsetItemDecorationLinear));
+            addItemDecoration(Objects.requireNonNull(mBottomOffsetItemDecorationLinear));
         }
     }
 
     /**
-     * If this view's content description isn't set to opt out of scrolling via the rotary
-     * controller, initialize it accordingly.
+     * If this view's {@code rotaryScrollEnabled} attribute is set to true, sets the content
+     * description so that the {@code RotaryService} will treat it as a scrollable container and
+     * initializes this view accordingly.
      */
-    private void initRotaryScroll(Context context, AttributeSet attrs, int defStyleAttr) {
-        CharSequence contentDescription = getContentDescription();
-        if (contentDescription == null) {
-            TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.RecyclerView,
-                    defStyleAttr, /* defStyleRes= */ 0);
-            int orientation = a.getInt(R.styleable.RecyclerView_android_orientation,
+    private void initRotaryScroll(@Nullable TypedArray styledAttributes) {
+        boolean rotaryScrollEnabled = styledAttributes != null && styledAttributes.getBoolean(
+                R.styleable.CarUiRecyclerView_rotaryScrollEnabled, /* defValue=*/ false);
+        if (rotaryScrollEnabled) {
+            int orientation = styledAttributes.getInt(R.styleable.RecyclerView_android_orientation,
                     LinearLayout.VERTICAL);
-            setContentDescription(
-                    orientation == LinearLayout.HORIZONTAL
-                            ? ROTARY_HORIZONTALLY_SCROLLABLE
-                            : ROTARY_VERTICALLY_SCROLLABLE);
-        } else if (!ROTARY_HORIZONTALLY_SCROLLABLE.contentEquals(contentDescription)
-                && !ROTARY_VERTICALLY_SCROLLABLE.contentEquals(contentDescription)) {
-            return;
+            CarUiUtils.setRotaryScrollEnabled(
+                    this, /* isVertical= */ orientation == LinearLayout.VERTICAL);
+        } else {
+            CharSequence contentDescription = getContentDescription();
+            rotaryScrollEnabled = contentDescription != null
+                    && (ROTARY_HORIZONTALLY_SCROLLABLE.contentEquals(contentDescription)
+                    || ROTARY_VERTICALLY_SCROLLABLE.contentEquals(contentDescription));
         }
 
-        // Convert SOURCE_ROTARY_ENCODER scroll events into SOURCE_MOUSE scroll events that
-        // RecyclerView knows how to handle.
-        setOnGenericMotionListener((v, event) -> {
+        // If rotary scrolling is enabled, set a generic motion event listener to convert
+        // SOURCE_ROTARY_ENCODER scroll events into SOURCE_MOUSE scroll events that RecyclerView
+        // knows how to handle.
+        setOnGenericMotionListener(rotaryScrollEnabled ? (v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_SCROLL) {
                 if (event.getSource() == InputDevice.SOURCE_ROTARY_ENCODER) {
                     MotionEvent mouseEvent = MotionEvent.obtain(event);
@@ -311,11 +326,11 @@ public final class CarUiRecyclerView extends RecyclerView {
                 }
             }
             return false;
-        });
+        } : null);
 
-        // Mark this view as focusable. This view will be focused when no focusable elements are
-        // visible.
-        setFocusable(true);
+        // If rotary scrolling is enabled, mark this view as focusable. This view will be focused
+        // when no focusable elements are visible.
+        setFocusable(rotaryScrollEnabled);
 
         // Focus this view before descendants so that the RotaryService can focus this view when it
         // wants to.
@@ -324,15 +339,20 @@ public final class CarUiRecyclerView extends RecyclerView {
         // Disable the default focus highlight. No highlight should appear when this view is
         // focused.
         setDefaultFocusHighlightEnabled(false);
+
+        // This view is a rotary container if it's not a scrollable container.
+        if (!rotaryScrollEnabled) {
+            super.setContentDescription(ROTARY_CONTAINER);
+        }
     }
 
     @Override
     protected void onRestoreInstanceState(Parcelable state) {
         super.onRestoreInstanceState(state);
 
-        // If we're restoring an existing RecyclerView, we don't want
-        // to do the initial scroll to top
-        mHasScrolledToTop = true;
+        // If we're restoring an existing RecyclerView, consider
+        // it as having already scrolled some.
+        mHasScrolled = true;
     }
 
     @Override
@@ -369,7 +389,6 @@ public final class CarUiRecyclerView extends RecyclerView {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mCarUxRestrictionsUtil.register(mListener);
-        this.getViewTreeObserver().addOnGlobalLayoutListener(mOnGlobalLayoutListener);
         if (mInstallingExtScrollBar || !mScrollBarEnabled) {
             return;
         }
@@ -385,11 +404,10 @@ public final class CarUiRecyclerView extends RecyclerView {
 
     /**
      * This method will detach the current recycler view from its parent and attach it to the
-     * container which is a LinearLayout. Later the entire container is attached to the
-     * parent where the recycler view was set with the same layout params.
+     * container which is a LinearLayout. Later the entire container is attached to the parent where
+     * the recycler view was set with the same layout params.
      */
     private void installExternalScrollBar() {
-        mContainer = new LinearLayout(getContext());
         LayoutInflater inflater = LayoutInflater.from(getContext());
         inflater.inflate(R.layout.car_ui_recycler_view, mContainer, true);
         mContainer.setVisibility(mContainerVisibility);
@@ -444,10 +462,23 @@ public final class CarUiRecyclerView extends RecyclerView {
     }
 
     @Override
+    public void setAlpha(float value) {
+        if (mScrollBarEnabled) {
+            mContainer.setAlpha(value);
+        } else {
+            super.setAlpha(value);
+        }
+    }
+
+    @Override
+    public ViewPropertyAnimator animate() {
+        return mScrollBarEnabled ? mContainer.animate() : super.animate();
+    }
+
+    @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mCarUxRestrictionsUtil.unregister(mListener);
-        this.getViewTreeObserver().removeOnGlobalLayoutListener(mOnGlobalLayoutListener);
     }
 
     @Override
@@ -455,6 +486,13 @@ public final class CarUiRecyclerView extends RecyclerView {
         mContainerPaddingRelative = null;
         if (mScrollBarEnabled) {
             super.setPadding(0, top, 0, bottom);
+            if (!mHasScrolled) {
+                // If we haven't scrolled, and thus are still at the top of the screen,
+                // we should stay scrolled to the top after applying padding. Without this
+                // scroll, the padding will start scrolled offscreen. We need the padding
+                // to be onscreen to shift the content into a good visible range.
+                scrollToPosition(0);
+            }
             mContainerPadding = new Rect(left, 0, right, 0);
             if (mContainer != null) {
                 mContainer.setPadding(left, 0, right, 0);
@@ -470,6 +508,13 @@ public final class CarUiRecyclerView extends RecyclerView {
         mContainerPadding = null;
         if (mScrollBarEnabled) {
             super.setPaddingRelative(0, top, 0, bottom);
+            if (!mHasScrolled) {
+                // If we haven't scrolled, and thus are still at the top of the screen,
+                // we should stay scrolled to the top after applying padding. Without this
+                // scroll, the padding will start scrolled offscreen. We need the padding
+                // to be onscreen to shift the content into a good visible range.
+                scrollToPosition(0);
+            }
             mContainerPaddingRelative = new Rect(start, 0, end, 0);
             if (mContainer != null) {
                 mContainer.setPaddingRelative(start, 0, end, 0);
@@ -481,8 +526,8 @@ public final class CarUiRecyclerView extends RecyclerView {
     }
 
     /**
-     * Sets the scrollbar's padding top and bottom.
-     * This padding is applied in addition to the padding of the RecyclerView.
+     * Sets the scrollbar's padding top and bottom. This padding is applied in addition to the
+     * padding of the RecyclerView.
      */
     public void setScrollBarPadding(int paddingTop, int paddingBottom) {
         if (mScrollBarEnabled) {
@@ -516,6 +561,22 @@ public final class CarUiRecyclerView extends RecyclerView {
             return;
         }
         removeItemDecoration(mDividerItemDecorationGrid);
+    }
+
+    @Override
+    public void setContentDescription(CharSequence contentDescription) {
+        super.setContentDescription(contentDescription);
+        initRotaryScroll(/* styledAttributes= */ null);
+    }
+
+    @Override
+    public void setAdapter(@Nullable Adapter adapter) {
+        if (mScrollBar != null) {
+            // Make sure this is called before super so that scrollbar can get a reference to
+            // the adapter using RecyclerView#getAdapter()
+            mScrollBar.adapterChanged(adapter);
+        }
+        super.setAdapter(adapter);
     }
 
     private static RuntimeException andLog(String msg, Throwable t) {

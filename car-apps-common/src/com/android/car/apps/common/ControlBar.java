@@ -16,6 +16,8 @@
 
 package com.android.car.apps.common;
 
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -29,6 +31,7 @@ import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -90,6 +93,10 @@ public class ControlBar extends RelativeLayout implements ExpandableControlBar {
     private boolean mExpandEnabled;
     // Callback for the expand/collapse button
     private ExpandCollapseCallback mExpandCollapseCallback;
+    // The root of the transition animation.
+    private ViewGroup mTransitionRoot;
+    // Whether this control bar has focus.
+    private boolean mHasFocus;
 
     // Default number of columns, if unspecified
     private static final int DEFAULT_COLUMNS = 3;
@@ -160,6 +167,15 @@ public class ControlBar extends RelativeLayout implements ExpandableControlBar {
         mDefaultExpandCollapseView.setContentDescription(context.getString(
                 R.string.control_bar_expand_collapse_button));
         mDefaultExpandCollapseView.setOnClickListener(v -> onExpandCollapse());
+
+        // Collapse the control bar when it is expanded and loses focus.
+        getViewTreeObserver().addOnGlobalFocusChangeListener((oldFocus, newFocus) -> {
+            boolean hasFocus = hasFocus();
+            if (mHasFocus && !hasFocus && mIsExpanded) {
+                onExpandCollapse();
+            }
+            mHasFocus = hasFocus;
+        });
     }
 
     private int getSlotIndex(@SlotPosition int slotPosition) {
@@ -310,9 +326,31 @@ public class ControlBar extends RelativeLayout implements ExpandableControlBar {
                 .addTransition(new Fade())
                 .setDuration(animationDuration)
                 .setInterpolator(new FastOutSlowInInterpolator());
-        TransitionManager.beginDelayedTransition(this, set);
+        maybeInitTransitionRoot();
+        TransitionManager.beginDelayedTransition(mTransitionRoot, set);
         for (int i = 0; i < mNumExtraRowsInUse; i++) {
             mRowsContainer.getChildAt(i).setVisibility(mIsExpanded ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private void maybeInitTransitionRoot() {
+        if (mTransitionRoot != null) {
+            return;
+        }
+        // During the control bar expanding/collapsing animation, the height of the control bar
+        // changes gradually. If the height of its ancestor is WRAP_CONTENT, the height of its
+        // ancestor will not change during the animation, causing janky animation. To fix it the
+        // animation should be played on the highest ancestor that wraps the control bar vertically.
+        mTransitionRoot = this;
+        ViewParent viewParent = getParent();
+        while (viewParent != null && viewParent instanceof ViewGroup) {
+            ViewGroup parent = (ViewGroup) viewParent;
+            if (parent.getLayoutParams().height == WRAP_CONTENT) {
+                mTransitionRoot = parent;
+                viewParent = parent.getParent();
+            } else {
+                break;
+            }
         }
     }
 

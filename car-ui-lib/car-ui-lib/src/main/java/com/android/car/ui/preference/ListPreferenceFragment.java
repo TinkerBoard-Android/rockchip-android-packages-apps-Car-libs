@@ -30,6 +30,7 @@ import androidx.preference.DialogPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 
+import com.android.car.ui.FocusArea;
 import com.android.car.ui.R;
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
@@ -51,20 +52,23 @@ import java.util.List;
  */
 public class ListPreferenceFragment extends Fragment implements InsetsChangedListener {
 
-    private ToolbarController mToolbar;
+    private static final String ARG_FULLSCREEN = "fullscreen";
+
     private ListPreference mPreference;
     private CarUiContentListItem mSelectedItem;
     private int mSelectedIndex = -1;
+    private boolean mFullScreen;
 
     /**
      * Returns a new instance of {@link ListPreferenceFragment} for the {@link ListPreference} with
      * the given {@code key}.
      */
     @NonNull
-    static ListPreferenceFragment newInstance(String key) {
+    static ListPreferenceFragment newInstance(String key, boolean fullScreen) {
         ListPreferenceFragment fragment = new ListPreferenceFragment();
         Bundle b = new Bundle(/* capacity= */ 1);
         b.putString(ARG_KEY, key);
+        b.putBoolean(ARG_FULLSCREEN, fullScreen);
         fragment.setArguments(b);
         return fragment;
     }
@@ -85,29 +89,40 @@ public class ListPreferenceFragment extends Fragment implements InsetsChangedLis
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         final CarUiRecyclerView carUiRecyclerView = CarUiUtils.requireViewByRefId(view, R.id.list);
-        mToolbar = CarUi.getToolbar(getActivity());
+        mFullScreen = requireArguments().getBoolean(ARG_FULLSCREEN, true);
+        ToolbarController toolbar = mFullScreen ? CarUi.getToolbar(getActivity()) : null;
 
         // TODO(b/150230923) remove the code for the old toolbar height change when apps are ready
-        if (mToolbar == null) {
-            Toolbar toolbarView = CarUiUtils.requireViewByRefId(view, R.id.toolbar);
-            mToolbar = toolbarView;
+        if (toolbar == null) {
+            Toolbar toolbarView = CarUiUtils.findViewByRefId(view, R.id.toolbar);
+            toolbar = toolbarView;
 
-            carUiRecyclerView.setPadding(0, toolbarView.getHeight(), 0, 0);
-            toolbarView.registerToolbarHeightChangeListener(newHeight -> {
-                if (carUiRecyclerView.getPaddingTop() == newHeight) {
-                    return;
-                }
+            if (toolbarView != null) {
+                carUiRecyclerView.setPadding(0, toolbarView.getHeight(), 0, 0);
+                toolbarView.registerToolbarHeightChangeListener(newHeight -> {
+                    if (carUiRecyclerView.getPaddingTop() == newHeight) {
+                        return;
+                    }
 
-                int oldHeight = carUiRecyclerView.getPaddingTop();
-                carUiRecyclerView.setPadding(0, newHeight, 0, 0);
-                carUiRecyclerView.scrollBy(0, oldHeight - newHeight);
-            });
+                    int oldHeight = carUiRecyclerView.getPaddingTop();
+                    carUiRecyclerView.setPadding(0, newHeight, 0, 0);
+                    carUiRecyclerView.scrollBy(0, oldHeight - newHeight);
+
+                    FocusArea focusArea = view.findViewById(R.id.car_ui_focus_area);
+                    if (focusArea != null) {
+                        focusArea.setHighlightPadding(0, newHeight, 0, 0);
+                        focusArea.setBoundsOffset(0, newHeight, 0, 0);
+                    }
+                });
+            }
         }
 
         carUiRecyclerView.setClipToPadding(false);
         mPreference = getListPreference();
-        mToolbar.setTitle(mPreference.getTitle());
-        mToolbar.setState(Toolbar.State.SUBPAGE);
+        if (toolbar != null) {
+            toolbar.setTitle(mPreference.getTitle());
+            toolbar.setState(Toolbar.State.SUBPAGE);
+        }
 
         CharSequence[] entries = mPreference.getEntries();
         CharSequence[] entryValues = mPreference.getEntryValues();
@@ -178,11 +193,7 @@ public class ListPreferenceFragment extends Fragment implements InsetsChangedLis
     }
 
     private ListPreference getListPreference() {
-        if (getArguments() == null) {
-            throw new IllegalStateException("Preference arguments cannot be null");
-        }
-
-        String key = getArguments().getString(ARG_KEY);
+        String key = requireArguments().getString(ARG_KEY);
         DialogPreference.TargetFragment fragment =
                 (DialogPreference.TargetFragment) getTargetFragment();
 
@@ -210,9 +221,17 @@ public class ListPreferenceFragment extends Fragment implements InsetsChangedLis
 
     @Override
     public void onCarUiInsetsChanged(@NonNull Insets insets) {
+        if (!mFullScreen) {
+            return;
+        }
         View view = requireView();
         CarUiUtils.requireViewByRefId(view, R.id.list)
                 .setPadding(0, insets.getTop(), 0, insets.getBottom());
         view.setPadding(insets.getLeft(), 0, insets.getRight(), 0);
+        FocusArea focusArea = view.findViewById(R.id.car_ui_focus_area);
+        if (focusArea != null) {
+            focusArea.setHighlightPadding(0, insets.getTop(), 0, insets.getBottom());
+            focusArea.setBoundsOffset(0, insets.getTop(), 0, insets.getBottom());
+        }
     }
 }

@@ -283,6 +283,7 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
                 case ICON:
                     mSupplementalIcon.setVisibility(View.VISIBLE);
                     mSupplementalIcon.setImageDrawable(item.getSupplementalIcon());
+
                     mActionContainer.setVisibility(View.VISIBLE);
 
                     // If the icon has a click listener, use a reduced touch interceptor to create
@@ -309,8 +310,7 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
                         mActionContainerTouchInterceptor.setOnClickListener(
                                 (container) -> {
                                     if (item.getSupplementalIconOnClickListener() != null) {
-                                        item.getSupplementalIconOnClickListener().onClick(
-                                                mSupplementalIcon);
+                                        item.getSupplementalIconOnClickListener().onClick(item);
                                     }
                                 });
                         mTouchInterceptor.setVisibility(View.GONE);
