@@ -61,6 +61,7 @@ import android.inputmethodservice.InputMethodService;
 import android.inputmethodservice.InputMethodService.Insets;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.LayoutInflater;
 import android.view.SurfaceControlViewHost;
 import android.view.View;
@@ -105,9 +106,6 @@ public class CarUiImeWideScreenControllerTest {
 
     @Mock
     private InputConnection mInputConnection;
-
-    @Mock
-    private SurfaceControlViewHost.SurfacePackage mSurfacePackageMock;
 
     @Mock
     private InputMethodService mInputMethodService;
@@ -290,7 +288,12 @@ public class CarUiImeWideScreenControllerTest {
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             Bundle bundle = new Bundle();
-            bundle.putParcelable(CONTENT_AREA_SURFACE_PACKAGE, mSurfacePackageMock);
+            // can't be inline to avoid ambiguity of constructors in SurfaceControlViewHost.
+            IBinder hostToken = null;
+            SurfaceControlViewHost surfaceControlViewHost = new SurfaceControlViewHost(mContext,
+                    null, hostToken);
+            bundle.putParcelable(CONTENT_AREA_SURFACE_PACKAGE,
+                    surfaceControlViewHost.getSurfacePackage());
             sCarUiImeWideScreenController.onAppPrivateCommand(WIDE_SCREEN_ACTION, bundle);
         });
 
