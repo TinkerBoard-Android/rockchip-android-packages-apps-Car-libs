@@ -51,7 +51,10 @@ public class CarUi {
      */
     @Nullable
     @SuppressWarnings("unchecked")
-    public static <T> T findCarUiComponentById(View view, int id) {
+    public static <T> T findCarUiComponentById(@Nullable View view, int id) {
+        if (view == null) {
+            return null;
+        }
         View componentView = view.findViewById(id);
         return componentView != null
                 ? (T) componentView.getTag(R.id.car_ui_component_reference)

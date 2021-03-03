@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright 2019 The Android Open Source Project
+  ~ Copyright 2021 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,20 +14,18 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical">
-
-    <CheckBox
-        android:id="@+id/check"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    <TextView
+        android:id="@+id/car_ui_button_text_view"
+        android:layout_height="72dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/widget_checkbox_text"/>
-
-    <Switch
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/widget_switch_text"/>
-</LinearLayout>
+        android:minWidth="72dp"
+        android:background="@drawable/car_ui_button_floating_background"
+        android:textAppearance="@style/TextAppearance.CarUi.Body3"
+        android:elevation="10dp"
+        android:drawableTint="?android:attr/colorForeground"
+        android:gravity="center"/>
+</FrameLayout>

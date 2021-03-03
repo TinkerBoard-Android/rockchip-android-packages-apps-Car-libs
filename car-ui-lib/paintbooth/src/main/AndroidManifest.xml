@@ -114,6 +114,10 @@
         android:name=".caruirecyclerview.CarUiListItemActivity"
         android:exported="false"
         android:parentActivityName=".MainActivity"/>
+    <activity
+        android:name=".button.CarUiButtonActivity"
+        android:exported="false"
+        android:parentActivityName=".MainActivity"/>
 
     <service
         android:label="Current Activity Service"

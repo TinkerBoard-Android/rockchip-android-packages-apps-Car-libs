@@ -16,10 +16,8 @@
 package com.android.car.ui.button;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.view.View;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.car.ui.CarUiLayoutInflaterFactory;
@@ -57,46 +55,6 @@ public interface CarUiButton {
         controller.getView().setTag(R.id.car_ui_component_reference, controller);
         return controller;
     }
-
-    enum Size {
-        SMALL,
-        MEDIUM,
-        LARGE,
-    }
-
-    /**
-     * Sets the color scheme of the button.
-     *
-     * @see CarUiButtonColorScheme
-     */
-    void setColorScheme(@NonNull CarUiButtonColorScheme scheme);
-
-    /**
-     * Sets an icon to display on the button.
-     */
-    void setIcon(@Nullable Drawable icon);
-
-    /**
-     * Sets the title of the button.
-     *
-     * This should accommodate 20 'W's of width, after which the text may be cut off.
-     *
-     * @param title The title of the button.
-     */
-    void setTitle(@Nullable CharSequence title);
-
-    /**
-     * Sets the {@link Size} of the button. Your {@link android.view.ViewGroup.LayoutParams} have to
-     * accommodate this, so it's recommended to use wrap_content for both width/height. If
-     * LayoutParams restrict the button to too small of an area, it may be cut off.
-     *
-     * This can also change the design of the button to take advantage of the space.
-     *
-     * By default the size is {@link Size#MEDIUM}.
-     *
-     * @param size the size of the button.
-     */
-    void setSize(@NonNull Size size);
 
     /** Same as {@link View#setEnabled(boolean)} */
     void setEnabled(boolean enabled);

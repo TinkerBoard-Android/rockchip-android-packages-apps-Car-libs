@@ -36,14 +36,14 @@ import java.util.Objects;
 public class CarUiButtonAttributes {
     private final int mId;
     private final boolean mEnabled;
-    @NonNull
-    private final CarUiButton.Size mSize;
     @Nullable
-    private final CharSequence mTitle;
+    private final CharSequence mText;
     @Nullable
     private final Drawable mIcon;
     @NonNull
     private final CarUiButtonColorScheme mColorScheme;
+    @NonNull
+    private final CarUiButtonStyle mStyle;
 
     /** Creates a new {@link Builder} */
     public static Builder builder() {
@@ -53,10 +53,10 @@ public class CarUiButtonAttributes {
     private CarUiButtonAttributes(Builder builder) {
         mId = builder.mId;
         mEnabled = builder.mEnabled;
-        mSize = builder.mSize;
-        mTitle = builder.mTitle;
+        mText = builder.mText;
         mIcon = builder.mIcon;
         mColorScheme = builder.mColorScheme;
+        mStyle = builder.mStyle;
     }
 
     public int getId() {
@@ -67,14 +67,9 @@ public class CarUiButtonAttributes {
         return mEnabled;
     }
 
-    @NonNull
-    public CarUiButton.Size getSize() {
-        return mSize;
-    }
-
     @Nullable
-    public CharSequence getTitle() {
-        return mTitle;
+    public CharSequence getText() {
+        return mText;
     }
 
     @Nullable
@@ -87,18 +82,23 @@ public class CarUiButtonAttributes {
         return mColorScheme;
     }
 
+    @NonNull
+    public CarUiButtonStyle getStyle() {
+        return mStyle;
+    }
+
     /** A builder class for CarUiButtonAttributes. Create it with {@link #builder()} */
     public static class Builder {
         private int mId = View.NO_ID;
         private boolean mEnabled = true;
-        @NonNull
-        private CarUiButton.Size mSize = CarUiButton.Size.MEDIUM;
         @Nullable
-        private CharSequence mTitle;
+        private CharSequence mText;
         @Nullable
         private Drawable mIcon;
         @NonNull
         private CarUiButtonColorScheme mColorScheme = CarUiButtonColorScheme.BASIC;
+        @NonNull
+        private CarUiButtonStyle mStyle = CarUiButtonStyle.PRIMARY;
 
         private Builder() {
         }
@@ -118,15 +118,9 @@ public class CarUiButtonAttributes {
             return this;
         }
 
-        /** Sets the size of the button. See {@link CarUiButton.Size} */
-        public Builder setSize(@NonNull CarUiButton.Size size) {
-            mSize = Objects.requireNonNull(size);
-            return this;
-        }
-
-        /** Sets the title of the button */
-        public Builder setTitle(@Nullable CharSequence title) {
-            mTitle = title;
+        /** Sets the text of the button */
+        public Builder setText(@Nullable CharSequence text) {
+            mText = text;
             return this;
         }
 
@@ -139,6 +133,12 @@ public class CarUiButtonAttributes {
         /** Sets the color of the button. See {@link CarUiButtonColorScheme} */
         public Builder setColorScheme(@NonNull CarUiButtonColorScheme colorScheme) {
             mColorScheme = Objects.requireNonNull(colorScheme);
+            return this;
+        }
+
+        /** Sets the style of the button. See {@link CarUiButtonStyle} */
+        public Builder setStyle(@NonNull CarUiButtonStyle style) {
+            mStyle = Objects.requireNonNull(style);
             return this;
         }
 
@@ -160,14 +160,20 @@ public class CarUiButtonAttributes {
         try {
             builder.setId(array.getResourceId(R.styleable.CarUiButton_android_id, View.NO_ID));
             builder.setEnabled(array.getBoolean(R.styleable.CarUiButton_android_enabled, true));
-            builder.setSize(unpackEnum(array.getInteger(R.styleable.CarUiButton_carUiButtonSize, 1),
-                    CarUiButton.Size.SMALL, CarUiButton.Size.MEDIUM, CarUiButton.Size.LARGE));
-            builder.setTitle(array.getString(R.styleable.CarUiButton_carUiButtonTitle));
+            builder.setText(array.getString(R.styleable.CarUiButton_carUiButtonTitle));
             builder.setIcon(array.getDrawable(R.styleable.CarUiButton_carUiButtonIcon));
             builder.setColorScheme(unpackEnum(
                     array.getInteger(R.styleable.CarUiButton_carUiButtonColorScheme, 0),
-                    CarUiButtonColorScheme.BASIC, CarUiButtonColorScheme.WARNING,
-                    CarUiButtonColorScheme.ERROR));
+                    CarUiButtonColorScheme.BASIC,
+                    CarUiButtonColorScheme.RED,
+                    CarUiButtonColorScheme.BLUE,
+                    CarUiButtonColorScheme.GREEN,
+                    CarUiButtonColorScheme.YELLOW));
+            builder.setStyle(unpackEnum(
+                    array.getInteger(R.styleable.CarUiButton_carUiButtonStyle, 0),
+                    CarUiButtonStyle.PRIMARY,
+                    CarUiButtonStyle.SECONDARY,
+                    CarUiButtonStyle.FLOATING));
         } finally {
             array.recycle();
         }
@@ -176,7 +182,7 @@ public class CarUiButtonAttributes {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T unpackEnum(int intVal, Object... enumVals) {
-        return (T) enumVals[intVal];
+    private static <T> T unpackEnum(int intVal, T... enumVals) {
+        return enumVals[intVal];
     }
 }
