@@ -247,39 +247,6 @@ public class CarUiImeWideScreenControllerTest {
     }
 
     @Test
-    public void onAppPrivateCommand_shouldShowSearchResults() {
-        ContentResolver cr = ApplicationProvider.getApplicationContext().getContentResolver();
-        cr.insert(Uri.parse(AUTHORITY), getRecord());
-
-        when(mInputMethodService.getWindow()).thenReturn(mDialog);
-        when(mDialog.getWindow()).thenReturn(mWindow);
-
-        sCarUiImeWideScreenController.setExtractEditText(new ExtractEditText(mContext));
-        sCarUiImeWideScreenController.setEditorInfo(mEditorInfoMock);
-        sCarUiImeWideScreenController.setInputConnection(mInputConnection);
-
-        CarUiImeWideScreenController spy = Mockito.spy(sCarUiImeWideScreenController);
-
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            doReturn("com.android.car.ui.test").when(spy).getPackageName(ArgumentMatchers.any());
-            doNothing().when(spy).onItemClicked(ArgumentMatchers.any());
-            Bundle bundle = new Bundle();
-            spy.onAppPrivateCommand(WIDE_SCREEN_SEARCH_RESULTS, bundle);
-        });
-
-        onView(withId(R.id.car_ui_wideScreenSearchResultList)).check(matches(isDisplayed()));
-        onView(withId(R.id.car_ui_wideScreenSearchResultList))
-                .check(matches(atPosition(0, hasDescendant(withText("Title")))));
-        onView(withId(R.id.car_ui_wideScreenSearchResultList))
-                .check(matches(atPosition(0, hasDescendant(withText("SubTitle")))));
-        onView(withId(R.id.car_ui_wideScreenSearchResultList))
-                .perform(RecyclerViewActions.actionOnItem(hasDescendant(withText("Title")),
-                        click()));
-
-        verify(spy, times(1)).onItemClicked("1");
-    }
-
-    @Test
     public void onAppPrivateCommand_shouldShowSurfaceView() {
         when(mInputMethodService.getWindow()).thenReturn(mDialog);
         when(mDialog.getWindow()).thenReturn(mWindow);

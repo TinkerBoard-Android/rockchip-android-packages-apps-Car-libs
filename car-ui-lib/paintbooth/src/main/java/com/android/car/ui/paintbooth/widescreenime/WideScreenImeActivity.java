@@ -30,12 +30,10 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -56,7 +54,6 @@ import com.android.car.ui.toolbar.ToolbarController;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Activity that shows different scenarios for wide screen ime.
@@ -121,40 +118,20 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
             mSearchItems.add(item);
         }
 
-        AtomicBoolean showResultsInView = new AtomicBoolean(false);
-
         mMenuItems.add(MenuItem.builder(this)
                 .setToSearch()
                 .setOnClickListener(i -> {
                     toolbar.setState(State.SEARCH);
-                    if (showResultsInView.get() && toolbar.canShowSearchResultsView()) {
-                        LayoutInflater inflater = LayoutInflater.from(this);
-                        View contentArea = inflater.inflate(R.layout.ime_wide_screen_dummy_view,
-                                null, true);
-                        contentArea.findViewById(R.id.button_1).setOnClickListener(v ->
-                                Toast.makeText(this, "Button 1 clicked", Toast.LENGTH_SHORT).show()
-                        );
-
-                        contentArea.findViewById(R.id.button_2).setOnClickListener(v -> {
-                                    Toast.makeText(this, "Clearing the view...",
-                                            Toast.LENGTH_SHORT).show();
-                                    toolbar.setSearchResultsView(null);
-                                }
-                        );
-                        toolbar.setSearchResultsView(contentArea);
-                    } else if (toolbar.canShowSearchResultItems()) {
+                    if (toolbar.canShowSearchResultItems()) {
                         toolbar.setSearchResultsView(null);
                         toolbar.setSearchResultItems(mSearchItems);
+                        toolbar.setSearchResultsInputViewIcon(
+                                getDrawable(R.drawable.car_ui_icon_search));
                     }
                 })
                 .build());
 
         toolbar.setMenuItems(mMenuItems);
-
-        mWidescreenItems.add(new ButtonElement("Show custom search view", v -> {
-            Switch swtch = (Switch) v;
-            showResultsInView.set(swtch.isChecked());
-        }));
 
         mWidescreenItems.add(new EditTextElement("Default Input Edit Text field", null));
         mWidescreenItems.add(
@@ -236,7 +213,6 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
         mInputMethodManager.sendAppPrivateCommand(view, WIDE_SCREEN_ACTION, bundle);
     }
 
-
     private abstract static class ViewHolder extends RecyclerView.ViewHolder {
 
         ViewHolder(@NonNull View itemView) {
@@ -247,6 +223,7 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
     }
 
     private static class EditTextViewHolder extends ViewHolder {
+
         private final EditText mEditText;
 
         EditTextViewHolder(@NonNull View itemView) {
@@ -265,26 +242,6 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
         }
     }
 
-    private static class ButtonViewHolder extends ViewHolder {
-        private final Switch mSwitch;
-
-        ButtonViewHolder(@NonNull View itemView) {
-            super(itemView);
-            mSwitch = itemView.requireViewById(R.id.button);
-        }
-
-        @Override
-        public void bind(ListElement e) {
-            if (!(e instanceof ButtonElement)) {
-                throw new IllegalArgumentException("Expected an ButtonElement");
-            }
-            ButtonElement element = (ButtonElement) e;
-            mSwitch.setText(element.getText());
-            mSwitch.setOnClickListener(element.getOnClickListener());
-            mSwitch.setChecked(false);
-        }
-    }
-
     private final RecyclerView.Adapter<ViewHolder> mAdapter =
             new RecyclerView.Adapter<ViewHolder>() {
                 @Override
@@ -298,9 +255,6 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
                     if (viewType == ListElement.TYPE_EDIT_TEXT) {
                         return new EditTextViewHolder(
                                 inflater.inflate(R.layout.edit_text_list_item, parent, false));
-                    } else if (viewType == ListElement.TYPE_BUTTON) {
-                        return new ButtonViewHolder(
-                                inflater.inflate(R.layout.list_item_switch, parent, false));
                     } else {
                         throw new IllegalArgumentException("Unknown viewType: " + viewType);
                     }
@@ -326,8 +280,8 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
     }
 
     private abstract static class ListElement {
+
         static final int TYPE_EDIT_TEXT = 0;
-        static final int TYPE_BUTTON = 1;
 
         private final String mText;
 
@@ -343,6 +297,7 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
     }
 
     private static class EditTextElement extends ListElement {
+
         private OnFocusChangeListener mListener;
 
         EditTextElement(String text, OnFocusChangeListener listener) {
@@ -357,24 +312,6 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
         @Override
         int getType() {
             return TYPE_EDIT_TEXT;
-        }
-    }
-
-    private static class ButtonElement extends ListElement {
-        private OnClickListener mOnClickListener;
-
-        ButtonElement(String text, OnClickListener listener) {
-            super(text);
-            mOnClickListener = listener;
-        }
-
-        public OnClickListener getOnClickListener() {
-            return mOnClickListener;
-        }
-
-        @Override
-        int getType() {
-            return TYPE_BUTTON;
         }
     }
 }

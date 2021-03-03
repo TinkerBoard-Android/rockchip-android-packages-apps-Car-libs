@@ -112,6 +112,11 @@ public interface ToolbarControllerOEMV1 {
     void setSearchResultsView(View view);
 
     /**
+     * Set the icon to be displayed within the input field of IME window.
+     */
+    void setSearchResultsInputViewIcon(Drawable view);
+
+    /**
      * Sets list of search item {@link SearchItemOEMV1} to be displayed in the IMS
      * template. This method should be called when system is running in a wide screen mode. Apps
      * can check that by using {@link #canShowSearchResultItems()}

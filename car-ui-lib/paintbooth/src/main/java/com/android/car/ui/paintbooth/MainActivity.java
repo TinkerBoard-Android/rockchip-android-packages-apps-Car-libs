@@ -56,6 +56,7 @@ import com.android.car.ui.paintbooth.toolbar.NoCarUiToolbarActivity;
 import com.android.car.ui.paintbooth.toolbar.OldToolbarActivity;
 import com.android.car.ui.paintbooth.toolbar.ToolbarActivity;
 import com.android.car.ui.paintbooth.widescreenime.WideScreenImeActivity;
+import com.android.car.ui.paintbooth.widescreenime.WideScreenTestView;
 import com.android.car.ui.paintbooth.widgets.WidgetActivity;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.ToolbarController;
@@ -92,8 +93,9 @@ public class MainActivity extends Activity implements InsetsChangedListener {
             new ActivityElement("No CarUiToolbar sample", NoCarUiToolbarActivity.class),
             new ActivityElement("Widget sample", WidgetActivity.class),
             new ActivityElement("Wide Screen IME", WideScreenImeActivity.class),
-            new ActivityElement("ListItem sample", CarUiListItemActivity.class),
-            new ActivityElement("CarUiButton sample", CarUiButtonActivity.class));
+            new ActivityElement("Wide Screen View IME", WideScreenTestView.class),
+            new ActivityElement("CarUiButton sample", CarUiButtonActivity.class),
+            new ActivityElement("ListItem sample", CarUiListItemActivity.class));
 
     private abstract static class ViewHolder extends RecyclerView.ViewHolder {
 

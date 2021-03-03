@@ -236,7 +236,6 @@
   <public type="drawable" name="car_ui_preference_icon_chevron"/>
   <public type="drawable" name="car_ui_preference_icon_chevron_disabled"/>
   <public type="drawable" name="car_ui_preference_icon_chevron_enabled"/>
-  <public type="drawable" name="car_ui_recycler_view_ime_wide_screen_thumb"/>
   <public type="drawable" name="car_ui_recyclerview_button_ripple_background"/>
   <public type="drawable" name="car_ui_recyclerview_divider"/>
   <public type="drawable" name="car_ui_recyclerview_ic_down"/>
@@ -284,6 +283,7 @@
   <public type="id" name="car_ui_list_limiting_message"/>
   <public type="id" name="car_ui_preference_container_without_widget"/>
   <public type="id" name="car_ui_recycler_view"/>
+  <public type="id" name="car_ui_recycler_view_container"/>
   <public type="id" name="car_ui_scroll_bar"/>
   <public type="id" name="car_ui_scrollbar_page_down"/>
   <public type="id" name="car_ui_scrollbar_page_up"/>

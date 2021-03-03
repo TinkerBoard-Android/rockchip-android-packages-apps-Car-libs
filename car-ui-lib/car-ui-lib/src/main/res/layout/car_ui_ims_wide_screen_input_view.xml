@@ -133,7 +133,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"
-        android:focusable="false"/>
+        android:focusable="false"
+        android:paddingBottom="@dimen/car_ui_ime_wide_screen_keyboard_area_padding_bottom"
+        android:layout_marginTop="@dimen/car_ui_ime_wide_screen_input_area_margin_top"/>
 
     <RelativeLayout
         android:id="@id/car_ui_contentAreaAutomotive"
@@ -141,12 +143,10 @@
         android:layout_height="match_parent"
         android:visibility="gone"
         android:background="@drawable/car_ui_ime_wide_screen_no_content_background">
-        <androidx.recyclerview.widget.RecyclerView
+        <com.android.car.ui.recyclerview.CarUiRecyclerView
             android:id="@id/car_ui_wideScreenSearchResultList"
-            android:scrollbarThumbVertical="@drawable/car_ui_recycler_view_ime_wide_screen_thumb"
-            android:scrollbars="vertical"
             android:requiresFadingEdge="vertical"
-            android:paddingTop="@dimen/car_ui_ime_wide_screen_recycler_view_padding_top"
+            android:paddingTop="@dimen/car_ui_ime_wide_screen_input_area_margin_top"
             android:layout_width="match_parent"
             android:visibility="gone"
             android:layout_height="match_parent"/>

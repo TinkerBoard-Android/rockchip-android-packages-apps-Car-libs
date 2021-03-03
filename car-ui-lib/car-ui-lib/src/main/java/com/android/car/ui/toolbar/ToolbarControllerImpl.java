@@ -28,6 +28,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.text.PrecomputedText;
 import android.text.TextUtils;
 import android.util.Log;
@@ -121,6 +123,8 @@ public final class ToolbarControllerImpl implements ToolbarController {
     private boolean mNavIconSpaceReserved;
     private boolean mLogoFillsNavIconSpace;
     private View mViewForContentAreaInWideScreenMode;
+    private Drawable mSearchResultsInputViewIcon;
+    private View mWideScreenViewParent;
     private boolean mShowLogo;
     private List<? extends CarUiImeSearchListItem> mSearchItems;
     private final ProgressBarController mProgressBar;
@@ -754,13 +758,18 @@ public final class ToolbarControllerImpl implements ToolbarController {
                     ViewGroup.LayoutParams.MATCH_PARENT);
             mSearchViewContainer.addView(searchView, layoutParams);
             if (canShowSearchResultsView()) {
-                searchView.setViewToImeWideScreenSurface(mViewForContentAreaInWideScreenMode);
+                searchView.setViewToImeWideScreenSurface(mViewForContentAreaInWideScreenMode,
+                        mWideScreenViewParent);
             }
 
             searchView.installWindowInsetsListener(mSearchViewContainer);
 
             if (mSearchItems != null) {
                 searchView.setSearchItemsForWideScreen(mSearchItems);
+            }
+
+            if (mSearchResultsInputViewIcon != null) {
+                searchView.setSearchResultsInputViewIcon(mSearchResultsInputViewIcon);
             }
 
             mSearchView = searchView;
@@ -882,7 +891,8 @@ public final class ToolbarControllerImpl implements ToolbarController {
      */
     private static boolean isWideScreenMode(Context context) {
         return getBooleanSystemProperty(context.getResources(),
-                R.string.car_ui_ime_wide_screen_system_property_name, false);
+                R.string.car_ui_ime_wide_screen_system_property_name, false)
+                && Build.VERSION.SDK_INT >= VERSION_CODES.R;
     }
 
     /**
@@ -915,11 +925,31 @@ public final class ToolbarControllerImpl implements ToolbarController {
                             + mContext.getPackageName());
         }
 
-        if (mSearchView != null) {
-            mSearchView.setViewToImeWideScreenSurface(view);
+        View contentArea = view;
+        ViewGroup parent = null;
+        if (contentArea != null) {
+            parent = (ViewGroup) contentArea.getParent();
+        }
+        if (parent != null) {
+            parent.removeAllViews();
         }
 
-        mViewForContentAreaInWideScreenMode = view;
+        if (mSearchView != null) {
+            mSearchView.setViewToImeWideScreenSurface(contentArea, parent);
+        }
+
+        mViewForContentAreaInWideScreenMode = contentArea;
+        mWideScreenViewParent = parent;
+    }
+
+    @Override
+    public void setSearchResultsInputViewIcon(Drawable drawable) {
+        Log.d(TAG, "setSearchResultsInputViewIcon: ");
+        if (mSearchView != null) {
+            mSearchView.setSearchResultsInputViewIcon(drawable);
+        }
+
+        mSearchResultsInputViewIcon = drawable;
     }
 
     /**

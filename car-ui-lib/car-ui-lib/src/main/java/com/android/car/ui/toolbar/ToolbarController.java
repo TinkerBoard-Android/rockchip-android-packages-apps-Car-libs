@@ -292,7 +292,12 @@ public interface ToolbarController {
      *
      * @param view to be added in the container.
      */
-    void setSearchResultsView(View view);
+    void setSearchResultsView(@Nullable View view);
+
+    /**
+     * Set the icon to be displayed within the input field of IME window.
+     */
+    void setSearchResultsInputViewIcon(@NonNull Drawable drawable);
 
     /**
      * Sets list of search item {@link CarUiListItem} to be displayed in the IMS

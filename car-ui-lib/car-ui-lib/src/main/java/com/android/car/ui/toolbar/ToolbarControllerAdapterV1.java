@@ -490,6 +490,11 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     }
 
     @Override
+    public void setSearchResultsInputViewIcon(Drawable drawable) {
+        mOemToolbar.setSearchResultsInputViewIcon(drawable);
+    }
+
+    @Override
     public void setSearchResultItems(List<? extends CarUiImeSearchListItem> searchItems) {
         mOemToolbar.setSearchResultItems(convertList(searchItems, SearchItemAdapterV1::new));
     }
