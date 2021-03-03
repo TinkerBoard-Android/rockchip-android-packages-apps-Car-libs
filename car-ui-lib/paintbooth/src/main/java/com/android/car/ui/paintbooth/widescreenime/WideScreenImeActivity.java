@@ -101,7 +101,9 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
                 });
 
         CarUiContentListItem.OnClickListener mainClickListener = i ->
-                Toast.makeText(this, "Item clicked! " + i.getTitle(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Item clicked! " + (i.getTitle() != null
+                                ? i.getTitle().getPreferredText() : null),
+                        Toast.LENGTH_SHORT).show();
         CarUiContentListItem.OnClickListener secondaryClickListener = i ->
                 Toast.makeText(this, "Item's secondary action clicked!", Toast.LENGTH_SHORT).show();
 
