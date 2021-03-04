@@ -30,6 +30,8 @@ android_library {
     sdk_version: "current",
 
     static_libs: [
+        // ensure unbundled
+        "car-messaging-models",
         "androidx.legacy_legacy-support-v4",
         "androidx.annotation_annotation",
     ],
