@@ -66,6 +66,7 @@ public class CarUxRestrictionsUtil {
                     }
                 };
 
+        // copybara:strip_begin
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             Car.createCar(context.getApplicationContext(), null, Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT,
                     (Car car, boolean ready) -> {
@@ -82,6 +83,7 @@ public class CarUxRestrictionsUtil {
                         }
                     });
         } else {
+            // copybara:strip_end
             Car carApi = Car.createCar(context.getApplicationContext());
 
             try {
@@ -95,7 +97,9 @@ public class CarUxRestrictionsUtil {
                 Log.e(TAG, "Car not connected", e);
                 // mCarUxRestrictions will be the default
             }
+            // copybara:strip_begin
         }
+        // copybara:strip_end
     }
 
     @NonNull

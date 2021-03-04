@@ -240,6 +240,20 @@ public class CarAssistUtils {
 
     /**
      * Retrieves the {@link NotificationCompat.Action} containing the
+     * {@link NotificationCompat.Action#SEMANTIC_ACTION_MUTE semantic action.
+     */
+    @Nullable
+    public static NotificationCompat.Action getMuteAction(Notification notification) {
+        for (NotificationCompat.Action action : getAllActions(notification)) {
+            if (action.getSemanticAction() == Action.SEMANTIC_ACTION_MUTE) {
+                return action;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves the {@link NotificationCompat.Action} containing the
      * {@link NotificationCompat.Action#SEMANTIC_ACTION_REPLY} semantic action.
      */
     @Nullable
