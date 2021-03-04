@@ -19,11 +19,16 @@ package com.android.car.media.common.browse;
 import android.os.Bundle;
 import android.support.v4.media.MediaBrowserCompat;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.car.media.common.MediaConstants;
 import com.android.car.media.common.MediaItemMetadata;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -49,6 +54,16 @@ public class MediaBrowserViewModelImpl {
                 : item -> (item.isPlayable() || item.isBrowsable());
         return items.stream().filter(predicate).collect(Collectors.toList());
     }
+
+    /** Returns only the browse-able items from the given list. */
+    @Nullable
+    public static List<MediaItemMetadata> selectBrowseableItems(
+            @Nullable List<MediaItemMetadata> items) {
+        if (items == null) return null;
+        Predicate<MediaItemMetadata> predicate = MediaItemMetadata::isBrowsable;
+        return items.stream().filter(predicate).collect(Collectors.toList());
+    }
+
 
     @SuppressWarnings("deprecation")
     public static boolean getSupportsSearch(@Nullable MediaBrowserCompat mediaBrowserCompat) {
@@ -102,5 +117,23 @@ public class MediaBrowserViewModelImpl {
             return extras.getInt(MediaConstants.CONTENT_STYLE_PLAYABLE_HINT_PRERELEASE, 0);
         }
         return 0;
+    }
+
+    /** Returns the elements of oldList that do NOT appear in newList. */
+    public static @NonNull Collection<MediaItemMetadata> computeRemovedItems(
+            @Nullable List<MediaItemMetadata> oldList, @Nullable List<MediaItemMetadata> newList) {
+        if (oldList == null || oldList.isEmpty()) {
+            // Nothing was removed
+            return Collections.emptyList();
+        }
+
+        if (newList == null || newList.isEmpty()) {
+            // Everything was removed
+            return new ArrayList<>(oldList);
+        }
+
+        HashSet<MediaItemMetadata> itemsById = new HashSet<>(oldList);
+        itemsById.removeAll(newList);
+        return itemsById;
     }
 }
