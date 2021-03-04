@@ -79,8 +79,8 @@ public final class ToolbarControllerImpl implements ToolbarController {
     @NonNull
     private CharSequence mTitleText = "";
     private TextView mSubtitle;
-    @Nullable
-    private CharSequence mSubtitleText;
+    @NonNull
+    private CharSequence mSubtitleText = "";
     private ImageView mTitleLogo;
     private ViewGroup mTitleLogoContainer;
     private TabLayout mTabLayout;
@@ -283,8 +283,8 @@ public final class ToolbarControllerImpl implements ToolbarController {
      */
     @Override
     public void setSubtitle(CharSequence subTitle) {
-        mSubtitleText = subTitle;
-        asyncSetText(mSubtitle, subTitle == null ? "" : subTitle, Runnable::run);
+        mSubtitleText = subTitle == null ? "" : subTitle;
+        asyncSetText(mSubtitle, mSubtitleText, Runnable::run);
         setState(getState());
     }
 
