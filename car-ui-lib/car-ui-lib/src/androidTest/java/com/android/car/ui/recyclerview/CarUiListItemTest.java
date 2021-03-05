@@ -548,4 +548,55 @@ public class CarUiListItemTest {
         TextView bodyTextView = mCarUiRecyclerView.requireViewById(R.id.car_ui_list_item_body);
         assertEquals(line1, bodyTextView.getText());
     }
+
+    @Test
+    public void testTextVariants() {
+        List<CharSequence> variants = new ArrayList<>();
+        variants.add(LONG_CHAR_SEQUENCE);
+        variants.add("Short string");
+        CarUiText text = new CarUiText(variants, 1);
+
+        CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
+        item.setBody(text);
+        List<CarUiListItem> items = new ArrayList<>();
+        items.add(item);
+
+        mCarUiRecyclerView.post(
+                () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items)));
+
+        // Check for no manual truncation ellipsis.
+        onView(withId(R.id.car_ui_list_item_body)).check(
+                matches(not(withText(containsString(ELLIPSIS)))));
+
+        TextView bodyTextView = mCarUiRecyclerView.requireViewById(R.id.car_ui_list_item_body);
+        assertEquals(1, bodyTextView.getLineCount());
+    }
+
+    @Test
+    public void testTextVariants_noFit() {
+        List<CharSequence> variants = new ArrayList<>();
+        String marker = "MARKING AS PREFERRED VARIANT";
+        variants.add(marker + LONG_CHAR_SEQUENCE);
+        variants.add(LONG_CHAR_SEQUENCE);
+        variants.add(LONG_CHAR_SEQUENCE);
+        CarUiText text = new CarUiText(variants, 2);
+
+        CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
+        item.setBody(text);
+        List<CarUiListItem> items = new ArrayList<>();
+        items.add(item);
+
+        mCarUiRecyclerView.post(
+                () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items)));
+
+        // Check for manual truncation ellipsis.
+        onView(withId(R.id.car_ui_list_item_body)).check(
+                matches(withText(containsString(ELLIPSIS))));
+
+        TextView bodyTextView = mCarUiRecyclerView.requireViewById(R.id.car_ui_list_item_body);
+        assertEquals(2, bodyTextView.getLineCount());
+
+        onView(withId(R.id.car_ui_list_item_body)).check(
+                matches(withText(containsString(marker))));
+    }
 }
