@@ -209,6 +209,8 @@
 
         <!-- textAppearance -->
         <item name="android:textAppearance">@style/TextAppearance.CarUi</item>
+        <!--@color/transparent does not completely remove highlight  -->
+        <item name="android:textColorHighlight">#00FFFFFF</item>
     </style>
 
     <!-- TODO(b/150230923) remove this when other apps are ready -->
