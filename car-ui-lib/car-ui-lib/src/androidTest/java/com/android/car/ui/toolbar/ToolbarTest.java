@@ -82,6 +82,20 @@ public class ToolbarTest {
         assertEquals("", getTitleResult[0]);
     }
 
+    /**
+     * This is somewhat of a bug, but various tests in other apps rely on this functionality.
+     */
+    @Test
+    public void test_setSubtitle_null_returns_nonNull() throws Throwable {
+        CharSequence[] getTitleResult = new CharSequence[] {"Something obviously incorrect"};
+        runWithToolbar((toolbar) -> {
+            toolbar.setSubtitle(null);
+            getTitleResult[0] = toolbar.getSubtitle();
+        });
+
+        assertEquals("", getTitleResult[0]);
+    }
+
     @Test
     public void test_setSubtitle_displaysSubtitle() throws Throwable {
         runWithToolbar((toolbar) -> toolbar.setSubtitle("Test subtitle"));
