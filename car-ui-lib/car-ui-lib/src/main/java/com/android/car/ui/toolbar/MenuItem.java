@@ -73,6 +73,17 @@ public class MenuItem {
     private boolean mIsVisible;
     private boolean mIsActivated;
 
+    @SuppressWarnings("FieldCanBeLocal") // Used with weak references
+    private final CarUxRestrictionsUtil.OnUxRestrictionsChangedListener mUxRestrictionsListener =
+            uxRestrictions -> {
+                boolean wasRestricted = isRestricted();
+                mCurrentRestrictions = uxRestrictions;
+
+                if (isRestricted() != wasRestricted) {
+                    update();
+                }
+            };
+
     private MenuItem(Builder builder) {
         mContext = builder.mContext;
         mId = builder.mId;
@@ -92,7 +103,7 @@ public class MenuItem {
         mIsPrimary = builder.mIsPrimary;
         mUxRestrictions = builder.mUxRestrictions;
 
-        mCurrentRestrictions = CarUxRestrictionsUtil.getInstance(mContext).getCurrentRestrictions();
+        CarUxRestrictionsUtil.getInstance(mContext).register(mUxRestrictionsListener);
     }
 
     private void update() {
@@ -237,15 +248,6 @@ public class MenuItem {
         mOnClickListener = listener;
 
         update();
-    }
-
-    /* package */ void setCarUxRestrictions(CarUxRestrictions restrictions) {
-        boolean wasRestricted = isRestricted();
-        mCurrentRestrictions = restrictions;
-
-        if (isRestricted() != wasRestricted) {
-            update();
-        }
     }
 
     /* package */ boolean isRestricted() {
