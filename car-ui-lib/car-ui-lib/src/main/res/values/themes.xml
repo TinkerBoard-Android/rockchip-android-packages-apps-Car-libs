@@ -219,7 +219,6 @@
     <style name="Theme.CarUi.WithToolbar">
         <item name="carUiBaseLayout">true</item>
         <item name="carUiToolbar">true</item>
-        <item name="preferenceTheme">@style/CarUiPreferenceTheme.WithToolbar</item>
     </style>
 
     <style name="Theme.CarUi.NoToolbar">
@@ -240,12 +239,6 @@
         <item name="preferenceStyle">@style/Preference.CarUi</item>
         <item name="seekBarPreferenceStyle">@style/Preference.CarUi.SeekBarPreference</item>
         <item name="switchPreferenceStyle">@style/Preference.CarUi.SwitchPreference</item>
-    </style>
-
-    <!-- TODO(b/150230923) remove this when other apps are ready -->
-    <style name="CarUiPreferenceTheme.WithToolbar">
-        <item name="preferenceFragmentCompatStyle">@style/PreferenceFragment.CarUi.WithToolbar</item>
-        <item name="preferenceFragmentStyle">@style/PreferenceFragment.CarUi.WithToolbar</item>
     </style>
 
 </resources>

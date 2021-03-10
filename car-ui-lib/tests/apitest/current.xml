@@ -289,7 +289,6 @@
   <public type="id" name="car_ui_list_item_touch_interceptor"/>
   <public type="id" name="car_ui_list_limiting_message"/>
   <public type="id" name="car_ui_preference_container_without_widget"/>
-  <public type="id" name="car_ui_preference_fragment_container"/>
   <public type="id" name="car_ui_recycler_view"/>
   <public type="id" name="car_ui_scroll_bar"/>
   <public type="id" name="car_ui_scrollbar_page_down"/>
@@ -353,7 +352,6 @@
   <public type="id" name="spinner"/>
   <public type="id" name="textbox"/>
   <public type="id" name="title_template"/>
-  <public type="id" name="toolbar"/>
   <public type="integer" name="car_ui_default_max_string_length"/>
   <public type="integer" name="car_ui_focus_area_history_cache_type"/>
   <public type="integer" name="car_ui_focus_area_history_expiration_period_ms"/>
@@ -374,14 +372,12 @@
   <public type="layout" name="car_ui_list_item"/>
   <public type="layout" name="car_ui_list_limiting_message"/>
   <public type="layout" name="car_ui_list_preference"/>
-  <public type="layout" name="car_ui_list_preference_with_toolbar"/>
   <public type="layout" name="car_ui_preference"/>
   <public type="layout" name="car_ui_preference_category"/>
   <public type="layout" name="car_ui_preference_chevron"/>
   <public type="layout" name="car_ui_preference_dialog_edittext"/>
   <public type="layout" name="car_ui_preference_dropdown"/>
   <public type="layout" name="car_ui_preference_fragment"/>
-  <public type="layout" name="car_ui_preference_fragment_with_toolbar"/>
   <public type="layout" name="car_ui_preference_two_action_icon"/>
   <public type="layout" name="car_ui_preference_two_action_switch"/>
   <public type="layout" name="car_ui_preference_two_action_text"/>
@@ -425,7 +421,6 @@
   <public type="string" name="car_ui_toolbar_menu_item_settings_title"/>
   <public type="string" name="car_ui_toolbar_nav_icon_content_description"/>
   <public type="style" name="CarUiPreferenceTheme"/>
-  <public type="style" name="CarUiPreferenceTheme.WithToolbar"/>
   <public type="style" name="Preference.CarUi"/>
   <public type="style" name="Preference.CarUi.Category"/>
   <public type="style" name="Preference.CarUi.CheckBoxPreference"/>
@@ -445,7 +440,6 @@
   <public type="style" name="Preference.CarUi.SeekBarPreference"/>
   <public type="style" name="Preference.CarUi.SwitchPreference"/>
   <public type="style" name="PreferenceFragment.CarUi"/>
-  <public type="style" name="PreferenceFragment.CarUi.WithToolbar"/>
   <public type="style" name="PreferenceFragmentList.CarUi"/>
   <public type="style" name="TextAppearance.CarUi"/>
   <public type="style" name="TextAppearance.CarUi.AlertDialog.Subtitle"/>
