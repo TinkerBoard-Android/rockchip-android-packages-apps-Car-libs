@@ -64,7 +64,7 @@ public final class SharedLibraryFactorySingleton {
                 R.string.car_ui_shared_library_package_system_property_name);
 
         if (TextUtils.isEmpty(sharedLibPackageName)) {
-            sInstance = new SharedLibraryFactoryStub();
+            sInstance = new SharedLibraryFactoryStub(context);
             return sInstance;
         }
 
@@ -75,7 +75,7 @@ public final class SharedLibraryFactorySingleton {
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "Could not load CarUi shared library, package "
                     + sharedLibPackageName + " was not found.");
-            sInstance = new SharedLibraryFactoryStub();
+            sInstance = new SharedLibraryFactoryStub(context);
             return sInstance;
         }
 
@@ -87,7 +87,7 @@ public final class SharedLibraryFactorySingleton {
                     .anyMatch(specs -> specs.matches(sharedLibPackageInfo))) {
                 Log.i(TAG, "Package " + context.getPackageName()
                         + " denied loading shared library " + sharedLibPackageName);
-                sInstance = new SharedLibraryFactoryStub();
+                sInstance = new SharedLibraryFactoryStub(context);
                 return sInstance;
             }
         }
@@ -100,7 +100,7 @@ public final class SharedLibraryFactorySingleton {
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "Could not load CarUi shared library, package "
                     + sharedLibPackageName + " was not found.");
-            sInstance = new SharedLibraryFactoryStub();
+            sInstance = new SharedLibraryFactoryStub(context);
             return sInstance;
         }
 
@@ -119,13 +119,13 @@ public final class SharedLibraryFactorySingleton {
                     .invoke(null, sharedLibraryContext, context.getPackageName());
         } catch (ReflectiveOperationException e) {
             Log.e(TAG, "Could not load CarUi shared library", e);
-            sInstance = new SharedLibraryFactoryStub();
+            sInstance = new SharedLibraryFactoryStub(context);
             return sInstance;
         }
 
         if (sInstance == null) {
             Log.e(TAG, "Could not load CarUi shared library");
-            sInstance = new SharedLibraryFactoryStub();
+            sInstance = new SharedLibraryFactoryStub(context);
             return sInstance;
         }
 

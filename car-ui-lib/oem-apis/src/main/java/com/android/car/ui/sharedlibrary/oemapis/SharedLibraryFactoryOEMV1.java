@@ -18,6 +18,7 @@ package com.android.car.ui.sharedlibrary.oemapis;
 import android.content.Context;
 import android.view.View;
 
+import com.android.car.ui.sharedlibrary.oemapis.appstyledview.AppStyledViewControllerOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.recyclerview.RecyclerViewAttributesOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.recyclerview.RecyclerViewOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
@@ -45,8 +46,8 @@ public interface SharedLibraryFactoryOEMV1 {
      * @param insetsChangedListener A method to call when the insets change.
      * @param toolbarEnabled Whether or not to add a toolbar to the base layout.
      * @param fullscreen Whether or not this base layout / toolbar is taking up the whole screen.
-     *                   This can be used to decide whether or not to add decorations around the
-     *                   edge of it.
+     * This can be used to decide whether or not to add decorations around the
+     * edge of it.
      * @return A {@link ToolbarControllerOEMV1} or null if {@code toolbarEnabled} was false.
      */
     ToolbarControllerOEMV1 installBaseLayoutAround(
@@ -56,7 +57,15 @@ public interface SharedLibraryFactoryOEMV1 {
             boolean fullscreen);
 
     /**
+     * Creates a app styled view.
+     *
+     * @return the view used for app styled view.
+     */
+    AppStyledViewControllerOEMV1 createAppStyledView();
+
+    /**
      * Creates an instance of CarUiRecyclerView
+     *
      * @param context The visual context to create views with.
      * @param attrs An object containing initial attributes for the button.
      */

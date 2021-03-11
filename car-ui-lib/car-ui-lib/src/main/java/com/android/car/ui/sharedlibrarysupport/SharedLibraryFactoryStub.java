@@ -32,6 +32,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.android.car.ui.R;
+import com.android.car.ui.appstyledview.AppStyledViewController;
+import com.android.car.ui.appstyledview.AppStyledViewControllerImpl;
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.button.CarUiButton;
@@ -51,6 +53,13 @@ import com.android.car.ui.toolbar.ToolbarControllerImpl;
  */
 //TODO(b/179092760) Find a way to prevent apps from using this
 public final class SharedLibraryFactoryStub implements SharedLibraryFactory {
+
+    private final Context mContext;
+
+    public SharedLibraryFactoryStub(Context context) {
+        mContext = context;
+    }
+
     @Nullable
     @Override
     public ToolbarController installBaseLayoutAround(View contentView,
@@ -105,6 +114,11 @@ public final class SharedLibraryFactoryStub implements SharedLibraryFactory {
         return new CarUiButtonImpl(context, attrs);
     }
 
+    @Override
+    public AppStyledViewController createAppStyledView() {
+        return new AppStyledViewControllerImpl(mContext);
+    }
+
     /**
      * InsetsUpdater waits for layout changes, and when there is one, calculates the appropriate
      * insets into the content view.
@@ -138,7 +152,7 @@ public final class SharedLibraryFactoryStub implements SharedLibraryFactory {
         /**
          * Constructs an InsetsUpdater that calculates and dispatches insets to an {@link Activity}.
          *
-         * @param baseLayout  The root view of the base layout
+         * @param baseLayout The root view of the base layout
          * @param contentView The android.R.id.content View
          */
         InsetsUpdater(

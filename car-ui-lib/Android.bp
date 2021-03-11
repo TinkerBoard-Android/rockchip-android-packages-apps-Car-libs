@@ -28,6 +28,7 @@ android_library {
     resource_dirs: [
         "car-ui-lib/src/main/res",
         "car-ui-lib/src/main/res-overlayable",
+        "car-ui-lib/src/main/res-private"
     ],
     optimize: {
         proguard_flags_files: [

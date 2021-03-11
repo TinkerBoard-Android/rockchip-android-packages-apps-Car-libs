@@ -16,35 +16,35 @@
 package com.android.car.ui.appstyledview;
 
 import android.app.Dialog;
-import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
-import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.android.car.ui.R;
-import com.android.car.ui.appstyledview.AppStyledViewController.AppStyledVCloseClickListener;
-import com.android.car.ui.recyclerview.CarUiRecyclerView;
+import com.android.car.ui.appstyledview.AppStyledViewController.AppStyledDismissListener;
 
 /**
  * App styled dialog Fragment used to display a view that cannot be customized via OEM. Dialog
- * Fragment
- * will inflate a layout and add the view provided by the application into the layout. Everything
- * other than the view within the layout can be customized by OEM.
+ * Fragment will inflate a layout and add the view provided by the application into the layout.
+ * Everything other than the view within the layout can be customized by OEM.
+ *
+ * Apps should not use this directly. App's should use {@link AppStyledDialogController}.
  */
-public class AppStyledDialogFragment extends DialogFragment {
+public final class AppStyledDialogFragment extends DialogFragment {
 
+    private final AppStyledViewController mController;
+    private AppStyledDismissListener mOnDismissListener;
     private View mContent;
-    private ImageView mCloseView;
-    private AppStyledVCloseClickListener mAppStyledVCloseClickListener;
+
+    public AppStyledDialogFragment(AppStyledViewController controller) {
+        mController = controller;
+    }
 
     @Nullable
     @Override
@@ -52,31 +52,7 @@ public class AppStyledDialogFragment extends DialogFragment {
             @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
 
-        // create ContextThemeWrapper from the original Activity Context with the custom theme
-        final Context contextThemeWrapper = new ContextThemeWrapper(getActivity(),
-                R.style.Theme_CarUi);
-
-        // clone the inflater using the ContextThemeWrapper
-        LayoutInflater localInflater = inflater.cloneInContext(contextThemeWrapper);
-
-        View appStyledView = localInflater.inflate(R.layout.car_ui_app_styled_view, container,
-                false);
-
-        CarUiRecyclerView rv = appStyledView.findViewById(R.id.car_ui_app_styled_content);
-
-        AppStyledRecyclerViewAdapter adapter = new AppStyledRecyclerViewAdapter(mContent);
-        rv.setLayoutManager(new LinearLayoutManager(getContext()));
-        rv.setAdapter(adapter);
-
-        mCloseView = appStyledView.findViewById(R.id.car_ui_app_styled_view_icon_close);
-        mCloseView.setOnClickListener(v -> {
-            dismiss();
-            if (mAppStyledVCloseClickListener != null) {
-                mAppStyledVCloseClickListener.onClick();
-            }
-        });
-
-        return appStyledView;
+        return mController.getAppStyledView(container, mContent);
     }
 
     @Override
@@ -84,13 +60,17 @@ public class AppStyledDialogFragment extends DialogFragment {
         super.onResume();
 
         ViewGroup.LayoutParams params = getDialog().getWindow().getAttributes();
-        params.width = getContext().getResources().getDimensionPixelSize(
-                R.dimen.car_ui_app_styled_dialog_width);
-        params.height = getContext().getResources().getDimensionPixelSize(
-                R.dimen.car_ui_app_styled_dialog_height);
+        params.width = mController.getAppStyledViewDialogWidth();
+        params.height = mController.getAppStyledViewDialogHeight();
         getDialog().getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
     }
 
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        if (mOnDismissListener != null) {
+            mOnDismissListener.onDismiss();
+        }
+    }
 
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
@@ -100,11 +80,11 @@ public class AppStyledDialogFragment extends DialogFragment {
         return dialog;
     }
 
-    void setContent(View view) {
-        mContent = view;
+    void setContent(View contentView) {
+        mContent = contentView;
     }
 
-    void setOnCloseClickListener(AppStyledVCloseClickListener listener) {
-        mAppStyledVCloseClickListener = listener;
+    void setOnDismissListener(AppStyledDismissListener listener) {
+        mOnDismissListener = listener;
     }
 }
