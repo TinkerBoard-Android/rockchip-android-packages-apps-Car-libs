@@ -52,8 +52,6 @@ import java.util.Set;
  */
 public class MultiSelectListPreferenceFragment extends Fragment implements InsetsChangedListener {
 
-    private static final String ARG_LAYOUT_WITH_TOOLBAR = "layout_with_toolbar";
-
     private CarUiMultiSelectListPreference mPreference;
     private Set<String> mNewValues;
     private boolean mUseInstantPreferenceChangeCallback;
@@ -63,11 +61,10 @@ public class MultiSelectListPreferenceFragment extends Fragment implements Inset
      * CarUiMultiSelectListPreference} with the given {@code key}.
      */
     @NonNull
-    static MultiSelectListPreferenceFragment newInstance(String key, boolean useLayoutWithToolbar) {
+    static MultiSelectListPreferenceFragment newInstance(String key) {
         MultiSelectListPreferenceFragment fragment = new MultiSelectListPreferenceFragment();
         Bundle b = new Bundle(/* capacity= */ 1);
         b.putString(ARG_KEY, key);
-        b.putBoolean(ARG_LAYOUT_WITH_TOOLBAR, useLayoutWithToolbar);
         fragment.setArguments(b);
         return fragment;
     }
@@ -77,12 +74,7 @@ public class MultiSelectListPreferenceFragment extends Fragment implements Inset
     public View onCreateView(
             @NonNull LayoutInflater inflater, @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
-        boolean useLayoutWithToolbar = requireArguments().getBoolean(ARG_LAYOUT_WITH_TOOLBAR, true);
-        if (useLayoutWithToolbar) {
-            return inflater.inflate(R.layout.car_ui_list_preference_with_toolbar, container, false);
-        } else {
-            return inflater.inflate(R.layout.car_ui_list_preference, container, false);
-        }
+        return inflater.inflate(R.layout.car_ui_list_preference, container, false);
     }
 
     @Override
