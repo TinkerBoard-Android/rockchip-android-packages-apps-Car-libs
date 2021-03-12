@@ -57,6 +57,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.android.car.ui.CarUiText;
 import com.android.car.ui.R;
 import com.android.car.ui.core.SearchResultsProvider;
 import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
@@ -268,8 +269,7 @@ public class SearchView extends ConstraintLayout {
     }
 
     /**
-     * Sets list of search item {@link CarUiListItem} to be displayed in the IMS
-     * template.
+     * Sets list of search item {@link CarUiListItem} to be displayed in the IMS template.
      */
     public void setSearchItemsForWideScreen(List<? extends CarUiImeSearchListItem> searchItems) {
         mWideScreenSearchItemList = searchItems != null ? new ArrayList<>(searchItems) : null;
@@ -311,9 +311,10 @@ public class SearchView extends ConstraintLayout {
                     supplementalIcon != null ? bitmapToByteArray(supplementalIcon.getBitmap())
                             : null);
             values.put(SearchResultsProvider.TITLE,
-                    item.getTitle() != null ? item.getTitle().toString() : null);
+                    item.getTitle() != null ? item.getTitle().getPreferredText().toString() : null);
             values.put(SearchResultsProvider.SUBTITLE,
-                    item.getBody() != null ? item.getBody().toString() : null);
+                    item.getBody() != null ? CarUiText.combineMultiLine(item.getBody()).toString()
+                            : null);
             getContext().getContentResolver().insert(mContentUri, values);
             mIdToListItem.put(idString, item);
             id++;
@@ -362,8 +363,8 @@ public class SearchView extends ConstraintLayout {
     }
 
     /**
-     * Sets whether or not the search bar should look like a regular text box
-     * instead of a search box.
+     * Sets whether or not the search bar should look like a regular text box instead of a search
+     * box.
      */
     public void setPlainText(boolean plainText) {
         if (plainText != mIsPlainText) {
