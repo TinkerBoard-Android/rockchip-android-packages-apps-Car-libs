@@ -20,7 +20,6 @@ import androidx.annotation.Nullable;
 
 import dalvik.system.PathClassLoader;
 
-import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -35,10 +34,14 @@ import java.util.regex.Pattern;
 class AdapterClassLoader extends PathClassLoader {
 
     @Nullable
-    private final ClassLoader mAdditionalClassLoader;
+    private final ClassLoader mSharedLibraryClassLoader;
 
     private final Pattern mPattern =
             Pattern.compile("^com\\.android\\.car\\.ui\\..*AdapterV[0-9]+(\\$.*)?$");
+
+    private final Pattern mSharedLibraryPattern =
+            Pattern.compile("^com\\.android\\.car\\.ui\\.sharedlibrary\\."
+                    + "(oemapis\\..*|SharedLibraryVersionProviderImpl)$");
 
     /**
      * Equivalent to calling {@link #AdapterClassLoader(String, String, ClassLoader, boolean)}
@@ -66,7 +69,7 @@ class AdapterClassLoader extends PathClassLoader {
             @Nullable ClassLoader parent, @Nullable ClassLoader additionalClassloader,
                 boolean delegateResourceLoading) {
         super(dexPath, librarySearchPath, parent);
-        mAdditionalClassLoader = additionalClassloader;
+        mSharedLibraryClassLoader = additionalClassloader;
     }
 
     /**
@@ -108,9 +111,9 @@ class AdapterClassLoader extends PathClassLoader {
 
         // Loading OEM-APIs
         // Next, check any additional classloaders.
-        if (mAdditionalClassLoader != null) {
+        if (mSharedLibraryClassLoader != null && mSharedLibraryPattern.matcher(name).matches()) {
             try {
-                return mAdditionalClassLoader.loadClass(name);
+                return mSharedLibraryClassLoader.loadClass(name);
             } catch (ClassNotFoundException ignored) {
                 // It's fine, just continue
             }
