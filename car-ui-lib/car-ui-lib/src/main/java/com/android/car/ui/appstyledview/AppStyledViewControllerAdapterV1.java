@@ -16,10 +16,8 @@
 package com.android.car.ui.appstyledview;
 
 import android.view.View;
-import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.android.car.ui.sharedlibrary.oemapis.appstyledview.AppStyledViewControllerOEMV1;
 
@@ -38,8 +36,8 @@ public class AppStyledViewControllerAdapterV1 implements AppStyledViewController
      * Returns the view that will be displayed on the screen.
      */
     @Override
-    public View getAppStyledView(@Nullable ViewGroup container, View contentView) {
-        return mOemController.getAppStyledView(container, contentView);
+    public View getAppStyledView(View contentView) {
+        return mOemController.getAppStyledView(contentView);
     }
 
     @Override
