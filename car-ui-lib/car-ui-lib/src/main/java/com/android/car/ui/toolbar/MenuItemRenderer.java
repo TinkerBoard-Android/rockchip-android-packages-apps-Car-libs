@@ -18,7 +18,6 @@ package com.android.car.ui.toolbar;
 import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
 import android.app.Activity;
-import android.car.drivingstate.CarUxRestrictions;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -83,10 +82,6 @@ class MenuItemRenderer implements MenuItem.Listener {
         if (mMenuItem.isSearch()) {
             updateView();
         }
-    }
-
-    void setCarUxRestrictions(CarUxRestrictions restrictions) {
-        mMenuItem.setCarUxRestrictions(restrictions);
     }
 
     @Override
