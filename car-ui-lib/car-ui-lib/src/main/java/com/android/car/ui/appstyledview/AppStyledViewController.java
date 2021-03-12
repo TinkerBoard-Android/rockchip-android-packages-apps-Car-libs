@@ -16,19 +16,25 @@
 
 package com.android.car.ui.appstyledview;
 
-import android.view.View;
+import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-import androidx.fragment.app.FragmentManager;
+import android.view.View;
+import android.view.ViewGroup;
+
+import androidx.annotation.IntDef;
+
+import java.lang.annotation.Retention;
 
 /**
- * Controller to interact with the app styled Dialog Fragment.
+ * An interface for accessing a Chassis AppStyledView, regardless of how the underlying
+ * views are represented.
  */
-public class AppStyledViewController {
+public interface AppStyledViewController {
 
     /**
      * Callback to be invoked when the close icon is clicked.
      */
-    public interface AppStyledVCloseClickListener {
+    interface AppStyledVCloseClickListener {
 
         /**
          * Called when the close icon is clicked.
@@ -36,37 +42,63 @@ public class AppStyledViewController {
         void onClick();
     }
 
-    private View mContent;
-    private FragmentManager mFragmentManager;
-    private AppStyledDialogFragment mFragment;
+    /**
+     * Callback to be invoked when the dialog is dismissed.
+     */
+    interface AppStyledDismissListener {
 
-    public AppStyledViewController(FragmentManager fragmentManager) {
-        mFragmentManager = fragmentManager;
-        mFragment = new AppStyledDialogFragment();
+        /**
+         * Called when the dialog is dismissed.
+         */
+        void onDismiss();
     }
 
     /**
-     * Sets the content view to be displayed in the dialog fragment.
+     * The possible values for AppStyledViewNavIcon.
      */
-    public void setContentView(View contentView) {
-        mContent = contentView;
+    @IntDef({
+            AppStyledViewNavIcon.BACK,
+            AppStyledViewNavIcon.CLOSE,
+    })
+    @Retention(SOURCE)
+    @interface AppStyledViewNavIcon {
+        /**
+         * Show a back icon
+         */
+        int BACK = 0;
+
+        /**
+         * Show a close icon
+         */
+        int CLOSE = 1;
     }
 
     /**
-     * Displays the dialog fragment to the user with the custom view provided by the app.
+     * Creates a app styled view.
+     *
+     * @param container If non-null, this is the parent view that the view
+     * should be attached to.
+     * @return the view used for app styled view.
      */
-    public void show() {
-        if (mContent == null) {
-            throw new RuntimeException("call setContentView(view) before calling show()");
-        }
-        mFragment.setContent(mContent);
-        mFragment.show(mFragmentManager, "AppStyledFragment");
-    }
+    View getAppStyledView(ViewGroup container, View contentView);
 
     /**
-     * Sets the AppStyledVCloseClickListener on the close icon.
+     * Sets the nav icon to be used.
      */
-    public void setOnCloseClickListener(AppStyledVCloseClickListener listener) {
-        mFragment.setOnCloseClickListener(listener);
-    }
+    void setNavIcon(@AppStyledViewNavIcon int navIcon);
+
+    /**
+     * Sets the {@link AppStyledVCloseClickListener}
+     */
+    void setOnCloseClickListener(AppStyledVCloseClickListener listener);
+
+    /**
+     * Returns the width of the AppStyledView
+     */
+    int getAppStyledViewDialogWidth();
+
+    /**
+     * Returns the height of the AppStyledView
+     */
+    int getAppStyledViewDialogHeight();
 }

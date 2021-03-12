@@ -57,8 +57,6 @@
   <public type="color" name="car_ui_toolbar_tab_item_selector"/>
   <public type="color" name="car_ui_toolbar_tab_selected_color"/>
   <public type="color" name="car_ui_toolbar_tab_unselected_color"/>
-  <public type="dimen" name="car_ui_app_styled_dialog_height"/>
-  <public type="dimen" name="car_ui_app_styled_dialog_width"/>
   <public type="dimen" name="car_ui_body1_size"/>
   <public type="dimen" name="car_ui_body2_size"/>
   <public type="dimen" name="car_ui_body3_size"/>
@@ -207,7 +205,6 @@
   <public type="dimen" name="car_ui_touch_target_width"/>
   <public type="dimen" name="wrap_content"/>
   <public type="drawable" name="car_ui_activity_background"/>
-  <public type="drawable" name="car_ui_app_styled_view_background"/>
   <public type="drawable" name="car_ui_divider"/>
   <public type="drawable" name="car_ui_focus_area_background_highlight"/>
   <public type="drawable" name="car_ui_focus_area_foreground_highlight"/>
@@ -255,9 +252,6 @@
   <public type="id" name="car_ui_alert_icon"/>
   <public type="id" name="car_ui_alert_subtitle"/>
   <public type="id" name="car_ui_alert_title"/>
-  <public type="id" name="car_ui_app_styled_content"/>
-  <public type="id" name="car_ui_app_styled_item"/>
-  <public type="id" name="car_ui_app_styled_view_icon_close"/>
   <public type="id" name="car_ui_base_layout_content_container"/>
   <public type="id" name="car_ui_closeKeyboard"/>
   <public type="id" name="car_ui_component_reference"/>
@@ -362,8 +356,6 @@
   <public type="layout" name="car_ui_alert_dialog_edit_text"/>
   <public type="layout" name="car_ui_alert_dialog_list"/>
   <public type="layout" name="car_ui_alert_dialog_title_with_subtitle"/>
-  <public type="layout" name="car_ui_app_styled_view"/>
-  <public type="layout" name="car_ui_app_styled_view_item"/>
   <public type="layout" name="car_ui_base_layout"/>
   <public type="layout" name="car_ui_base_layout_toolbar"/>
   <public type="layout" name="car_ui_base_layout_toolbar_legacy"/>

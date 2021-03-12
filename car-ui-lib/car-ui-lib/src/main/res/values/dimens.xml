@@ -253,8 +253,4 @@
      padding is needed so that the icon does not overlap the input field. The
      padding is calculated by 24dp + car_ui_primary_icon_size (44dp). -->
     <dimen name="car_ui_ime_wide_screen_input_area_padding_end">68dp</dimen>
-
-    <!-- height and width of the dialog modal.  -->
-    <dimen name="car_ui_app_styled_dialog_width">500dp</dimen>
-    <dimen name="car_ui_app_styled_dialog_height">500dp</dimen>
 </resources>

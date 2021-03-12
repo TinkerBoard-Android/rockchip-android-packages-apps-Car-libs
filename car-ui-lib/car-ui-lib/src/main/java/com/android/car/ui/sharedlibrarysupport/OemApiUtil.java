@@ -78,7 +78,7 @@ final class OemApiUtil {
                     1, sharedLibraryContext, appPackageName);
             if (factory instanceof SharedLibraryFactoryOEMV1) {
                 oemSharedLibraryFactory = new SharedLibraryFactoryAdapterV1(
-                        (SharedLibraryFactoryOEMV1) factory);
+                        (SharedLibraryFactoryOEMV1) factory, sharedLibraryContext);
             } else {
                 Log.e(TAG, "SharedLibraryVersionProvider found, but did not provide a"
                         + " factory implementing any known interfaces!");

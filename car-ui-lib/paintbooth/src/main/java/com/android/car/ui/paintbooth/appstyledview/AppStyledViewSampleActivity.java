@@ -16,6 +16,8 @@
 package com.android.car.ui.paintbooth.appstyledview;
 
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -26,15 +28,14 @@ import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.android.car.ui.appstyledview.AppStyledViewController;
+import com.android.car.ui.appstyledview.AppStyledDialogController;
+import com.android.car.ui.appstyledview.AppStyledViewController.AppStyledViewNavIcon;
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.core.CarUi;
 import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.toolbar.Toolbar;
 import com.android.car.ui.toolbar.ToolbarController;
-
-import java.util.ArrayList;
 
 /**
  * Sample activity to show app styled Dialog fragment.
@@ -63,7 +64,18 @@ public class AppStyledViewSampleActivity extends AppCompatActivity implements
                     return false;
                 });
 
-        Context contextThemeWrapper = new ContextThemeWrapper(this,
+        AppStyledDialogController controller = new AppStyledDialogController(this);
+        int width = controller.getAppStyledViewDialogWidth();
+
+        Resources resources = getResources();
+        Configuration config = resources.getConfiguration();
+
+        config.smallestScreenWidthDp = width;
+        // fake the min screen size so resources load from the corresponding folders. For eg.
+        // layout-sw400dp
+        Context testContext = createConfigurationContext(config);
+
+        Context contextThemeWrapper = new ContextThemeWrapper(testContext,
                 R.style.AppStyledDialogThemeSample);
 
         LayoutInflater inflator = LayoutInflater.from(contextThemeWrapper);
@@ -73,19 +85,10 @@ public class AppStyledViewSampleActivity extends AppCompatActivity implements
 
         Button btn = findViewById(R.id.show_app_styled_fragment);
         btn.setOnClickListener(v -> {
-            AppStyledViewController controller = new AppStyledViewController(
-                    getSupportFragmentManager());
             controller.setContentView(appStyledTestView);
-            controller.show();
+            controller.setNavIcon(AppStyledViewNavIcon.CLOSE);
+            controller.show(getSupportFragmentManager());
         });
-    }
-
-    private ArrayList<String> generateSampleData() {
-        ArrayList<String> data = new ArrayList<>();
-        for (int i = 0; i <= 50; i++) {
-            data.add(getString(R.string.test_data) + i);
-        }
-        return data;
     }
 
     @Override

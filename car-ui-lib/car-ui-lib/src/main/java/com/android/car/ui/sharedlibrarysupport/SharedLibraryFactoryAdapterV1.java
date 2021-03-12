@@ -22,6 +22,9 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.car.ui.appstyledview.AppStyledViewController;
+import com.android.car.ui.appstyledview.AppStyledViewControllerAdapterV1;
+import com.android.car.ui.appstyledview.AppStyledViewControllerImpl;
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.button.CarUiButton;
@@ -29,6 +32,7 @@ import com.android.car.ui.button.CarUiButtonAttributes;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.sharedlibrary.oemapis.InsetsOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryFactoryOEMV1;
+import com.android.car.ui.sharedlibrary.oemapis.appstyledview.AppStyledViewControllerOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
 import com.android.car.ui.toolbar.ToolbarController;
 import com.android.car.ui.toolbar.ToolbarControllerAdapterV1;
@@ -40,11 +44,15 @@ import com.android.car.ui.toolbar.ToolbarControllerAdapterV1;
  */
 public final class SharedLibraryFactoryAdapterV1 implements SharedLibraryFactory {
 
-    SharedLibraryFactoryOEMV1 mOem;
-    SharedLibraryFactoryStub mFactoryStub = new SharedLibraryFactoryStub();
+    private final Context mContext;
 
-    public SharedLibraryFactoryAdapterV1(SharedLibraryFactoryOEMV1 oem) {
+    SharedLibraryFactoryOEMV1 mOem;
+    SharedLibraryFactoryStub mFactoryStub;
+
+    public SharedLibraryFactoryAdapterV1(SharedLibraryFactoryOEMV1 oem, Context context) {
         mOem = oem;
+        mContext = context;
+        mFactoryStub = new SharedLibraryFactoryStub(context);
     }
 
     @Override
@@ -68,6 +76,14 @@ public final class SharedLibraryFactoryAdapterV1 implements SharedLibraryFactory
     public CarUiButton createButton(Context context, @Nullable CarUiButtonAttributes attrs) {
         // TODO(b/172345817) Create OEM APIs for this and call them from here
         return mFactoryStub.createButton(context, attrs);
+    }
+
+
+    @Override
+    public AppStyledViewController createAppStyledView() {
+        AppStyledViewControllerOEMV1 appStyledViewControllerOEMV1 = mOem.createAppStyledView();
+        return appStyledViewControllerOEMV1 == null ? new AppStyledViewControllerImpl(mContext)
+                : new AppStyledViewControllerAdapterV1(appStyledViewControllerOEMV1);
     }
 
     private Insets adaptInsets(InsetsOEMV1 insetsOEM) {
