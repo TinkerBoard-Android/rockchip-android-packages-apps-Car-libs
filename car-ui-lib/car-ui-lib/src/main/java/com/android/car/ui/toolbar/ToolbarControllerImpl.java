@@ -49,7 +49,6 @@ import com.android.car.ui.recyclerview.CarUiContentListItem;
 import com.android.car.ui.recyclerview.CarUiListItem;
 import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.utils.CarUiUtils;
-import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -123,15 +122,6 @@ public final class ToolbarControllerImpl implements ToolbarController {
         setState(getState());
     };
 
-    // Despite the warning, this has to be a field so it's not garbage-collected.
-    // The only other reference to it is a weak reference
-    private final CarUxRestrictionsUtil.OnUxRestrictionsChangedListener
-            mOnUxRestrictionsChangedListener = restrictions -> {
-                for (MenuItemRenderer renderer : mMenuItemRenderers) {
-                    renderer.setCarUxRestrictions(restrictions);
-                }
-            };
-
 
     public ToolbarControllerImpl(View view) {
         mContext = view.getContext();
@@ -197,10 +187,6 @@ public final class ToolbarControllerImpl implements ToolbarController {
         setBackgroundShown(true);
 
         mOverflowAdapter = new CarUiListItemAdapter(mUiOverflowItems);
-
-        // This holds weak references so we don't need to unregister later
-        CarUxRestrictionsUtil.getInstance(getContext())
-                .register(mOnUxRestrictionsChangedListener);
     }
 
     private Context getContext() {
