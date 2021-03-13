@@ -25,6 +25,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.isNotChecked;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -33,8 +34,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.widget.TextView;
+
+import androidx.core.content.ContextCompat;
 import androidx.test.rule.ActivityTestRule;
 
+import com.android.car.ui.CarUiText;
 import com.android.car.ui.R;
 
 import org.junit.Before;
@@ -48,6 +56,20 @@ import java.util.List;
  * Unit tests for {@link CarUiListItem}.
  */
 public class CarUiListItemTest {
+    private static final CharSequence LONG_CHAR_SEQUENCE =
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor "
+                    + "incididunt ut labore et dolore magna aliqua. Netus et malesuada fames ac "
+                    + "turpis egestas maecenas pharetra convallis. At urna condimentum mattis "
+                    + "pellentesque id nibh tortor. Purus in mollis nunc sed id semper risus in. "
+                    + "Turpis massa tincidunt dui ut ornare lectus sit amet. Porttitor lacus "
+                    + "luctus accumsan tortor posuere ac. Augue eget arcu dictum varius. Massa "
+                    + "tempor nec feugiat nisl pretium fusce id velit ut. Fames ac turpis egestas"
+                    + " sed tempus urna et pharetra pharetra. Tellus orci ac auctor augue mauris "
+                    + "augue neque gravida. Purus viverra accumsan in nisl nisi scelerisque eu. "
+                    + "Ut lectus arcu bibendum at varius vel pharetra. Penatibus et magnis dis "
+                    + "parturient montes nascetur ridiculus mus. Suspendisse sed nisi lacus sed "
+                    + "viverra tellus in hac habitasse.";
+    private static final String ELLIPSIS = "…";
 
     private CarUiRecyclerView mCarUiRecyclerView;
 
@@ -373,5 +395,157 @@ public class CarUiListItemTest {
         assertFalse(itemTwo.isChecked());
         assertTrue(itemThree.isChecked());
         assertEquals(adapter.getSelectedItemPosition(), 2);
+    }
+
+    @Test
+    public void testTextTruncation_twoShortLines() {
+        List<CarUiText> lines = new ArrayList<>();
+        lines.add(new CarUiText("Short text string", 2));
+        lines.add(new CarUiText("Second short string", 2));
+
+        CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
+        item.setBody(lines);
+        List<CarUiListItem> items = new ArrayList<>();
+        items.add(item);
+
+        mCarUiRecyclerView.post(
+                () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items)));
+
+        // Check for no manual truncation ellipsis.
+        onView(withId(R.id.car_ui_list_item_body)).check(
+                matches(not(withText(containsString(ELLIPSIS)))));
+    }
+
+    @Test
+    public void testTextTruncation_oneLongOneShort_withMaxLines() {
+        List<CarUiText> lines = new ArrayList<>();
+        lines.add(new CarUiText(LONG_CHAR_SEQUENCE, 2));
+        lines.add(new CarUiText("Second short string", 2));
+
+        CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
+        item.setBody(lines);
+        List<CarUiListItem> items = new ArrayList<>();
+        items.add(item);
+
+        mCarUiRecyclerView.post(
+                () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items)));
+
+        // Check for manual truncation ellipsis.
+        onView(withId(R.id.car_ui_list_item_body)).check(
+                matches(withText(containsString(ELLIPSIS))));
+
+        TextView bodyTextView = mCarUiRecyclerView.requireViewById(R.id.car_ui_list_item_body);
+        assertEquals(3, bodyTextView.getLineCount());
+    }
+
+    @Test
+    public void testTextTruncation_oneLongOneShort_noMaxLines() {
+        List<CarUiText> lines = new ArrayList<>();
+        lines.add(new CarUiText(LONG_CHAR_SEQUENCE, Integer.MAX_VALUE));
+        lines.add(new CarUiText("Second short string"));
+
+        CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
+        item.setBody(lines);
+        List<CarUiListItem> items = new ArrayList<>();
+        items.add(item);
+
+        mCarUiRecyclerView.post(
+                () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items)));
+
+        // Check for no manual truncation ellipsis.
+        onView(withId(R.id.car_ui_list_item_body)).check(
+                matches(not(withText(containsString(ELLIPSIS)))));
+    }
+
+    @Test
+    public void testTextTruncation_twoLong_withMaxLines() {
+        List<CarUiText> lines = new ArrayList<>();
+        lines.add(new CarUiText(LONG_CHAR_SEQUENCE, 3));
+        lines.add(new CarUiText(LONG_CHAR_SEQUENCE, 3));
+
+        CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
+        item.setBody(lines);
+        List<CarUiListItem> items = new ArrayList<>();
+        items.add(item);
+
+        mCarUiRecyclerView.post(
+                () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items)));
+
+        // Check for manual truncation ellipsis.
+        onView(withId(R.id.car_ui_list_item_body)).check(
+                matches(withText(containsString(ELLIPSIS))));
+
+        TextView bodyTextView = mCarUiRecyclerView.requireViewById(R.id.car_ui_list_item_body);
+        assertEquals(6, bodyTextView.getLineCount());
+    }
+
+    @Test
+    public void testTextTruncation_twoLong_differentMaxLines() {
+        List<CarUiText> lines = new ArrayList<>();
+        lines.add(new CarUiText(LONG_CHAR_SEQUENCE, 1));
+        lines.add(new CarUiText(LONG_CHAR_SEQUENCE, 4));
+
+        CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
+        item.setBody(lines);
+        List<CarUiListItem> items = new ArrayList<>();
+        items.add(item);
+
+        mCarUiRecyclerView.post(
+                () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items)));
+
+        // Check for manual truncation ellipsis.
+        onView(withId(R.id.car_ui_list_item_body)).check(
+                matches(withText(containsString(ELLIPSIS))));
+
+        TextView bodyTextView = mCarUiRecyclerView.requireViewById(R.id.car_ui_list_item_body);
+        assertEquals(5, bodyTextView.getLineCount());
+    }
+
+    @Test
+    public void testMultipleBodyTextLines() {
+        CharSequence line1 = "First short string";
+        CharSequence line2 = "Second short string";
+        CharSequence line3 = "Third short string";
+
+        List<CarUiText> lines = new ArrayList<>();
+        lines.add(new CarUiText(line1));
+        lines.add(new CarUiText(line2));
+        lines.add(new CarUiText(line3));
+
+        CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
+        item.setBody(lines);
+        List<CarUiListItem> items = new ArrayList<>();
+        items.add(item);
+
+        mCarUiRecyclerView.post(
+                () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items)));
+
+        String expectedText = line1 + "\n" + line2 + "\n" + line3;
+        onView(withId(R.id.car_ui_list_item_body)).check(
+                matches(withText(containsString(expectedText))));
+    }
+
+    @Test
+    public void testBodyTextSpans() {
+        int color = ContextCompat.getColor(mCarUiRecyclerView.getContext(),
+                R.color.car_ui_color_accent);
+
+        Spannable line1 = new SpannableString("This text contains color");
+        line1.setSpan(new ForegroundColorSpan(color), 19, 24, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        List<CarUiText> lines = new ArrayList<>();
+        lines.add(new CarUiText(line1, Integer.MAX_VALUE));
+
+        CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
+        item.setBody(lines);
+        List<CarUiListItem> items = new ArrayList<>();
+        items.add(item);
+
+        mCarUiRecyclerView.post(
+                () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items)));
+
+        onView(withId(R.id.car_ui_list_item_body)).check(matches(isDisplayed()));
+        TextView bodyTextView = mCarUiRecyclerView.requireViewById(R.id.car_ui_list_item_body);
+        assertEquals(line1, bodyTextView.getText());
     }
 }
