@@ -480,16 +480,26 @@ public class FocusArea extends LinearLayout {
     @Override
     public void onWindowFocusChanged(boolean hasWindowFocus) {
         // To ensure the focus is initialized properly in rotary mode when there is a window focus
-        // change, this FocusArea will grab the focus from the currently focused view if one of this
-        // FocusArea's descendants is a better focus candidate than the currently focused view.
+        // change, this FocusArea will grab the focus if nothing is focused or the currently
+        // focused view's FocusLevel is lower than REGULAR_FOCUS.
         if (hasWindowFocus && !isInTouchMode()) {
-            maybeAdjustFocus();
+            maybeInitFocus();
         }
         super.onWindowFocusChanged(hasWindowFocus);
     }
 
     /**
-     * Focuses on another view in this FocusArea if the view is a better focus candidate than the
+     * Focuses on another view in this FocusArea if nothing is focused or the currently focused
+     * view's FocusLevel is lower than REGULAR_FOCUS.
+     */
+    private boolean maybeInitFocus() {
+        View root = getRootView();
+        View focus = root.findFocus();
+        return ViewUtils.initFocus(root, focus);
+    }
+
+    /**
+     * Focuses on a view in this FocusArea if the view is a better focus candidate than the
      * currently focused view.
      */
     private boolean maybeAdjustFocus() {
