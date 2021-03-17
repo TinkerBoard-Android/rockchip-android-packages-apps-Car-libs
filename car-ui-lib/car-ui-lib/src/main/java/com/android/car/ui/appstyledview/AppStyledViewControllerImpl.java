@@ -20,10 +20,8 @@ import android.content.Context;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -56,15 +54,14 @@ public class AppStyledViewControllerImpl implements AppStyledViewController {
     }
 
     @Override
-    public View getAppStyledView(@Nullable ViewGroup container, View contentView) {
+    public View getAppStyledView(View contentView) {
         // create ContextThemeWrapper from the original Activity Context with the custom theme
         final Context contextThemeWrapper = new ContextThemeWrapper(mContext, R.style.Theme_CarUi);
         LayoutInflater inflater = LayoutInflater.from(mContext);
         // clone the inflater using the ContextThemeWrapper
         LayoutInflater localInflater = inflater.cloneInContext(contextThemeWrapper);
 
-        View appStyleView = localInflater.inflate(R.layout.car_ui_app_styled_view, container,
-                false);
+        View appStyleView = localInflater.inflate(R.layout.car_ui_app_styled_view, null, false);
 
         RecyclerView rv = appStyleView.findViewById(R.id.car_ui_app_styled_content);
 

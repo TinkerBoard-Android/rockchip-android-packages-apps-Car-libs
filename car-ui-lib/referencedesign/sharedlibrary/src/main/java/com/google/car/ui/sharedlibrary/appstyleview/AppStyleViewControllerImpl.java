@@ -19,7 +19,6 @@ package com.google.car.ui.sharedlibrary.appstyleview;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 
@@ -27,7 +26,9 @@ import com.android.car.ui.sharedlibrary.oemapis.appstyledview.AppStyledViewContr
 
 import com.google.car.ui.sharedlibrary.R;
 
-/** The OEM implementation for {@link AppStyledViewControllerOEMV1} for a AppStyledView. */
+/**
+ * The OEM implementation for {@link AppStyledViewControllerOEMV1} for a AppStyledView.
+ */
 public class AppStyleViewControllerImpl implements AppStyledViewControllerOEMV1 {
 
     private final Context mContext;
@@ -40,7 +41,7 @@ public class AppStyleViewControllerImpl implements AppStyledViewControllerOEMV1 
     }
 
     @Override
-    public View getAppStyledView(ViewGroup container, View content) {
+    public View getAppStyledView(View content) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         mAppStyleView = inflater.inflate(R.layout.app_styled_view, null, false);
 

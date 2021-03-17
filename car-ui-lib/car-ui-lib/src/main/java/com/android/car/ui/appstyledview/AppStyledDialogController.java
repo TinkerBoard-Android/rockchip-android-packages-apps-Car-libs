@@ -20,7 +20,6 @@ import android.content.Context;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentManager;
 
 import com.android.car.ui.appstyledview.AppStyledViewController.AppStyledDismissListener;
 import com.android.car.ui.appstyledview.AppStyledViewController.AppStyledVCloseClickListener;
@@ -36,13 +35,14 @@ public final class AppStyledDialogController {
 
     @NonNull
     private final AppStyledViewController mAppStyledViewController;
-    @NonNull
-    private AppStyledDialogFragment mFragment;
+    private final Context mContext;
+    @NonNull private AppStyledDialog mDialog;
 
     public AppStyledDialogController(@NonNull Context context) {
         Objects.requireNonNull(context);
+        mContext = context;
         mAppStyledViewController = SharedLibraryFactorySingleton.get(context)
-            .createAppStyledView();
+                .createAppStyledView();
     }
 
     /**
@@ -51,10 +51,9 @@ public final class AppStyledDialogController {
     public void setContentView(@NonNull View contentView) {
         Objects.requireNonNull(contentView);
 
-        mFragment = new AppStyledDialogFragment(mAppStyledViewController);
-
-        mFragment.setContent(contentView);
-        mAppStyledViewController.setOnCloseClickListener(mFragment::dismiss);
+        mDialog = new AppStyledDialog(mContext, mAppStyledViewController);
+        mDialog.setContent(contentView);
+        mAppStyledViewController.setOnCloseClickListener(mDialog::dismiss);
     }
 
     /**
@@ -65,10 +64,10 @@ public final class AppStyledDialogController {
     }
 
     /**
-     * Displays the dialog fragment to the user with the custom view provided by the app.
+     * Displays the dialog to the user with the custom view provided by the app.
      */
-    public void show(@NonNull FragmentManager fm) {
-        mFragment.show(fm, "AppStyledFragment");
+    public void show() {
+        mDialog.show();
     }
 
     /**
@@ -76,7 +75,7 @@ public final class AppStyledDialogController {
      */
     public void setOnCloseClickListener(@NonNull AppStyledVCloseClickListener listener) {
         mAppStyledViewController.setOnCloseClickListener(() -> {
-            mFragment.dismiss();
+            mDialog.dismiss();
             listener.onClick();
         });
     }
@@ -85,7 +84,7 @@ public final class AppStyledDialogController {
      * Sets the {@link AppStyledDismissListener}
      */
     public void setOnDismissListener(@NonNull AppStyledDismissListener listener) {
-        mFragment.setOnDismissListener(listener);
+        mDialog.setOnDismissListener(listener);
     }
 
     /**

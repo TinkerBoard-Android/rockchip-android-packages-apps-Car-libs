@@ -19,15 +19,14 @@ package com.android.car.ui.appstyledview;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.view.View;
-import android.view.ViewGroup;
 
 import androidx.annotation.IntDef;
 
 import java.lang.annotation.Retention;
 
 /**
- * An interface for accessing a Chassis AppStyledView, regardless of how the underlying
- * views are represented.
+ * An interface for accessing a Chassis AppStyledView, regardless of how the underlying views are
+ * represented.
  */
 public interface AppStyledViewController {
 
@@ -62,6 +61,7 @@ public interface AppStyledViewController {
     })
     @Retention(SOURCE)
     @interface AppStyledViewNavIcon {
+
         /**
          * Show a back icon
          */
@@ -76,11 +76,9 @@ public interface AppStyledViewController {
     /**
      * Creates a app styled view.
      *
-     * @param container If non-null, this is the parent view that the view
-     * should be attached to.
      * @return the view used for app styled view.
      */
-    View getAppStyledView(ViewGroup container, View contentView);
+    View getAppStyledView(View contentView);
 
     /**
      * Sets the nav icon to be used.

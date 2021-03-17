@@ -87,7 +87,7 @@ public class AppStyledViewSampleActivity extends AppCompatActivity implements
         btn.setOnClickListener(v -> {
             controller.setContentView(appStyledTestView);
             controller.setNavIcon(AppStyledViewNavIcon.CLOSE);
-            controller.show(getSupportFragmentManager());
+            controller.show();
         });
     }
 

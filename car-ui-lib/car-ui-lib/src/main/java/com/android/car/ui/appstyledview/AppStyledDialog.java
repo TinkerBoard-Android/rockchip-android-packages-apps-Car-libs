@@ -13,56 +13,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.car.ui.appstyledview;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
 
 import com.android.car.ui.appstyledview.AppStyledViewController.AppStyledDismissListener;
 
 /**
- * App styled dialog Fragment used to display a view that cannot be customized via OEM. Dialog
- * Fragment will inflate a layout and add the view provided by the application into the layout.
+ * App styled dialog used to display a view that cannot be customized via OEM. Dialog
+ * will inflate a layout and add the view provided by the application into the layout.
  * Everything other than the view within the layout can be customized by OEM.
  *
  * Apps should not use this directly. App's should use {@link AppStyledDialogController}.
  */
-public final class AppStyledDialogFragment extends DialogFragment {
+public class AppStyledDialog extends Dialog implements DialogInterface.OnDismissListener {
 
     private final AppStyledViewController mController;
     private AppStyledDismissListener mOnDismissListener;
     private View mContent;
 
-    public AppStyledDialogFragment(AppStyledViewController controller) {
+    public AppStyledDialog(@NonNull Context context, AppStyledViewController controller) {
+        super(context);
         mController = controller;
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-            @Nullable Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
-
-        return mController.getAppStyledView(container, mContent);
+        setOnDismissListener(this);
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(mController.getAppStyledView(mContent));
 
-        ViewGroup.LayoutParams params = getDialog().getWindow().getAttributes();
+        ViewGroup.LayoutParams params = getWindow().getAttributes();
         params.width = mController.getAppStyledViewDialogWidth();
         params.height = mController.getAppStyledViewDialogHeight();
-        getDialog().getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
+        getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
     }
 
     @Override
@@ -70,14 +64,6 @@ public final class AppStyledDialogFragment extends DialogFragment {
         if (mOnDismissListener != null) {
             mOnDismissListener.onDismiss();
         }
-    }
-
-    @Override
-    public Dialog onCreateDialog(final Bundle savedInstanceState) {
-        final Dialog dialog = new Dialog(getActivity());
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-        return dialog;
     }
 
     void setContent(View contentView) {

@@ -17,7 +17,6 @@
 package com.android.car.ui.sharedlibrary.oemapis.appstyledview;
 
 import android.view.View;
-import android.view.ViewGroup;
 
 /** The OEM interface for a AppStyledView. */
 public interface AppStyledViewControllerOEMV1 {
@@ -25,13 +24,10 @@ public interface AppStyledViewControllerOEMV1 {
     /**
      * Creates a app styled view.
      *
-     * @param container If non-null, this is the parent view that the view
-     * should be attached to.
      * @param content app content view.
      * @return the view used for app styled view.
      */
-    View getAppStyledView(ViewGroup container,
-            View content);
+    View getAppStyledView(View content);
 
     /**
      * Sets a {@link Runnable} to be called whenever the close icon is clicked.
