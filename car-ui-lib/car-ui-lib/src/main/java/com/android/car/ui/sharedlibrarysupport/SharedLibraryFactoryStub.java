@@ -43,12 +43,14 @@ import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.recyclerview.CarUiRecyclerViewImpl;
 import com.android.car.ui.toolbar.ToolbarController;
 import com.android.car.ui.toolbar.ToolbarControllerImpl;
+import com.android.car.ui.widget.CarUiTextView;
+import com.android.car.ui.widget.CarUiTextViewImpl;
 
 /**
- * This is the stub implementation of {@link SharedLibraryFactory}, used when there is no
- * shared library installed on the system. It delegates to the static library implementation
- * of the necessary components.
- *
+ * This is the stub implementation of {@link SharedLibraryFactory}, used when there is no shared
+ * library installed on the system. It delegates to the static library implementation of the
+ * necessary components.
+ * <p>
  * Do not use from client apps, for car-ui-lib internal use only.
  */
 //TODO(b/179092760) Find a way to prevent apps from using this
@@ -114,6 +116,12 @@ public final class SharedLibraryFactoryStub implements SharedLibraryFactory {
         return new CarUiButtonImpl(context, attrs);
     }
 
+    @NonNull
+    @Override
+    public CarUiTextView createTextView(Context context, AttributeSet attrs) {
+        return new CarUiTextViewImpl(context, attrs);
+    }
+
     @Override
     public AppStyledViewController createAppStyledView() {
         return new AppStyledViewControllerImpl(mContext);
@@ -124,9 +132,9 @@ public final class SharedLibraryFactoryStub implements SharedLibraryFactory {
      * insets into the content view.
      *
      * <p>It then calls {@link InsetsChangedListener#onCarUiInsetsChanged(Insets)} on the
-     * {@link Activity} and any {@link Fragment Fragments} the Activity might have. If
-     * none of the Activity/Fragments implement {@link InsetsChangedListener}, it will set
-     * padding on the content view equal to the insets.
+     * {@link Activity} and any {@link Fragment Fragments} the Activity might have. If none of the
+     * Activity/Fragments implement {@link InsetsChangedListener}, it will set padding on the
+     * content view equal to the insets.
      */
     public static final class InsetsUpdater {
         // These tags mark views that should overlay the content view in the base layout.
@@ -150,9 +158,10 @@ public final class SharedLibraryFactoryStub implements SharedLibraryFactory {
         private Insets mInsets = new Insets();
 
         /**
-         * Constructs an InsetsUpdater that calculates and dispatches insets to an {@link Activity}.
+         * Constructs an InsetsUpdater that calculates and dispatches insets to an {@link
+         * Activity}.
          *
-         * @param baseLayout The root view of the base layout
+         * @param baseLayout  The root view of the base layout
          * @param contentView The android.R.id.content View
          */
         InsetsUpdater(
@@ -240,9 +249,9 @@ public final class SharedLibraryFactoryStub implements SharedLibraryFactory {
 
         /**
          * Dispatch the new {@link Insets} to the {@link InsetsChangedListener} IIF there is one,
-         * otherwise dispatch the new {@link Insets} to the {@link Activity} and all of its
-         * {@link Fragment Fragments}. If none of those implement {@link InsetsChangedListener},
-         * we will set the value of the insets as padding on the content view.
+         * otherwise dispatch the new {@link Insets} to the {@link Activity} and all of its {@link
+         * Fragment Fragments}. If none of those implement {@link InsetsChangedListener}, we will
+         * set the value of the insets as padding on the content view.
          *
          * @param insets The newly-changed insets.
          */

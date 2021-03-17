@@ -19,8 +19,6 @@ package com.android.car.ui.recyclerview;
 import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
 import android.graphics.drawable.Drawable;
-import android.text.SpannableStringBuilder;
-import android.text.StaticLayout;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,11 +34,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.car.ui.CarUiText;
 import com.android.car.ui.R;
+import com.android.car.ui.widget.CarUiTextView;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Adapter for {@link CarUiRecyclerView} to display {@link CarUiContentListItem} and {@link
@@ -50,7 +47,6 @@ import java.util.Objects;
  * <li> Implements {@link CarUiRecyclerView.ItemCap} - defaults to unlimited item count.
  * </ul>
  */
-@SuppressWarnings("AndroidJdkLibsChecker")
 public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements
         CarUiRecyclerView.ItemCap {
 
@@ -157,8 +153,8 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
      */
     static class ListItemViewHolder extends RecyclerView.ViewHolder {
 
-        final TextView mTitle;
-        final TextView mBody;
+        final CarUiTextView mTitle;
+        final CarUiTextView mBody;
         final ImageView mIcon;
         final ImageView mContentIcon;
         final ImageView mAvatarIcon;
@@ -198,14 +194,14 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         void bind(@NonNull CarUiContentListItem item) {
             if (item.getTitle() != null) {
-                bindTitleText(item);
+                mTitle.setText(item.getTitle());
                 mTitle.setVisibility(View.VISIBLE);
             } else {
                 mTitle.setVisibility(View.GONE);
             }
 
             if (item.getBody() != null) {
-                bindBodyText(item);
+                mBody.setText(item.getBody());
                 mBody.setVisibility(View.VISIBLE);
             } else {
                 mBody.setVisibility(View.GONE);
@@ -363,68 +359,6 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
 
             mActionContainer.setVisibility(View.VISIBLE);
             mActionContainer.setClickable(false);
-        }
-
-        // TODO(b/180627124): Add support for rendering text variants.
-        private void setText(@NonNull CarUiText text, @NonNull TextView textView) {
-            if (text.getMaxLines() == Integer.MAX_VALUE) {
-                textView.setText(text.getPreferredText());
-                return;
-            }
-
-            // Run on next UI cycle to ensure layout has been performed and width is correct
-            textView.post(() -> {
-                StaticLayout truncatedLayout = createStaticLayout(textView, text.getPreferredText(),
-                        text.getMaxLines());
-                textView.setText(truncatedLayout.getText());
-            });
-        }
-
-        private void bindTitleText(@NonNull CarUiContentListItem item) {
-            setText(Objects.requireNonNull(item.getTitle()), mTitle);
-        }
-
-        // TODO(b/180627124): Add support for rendering text variants.
-        private void bindBodyText(@NonNull CarUiContentListItem item) {
-            List<CarUiText> text = Objects.requireNonNull(item.getBody());
-            if (text.size() == 1) {
-                setText(text.get(0), mBody);
-                return;
-            }
-
-            if (text.stream().allMatch(line -> line.getMaxLines() == Integer.MAX_VALUE)) {
-                mBody.setText(CarUiText.combineMultiLine(text));
-                return;
-            }
-
-            // Run on next UI cycle to ensure layout has been performed and width is correct
-            mBody.post(() -> {
-                CharSequence delimiter = "";
-                SpannableStringBuilder builder = new SpannableStringBuilder();
-                for (CarUiText line : text) {
-                    if (line.getMaxLines() == Integer.MAX_VALUE) {
-                        builder.append(delimiter).append(line.getPreferredText());
-                    } else {
-                        StaticLayout truncatedLayout = createStaticLayout(mBody,
-                                line.getPreferredText(), line.getMaxLines());
-                        builder.append(delimiter).append(truncatedLayout.getText());
-                    }
-                    delimiter = "\n";
-                }
-                mBody.setText(builder);
-            });
-        }
-
-        private StaticLayout createStaticLayout(TextView textView, CharSequence text,
-                int maxLines) {
-            return StaticLayout.Builder.obtain(text, 0, text.length(), textView.getPaint(),
-                    textView.getWidth())
-                    .setAlignment(textView.getLayout().getAlignment())
-                    .setLineSpacing(textView.getLayout().getSpacingAdd(),
-                            textView.getLayout().getSpacingAdd())
-                    .setMaxLines(maxLines)
-                    .setEllipsize(TextUtils.TruncateAt.END)
-                    .build();
         }
     }
 

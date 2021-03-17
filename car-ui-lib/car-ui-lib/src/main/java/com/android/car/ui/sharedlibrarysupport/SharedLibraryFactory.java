@@ -28,6 +28,7 @@ import com.android.car.ui.button.CarUiButton;
 import com.android.car.ui.button.CarUiButtonAttributes;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.ToolbarController;
+import com.android.car.ui.widget.CarUiTextView;
 
 /**
  * This interface contains methods to create customizable carui components.
@@ -64,6 +65,14 @@ public interface SharedLibraryFactory {
             Context context,
             @Nullable CarUiButtonAttributes attrs);
 
+    /**
+     * Creates a {@link CarUiTextView}.
+     *
+     * @param context The visual context to create views with.
+     * @return A {@link CarUiTextView}
+     */
+    @NonNull
+    CarUiTextView createTextView(Context context, AttributeSet attrs);
 
     /**
      * Creates a app styled view.

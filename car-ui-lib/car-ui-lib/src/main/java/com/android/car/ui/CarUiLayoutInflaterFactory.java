@@ -27,11 +27,12 @@ import com.android.car.ui.button.CarUiButton;
 import com.android.car.ui.button.CarUiButtonAttributes;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
+import com.android.car.ui.widget.CarUiTextView;
 
 /**
- * A custom {@link LayoutInflater.Factory2} that will create CarUi components such as
- * {@link CarUiButton}. It extends AppCompatViewInflater so that it can still let
- * AppCompat components be created correctly.
+ * A custom {@link LayoutInflater.Factory2} that will create CarUi components such as {@link
+ * CarUiButton}. It extends AppCompatViewInflater so that it can still let AppCompat components be
+ * created correctly.
  */
 public class CarUiLayoutInflaterFactory extends AppCompatViewInflater
         implements LayoutInflater.Factory2 {
@@ -50,6 +51,8 @@ public class CarUiLayoutInflaterFactory extends AppCompatViewInflater
         } else if (CarUiRecyclerView.class.getName().equals(name)) {
             view = SharedLibraryFactorySingleton.get(context)
                     .createRecyclerView(context, attrs);
+        } else if (CarUiTextView.class.getSimpleName().equals(name)) {
+            view = SharedLibraryFactorySingleton.get(context).createTextView(context, attrs);
         }
 
         return view;
