@@ -26,6 +26,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 /** Helper class to toggle direct manipulation mode. */
 public final class DirectManipulationHelper {
@@ -35,7 +36,8 @@ public final class DirectManipulationHelper {
      * class name of {@link AccessibilityEvent} to indicate that the AccessibilityEvent represents
      * a request to toggle direct manipulation mode.
      */
-    private static final String DIRECT_MANIPULATION =
+    @VisibleForTesting
+    public static final String DIRECT_MANIPULATION =
             "com.android.car.ui.utils.DIRECT_MANIPULATION";
 
     /** This is a utility class. */
