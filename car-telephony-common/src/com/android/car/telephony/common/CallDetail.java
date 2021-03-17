@@ -17,6 +17,7 @@
 package com.android.car.telephony.common;
 
 import android.net.Uri;
+import android.os.Bundle;
 import android.telecom.Call;
 import android.telecom.DisconnectCause;
 import android.telecom.GatewayInfo;
@@ -29,22 +30,31 @@ import androidx.annotation.Nullable;
  * Represents details of {@link Call.Details}.
  */
 public class CallDetail {
+    private static final String EXTRA_SCO_STATE = "com.android.bluetooth.hfpclient.SCO_STATE";
+
+    public static final int STATE_AUDIO_ERROR = -1;
+    public static final int STATE_AUDIO_DISCONNECTED = 0;
+    public static final int STATE_AUDIO_CONNECTING = 1;
+    public static final int STATE_AUDIO_CONNECTED = 2;
+
     private final String mNumber;
     private final CharSequence mDisconnectCause;
     private final Uri mGatewayInfoOriginalAddress;
     private final long mConnectTimeMillis;
     private final boolean mIsConference;
     private final PhoneAccountHandle mPhoneAccountHandle;
+    private final int mScoState;
 
     private CallDetail(String number, CharSequence disconnectCause,
-                       Uri gatewayInfoOriginalAddress, long connectTimeMillis,
-                       boolean isConference, PhoneAccountHandle phoneAccountHandle) {
+            Uri gatewayInfoOriginalAddress, long connectTimeMillis,
+            boolean isConference, PhoneAccountHandle phoneAccountHandle, int scoState) {
         mNumber = number;
         mDisconnectCause = disconnectCause;
         mGatewayInfoOriginalAddress = gatewayInfoOriginalAddress;
         mConnectTimeMillis = connectTimeMillis;
         mIsConference = isConference;
         mPhoneAccountHandle = phoneAccountHandle;
+        mScoState = scoState;
     }
 
     /**
@@ -53,7 +63,8 @@ public class CallDetail {
     public static CallDetail fromTelecomCallDetail(@Nullable Call.Details callDetail) {
         return new CallDetail(getNumber(callDetail), getDisconnectCause(callDetail),
                 getGatewayInfoOriginalAddress(callDetail), getConnectTimeMillis(callDetail),
-                isConferenceCall(callDetail), getPhoneAccountHandle(callDetail));
+                isConferenceCall(callDetail), getPhoneAccountHandle(callDetail),
+                getScoState(callDetail));
     }
 
     /**
@@ -94,6 +105,13 @@ public class CallDetail {
         return mIsConference;
     }
 
+    /**
+     * Returns the SCO state of the call.
+     */
+    public int getScoState() {
+        return mScoState;
+    }
+
     /** Returns the {@link PhoneAccountHandle} for this call. */
     @Nullable
     public PhoneAccountHandle getPhoneAccountHandle() {
@@ -129,11 +147,7 @@ public class CallDetail {
     }
 
     private static long getConnectTimeMillis(Call.Details callDetail) {
-        if (callDetail != null) {
-            return callDetail.getConnectTimeMillis();
-        } else {
-            return 0;
-        }
+        return callDetail == null ? 0 : callDetail.getConnectTimeMillis();
     }
 
     private static boolean isConferenceCall(Call.Details callDetail) {
@@ -143,5 +157,16 @@ public class CallDetail {
     @Nullable
     private static PhoneAccountHandle getPhoneAccountHandle(Call.Details callDetail) {
         return callDetail == null ? null : callDetail.getAccountHandle();
+    }
+
+    private static int getScoState(Call.Details callDetail) {
+        int state = STATE_AUDIO_ERROR;
+        if (callDetail != null) {
+            Bundle extras = callDetail.getExtras();
+            if (extras != null && extras.containsKey(EXTRA_SCO_STATE)) {
+                state = extras.getInt(EXTRA_SCO_STATE);
+            }
+        }
+        return state;
     }
 }
