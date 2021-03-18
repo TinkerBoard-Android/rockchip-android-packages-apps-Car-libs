@@ -160,7 +160,9 @@ public class FocusParkingView extends View {
     }
 
     private void updateFocusedView(@Nullable View focusedView) {
-        mFocusCache.setFocusedView(mFocusedView, SystemClock.uptimeMillis());
+        if (mFocusedView != null) {
+            mFocusCache.setFocusedView(mFocusedView, SystemClock.uptimeMillis());
+        }
         mFocusedView = focusedView;
         mScrollableContainer = ViewUtils.getAncestorScrollableContainer(focusedView);
     }
@@ -201,7 +203,7 @@ public class FocusParkingView extends View {
         } else if (isFocused()) {
             // When FocusParkingView is focused and the window just gets focused, transfer the view
             // focus to a non-FocusParkingView in the window.
-            restoreFocusInRoot(/* checkForTouchMode= */ true, /* checkFocusHistory= */ false);
+            restoreFocusInRoot(/* checkForTouchMode= */ true);
         }
         super.onWindowFocusChanged(hasWindowFocus);
     }
@@ -215,8 +217,7 @@ public class FocusParkingView extends View {
     public boolean performAccessibilityAction(int action, Bundle arguments) {
         switch (action) {
             case ACTION_RESTORE_DEFAULT_FOCUS:
-                return restoreFocusInRoot(
-                        /* checkForTouchMode= */ false, /* checkFocusHistory= */ true);
+                return restoreFocusInRoot(/* checkForTouchMode= */ false);
             case ACTION_HIDE_IME:
                 InputMethodManager inputMethodManager =
                         getContext().getSystemService(InputMethodManager.class);
@@ -239,7 +240,7 @@ public class FocusParkingView extends View {
         }
         // Find a better target to focus instead of focusing this FocusParkingView when the
         // framework wants to focus it.
-        return restoreFocusInRoot(/* checkForTouchMode= */ true, /* checkFocusHistory= */ false);
+        return restoreFocusInRoot(/* checkForTouchMode= */ true);
     }
 
     @Override
@@ -249,7 +250,7 @@ public class FocusParkingView extends View {
         }
         // Find a better target to focus instead of focusing this FocusParkingView when the
         // framework wants to focus it.
-        return restoreFocusInRoot(/* checkForTouchMode= */ true, /* checkFocusHistory= */ false);
+        return restoreFocusInRoot(/* checkForTouchMode= */ true);
     }
 
     /**
@@ -261,7 +262,7 @@ public class FocusParkingView extends View {
         mShouldRestoreFocus = shouldRestoreFocus;
     }
 
-    private boolean restoreFocusInRoot(boolean checkForTouchMode, boolean checkFocusHistory) {
+    private boolean restoreFocusInRoot(boolean checkForTouchMode) {
         // Don't do anything in touch mode if checkForTouchMode is true.
         if (checkForTouchMode && isInTouchMode()) {
             return false;
@@ -274,9 +275,7 @@ public class FocusParkingView extends View {
         }
 
         // Otherwise try to find the best target view to focus.
-        View cachedFocusedView = checkFocusHistory
-                ? mFocusCache.getFocusedView(SystemClock.uptimeMillis())
-                : null;
+        View cachedFocusedView = mFocusCache.getFocusedView(SystemClock.uptimeMillis());
         if (ViewUtils.adjustFocus(
                 getRootView(), cachedFocusedView, mDefaultFocusOverridesHistory)) {
             return true;
