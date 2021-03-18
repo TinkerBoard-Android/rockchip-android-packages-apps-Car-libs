@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class CarUiText {
     private final int mMaxLines;
-    private final List<CharSequence> mText;
+    private final List<CharSequence> mVariants;
 
     /**
      * Convenience method that returns a single {@link CharSequence} that is a combination of the
@@ -61,7 +61,21 @@ public class CarUiText {
      *                 number of lines is ellipsized
      */
     public CarUiText(@NonNull CharSequence text, int maxLines) {
-        mText = Collections.singletonList(text);
+        mVariants = Collections.singletonList(text);
+        mMaxLines = maxLines;
+    }
+
+    /**
+     * Create a new {@link CarUiText}.
+     *
+     * @param variants list of text variants. Variants provide alternative text to be used to avoid
+     *                 truncation. Provide variants in order of preference.
+     * @param maxLines the maximum number of lines the text should be displayed on when width
+     *                 constraints force the text to be wrapped. Text that exceeds the maximum
+     *                 number of lines is ellipsized
+     */
+    public CarUiText(@NonNull List<CharSequence> variants, int maxLines) {
+        mVariants = variants;
         mMaxLines = maxLines;
     }
 
@@ -74,14 +88,17 @@ public class CarUiText {
     }
 
 
-    public List<CharSequence> getText() {
-        return mText;
+    /**
+     * Returns the list of text variants for this {@link CarUiText}.
+     */
+    public List<CharSequence> getTextVariants() {
+        return mVariants;
     }
 
     /**
      * Returns the preferred text to render for this {@link CarUiText}.
      */
     public CharSequence getPreferredText() {
-        return mText.get(0);
+        return mVariants.get(0);
     }
 }

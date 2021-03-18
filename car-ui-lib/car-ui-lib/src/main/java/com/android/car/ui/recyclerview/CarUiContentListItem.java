@@ -171,6 +171,15 @@ public class CarUiContentListItem extends CarUiListItem {
     /**
      * Sets the body of the item.
      *
+     * @param body text to display as body text.
+     */
+    public void setBody(@NonNull CarUiText body) {
+        mBody = Collections.singletonList(body);
+    }
+
+    /**
+     * Sets the body of the item.
+     *
      * @param textList list of text to display as body text. Each {@link CarUiText} in the list will
      *                 be rendered on a new line, separated by a line break.
      */

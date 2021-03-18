@@ -36,6 +36,7 @@ import com.android.car.ui.sharedlibrary.oemapis.appstyledview.AppStyledViewContr
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
 import com.android.car.ui.toolbar.ToolbarController;
 import com.android.car.ui.toolbar.ToolbarControllerAdapterV1;
+import com.android.car.ui.widget.CarUiTextView;
 
 /**
  * This class is an wrapper around {@link SharedLibraryFactoryOEMV1} that implements
@@ -76,6 +77,12 @@ public final class SharedLibraryFactoryAdapterV1 implements SharedLibraryFactory
     public CarUiButton createButton(Context context, @Nullable CarUiButtonAttributes attrs) {
         // TODO(b/172345817) Create OEM APIs for this and call them from here
         return mFactoryStub.createButton(context, attrs);
+    }
+
+    @NonNull
+    @Override
+    public CarUiTextView createTextView(Context context, AttributeSet attrs) {
+        return mFactoryStub.createTextView(context, attrs);
     }
 
 
