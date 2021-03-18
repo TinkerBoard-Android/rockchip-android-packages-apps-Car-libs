@@ -174,6 +174,21 @@ public final class ViewUtils {
     }
 
     /**
+     * If the {@code currentFocus}'s FocusLevel is lower than REGULAR_FOCUS, adjusts focus within
+     * {@code root}. See {@link #adjustFocus(View, int)}. Otherwise no-op.
+     *
+     * @return whether the focus has changed
+     */
+    public static boolean initFocus(@NonNull View root, @Nullable View currentFocus) {
+        @FocusLevel int currentLevel = getFocusLevel(currentFocus);
+        if (currentLevel >= REGULAR_FOCUS) {
+            return false;
+        }
+        return adjustFocus(root, currentLevel, /* cachedFocusedView= */ null,
+                /* defaultFocusOverridesHistory= */ false);
+    }
+
+    /**
      * Searches the {@code root}'s descendants for a view with the highest {@link FocusLevel}. If
      * the view's FocusLevel is higher than {@code currentLevel}, focuses on the view.
      *

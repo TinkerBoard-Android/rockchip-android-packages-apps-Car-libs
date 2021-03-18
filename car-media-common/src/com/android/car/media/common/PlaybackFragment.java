@@ -121,8 +121,22 @@ public class PlaybackFragment extends Fragment {
         TextView subtitle = view.findViewById(R.id.subtitle);
         mInnerViewModel.getSubtitle().observe(getViewLifecycleOwner(), subtitle::setText);
 
+        boolean useSourceLogoForAppSelector =
+                getResources().getBoolean(R.bool.use_media_source_logo_for_app_selector);
+
         ImageView appIcon = view.findViewById(R.id.app_icon);
-        mInnerViewModel.getAppIcon().observe(getViewLifecycleOwner(), appIcon::setImageBitmap);
+        View appSelector = view.findViewById(R.id.app_selector_container);
+        mInnerViewModel.getAppIcon().observe(getViewLifecycleOwner(), bitmap -> {
+            if (useSourceLogoForAppSelector) {
+                ImageView appSelectorIcon = appSelector.findViewById(R.id.app_selector);
+                appSelectorIcon.setImageBitmap(bitmap);
+                appSelectorIcon.setImageTintList(null);
+
+                appIcon.setVisibility(View.GONE);
+            } else {
+                appIcon.setImageBitmap(bitmap);
+            }
+        });
 
         mInnerViewModel.getBrowseTreeHasChildren().observe(getViewLifecycleOwner(),
                 this::onBrowseTreeHasChildrenChanged);
@@ -152,10 +166,8 @@ public class PlaybackFragment extends Fragment {
         mPlaybackViewModel.getMetadata().observe(getViewLifecycleOwner(),
                 item -> mAlbumArtBinder.setImage(PlaybackFragment.this.getContext(),
                         item != null ? item.getArtworkKey() : null));
-        View appSelector = view.findViewById(R.id.app_selector_container);
         appSelector.setVisibility(mAppSelectorIntent != null ? View.VISIBLE : View.GONE);
         appSelector.setOnClickListener(e -> getContext().startActivity(mAppSelectorIntent));
-
 
         mErrorsHelper = new PlaybackErrorsHelper(activity) {
 
