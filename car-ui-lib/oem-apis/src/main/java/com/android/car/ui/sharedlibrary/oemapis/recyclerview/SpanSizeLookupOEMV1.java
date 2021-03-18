@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,11 @@
  */
 package com.android.car.ui.sharedlibrary.oemapis.recyclerview;
 
-import android.view.View;
+/**
+ * {@link androidx.recyclerview.widget.GridLayoutManager#setSpanSizeLookup}
+ */
+public interface SpanSizeLookupOEMV1 {
 
-/** {@link androidx.recyclerview.widget.RecyclerView.ViewHolder} */
-public interface ViewHolderOEMV1 {
-
-    /** {@link androidx.recyclerview.widget.RecyclerView.ViewHolder#isRecyclable()} */
-    boolean isRecyclable();
-
-    /**
-     * Returns the ItemView for each element in the recyclerview.
-     */
-    View getItemView();
+    /** {@link androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup#getSpanSize} */
+    int getSpanSize(int position);
 }

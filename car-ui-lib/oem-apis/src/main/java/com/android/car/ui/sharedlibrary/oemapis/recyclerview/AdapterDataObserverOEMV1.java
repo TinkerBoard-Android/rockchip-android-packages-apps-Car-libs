@@ -36,7 +36,7 @@ public interface AdapterDataObserverOEMV1 {
     void onItemRangeRemoved(int positionStart, int itemCount);
 
     /** {@link androidx.recyclerview.widget.RecyclerView.AdapterDataObserver#onItemRangeMoved(int, int, int)} */
-    void onItemRangeMoved(int fromPosition, int toPosition, int itemCount);
+    void onItemMoved(int fromPosition, int toPosition);
 
     /** {@link androidx.recyclerview.widget.RecyclerView.AdapterDataObserver#onStateRestorationPolicyChanged()} */
     void onStateRestorationPolicyChanged();
