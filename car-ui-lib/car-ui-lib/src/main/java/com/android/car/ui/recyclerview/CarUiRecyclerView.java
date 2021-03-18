@@ -33,7 +33,7 @@ import java.lang.annotation.Retention;
 /**
  * A class to access the {@link CarUiRecyclerView} methods. The appearance and layout is
  * customizable by OEM.
- *
+ * <p>
  * This is the base class for CarUiRecyclerView implementation.
  */
 public abstract class CarUiRecyclerView extends RecyclerView {
@@ -55,7 +55,7 @@ public abstract class CarUiRecyclerView extends RecyclerView {
     }
 
     /**
-     * The possible values for setScrollBarPosition. The default value is actually {@link
+     * The possible values for setScrollBarPosition. The default value is {@link
      * CarUiRecyclerViewLayout#LINEAR}.
      */
     @IntDef({
@@ -136,9 +136,9 @@ public abstract class CarUiRecyclerView extends RecyclerView {
     public abstract void setLinearDividerItemDecoration(boolean enableDividers);
 
     /**
-     * Sets divider item decoration for grid layout. This should be called after the call to
-     * {@link #setLayoutManager(LayoutManager)}  has been completed. If called before that could
-     * result in unexpected behavior.
+     * Sets divider item decoration for grid layout. This should be called after the call to {@link
+     * #setLayoutManager(LayoutManager)}  has been completed. If called before that could result in
+     * unexpected behavior.
      */
     public abstract void setGridDividerItemDecoration(boolean enableDividers);
 
@@ -146,9 +146,9 @@ public abstract class CarUiRecyclerView extends RecyclerView {
      * Set the {@link LayoutManager} that this RecyclerView will use.
      *
      * <p>In contrast to other adapter-backed views such as {@link android.widget.ListView}
-     * or {@link android.widget.GridView}, RecyclerView allows client code to provide custom
-     * layout arrangements for child views. These arrangements are controlled by the
-     * {@link LayoutManager}. A LayoutManager must be provided for RecyclerView to function.</p>
+     * or {@link android.widget.GridView}, RecyclerView allows client code to provide custom layout
+     * arrangements for child views. These arrangements are controlled by the {@link LayoutManager}.
+     * A LayoutManager must be provided for RecyclerView to function.</p>
      *
      * <p>Several default strategies are provided for common uses such as lists and grids.</p>
      *
@@ -162,14 +162,13 @@ public abstract class CarUiRecyclerView extends RecyclerView {
     }
 
     /**
-     * Add an {@link ItemDecoration} to this RecyclerView. Item decorations can
-     * affect both measurement and drawing of individual item views.
+     * Add an {@link ItemDecoration} to this RecyclerView. Item decorations can affect both
+     * measurement and drawing of individual item views.
      *
      * <p>Item decorations are ordered. Decorations placed earlier in the list will
-     * be run/queried/drawn first for their effects on item views. Padding added to views
-     * will be nested; a padding added by an earlier decoration will mean further
-     * item decorations in the list will be asked to draw/pad within the previous decoration's
-     * given area.</p>
+     * be run/queried/drawn first for their effects on item views. Padding added to views will be
+     * nested; a padding added by an earlier decoration will mean further item decorations in the
+     * list will be asked to draw/pad within the previous decoration's given area.</p>
      *
      * @param decor Decoration to add
      * @deprecated to be implemented by OEMs
@@ -181,18 +180,17 @@ public abstract class CarUiRecyclerView extends RecyclerView {
     }
 
     /**
-     * Add an {@link ItemDecoration} to this RecyclerView. Item decorations can
-     * affect both measurement and drawing of individual item views.
+     * Add an {@link ItemDecoration} to this RecyclerView. Item decorations can affect both
+     * measurement and drawing of individual item views.
      *
      * <p>Item decorations are ordered. Decorations placed earlier in the list will
-     * be run/queried/drawn first for their effects on item views. Padding added to views
-     * will be nested; a padding added by an earlier decoration will mean further
-     * item decorations in the list will be asked to draw/pad within the previous decoration's
-     * given area.</p>
+     * be run/queried/drawn first for their effects on item views. Padding added to views will be
+     * nested; a padding added by an earlier decoration will mean further item decorations in the
+     * list will be asked to draw/pad within the previous decoration's given area.</p>
      *
      * @param decor Decoration to add
-     * @param index Position in the decoration chain to insert this decoration at. If this value
-     *              is negative the decoration will be added at the end.
+     * @param index Position in the decoration chain to insert this decoration at. If this value is
+     *              negative the decoration will be added at the end.
      * @deprecated to be implemented by OEM
      */
     @Deprecated
@@ -211,7 +209,8 @@ public abstract class CarUiRecyclerView extends RecyclerView {
      */
     @Deprecated
     @Override
-    public @NonNull ItemDecoration getItemDecorationAt(int index) {
+    @NonNull
+    public ItemDecoration getItemDecorationAt(int index) {
         return super.getItemDecorationAt(index);
     }
 
