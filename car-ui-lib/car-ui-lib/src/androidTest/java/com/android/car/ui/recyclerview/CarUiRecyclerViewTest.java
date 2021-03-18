@@ -106,7 +106,7 @@ public class CarUiRecyclerViewTest {
     public ActivityScenarioRule<TestActivity> mActivityRule =
             new ActivityScenarioRule<>(TestActivity.class);
 
-    ActivityScenario<TestActivity> mScenario = ActivityScenario.launch(TestActivity.class);
+    ActivityScenario<TestActivity> mScenario;
 
     private TestActivity mActivity;
     private Context mTestableContext;
@@ -114,6 +114,7 @@ public class CarUiRecyclerViewTest {
 
     @Before
     public void setUp() {
+        mScenario = mActivityRule.getScenario();
         mScenario.onActivity(activity -> {
             mActivity = activity;
             mTestableContext = spy(mActivity);
