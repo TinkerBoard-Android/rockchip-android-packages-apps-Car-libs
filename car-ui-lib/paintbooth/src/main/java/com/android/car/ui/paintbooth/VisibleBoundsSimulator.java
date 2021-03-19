@@ -72,7 +72,7 @@ public class VisibleBoundsSimulator extends Service {
         Intent notificationIntent = new Intent(this, VisibleBoundsSimulator.class);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
-                notificationIntent, 0);
+                notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 
         NotificationChannel channel = new NotificationChannel("DisplayService",
                 "Show overlay screen",
