@@ -16,6 +16,7 @@
 
 package com.android.car.telephony.common;
 
+import android.Manifest;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.ContactsContract;
@@ -119,7 +120,8 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
                         ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE,
                         ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE,
                         ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE},
-                ContactsContract.Contacts.DISPLAY_NAME + " ASC ");
+                ContactsContract.Contacts.DISPLAY_NAME + " ASC ",
+                Manifest.permission.READ_CONTACTS);
         mContactListAsyncQueryLiveData = new AsyncQueryLiveData<List<Contact>>(mContext,
                 QueryParam.of(contactListQueryParam), Executors.newSingleThreadExecutor()) {
             @Override
