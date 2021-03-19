@@ -58,12 +58,13 @@ public class ConversationPayloadHandler {
     /**
      * Creates a notification from {@link Conversation}
      */
-    @Nullable
+    @NonNull
     public static Notification createNotificationFromConversation(
             @NonNull Context context,
             @NonNull String channelId,
             @NonNull Conversation conversation,
-            @NonNull @DrawableRes int iconRes) {
+            @DrawableRes int iconRes,
+            @Nullable String group) {
         MessagingStyle messagingStyle = getMessagingStyle(conversation);
         Action muteAction = getNotificationAction(context, conversation,
                 ActionType.ACTION_TYPE_MUTE);
@@ -80,6 +81,7 @@ public class ConversationPayloadHandler {
                 .addAction(markAsReadAction)
                 .addAction(muteAction)
                 .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                .setGroup(group)
                 .build();
     }
 
@@ -138,6 +140,7 @@ public class ConversationPayloadHandler {
         return messagingStyle;
     }
 
+    @Nullable
     private static Bitmap getBitmap(@Nullable IconCompat icon, Context context) {
         if (icon == null) {
             return null;

@@ -60,6 +60,8 @@ public final class SharedLibraryFactorySingleton {
             return sInstance;
         }
 
+        context = context.getApplicationContext();
+
         String sharedLibPackageName = CarUiUtils.getSystemProperty(context.getResources(),
                 R.string.car_ui_shared_library_package_system_property_name);
 
