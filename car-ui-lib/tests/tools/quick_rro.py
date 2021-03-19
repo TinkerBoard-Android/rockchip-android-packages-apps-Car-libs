@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright 2019, The Android Open Source Project
 #
@@ -22,6 +22,10 @@ import subprocess
 import time
 from hashlib import sha1
 
+if sys.version_info[0] != 3:
+    print("Must use python 3")
+    sys.exit(1)
+
 def hex_to_letters(hex):
     """Converts numbers in a hex string to letters.
 
@@ -43,18 +47,18 @@ def get_package_name(args):
     all of the inputs to the RRO. (package/targetName to overlay and resources)
     The hash will be entirely lowercase/uppercase letters, since
     android package names can't have numbers."""
-    hash = sha1(args.package)
+    hash = sha1(args.package.encode('UTF-8'))
     if args.target_name:
-        hash.update(args.target_name)
+        hash.update(args.target_name.encode('UTF-8'))
 
     if args.resources is not None:
         args.resources.sort()
-        hash.update(''.join(args.resources))
+        hash.update(''.join(args.resources).encode('UTF-8'))
     else:
         for root, dirs, files in os.walk(args.dir):
             for file in files:
                 path = os.path.join(root, file)
-                hash.update(path)
+                hash.update(path.encode('UTF-8'))
                 with open(path, 'rb') as f:
                     while True:
                         buf = f.read(4096)
