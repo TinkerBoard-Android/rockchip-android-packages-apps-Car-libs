@@ -62,18 +62,22 @@ public class QueryParam {
     final String[] mSelectionArgs;
     /** Used by {@link ObservableAsyncQuery#startQuery()} as query param. */
     final String mOrderBy;
+    /** Used by {@link ObservableAsyncQuery#startQuery()} to check query permission. */
+    final String mPermission;
 
     public QueryParam(
             @NonNull Uri uri,
             @Nullable String[] projection,
             @Nullable String selection,
             @Nullable String[] selectionArgs,
-            @Nullable String orderBy) {
+            @Nullable String orderBy,
+            @NonNull String permission) {
         mUri = uri;
         mProjection = projection;
         mSelection = selection;
         mSelectionArgs = selectionArgs;
         mOrderBy = orderBy;
+        mPermission = permission;
     }
 
     /**
@@ -87,6 +91,8 @@ public class QueryParam {
         static final String ORDER_DESC = "DESC";
 
         private final Uri mUri;
+
+        private String mPermission;
 
         private Condition mWhere = Condition.emptyCondition();
         private final List<String> mOrderBy = new ArrayList<>();
@@ -164,6 +170,11 @@ public class QueryParam {
             return this;
         }
 
+        /**Specifies the permission needed for this query.*/
+        public QueryBuilder checkPermission(@NonNull String permission) {
+            mPermission = permission;
+            return this;
+        }
         /**
          * Builds the selection condition. Use {@link #is(String, String, Object)} to create an
          * initial condition.
@@ -239,7 +250,8 @@ public class QueryParam {
                     projection,
                     mWhere.getSelection(),
                     mWhere.getWhereArgs(),
-                    orderBy);
+                    orderBy,
+                    mPermission);
         }
     }
 }
