@@ -76,7 +76,7 @@ public class CurrentActivityService extends Service {
         Intent notificationIntent = new Intent(this, CurrentActivityService.class);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
-                notificationIntent, 0);
+                notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 
         NotificationChannel channel = new NotificationChannel("CurrentActivityService",
                 "Show current activity",
