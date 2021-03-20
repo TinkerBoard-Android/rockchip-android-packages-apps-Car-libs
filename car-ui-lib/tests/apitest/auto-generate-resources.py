@@ -22,6 +22,10 @@ from resource_utils import get_all_resources, get_resources_from_single_file, ad
 from git_utils import has_chassis_changes
 from datetime import datetime
 
+if sys.version_info[0] != 3:
+    print("Must use python 3")
+    sys.exit(1)
+
 # path to 'packages/apps/Car/libs/car-ui-lib/'
 ROOT_FOLDER = os.path.dirname(os.path.abspath(__file__)) + '/../..'
 OUTPUT_FILE_PATH = ROOT_FOLDER + '/tests/apitest/'

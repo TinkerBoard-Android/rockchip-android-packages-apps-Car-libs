@@ -19,6 +19,10 @@ import sys
 from resource_utils import get_all_resources, merge_resources
 from git_utils import has_chassis_changes
 
+if sys.version_info[0] != 3:
+    print("Must use python 3")
+    sys.exit(1)
+
 def main():
     parser = argparse.ArgumentParser(description="Check that an rro does not attempt to overlay any resources that don't exist")
     parser.add_argument('--sha', help='Git hash of current changes. This script will not run if this is provided and there are no chassis changes.')
