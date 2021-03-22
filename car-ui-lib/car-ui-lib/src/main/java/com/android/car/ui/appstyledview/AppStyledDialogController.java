@@ -35,14 +35,14 @@ public final class AppStyledDialogController {
 
     @NonNull
     private final AppStyledViewController mAppStyledViewController;
-    private final Context mContext;
-    @NonNull private AppStyledDialog mDialog;
+    @NonNull
+    private final AppStyledDialog mDialog;
 
     public AppStyledDialogController(@NonNull Context context) {
         Objects.requireNonNull(context);
-        mContext = context;
         mAppStyledViewController = SharedLibraryFactorySingleton.get(context)
                 .createAppStyledView();
+        mDialog = new AppStyledDialog(context, mAppStyledViewController);
     }
 
     /**
@@ -51,7 +51,6 @@ public final class AppStyledDialogController {
     public void setContentView(@NonNull View contentView) {
         Objects.requireNonNull(contentView);
 
-        mDialog = new AppStyledDialog(mContext, mAppStyledViewController);
         mDialog.setContent(contentView);
         mAppStyledViewController.setOnCloseClickListener(mDialog::dismiss);
     }
@@ -91,13 +90,15 @@ public final class AppStyledDialogController {
      * Returns the width of the AppStyledView
      */
     public int getAppStyledViewDialogWidth() {
-        return mAppStyledViewController.getAppStyledViewDialogWidth();
+        return mAppStyledViewController.getDialogWindowLayoutParam(
+                mDialog.getWindowLayoutParams()).width;
     }
 
     /**
      * Returns the height of the AppStyledView
      */
     public int getAppStyledViewDialogHeight() {
-        return mAppStyledViewController.getAppStyledViewDialogHeight();
+        return mAppStyledViewController.getDialogWindowLayoutParam(
+                mDialog.getWindowLayoutParams()).height;
     }
 }

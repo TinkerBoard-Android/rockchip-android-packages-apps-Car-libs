@@ -19,6 +19,7 @@ package com.android.car.ui.appstyledview;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.view.View;
+import android.view.WindowManager;
 
 import androidx.annotation.IntDef;
 
@@ -91,12 +92,7 @@ public interface AppStyledViewController {
     void setOnCloseClickListener(AppStyledVCloseClickListener listener);
 
     /**
-     * Returns the width of the AppStyledView
+     * Returns the layout params for the AppStyledView dialog
      */
-    int getAppStyledViewDialogWidth();
-
-    /**
-     * Returns the height of the AppStyledView
-     */
-    int getAppStyledViewDialogHeight();
+    WindowManager.LayoutParams getDialogWindowLayoutParam(WindowManager.LayoutParams params);
 }

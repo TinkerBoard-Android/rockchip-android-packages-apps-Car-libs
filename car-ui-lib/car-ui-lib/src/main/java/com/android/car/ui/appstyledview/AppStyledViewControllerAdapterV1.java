@@ -16,6 +16,7 @@
 package com.android.car.ui.appstyledview;
 
 import android.view.View;
+import android.view.WindowManager.LayoutParams;
 
 import androidx.annotation.NonNull;
 
@@ -26,7 +27,8 @@ import com.android.car.ui.sharedlibrary.oemapis.appstyledview.AppStyledViewContr
  */
 public class AppStyledViewControllerAdapterV1 implements AppStyledViewController {
 
-    @NonNull private final AppStyledViewControllerOEMV1 mOemController;
+    @NonNull
+    private final AppStyledViewControllerOEMV1 mOemController;
 
     public AppStyledViewControllerAdapterV1(AppStyledViewControllerOEMV1 controllerOEMV1) {
         mOemController = controllerOEMV1;
@@ -41,17 +43,6 @@ public class AppStyledViewControllerAdapterV1 implements AppStyledViewController
     }
 
     @Override
-    public int getAppStyledViewDialogWidth() {
-        return mOemController.getAppStyledViewDialogWidth();
-    }
-
-
-    @Override
-    public int getAppStyledViewDialogHeight() {
-        return mOemController.getAppStyledViewDialogHeight();
-    }
-
-    @Override
     public void setNavIcon(int navIcon) {
         mOemController.setNavIcon(navIcon);
     }
@@ -59,5 +50,10 @@ public class AppStyledViewControllerAdapterV1 implements AppStyledViewController
     @Override
     public void setOnCloseClickListener(AppStyledVCloseClickListener listener) {
         mOemController.setOnCloseClickListener(listener::onClick);
+    }
+
+    @Override
+    public LayoutParams getDialogWindowLayoutParam(LayoutParams params) {
+        return mOemController.getDialogWindowLayoutParam(params);
     }
 }

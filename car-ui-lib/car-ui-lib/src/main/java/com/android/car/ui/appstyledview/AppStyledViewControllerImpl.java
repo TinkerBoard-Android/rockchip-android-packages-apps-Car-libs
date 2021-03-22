@@ -18,8 +18,10 @@ package com.android.car.ui.appstyledview;
 
 import android.content.Context;
 import android.view.ContextThemeWrapper;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager.LayoutParams;
 import android.widget.ImageView;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -33,7 +35,8 @@ import com.android.car.ui.R;
 public class AppStyledViewControllerImpl implements AppStyledViewController {
 
     private final Context mContext;
-    private @AppStyledViewNavIcon int mAppStyleViewNavIcon;
+    @AppStyledViewNavIcon
+    private int mAppStyleViewNavIcon;
     private AppStyledVCloseClickListener mAppStyledVCloseClickListener = null;
 
     public AppStyledViewControllerImpl(Context context) {
@@ -51,6 +54,20 @@ public class AppStyledViewControllerImpl implements AppStyledViewController {
     @Override
     public void setOnCloseClickListener(AppStyledVCloseClickListener listener) {
         mAppStyledVCloseClickListener = listener;
+    }
+
+    @Override
+    public LayoutParams getDialogWindowLayoutParam(LayoutParams params) {
+        params.width = mContext.getResources().getDimensionPixelSize(
+                R.dimen.car_ui_app_styled_dialog_width);
+        params.height = mContext.getResources().getDimensionPixelSize(
+                R.dimen.car_ui_app_styled_dialog_height);
+        params.gravity = Gravity.TOP | Gravity.START;
+        params.x = mContext.getResources().getDimensionPixelSize(
+                R.dimen.car_ui_app_styled_dialog_position_x);
+        params.y = mContext.getResources().getDimensionPixelSize(
+                R.dimen.car_ui_app_styled_dialog_position_y);
+        return params;
     }
 
     @Override
@@ -85,17 +102,5 @@ public class AppStyledViewControllerImpl implements AppStyledViewController {
         }
 
         return appStyleView;
-    }
-
-    @Override
-    public int getAppStyledViewDialogWidth() {
-        return mContext.getResources().getDimensionPixelSize(
-                R.dimen.car_ui_app_styled_dialog_width);
-    }
-
-    @Override
-    public int getAppStyledViewDialogHeight() {
-        return mContext.getResources().getDimensionPixelSize(
-                R.dimen.car_ui_app_styled_dialog_height);
     }
 }
