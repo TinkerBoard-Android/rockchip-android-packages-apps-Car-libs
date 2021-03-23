@@ -54,10 +54,16 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
     static final int VIEW_TYPE_LIST_HEADER = 2;
 
     private final List<? extends CarUiListItem> mItems;
+    private final boolean mCompactLayout;
     private int mMaxItems = CarUiRecyclerView.ItemCap.UNLIMITED;
 
     public CarUiListItemAdapter(List<? extends CarUiListItem> items) {
+        this(items, false);
+    }
+
+    public CarUiListItemAdapter(List<? extends CarUiListItem> items, boolean useCompactLayout) {
         this.mItems = items;
+        this.mCompactLayout = useCompactLayout;
     }
 
     @NonNull
@@ -68,6 +74,10 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         switch (viewType) {
             case VIEW_TYPE_LIST_ITEM:
+                if (mCompactLayout) {
+                    return new ListItemViewHolder(
+                            inflater.inflate(R.layout.car_ui_list_item_compact, parent, false));
+                }
                 return new ListItemViewHolder(
                         inflater.inflate(R.layout.car_ui_list_item, parent, false));
             case VIEW_TYPE_LIST_HEADER:
