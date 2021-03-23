@@ -362,6 +362,7 @@
   <public type="layout" name="car_ui_header_list_item"/>
   <public type="layout" name="car_ui_ims_wide_screen_input_view"/>
   <public type="layout" name="car_ui_list_item"/>
+  <public type="layout" name="car_ui_list_item_compact"/>
   <public type="layout" name="car_ui_list_limiting_message"/>
   <public type="layout" name="car_ui_list_preference"/>
   <public type="layout" name="car_ui_preference"/>

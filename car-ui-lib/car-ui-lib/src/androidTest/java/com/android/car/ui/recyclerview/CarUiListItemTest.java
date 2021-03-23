@@ -240,6 +240,26 @@ public class CarUiListItemTest {
         onView(withId(R.id.car_ui_list_item_radio_button_widget)).check(matches(isChecked()));
     }
 
+
+    @Test
+    public void testItem_withCompactLayout() {
+        List<CarUiListItem> items = new ArrayList<>();
+
+        CarUiContentListItem item = new CarUiContentListItem(
+                CarUiContentListItem.Action.NONE);
+        String titleText = "Item with compact layout";
+        item.setTitle(titleText);
+        String bodyText = "Test body text";
+        item.setBody(bodyText);
+        items.add(item);
+
+        mCarUiRecyclerView.post(
+                () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items, true)));
+
+        onView(withId(R.id.car_ui_list_item_title)).check(matches(withText(titleText)));
+        onView(withId(R.id.car_ui_list_item_body)).check(matches(withText(bodyText)));
+    }
+
     @Test
     public void testItem_withListener() {
         List<CarUiListItem> items = new ArrayList<>();
