@@ -32,8 +32,7 @@ public interface ScrollBar {
 
     /**
      * Requests layout of the scrollbar. Should be called when there's been a change that will
-     * affect
-     * the size of the scrollbar view.
+     * affect the size of the scrollbar view.
      */
     void requestLayout();
 

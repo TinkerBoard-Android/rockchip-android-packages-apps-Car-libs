@@ -98,6 +98,7 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
     private Rect mContainerPaddingRelative;
     @Nullable
     private ViewGroup mContainer;
+    private boolean mIsGutterEnabled;
 
     // Set to true when when styled attributes are read and initialized.
     private boolean mIsInitialized;
@@ -148,9 +149,8 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
         mScrollBarPaddingBottom = context.getResources()
                 .getDimensionPixelSize(R.dimen.car_ui_scrollbar_padding_bottom);
 
-        @CarUiRecyclerView.CarUiRecyclerViewLayout int carUiRecyclerViewLayout =
-                a.getInt(R.styleable.CarUiRecyclerView_layoutStyle,
-                        CarUiRecyclerView.CarUiRecyclerViewLayout.LINEAR);
+        @CarUiRecyclerViewLayout int carUiRecyclerViewLayout =
+                a.getInt(R.styleable.CarUiRecyclerView_layoutStyle, CarUiRecyclerViewLayout.LINEAR);
         mNumOfColumns = a.getInt(R.styleable.CarUiRecyclerView_numOfColumns, /* defValue= */ 2);
         mEnableDividers =
                 a.getBoolean(R.styleable.CarUiRecyclerView_enableDivider, /* defValue= */ false);
@@ -190,6 +190,9 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
             setLayoutManager(new GridLayoutManager(getContext(), mNumOfColumns));
         }
         addOnScrollListener(mOnScrollListener);
+
+        mIsGutterEnabled = a.getBoolean(R.styleable.CarUiRecyclerView_enableScrollBarGutter,
+                mScrollBarEnabled);
 
         a.recycle();
 
@@ -372,7 +375,11 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
 
         mContainer.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(getContext());
-        inflater.inflate(R.layout.car_ui_recycler_view, mContainer, true);
+        if (mIsGutterEnabled) {
+            inflater.inflate(R.layout.car_ui_recycler_view, mContainer, true);
+        } else {
+            inflater.inflate(R.layout.car_ui_recycler_view_no_gutter, mContainer, true);
+        }
         mContainer.setVisibility(mContainerVisibility);
 
         if (mContainerPadding != null) {
@@ -522,9 +529,9 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
     }
 
     /**
-     * Sets divider item decoration for grid layout. This should be called after the call to
-     * {@link #setLayoutManager(LayoutManager)}  has been completed. If called before that could
-     * result in unexpected behavior.
+     * Sets divider item decoration for grid layout. This should be called after the call to {@link
+     * #setLayoutManager(LayoutManager)}  has been completed. If called before that could result in
+     * unexpected behavior.
      */
     @Override
     public void setGridDividerItemDecoration(boolean enableDividers) {
