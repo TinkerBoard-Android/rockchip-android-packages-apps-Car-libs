@@ -293,17 +293,19 @@
     <declare-styleable name="CarUiButton">
         <attr name="android:id"/>
         <attr name="android:enabled"/>
-        <attr name="carUiButtonSize" format="enum">
-            <enum name="small" value="0"/>
-            <enum name="medium" value="1"/>
-            <enum name="large" value="2"/>
-        </attr>
         <attr name="carUiButtonTitle" format="string"/>
         <attr name="carUiButtonIcon" format="reference"/>
         <attr name="carUiButtonColorScheme" format="enum">
             <enum name="basic" value="0"/>
-            <enum name="warning" value="1"/>
-            <enum name="error" value="2"/>
+            <enum name="red" value="1"/>
+            <enum name="blue" value="2"/>
+            <enum name="green" value="3"/>
+            <enum name="yellow" value="4"/>
+        </attr>
+        <attr name="carUiButtonStyle" format="enum">
+            <enum name="primary" value="0"/>
+            <enum name="secondary" value="1"/>
+            <enum name="floating" value="2"/>
         </attr>
         <attr name="carUiButtonBorderless" format="boolean"/>
     </declare-styleable>

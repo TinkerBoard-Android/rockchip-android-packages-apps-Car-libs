@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp">
+        <CarUiButton
+            android:id="@+id/disable_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:carUiButtonTitle="Toggle enabled/disabled"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+        <ScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp">
+            <LinearLayout
+                android:id="@+id/column_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:divider="@drawable/linearlayout_spacing"
+                android:showDividers="middle"/>
+        </ScrollView>
+        <ScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp">
+            <LinearLayout
+                android:id="@+id/column_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:divider="@drawable/linearlayout_spacing"
+                android:showDividers="middle"/>
+        </ScrollView>
+        <ScrollView
+            android:id="@+id/floating_buttons_background"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
+            android:padding="5dp">
+            <LinearLayout
+                android:id="@+id/column_3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:divider="@drawable/linearlayout_spacing"
+                android:showDividers="middle"/>
+        </ScrollView>
+    </LinearLayout>
+</LinearLayout>
