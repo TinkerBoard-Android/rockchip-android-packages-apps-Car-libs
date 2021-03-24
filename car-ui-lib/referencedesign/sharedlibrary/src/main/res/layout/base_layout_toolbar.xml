@@ -110,9 +110,10 @@
             app:layout_constraintTop_toTopOf="parent"/>
 
         <ViewStub
-            android:id="@+id/toolbar_search_view_container"
+            android:id="@+id/toolbar_search_view_stub"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:layout="@layout/toolbar_search_view"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/toolbar_menu_items_container"
             app:layout_constraintStart_toEndOf="@+id/toolbar_nav_icon_container"

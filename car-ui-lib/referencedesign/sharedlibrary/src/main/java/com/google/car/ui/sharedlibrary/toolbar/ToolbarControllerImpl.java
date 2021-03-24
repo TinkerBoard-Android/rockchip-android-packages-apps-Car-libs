@@ -24,6 +24,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.MenuItemOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ProgressBarControllerOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.SearchItemOEMV1;
@@ -50,9 +52,9 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     private final ProgressBarController mProgressBar;
     private final TabLayout mTabContainer;
     private final ViewGroup mMenuItemsContainer;
+    private final SearchController mSearchController;
 
     private Runnable mBackListener;
-    private int mNavButtonMode = ToolbarControllerOEMV1.NAV_BUTTON_MODE_BACK;
 
     private boolean mBackButtonVisible = false;
     private boolean mHasLogo = false;
@@ -70,6 +72,8 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
                 view.requireViewById(R.id.toolbar_progress_bar));
         mTabContainer = view.requireViewById(R.id.toolbar_tabs);
         mMenuItemsContainer = view.requireViewById(R.id.toolbar_menu_items_container);
+        mSearchController = new SearchController(
+                view.requireViewById(R.id.toolbar_search_view_stub));
         mOverflowMenuItem = new OverflowMenuItem(sharedLibraryContext, activityContext);
     }
 
@@ -136,24 +140,25 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     }
 
     @Override
-    public void setSearchHint(String hint) {
-
+    public void setSearchHint(@Nullable String hint) {
+        mSearchController.setSearchHint(hint);
     }
 
     @Override
-    public void setSearchIcon(Drawable d) {
-
+    public void setSearchIcon(@Nullable Drawable d) {
+        mSearchController.setSearchIcon(d);
     }
 
     @Override
-    public void setSearchQuery(String query) {
-
+    public void setSearchQuery(@Nullable String query) {
+        mSearchController.setSearchQuery(query);
     }
 
     @Override
     public void setSearchMode(int searchMode) {
         if (mSearchMode != searchMode) {
             mSearchMode = searchMode;
+            mSearchController.setSearchMode(searchMode);
             update();
         }
     }
@@ -185,7 +190,6 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
 
     @Override
     public void setNavButtonMode(int mode) {
-        mNavButtonMode = mode;
         boolean visible = mode != NAV_BUTTON_MODE_DISABLED;
         if (visible != mBackButtonVisible) {
             mBackButtonVisible = visible;
@@ -198,7 +202,7 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
             update();
         }
 
-        switch (mNavButtonMode) {
+        switch (mode) {
             case ToolbarControllerOEMV1.NAV_BUTTON_MODE_CLOSE:
                 mBackButtonView.setImageResource(R.drawable.icon_close);
                 break;
@@ -222,9 +226,9 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
                 .collect(Collectors.toList());
 
         List<? extends MenuItemOEMV1> regularMenuItems = Stream.concat(
-                menuItems.stream().filter(
-                        i -> i.getDisplayBehavior() == MenuItemOEMV1.DISPLAY_BEHAVIOR_ALWAYS),
+                menuItems.stream(),
                 Stream.of(mOverflowMenuItem))
+                .filter(i -> i.getDisplayBehavior() == MenuItemOEMV1.DISPLAY_BEHAVIOR_ALWAYS)
                 .collect(Collectors.toList());
 
         mOverflowMenuItem.setOverflowMenuItems(overflowMenuItems);
@@ -240,13 +244,13 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     }
 
     @Override
-    public void setSearchListener(Consumer<String> listener) {
-
+    public void setSearchListener(@Nullable Consumer<String> listener) {
+        mSearchController.setSearchListener(listener);
     }
 
     @Override
-    public void setSearchCompletedListener(Runnable listener) {
-
+    public void setSearchCompletedListener(@Nullable Runnable listener) {
+        mSearchController.setSearchCompletedListener(listener);
     }
 
     @Override
