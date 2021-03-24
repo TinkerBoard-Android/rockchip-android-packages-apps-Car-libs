@@ -50,7 +50,7 @@ public class CarUi {
      * @return The component found, or null.
      */
     @Nullable
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"})
     public static <T> T findCarUiComponentById(@Nullable View view, int id) {
         if (view == null) {
             return null;
