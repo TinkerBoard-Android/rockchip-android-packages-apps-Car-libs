@@ -362,6 +362,7 @@
   <public type="layout" name="car_ui_header_list_item"/>
   <public type="layout" name="car_ui_ims_wide_screen_input_view"/>
   <public type="layout" name="car_ui_list_item"/>
+  <public type="layout" name="car_ui_list_item_compact"/>
   <public type="layout" name="car_ui_list_limiting_message"/>
   <public type="layout" name="car_ui_list_preference"/>
   <public type="layout" name="car_ui_preference"/>
@@ -380,6 +381,7 @@
   <public type="layout" name="car_ui_radio_button_preference_widget"/>
   <public type="layout" name="car_ui_recycler_view"/>
   <public type="layout" name="car_ui_recycler_view_item"/>
+  <public type="layout" name="car_ui_recycler_view_no_gutter"/>
   <public type="layout" name="car_ui_recyclerview_scrollbar"/>
   <public type="layout" name="car_ui_seekbar_dialog"/>
   <public type="layout" name="car_ui_toolbar"/>

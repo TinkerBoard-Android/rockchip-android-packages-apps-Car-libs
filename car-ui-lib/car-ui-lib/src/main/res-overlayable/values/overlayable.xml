@@ -427,6 +427,7 @@ limitations under the License.-->
       <item type="layout" name="car_ui_header_list_item"/>
       <item type="layout" name="car_ui_ims_wide_screen_input_view"/>
       <item type="layout" name="car_ui_list_item"/>
+      <item type="layout" name="car_ui_list_item_compact"/>
       <item type="layout" name="car_ui_list_limiting_message"/>
       <item type="layout" name="car_ui_list_preference"/>
       <item type="layout" name="car_ui_preference"/>
@@ -445,6 +446,7 @@ limitations under the License.-->
       <item type="layout" name="car_ui_radio_button_preference_widget"/>
       <item type="layout" name="car_ui_recycler_view"/>
       <item type="layout" name="car_ui_recycler_view_item"/>
+      <item type="layout" name="car_ui_recycler_view_no_gutter"/>
       <item type="layout" name="car_ui_recyclerview_scrollbar"/>
       <item type="layout" name="car_ui_seekbar_dialog"/>
       <item type="layout" name="car_ui_toolbar"/>

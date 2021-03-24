@@ -23,6 +23,7 @@ import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.assertion.PositionAssertions.isBottomAlignedWith;
 import static androidx.test.espresso.assertion.PositionAssertions.isCompletelyAbove;
+import static androidx.test.espresso.assertion.PositionAssertions.isCompletelyRightOf;
 import static androidx.test.espresso.assertion.PositionAssertions.isLeftAlignedWith;
 import static androidx.test.espresso.assertion.PositionAssertions.isRightAlignedWith;
 import static androidx.test.espresso.assertion.PositionAssertions.isTopAlignedWith;
@@ -1118,6 +1119,88 @@ public class CarUiRecyclerViewTest {
         int screenHeight = orientationHelper.getTotalSpace();
 
         assertEquals(recyclerviewHeight, screenHeight);
+    }
+
+    @Test
+    public void testDefaultGutter_noScrollbar() {
+        doReturn(false).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
+
+        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        ViewGroup container = mActivity.findViewById(R.id.test_container);
+        int listId = View.generateViewId();
+        TestAdapter adapter = new TestAdapter(50);
+        container.post(() -> {
+            container.addView(carUiRecyclerView);
+            carUiRecyclerView.setId(listId);
+            carUiRecyclerView.setAdapter(adapter);
+        });
+
+        onView(withId(R.id.car_ui_scroll_bar)).check(doesNotExist());
+        onView(withText(adapter.getItemText(0))).check(isLeftAlignedWith(withId(listId)));
+        onView(withText(adapter.getItemText(0))).check(isRightAlignedWith(withId(listId)));
+    }
+
+    @Test
+    public void testGutter_withScrollbar() {
+        doReturn(true).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
+
+        TypedArray typedArray = spy(mActivity.getBaseContext().obtainStyledAttributes(
+                null, R.styleable.CarUiRecyclerView));
+
+        doReturn(typedArray).when(mTestableContext).obtainStyledAttributes(
+                any(),
+                eq(R.styleable.CarUiRecyclerView),
+                anyInt(),
+                anyInt());
+        when(typedArray.getBoolean(eq(R.styleable.CarUiRecyclerView_enableScrollBarGutter),
+                anyBoolean())).thenReturn(true);
+
+        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        int listId = View.generateViewId();
+        ViewGroup container = mActivity.findViewById(R.id.test_container);
+        TestAdapter adapter = new TestAdapter(50);
+        container.post(() -> {
+            container.addView(carUiRecyclerView);
+            carUiRecyclerView.setId(listId);
+            carUiRecyclerView.setAdapter(adapter);
+        });
+
+        onView(withId(R.id.car_ui_scroll_bar)).check(matches(isDisplayed()));
+        onView(withText(adapter.getItemText(0))).check(
+                isCompletelyRightOf(withId(R.id.car_ui_scroll_bar)));
+        onView(withText(adapter.getItemText(0))).check(
+                matches(not(isRightAlignedWith(withId(listId)))));
+    }
+
+    @Test
+    public void testNoGutter_withScrollbar() {
+        doReturn(true).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
+
+        TypedArray typedArray = spy(mActivity.getBaseContext().obtainStyledAttributes(
+                null, R.styleable.CarUiRecyclerView));
+
+        doReturn(typedArray).when(mTestableContext).obtainStyledAttributes(
+                any(),
+                eq(R.styleable.CarUiRecyclerView),
+                anyInt(),
+                anyInt());
+        when(typedArray.getBoolean(eq(R.styleable.CarUiRecyclerView_enableScrollBarGutter),
+                anyBoolean())).thenReturn(false);
+
+        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        int listId = View.generateViewId();
+        ViewGroup container = mActivity.findViewById(R.id.test_container);
+        TestAdapter adapter = new TestAdapter(50);
+        container.post(() -> {
+            container.addView(carUiRecyclerView);
+            carUiRecyclerView.setId(listId);
+            carUiRecyclerView.setAdapter(adapter);
+        });
+
+        onView(withId(R.id.car_ui_scroll_bar)).check(matches(isDisplayed()));
+        onView(withText(adapter.getItemText(0))).check(
+                isCompletelyRightOf(withId(R.id.car_ui_scroll_bar)));
+        onView(withText(adapter.getItemText(0))).check(isRightAlignedWith(withId(listId)));
     }
 
     private static float dpToPixel(Context context, int dp) {

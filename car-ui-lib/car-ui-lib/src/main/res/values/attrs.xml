@@ -131,6 +131,8 @@
             <enum name="grid" value="1" />
         </attr>
 
+        <!-- car ui recycler view gutter. -->
+        <attr name="enableScrollBarGutter" format="boolean" />
         <!-- car ui recyclerview orientation -->
         <attr name="android:orientation" />
     </declare-styleable>
