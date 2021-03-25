@@ -20,6 +20,7 @@ import android.content.Context;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.car.ui.appstyledview.AppStyledViewController.AppStyledDismissListener;
 import com.android.car.ui.appstyledview.AppStyledViewController.AppStyledVCloseClickListener;
@@ -34,14 +35,20 @@ import java.util.Objects;
 public final class AppStyledDialogController {
 
     @NonNull
-    private final AppStyledViewController mAppStyledViewController;
+    private AppStyledViewController mAppStyledViewController;
     @NonNull
-    private final AppStyledDialog mDialog;
+    private AppStyledDialog mDialog;
 
     public AppStyledDialogController(@NonNull Context context) {
         Objects.requireNonNull(context);
         mAppStyledViewController = SharedLibraryFactorySingleton.get(context)
                 .createAppStyledView();
+        mDialog = new AppStyledDialog(context, mAppStyledViewController);
+    }
+
+    @VisibleForTesting
+    void setAppStyledViewController(AppStyledViewController controller, Context context) {
+        mAppStyledViewController = controller;
         mDialog = new AppStyledDialog(context, mAppStyledViewController);
     }
 
@@ -100,5 +107,10 @@ public final class AppStyledDialogController {
     public int getAppStyledViewDialogHeight() {
         return mAppStyledViewController.getDialogWindowLayoutParam(
                 mDialog.getWindowLayoutParams()).height;
+    }
+
+    @VisibleForTesting
+    AppStyledDialog getAppStyledDialog() {
+        return mDialog;
     }
 }
