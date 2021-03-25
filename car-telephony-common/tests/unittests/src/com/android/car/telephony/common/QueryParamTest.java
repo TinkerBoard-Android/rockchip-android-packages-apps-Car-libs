@@ -23,6 +23,7 @@ import static com.android.car.telephony.common.QueryParam.QueryBuilder.ORDER_DES
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.Manifest;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
@@ -88,7 +89,8 @@ public class QueryParamTest {
                         Phone.CONTENT_ITEM_TYPE,
                         StructuredName.CONTENT_ITEM_TYPE,
                         StructuredPostal.CONTENT_ITEM_TYPE},
-                ContactsContract.Contacts.DISPLAY_NAME + " ASC");
+                ContactsContract.Contacts.DISPLAY_NAME + " ASC",
+                Manifest.permission.READ_CONTACTS);
 
         QueryParam builtQueryParam = new QueryParam.QueryBuilder(Data.CONTENT_URI)
                 .projectAll()
@@ -97,6 +99,7 @@ public class QueryParamTest {
                         .or(Data.MIMETYPE, "=", StructuredName.CONTENT_ITEM_TYPE)
                         .or(Data.MIMETYPE, "=", StructuredPostal.CONTENT_ITEM_TYPE))
                 .orderAscBy(ContactsContract.Contacts.DISPLAY_NAME)
+                .checkPermission(Manifest.permission.READ_CONTACTS)
                 .toQueryParam();
 
         assertThat(builtQueryParam.mUri).isEqualTo(expectedParams.mUri);
@@ -105,6 +108,7 @@ public class QueryParamTest {
         assertThat(Arrays.equals(builtQueryParam.mSelectionArgs, expectedParams.mSelectionArgs))
                 .isTrue();
         assertThat(builtQueryParam.mOrderBy).isEqualTo(expectedParams.mOrderBy);
+        assertThat(builtQueryParam.mPermission).isEqualTo(expectedParams.mPermission);
     }
 
     @Test
