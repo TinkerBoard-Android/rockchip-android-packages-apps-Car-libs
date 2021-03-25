@@ -21,17 +21,17 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 
 import com.android.car.ui.appstyledview.AppStyledViewController.AppStyledDismissListener;
 
 /**
- * App styled dialog used to display a view that cannot be customized via OEM. Dialog
- * will inflate a layout and add the view provided by the application into the layout.
- * Everything other than the view within the layout can be customized by OEM.
+ * App styled dialog used to display a view that cannot be customized via OEM. Dialog will inflate a
+ * layout and add the view provided by the application into the layout. Everything other than the
+ * view within the layout can be customized by OEM.
  *
  * Apps should not use this directly. App's should use {@link AppStyledDialogController}.
  */
@@ -53,10 +53,8 @@ public class AppStyledDialog extends Dialog implements DialogInterface.OnDismiss
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(mController.getAppStyledView(mContent));
 
-        ViewGroup.LayoutParams params = getWindow().getAttributes();
-        params.width = mController.getAppStyledViewDialogWidth();
-        params.height = mController.getAppStyledViewDialogHeight();
-        getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
+        WindowManager.LayoutParams params = getWindow().getAttributes();
+        getWindow().setAttributes(mController.getDialogWindowLayoutParam(params));
     }
 
     @Override
@@ -72,5 +70,9 @@ public class AppStyledDialog extends Dialog implements DialogInterface.OnDismiss
 
     void setOnDismissListener(AppStyledDismissListener listener) {
         mOnDismissListener = listener;
+    }
+
+    WindowManager.LayoutParams getWindowLayoutParams() {
+        return getWindow().getAttributes();
     }
 }

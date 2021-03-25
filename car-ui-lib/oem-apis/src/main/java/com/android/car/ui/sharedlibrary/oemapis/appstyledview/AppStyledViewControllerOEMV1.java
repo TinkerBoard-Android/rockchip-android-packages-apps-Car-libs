@@ -17,6 +17,7 @@
 package com.android.car.ui.sharedlibrary.oemapis.appstyledview;
 
 import android.view.View;
+import android.view.WindowManager;
 
 /** The OEM interface for a AppStyledView. */
 public interface AppStyledViewControllerOEMV1 {
@@ -35,17 +36,12 @@ public interface AppStyledViewControllerOEMV1 {
     void setOnCloseClickListener(Runnable listener);
 
     /**
-     * Returns the width of the AppStyledView
-     */
-    int getAppStyledViewDialogWidth();
-
-    /**
-     * Returns the height of the AppStyledView
-     */
-    int getAppStyledViewDialogHeight();
-
-    /**
      * Sets the nav icon to be used.
      */
     void setNavIcon(int navIcon);
+
+    /**
+     * Returns the layout params for the AppStyledView dialog
+     */
+    WindowManager.LayoutParams getDialogWindowLayoutParam(WindowManager.LayoutParams params);
 }

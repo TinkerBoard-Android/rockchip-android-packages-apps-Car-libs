@@ -17,8 +17,10 @@
 package com.google.car.ui.sharedlibrary.appstyleview;
 
 import android.content.Context;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager.LayoutParams;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 
@@ -72,17 +74,21 @@ public class AppStyleViewControllerImpl implements AppStyledViewControllerOEMV1 
     }
 
     @Override
-    public int getAppStyledViewDialogWidth() {
-        return 1000;
-    }
-
-    @Override
-    public int getAppStyledViewDialogHeight() {
-        return 400;
-    }
-
-    @Override
     public void setNavIcon(int navIcon) {
         mNavIcon = navIcon;
+    }
+
+    @Override
+    public LayoutParams getDialogWindowLayoutParam(LayoutParams params) {
+        params.width = Math.round(
+                mContext.getResources().getDimension(R.dimen.app_styled_dialog_width));
+        params.height = Math.round(
+                mContext.getResources().getDimension(R.dimen.app_styled_dialog_height));
+        params.gravity = Gravity.TOP | Gravity.START;
+        params.x = Math.round(
+                mContext.getResources().getDimension(R.dimen.app_styled_dialog_position_x));
+        params.y = Math.round(
+                mContext.getResources().getDimension(R.dimen.app_styled_dialog_position_y));
+        return params;
     }
 }
