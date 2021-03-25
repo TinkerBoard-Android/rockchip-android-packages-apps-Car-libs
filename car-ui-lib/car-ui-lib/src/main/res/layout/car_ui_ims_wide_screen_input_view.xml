@@ -21,6 +21,7 @@
               android:orientation="horizontal">
 
     <RelativeLayout
+        android:id="@+id/car_ui_ime_carboard_area"
         android:layout_width="@dimen/car_ui_ime_wide_screen_keyboard_width"
         android:layout_height="match_parent"
         android:gravity="bottom"
