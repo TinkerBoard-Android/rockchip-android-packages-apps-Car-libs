@@ -27,7 +27,6 @@ import com.android.car.ui.button.CarUiButton;
 import com.android.car.ui.button.CarUiButtonAttributes;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
-import com.android.car.ui.widget.CarUiTextView;
 
 /**
  * A custom {@link LayoutInflater.Factory2} that will create CarUi components such as {@link
@@ -41,7 +40,9 @@ public class CarUiLayoutInflaterFactory extends AppCompatViewInflater
     protected View createView(Context context, String name, AttributeSet attrs) {
         View view = null;
 
-        if (CarUiButton.class.getSimpleName().equals(name)) {
+        // Don't use CarUiButton.class.getSimpleName(), as when proguard obfuscates the class name
+        // it will no longer match what's in xml.
+        if (name.contentEquals("CarUiButton")) {
             CarUiButton controller = SharedLibraryFactorySingleton.get(context).createButton(
                     context, CarUiButtonAttributes.fromAttributeSet(context, attrs));
             view = controller.getView();
@@ -51,7 +52,7 @@ public class CarUiLayoutInflaterFactory extends AppCompatViewInflater
         } else if (CarUiRecyclerView.class.getName().equals(name)) {
             view = SharedLibraryFactorySingleton.get(context)
                     .createRecyclerView(context, attrs);
-        } else if (CarUiTextView.class.getSimpleName().equals(name)) {
+        } else if (name.contentEquals("CarUiTextView")) {
             view = SharedLibraryFactorySingleton.get(context).createTextView(context, attrs);
         }
 
