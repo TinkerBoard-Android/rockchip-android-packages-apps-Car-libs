@@ -36,12 +36,12 @@ class AdapterClassLoader extends PathClassLoader {
     @Nullable
     private final ClassLoader mSharedLibraryClassLoader;
 
-    private final Pattern mPattern = Pattern.compile(
+    private static final Pattern PATTERN = Pattern.compile(
             "^com\\.android\\.car\\.ui\\..*AdapterV[0-9]+(\\$.*)?$"
             + "|Lambda"
             + "|^" + Pattern.quote(OemApiUtil.class.getName()) + "$");
 
-    private final Pattern mSharedLibraryPattern =
+    private static final Pattern SHARED_LIBRARY_PATTERN =
             Pattern.compile("^com\\.android\\.car\\.ui\\.sharedlibrary\\."
                     + "(oemapis\\..*|SharedLibraryVersionProviderImpl)$");
 
@@ -101,7 +101,7 @@ class AdapterClassLoader extends PathClassLoader {
         ClassNotFoundException fromSuper = null;
 
         // Only load adapter classes and certain util classes in this classloader.
-        if (name != null && mPattern.matcher(name).find()) {
+        if (name != null && PATTERN.matcher(name).find()) {
             // Next, check whether the class in question is present in the dexPath that this
             // classloader operates on, or its shared libraries.
             try {
@@ -113,7 +113,7 @@ class AdapterClassLoader extends PathClassLoader {
 
         // Loading OEM-APIs
         // Next, check any additional classloaders.
-        if (mSharedLibraryClassLoader != null && mSharedLibraryPattern.matcher(name).matches()) {
+        if (mSharedLibraryClassLoader != null && SHARED_LIBRARY_PATTERN.matcher(name).matches()) {
             try {
                 return mSharedLibraryClassLoader.loadClass(name);
             } catch (ClassNotFoundException ignored) {

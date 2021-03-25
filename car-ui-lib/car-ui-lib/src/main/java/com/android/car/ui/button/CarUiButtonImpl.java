@@ -39,7 +39,7 @@ import java.util.function.Consumer;
 /**
  * Static implementation of {@link CarUiButton}. Will be swapped out for a shared library
  * implementation when present.
- *
+ * <p>
  * Do not use this from client apps, for car-ui-lib internal use only.
  */
 //TODO(b/179092760) Find a way to prevent apps from using this
@@ -123,7 +123,9 @@ public class CarUiButtonImpl implements CarUiButton {
 
     private Drawable createBackground(
             @NonNull CarUiButtonAttributes attributes) {
-        assert attributes.getStyle() != CarUiButtonStyle.FLOATING;
+        if (attributes.getStyle() == CarUiButtonStyle.FLOATING) {
+            throw new IllegalArgumentException("Cannot create background for floating button");
+        }
 
         GradientDrawable gradientDrawable = new GradientDrawable();
         gradientDrawable.setShape(GradientDrawable.RECTANGLE);
@@ -162,7 +164,9 @@ public class CarUiButtonImpl implements CarUiButton {
         } else if (colorScheme == CarUiButtonColorScheme.YELLOW) {
             color = withDisabledColor(0xfff2f542);
         } else {
-            assert colorScheme.getType() == CarUiButtonColorScheme.TYPE_CUSTOM;
+            if (colorScheme.getType() != CarUiButtonColorScheme.TYPE_CUSTOM) {
+                throw new IllegalArgumentException("Unrecognized color scheme");
+            }
             color = withDisabledColor(colorScheme.getCustomColor());
         }
 

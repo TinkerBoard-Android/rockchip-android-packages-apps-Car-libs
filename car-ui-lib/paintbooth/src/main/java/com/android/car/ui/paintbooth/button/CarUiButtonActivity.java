@@ -95,12 +95,15 @@ public class CarUiButtonActivity extends AppCompatActivity {
                         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                                 ViewGroup.LayoutParams.WRAP_CONTENT,
                                 ViewGroup.LayoutParams.WRAP_CONTENT);
-                        if (style == CarUiButtonStyle.PRIMARY) {
-                            columns.get(0).addView(button.getView(), layoutParams);
-                        } else if (style == CarUiButtonStyle.SECONDARY) {
-                            columns.get(1).addView(button.getView(), layoutParams);
-                        } else {
-                            columns.get(2).addView(button.getView(), layoutParams);
+                        switch (style) {
+                            case PRIMARY:
+                                columns.get(0).addView(button.getView(), layoutParams);
+                                break;
+                            case SECONDARY:
+                                columns.get(1).addView(button.getView(), layoutParams);
+                                break;
+                            default:
+                                columns.get(2).addView(button.getView(), layoutParams);
                         }
                     }
                 }
