@@ -53,17 +53,21 @@ public class QueryParam {
     final String[] mSelectionArgs;
     /** Used by {@link ObservableAsyncQuery#startQuery()} as query param. */
     final String mOrderBy;
+    /** Used by {@link ObservableAsyncQuery#startQuery()} to check query permission. */
+    final String mPermission;
 
     public QueryParam(
             @NonNull Uri uri,
             @Nullable String[] projection,
             @Nullable String selection,
             @Nullable String[] selectionArgs,
-            @Nullable String orderBy) {
+            @Nullable String orderBy,
+            @NonNull String permission) {
         mUri = uri;
         mProjection = projection;
         mSelection = selection;
         mSelectionArgs = selectionArgs;
         mOrderBy = orderBy;
+        mPermission = permission;
     }
 }
