@@ -16,63 +16,86 @@
 
 package com.android.car.ui.toolbar;
 
+import androidx.annotation.Nullable;
+
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ProgressBarControllerOEMV1;
 
 class ProgressBarControllerAdapterV1 implements ProgressBarController {
 
-    private ProgressBarControllerOEMV1 mOemProgressbar;
+    @Nullable
+    private final ProgressBarControllerOEMV1 mOemProgressbar;
+    private boolean mVisible = false;
+    private boolean mIndeterminate = true;
+    private int mMax = 100;
+    private int mMin = 0;
+    private int mProgress = 0;
 
-    ProgressBarControllerAdapterV1(ProgressBarControllerOEMV1 oemProgressbar) {
+    ProgressBarControllerAdapterV1(@Nullable ProgressBarControllerOEMV1 oemProgressbar) {
         mOemProgressbar = oemProgressbar;
     }
 
     @Override
     public void setVisible(boolean visible) {
-        mOemProgressbar.setVisible(visible);
+        if (mOemProgressbar != null) {
+            mOemProgressbar.setVisible(visible);
+        }
+        mVisible = visible;
     }
 
     @Override
     public boolean isVisible() {
-        return mOemProgressbar.isVisible();
+        return mVisible;
     }
 
     @Override
     public void setIndeterminate(boolean indeterminate) {
-        mOemProgressbar.setIndeterminate(indeterminate);
+        if (mOemProgressbar != null) {
+            mOemProgressbar.setIndeterminate(indeterminate);
+        }
+        mIndeterminate = indeterminate;
     }
 
     @Override
     public boolean isIndeterminate() {
-        return mOemProgressbar.isIndeterminate();
+        return mIndeterminate;
     }
 
     @Override
     public void setMax(int max) {
-        mOemProgressbar.setMax(max);
+        if (mOemProgressbar != null) {
+            mOemProgressbar.setMax(max);
+        }
+        mMax = max;
     }
 
     @Override
     public int getMax() {
-        return mOemProgressbar.getMax();
+        return mMax;
     }
 
     @Override
     public void setMin(int min) {
-        mOemProgressbar.setMin(min);
+        if (mOemProgressbar != null) {
+            mOemProgressbar.setMin(min);
+        }
+        mMin = min;
     }
 
     @Override
     public int getMin() {
-        return mOemProgressbar.getMin();
+        return mMin;
     }
 
     @Override
     public void setProgress(int progress) {
-        mOemProgressbar.setProgress(progress);
+        if (mOemProgressbar != null) {
+            mOemProgressbar.setProgress(progress);
+        }
+        mProgress = progress;
     }
 
     @Override
     public int getProgress() {
-        return mOemProgressbar.getProgress();
+        return mProgress;
     }
 }

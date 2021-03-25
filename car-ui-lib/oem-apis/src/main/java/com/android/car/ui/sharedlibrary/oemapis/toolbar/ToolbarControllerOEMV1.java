@@ -64,12 +64,6 @@ public interface ToolbarControllerOEMV1 {
     /** Sets the hint for the search bar. */
     void setSearchHint(String hint);
 
-    /** Sets whether or not to display the back button */
-    void setBackButtonVisible(boolean visible);
-
-    /** Returns true if the back button is displayed to the user */
-    boolean isBackButtonVisible();
-
     /**
      * Sets the icon to display in the search box.
      *
@@ -125,36 +119,32 @@ public interface ToolbarControllerOEMV1 {
      */
     void setSearchResultItems(List<? extends SearchItemOEMV1> searchItems);
 
+    /** Don't show the nav button */
+    int NAV_BUTTON_MODE_DISABLED = 0;
     /** Display the nav button as a back button */
-    int NAV_BUTTON_MODE_BACK = 0;
+    int NAV_BUTTON_MODE_BACK = 1;
     /** Display the nav button as a close button */
-    int NAV_BUTTON_MODE_CLOSE = 1;
+    int NAV_BUTTON_MODE_CLOSE = 2;
     /**
      * Display the nav button as a "down" button.
      * This indicates that pressing it will slide a panel down to close it.
      */
-    int NAV_BUTTON_MODE_DOWN = 2;
+    int NAV_BUTTON_MODE_DOWN = 3;
 
     /**
      * Sets the nav button mode, which is a certain style to display the nav button in.
      * These styles are all purely visual, and don't affect the behavior of clicking
      * the nav button.
      *
-     * See {@link #NAV_BUTTON_MODE_BACK}, {@link #NAV_BUTTON_MODE_CLOSE},
-     * and {@link #NAV_BUTTON_MODE_DOWN}.
+     * See {@link #NAV_BUTTON_MODE_DISABLED}, {@link #NAV_BUTTON_MODE_BACK},
+     * {@link #NAV_BUTTON_MODE_CLOSE}, and {@link #NAV_BUTTON_MODE_DOWN}.
      */
     void setNavButtonMode(int mode);
-
-    /** Gets the nav button mode. See {@link #setNavButtonMode(int)} for more info. */
-    int getNavButtonMode();
 
     /**
      * Sets the {@link MenuItemOEMV1 Menuitems} to display.
      */
     void setMenuItems(List<? extends MenuItemOEMV1> items);
-
-    /** Gets the {@link MenuItemOEMV1 MenuItems} currently displayed */
-    List<? extends MenuItemOEMV1> getMenuItems();
 
     /**
      * Sets a {@link Consumer<String>} to be called whenever the text in the search box
