@@ -259,30 +259,12 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
     @Override
     public void setNavButtonMode(NavButtonMode style) {
-        switch (style) {
-            case BACK:
-                mOemToolbar.setNavButtonMode(ToolbarControllerOEMV1.NAV_BUTTON_MODE_BACK);
-                break;
-            case CLOSE:
-                mOemToolbar.setNavButtonMode(ToolbarControllerOEMV1.NAV_BUTTON_MODE_CLOSE);
-                break;
-            case DOWN:
-                mOemToolbar.setNavButtonMode(ToolbarControllerOEMV1.NAV_BUTTON_MODE_DOWN);
-                break;
-        }
+        update(mAdapterState.copy().setNavButtonMode(style).build());
     }
 
     @Override
     public NavButtonMode getNavButtonMode() {
-        int mode = mOemToolbar.getNavButtonMode();
-        switch (mode) {
-            case ToolbarControllerOEMV1.NAV_BUTTON_MODE_CLOSE:
-                return NavButtonMode.CLOSE;
-            case ToolbarControllerOEMV1.NAV_BUTTON_MODE_DOWN:
-                return NavButtonMode.DOWN;
-            default:
-                return NavButtonMode.BACK;
-        }
+        return mAdapterState.getNavButtonMode();
     }
 
     @Override
@@ -416,8 +398,18 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             }
         }
 
-        if (oldAdapterState.hasBackButton() != newAdapterState.hasBackButton()) {
-            mOemToolbar.setBackButtonVisible(newAdapterState.hasBackButton());
+        if (oldAdapterState.hasBackButton() != newAdapterState.hasBackButton()
+                || (newAdapterState.hasBackButton()
+                && oldAdapterState.getNavButtonMode() != newAdapterState.getNavButtonMode())) {
+            if (!newAdapterState.hasBackButton()) {
+                mOemToolbar.setNavButtonMode(ToolbarControllerOEMV1.NAV_BUTTON_MODE_DISABLED);
+            } else if (newAdapterState.getNavButtonMode() == NavButtonMode.CLOSE) {
+                mOemToolbar.setNavButtonMode(ToolbarControllerOEMV1.NAV_BUTTON_MODE_CLOSE);
+            } else if (newAdapterState.getNavButtonMode() == NavButtonMode.DOWN) {
+                mOemToolbar.setNavButtonMode(ToolbarControllerOEMV1.NAV_BUTTON_MODE_DOWN);
+            } else {
+                mOemToolbar.setNavButtonMode(ToolbarControllerOEMV1.NAV_BUTTON_MODE_BACK);
+            }
         }
 
         boolean gainingTabs = newAdapterState.hasTabs() && !oldAdapterState.hasTabs();
@@ -558,6 +550,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
         private final boolean mShowMenuItemsWhileSearching;
         private final boolean mTabsDirty;
         private final boolean mLogoDirty;
+        private final NavButtonMode mNavButtonMode;
 
         ToolbarAdapterState() {
             mState = State.HOME;
@@ -571,6 +564,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             mShowMenuItemsWhileSearching = false;
             mTabsDirty = false;
             mLogoDirty = false;
+            mNavButtonMode = NavButtonMode.BACK;
         }
 
         private ToolbarAdapterState(Builder builder) {
@@ -585,6 +579,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             mShowMenuItemsWhileSearching = builder.mShowMenuItemsWhileSearching;
             mTabsDirty = builder.mTabsDirty;
             mLogoDirty = builder.mLogoDirty;
+            mNavButtonMode = builder.mNavButtonMode;
         }
 
         public State getState() {
@@ -631,6 +626,10 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
         public boolean getShowMenuItemsWhileSearching() {
             return mShowMenuItemsWhileSearching;
+        }
+
+        public NavButtonMode getNavButtonMode() {
+            return mNavButtonMode;
         }
 
         private boolean hasLogo() {
@@ -690,6 +689,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             private boolean mShowMenuItemsWhileSearching;
             private boolean mTabsDirty = false;
             private boolean mLogoDirty = false;
+            private NavButtonMode mNavButtonMode;
 
             Builder(ToolbarAdapterState state) {
                 mStateClonedFrom = state;
@@ -702,6 +702,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
                 mTitle = state.getTitle();
                 mSubtitle = state.getSubtitle();
                 mLogo = state.getLogo();
+                mNavButtonMode = state.getNavButtonMode();
             }
 
             public ToolbarAdapterState build() {
@@ -795,6 +796,14 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
                 if (!Objects.equals(mMenuItems, menuItems)) {
                     mMenuItems = menuItems;
+                    mWasChanged = true;
+                }
+                return this;
+            }
+
+            public Builder setNavButtonMode(NavButtonMode newMode) {
+                if (newMode != mNavButtonMode) {
+                    mNavButtonMode = newMode;
                     mWasChanged = true;
                 }
                 return this;

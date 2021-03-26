@@ -67,6 +67,7 @@ public final class CarUiTextViewImpl extends CarUiTextView {
      * @param textList list of text to display. Each {@link CarUiText} in the list will be rendered
      *                 on a new line, separated by a line break
      */
+    @Override
     public void setText(@NonNull List<CarUiText> textList) {
         mText = Objects.requireNonNull(textList);
         if (mOneShotPreDrawListener == null) {
@@ -78,6 +79,7 @@ public final class CarUiTextViewImpl extends CarUiTextView {
     /**
      * Set text to display.
      */
+    @Override
     public void setText(@NonNull CarUiText text) {
         mText = Collections.singletonList(Objects.requireNonNull(text));
         if (mOneShotPreDrawListener == null) {

@@ -23,25 +23,14 @@ package com.android.car.ui.sharedlibrary.oemapis.toolbar;
  * views in it's hierarchy in ways that were not intended.
  */
 public interface ProgressBarControllerOEMV1 {
-
     /** Shows/hides the progress bar */
     void setVisible(boolean visible);
-    /** Returns true if the progress bar is visible */
-    boolean isVisible();
     /** Equivalent to {@link android.widget.ProgressBar#setIndeterminate(boolean)} */
     void setIndeterminate(boolean indeterminate);
-    /** Equivalent to {@link android.widget.ProgressBar#isIndeterminate()} */
-    boolean isIndeterminate();
     /** Equivalent to {@link android.widget.ProgressBar#setMax(int)} */
     void setMax(int max);
-    /** Equivalent to {@link android.widget.ProgressBar#getMax()} */
-    int getMax();
     /** Equivalent to {@link android.widget.ProgressBar#setMin(int)} */
     void setMin(int min);
-    /** Equivalent to {@link android.widget.ProgressBar#getMin()} */
-    int getMin();
     /** Equivalent to {@link android.widget.ProgressBar#setProgress(int)} */
     void setProgress(int progress);
-    /** Equivalent to {@link android.widget.ProgressBar#getProgress()} */
-    int getProgress();
 }

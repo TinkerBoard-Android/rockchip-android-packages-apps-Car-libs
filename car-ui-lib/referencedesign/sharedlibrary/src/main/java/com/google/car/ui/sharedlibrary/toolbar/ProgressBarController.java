@@ -35,18 +35,8 @@ class ProgressBarController implements ProgressBarControllerOEMV1 {
     }
 
     @Override
-    public boolean isVisible() {
-        return mProgressBar.getVisibility() == View.VISIBLE;
-    }
-
-    @Override
     public void setIndeterminate(boolean indeterminate) {
         mProgressBar.setIndeterminate(indeterminate);
-    }
-
-    @Override
-    public boolean isIndeterminate() {
-        return mProgressBar.isIndeterminate();
     }
 
     @Override
@@ -55,27 +45,12 @@ class ProgressBarController implements ProgressBarControllerOEMV1 {
     }
 
     @Override
-    public int getMax() {
-        return mProgressBar.getMax();
-    }
-
-    @Override
     public void setMin(int min) {
         mProgressBar.setMin(min);
     }
 
     @Override
-    public int getMin() {
-        return mProgressBar.getMin();
-    }
-
-    @Override
     public void setProgress(int progress) {
         mProgressBar.setProgress(progress);
-    }
-
-    @Override
-    public int getProgress() {
-        return mProgressBar.getProgress();
     }
 }
