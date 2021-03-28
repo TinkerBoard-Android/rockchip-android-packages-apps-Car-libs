@@ -85,6 +85,12 @@
         android:parentActivityName=".MainActivity">
     </activity>
     <activity
+        android:name=".widescreenime.WideScreenTestView"
+        android:windowSoftInputMode="stateHidden|adjustNothing"
+        android:exported="false"
+        android:parentActivityName=".MainActivity">
+    </activity>
+    <activity
         android:name=".toolbar.ToolbarActivity"
         android:exported="false"
         android:parentActivityName=".MainActivity">

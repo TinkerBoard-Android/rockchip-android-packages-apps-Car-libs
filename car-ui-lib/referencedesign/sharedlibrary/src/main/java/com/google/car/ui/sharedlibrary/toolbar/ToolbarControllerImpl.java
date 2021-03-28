@@ -174,6 +174,11 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     }
 
     @Override
+    public void setSearchResultsInputViewIcon(Drawable view) {
+        // Intentional no-op as canShowSearchResultsView returns false
+    }
+
+    @Override
     public void setSearchResultItems(List<? extends SearchItemOEMV1> searchItems) {
         // Intentional no-op as canShowSearchResultItems returns false
     }

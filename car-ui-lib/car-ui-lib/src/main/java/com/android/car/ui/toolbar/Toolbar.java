@@ -47,7 +47,7 @@ import java.util.List;
  * <p>The toolbar supports a navigation button, title, tabs, search, and {@link MenuItem MenuItems}
  *
  * @deprecated Instead of creating this class, use Theme.CarUi.WithToolbar, and get access to it
- *             via {@link com.android.car.ui.core.CarUi#requireToolbar(android.app.Activity)}
+ * via {@link com.android.car.ui.core.CarUi#requireToolbar(android.app.Activity)}
  */
 @Deprecated
 public final class Toolbar extends FrameLayout implements ToolbarController {
@@ -675,6 +675,11 @@ public final class Toolbar extends FrameLayout implements ToolbarController {
     @Override
     public void setSearchResultsView(View view) {
         mController.setSearchResultsView(view);
+    }
+
+    @Override
+    public void setSearchResultsInputViewIcon(Drawable drawable) {
+        mController.setSearchResultsInputViewIcon(drawable);
     }
 
     /**
