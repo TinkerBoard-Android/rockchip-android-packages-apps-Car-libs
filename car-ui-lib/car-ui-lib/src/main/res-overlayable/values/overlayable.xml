@@ -122,6 +122,10 @@ limitations under the License.-->
       <item type="color" name="car_ui_toolbar_tab_item_selector"/>
       <item type="color" name="car_ui_toolbar_tab_selected_color"/>
       <item type="color" name="car_ui_toolbar_tab_unselected_color"/>
+      <item type="dimen" name="car_ui_app_styled_dialog_height"/>
+      <item type="dimen" name="car_ui_app_styled_dialog_position_x"/>
+      <item type="dimen" name="car_ui_app_styled_dialog_position_y"/>
+      <item type="dimen" name="car_ui_app_styled_dialog_width"/>
       <item type="dimen" name="car_ui_body1_size"/>
       <item type="dimen" name="car_ui_body2_size"/>
       <item type="dimen" name="car_ui_body3_size"/>
