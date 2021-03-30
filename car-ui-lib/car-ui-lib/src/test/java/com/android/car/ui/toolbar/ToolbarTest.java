@@ -60,7 +60,7 @@ public class ToolbarTest {
         mActivityController = Robolectric.buildActivity(TestActivity.class);
         mActivityController.setup();
         mActivity = mActivityController.get();
-        mToolbar = mActivity.findViewById(R.id.toolbar);
+        mToolbar = mActivity.findViewById(R.id.car_ui_toolbar);
     }
 
     private int getTestDrawableInt(String drawable) {
