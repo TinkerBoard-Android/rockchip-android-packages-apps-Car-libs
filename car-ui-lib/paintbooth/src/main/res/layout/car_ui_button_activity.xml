@@ -58,5 +58,38 @@
                 android:divider="@drawable/linearlayout_spacing"
                 android:showDividers="middle"/>
         </ScrollView>
+        <ScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp">
+            <LinearLayout
+                android:id="@+id/column_4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:divider="@drawable/linearlayout_spacing"
+                android:showDividers="middle">
+                <CarUiButton
+                    android:id="@+id/changeable_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:carUiButtonTitle="Change me!"/>
+                <CarUiButton
+                    android:id="@+id/toggle_text_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:carUiButtonTitle="Click to toggle text"/>
+                <CarUiButton
+                    android:id="@+id/toggle_icon_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:carUiButtonTitle="Click to toggle icon"/>
+                <CarUiButton
+                    android:id="@+id/toggle_color_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:carUiButtonTitle="Click to toggle color"/>
+            </LinearLayout>
+        </ScrollView>
     </LinearLayout>
 </LinearLayout>

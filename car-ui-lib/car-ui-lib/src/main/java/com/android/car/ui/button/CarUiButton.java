@@ -16,6 +16,7 @@
 package com.android.car.ui.button;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -64,6 +65,15 @@ public interface CarUiButton {
      * ViewController instead of a view.
      */
     void setOnClickListener(@Nullable Consumer<CarUiButton> onClickListener);
+
+    /** Changes the text displayed. */
+    void setText(String text);
+
+    /** Changes the icon displayed. */
+    void setIcon(Drawable icon);
+
+    /** Changes the {@link CarUiButtonColorScheme} */
+    void setColorScheme(CarUiButtonColorScheme colorScheme);
 
     /**
      * Gets the view that corresponds to this ViewController. This should only be used

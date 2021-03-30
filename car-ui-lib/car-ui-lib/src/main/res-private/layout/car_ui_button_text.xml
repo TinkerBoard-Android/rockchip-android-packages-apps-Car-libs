@@ -14,20 +14,12 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<!-- We need this FrameLayout because when the CarUiButton is used within a layout file,
-     there will be new layout params specified that will override the layout params of the
-     top level view in this file. Consequently, what we put for layout_width/height doesn't
-     matter here. -->
-<FrameLayout
+<TextView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="1dp"
-    android:layout_height="1dp">
-    <TextView
-        android:id="@+id/car_ui_button_text_view"
-        android:layout_height="72dp"
-        android:layout_width="wrap_content"
-        android:minWidth="156dp"
-        android:tag="car_ui_button_background_view"
-        android:gravity="center"
-        android:textAppearance="@style/TextAppearance.CarUiButton" />
-</FrameLayout>
+    android:id="@+id/car_ui_button_text_view"
+    android:layout_height="72dp"
+    android:layout_width="wrap_content"
+    android:minWidth="156dp"
+    android:tag="car_ui_button_background_view"
+    android:gravity="center"
+    android:textAppearance="@style/TextAppearance.CarUiButton" />
