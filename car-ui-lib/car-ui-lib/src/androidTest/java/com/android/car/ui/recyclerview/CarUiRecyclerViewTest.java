@@ -1122,7 +1122,7 @@ public class CarUiRecyclerViewTest {
     }
 
     @Test
-    public void testDefaultGutter_noScrollbar() {
+    public void testDefaultSize_noScrollbar() {
         doReturn(false).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
 
         CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
@@ -1141,7 +1141,7 @@ public class CarUiRecyclerViewTest {
     }
 
     @Test
-    public void testGutter_withScrollbar() {
+    public void testLargeSize_withScrollbar() {
         doReturn(true).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
 
         TypedArray typedArray = spy(mActivity.getBaseContext().obtainStyledAttributes(
@@ -1152,8 +1152,8 @@ public class CarUiRecyclerViewTest {
                 eq(R.styleable.CarUiRecyclerView),
                 anyInt(),
                 anyInt());
-        when(typedArray.getBoolean(eq(R.styleable.CarUiRecyclerView_enableScrollBarGutter),
-                anyBoolean())).thenReturn(true);
+        when(typedArray.getInt(eq(R.styleable.CarUiRecyclerView_carUiSize),
+                anyInt())).thenReturn(2); // Large size
 
         CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
         int listId = View.generateViewId();
@@ -1173,7 +1173,7 @@ public class CarUiRecyclerViewTest {
     }
 
     @Test
-    public void testNoGutter_withScrollbar() {
+    public void testMediumSize_withScrollbar() {
         doReturn(true).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
 
         TypedArray typedArray = spy(mActivity.getBaseContext().obtainStyledAttributes(
@@ -1184,8 +1184,8 @@ public class CarUiRecyclerViewTest {
                 eq(R.styleable.CarUiRecyclerView),
                 anyInt(),
                 anyInt());
-        when(typedArray.getBoolean(eq(R.styleable.CarUiRecyclerView_enableScrollBarGutter),
-                anyBoolean())).thenReturn(false);
+        when(typedArray.getInt(eq(R.styleable.CarUiRecyclerView_carUiSize),
+                anyInt())).thenReturn(1); // Medium size
 
         CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
         int listId = View.generateViewId();
@@ -1200,6 +1200,36 @@ public class CarUiRecyclerViewTest {
         onView(withId(R.id.car_ui_scroll_bar)).check(matches(isDisplayed()));
         onView(withText(adapter.getItemText(0))).check(
                 isCompletelyRightOf(withId(R.id.car_ui_scroll_bar)));
+        onView(withText(adapter.getItemText(0))).check(isRightAlignedWith(withId(listId)));
+    }
+
+    @Test
+    public void testSmallSize_withScrollbar() {
+        doReturn(true).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
+
+        TypedArray typedArray = spy(mActivity.getBaseContext().obtainStyledAttributes(
+                null, R.styleable.CarUiRecyclerView));
+
+        doReturn(typedArray).when(mTestableContext).obtainStyledAttributes(
+                any(),
+                eq(R.styleable.CarUiRecyclerView),
+                anyInt(),
+                anyInt());
+        when(typedArray.getInt(eq(R.styleable.CarUiRecyclerView_carUiSize),
+                anyInt())).thenReturn(0); // Small size
+
+        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        int listId = View.generateViewId();
+        ViewGroup container = mActivity.findViewById(R.id.test_container);
+        TestAdapter adapter = new TestAdapter(50);
+        container.post(() -> {
+            container.addView(carUiRecyclerView);
+            carUiRecyclerView.setId(listId);
+            carUiRecyclerView.setAdapter(adapter);
+        });
+
+        onView(withId(R.id.car_ui_scroll_bar)).check(doesNotExist());
+        onView(withText(adapter.getItemText(0))).check(isLeftAlignedWith(withId(listId)));
         onView(withText(adapter.getItemText(0))).check(isRightAlignedWith(withId(listId)));
     }
 

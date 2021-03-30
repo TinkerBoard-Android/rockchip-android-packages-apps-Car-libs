@@ -14,19 +14,13 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<merge xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <com.android.car.ui.recyclerview.CarUiRecyclerViewContainer
-        android:id="@+id/car_ui_recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingLeft="@dimen/car_ui_scrollbar_margin"
-        android:tag="carUiRecyclerView" />
-
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="left" >
-        <include layout="@layout/car_ui_recyclerview_scrollbar"/>
-    </FrameLayout>
-</merge>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="48dp"
+        android:height="48dp"
+        android:viewportWidth="48.0"
+        android:viewportHeight="48.0">
+    <path
+        android:pathData="M14.83,30.83L24,21.66l9.17,9.17L36,28 24,16 12,28z"
+        android:fillColor="#FFFFFF"/>
+</vector>
