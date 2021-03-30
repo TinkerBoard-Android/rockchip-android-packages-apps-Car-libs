@@ -35,6 +35,6 @@ public class WidgetActivity extends Activity {
         setContentView(R.layout.widgets_activity);
         ToolbarController toolbar = CarUi.requireToolbar(this);
         toolbar.setTitle(getTitle());
-        toolbar.setState(Toolbar.State.SUBPAGE);
+        toolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
     }
 }

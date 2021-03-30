@@ -52,7 +52,7 @@ public class CarUiListItemActivity extends Activity implements InsetsChangedList
 
         ToolbarController toolbar = CarUi.requireToolbar(this);
         toolbar.setTitle(getTitle());
-        toolbar.setState(Toolbar.State.SUBPAGE);
+        toolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
 
         CarUiRecyclerView recyclerView = findViewById(R.id.list);
         mAdapter = new CarUiListItemAdapter(generateSampleData());

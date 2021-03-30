@@ -21,7 +21,6 @@ import androidx.fragment.app.Fragment;
 
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.paintbooth.R;
-import com.android.car.ui.toolbar.Toolbar;
 import com.android.car.ui.toolbar.ToolbarController;
 
 /**
@@ -35,7 +34,6 @@ public class SplitPreferenceDemoFragment extends PreferenceDemoFragment {
 
     @Override
     public void setupToolbar(@NonNull ToolbarController toolbar) {
-        toolbar.setState(Toolbar.State.HOME);
         toolbar.setLogo(R.drawable.ic_launcher);
         if (getPreferenceScreen() != null) {
             toolbar.setTitle(getPreferenceScreen().getTitle());

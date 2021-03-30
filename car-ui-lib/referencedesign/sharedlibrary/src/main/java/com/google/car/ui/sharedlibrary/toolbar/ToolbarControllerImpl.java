@@ -264,13 +264,15 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     }
 
     private void update() {
+        boolean isSearching = mSearchMode != SEARCH_MODE_DISABLED;
+        boolean hasTabs = mTabContainer.hasTabs();
+
         setVisible(mBackButtonView, mBackButtonVisible);
         setVisible(mLogoInNavIconSpace, mHasLogo && !mBackButtonVisible);
         setVisible(mLogo, mHasLogo && mBackButtonVisible);
-        boolean hasTabs = mTabContainer.hasTabs();
-        setVisible(mTabContainer, hasTabs);
-        setVisible(mTitleView, !TextUtils.isEmpty(getTitle()) && !hasTabs);
-        setVisible(mSubtitleView, !TextUtils.isEmpty(getSubtitle()) && !hasTabs);
+        setVisible(mTabContainer, hasTabs && !isSearching);
+        setVisible(mTitleView, !TextUtils.isEmpty(getTitle()) && !hasTabs && !isSearching);
+        setVisible(mSubtitleView, !TextUtils.isEmpty(getSubtitle()) && !hasTabs && !isSearching);
     }
 
     private static void setVisible(View view, boolean visible) {

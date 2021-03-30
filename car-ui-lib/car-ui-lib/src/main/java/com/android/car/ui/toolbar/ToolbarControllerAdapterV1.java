@@ -258,6 +258,11 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     }
 
     @Override
+    public void setSearchMode(SearchMode mode) {
+        update(mAdapterState.copy().setSearchMode(mode).build());
+    }
+
+    @Override
     public void setNavButtonMode(NavButtonMode style) {
         update(mAdapterState.copy().setNavButtonMode(style).build());
     }
@@ -355,38 +360,24 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
         ToolbarAdapterState oldAdapterState = mAdapterState;
         mAdapterState = newAdapterState;
 
-        boolean gainingTitleOrSubtitle = newAdapterState.hasTitleOrSubtitle()
-                && !oldAdapterState.hasTitleOrSubtitle();
-        boolean losingTitleOrSubtitle = !newAdapterState.hasTitleOrSubtitle()
-                && oldAdapterState.hasTitleOrSubtitle();
-        boolean gainingLogo = newAdapterState.hasLogo() && !oldAdapterState.hasLogo();
-        boolean losingLogo = !newAdapterState.hasLogo() && oldAdapterState.hasLogo();
-
-        if (gainingTitleOrSubtitle) {
+        if (!TextUtils.equals(newAdapterState.getShownTitle(), oldAdapterState.getShownTitle())) {
             mOemToolbar.setTitle(newAdapterState.getTitle());
+        }
+        if (!TextUtils.equals(newAdapterState.getShownSubtitle(),
+                oldAdapterState.getShownSubtitle())) {
             mOemToolbar.setSubtitle(newAdapterState.getSubtitle());
-        } else if (losingTitleOrSubtitle) {
-            mOemToolbar.setTitle(null);
-            mOemToolbar.setSubtitle(null);
-        } else if (newAdapterState.hasTitleOrSubtitle()) {
-            if (!TextUtils.equals(newAdapterState.getTitle(), oldAdapterState.getTitle())) {
-                mOemToolbar.setTitle(newAdapterState.getTitle());
-            }
-            if (!TextUtils.equals(newAdapterState.getSubtitle(), oldAdapterState.getSubtitle())) {
-                mOemToolbar.setSubtitle(newAdapterState.getSubtitle());
-            }
         }
 
-        if (gainingLogo) {
-            mOemToolbar.setLogo(newAdapterState.getLogo());
-        } else if (losingLogo) {
-            mOemToolbar.setLogo(null);
-        } else if (newAdapterState.hasLogo() && newAdapterState.getLogoDirty()) {
-            mOemToolbar.setLogo(newAdapterState.getLogo());
+        // This first check just checks if the logo is changing nullity, the second one checks
+        // if it's actually a different image.
+        if (newAdapterState.getShownLogo() != oldAdapterState.getShownLogo()) {
+            mOemToolbar.setLogo(newAdapterState.getShownLogo());
+        } else if (newAdapterState.getShownLogo() != null && newAdapterState.getLogoDirty()) {
+            mOemToolbar.setLogo(newAdapterState.getShownLogo());
         }
 
-        if (newAdapterState.getState() != oldAdapterState.getState()) {
-            switch (newAdapterState.getState()) {
+        if (newAdapterState.getSearchMode() != oldAdapterState.getSearchMode()) {
+            switch (newAdapterState.getSearchMode()) {
                 case SEARCH:
                     mOemToolbar.setSearchMode(ToolbarControllerOEMV1.SEARCH_MODE_SEARCH);
                     break;
@@ -398,10 +389,8 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             }
         }
 
-        if (oldAdapterState.hasBackButton() != newAdapterState.hasBackButton()
-                || (newAdapterState.hasBackButton()
-                && oldAdapterState.getNavButtonMode() != newAdapterState.getNavButtonMode())) {
-            if (!newAdapterState.hasBackButton()) {
+        if (oldAdapterState.getNavButtonMode() != newAdapterState.getNavButtonMode()) {
+            if (newAdapterState.getNavButtonMode() == NavButtonMode.DISABLED) {
                 mOemToolbar.setNavButtonMode(ToolbarControllerOEMV1.NAV_BUTTON_MODE_DISABLED);
             } else if (newAdapterState.getNavButtonMode() == NavButtonMode.CLOSE) {
                 mOemToolbar.setNavButtonMode(ToolbarControllerOEMV1.NAV_BUTTON_MODE_CLOSE);
@@ -425,13 +414,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             mOemToolbar.selectTab(newAdapterState.getSelectedTab());
         }
 
-        boolean gainingMenuItem = newAdapterState.hasMenuItems() && !oldAdapterState.hasMenuItems();
-        boolean losingMenuItems = !newAdapterState.hasMenuItems() && oldAdapterState.hasMenuItems();
-        if (gainingMenuItem) {
-            mOemToolbar.setMenuItems(newAdapterState.getShownMenuItems());
-        } else if (losingMenuItems) {
-            mOemToolbar.setMenuItems(Collections.emptyList());
-        } else if (newAdapterState.hasMenuItems() && !Objects.equals(
+        if (!Objects.equals(
                 newAdapterState.getShownMenuItems(), oldAdapterState.getShownMenuItems())) {
             mOemToolbar.setMenuItems(newAdapterState.getShownMenuItems());
         }
@@ -543,6 +526,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
     private static class ToolbarAdapterState {
         private final State mState;
+        private final boolean mStateSet;
         private final boolean mShowTabsInSubpage;
         @NonNull
         private final List<TabAdapterV1> mTabs;
@@ -556,9 +540,11 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
         private final boolean mTabsDirty;
         private final boolean mLogoDirty;
         private final NavButtonMode mNavButtonMode;
+        private final SearchMode mSearchMode;
 
         ToolbarAdapterState() {
             mState = State.HOME;
+            mStateSet = false;
             mShowTabsInSubpage = false;
             mTabs = Collections.emptyList();
             mMenuItems = Collections.emptyList();
@@ -569,11 +555,13 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             mShowMenuItemsWhileSearching = false;
             mTabsDirty = false;
             mLogoDirty = false;
-            mNavButtonMode = NavButtonMode.BACK;
+            mNavButtonMode = NavButtonMode.DISABLED;
+            mSearchMode = SearchMode.DISABLED;
         }
 
         private ToolbarAdapterState(Builder builder) {
             mState = builder.mState;
+            mStateSet = builder.mStateSet;
             mShowTabsInSubpage = builder.mShowTabsInSubpage;
             mTabs = builder.mTabs;
             mMenuItems = builder.mMenuItems;
@@ -585,10 +573,15 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             mTabsDirty = builder.mTabsDirty;
             mLogoDirty = builder.mLogoDirty;
             mNavButtonMode = builder.mNavButtonMode;
+            mSearchMode = builder.mSearchMode;
         }
 
         public State getState() {
             return mState;
+        }
+
+        public boolean isStateSet() {
+            return mStateSet;
         }
 
         public boolean getShowTabsInSubpage() {
@@ -600,29 +593,45 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             return mTabs;
         }
 
-        public int getSelectedTab() {
-            return mSelectedTab;
+        public boolean getTabsDirty() {
+            return mTabsDirty;
         }
 
-        @NonNull
-        public List<MenuItemAdapterV1> getMenuItems() {
-            return mMenuItems;
+        public int getSelectedTab() {
+            return mSelectedTab;
         }
 
         public String getTitle() {
             return mTitle == null ? "" : mTitle;
         }
 
+        public String getShownTitle() {
+            if (mStateSet && (mState != State.HOME && mState != State.SUBPAGE)) {
+                return "";
+            }
+            return mTitle == null ? "" : mTitle;
+        }
+
         public String getSubtitle() {
-            return mSubtitle;
+            return mSubtitle == null ? "" : mSubtitle;
+        }
+
+        public String getShownSubtitle() {
+            if (mStateSet && (mState != State.HOME && mState != State.SUBPAGE)) {
+                return "";
+            }
+            return mSubtitle == null ? "" : mSubtitle;
         }
 
         public Drawable getLogo() {
             return mLogo;
         }
 
-        public boolean getTabsDirty() {
-            return mTabsDirty;
+        public Drawable getShownLogo() {
+            if (mStateSet && (mState != State.HOME && mState != State.SUBPAGE)) {
+                return null;
+            }
+            return mLogo;
         }
 
         public boolean getLogoDirty() {
@@ -634,44 +643,44 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
         }
 
         public NavButtonMode getNavButtonMode() {
+            if (mStateSet && mNavButtonMode == NavButtonMode.DISABLED && mState != State.HOME) {
+                return NavButtonMode.BACK;
+            }
             return mNavButtonMode;
         }
 
-        private boolean hasLogo() {
-            State state = getState();
-            return (state == State.HOME || state == State.SUBPAGE) && getLogo() != null;
-        }
-
-        private boolean hasTitleOrSubtitle() {
-            State state = getState();
-            return state == State.HOME || state == State.SUBPAGE;
-        }
-
         private boolean hasTabs() {
-            State state = getState();
-            return (state == State.HOME || (state == State.SUBPAGE && getShowTabsInSubpage()))
+            if (!mStateSet) {
+                return !getTabs().isEmpty();
+            }
+            return (mState == State.HOME || (mState == State.SUBPAGE && getShowTabsInSubpage()))
                     && !getTabs().isEmpty();
         }
 
-        private boolean hasMenuItems() {
-            return getShownMenuItems().size() > 0;
-        }
-
         private List<MenuItemAdapterV1> getShownMenuItems() {
-            State state = getState();
-            if (state == State.EDIT) {
+            SearchMode searchMode = getSearchMode();
+            if (searchMode == SearchMode.EDIT) {
                 return mShowMenuItemsWhileSearching ? mMenuItems : Collections.emptyList();
-            } else if (state == State.SEARCH) {
+            } else if (searchMode == SearchMode.SEARCH) {
                 return mShowMenuItemsWhileSearching
-                        ? mMenuItems.stream().filter(i -> !i.isSearch()).collect(toList())
-                        : Collections.emptyList();
+                    ? mMenuItems.stream().filter(i -> !i.isSearch()).collect(toList())
+                    : Collections.emptyList();
             } else {
                 return mMenuItems;
             }
         }
 
-        private boolean hasBackButton() {
-            return getState() != State.HOME;
+        private SearchMode getSearchMode() {
+            if (mStateSet) {
+                if (mState == State.SEARCH) {
+                    return SearchMode.SEARCH;
+                } else if (mState == State.EDIT) {
+                    return SearchMode.EDIT;
+                } else {
+                    return SearchMode.DISABLED;
+                }
+            }
+            return mSearchMode;
         }
 
         public Builder copy() {
@@ -682,6 +691,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             private final ToolbarAdapterState mStateClonedFrom;
             private boolean mWasChanged = false;
             private State mState;
+            private boolean mStateSet;
             private boolean mShowTabsInSubpage;
             @NonNull
             private List<TabAdapterV1> mTabs;
@@ -695,19 +705,22 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             private boolean mTabsDirty = false;
             private boolean mLogoDirty = false;
             private NavButtonMode mNavButtonMode;
+            private SearchMode mSearchMode;
 
             Builder(ToolbarAdapterState state) {
                 mStateClonedFrom = state;
-                mState = state.getState();
-                mShowTabsInSubpage = state.getShowTabsInSubpage();
-                mTabs = state.getTabs();
-                mMenuItems = state.getMenuItems();
-                mShowMenuItemsWhileSearching = state.getShowMenuItemsWhileSearching();
-                mSelectedTab = state.getSelectedTab();
-                mTitle = state.getTitle();
-                mSubtitle = state.getSubtitle();
-                mLogo = state.getLogo();
-                mNavButtonMode = state.getNavButtonMode();
+                mState = state.mState;
+                mStateSet = state.mStateSet;
+                mShowTabsInSubpage = state.mShowTabsInSubpage;
+                mTabs = state.mTabs;
+                mMenuItems = state.mMenuItems;
+                mShowMenuItemsWhileSearching = state.mShowMenuItemsWhileSearching;
+                mSelectedTab = state.mSelectedTab;
+                mTitle = state.mTitle;
+                mSubtitle = state.mSubtitle;
+                mLogo = state.mLogo;
+                mNavButtonMode = state.mNavButtonMode;
+                mSearchMode = state.mSearchMode;
             }
 
             public ToolbarAdapterState build() {
@@ -719,8 +732,12 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             }
 
             public Builder setState(State state) {
+                if (mSearchMode != SearchMode.DISABLED) {
+                    throw new IllegalStateException("Cannot use setSearchMode() with setState()");
+                }
                 if (state != mState) {
                     mState = state;
+                    mStateSet = true;
                     mWasChanged = true;
                 }
                 return this;
@@ -809,6 +826,17 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             public Builder setNavButtonMode(NavButtonMode newMode) {
                 if (newMode != mNavButtonMode) {
                     mNavButtonMode = newMode;
+                    mWasChanged = true;
+                }
+                return this;
+            }
+
+            public Builder setSearchMode(SearchMode searchMode) {
+                if (mStateSet) {
+                    throw new IllegalStateException("Cannot use setSearchMode() with setState()");
+                }
+                if (mSearchMode != searchMode) {
+                    mSearchMode = searchMode;
                     mWasChanged = true;
                 }
                 return this;

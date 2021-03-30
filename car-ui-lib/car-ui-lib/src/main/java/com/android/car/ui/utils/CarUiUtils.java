@@ -93,7 +93,7 @@ public final class CarUiUtils {
      * this method will return null.
      */
     @Nullable
-    public static Activity getActivity(Context context) {
+    public static Activity getActivity(@Nullable Context context) {
         while (context instanceof ContextWrapper) {
             if (context instanceof Activity) {
                 return (Activity) context;
