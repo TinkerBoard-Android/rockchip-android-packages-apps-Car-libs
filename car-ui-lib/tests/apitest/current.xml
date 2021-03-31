@@ -264,6 +264,7 @@
   <public type="id" name="car_ui_focus_area"/>
   <public type="id" name="car_ui_fullscreenArea"/>
   <public type="id" name="car_ui_imeWideScreenInputArea"/>
+  <public type="id" name="car_ui_ime_carboard_area"/>
   <public type="id" name="car_ui_ime_surface"/>
   <public type="id" name="car_ui_inputExtractActionAutomotive"/>
   <public type="id" name="car_ui_inputExtractEditTextContainer"/>

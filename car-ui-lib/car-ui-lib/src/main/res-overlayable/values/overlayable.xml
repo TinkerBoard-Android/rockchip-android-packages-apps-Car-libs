@@ -329,6 +329,7 @@ limitations under the License.-->
       <item type="id" name="car_ui_focus_area"/>
       <item type="id" name="car_ui_fullscreenArea"/>
       <item type="id" name="car_ui_imeWideScreenInputArea"/>
+      <item type="id" name="car_ui_ime_carboard_area"/>
       <item type="id" name="car_ui_ime_surface"/>
       <item type="id" name="car_ui_inputExtractActionAutomotive"/>
       <item type="id" name="car_ui_inputExtractEditTextContainer"/>
