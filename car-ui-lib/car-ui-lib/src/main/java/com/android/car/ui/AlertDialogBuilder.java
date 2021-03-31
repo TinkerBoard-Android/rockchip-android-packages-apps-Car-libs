@@ -29,6 +29,7 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -76,6 +77,28 @@ public class AlertDialogBuilder {
     private ViewGroup mRoot;
     private boolean mAllowDismissButton = true;
     private boolean mHasSingleChoiceBodyButton = false;
+
+    private final TextWatcher mTextWatcherWideScreen = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            Bundle bundle = new Bundle();
+            String titleString = mWideScreenTitle != null ? mWideScreenTitle : mTitle.toString();
+            bundle.putString(ADD_DESC_TITLE_TO_CONTENT_AREA, titleString);
+            bundle.putString(ADD_DESC_TO_CONTENT_AREA, s.toString());
+            mInputMethodManager.sendAppPrivateCommand(mCarUiEditText, WIDE_SCREEN_ACTION,
+                    bundle);
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
+    };
 
     // Whenever the IME is closed and opened again, the title and desc information needs to be
     // passed to the IME to be rendered. If the information is not passed to the IME the content
@@ -721,6 +744,22 @@ public class AlertDialogBuilder {
         mWideScreenTitle = title;
         mWideScreenTitleDesc = desc;
 
+        return this;
+    }
+
+    /**
+     * By default, the AlertDialogBuilder will just display the static text in the content area of
+     * widescreen IME provided by {@link #setEditTextTitleAndDescForWideScreen(String, String)}. To
+     * display the text typed by the user in the description set this to true.
+     *
+     * @return this Builder object to allow for chaining of calls to set methods
+     */
+    public AlertDialogBuilder setAutoDescUpdateForWidescreen(boolean autoUpdateDesc) {
+        if (autoUpdateDesc) {
+            mCarUiEditText.addTextChangedListener(mTextWatcherWideScreen);
+        } else {
+            mCarUiEditText.removeTextChangedListener(mTextWatcherWideScreen);
+        }
         return this;
     }
 
