@@ -500,6 +500,24 @@ public class CarUiListItemTest {
     }
 
     @Test
+    public void testTitleTextTruncation_withMaxLines() {
+        CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
+        item.setTitle(new CarUiText(LONG_CHAR_SEQUENCE, 2));
+        List<CarUiListItem> items = new ArrayList<>();
+        items.add(item);
+
+        mCarUiRecyclerView.post(
+                () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items)));
+
+        // Check for manual truncation ellipsis.
+        onView(withId(R.id.car_ui_list_item_title)).check(
+                matches(withText(containsString(ELLIPSIS))));
+
+        TextView bodyTextView = mCarUiRecyclerView.requireViewById(R.id.car_ui_list_item_title);
+        assertEquals(2, bodyTextView.getLineCount());
+    }
+
+    @Test
     public void testTextTruncation_twoLong_differentMaxLines() {
         List<CarUiText> lines = new ArrayList<>();
         lines.add(new CarUiText(LONG_CHAR_SEQUENCE, 1));

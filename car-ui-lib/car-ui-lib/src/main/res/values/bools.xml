@@ -49,7 +49,7 @@
 
     <!-- List items -->
 
-    <bool name="car_ui_list_item_single_line_title">true</bool>
+    <bool name="car_ui_list_item_single_line_title">false</bool>
 
     <!-- FocusArea -->
 
