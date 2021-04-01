@@ -154,7 +154,7 @@ class OverflowMenuItem implements MenuItemOEMV1 {
 
     @Override
     public int getDisplayBehavior() {
-        return 0;
+        return MenuItemOEMV1.DISPLAY_BEHAVIOR_ALWAYS;
     }
 
     @Override
