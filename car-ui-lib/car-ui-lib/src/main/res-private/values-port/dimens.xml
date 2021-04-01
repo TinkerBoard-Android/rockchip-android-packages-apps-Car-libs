@@ -15,6 +15,6 @@
 -->
 <resources>
     <!-- height and width of the dialog modal.  -->
-    <dimen name="car_ui_app_styled_dialog_width_max">1334dp</dimen>
-    <dimen name="car_ui_app_styled_dialog_height_max">768dp</dimen>
+    <dimen name="car_ui_app_styled_dialog_width_max">768dp</dimen>
+    <dimen name="car_ui_app_styled_dialog_height_max">1056dp</dimen>
 </resources>

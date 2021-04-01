@@ -17,10 +17,13 @@
 package com.android.car.ui.imewidescreen;
 
 import android.app.Activity;
+import android.inputmethodservice.ExtractEditText;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
 import com.android.car.ui.test.R;
 
@@ -42,6 +45,19 @@ public class CarUiImeWideScreenTestActivity extends Activity {
             public boolean isWideScreenMode() {
                 return true;
             }
+
+            @Override
+            ExtractEditText getExtractEditText() {
+                FrameLayout parent = new FrameLayout(getApplicationContext());
+                ExtractEditText extractEditText = new ExtractEditText(getApplicationContext());
+                parent.addView(extractEditText);
+                return extractEditText;
+            }
+
+            @Override
+            String getEditorInfoPackageName() {
+                return "com.android.car.ui.test";
+            }
         };
 
         View imeInputView = LayoutInflater.from(this)
@@ -50,5 +66,10 @@ public class CarUiImeWideScreenTestActivity extends Activity {
         View templateView = sCarUiImeWideScreenController.createWideScreenImeView(imeInputView);
 
         root.addView(templateView);
+
+        RelativeLayout carboardArea = findViewById(R.id.car_ui_ime_carboard_area);
+        ViewGroup.LayoutParams lp = carboardArea.getLayoutParams();
+        lp.width = 400;
+        carboardArea.setLayoutParams(lp);
     }
 }

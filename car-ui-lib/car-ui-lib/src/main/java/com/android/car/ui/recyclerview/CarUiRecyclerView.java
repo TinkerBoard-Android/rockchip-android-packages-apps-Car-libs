@@ -55,6 +55,17 @@ public abstract class CarUiRecyclerView extends RecyclerView {
     }
 
     /**
+     * Describes the expected relative size of the {@link CarUiRecyclerView}. The list may be
+     * rendered differently for each expected size.
+     */
+    @Retention(SOURCE)
+    @IntDef({SIZE_SMALL, SIZE_MEDIUM, SIZE_LARGE})
+    protected @interface Size {}
+    protected static final int SIZE_SMALL = 0;
+    protected static final int SIZE_MEDIUM = 1;
+    protected static final int SIZE_LARGE = 2;
+
+    /**
      * The possible values for setScrollBarPosition. The default value is {@link
      * CarUiRecyclerViewLayout#LINEAR}.
      */

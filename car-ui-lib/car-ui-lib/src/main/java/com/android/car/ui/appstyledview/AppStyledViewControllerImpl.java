@@ -17,10 +17,13 @@
 package com.android.car.ui.appstyledview;
 
 import android.content.Context;
+import android.content.res.Configuration;
+import android.util.DisplayMetrics;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.ImageView;
 
@@ -33,6 +36,8 @@ import com.android.car.ui.R;
  * Controller to interact with the app styled view.
  */
 public class AppStyledViewControllerImpl implements AppStyledViewController {
+
+    private static final double VISIBLE_SCREEN_PERCENTAGE = 0.9;
 
     private final Context mContext;
     @AppStyledViewNavIcon
@@ -58,15 +63,43 @@ public class AppStyledViewControllerImpl implements AppStyledViewController {
 
     @Override
     public LayoutParams getDialogWindowLayoutParam(LayoutParams params) {
-        params.width = mContext.getResources().getDimensionPixelSize(
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        WindowManager wm = mContext.getSystemService(WindowManager.class);
+        wm.getDefaultDisplay().getMetrics(displayMetrics);
+
+        int maxWidth = mContext.getResources().getDimensionPixelSize(
+                R.dimen.car_ui_app_styled_dialog_width_max);
+        int maxHeight = mContext.getResources().getDimensionPixelSize(
+                R.dimen.car_ui_app_styled_dialog_height_max);
+
+        int displayWidth = (int) (displayMetrics.widthPixels * VISIBLE_SCREEN_PERCENTAGE);
+        int displayHeight = (int) (displayMetrics.heightPixels * VISIBLE_SCREEN_PERCENTAGE);
+
+        if (mContext.getResources().getConfiguration()
+                .orientation == Configuration.ORIENTATION_LANDSCAPE && maxWidth < displayWidth) {
+            params.gravity = Gravity.START;
+        }
+
+        int width = mContext.getResources().getDimensionPixelSize(
                 R.dimen.car_ui_app_styled_dialog_width);
-        params.height = mContext.getResources().getDimensionPixelSize(
+        int height = mContext.getResources().getDimensionPixelSize(
                 R.dimen.car_ui_app_styled_dialog_height);
-        params.gravity = Gravity.TOP | Gravity.START;
-        params.x = mContext.getResources().getDimensionPixelSize(
+
+        params.width = width != 0 ? width : Math.min(displayWidth, maxWidth);
+        params.height = height != 0 ? height : Math.min(displayHeight, maxHeight);
+
+        int posX = mContext.getResources().getDimensionPixelSize(
                 R.dimen.car_ui_app_styled_dialog_position_x);
-        params.y = mContext.getResources().getDimensionPixelSize(
+        int posY = mContext.getResources().getDimensionPixelSize(
                 R.dimen.car_ui_app_styled_dialog_position_y);
+
+        if (posX != 0 || posY != 0) {
+            params.gravity = Gravity.TOP | Gravity.START;
+            params.x = posX;
+            params.y = posY;
+        }
+
         return params;
     }
 

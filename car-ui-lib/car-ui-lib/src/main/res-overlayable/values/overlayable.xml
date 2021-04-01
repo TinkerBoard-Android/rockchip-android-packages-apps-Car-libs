@@ -122,6 +122,10 @@ limitations under the License.-->
       <item type="color" name="car_ui_toolbar_tab_item_selector"/>
       <item type="color" name="car_ui_toolbar_tab_selected_color"/>
       <item type="color" name="car_ui_toolbar_tab_unselected_color"/>
+      <item type="dimen" name="car_ui_app_styled_dialog_height"/>
+      <item type="dimen" name="car_ui_app_styled_dialog_position_x"/>
+      <item type="dimen" name="car_ui_app_styled_dialog_position_y"/>
+      <item type="dimen" name="car_ui_app_styled_dialog_width"/>
       <item type="dimen" name="car_ui_body1_size"/>
       <item type="dimen" name="car_ui_body2_size"/>
       <item type="dimen" name="car_ui_body3_size"/>
@@ -325,6 +329,7 @@ limitations under the License.-->
       <item type="id" name="car_ui_focus_area"/>
       <item type="id" name="car_ui_fullscreenArea"/>
       <item type="id" name="car_ui_imeWideScreenInputArea"/>
+      <item type="id" name="car_ui_ime_carboard_area"/>
       <item type="id" name="car_ui_ime_surface"/>
       <item type="id" name="car_ui_inputExtractActionAutomotive"/>
       <item type="id" name="car_ui_inputExtractEditTextContainer"/>
@@ -446,7 +451,6 @@ limitations under the License.-->
       <item type="layout" name="car_ui_radio_button_preference_widget"/>
       <item type="layout" name="car_ui_recycler_view"/>
       <item type="layout" name="car_ui_recycler_view_item"/>
-      <item type="layout" name="car_ui_recycler_view_no_gutter"/>
       <item type="layout" name="car_ui_recyclerview_scrollbar"/>
       <item type="layout" name="car_ui_seekbar_dialog"/>
       <item type="layout" name="car_ui_toolbar"/>

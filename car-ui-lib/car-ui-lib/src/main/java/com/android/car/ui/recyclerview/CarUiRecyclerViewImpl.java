@@ -98,7 +98,8 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
     private Rect mContainerPaddingRelative;
     @Nullable
     private ViewGroup mContainer;
-    private boolean mIsGutterEnabled;
+    @Size
+    private int mSize;
 
     // Set to true when when styled attributes are read and initialized.
     private boolean mIsInitialized;
@@ -191,8 +192,7 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
         }
         addOnScrollListener(mOnScrollListener);
 
-        mIsGutterEnabled = a.getBoolean(R.styleable.CarUiRecyclerView_enableScrollBarGutter,
-                mScrollBarEnabled);
+        mSize = a.getInt(R.styleable.CarUiRecyclerView_carUiSize, SIZE_LARGE);
 
         a.recycle();
 
@@ -376,11 +376,19 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
 
         mContainer.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(getContext());
-        if (mIsGutterEnabled) {
-            inflater.inflate(R.layout.car_ui_recycler_view, mContainer, true);
-        } else {
-            inflater.inflate(R.layout.car_ui_recycler_view_no_gutter, mContainer, true);
+
+        switch (mSize) {
+            case SIZE_SMALL:
+                // Small layout is rendered without scrollbar
+                return;
+            case SIZE_MEDIUM:
+                inflater.inflate(R.layout.car_ui_recycler_view_medium, mContainer, true);
+                break;
+            case SIZE_LARGE:
+            default:
+                inflater.inflate(R.layout.car_ui_recycler_view, mContainer, true);
         }
+
         mContainer.setVisibility(mContainerVisibility);
 
         if (mContainerPadding != null) {

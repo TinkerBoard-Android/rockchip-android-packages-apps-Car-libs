@@ -57,6 +57,10 @@
   <public type="color" name="car_ui_toolbar_tab_item_selector"/>
   <public type="color" name="car_ui_toolbar_tab_selected_color"/>
   <public type="color" name="car_ui_toolbar_tab_unselected_color"/>
+  <public type="dimen" name="car_ui_app_styled_dialog_height"/>
+  <public type="dimen" name="car_ui_app_styled_dialog_position_x"/>
+  <public type="dimen" name="car_ui_app_styled_dialog_position_y"/>
+  <public type="dimen" name="car_ui_app_styled_dialog_width"/>
   <public type="dimen" name="car_ui_body1_size"/>
   <public type="dimen" name="car_ui_body2_size"/>
   <public type="dimen" name="car_ui_body3_size"/>
@@ -260,6 +264,7 @@
   <public type="id" name="car_ui_focus_area"/>
   <public type="id" name="car_ui_fullscreenArea"/>
   <public type="id" name="car_ui_imeWideScreenInputArea"/>
+  <public type="id" name="car_ui_ime_carboard_area"/>
   <public type="id" name="car_ui_ime_surface"/>
   <public type="id" name="car_ui_inputExtractActionAutomotive"/>
   <public type="id" name="car_ui_inputExtractEditTextContainer"/>
@@ -381,7 +386,6 @@
   <public type="layout" name="car_ui_radio_button_preference_widget"/>
   <public type="layout" name="car_ui_recycler_view"/>
   <public type="layout" name="car_ui_recycler_view_item"/>
-  <public type="layout" name="car_ui_recycler_view_no_gutter"/>
   <public type="layout" name="car_ui_recyclerview_scrollbar"/>
   <public type="layout" name="car_ui_seekbar_dialog"/>
   <public type="layout" name="car_ui_toolbar"/>
