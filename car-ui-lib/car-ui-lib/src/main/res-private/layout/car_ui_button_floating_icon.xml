@@ -14,15 +14,12 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<!-- We need this FrameLayout because when the CarUiButton is used within a layout file,
-     there will be new layout params specified that will override the layout params of the
-     top level view in this file. Consequently, what we put for layout_width/height doesn't
-     matter here. -->
+<!-- We need this FrameLayout to add bottom padding so the shadow fully shows up -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="1dp"
-    android:layout_height="1dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:paddingBottom="4dp"
     android:clipToPadding="false">
     <FrameLayout

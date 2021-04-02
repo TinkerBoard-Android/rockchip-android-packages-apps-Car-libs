@@ -37,7 +37,7 @@ public class CarUiButtonAttributes {
     private final int mId;
     private final boolean mEnabled;
     @Nullable
-    private final CharSequence mText;
+    private final String mText;
     @Nullable
     private final Drawable mIcon;
     @NonNull
@@ -68,7 +68,7 @@ public class CarUiButtonAttributes {
     }
 
     @Nullable
-    public CharSequence getText() {
+    public String getText() {
         return mText;
     }
 
@@ -87,12 +87,22 @@ public class CarUiButtonAttributes {
         return mStyle;
     }
 
+    /**
+     * Creates a new {@link Builder} that starts off as a copy of these attributes.
+     *
+     * This is to allow getting a new modified copy of the immutable CarUiButtonAttributes class,
+     * by doing something like {@code attributes.copy().setText("Foo").build()}.
+     */
+    public Builder copy() {
+        return new Builder(this);
+    }
+
     /** A builder class for CarUiButtonAttributes. Create it with {@link #builder()} */
     public static class Builder {
         private int mId = View.NO_ID;
         private boolean mEnabled = true;
         @Nullable
-        private CharSequence mText;
+        private String mText;
         @Nullable
         private Drawable mIcon;
         @NonNull
@@ -101,6 +111,15 @@ public class CarUiButtonAttributes {
         private CarUiButtonStyle mStyle = CarUiButtonStyle.PRIMARY;
 
         private Builder() {
+        }
+
+        private Builder(CarUiButtonAttributes toCopy) {
+            mId = toCopy.getId();
+            mEnabled = toCopy.getEnabled();
+            mText = toCopy.getText();
+            mIcon = toCopy.getIcon();
+            mColorScheme = toCopy.getColorScheme();
+            mStyle = toCopy.getStyle();
         }
 
         /**
@@ -119,7 +138,7 @@ public class CarUiButtonAttributes {
         }
 
         /** Sets the text of the button */
-        public Builder setText(@Nullable CharSequence text) {
+        public Builder setText(@Nullable String text) {
             mText = text;
             return this;
         }

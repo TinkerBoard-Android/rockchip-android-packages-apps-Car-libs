@@ -25,6 +25,7 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -46,42 +47,46 @@ import java.util.function.Consumer;
 @SuppressWarnings("AndroidJdkLibsChecker")
 public class CarUiButtonImpl implements CarUiButton {
     private final Context mContext;
-    private View mView;
+    private final FrameLayout mContainer;
+    private CarUiButtonAttributes mAttributes;
+    @Nullable
+    private Consumer<CarUiButton> mOnClickListener;
 
     public CarUiButtonImpl(@NonNull Context context, @Nullable CarUiButtonAttributes attributes) {
         mContext = Objects.requireNonNull(context);
         if (attributes == null) {
             attributes = CarUiButtonAttributes.builder().build();
         }
+        mContainer = new FrameLayout(context);
         init(attributes);
-        setEnabled(attributes.getEnabled());
     }
 
     private void init(@NonNull CarUiButtonAttributes attributes) {
         CarUiButtonStyle style = attributes.getStyle();
 
+        mContainer.removeAllViews();
         if (style == CarUiButtonStyle.FLOATING) {
             if (!TextUtils.isEmpty(attributes.getText())) {
-                mView = LayoutInflater.from(mContext)
-                        .inflate(R.layout.car_ui_button_floating_text, null, false);
+                LayoutInflater.from(mContext)
+                        .inflate(R.layout.car_ui_button_floating_text, mContainer, true);
             } else {
-                mView = LayoutInflater.from(mContext)
-                        .inflate(R.layout.car_ui_button_floating_icon, null, false);
+                LayoutInflater.from(mContext)
+                        .inflate(R.layout.car_ui_button_floating_icon, mContainer, true);
             }
         } else {
             if (!TextUtils.isEmpty(attributes.getText())) {
-                mView = LayoutInflater.from(mContext)
-                        .inflate(R.layout.car_ui_button_text, null, false);
+                LayoutInflater.from(mContext)
+                        .inflate(R.layout.car_ui_button_text, mContainer, true);
             } else {
-                mView = LayoutInflater.from(mContext)
-                        .inflate(R.layout.car_ui_button_icon, null, false);
+                LayoutInflater.from(mContext)
+                        .inflate(R.layout.car_ui_button_icon, mContainer, true);
             }
         }
-        TextView textView = mView.findViewById(R.id.car_ui_button_text_view);
-        ImageView imageView = mView.findViewById(R.id.car_ui_button_image_view);
+        TextView textView = mContainer.findViewById(R.id.car_ui_button_text_view);
+        ImageView imageView = mContainer.findViewById(R.id.car_ui_button_image_view);
 
         if (style != CarUiButtonStyle.FLOATING) {
-            View background = mView.findViewWithTag("car_ui_button_background_view");
+            View background = mContainer.findViewWithTag("car_ui_button_background_view");
             if (background != null) {
                 background.setBackground(createBackground(attributes));
             }
@@ -118,7 +123,18 @@ public class CarUiButtonImpl implements CarUiButton {
             }
         }
 
-        mView.setId(attributes.getId());
+        View clickTarget = mContainer.findViewWithTag("car_ui_button_background_view");
+
+        if (mOnClickListener == null) {
+            clickTarget.setOnClickListener(null);
+        } else {
+            clickTarget.setOnClickListener(v -> mOnClickListener.accept(this));
+        }
+
+        mContainer.setId(attributes.getId());
+        recursiveSetEnabled(mContainer, attributes.getEnabled());
+
+        mAttributes = attributes;
     }
 
     private Drawable createBackground(
@@ -205,7 +221,48 @@ public class CarUiButtonImpl implements CarUiButton {
 
     @Override
     public void setEnabled(boolean enabled) {
-        recursiveSetEnabled(mView, enabled);
+        mAttributes = mAttributes.copy().setEnabled(enabled).build();
+        // We could just call init(newAttributes), but that would be much slower
+        recursiveSetEnabled(mContainer, enabled);
+    }
+
+    @Override
+    public void setOnClickListener(Consumer<CarUiButton> onClickListener) {
+        mOnClickListener = onClickListener;
+        View clickTarget = mContainer.findViewWithTag("car_ui_button_background_view");
+
+        if (onClickListener == null) {
+            clickTarget.setOnClickListener(null);
+        } else {
+            clickTarget.setOnClickListener(v -> onClickListener.accept(this));
+        }
+    }
+
+    @Override
+    public void setText(String text) {
+        CarUiButtonAttributes newAttributes = mAttributes.copy().setText(text).build();
+        init(newAttributes);
+    }
+
+    @Override
+    public void setIcon(Drawable icon) {
+        CarUiButtonAttributes newAttributes = mAttributes.copy().setIcon(icon).build();
+        init(newAttributes);
+    }
+
+    @Override
+    public void setColorScheme(CarUiButtonColorScheme scheme) {
+        CarUiButtonAttributes newAttributes = mAttributes.copy().setColorScheme(scheme).build();
+        init(newAttributes);
+    }
+
+    @Override
+    public View getView() {
+        return mContainer;
+    }
+
+    private int dpToPx(int dp) {
+        return (int) (dp * mContext.getResources().getDisplayMetrics().density);
     }
 
     private static void recursiveSetEnabled(View view, boolean enabled) {
@@ -221,25 +278,5 @@ public class CarUiButtonImpl implements CarUiButton {
                 recursiveSetEnabled(vg.getChildAt(i), enabled);
             }
         }
-    }
-
-    @Override
-    public void setOnClickListener(Consumer<CarUiButton> onClickListener) {
-        View clickTarget = mView.findViewWithTag("car_ui_button_background_view");
-
-        if (onClickListener == null) {
-            clickTarget.setOnClickListener(null);
-        } else {
-            clickTarget.setOnClickListener(v -> onClickListener.accept(this));
-        }
-    }
-
-    @Override
-    public View getView() {
-        return mView;
-    }
-
-    private int dpToPx(int dp) {
-        return (int) (dp * mContext.getResources().getDisplayMetrics().density);
     }
 }

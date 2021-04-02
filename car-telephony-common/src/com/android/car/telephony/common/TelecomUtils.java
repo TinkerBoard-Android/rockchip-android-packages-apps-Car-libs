@@ -286,29 +286,33 @@ public class TelecomUtils {
                     null);
         }
 
-        Contact contact = InMemoryPhoneBook.get().lookupContactEntry(number);
-        if (contact != null) {
-            String name = contact.getDisplayName();
-            String nameAlt = contact.getDisplayNameAlt();
-            if (TextUtils.isEmpty(name)) {
-                name = getReadableNumber(context, number);
-            }
-            if (TextUtils.isEmpty(nameAlt)) {
-                nameAlt = name;
-            }
+        if (InMemoryPhoneBook.isInitialized()) {
+            Contact contact = InMemoryPhoneBook.get().lookupContactEntry(number);
+            if (contact != null) {
+                String name = contact.getDisplayName();
+                String nameAlt = contact.getDisplayNameAlt();
+                if (TextUtils.isEmpty(name)) {
+                    name = getReadableNumber(context, number);
+                }
+                if (TextUtils.isEmpty(nameAlt)) {
+                    nameAlt = name;
+                }
 
-            PhoneNumber phoneNumber = contact.getPhoneNumber(context, number);
-            CharSequence typeLabel = phoneNumber == null ? "" : phoneNumber.getReadableLabel(
-                    context.getResources());
+                PhoneNumber phoneNumber = contact.getPhoneNumber(context, number);
+                CharSequence typeLabel = phoneNumber == null ? "" : phoneNumber.getReadableLabel(
+                        context.getResources());
 
-            return new PhoneNumberInfo(
-                    number,
-                    name,
-                    nameAlt,
-                    contact.getInitials(),
-                    contact.getAvatarUri(),
-                    typeLabel.toString(),
-                    contact.getLookupKey());
+                return new PhoneNumberInfo(
+                        number,
+                        name,
+                        nameAlt,
+                        contact.getInitials(),
+                        contact.getAvatarUri(),
+                        typeLabel.toString(),
+                        contact.getLookupKey());
+            }
+        } else {
+          L.d(TAG, "InMemoryPhoneBook not initialized.");
         }
 
         String name = null;

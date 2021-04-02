@@ -50,17 +50,20 @@ public class CarUiButtonActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.car_ui_button_activity);
+        View contentView = requireViewById(android.R.id.content);
+
         ToolbarController toolbar = CarUi.requireToolbar(this);
         toolbar.setTitle("CarUiButtons");
         toolbar.setState(Toolbar.State.SUBPAGE);
-        setContentView(R.layout.car_ui_button_activity);
+
         List<LinearLayout> columns = Arrays.asList(
                 findViewById(R.id.column_1),
                 findViewById(R.id.column_2),
                 findViewById(R.id.column_3));
+
         List<CarUiButton> allButtons = new ArrayList<>();
-        CarUiButton disableButton = requireCarUiComponentById(
-                findViewById(android.R.id.content), R.id.disable_button);
+        CarUiButton disableButton = requireCarUiComponentById(contentView, R.id.disable_button);
         boolean[] enabled = new boolean[] { true };
         disableButton.setOnClickListener(b -> {
             enabled[0] = !enabled[0];
@@ -124,6 +127,41 @@ public class CarUiButtonActivity extends AppCompatActivity {
                 floatingButtonsBackground.setBackgroundColor((int) animator.getAnimatedValue()));
         mColorAnimation.setRepeatCount(ValueAnimator.INFINITE);
         mColorAnimation.start();
+
+        CarUiButton changeableButton = requireCarUiComponentById(
+                contentView, R.id.changeable_button);
+        allButtons.add(changeableButton);
+        boolean[] toggle = new boolean[] { true, true, true };
+        CarUiButton toggleTextButton = requireCarUiComponentById(
+                contentView, R.id.toggle_text_button);
+        toggleTextButton.setOnClickListener(b -> {
+            if (toggle[0]) {
+                changeableButton.setText(null);
+            } else {
+                changeableButton.setText("Change me!");
+            }
+            toggle[0] = !toggle[0];
+        });
+        CarUiButton toggleIconButton = requireCarUiComponentById(
+                contentView, R.id.toggle_icon_button);
+        toggleIconButton.setOnClickListener(b -> {
+            if (toggle[1]) {
+                changeableButton.setIcon(getDrawable(R.drawable.ic_cut));
+            } else {
+                changeableButton.setIcon(null);
+            }
+            toggle[1] = !toggle[1];
+        });
+        CarUiButton toggleColorButton = requireCarUiComponentById(
+                contentView, R.id.toggle_color_button);
+        toggleColorButton.setOnClickListener(b -> {
+            if (toggle[2]) {
+                changeableButton.setColorScheme(CarUiButtonColorScheme.GREEN);
+            } else {
+                changeableButton.setColorScheme(CarUiButtonColorScheme.BASIC);
+            }
+            toggle[2] = !toggle[2];
+        });
     }
 
     @Override
