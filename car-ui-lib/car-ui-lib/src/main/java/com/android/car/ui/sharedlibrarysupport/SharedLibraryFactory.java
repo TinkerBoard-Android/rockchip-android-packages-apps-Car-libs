@@ -24,8 +24,6 @@ import androidx.annotation.Nullable;
 
 import com.android.car.ui.appstyledview.AppStyledViewController;
 import com.android.car.ui.baselayout.InsetsChangedListener;
-import com.android.car.ui.button.CarUiButton;
-import com.android.car.ui.button.CarUiButtonAttributes;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.ToolbarController;
 import com.android.car.ui.widget.CarUiTextView;
@@ -52,18 +50,6 @@ public interface SharedLibraryFactory {
             InsetsChangedListener insetsChangedListener,
             boolean toolbarEnabled,
             boolean fullscreen);
-
-    /**
-     * Creates a {@link CarUiButton}.
-     *
-     * @param context The visual context to create views with.
-     * @param attrs An object containing initial attributes for the button.
-     * @return A {@link CarUiButton}
-     */
-    @NonNull
-    CarUiButton createButton(
-            Context context,
-            @Nullable CarUiButtonAttributes attrs);
 
     /**
      * Creates a {@link CarUiTextView}.
