@@ -51,6 +51,14 @@ public interface PrivateImeCommandCallback {
     void onSurfaceInfo(int displayId, IBinder binder, int height, int width);
 
     /**
+     * Called when the edit text is clicked and surface view's surface is created.
+     *
+     * This method will NOT be called if an OEM has not allowed an application to hide the
+     * content area.
+     */
+    void reLayout(int height, int width);
+
+    /**
      * Called when the search results are read and displayed from the content provider by IME.
      */
     void onPostLoadSearchResults();
