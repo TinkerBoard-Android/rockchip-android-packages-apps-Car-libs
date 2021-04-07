@@ -16,10 +16,11 @@
 
 package com.android.car.ui.widget;
 
+import static java.util.Objects.requireNonNull;
+
 import android.content.Context;
 import android.text.Layout;
 import android.text.SpannableStringBuilder;
-import android.text.StaticLayout;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.widget.TextView;
@@ -32,7 +33,6 @@ import com.android.car.ui.CarUiText;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Extension of {@link TextView} that supports {@link CarUiText}.
@@ -69,7 +69,7 @@ public final class CarUiTextViewImpl extends CarUiTextView {
      */
     @Override
     public void setText(@NonNull List<CarUiText> textList) {
-        mText = Objects.requireNonNull(textList);
+        mText = requireNonNull(textList);
         if (mOneShotPreDrawListener == null) {
             mOneShotPreDrawListener = OneShotPreDrawListener.add(this, this::updateText);
         }
@@ -81,7 +81,7 @@ public final class CarUiTextViewImpl extends CarUiTextView {
      */
     @Override
     public void setText(@NonNull CarUiText text) {
-        mText = Collections.singletonList(Objects.requireNonNull(text));
+        mText = Collections.singletonList(requireNonNull(text));
         if (mOneShotPreDrawListener == null) {
             mOneShotPreDrawListener = OneShotPreDrawListener.add(this, this::updateText);
         }
@@ -89,7 +89,7 @@ public final class CarUiTextViewImpl extends CarUiTextView {
     }
 
     private void updateText() {
-        Objects.requireNonNull(mText);
+        requireNonNull(mText);
         mOneShotPreDrawListener = null;
 
         // If all lines of text have no maxLines limit, the preferred text set at invocation of
@@ -113,29 +113,106 @@ public final class CarUiTextViewImpl extends CarUiTextView {
     private CharSequence getBestVariant(CarUiText text) {
         if (text.getTextVariants().size() > 1) {
             for (CharSequence variant : text.getTextVariants()) {
-                StaticLayout updatedLayout = getUpdatedLayout(variant, Integer.MAX_VALUE);
-                if (updatedLayout.getLineCount() <= text.getMaxLines()) {
+                if (getLineCount(variant) <= text.getMaxLines()) {
                     return variant;
                 }
             }
         }
 
         // If no text variant can be rendered without truncation, use the preferred text
-        return getUpdatedLayout(text.getPreferredText(), text.getMaxLines()).getText();
+        return getTruncatedText(text.getPreferredText(), text.getMaxLines());
     }
 
-    private StaticLayout getUpdatedLayout(CharSequence text, int maxLines) {
-        Layout layout = Objects.requireNonNull(getLayout());
-        int width = layout.getWidth();
-        Layout.Alignment alignment = layout.getAlignment();
-        float spacingAdd = layout.getSpacingAdd();
-        float spacingMult = layout.getSpacingMultiplier();
+    private int getLineCount(CharSequence text) {
+        Layout layout = requireNonNull(getLayout());
+        int lineCount = 0;
+        int index = 0;
+        int length = text.length();
 
-        return StaticLayout.Builder.obtain(text, 0, text.length(), getPaint(), width)
-                .setAlignment(alignment)
-                .setLineSpacing(spacingAdd, spacingMult)
-                .setMaxLines(maxLines)
-                .setEllipsize(TextUtils.TruncateAt.END)
-                .build();
+        while (index <= length - 1) {
+            int lastLineEnd = index;
+            // Measure the text, stopping early if the measured width exceeds textView width
+            index += getPaint().breakText(text, index, length, true, layout.getWidth(), null);
+
+            lineCount++;
+
+            // Reached end of text
+            if (index == length) {
+                break;
+            }
+
+            // Account for word wrapping by removing partial words at end of line by moving index
+            // back to last whitespace character
+            int offset = 0;
+            while (!Character.isWhitespace(text.charAt(index - offset))) {
+                offset++;
+
+                if (index - offset == lastLineEnd) {
+                    offset = 0;
+                    break;
+                }
+            }
+            index -= offset;
+        }
+
+        return lineCount;
+    }
+
+    private CharSequence getTruncatedText(CharSequence text, int maxLines) {
+        Layout layout = requireNonNull(getLayout());
+        int maxWidth = layout.getWidth();
+
+        if (maxLines == 1) {
+            return TextUtils.ellipsize(text, getPaint(), maxWidth, TextUtils.TruncateAt.END);
+        }
+
+        int lineCount = 0;
+        int index = 0;
+        int lastLineEnd = 0;
+        int length = text.length();
+        boolean isTruncationComplete = false;
+
+        while (!isTruncationComplete) {
+            lastLineEnd = index;
+            // Measure the text, stopping early if the measured width exceeds textView width
+            index += getPaint().breakText(text, index, length, true, maxWidth, null);
+
+            lineCount++;
+            // Hitting maxLine limit or reaching the end of the CharSequence means truncation is
+            // complete
+            if (lineCount == maxLines || index > length - 1) {
+                isTruncationComplete = true;
+            }
+
+            // Account for word wrapping by removing partial words at end of line by moving index
+            // back to last whitespace character
+            if (!isTruncationComplete) {
+                int offset = 0;
+                while (!Character.isWhitespace(text.charAt(index - offset))) {
+                    offset++;
+
+                    // partial word reaches to the start of line, so it must be kept
+                    if (index - offset == lastLineEnd) {
+                        offset = 0;
+                        break;
+                    }
+                }
+
+                index -= offset;
+            }
+        }
+
+        SpannableStringBuilder builder = new SpannableStringBuilder();
+        // Get text up until the last line
+        builder.append(text.subSequence(0, lastLineEnd));
+        // Add space to separate last word of 2nd last line and first word of last line
+        if (!TextUtils.isEmpty(builder)) {
+            builder.append(" ");
+        }
+        CharSequence lastLine = text.subSequence(lastLineEnd, length);
+        // Add truncation ellipsis to last line if required
+        builder.append(
+                TextUtils.ellipsize(lastLine, getPaint(), maxWidth, TextUtils.TruncateAt.END));
+        return builder;
     }
 }
