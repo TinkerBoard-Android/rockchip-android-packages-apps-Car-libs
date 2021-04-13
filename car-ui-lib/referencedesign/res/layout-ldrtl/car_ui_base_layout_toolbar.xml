@@ -145,9 +145,9 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toRightOf="@+id/car_ui_toolbar_menu_items_container"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintLeft_toRightOf="@id/car_ui_toolbar_menu_items_container"
+                app:layout_constraintRight_toLeftOf="@id/car_ui_toolbar_title_logo_container"
+                app:layout_constraintTop_toTopOf="parent"/>
 
             <ProgressBar
                 android:id="@+id/car_ui_toolbar_progress_bar"

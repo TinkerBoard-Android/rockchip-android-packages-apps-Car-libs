@@ -224,7 +224,7 @@
   <string name="toolbar_toggle_logo">Toggle logo</string>
 
   <!-- Text for cycle state button [CHAR_LIMIT=20]-->
-  <string name="toolbar_cycle_state">Cycle state</string>
+  <string name="toolbar_cycle_state">Cycle state (Deprecated)</string>
 
   <!-- Text for toggle search hint button [CHAR_LIMIT=30]-->
   <string name="toolbar_toggle_search_hint">Toggle search hint</string>
@@ -239,7 +239,7 @@
   <string name="toolbar_add_tab_with_custom_text">Add tab with custom text</string>
 
   <!-- Text for showing tabs in subpages [CHAR_LIMIT=50]-->
-  <string name="toolbar_show_tabs_in_subpage">Toggle showing tabs in subpages</string>
+  <string name="toolbar_show_tabs_in_subpage">Toggle showing tabs in subpages (Deprecated)</string>
 
   <!-- Text for toggle search icon button [CHAR_LIMIT=30]-->
   <string name="toolbar_toggle_search_icon">Toggle search icon</string>

@@ -48,8 +48,8 @@ import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.recyclerview.CarUiContentListItem;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.MenuItem;
+import com.android.car.ui.toolbar.SearchMode;
 import com.android.car.ui.toolbar.Toolbar;
-import com.android.car.ui.toolbar.Toolbar.State;
 import com.android.car.ui.toolbar.ToolbarController;
 
 import java.util.ArrayList;
@@ -85,13 +85,14 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
 
         ToolbarController toolbar = CarUi.getToolbar(this);
         toolbar.setTitle(getTitle());
-        toolbar.setState(Toolbar.State.SUBPAGE);
+        toolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
         toolbar.setLogo(R.drawable.ic_launcher);
+        boolean[] isSearching = new boolean[] { false };
         toolbar.registerOnBackListener(
                 () -> {
-                    if (toolbar.getState() == Toolbar.State.SEARCH
-                            || toolbar.getState() == Toolbar.State.EDIT) {
-                        toolbar.setState(Toolbar.State.SUBPAGE);
+                    if (isSearching[0]) {
+                        toolbar.setSearchMode(SearchMode.DISABLED);
+                        isSearching[0] = false;
                         return true;
                     }
                     return false;
@@ -121,7 +122,8 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
         mMenuItems.add(MenuItem.builder(this)
                 .setToSearch()
                 .setOnClickListener(i -> {
-                    toolbar.setState(State.SEARCH);
+                    isSearching[0] = true;
+                    toolbar.setSearchMode(SearchMode.SEARCH);
                     if (toolbar.canShowSearchResultItems()) {
                         toolbar.setSearchResultsView(null);
                         toolbar.setSearchResultItems(mSearchItems);

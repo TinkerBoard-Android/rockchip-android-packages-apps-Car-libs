@@ -116,8 +116,10 @@
             android:layout="@layout/toolbar_search_view"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/toolbar_menu_items_container"
-            app:layout_constraintStart_toEndOf="@+id/toolbar_nav_icon_container"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintStart_toEndOf="@+id/toolbar_title_logo"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="16dp"
+            app:layout_goneMarginStart="0dp"/>
 
         <ProgressBar
             android:id="@+id/toolbar_progress_bar"

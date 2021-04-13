@@ -40,12 +40,8 @@ public class SplitPreferenceActivity extends AppCompatActivity implements Insets
 
         ToolbarController mainToolbar = CarUi.getToolbar(this);
         if (mainToolbar != null) {
-            mainToolbar.setState(Toolbar.State.SUBPAGE);
+            mainToolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
             mainToolbar.setTitle("Split preferences sample");
-            mainToolbar.registerOnBackListener(() -> {
-                finish();
-                return true;
-            });
         }
 
         // We do this so that the insets are not automatically sent to the fragments.

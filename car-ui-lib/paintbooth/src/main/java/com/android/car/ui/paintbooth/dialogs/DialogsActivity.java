@@ -60,7 +60,7 @@ public class DialogsActivity extends Activity implements InsetsChangedListener {
         setContentView(R.layout.car_ui_recycler_view_activity);
         ToolbarController toolbar = CarUi.requireToolbar(this);
         toolbar.setTitle(getTitle());
-        toolbar.setState(Toolbar.State.SUBPAGE);
+        toolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
 
         mButtons.add(Pair.create(R.string.dialog_show_dialog,
                 v -> showDialog()));

@@ -93,7 +93,7 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
      *                passed to getToolbar() is this fragment.
      */
     protected void setupToolbar(@NonNull ToolbarController toolbar) {
-        toolbar.setState(Toolbar.State.SUBPAGE);
+        toolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
         PreferenceScreen preferenceScreen = getPreferenceScreen();
         if (preferenceScreen != null) {
             toolbar.setTitle(preferenceScreen.getTitle());
