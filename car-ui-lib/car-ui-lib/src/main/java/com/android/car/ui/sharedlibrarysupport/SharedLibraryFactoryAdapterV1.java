@@ -27,8 +27,6 @@ import com.android.car.ui.appstyledview.AppStyledViewControllerAdapterV1;
 import com.android.car.ui.appstyledview.AppStyledViewControllerImpl;
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
-import com.android.car.ui.button.CarUiButton;
-import com.android.car.ui.button.CarUiButtonAttributes;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.sharedlibrary.oemapis.InsetsOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryFactoryOEMV1;
@@ -70,13 +68,6 @@ public final class SharedLibraryFactoryAdapterV1 implements SharedLibraryFactory
         return toolbar != null
                 ? new ToolbarControllerAdapterV1(contentView.getContext(), toolbar)
                 : null;
-    }
-
-    @NonNull
-    @Override
-    public CarUiButton createButton(Context context, @Nullable CarUiButtonAttributes attrs) {
-        // TODO(b/172345817) Create OEM APIs for this and call them from here
-        return mFactoryStub.createButton(context, attrs);
     }
 
     @NonNull

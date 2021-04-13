@@ -36,9 +36,6 @@ import com.android.car.ui.appstyledview.AppStyledViewController;
 import com.android.car.ui.appstyledview.AppStyledViewControllerImpl;
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
-import com.android.car.ui.button.CarUiButton;
-import com.android.car.ui.button.CarUiButtonAttributes;
-import com.android.car.ui.button.CarUiButtonImpl;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.recyclerview.CarUiRecyclerViewImpl;
 import com.android.car.ui.toolbar.ToolbarController;
@@ -108,12 +105,6 @@ public final class SharedLibraryFactoryStub implements SharedLibraryFactory {
         insetsUpdater.replaceInsetsChangedListenerWith(insetsChangedListener);
 
         return toolbarController;
-    }
-
-    @NonNull
-    @Override
-    public CarUiButton createButton(Context context, @Nullable CarUiButtonAttributes attrs) {
-        return new CarUiButtonImpl(context, attrs);
     }
 
     @NonNull

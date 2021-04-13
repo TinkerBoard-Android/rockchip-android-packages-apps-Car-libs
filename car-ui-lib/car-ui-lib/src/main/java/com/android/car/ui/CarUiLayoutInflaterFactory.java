@@ -23,15 +23,13 @@ import android.view.View;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatViewInflater;
 
-import com.android.car.ui.button.CarUiButton;
-import com.android.car.ui.button.CarUiButtonAttributes;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
 
 /**
  * A custom {@link LayoutInflater.Factory2} that will create CarUi components such as {@link
- * CarUiButton}. It extends AppCompatViewInflater so that it can still let AppCompat components be
- * created correctly.
+ * CarUiRecyclerView}. It extends AppCompatViewInflater so that it can still let AppCompat
+ * components be created correctly.
  */
 public class CarUiLayoutInflaterFactory extends AppCompatViewInflater
         implements LayoutInflater.Factory2 {
@@ -40,16 +38,9 @@ public class CarUiLayoutInflaterFactory extends AppCompatViewInflater
     protected View createView(Context context, String name, AttributeSet attrs) {
         View view = null;
 
-        // Don't use CarUiButton.class.getSimpleName(), as when proguard obfuscates the class name
+        // Don't use CarUiTextView.class.getSimpleName(), as when proguard obfuscates the class name
         // it will no longer match what's in xml.
-        if (name.contentEquals("CarUiButton")) {
-            CarUiButton controller = SharedLibraryFactorySingleton.get(context).createButton(
-                    context, CarUiButtonAttributes.fromAttributeSet(context, attrs));
-            view = controller.getView();
-            if (view != null) {
-                view.setTag(R.id.car_ui_component_reference, controller);
-            }
-        } else if (CarUiRecyclerView.class.getName().equals(name)) {
+        if (CarUiRecyclerView.class.getName().equals(name)) {
             view = SharedLibraryFactorySingleton.get(context)
                     .createRecyclerView(context, attrs);
         } else if (name.contentEquals("CarUiTextView")) {
