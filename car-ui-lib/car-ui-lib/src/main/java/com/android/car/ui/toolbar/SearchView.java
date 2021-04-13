@@ -16,6 +16,7 @@
 package com.android.car.ui.toolbar;
 
 import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowInsets.Type.systemBars;
 
 import static com.android.car.ui.core.SearchResultsProvider.CONTENT;
 import static com.android.car.ui.core.SearchResultsProvider.SEARCH_RESULTS_PROVIDER;
@@ -29,6 +30,8 @@ import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Insets;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
@@ -65,6 +68,7 @@ import com.android.car.ui.core.SearchResultsProvider;
 import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
 import com.android.car.ui.recyclerview.CarUiContentListItem;
 import com.android.car.ui.recyclerview.CarUiListItem;
+import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.utils.CarUiUtils;
 
 import java.util.ArrayList;
@@ -86,6 +90,7 @@ public class SearchView extends ConstraintLayout {
     private final int mStartPaddingWithoutIcon;
     private final int mStartPadding;
     private final int mEndPadding;
+    private View mContentView;
     private View mOriginalView;
     private View mParent;
     private boolean mIsImeWidescreenViewSet;
@@ -96,6 +101,7 @@ public class SearchView extends ConstraintLayout {
     private Uri mContentUri;
     private int mSurfaceHeight;
     private int mSurfaceWidth;
+    private Rect mRectPadding;
     private List<? extends CarUiImeSearchListItem> mWideScreenSearchItemList;
     private final Map<String, CarUiImeSearchListItem> mIdToListItem = new HashMap<>();
 
@@ -202,31 +208,36 @@ public class SearchView extends ConstraintLayout {
         searchContainer.getRootView().setOnApplyWindowInsetsListener((v, insets) -> {
 
             if (insets.isVisible(ime())) {
-                if (mWideScreenImeContentAreaViewContainer != null
-                        && mWideScreenImeContentAreaViewContainer.getParent() != null
-                        && !mIsImeWidescreenViewSet) {
+                if (!mIsImeWidescreenViewSet && mContentView != null) {
                     // when the IME is closed and opened again by clicking on the EditText and
                     // setViewToImeWideScreenSurface is not called by the app then we need to reset
                     // the container as the previous instance would be attached to the surface and
                     // we cannot dettatch it. It will be removed automatically by GC.
                     mWideScreenImeContentAreaViewContainer = new FrameLayout(getContext());
+                    FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT);
+                    ViewGroup parent = (ViewGroup) mContentView.getParent();
+                    if (parent != null) {
+                        parent.removeView(mContentView);
+                    }
+                    mWideScreenImeContentAreaViewContainer.addView(mContentView, params);
                 }
 
-                if (mWideScreenImeContentAreaViewContainer != null && mOriginalView != null
-                        && mWideScreenImeContentAreaViewContainer.getChildCount() == 0) {
-                    // At this point we will always have a new container to inflate the view into.
-                    // We will detach the apps view from its original parent and attach it into the
-                    // container to display it within the IME's SurfaceView.
-                    mHandler.post(() -> {
-                        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.MATCH_PARENT);
-                        ViewGroup parent = (ViewGroup) mOriginalView.getParent();
-                        parent.removeView(mOriginalView);
-                        mWideScreenImeContentAreaViewContainer.addView(mOriginalView, params);
-                    });
+                if (mRectPadding == null && mOriginalView instanceof CarUiRecyclerView) {
+                    // When the IME is re-open by clicking the EditText and
+                    // setViewToImeWideScreenSurface is not called by the app then we need to reset
+                    // the padding.
+                    mRectPadding = new Rect(mOriginalView.getPaddingLeft(),
+                            mOriginalView.getPaddingTop(),
+                            mOriginalView.getPaddingRight(),
+                            mOriginalView.getPaddingBottom());
+                    mOriginalView.setPadding(0, 0, 0, 0);
                 }
+
                 displaySearchWideScreen();
+                Insets insetsSysBar = insets.getInsets(systemBars());
+
                 mHandler.post(() -> {
                     if (mSurfaceControlViewHost != null
                             && mWideScreenImeContentAreaViewContainer != null
@@ -236,7 +247,6 @@ public class SearchView extends ConstraintLayout {
                         mSurfaceControlViewHost.setView(
                                 mWideScreenImeContentAreaViewContainer, mSurfaceWidth,
                                 mSurfaceHeight);
-                        mWideScreenImeContentAreaViewContainer.requestLayout();
                     }
                 });
             } else {
@@ -253,9 +263,17 @@ public class SearchView extends ConstraintLayout {
     private void removeView() {
         if (mWideScreenImeContentAreaViewContainer != null && mParent != null) {
             mHandler.post(() -> {
-                ViewGroup parent = (ViewGroup) mOriginalView.getParent();
-                parent.removeView(mOriginalView);
-                ((ViewGroup) mParent).addView(mOriginalView);
+                ViewGroup parent = (ViewGroup) mContentView.getParent();
+                if (parent != null) {
+                    parent.removeView(mContentView);
+                }
+                if (mRectPadding != null) {
+                    mOriginalView.setPadding(mRectPadding.left, mRectPadding.top,
+                            mRectPadding.right, mRectPadding.bottom);
+                    mContentView.setPadding(0, 0, 0, 0);
+                }
+                mRectPadding = null;
+                ((ViewGroup) mParent).addView(mContentView);
             });
         }
     }
@@ -269,22 +287,35 @@ public class SearchView extends ConstraintLayout {
         mInputMethodManager.sendAppPrivateCommand(mSearchText, WIDE_SCREEN_ACTION, bundle);
     }
 
-    void setViewToImeWideScreenSurface(View view, View parent) {
-
-        if (view != null && view.getParent() != null) {
-            throw new IllegalStateException("view should not have a parent");
-        }
-
+    void setViewToImeWideScreenSurface(View view) {
         if (view == null) {
             mWideScreenImeContentAreaViewContainer = null;
-        } else {
-            mWideScreenImeContentAreaViewContainer = new FrameLayout(getContext());
-            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-            mOriginalView = view;
-            mParent = parent;
-            mWideScreenImeContentAreaViewContainer.addView(mOriginalView, params);
+            return;
         }
+
+        mOriginalView = view;
+
+        if (view instanceof CarUiRecyclerView) {
+            mRectPadding = new Rect(view.getPaddingLeft(),
+                    view.getPaddingTop(),
+                    view.getPaddingRight(),
+                    view.getPaddingBottom());
+            view.setPadding(0, 0, 0, 0);
+            mContentView = view.getRootView().findViewById(R.id.car_ui_recycler_view_container);
+            ViewGroup parentView = (ViewGroup) mContentView.getParent();
+            if (parentView != null) {
+                parentView.removeView(mContentView);
+            }
+            mParent = parentView;
+            return;
+        }
+
+        mContentView = view;
+        ViewGroup parentView = (ViewGroup) view.getParent();
+        if (parentView != null) {
+            parentView.removeView(view);
+        }
+        mParent = parentView;
     }
 
     private boolean isEnter(KeyEvent event) {
@@ -497,9 +528,8 @@ public class SearchView extends ConstraintLayout {
 
         @Override
         public void onSurfaceInfo(int displayId, IBinder binder, int height,
-                int width) {
-            if (Build.VERSION.SDK_INT < VERSION_CODES.R
-                    || mWideScreenImeContentAreaViewContainer == null) {
+                                  int width) {
+            if (Build.VERSION.SDK_INT < VERSION_CODES.R) {
                 // SurfaceControlViewHost is only available on R and above
                 return;
             }
@@ -520,6 +550,16 @@ public class SearchView extends ConstraintLayout {
                     mSurfaceControlViewHost.getSurfacePackage());
             mInputMethodManager.sendAppPrivateCommand(mSearchText,
                     WIDE_SCREEN_ACTION, bundle);
+        }
+
+        @Override
+        public void reLayout(int height, int width) {
+            mSurfaceHeight = height;
+            mSurfaceWidth = width;
+
+            if (mSurfaceControlViewHost != null) {
+                mSurfaceControlViewHost.relayout(width, height);
+            }
         }
 
         @Override

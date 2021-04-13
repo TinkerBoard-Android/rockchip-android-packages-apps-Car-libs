@@ -69,8 +69,7 @@ public class WideScreenTestView extends AppCompatActivity implements InsetsChang
                 .setOnClickListener(i -> {
                     toolbar.setState(State.SEARCH);
                     if (toolbar.canShowSearchResultsView()) {
-                        toolbar.setSearchResultsView(
-                                findViewById(R.id.car_ui_recycler_view_container));
+                        toolbar.setSearchResultsView(findViewById(R.id.list));
                     }
                 }).build());
 

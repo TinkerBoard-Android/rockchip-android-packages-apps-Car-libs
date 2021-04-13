@@ -124,7 +124,6 @@ public final class ToolbarControllerImpl implements ToolbarController {
     private boolean mLogoFillsNavIconSpace;
     private View mViewForContentAreaInWideScreenMode;
     private Drawable mSearchResultsInputViewIcon;
-    private View mWideScreenViewParent;
     private boolean mShowLogo;
     private List<? extends CarUiImeSearchListItem> mSearchItems;
     private final ProgressBarController mProgressBar;
@@ -758,8 +757,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
                     ViewGroup.LayoutParams.MATCH_PARENT);
             mSearchViewContainer.addView(searchView, layoutParams);
             if (canShowSearchResultsView()) {
-                searchView.setViewToImeWideScreenSurface(mViewForContentAreaInWideScreenMode,
-                        mWideScreenViewParent);
+                searchView.setViewToImeWideScreenSurface(mViewForContentAreaInWideScreenMode);
             }
 
             searchView.installWindowInsetsListener(mSearchViewContainer);
@@ -925,21 +923,11 @@ public final class ToolbarControllerImpl implements ToolbarController {
                             + mContext.getPackageName());
         }
 
-        View contentArea = view;
-        ViewGroup parent = null;
-        if (contentArea != null) {
-            parent = (ViewGroup) contentArea.getParent();
-        }
-        if (parent != null) {
-            parent.removeAllViews();
-        }
-
         if (mSearchView != null) {
-            mSearchView.setViewToImeWideScreenSurface(contentArea, parent);
+            mSearchView.setViewToImeWideScreenSurface(view);
         }
 
-        mViewForContentAreaInWideScreenMode = contentArea;
-        mWideScreenViewParent = parent;
+        mViewForContentAreaInWideScreenMode = view;
     }
 
     @Override
