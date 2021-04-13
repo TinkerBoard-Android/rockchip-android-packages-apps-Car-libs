@@ -68,7 +68,7 @@
             android:layout_height="@dimen/car_ui_list_item_icon_size"
             android:layout_gravity="center"
             android:visibility="gone"
-            android:scaleType="fitXY" />
+            android:scaleType="fitCenter" />
 
         <ImageView
             android:id="@+id/car_ui_list_item_content_icon"
@@ -76,7 +76,7 @@
             android:layout_height="@dimen/car_ui_list_item_content_icon_height"
             android:layout_gravity="center"
             android:visibility="gone"
-            android:scaleType="fitXY" />
+            android:scaleType="fitCenter" />
 
         <ImageView
             android:id="@+id/car_ui_list_item_avatar_icon"
@@ -85,7 +85,7 @@
             android:layout_height="@dimen/car_ui_list_item_avatar_icon_height"
             android:layout_gravity="center"
             android:visibility="gone"
-            android:scaleType="fitXY" />
+            android:scaleType="fitCenter" />
     </FrameLayout>
 
     <CarUiTextView
@@ -172,7 +172,7 @@
             android:layout_width="@dimen/car_ui_list_item_supplemental_icon_size"
             android:layout_height="@dimen/car_ui_list_item_supplemental_icon_size"
             android:layout_gravity="center"
-            android:scaleType="fitXY" />
+            android:scaleType="fitCenter" />
     </FrameLayout>
 
     <androidx.constraintlayout.widget.Guideline
