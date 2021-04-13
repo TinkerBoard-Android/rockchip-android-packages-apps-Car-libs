@@ -104,8 +104,6 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
     // Set to true when when styled attributes are read and initialized.
     private boolean mIsInitialized;
     private boolean mEnableDividers;
-    private int mTopOffset;
-    private int mBottomOffset;
 
     private boolean mHasScrolled = false;
 
@@ -165,18 +163,15 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
                         context.getDrawable(R.drawable.car_ui_divider),
                         mNumOfColumns);
 
-        mTopOffset = a.getInteger(R.styleable.CarUiRecyclerView_topOffset, /* defValue= */0);
-        mBottomOffset = a.getInteger(
-                R.styleable.CarUiRecyclerView_bottomOffset, /* defValue= */0);
         mTopOffsetItemDecorationLinear =
-                new LinearOffsetItemDecoration(mTopOffset, OffsetPosition.START);
+                new LinearOffsetItemDecoration(0, OffsetPosition.START);
         mBottomOffsetItemDecorationLinear =
-                new LinearOffsetItemDecoration(mBottomOffset, OffsetPosition.END);
+                new LinearOffsetItemDecoration(0, OffsetPosition.END);
         mTopOffsetItemDecorationGrid =
-                new GridOffsetItemDecoration(mTopOffset, mNumOfColumns,
+                new GridOffsetItemDecoration(0, mNumOfColumns,
                         OffsetPosition.START);
         mBottomOffsetItemDecorationGrid =
-                new GridOffsetItemDecoration(mBottomOffset, mNumOfColumns,
+                new GridOffsetItemDecoration(0, mNumOfColumns,
                         OffsetPosition.END);
 
         mIsInitialized = true;
@@ -216,6 +211,22 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
             addItemDecorations(layoutManager);
         }
         super.setLayoutManager(layoutManager);
+    }
+
+    @Override
+    public void setLayoutStyle(CarUiLayoutStyle layoutStyle) {
+        LayoutManager layoutManager;
+        if (layoutStyle.getLayoutType() == CarUiRecyclerViewLayout.LINEAR) {
+            layoutManager = new LinearLayoutManager(getContext(),
+                layoutStyle.getOrientation(),
+                layoutStyle.getReverseLayout());
+        } else {
+            layoutManager = new GridLayoutManager(getContext(),
+                layoutStyle.getSpanCount(),
+                layoutStyle.getOrientation(),
+                layoutStyle.getReverseLayout());
+        }
+        setLayoutManager(layoutManager);
     }
 
     // This method should not be invoked before item decorations are initialized by the #init()
@@ -319,8 +330,7 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
     /**
      * Sets the number of columns in which grid needs to be divided.
      */
-    @Override
-    public void setNumOfColumns(int numberOfColumns) {
+    private void setNumOfColumns(int numberOfColumns) {
         mNumOfColumns = numberOfColumns;
         if (mTopOffsetItemDecorationGrid != null) {
             mTopOffsetItemDecorationGrid.setNumOfColumns(mNumOfColumns);
@@ -510,8 +520,7 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
      * Sets the scrollbar's padding top and bottom. This padding is applied in addition to the
      * padding of the RecyclerView.
      */
-    @Override
-    public void setScrollBarPadding(int paddingTop, int paddingBottom) {
+    private void setScrollBarPadding(int paddingTop, int paddingBottom) {
         if (mScrollBarEnabled) {
             mScrollBarPaddingTop = paddingTop;
             mScrollBarPaddingBottom = paddingBottom;
@@ -521,34 +530,6 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
                         paddingBottom + getPaddingBottom());
             }
         }
-    }
-
-    /**
-     * Sets divider item decoration for linear layout. This should be called after the call to
-     * {@link #setLayoutManager(LayoutManager)}  has been completed. If called before that could
-     * result in unexpected behavior.
-     */
-    @Override
-    public void setLinearDividerItemDecoration(boolean enableDividers) {
-        if (enableDividers) {
-            addItemDecoration(mDividerItemDecorationLinear);
-            return;
-        }
-        removeItemDecoration(mDividerItemDecorationLinear);
-    }
-
-    /**
-     * Sets divider item decoration for grid layout. This should be called after the call to {@link
-     * #setLayoutManager(LayoutManager)}  has been completed. If called before that could result in
-     * unexpected behavior.
-     */
-    @Override
-    public void setGridDividerItemDecoration(boolean enableDividers) {
-        if (enableDividers) {
-            addItemDecoration(mDividerItemDecorationGrid);
-            return;
-        }
-        removeItemDecoration(mDividerItemDecorationGrid);
     }
 
     @Override

@@ -108,10 +108,6 @@
         car_ui_recyclerview_divider.xml and car_ui_divider.xml drawables
         respectively for styling dividers. -->
         <attr name="enableDivider" format="boolean" />
-        <!-- Top offset for car ui recycler view. -->
-        <attr name="topOffset" format="integer" />
-        <!-- Bottom offset for car ui recycler view for linear layout. -->
-        <attr name="bottomOffset" format="integer" />
 
         <!-- Whether to enable rotary scrolling. Disabled by default. With rotary scrolling enabled,
         rotating the rotary controller will scroll rather than moving the focus when moving the
@@ -140,6 +136,8 @@
 
         <!-- car ui recyclerview orientation -->
         <attr name="android:orientation" />
+        <!-- car ui recyclerview layout reversed -->
+        <attr name="reverseLayout" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="CarUiPreference">

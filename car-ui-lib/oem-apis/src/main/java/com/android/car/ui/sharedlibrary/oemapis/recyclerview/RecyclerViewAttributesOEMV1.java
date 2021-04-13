@@ -16,31 +16,23 @@
 package com.android.car.ui.sharedlibrary.oemapis.recyclerview;
 
 /**
- * Set of attributes passed from UI to the oem implementation
+ * Set of attributes passed from UI/layout to the oem implementation
  */
 public interface RecyclerViewAttributesOEMV1 {
 
-    /** Returns Id of the view set in the layout */
-    int getId();
-
-    /** Returns if dividers should be enabled or not */
-    boolean enableDivider();
-
-    /** Returns top offset */
-    int getTopOffset();
-
-    /** Returns bottom offset */
-    int getBottomOffset();
-
-    /** Returns left offset */
-    int getLeftOffset();
-
-    /** Returns right offset */
-    int getRightOffset();
+    int SIZE_SMALL = 0;
+    int SIZE_MEDIUM = 1;
+    int SIZE_LARGE = 2;
 
     /** Returns if rotary scroll is enabled */
     boolean isRotaryScrollEnabled();
 
-    /** Returns layout style set in xml */
+    /** Describes the expected relative size of the
+     * {@link androidx.recyclerview.widget.RecyclerView}. The list may be rendered differently for
+     * each expected size.
+     */
+    int getSize();
+
+    /** Returns information regarding the layout style */
     LayoutStyleOEMV1 getLayoutStyle();
 }
