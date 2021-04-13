@@ -44,7 +44,7 @@ public class GridCarUiRecyclerViewActivity extends Activity implements
 
         ToolbarController toolbar = CarUi.requireToolbar(this);
         toolbar.setTitle(getTitle());
-        toolbar.setState(Toolbar.State.SUBPAGE);
+        toolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
 
         CarUiRecyclerView recyclerView = findViewById(R.id.list);
 
