@@ -20,6 +20,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
@@ -60,10 +61,10 @@ public abstract class CarUiRecyclerView extends RecyclerView {
      */
     @Retention(SOURCE)
     @IntDef({SIZE_SMALL, SIZE_MEDIUM, SIZE_LARGE})
-    protected @interface Size {}
-    protected static final int SIZE_SMALL = 0;
-    protected static final int SIZE_MEDIUM = 1;
-    protected static final int SIZE_LARGE = 2;
+    public @interface Size {}
+    public static final int SIZE_SMALL = 0;
+    public static final int SIZE_MEDIUM = 1;
+    public static final int SIZE_LARGE = 2;
 
     /**
      * The possible values for setScrollBarPosition. The default value is {@link
@@ -129,31 +130,6 @@ public abstract class CarUiRecyclerView extends RecyclerView {
     }
 
     /**
-     * Sets the number of columns in which grid needs to be divided.
-     */
-    public abstract void setNumOfColumns(int numberOfColumns);
-
-    /**
-     * Sets the scrollbar's padding top and bottom. This padding is applied in addition to the
-     * padding of the RecyclerView.
-     */
-    public abstract void setScrollBarPadding(int paddingTop, int paddingBottom);
-
-    /**
-     * Sets divider item decoration for linear layout. This should be called after the call to
-     * {@link #setLayoutManager(LayoutManager)}  has been completed. If called before that could
-     * result in unexpected behavior.
-     */
-    public abstract void setLinearDividerItemDecoration(boolean enableDividers);
-
-    /**
-     * Sets divider item decoration for grid layout. This should be called after the call to {@link
-     * #setLayoutManager(LayoutManager)}  has been completed. If called before that could result in
-     * unexpected behavior.
-     */
-    public abstract void setGridDividerItemDecoration(boolean enableDividers);
-
-    /**
      * Set the {@link LayoutManager} that this RecyclerView will use.
      *
      * <p>In contrast to other adapter-backed views such as {@link android.widget.ListView}
@@ -170,6 +146,20 @@ public abstract class CarUiRecyclerView extends RecyclerView {
     @Override
     public void setLayoutManager(@Nullable LayoutManager layoutManager) {
         super.setLayoutManager(layoutManager);
+    }
+
+    /**
+     * Return the {@link LayoutManager} currently responsible for
+     * layout policy for this RecyclerView.
+     *
+     * @return The currently bound LayoutManager
+     * @deprecated will return null for OEM implementation.
+     */
+    @Deprecated
+    @Nullable
+    @Override
+    public LayoutManager getLayoutManager() {
+        return super.getLayoutManager();
     }
 
     /**
@@ -264,4 +254,28 @@ public abstract class CarUiRecyclerView extends RecyclerView {
     public void removeItemDecoration(@NonNull ItemDecoration decor) {
         super.removeItemDecoration(decor);
     }
+
+    /**
+     * @deprecated this will return incorrect value when there is a oem implementation
+     */
+    @Override
+    @Deprecated
+    public int getChildCount() {
+        return super.getChildCount();
+    }
+
+    /**
+     * @deprecated this will return incorrect value when there is a oem implementation
+     */
+    @Deprecated
+    @Override
+    public View getChildAt(int index) {
+        return super.getChildAt(index);
+    }
+
+    /**
+     * Use this instead of setLayoutManager
+     * @param layoutStyle
+     */
+    public abstract void setLayoutStyle(CarUiLayoutStyle layoutStyle);
 }

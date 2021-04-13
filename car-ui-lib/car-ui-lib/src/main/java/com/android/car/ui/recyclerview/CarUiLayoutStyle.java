@@ -13,31 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.car.ui.sharedlibrary.oemapis.recyclerview;
+package com.android.car.ui.recyclerview;
+
+import androidx.recyclerview.widget.RecyclerView.LayoutManager;
+import androidx.recyclerview.widget.RecyclerView.Orientation;
+
+import com.android.car.ui.recyclerview.CarUiRecyclerView.CarUiRecyclerViewLayout;
 
 /**
- * Class for storing recyclerview layout style informatioon.
+ * CarUi proxy class for {@link LayoutManager}
  */
-public interface LayoutStyleOEMV1 {
-
-    int LAYOUT_TYPE_LINEAR = 0;
-    int LAYOUT_TYPE_GRID = 1;
-
-    int ORIENTATION_HORIZONTAL = 0;
-    int ORIENTATION_VERTICAL = 1;
+public interface CarUiLayoutStyle {
 
     /** Returns number of recyclerview spans */
     int getSpanCount();
 
-    /** Returns LAYOUT_TYPE_LINEAR vs LAYOUT_TYPE_GRID */
+    /** Returns {@link CarUiRecyclerViewLayout} */
+    @CarUiRecyclerViewLayout
     int getLayoutType();
 
-    /** Returns layout direction 0 for VERTICAL, 1 for HORIZONTAL */
+    /** Returns layout direction {@link Orientation} */
+    @Orientation
     int getOrientation();
 
     /** Returns true if layout is reversed */
     boolean getReverseLayout();
 
-    /** Returns a wrapper {@link androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup} */
-    SpanSizeLookupOEMV1 getSpanSizeLookup();
+    /** Returns CarUiRecyclerView size */
+    int getSize();
 }
