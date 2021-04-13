@@ -15,6 +15,8 @@
  */
 package com.android.car.ui.core;
 
+import static com.android.car.ui.core.BaseLayoutController.getBaseLayoutController;
+
 import android.app.Activity;
 import android.view.View;
 
@@ -27,7 +29,6 @@ import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
 import com.android.car.ui.toolbar.ToolbarController;
 
-import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
@@ -204,29 +205,5 @@ public class CarUi {
             boolean fullscreen) {
         return SharedLibraryFactorySingleton.get(view.getContext())
                 .installBaseLayoutAround(view, insetsChangedListener, hasToolbar, fullscreen);
-    }
-
-    /* package */ static BaseLayoutController getBaseLayoutController(@Nullable Activity activity) {
-        if (activity == null) {
-            return null;
-        }
-
-        if (activity.getClassLoader().equals(CarUi.class.getClassLoader())) {
-            return BaseLayoutController.getBaseLayout(activity);
-        } else {
-            // Note: (b/156532465)
-            // The usage of the alternate classloader is to accommodate GMSCore.
-            // Some activities are loaded dynamically from external modules.
-            try {
-                Class<?> baseLayoutControllerClass = activity.getClassLoader()
-                        .loadClass(BaseLayoutController.class.getName());
-                Method method = baseLayoutControllerClass
-                        .getDeclaredMethod("getBaseLayout", Activity.class);
-                method.setAccessible(true);
-                return (BaseLayoutController) method.invoke(null, activity);
-            } catch (ReflectiveOperationException | SecurityException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 }
