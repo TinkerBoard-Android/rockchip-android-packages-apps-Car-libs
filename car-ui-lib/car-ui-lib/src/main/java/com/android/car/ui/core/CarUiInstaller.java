@@ -67,7 +67,6 @@ public class CarUiInstaller extends ContentProvider {
         Log.i(TAG, "CarUiInstaller started for " + context.getPackageName());
 
         Application application = (Application) context.getApplicationContext();
-        injectLayoutInflaterFactory(application);
         application.registerActivityLifecycleCallbacks(
                 new Application.ActivityLifecycleCallbacks() {
                     private Insets mInsets = null;
