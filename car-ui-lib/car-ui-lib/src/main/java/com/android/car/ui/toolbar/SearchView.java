@@ -301,7 +301,7 @@ public class SearchView extends ConstraintLayout {
                     view.getPaddingRight(),
                     view.getPaddingBottom());
             view.setPadding(0, 0, 0, 0);
-            mContentView = view.getRootView().findViewById(R.id.car_ui_recycler_view_container);
+            mContentView = ((CarUiRecyclerView) view).getContainer();
             ViewGroup parentView = (ViewGroup) mContentView.getParent();
             if (parentView != null) {
                 parentView.removeView(mContentView);

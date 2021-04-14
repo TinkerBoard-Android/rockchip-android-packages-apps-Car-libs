@@ -156,4 +156,9 @@ public final class RecyclerViewImpl extends RecyclerView implements RecyclerView
     public View getView() {
         return this;
     }
+
+    @Override
+    public View getContainer() {
+        return this;
+    }
 }

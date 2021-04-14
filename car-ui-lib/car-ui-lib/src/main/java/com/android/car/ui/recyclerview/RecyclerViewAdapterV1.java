@@ -90,6 +90,11 @@ public final class RecyclerViewAdapterV1 extends CarUiRecyclerView
     }
 
     @Override
+    public View getContainer() {
+        return mOEMRecyclerView.getContainer();
+    }
+
+    @Override
     public void setAdapter(RecyclerView.Adapter adapter) {
         if (mOEMAdapter != null) {
             mOEMAdapter.setRecyclerView(null);
