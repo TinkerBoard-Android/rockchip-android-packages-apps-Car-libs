@@ -15,15 +15,25 @@
  */
 package com.android.car.ui.recyclerview;
 
+import android.widget.LinearLayout;
+import androidx.annotation.IntDef;
 import androidx.recyclerview.widget.RecyclerView.LayoutManager;
-import androidx.recyclerview.widget.RecyclerView.Orientation;
 
 import com.android.car.ui.recyclerview.CarUiRecyclerView.CarUiRecyclerViewLayout;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * CarUi proxy class for {@link LayoutManager}
  */
 public interface CarUiLayoutStyle {
+
+    @IntDef({HORIZONTAL, VERTICAL})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface Orientation {
+    }
+    int HORIZONTAL = LinearLayout.HORIZONTAL;
+    int VERTICAL = LinearLayout.VERTICAL;
 
     /** Returns number of recyclerview spans */
     int getSpanCount();
