@@ -196,7 +196,6 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
         }
 
         mContainer = new FrameLayout(getContext());
-        mContainer.setId(R.id.car_ui_recycler_view_container);
 
         setVerticalScrollBarEnabled(false);
         setHorizontalScrollBarEnabled(false);
@@ -227,6 +226,11 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
                 layoutStyle.getReverseLayout());
         }
         setLayoutManager(layoutManager);
+    }
+
+    @Override
+    public View getContainer() {
+        return mContainer;
     }
 
     // This method should not be invoked before item decorations are initialized by the #init()
