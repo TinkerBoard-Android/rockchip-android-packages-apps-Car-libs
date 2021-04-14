@@ -211,12 +211,12 @@ public class CarUiImeWideScreenControllerTest {
     public void onComputeInsets_hideContentArea_shouldUpdateRegionAsTouchable() {
         when(mInputMethodServiceMock.getWindow()).thenReturn(mDialogMock);
         when(mDialogMock.getWindow()).thenReturn(mWindowMock);
-        View view = new FrameLayout(mContext);
+        View view = new FrameLayout(mActivity);
         view.setTop(0);
         view.setBottom(200);
         when(mWindowMock.getDecorView()).thenReturn(view);
 
-        View imeInputView = LayoutInflater.from(mContext)
+        View imeInputView = LayoutInflater.from(mActivity)
                 .inflate(R.layout.test_ime_input_view, null, false);
         CarUiImeWideScreenController carUiImeWideScreenController = getController();
         carUiImeWideScreenController.createWideScreenImeView(imeInputView);
@@ -512,7 +512,7 @@ public class CarUiImeWideScreenControllerTest {
     }
 
     private CarUiImeWideScreenController getController() {
-        return new CarUiImeWideScreenController(mContext, mInputMethodServiceMock) {
+        return new CarUiImeWideScreenController(mActivity, mInputMethodServiceMock) {
             @Override
             public boolean isWideScreenMode() {
                 return true;

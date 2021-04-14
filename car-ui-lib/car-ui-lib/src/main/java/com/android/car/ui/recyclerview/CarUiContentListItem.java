@@ -373,8 +373,7 @@ public class CarUiContentListItem extends CarUiListItem {
      *
      * @param listener callback to be invoked when the checked state shown in the UI changes.
      */
-    public void setOnCheckedChangeListener(
-            @Nullable OnCheckedChangeListener listener) {
+    public void setOnCheckedChangeListener(@Nullable OnCheckedChangeListener listener) {
         mOnCheckedChangeListener = listener;
     }
 

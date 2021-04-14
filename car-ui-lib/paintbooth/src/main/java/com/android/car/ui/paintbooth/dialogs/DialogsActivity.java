@@ -147,6 +147,7 @@ public class DialogsActivity extends Activity implements InsetsChangedListener {
         new AlertDialogBuilder(this)
                 .setTitle(R.string.standard_alert_dialog)
                 .setEditBox(getString(R.string.edit_me_please), null, null)
+                .setAutoDescUpdateForWidescreen(true)
                 .setEditTextTitleAndDescForWideScreen("title", "desc from app")
                 .setPositiveButton("OK", (dialogInterface, i) -> {
                 })

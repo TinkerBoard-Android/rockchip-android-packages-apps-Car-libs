@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.car.ui.button;
+package com.android.car.ui.sharedlibrary.oemapis.recyclerview;
 
-public enum CarUiButtonStyle {
-    PRIMARY,
-    SECONDARY,
-    FLOATING
+/**
+ * {@link androidx.recyclerview.widget.GridLayoutManager#setSpanSizeLookup}
+ */
+public interface SpanSizeLookupOEMV1 {
+
+    /** {@link androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup#getSpanSize} */
+    int getSpanSize(int position);
 }

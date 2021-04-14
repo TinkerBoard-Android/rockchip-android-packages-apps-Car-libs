@@ -15,8 +15,6 @@
  */
 package com.android.car.ui.core;
 
-import static com.android.car.ui.core.CarUi.getBaseLayoutController;
-
 import android.app.Activity;
 import android.app.Application;
 import android.content.ContentProvider;
@@ -36,7 +34,9 @@ import androidx.appcompat.app.AppCompatDelegate;
 import com.android.car.ui.CarUiLayoutInflaterFactory;
 import com.android.car.ui.baselayout.Insets;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Locale;
 
 /**
@@ -44,6 +44,15 @@ import java.util.Locale;
  * content providers on the application main thread at application launch time." This means we
  * can use a content provider to register for Activity lifecycle callbacks before any activities
  * have started, for installing the CarUi base layout into all activities.
+ *
+ * Notice that in many of the methods in this class we're using reflection to make method calls.
+ * As it's explained in (b/156532465), {@link CarUiInstaller} is loaded from
+ * GMSCore's ContainerActivity classloader which is different than the classloader of the Activity
+ * that's passed as an argument to these methods. This happens when the Activity's module is loaded
+ * dynamically. That means {@link CarUiInstaller} will have a different classloader than the
+ * Activity. Hence we will need to use the Activity's classloader to load
+ * {@link BaseLayoutController} class otherwise the base layout will be loaded
+ * by the wrong classloader. And then calls to {@see CarUi#getToolbar(Activity)} will return null.
  */
 public class CarUiInstaller extends ContentProvider {
 
@@ -67,7 +76,6 @@ public class CarUiInstaller extends ContentProvider {
         Log.i(TAG, "CarUiInstaller started for " + context.getPackageName());
 
         Application application = (Application) context.getApplicationContext();
-        injectLayoutInflaterFactory(application);
         application.registerActivityLifecycleCallbacks(
                 new Application.ActivityLifecycleCallbacks() {
                     private Insets mInsets = null;
@@ -77,12 +85,12 @@ public class CarUiInstaller extends ContentProvider {
                     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
                         injectLayoutInflaterFactory(activity);
 
-                        if (activity.getClassLoader()
-                                .equals(CarUiInstaller.class.getClassLoader())) {
-                            BaseLayoutController.build(activity);
-                        } else {
-                            callBaseLayoutControllerMethod("build", activity);
-                        }
+                        callMethodReflective(
+                                activity.getClassLoader(),
+                                BaseLayoutController.class,
+                                "build",
+                                null,
+                                activity);
 
                         if (savedInstanceState != null) {
                             int inset_left = savedInstanceState.getInt(CAR_UI_INSET_LEFT);
@@ -97,10 +105,20 @@ public class CarUiInstaller extends ContentProvider {
 
                     @Override
                     public void onActivityPostStarted(Activity activity) {
-                        BaseLayoutController controller = getBaseLayoutController(activity);
+                        Object controller = callMethodReflective(
+                                activity.getClassLoader(),
+                                BaseLayoutController.class,
+                                "getBaseLayoutController",
+                                null,
+                                activity);
                         if (mInsets != null && controller != null
                                 && mIsActivityStartedForFirstTime) {
-                            controller.dispatchNewInsets(mInsets);
+                            callMethodReflective(
+                                    activity.getClassLoader(),
+                                    BaseLayoutController.class,
+                                    "dispatchNewInsets",
+                                    controller,
+                                    changeInsetsClassLoader(activity.getClassLoader(), mInsets));
                             mIsActivityStartedForFirstTime = false;
                         }
                     }
@@ -123,24 +141,53 @@ public class CarUiInstaller extends ContentProvider {
 
                     @Override
                     public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-                        BaseLayoutController controller = getBaseLayoutController(activity);
+                        Object controller = callMethodReflective(
+                                activity.getClassLoader(),
+                                BaseLayoutController.class,
+                                "getBaseLayoutController",
+                                null,
+                                activity);
                         if (controller != null) {
-                            Insets insets = controller.getInsets();
-                            outState.putInt(CAR_UI_INSET_LEFT, insets.getLeft());
-                            outState.putInt(CAR_UI_INSET_TOP, insets.getTop());
-                            outState.putInt(CAR_UI_INSET_RIGHT, insets.getRight());
-                            outState.putInt(CAR_UI_INSET_BOTTOM, insets.getBottom());
+                            Object insets = callMethodReflective(
+                                    activity.getClassLoader(),
+                                    BaseLayoutController.class,
+                                    "getInsets",
+                                    controller);
+                            outState.putInt(CAR_UI_INSET_LEFT,
+                                    (int) callMethodReflective(
+                                            activity.getClassLoader(),
+                                            Insets.class,
+                                            "getLeft",
+                                            insets));
+                            outState.putInt(CAR_UI_INSET_TOP,
+                                    (int) callMethodReflective(
+                                            activity.getClassLoader(),
+                                            Insets.class,
+                                            "getTop",
+                                            insets));
+                            outState.putInt(CAR_UI_INSET_RIGHT,
+                                    (int) callMethodReflective(
+                                            activity.getClassLoader(),
+                                            Insets.class,
+                                            "getRight",
+                                            insets));
+                            outState.putInt(CAR_UI_INSET_BOTTOM,
+                                    (int) callMethodReflective(
+                                            activity.getClassLoader(),
+                                            Insets.class,
+                                            "getBottom",
+                                            insets));
                         }
                     }
 
                     @Override
                     public void onActivityDestroyed(Activity activity) {
-                        if (activity.getClassLoader()
-                                .equals(CarUiInstaller.class.getClassLoader())) {
-                            BaseLayoutController.destroy(activity);
-                        } else {
-                            callBaseLayoutControllerMethod("destroy", activity);
-                        }
+                        callMethodReflective(
+                                activity.getClassLoader(),
+                                BaseLayoutController.class,
+                                "destroy",
+                                null,
+                                activity);
                     }
                 });
 
@@ -184,20 +231,42 @@ public class CarUiInstaller extends ContentProvider {
         return 0;
     }
 
-    private static void callBaseLayoutControllerMethod(String methodName, Activity activity) {
-        // Note: (b/156532465)
-        // The usage of the alternate classloader is to accommodate GMSCore.
-        // Some activities are loaded dynamically from external modules.
+    @SuppressWarnings("AndroidJdkLibsChecker")
+    private static Object callMethodReflective(@NonNull ClassLoader cl, @NonNull Class<?> srcClass,
+            @NonNull String methodName, @Nullable Object instance, @Nullable Object... args) {
         try {
-            Class<?> baseLayoutControllerClass =
-                    activity.getClassLoader()
-                            .loadClass(BaseLayoutController.class.getName());
-            Method method = baseLayoutControllerClass
-                    .getDeclaredMethod(methodName, Activity.class);
+            Class<?> clazz = cl.loadClass(srcClass.getName());
+            Class<?>[] classArgs = args == null ? null
+                    : Arrays.stream(args)
+                            .map(arg -> arg instanceof Activity ? Activity.class : arg.getClass())
+                            .toArray(Class<?>[]::new);
+            Method method = clazz.getDeclaredMethod(methodName, classArgs);
             method.setAccessible(true);
-            method.invoke(null, activity);
+            return method.invoke(instance, args);
         } catch (ReflectiveOperationException | SecurityException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private static Object changeInsetsClassLoader(@NonNull ClassLoader cl, @Nullable Insets src) {
+        if (src == null) {
+            return null;
+        }
+        try {
+            Class<?> insetsClass = cl.loadClass(Insets.class.getName());
+            Constructor<?> cnst = insetsClass.getDeclaredConstructor(
+                    int.class,
+                    int.class,
+                    int.class,
+                    int.class);
+            cnst.setAccessible(true);
+            return cnst.newInstance(
+                    src.getLeft(),
+                    src.getTop(),
+                    src.getRight(),
+                    src.getBottom());
+        } catch (ReflectiveOperationException | SecurityException e) {
+            throw new RuntimeException();
         }
     }
 

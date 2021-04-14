@@ -265,6 +265,7 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
                             itemOnClickListener.onClick(item);
                         }
                     });
+                    mTouchInterceptor.setClickable(itemOnClickListener != null);
                     mReducedTouchInterceptor.setVisibility(View.GONE);
                     mActionContainerTouchInterceptor.setVisibility(View.GONE);
                     break;
@@ -288,6 +289,7 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
                             itemOnClickListener.onClick(item);
                         }
                     });
+                    mTouchInterceptor.setClickable(itemOnClickListener != null);
                     mReducedTouchInterceptor.setVisibility(View.GONE);
                     mActionContainerTouchInterceptor.setVisibility(View.GONE);
                     break;
@@ -308,6 +310,7 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
                                 itemOnClickListener.onClick(item);
                             }
                         });
+                        mTouchInterceptor.setClickable(itemOnClickListener != null);
                         mReducedTouchInterceptor.setVisibility(View.GONE);
                         mActionContainerTouchInterceptor.setVisibility(View.GONE);
                     } else {
@@ -317,6 +320,7 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
                                 itemOnClickListener.onClick(item);
                             }
                         });
+                        mReducedTouchInterceptor.setClickable(itemOnClickListener != null);
                         mActionContainerTouchInterceptor.setVisibility(View.VISIBLE);
                         mActionContainerTouchInterceptor.setOnClickListener(
                                 (container) -> {
@@ -324,6 +328,8 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
                                         item.getSupplementalIconOnClickListener().onClick(item);
                                     }
                                 });
+                        mActionContainerTouchInterceptor.setClickable(
+                                item.getSupplementalIconOnClickListener() != null);
                         mTouchInterceptor.setVisibility(View.GONE);
                     }
                     break;
@@ -364,6 +370,8 @@ public class CarUiListItemAdapter extends RecyclerView.Adapter<RecyclerView.View
                     itemOnClickListener.onClick(item);
                 }
             });
+            // Compound button list items should always be clickable
+            mTouchInterceptor.setClickable(true);
             mReducedTouchInterceptor.setVisibility(View.GONE);
             mActionContainerTouchInterceptor.setVisibility(View.GONE);
 

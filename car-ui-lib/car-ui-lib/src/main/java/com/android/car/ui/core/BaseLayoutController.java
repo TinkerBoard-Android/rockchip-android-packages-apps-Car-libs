@@ -51,7 +51,7 @@ public final class BaseLayoutController {
      * {@link #build(Activity)} with the same activity earlier, otherwise will return null.
      */
     @Nullable
-    /* package */ static BaseLayoutController getBaseLayout(Activity activity) {
+    /* package */ static BaseLayoutController getBaseLayoutController(@Nullable Activity activity) {
         return sBaseLayoutMap.get(activity);
     }
 
@@ -65,7 +65,7 @@ public final class BaseLayoutController {
     /**
      * Create a new BaseLayoutController for the given {@link Activity}.
      *
-     * <p>You can get a reference to it by calling {@link #getBaseLayout(Activity)}.
+     * <p>You can get a reference to it by calling {@link #getBaseLayoutController(Activity)}.
      */
     /* package */
     static void build(Activity activity) {

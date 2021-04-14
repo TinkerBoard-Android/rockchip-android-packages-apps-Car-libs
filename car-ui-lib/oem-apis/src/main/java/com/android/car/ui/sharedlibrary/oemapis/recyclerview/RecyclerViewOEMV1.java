@@ -17,8 +17,6 @@ package com.android.car.ui.sharedlibrary.oemapis.recyclerview;
 
 import android.view.View;
 
-import com.android.car.ui.sharedlibrary.oemapis.InsetsOEMV1;
-
 /**
  * {@link androidx.recyclerview.widget.RecyclerView}
  */
@@ -26,27 +24,6 @@ public interface RecyclerViewOEMV1 {
 
     /** {@link androidx.recyclerview.widget.RecyclerView#setAdapter(Adapter)} */
     void setAdapter(AdapterOEMV1 adapter);
-
-    /**
-     * Sets the number of columns in which grid needs to be divided.
-     */
-    void setNumOfColumns(int numberOfColumns);
-
-    /**
-     * Sets the scrollbar's insets. This padding is applied in addition to the
-     * insets of the RecyclerView.
-     */
-    void setScrollBarInsets(InsetsOEMV1 insets);
-
-    /**
-     * Sets divider item decoration for linear layout.
-     */
-    void setLinearDividerItemDecoration(boolean enableDividers);
-
-    /**
-     * Sets divider item decoration for grid layout.
-     */
-    void setGridDividerItemDecoration(boolean enableDividers);
 
     /** {@link androidx.recyclerview.widget.RecyclerView#addOnScrollListener} */
     void addOnScrollListener(OnScrollListenerOEMV1 listener);
@@ -66,27 +43,6 @@ public interface RecyclerViewOEMV1 {
     /** {@link androidx.recyclerview.widget.RecyclerView#smoothScrollToPosition(int)} */
     void smoothScrollToPosition(int position);
 
-    /** {@link androidx.recyclerview.widget.RecyclerView#findViewHolderForAdapterPosition(int)} */
-    ViewHolderOEMV1 findViewHolderForAdapterPosition(int position);
-
-    /** {@link androidx.recyclerview.widget.RecyclerView#computeVerticalScrollRange()} */
-    int computeVerticalScrollRange();
-
-    /** {@link androidx.recyclerview.widget.RecyclerView#computeVerticalScrollOffset()} */
-    int computeVerticalScrollOffset();
-
-    /** {@link androidx.recyclerview.widget.RecyclerView#computeVerticalScrollExtent()} */
-    int computeVerticalScrollExtent();
-
-    /** {@link androidx.recyclerview.widget.RecyclerView#computeHorizontalScrollRange()} */
-    int computeHorizontalScrollRange();
-
-    /** {@link androidx.recyclerview.widget.RecyclerView#computeHorizontalScrollOffset()} */
-    int computeHorizontalScrollOffset();
-
-    /** {@link androidx.recyclerview.widget.RecyclerView#computeHorizontalScrollExtent()} */
-    int computeHorizontalScrollExtent();
-
     /** {@link androidx.recyclerview.widget.RecyclerView#setHasFixedSize(boolean)} */
     void setHasFixedSize(boolean hasFixedSize);
 
@@ -94,7 +50,22 @@ public interface RecyclerViewOEMV1 {
     boolean hasFixedSize();
 
     /**
+     * set {@link LayoutStyleOEMV1}. This is the replacement for
+     * {@link androidx.recyclerview.widget.RecyclerView.LayoutManager}
+     */
+    void setLayoutStyle(LayoutStyleOEMV1 layoutStyle);
+
+    /**
      * Returns the view that will be displayed on the screen.
      */
     View getView();
+
+    /** {@link android.view.View#setPadding(int, int, int, int)} */
+    void setPadding(int left, int top, int right, int bottom);
+
+    /** {@link android.view.View#setPaddingRelative(int, int, int, int)} */
+    void setPaddingRelative(int start, int top, int end, int bottom);
+
+    /** {@link androidx.recyclerview.widget.RecyclerView#setClipToPadding(boolean)} */
+    void setClipToPadding(boolean clipToPadding);
 }

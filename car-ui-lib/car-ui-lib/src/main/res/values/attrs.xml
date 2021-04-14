@@ -108,10 +108,6 @@
         car_ui_recyclerview_divider.xml and car_ui_divider.xml drawables
         respectively for styling dividers. -->
         <attr name="enableDivider" format="boolean" />
-        <!-- Top offset for car ui recycler view. -->
-        <attr name="topOffset" format="integer" />
-        <!-- Bottom offset for car ui recycler view for linear layout. -->
-        <attr name="bottomOffset" format="integer" />
 
         <!-- Whether to enable rotary scrolling. Disabled by default. With rotary scrolling enabled,
         rotating the rotary controller will scroll rather than moving the focus when moving the
@@ -140,6 +136,8 @@
 
         <!-- car ui recyclerview orientation -->
         <attr name="android:orientation" />
+        <!-- car ui recyclerview layout reversed -->
+        <attr name="reverseLayout" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="CarUiPreference">
@@ -295,25 +293,5 @@
              false, the FocusParkingView allows itself to be focused instead. This should be false
              for the FocusParkingView in an ActivityView. The default value is true. -->
         <attr name="shouldRestoreFocus" format="boolean"/>
-    </declare-styleable>
-
-    <declare-styleable name="CarUiButton">
-        <attr name="android:id"/>
-        <attr name="android:enabled"/>
-        <attr name="carUiButtonTitle" format="string"/>
-        <attr name="carUiButtonIcon" format="reference"/>
-        <attr name="carUiButtonColorScheme" format="enum">
-            <enum name="basic" value="0"/>
-            <enum name="red" value="1"/>
-            <enum name="blue" value="2"/>
-            <enum name="green" value="3"/>
-            <enum name="yellow" value="4"/>
-        </attr>
-        <attr name="carUiButtonStyle" format="enum">
-            <enum name="primary" value="0"/>
-            <enum name="secondary" value="1"/>
-            <enum name="floating" value="2"/>
-        </attr>
-        <attr name="carUiButtonBorderless" format="boolean"/>
     </declare-styleable>
 </resources>

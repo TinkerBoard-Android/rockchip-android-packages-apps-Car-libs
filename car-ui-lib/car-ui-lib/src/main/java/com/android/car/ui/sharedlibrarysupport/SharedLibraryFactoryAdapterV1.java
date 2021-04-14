@@ -16,23 +16,29 @@
 package com.android.car.ui.sharedlibrarysupport;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.car.ui.R;
 import com.android.car.ui.appstyledview.AppStyledViewController;
 import com.android.car.ui.appstyledview.AppStyledViewControllerAdapterV1;
 import com.android.car.ui.appstyledview.AppStyledViewControllerImpl;
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
-import com.android.car.ui.button.CarUiButton;
-import com.android.car.ui.button.CarUiButtonAttributes;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
+import com.android.car.ui.recyclerview.CarUiRecyclerView.CarUiRecyclerViewLayout;
+import com.android.car.ui.recyclerview.RecyclerViewAdapterV1;
 import com.android.car.ui.sharedlibrary.oemapis.InsetsOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryFactoryOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.appstyledview.AppStyledViewControllerOEMV1;
+import com.android.car.ui.sharedlibrary.oemapis.recyclerview.LayoutStyleOEMV1;
+import com.android.car.ui.sharedlibrary.oemapis.recyclerview.RecyclerViewAttributesOEMV1;
+import com.android.car.ui.sharedlibrary.oemapis.recyclerview.SpanSizeLookupOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
 import com.android.car.ui.toolbar.ToolbarController;
 import com.android.car.ui.toolbar.ToolbarControllerAdapterV1;
@@ -74,13 +80,6 @@ public final class SharedLibraryFactoryAdapterV1 implements SharedLibraryFactory
 
     @NonNull
     @Override
-    public CarUiButton createButton(Context context, @Nullable CarUiButtonAttributes attrs) {
-        // TODO(b/172345817) Create OEM APIs for this and call them from here
-        return mFactoryStub.createButton(context, attrs);
-    }
-
-    @NonNull
-    @Override
     public CarUiTextView createTextView(Context context, AttributeSet attrs) {
         return mFactoryStub.createTextView(context, attrs);
     }
@@ -99,8 +98,104 @@ public final class SharedLibraryFactoryAdapterV1 implements SharedLibraryFactory
     }
 
     @Override
-    public CarUiRecyclerView createRecyclerView(Context context, AttributeSet attrs) {
-        // TODO(b/177687696): implement the adapter
-        return mFactoryStub.createRecyclerView(context, attrs);
+    public CarUiRecyclerView createRecyclerView(@NonNull Context context,
+            @Nullable AttributeSet attrs) {
+        RecyclerViewAdapterV1 rv = new RecyclerViewAdapterV1(context, attrs);
+        RecyclerViewAttributesOEMV1 oemAttrs = from(context, attrs);
+        rv.setRecyclerViewOEMV1(mOem.createRecyclerView(context, oemAttrs));
+        return rv;
+    }
+
+    private static RecyclerViewAttributesOEMV1 from(Context context, AttributeSet attrs) {
+        RecyclerViewAttributesOEMV1 oemAttrs = null;
+        if (attrs != null) {
+            TypedArray a = context.obtainStyledAttributes(
+                    attrs,
+                    R.styleable.CarUiRecyclerView,
+                    0,
+                    R.style.Widget_CarUi_CarUiRecyclerView);
+            final int carUiRecyclerViewLayout = a.getInt(
+                    R.styleable.CarUiRecyclerView_layoutStyle,
+                    CarUiRecyclerViewLayout.LINEAR);
+            final int spanCount = a.getInt(
+                    R.styleable.CarUiRecyclerView_numOfColumns, /* defValue= */ 1);
+            final boolean rotaryScrollEnabled = a.getBoolean(
+                    R.styleable.CarUiRecyclerView_rotaryScrollEnabled,
+                    /* defValue=*/ false);
+            final int orientation = a.getInt(
+                    R.styleable.CarUiRecyclerView_android_orientation,
+                    RecyclerView.VERTICAL);
+            final boolean reversed = a.getBoolean(
+                    R.styleable.CarUiRecyclerView_reverseLayout, false);
+            final int size = a.getInt(R.styleable.CarUiRecyclerView_carUiSize,
+                    CarUiRecyclerView.SIZE_LARGE);
+            a.recycle();
+
+            final LayoutStyleOEMV1 layoutStyle = new LayoutStyleOEMV1() {
+                @Override
+                public int getSpanCount() {
+                    return spanCount;
+                }
+
+                @Override
+                public int getLayoutType() {
+                    switch (carUiRecyclerViewLayout) {
+                        case CarUiRecyclerViewLayout.GRID:
+                            return LayoutStyleOEMV1.LAYOUT_TYPE_GRID;
+                        case CarUiRecyclerViewLayout.LINEAR:
+                        default:
+                            return LayoutStyleOEMV1.LAYOUT_TYPE_LINEAR;
+                    }
+                }
+
+                @Override
+                public int getOrientation() {
+                    switch (orientation) {
+                        case RecyclerView.HORIZONTAL:
+                            return LayoutStyleOEMV1.ORIENTATION_HORIZONTAL;
+                        case RecyclerView.VERTICAL:
+                        default:
+                            return LayoutStyleOEMV1.ORIENTATION_VERTICAL;
+                    }
+                }
+
+                @Override
+                public boolean getReverseLayout() {
+                    return reversed;
+                }
+
+                @Override
+                public SpanSizeLookupOEMV1 getSpanSizeLookup() {
+                    // This can be set via setLayoutStyle API later.
+                    return null;
+                }
+            };
+
+            oemAttrs = new RecyclerViewAttributesOEMV1() {
+                @Override
+                public boolean isRotaryScrollEnabled() {
+                    return rotaryScrollEnabled;
+                }
+
+                @Override
+                public int getSize() {
+                    switch (size) {
+                        case CarUiRecyclerView.SIZE_SMALL:
+                            return RecyclerViewAttributesOEMV1.SIZE_SMALL;
+                        case CarUiRecyclerView.SIZE_MEDIUM:
+                            return RecyclerViewAttributesOEMV1.SIZE_MEDIUM;
+                        case CarUiRecyclerView.SIZE_LARGE:
+                        default:
+                            return RecyclerViewAttributesOEMV1.SIZE_LARGE;
+                    }
+                }
+
+                @Override
+                public LayoutStyleOEMV1 getLayoutStyle() {
+                    return layoutStyle;
+                }
+            };
+        }
+        return oemAttrs;
     }
 }

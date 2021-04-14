@@ -103,6 +103,13 @@ class CarUiEditText extends EditText {
             for (PrivateImeCommandCallback listener : mPrivateImeCommandCallback) {
                 listener.onSurfaceInfo(displayId, binder, height, width);
             }
+            return false;
+        }
+
+        if (height != 0 || width != 0) {
+            for (PrivateImeCommandCallback listener : mPrivateImeCommandCallback) {
+                listener.reLayout(height, width);
+            }
         }
 
         return false;

@@ -15,42 +15,16 @@
  */
 package com.android.car.ui.sharedlibrary.oemapis.recyclerview;
 
+import android.view.View;
+
 /** {@link androidx.recyclerview.widget.RecyclerView.ViewHolder} */
 public interface ViewHolderOEMV1 {
-
-    /** {@link androidx.recyclerview.widget.RecyclerView.ViewHolder#getAbsoluteAdapterPosition()} */
-    int getAbsoluteAdapterPosition();
-
-    /** {@link androidx.recyclerview.widget.RecyclerView.ViewHolder#getAdapterPosition()} */
-    int getAdapterPosition();
-
-    /** {@link androidx.recyclerview.widget.RecyclerView.ViewHolder#getBindingAdapter()} */
-    AdapterOEMV1<? extends ViewHolderOEMV1> getBindingAdapter();
-
-    /** {@link androidx.recyclerview.widget.RecyclerView.ViewHolder#getBindingAdapterPosition()} */
-    int getBindingAdapterPosition();
-
-    /** {@link androidx.recyclerview.widget.RecyclerView.ViewHolder#getItemId()} */
-    long getItemId();
-
-    /** {@link androidx.recyclerview.widget.RecyclerView.ViewHolder#getItemViewType()} */
-    int getItemViewType();
-
-    /** {@link androidx.recyclerview.widget.RecyclerView.ViewHolder#getLayoutPosition()} */
-    int getLayoutPosition();
-
-    /** {@link androidx.recyclerview.widget.RecyclerView.ViewHolder#getOldPosition()} */
-    int getOldPosition();
-
-    /** {@link androidx.recyclerview.widget.RecyclerView.ViewHolder#getPosition()} */
-    int getPosition();
 
     /** {@link androidx.recyclerview.widget.RecyclerView.ViewHolder#isRecyclable()} */
     boolean isRecyclable();
 
-    /** {@link androidx.recyclerview.widget.RecyclerView.ViewHolder#setIsRecyclable(boolean)} */
-    void setIsRecyclable(boolean recyclable);
-
-    /** {@link androidx.recyclerview.widget.RecyclerView.ViewHolder#toString()} */
-    String toString();
+    /**
+     * Returns the ItemView for each element in the recyclerview.
+     */
+    View getItemView();
 }

@@ -37,7 +37,8 @@ public class CarUiText {
         SpannableStringBuilder builder = new SpannableStringBuilder();
         CharSequence delimiter = "";
         for (CarUiText line : lines) {
-            builder.append(delimiter).append(line.getPreferredText());
+            builder.append(delimiter)
+                .append(line.getPreferredText() == null ? " " : line.getPreferredText());
             delimiter = "\n";
         }
         return builder;

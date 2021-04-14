@@ -41,7 +41,9 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.SurfaceControlViewHost.SurfacePackage;
+import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,6 +60,7 @@ import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.android.car.ui.CarUiLayoutInflaterFactory;
 import com.android.car.ui.R;
 import com.android.car.ui.core.SearchResultsProvider;
 import com.android.car.ui.recyclerview.CarUiContentListItem;
@@ -223,7 +226,13 @@ public class CarUiImeWideScreenController {
         if (!isWideScreenMode()) {
             return inputView;
         }
-        mRootView = View.inflate(mContext, R.layout.car_ui_ims_wide_screen_input_view, null);
+
+        LayoutInflater inflater = LayoutInflater.from(mContext);
+        if (inflater.getFactory2() == null) {
+            inflater.setFactory2(new CarUiLayoutInflaterFactory());
+        }
+
+        mRootView = inflater.inflate(R.layout.car_ui_ims_wide_screen_input_view, null);
 
         mInputFrame = mRootView.requireViewById(R.id.car_ui_wideScreenInputArea);
         mInputFrame.addView(inputView, new FrameLayout.LayoutParams(
@@ -234,6 +243,25 @@ public class CarUiImeWideScreenController {
                         R.bool.car_ui_ime_wide_screen_allow_app_hide_content_area);
 
         mContentAreaSurfaceView = mRootView.requireViewById(R.id.car_ui_ime_surface);
+        mContentAreaSurfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
+            @Override
+            public void surfaceCreated(SurfaceHolder holder) {
+            }
+
+            @Override
+            public void surfaceChanged(SurfaceHolder holder, int format,
+                                       int width, int height) {
+                Bundle bundle = new Bundle();
+                bundle.putInt(CONTENT_AREA_SURFACE_HEIGHT,
+                        mContentAreaSurfaceView.getHeight());
+                bundle.putInt(CONTENT_AREA_SURFACE_WIDTH, mContentAreaSurfaceView.getWidth());
+                mInputConnection.performPrivateCommand(WIDE_SCREEN_ACTION, bundle);
+            }
+
+            @Override
+            public void surfaceDestroyed(SurfaceHolder holder) {
+            }
+        });
         mContentAreaSurfaceView.setZOrderOnTop(true);
         mWideScreenDescriptionTitle =
                 mRootView.requireViewById(R.id.car_ui_wideScreenDescriptionTitle);
@@ -300,7 +328,7 @@ public class CarUiImeWideScreenController {
      * and "add_desc_to_content_area" to provide the data. Sending action with only
      * "add_desc_to_content_area" bundle key will not add an extra view but will display only the
      * description and not the title.
-     *
+     * <p>
      * When the IME window is closed all the views are reset. For the default view visibility see
      * {@link #resetAutomotiveWideScreenViews()}.
      *
@@ -495,7 +523,8 @@ public class CarUiImeWideScreenController {
      */
     @RequiresApi(api = VERSION_CODES.R)
     public void onStartInputView(@NonNull EditorInfo editorInfo,
-            @Nullable InputConnection inputConnection, @Nullable CharSequence textForImeAction) {
+                                 @Nullable InputConnection inputConnection,
+                                 @Nullable CharSequence textForImeAction) {
         if (!isWideScreenMode()) {
             return;
         }
@@ -585,7 +614,8 @@ public class CarUiImeWideScreenController {
         // Dispatch the window visibility change for IME window as soon as its displayed.
         mRootView.dispatchWindowVisibilityChanged(View.VISIBLE);
         IBinder hostToken = null;
-        int displayId = mContentAreaSurfaceView.getDisplay().getDisplayId();
+        int displayId = mContentAreaSurfaceView.getDisplay() == null
+                ? 0 : mContentAreaSurfaceView.getDisplay().getDisplayId();
         hostToken = mContentAreaSurfaceView.getHostToken();
 
         Bundle bundle = new Bundle();
@@ -625,7 +655,7 @@ public class CarUiImeWideScreenController {
      */
     @Nullable
     private static PackageInfo getPackageInfo(Context context,
-            String packageName) {
+                                              String packageName) {
         PackageManager packageManager = context.getPackageManager();
         PackageInfo packageInfo = null;
         try {
@@ -665,7 +695,7 @@ public class CarUiImeWideScreenController {
      * To support wide screen mode, IME should always call
      * {@link InputMethodService#setExtractViewShown}
      * with false and pass the flag to this method.
-     *
+     * <p>
      * For example, within the IMS service call
      * <pre>
      *   @Override
@@ -678,7 +708,7 @@ public class CarUiImeWideScreenController {
      *     mImeWideScreenController.setExtractViewShown(shown);
      *   }
      * </pre>
-     *
+     * <p>
      * This is required as IMS checks for ExtractViewIsShown and if that is true then set the
      * touchable insets to the entire screen rather than a region. If an app hides the content area
      * in that case we want the user to be able to interact with the application.
