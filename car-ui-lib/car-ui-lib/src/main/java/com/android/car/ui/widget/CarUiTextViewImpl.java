@@ -147,7 +147,7 @@ public final class CarUiTextViewImpl extends CarUiTextView {
             while (!Character.isWhitespace(text.charAt(index - offset))) {
                 offset++;
 
-                if (index - offset == lastLineEnd) {
+                if (index - offset == lastLineEnd || offset >= index) {
                     offset = 0;
                     break;
                 }
@@ -192,7 +192,7 @@ public final class CarUiTextViewImpl extends CarUiTextView {
                     offset++;
 
                     // partial word reaches to the start of line, so it must be kept
-                    if (index - offset == lastLineEnd) {
+                    if (index - offset == lastLineEnd || offset >= index) {
                         offset = 0;
                         break;
                     }
