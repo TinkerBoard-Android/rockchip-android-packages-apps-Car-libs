@@ -130,6 +130,11 @@ public abstract class CarUiRecyclerView extends RecyclerView {
     }
 
     /**
+     * Return's the container which contains the scrollbar and this RecyclerView.
+     */
+    public abstract View getContainer();
+
+    /**
      * Set the {@link LayoutManager} that this RecyclerView will use.
      *
      * <p>In contrast to other adapter-backed views such as {@link android.widget.ListView}

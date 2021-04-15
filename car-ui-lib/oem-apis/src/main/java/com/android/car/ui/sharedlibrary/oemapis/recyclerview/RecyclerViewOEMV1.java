@@ -68,4 +68,9 @@ public interface RecyclerViewOEMV1 {
 
     /** {@link androidx.recyclerview.widget.RecyclerView#setClipToPadding(boolean)} */
     void setClipToPadding(boolean clipToPadding);
+
+    /**
+     * Return's the container which contains the scrollbar and this RecyclerView.
+     */
+    View getContainer();
 }

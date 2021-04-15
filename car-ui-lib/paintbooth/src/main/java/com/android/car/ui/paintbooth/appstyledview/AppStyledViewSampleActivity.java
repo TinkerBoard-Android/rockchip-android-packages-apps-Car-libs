@@ -52,17 +52,8 @@ public class AppStyledViewSampleActivity extends AppCompatActivity implements
 
         ToolbarController toolbar = CarUi.getToolbar(this);
         toolbar.setTitle(getTitle());
-        toolbar.setState(Toolbar.State.SUBPAGE);
+        toolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
         toolbar.setLogo(R.drawable.ic_launcher);
-        toolbar.registerOnBackListener(
-                () -> {
-                    if (toolbar.getState() == Toolbar.State.SEARCH
-                            || toolbar.getState() == Toolbar.State.EDIT) {
-                        toolbar.setState(Toolbar.State.SUBPAGE);
-                        return true;
-                    }
-                    return false;
-                });
 
         AppStyledDialogController controller = new AppStyledDialogController(this);
         int width = controller.getAppStyledViewDialogWidth();
@@ -78,10 +69,8 @@ public class AppStyledViewSampleActivity extends AppCompatActivity implements
         Context contextThemeWrapper = new ContextThemeWrapper(testContext,
                 R.style.AppStyledDialogThemeSample);
 
-        LayoutInflater inflator = LayoutInflater.from(contextThemeWrapper);
-
-        View appStyledTestView = inflator.inflate(R.layout.app_styled_view_test_sample, null,
-                false);
+        View appStyledTestView = LayoutInflater.from(contextThemeWrapper)
+                .inflate(R.layout.app_styled_view_test_sample, null, false);
 
         Button btn = findViewById(R.id.show_app_styled_fragment);
         btn.setOnClickListener(v -> {

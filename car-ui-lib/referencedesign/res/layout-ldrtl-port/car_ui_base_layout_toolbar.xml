@@ -133,7 +133,7 @@
                 android:layout_height="0dp"
                 app:layout_constraintBottom_toTopOf="@id/car_ui_toolbar_row_separator_guideline"
                 app:layout_constraintLeft_toRightOf="@+id/car_ui_toolbar_menu_items_container"
-                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintRight_toLeftOf="@id/car_ui_toolbar_title_logo_container"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <LinearLayout

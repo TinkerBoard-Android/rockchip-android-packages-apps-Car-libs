@@ -113,12 +113,21 @@ public interface ToolbarController {
 
     /**
      * Sets whether or not tabs should also be shown in the SUBPAGE {@link Toolbar.State}.
+     *
+     * @deprecated When not using {@link #setState(Toolbar.State)}, this method is not necessary.
+     *             Simply add tabs to the toolbar when they should be shown.
      */
+    @Deprecated
     void setShowTabsInSubpage(boolean showTabs);
 
     /**
      * Gets whether or not tabs should also be shown in the SUBPAGE {@link Toolbar.State}.
+     *
+     * @deprecated When not using {@link #setState(Toolbar.State)},
+     *             {@link #setShowTabsInSubpage(boolean)} is not necessary.
+     *             Simply add tabs to the toolbar when they should be shown.
      */
+    @Deprecated
     boolean getShowTabsInSubpage();
 
     /**
@@ -158,6 +167,12 @@ public interface ToolbarController {
      */
     void setSearchIcon(Drawable d);
 
+    /**
+     * Sets the search mode, which can enable/disable the search bar in the toolbar.
+     *
+     * See {@link SearchMode}.
+     */
+    void setSearchMode(SearchMode mode);
 
     /** Sets the {@link Toolbar.NavButtonMode} */
     void setNavButtonMode(Toolbar.NavButtonMode style);
@@ -237,10 +252,21 @@ public interface ToolbarController {
     /**
      * Sets the state of the toolbar. This will show/hide the appropriate elements of the toolbar
      * for the desired state.
+     *
+     * @deprecated Instead of using setState(), simply add the elements you want to see when
+     *             you want to see them. The back button visibility can be controlled with the
+     *             {@link com.android.car.ui.toolbar.Toolbar.NavButtonMode#DISABLED} enum,
+     *             and the search bar can also be controlled with the {@link SearchMode} enum.
      */
+    @Deprecated
     void setState(Toolbar.State state);
 
-    /** Gets the current {@link Toolbar.State} of the toolbar. */
+    /**
+     * Gets the current {@link Toolbar.State} of the toolbar.
+     *
+     * @deprecated See {@link #setState(Toolbar.State)} for details.
+     */
+    @Deprecated
     Toolbar.State getState();
 
     /**

@@ -19,7 +19,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -163,7 +162,7 @@ public final class Toolbar extends FrameLayout implements ToolbarController {
                 setSearchHint(searchHint);
             }
 
-            switch (a.getInt(R.styleable.CarUiToolbar_car_ui_state, 0)) {
+            switch (a.getInt(R.styleable.CarUiToolbar_car_ui_state, -1)) {
                 case 0:
                     setState(State.HOME);
                     break;
@@ -174,13 +173,10 @@ public final class Toolbar extends FrameLayout implements ToolbarController {
                     setState(State.SEARCH);
                     break;
                 default:
-                    if (Log.isLoggable(TAG, Log.WARN)) {
-                        Log.w(TAG, "Unknown initial state");
-                    }
                     break;
             }
 
-            switch (a.getInt(R.styleable.CarUiToolbar_car_ui_navButtonMode, 0)) {
+            switch (a.getInt(R.styleable.CarUiToolbar_car_ui_navButtonMode, -1)) {
                 case 0:
                     setNavButtonMode(NavButtonMode.BACK);
                     break;
@@ -191,9 +187,6 @@ public final class Toolbar extends FrameLayout implements ToolbarController {
                     setNavButtonMode(NavButtonMode.DOWN);
                     break;
                 default:
-                    if (Log.isLoggable(TAG, Log.WARN)) {
-                        Log.w(TAG, "Unknown navigation button style");
-                    }
                     break;
             }
         } finally {
@@ -397,6 +390,11 @@ public final class Toolbar extends FrameLayout implements ToolbarController {
         mController.setSearchIcon(d);
     }
 
+    @Override
+    public void setSearchMode(SearchMode mode) {
+        mController.setSearchMode(mode);
+    }
+
     /**
      * An enum of possible styles the nav button could be in. All styles will still call
      * {@link OnBackListener#onBack()}.
@@ -407,7 +405,9 @@ public final class Toolbar extends FrameLayout implements ToolbarController {
         /** A close button */
         CLOSE,
         /** A down button, used to indicate that the page will animate down when navigating away */
-        DOWN
+        DOWN,
+        /** Don't show the nav button */
+        DISABLED,
     }
 
     /** Sets the {@link NavButtonMode} */

@@ -44,6 +44,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.annotation.XmlRes;
+import androidx.core.content.ContextCompat;
 
 import com.android.car.ui.AlertDialogBuilder;
 import com.android.car.ui.R;
@@ -51,6 +52,7 @@ import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
 import com.android.car.ui.recyclerview.CarUiContentListItem;
 import com.android.car.ui.recyclerview.CarUiListItem;
 import com.android.car.ui.recyclerview.CarUiListItemAdapter;
+import com.android.car.ui.toolbar.Toolbar.NavButtonMode;
 import com.android.car.ui.utils.CarUiUtils;
 
 import java.lang.ref.WeakReference;
@@ -110,7 +112,9 @@ public final class ToolbarControllerImpl implements ToolbarController {
     private boolean mHasLogo = false;
     private boolean mShowMenuItemsWhileSearching;
     private Toolbar.State mState = Toolbar.State.HOME;
-    private Toolbar.NavButtonMode mNavButtonMode = Toolbar.NavButtonMode.BACK;
+    private boolean mStateSet = false;
+    private Toolbar.NavButtonMode mNavButtonMode = Toolbar.NavButtonMode.DISABLED;
+    private SearchMode mSearchMode = SearchMode.DISABLED;
     @NonNull
     private List<MenuItem> mMenuItems = Collections.emptyList();
     private List<MenuItem> mOverflowItems = new ArrayList<>();
@@ -120,16 +124,16 @@ public final class ToolbarControllerImpl implements ToolbarController {
     private View[] mMenuItemViews;
     private int mMenuItemsXmlId = 0;
     private AlertDialog mOverflowDialog;
-    private boolean mNavIconSpaceReserved;
-    private boolean mLogoFillsNavIconSpace;
+    private final boolean mNavIconSpaceReserved;
+    private final boolean mLogoFillsNavIconSpace;
+    private final boolean mShowLogo;
     private View mViewForContentAreaInWideScreenMode;
     private Drawable mSearchResultsInputViewIcon;
-    private boolean mShowLogo;
     private List<? extends CarUiImeSearchListItem> mSearchItems;
     private final ProgressBarController mProgressBar;
     private final MenuItem.Listener mOverflowItemListener = item -> {
         updateOverflowDialog(item);
-        setState(getState());
+        update();
     };
 
 
@@ -203,6 +207,10 @@ public final class ToolbarControllerImpl implements ToolbarController {
         return mContext;
     }
 
+    private Drawable getDrawable(@DrawableRes int resId) {
+        return ContextCompat.getDrawable(getContext(), resId);
+    }
+
     /**
      * Returns {@code true} if a two row layout in enabled for the toolbar.
      */
@@ -221,7 +229,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
         String titleText = getContext().getString(title);
         mTitleText = titleText == null ? "" : titleText;
         asyncSetText(mTitle, mTitleText, Runnable::run);
-        setState(getState());
+        update();
     }
 
     /**
@@ -233,7 +241,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
     public void setTitle(CharSequence title) {
         mTitleText = title == null ? "" : title;
         asyncSetText(mTitle, mTitleText, Runnable::run);
-        setState(getState());
+        update();
     }
 
     private void asyncSetText(TextView textView, @NonNull CharSequence title, Executor bgExecutor) {
@@ -276,7 +284,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
         String subTitleText = getContext().getString(subTitle);
         mSubtitleText = subTitleText;
         asyncSetText(mSubtitle, subTitleText == null ? "" : subTitleText, Runnable::run);
-        setState(getState());
+        update();
     }
 
     /**
@@ -288,7 +296,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
     public void setSubtitle(CharSequence subTitle) {
         mSubtitleText = subTitle == null ? "" : subTitle;
         asyncSetText(mSubtitle, mSubtitleText, Runnable::run);
-        setState(getState());
+        update();
     }
 
     @Override
@@ -320,14 +328,14 @@ public final class ToolbarControllerImpl implements ToolbarController {
     @Override
     public void addTab(TabLayout.Tab tab) {
         mTabLayout.addTab(tab);
-        setState(getState());
+        update();
     }
 
     /** Removes all the tabs. */
     @Override
     public void clearAllTabs() {
         mTabLayout.clearAllTabs();
-        setState(getState());
+        update();
     }
 
     /**
@@ -355,7 +363,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
     public void setShowTabsInSubpage(boolean showTabs) {
         if (showTabs != mShowTabsInSubpage) {
             mShowTabsInSubpage = showTabs;
-            setState(getState());
+            update();
         }
     }
 
@@ -384,7 +392,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
         if (resId != 0) {
             bgExecutor.execute(() -> {
                 // load resource on background thread.
-                Drawable drawable = getContext().getDrawable(resId);
+                Drawable drawable = getDrawable(resId);
                 mTitleLogo.post(() -> {
                     // UI thread.
                     mLogoInNavIconSpace.setImageDrawable(drawable);
@@ -395,7 +403,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
         } else {
             mHasLogo = false;
         }
-        setState(mState);
+        update();
     }
 
     /**
@@ -415,7 +423,8 @@ public final class ToolbarControllerImpl implements ToolbarController {
         } else {
             mHasLogo = false;
         }
-        setState(mState);
+
+        update();
     }
 
     /** Sets the hint for the search bar. */
@@ -446,7 +455,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
      */
     @Override
     public void setSearchIcon(@DrawableRes int resId) {
-        setSearchIcon(getContext().getDrawable(resId));
+        setSearchIcon(getDrawable(resId));
     }
 
     /**
@@ -468,16 +477,19 @@ public final class ToolbarControllerImpl implements ToolbarController {
 
     /** Sets the {@link Toolbar.NavButtonMode} */
     @Override
-    public void setNavButtonMode(Toolbar.NavButtonMode style) {
-        if (style != mNavButtonMode) {
-            mNavButtonMode = style;
-            setState(mState);
+    public void setNavButtonMode(Toolbar.NavButtonMode mode) {
+        if (mode != mNavButtonMode) {
+            mNavButtonMode = mode;
+            update();
         }
     }
 
     /** Gets the {@link Toolbar.NavButtonMode} */
     @Override
-    public Toolbar.NavButtonMode getNavButtonMode() {
+    public NavButtonMode getNavButtonMode() {
+        if (mStateSet && mNavButtonMode == NavButtonMode.DISABLED && mState != Toolbar.State.HOME) {
+            return Toolbar.NavButtonMode.BACK;
+        }
         return mNavButtonMode;
     }
 
@@ -489,8 +501,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
         }
 
         if (shown) {
-            mBackground.setBackground(
-                    getContext().getDrawable(R.drawable.car_ui_toolbar_background));
+            mBackground.setBackground(getDrawable(R.drawable.car_ui_toolbar_background));
         } else {
             mBackground.setBackground(null);
         }
@@ -566,7 +577,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
             }
         }
 
-        setState(mState);
+        update();
     }
 
     /**
@@ -711,7 +722,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
     @Override
     public void setShowMenuItemsWhileSearching(boolean showMenuItems) {
         mShowMenuItemsWhileSearching = showMenuItems;
-        setState(mState);
+        update();
     }
 
     /** Returns if {@link MenuItem MenuItems} are shown while searching */
@@ -741,40 +752,65 @@ public final class ToolbarControllerImpl implements ToolbarController {
      */
     @Override
     public void setState(Toolbar.State state) {
-        mState = state;
+        if (mState != state || !mStateSet) {
+            mState = state;
+            mStateSet = true;
+            update();
+        }
+    }
 
-        if (mSearchView == null && (state == Toolbar.State.SEARCH || state == Toolbar.State.EDIT)) {
-            SearchView searchView = new SearchView(getContext());
-            searchView.setHint(mSearchHint);
-            searchView.setIcon(mSearchIcon);
-            searchView.setSearchQuery(mSearchQuery);
-            searchView.setSearchListeners(mOnSearchListeners);
-            searchView.setSearchCompletedListeners(mOnSearchCompletedListeners);
-            searchView.setVisibility(GONE);
+    @Override
+    public void setSearchMode(SearchMode mode) {
+        if (mStateSet) {
+            throw new IllegalStateException("Cannot set search mode when using setState()");
+        }
+        if (mSearchMode != mode) {
+            mSearchMode = mode;
+            update();
+        }
+    }
 
-            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT);
-            mSearchViewContainer.addView(searchView, layoutParams);
-            if (canShowSearchResultsView()) {
-                searchView.setViewToImeWideScreenSurface(mViewForContentAreaInWideScreenMode);
+    private void update() {
+        // Start by removing mState/mStateSet from the equation by incorporating them into other
+        // variables.
+        Toolbar.NavButtonMode navButtonMode = mNavButtonMode;
+        if (mStateSet) {
+            if (mState == Toolbar.State.HOME) {
+                navButtonMode = Toolbar.NavButtonMode.DISABLED;
+            } else if (navButtonMode == Toolbar.NavButtonMode.DISABLED) {
+                navButtonMode = Toolbar.NavButtonMode.BACK;
             }
+        }
 
-            searchView.installWindowInsetsListener(mSearchViewContainer);
-
-            if (mSearchItems != null) {
-                searchView.setSearchItemsForWideScreen(mSearchItems);
+        SearchMode searchMode = mSearchMode;
+        if (mStateSet) {
+            if (mState == Toolbar.State.SEARCH) {
+                searchMode = SearchMode.SEARCH;
+            } else if (mState == Toolbar.State.EDIT) {
+                searchMode = SearchMode.EDIT;
+            } else {
+                searchMode = SearchMode.DISABLED;
             }
+        }
 
-            if (mSearchResultsInputViewIcon != null) {
-                searchView.setSearchResultsInputViewIcon(mSearchResultsInputViewIcon);
-            }
+        boolean hasLogo = mHasLogo;
+        if (mStateSet && (mState == Toolbar.State.SEARCH || mState == Toolbar.State.EDIT)) {
+            hasLogo = false;
+        }
 
-            mSearchView = searchView;
+        boolean hasTabs = mTabLayout.getTabCount() > 0;
+        if (mStateSet && mState != Toolbar.State.HOME
+                    && !(mState == Toolbar.State.SUBPAGE && mShowTabsInSubpage)) {
+            hasTabs = false;
+        }
+
+        boolean isSearching = searchMode != SearchMode.DISABLED;
+        if (mSearchView == null && isSearching) {
+            inflateSearchView();
         }
 
         for (MenuItemRenderer renderer : mMenuItemRenderers) {
-            renderer.setToolbarState(mState);
+            renderer.setToolbarIsSearching(searchMode == SearchMode.SEARCH);
         }
 
         View.OnClickListener backClickListener = (v) -> {
@@ -792,78 +828,100 @@ public final class ToolbarControllerImpl implements ToolbarController {
             }
         };
 
-        if (state == Toolbar.State.SEARCH) {
-            mNavIcon.setImageResource(R.drawable.car_ui_icon_search_nav_icon);
-        } else {
-            switch (mNavButtonMode) {
-                case CLOSE:
-                    mNavIcon.setImageResource(R.drawable.car_ui_icon_close);
-                    break;
-                case DOWN:
-                    mNavIcon.setImageResource(R.drawable.car_ui_icon_down);
-                    break;
-                default:
-                    mNavIcon.setImageResource(R.drawable.car_ui_icon_arrow_back);
-                    break;
-            }
+        switch (navButtonMode) {
+            case CLOSE:
+                mNavIcon.setImageResource(R.drawable.car_ui_icon_close);
+                break;
+            case DOWN:
+                mNavIcon.setImageResource(R.drawable.car_ui_icon_down);
+                break;
+            default:
+                mNavIcon.setImageResource(R.drawable.car_ui_icon_arrow_back);
+                break;
         }
 
-        mNavIcon.setVisibility(state != Toolbar.State.HOME ? VISIBLE : GONE);
+        mNavIcon.setVisibility(navButtonMode != Toolbar.NavButtonMode.DISABLED
+                ? VISIBLE : GONE);
 
         // Show the logo in the nav space if that's enabled, we have a logo,
-        // and we're in the Home state.
-        mLogoInNavIconSpace.setVisibility(mHasLogo
-                && state == Toolbar.State.HOME
+        // and we don't have a nav button.
+        mLogoInNavIconSpace.setVisibility(hasLogo
+                && navButtonMode == Toolbar.NavButtonMode.DISABLED
                 && mLogoFillsNavIconSpace
                 ? VISIBLE : INVISIBLE);
 
-        // Show logo next to the title if we're in the subpage state or we're configured to not show
+        // Show logo next to the title if we have a back button or we're configured to not show
         // the logo in the nav icon space.
-        mTitleLogoContainer.setVisibility(mHasLogo
-                && (state == Toolbar.State.SUBPAGE
-                || (state == Toolbar.State.HOME && !mLogoFillsNavIconSpace))
+        mTitleLogoContainer.setVisibility(hasLogo
+                && (navButtonMode != Toolbar.NavButtonMode.DISABLED || !mLogoFillsNavIconSpace)
                 ? VISIBLE : GONE);
 
         // Show the nav icon container if we're not in the home space or the logo fills the nav icon
         // container. If car_ui_toolbar_nav_icon_reserve_space is true, hiding it will still reserve
         // its space
         mNavIconContainer.setVisibility(
-                state != Toolbar.State.HOME || (mHasLogo && mLogoFillsNavIconSpace)
+                navButtonMode != Toolbar.NavButtonMode.DISABLED
+                        || (hasLogo && mLogoFillsNavIconSpace)
                         ? VISIBLE : (mNavIconSpaceReserved ? INVISIBLE : GONE));
         mNavIconContainer.setOnClickListener(
-                state != Toolbar.State.HOME ? backClickListener : null);
-        mNavIconContainer.setClickable(state != Toolbar.State.HOME);
-        mNavIconContainer.setContentDescription(state != Toolbar.State.HOME
-                ? mContext.getString(R.string.car_ui_toolbar_nav_icon_content_description)
+                navButtonMode != Toolbar.NavButtonMode.DISABLED ? backClickListener : null);
+        mNavIconContainer.setClickable(navButtonMode != Toolbar.NavButtonMode.DISABLED);
+        mNavIconContainer.setContentDescription(navButtonMode != Toolbar.NavButtonMode.DISABLED
+                ? getContext().getString(R.string.car_ui_toolbar_nav_icon_content_description)
                 : null);
 
-        boolean hasTabs = mTabLayout.getTabCount() > 0
-                && (state == Toolbar.State.HOME
-                || (state == Toolbar.State.SUBPAGE && mShowTabsInSubpage));
         // Show the title if we're in the subpage state, or in the home state with no tabs or tabs
         // on the second row
-        int visibility = (state == Toolbar.State.SUBPAGE || state == Toolbar.State.HOME)
-                && (!hasTabs || mIsTabsInSecondRow)
-                ? VISIBLE : GONE;
-        mTitleContainer.setVisibility(visibility);
+        mTitleContainer.setVisibility((!hasTabs || mIsTabsInSecondRow) && !isSearching
+                ? VISIBLE : GONE);
         mSubtitle.setVisibility(
                 TextUtils.isEmpty(getSubtitle()) ? GONE : VISIBLE);
 
-        mTabLayout.setVisibility(hasTabs ? VISIBLE : GONE);
+        mTabLayout.setVisibility(hasTabs
+                && (mSearchMode == SearchMode.DISABLED || mIsTabsInSecondRow) ? VISIBLE : GONE);
 
         if (mSearchView != null) {
-            if (state == Toolbar.State.SEARCH || state == Toolbar.State.EDIT) {
-                mSearchView.setPlainText(state == Toolbar.State.EDIT);
+            if (isSearching) {
+                mSearchView.setPlainText(searchMode == SearchMode.EDIT);
                 mSearchView.setVisibility(VISIBLE);
             } else {
                 mSearchView.setVisibility(GONE);
             }
         }
 
-        boolean showButtons = (state != Toolbar.State.SEARCH && state != Toolbar.State.EDIT)
-                || mShowMenuItemsWhileSearching;
+        boolean showButtons = !isSearching || mShowMenuItemsWhileSearching;
         mMenuItemsContainer.setVisibility(showButtons ? VISIBLE : GONE);
         mOverflowButton.setVisible(showButtons && countVisibleOverflowItems() > 0);
+    }
+
+    private void inflateSearchView() {
+        SearchView searchView = new SearchView(getContext());
+        searchView.setHint(mSearchHint);
+        searchView.setIcon(mSearchIcon);
+        searchView.setSearchQuery(mSearchQuery);
+        searchView.setSearchListeners(mOnSearchListeners);
+        searchView.setSearchCompletedListeners(mOnSearchCompletedListeners);
+        searchView.setVisibility(GONE);
+
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
+        mSearchViewContainer.addView(searchView, layoutParams);
+        if (canShowSearchResultsView()) {
+            searchView.setViewToImeWideScreenSurface(mViewForContentAreaInWideScreenMode);
+        }
+
+        searchView.installWindowInsetsListener(mSearchViewContainer);
+
+        if (mSearchItems != null) {
+            searchView.setSearchItemsForWideScreen(mSearchItems);
+        }
+
+        if (mSearchResultsInputViewIcon != null) {
+            searchView.setSearchResultsInputViewIcon(mSearchResultsInputViewIcon);
+        }
+
+        mSearchView = searchView;
     }
 
     /**
@@ -898,10 +956,11 @@ public final class ToolbarControllerImpl implements ToolbarController {
      */
     @Override
     public boolean canShowSearchResultsView() {
-        boolean allowAppsToHideContentArea = mContext.getResources().getBoolean(
+        Context context = getContext();
+        boolean allowAppsToHideContentArea = context.getResources().getBoolean(
                 R.bool.car_ui_ime_wide_screen_allow_app_hide_content_area);
-        return isWideScreenMode(mContext) && (allowPackageList(mContext).contains(
-                mContext.getPackageName()) || allowAppsToHideContentArea);
+        return isWideScreenMode(context) && (allowPackageList(context).contains(
+                context.getPackageName()) || allowAppsToHideContentArea);
     }
 
     /**
@@ -920,7 +979,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
         if (!canShowSearchResultsView()) {
             throw new IllegalStateException(
                     "not allowed to add view to wide screen IME, package name: "
-                            + mContext.getPackageName());
+                            + getContext().getPackageName());
         }
 
         if (mSearchView != null) {
@@ -932,7 +991,6 @@ public final class ToolbarControllerImpl implements ToolbarController {
 
     @Override
     public void setSearchResultsInputViewIcon(Drawable drawable) {
-        Log.d(TAG, "setSearchResultsInputViewIcon: ");
         if (mSearchView != null) {
             mSearchView.setSearchResultsInputViewIcon(drawable);
         }

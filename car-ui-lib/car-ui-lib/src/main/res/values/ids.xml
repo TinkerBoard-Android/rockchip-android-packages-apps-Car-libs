@@ -20,9 +20,6 @@
     <!-- Id used as a tag on views to store their CarUi component objects. -->
     <item type="id" name="car_ui_component_reference"/>
 
-    <!-- Id used for CarUiRecyclerView container which holds a recyclerview and a scrollbar. -->
-    <item type="id" name="car_ui_recycler_view_container"/>
-
     <!-- WideScreen Keyboard IDs-->
     <item type="id" name="car_ui_wideScreenInputArea"/>
     <item type="id" name="car_ui_imeWideScreenInputArea"/>

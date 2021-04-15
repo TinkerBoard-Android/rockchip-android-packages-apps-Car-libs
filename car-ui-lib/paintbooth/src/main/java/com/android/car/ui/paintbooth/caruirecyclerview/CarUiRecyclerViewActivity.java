@@ -46,7 +46,7 @@ public class CarUiRecyclerViewActivity extends Activity implements InsetsChanged
 
         ToolbarController toolbar = CarUi.requireToolbar(this);
         toolbar.setTitle(getTitle());
-        toolbar.setState(Toolbar.State.SUBPAGE);
+        toolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
 
         CarUiRecyclerView recyclerView = findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));

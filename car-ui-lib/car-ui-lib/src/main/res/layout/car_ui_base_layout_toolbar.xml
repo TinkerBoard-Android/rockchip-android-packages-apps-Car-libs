@@ -147,9 +147,11 @@
                 android:id="@+id/car_ui_toolbar_search_view_container"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/car_ui_toolbar_search_height"
+                android:layout_marginStart="@dimen/car_ui_toolbar_title_margin_start"
+                app:layout_goneMarginStart="@dimen/car_ui_toolbar_title_no_logo_margin_start"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/car_ui_toolbar_menu_items_container"
-                app:layout_constraintStart_toEndOf="@+id/car_ui_toolbar_nav_icon_container"
+                app:layout_constraintStart_toEndOf="@+id/car_ui_toolbar_title_logo_container"
                 app:layout_constraintTop_toTopOf="parent"/>
 
             <ProgressBar

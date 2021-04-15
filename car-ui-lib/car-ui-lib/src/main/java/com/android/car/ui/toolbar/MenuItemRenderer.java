@@ -39,7 +39,7 @@ class MenuItemRenderer implements MenuItem.Listener {
 
     private final int mMenuItemIconSize;
 
-    private Toolbar.State mToolbarState;
+    private boolean mToolbarIsSearching;
 
     private final MenuItem mMenuItem;
     private final ViewGroup mParentView;
@@ -60,11 +60,13 @@ class MenuItemRenderer implements MenuItem.Listener {
                 .getDimensionPixelSize(R.dimen.car_ui_toolbar_menu_item_icon_size);
     }
 
-    void setToolbarState(Toolbar.State state) {
-        mToolbarState = state;
+    void setToolbarIsSearching(boolean searching) {
+        if (searching != mToolbarIsSearching) {
+            mToolbarIsSearching = searching;
 
-        if (mMenuItem.isSearch()) {
-            updateView();
+            if (mMenuItem.isSearch()) {
+                updateView();
+            }
         }
     }
 
@@ -110,7 +112,7 @@ class MenuItemRenderer implements MenuItem.Listener {
         boolean checkable = mMenuItem.isCheckable();
 
         if (!mMenuItem.isVisible()
-                || (mMenuItem.isSearch() && mToolbarState == Toolbar.State.SEARCH)
+                || (mMenuItem.isSearch() && mToolbarIsSearching)
                 || (!checkable && !hasIcon && !hasText)) {
             mView.setVisibility(View.GONE);
             return;

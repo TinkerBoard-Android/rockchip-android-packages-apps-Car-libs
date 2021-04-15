@@ -353,7 +353,6 @@ limitations under the License.-->
       <item type="id" name="car_ui_list_limiting_message"/>
       <item type="id" name="car_ui_preference_container_without_widget"/>
       <item type="id" name="car_ui_recycler_view"/>
-      <item type="id" name="car_ui_recycler_view_container"/>
       <item type="id" name="car_ui_scroll_bar"/>
       <item type="id" name="car_ui_scrollbar_page_down"/>
       <item type="id" name="car_ui_scrollbar_page_up"/>
