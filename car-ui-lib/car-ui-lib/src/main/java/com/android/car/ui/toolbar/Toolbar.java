@@ -34,7 +34,11 @@ import com.android.car.ui.R;
 import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
 import com.android.car.ui.recyclerview.CarUiListItem;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * A toolbar for Android Automotive OS apps.
@@ -126,6 +130,7 @@ public final class Toolbar extends FrameLayout implements ToolbarController {
     private ToolbarControllerImpl mController;
     private boolean mEatingTouch = false;
     private boolean mEatingHover = false;
+    private final Set<OnHeightChangedListener> mOnHeightChangedListeners = new HashSet<>();
 
     public Toolbar(Context context) {
         this(context, null);
@@ -145,6 +150,15 @@ public final class Toolbar extends FrameLayout implements ToolbarController {
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(getToolbarLayout(), this, true);
+
+        addOnLayoutChangeListener((v, left, top, right, bottom,
+                oldLeft, oldTop, oldRight, oldBottom) -> {
+            if (oldBottom - oldTop != bottom - top) {
+                for (Toolbar.OnHeightChangedListener listener : mOnHeightChangedListeners) {
+                    listener.onHeightChanged(getHeight());
+                }
+            }
+        });
 
         mController = new ToolbarControllerImpl(this);
 
@@ -178,13 +192,13 @@ public final class Toolbar extends FrameLayout implements ToolbarController {
 
             switch (a.getInt(R.styleable.CarUiToolbar_car_ui_navButtonMode, -1)) {
                 case 0:
-                    setNavButtonMode(NavButtonMode.BACK);
+                    setNavButtonMode(Toolbar.NavButtonMode.BACK);
                     break;
                 case 1:
-                    setNavButtonMode(NavButtonMode.CLOSE);
+                    setNavButtonMode(Toolbar.NavButtonMode.CLOSE);
                     break;
                 case 2:
-                    setNavButtonMode(NavButtonMode.DOWN);
+                    setNavButtonMode(Toolbar.NavButtonMode.DOWN);
                     break;
                 default:
                     break;
@@ -264,6 +278,11 @@ public final class Toolbar extends FrameLayout implements ToolbarController {
     @Override
     public CharSequence getSubtitle() {
         return mController.getSubtitle();
+    }
+
+    @Override
+    public void setTabs(List<Tab> tabs) {
+        mController.setTabs(tabs);
     }
 
     /**
@@ -414,6 +433,11 @@ public final class Toolbar extends FrameLayout implements ToolbarController {
     @Override
     public void setNavButtonMode(NavButtonMode style) {
         mController.setNavButtonMode(style);
+    }
+
+    @Override
+    public void setNavButtonMode(com.android.car.ui.toolbar.NavButtonMode mode) {
+        mController.setNavButtonMode(mode);
     }
 
     /** Gets the {@link NavButtonMode} */
@@ -601,23 +625,17 @@ public final class Toolbar extends FrameLayout implements ToolbarController {
     }
 
     /**
-     * Registers a new {@link OnHeightChangedListener} to the list of listeners. Register a
-     * {@link com.android.car.ui.recyclerview.CarUiRecyclerView} only if there is a toolbar at
-     * the top and a {@link com.android.car.ui.recyclerview.CarUiRecyclerView} in the view and
-     * nothing else. {@link com.android.car.ui.recyclerview.CarUiRecyclerView} will
-     * automatically adjust its height according to the height of the Toolbar.
+     * Registers a new {@link OnHeightChangedListener} to the list of listeners.
      */
-    @Override
     public void registerToolbarHeightChangeListener(
             OnHeightChangedListener listener) {
-        mController.registerToolbarHeightChangeListener(listener);
+        mOnHeightChangedListeners.add(listener);
     }
 
     /** Unregisters an existing {@link OnHeightChangedListener} from the list of listeners. */
-    @Override
     public boolean unregisterToolbarHeightChangeListener(
             OnHeightChangedListener listener) {
-        return mController.unregisterToolbarHeightChangeListener(listener);
+        return mOnHeightChangedListeners.remove(listener);
     }
 
     /** Registers a new {@link OnTabSelectedListener} to the list of listeners. */
@@ -654,6 +672,20 @@ public final class Toolbar extends FrameLayout implements ToolbarController {
         return mController.getSearchCapabilities();
     }
 
+    @Override
+    public void registerSearchListener(Consumer<String> listener) {
+        mController.registerSearchListener(listener);
+    }
+
+    @Override
+    public boolean unregisterSearchListener(Consumer<String> listener) {
+        return mController.unregisterSearchListener(listener);
+    }
+
+    /**
+     * Returns true if the toolbar can display search result items. One example of this is when the
+     * system is configured to display search items in the IME instead of in the app.
+     */
     @Override
     public boolean canShowSearchResultItems() {
         return mController.canShowSearchResultItems();
@@ -709,6 +741,16 @@ public final class Toolbar extends FrameLayout implements ToolbarController {
         return mController.unregisterOnSearchCompletedListener(listener);
     }
 
+    @Override
+    public void registerSearchCompletedListener(Runnable listener) {
+        mController.registerSearchCompletedListener(listener);
+    }
+
+    @Override
+    public boolean unregisterSearchCompletedListener(Runnable listener) {
+        return mController.unregisterSearchCompletedListener(listener);
+    }
+
     /** Registers a new {@link OnBackListener} to the list of listeners. */
     @Override
     public void registerOnBackListener(OnBackListener listener) {
@@ -719,6 +761,16 @@ public final class Toolbar extends FrameLayout implements ToolbarController {
     @Override
     public boolean unregisterOnBackListener(OnBackListener listener) {
         return mController.unregisterOnBackListener(listener);
+    }
+
+    @Override
+    public void registerBackListener(Supplier<Boolean> listener) {
+        mController.registerBackListener(listener);
+    }
+
+    @Override
+    public boolean unregisterBackListener(Supplier<Boolean> listener) {
+        return mController.unregisterBackListener(listener);
     }
 
     /** Returns the progress bar */

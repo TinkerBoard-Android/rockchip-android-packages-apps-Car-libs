@@ -67,13 +67,12 @@ public class TabLayout extends LinearLayout {
         mSelectedTab = null;
         mTabs = tabs;
 
-        if (tabs != null && tabs.size() > 0) {
+        if (tabs.size() > 0) {
             mSelectedTab = tabs.get(selectedTab);
             for (TabOEMV1 tab : tabs) {
                 View view = LayoutInflater.from(getContext())
                         .inflate(R.layout.toolbar_tab, this, false);
                 addView(view);
-                tab.setUpdateListener(this::bindTab);
                 mTabViews.put(tab, view);
                 bindTab(tab);
             }

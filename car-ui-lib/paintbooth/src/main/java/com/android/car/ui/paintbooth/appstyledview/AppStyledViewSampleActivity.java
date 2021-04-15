@@ -31,7 +31,7 @@ import com.android.car.ui.appstyledview.AppStyledDialogController;
 import com.android.car.ui.appstyledview.AppStyledViewController.AppStyledViewNavIcon;
 import com.android.car.ui.core.CarUi;
 import com.android.car.ui.paintbooth.R;
-import com.android.car.ui.toolbar.Toolbar;
+import com.android.car.ui.toolbar.NavButtonMode;
 import com.android.car.ui.toolbar.ToolbarController;
 
 /**
@@ -48,7 +48,7 @@ public class AppStyledViewSampleActivity extends AppCompatActivity {
 
         ToolbarController toolbar = CarUi.requireToolbar(this);
         toolbar.setTitle(getTitle());
-        toolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
+        toolbar.setNavButtonMode(NavButtonMode.BACK);
         toolbar.setLogo(R.drawable.ic_launcher);
 
         AppStyledDialogController controller = new AppStyledDialogController(this);

@@ -18,13 +18,8 @@ package com.android.car.ui.sharedlibrary.oemapis.toolbar;
 
 import android.graphics.drawable.Drawable;
 
-import java.util.function.Consumer;
-
 /** Interface representing a toolbar tab */
-@SuppressWarnings("AndroidJdkLibsChecker")
 public interface TabOEMV1 {
-    /** Sets the listener for when the properties of this tab change */
-    void setUpdateListener(Consumer<TabOEMV1> listener);
     /** Gets the title of the tab */
     String getTitle();
     /** Gets the icon of the tab. The icon may be tinted to match the theme of the toolbar */

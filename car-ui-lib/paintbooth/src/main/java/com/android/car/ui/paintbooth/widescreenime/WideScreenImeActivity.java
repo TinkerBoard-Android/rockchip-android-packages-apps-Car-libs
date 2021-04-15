@@ -49,10 +49,10 @@ import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.recyclerview.CarUiContentListItem;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.MenuItem;
+import com.android.car.ui.toolbar.NavButtonMode;
 import com.android.car.ui.toolbar.SearchConfig;
 import com.android.car.ui.toolbar.SearchConfig.SearchConfigBuilder;
 import com.android.car.ui.toolbar.SearchMode;
-import com.android.car.ui.toolbar.Toolbar;
 import com.android.car.ui.toolbar.ToolbarController;
 
 import java.util.ArrayList;
@@ -67,13 +67,6 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
 
     private final List<MenuItem> mMenuItems = new ArrayList<>();
     private final List<ListElement> mWidescreenItems = new ArrayList<>();
-
-    private final ArrayList<String> mItemIdList = new ArrayList<>();
-    private final ArrayList<String> mTitleList = new ArrayList<>();
-    private final ArrayList<String> mSubTitleList = new ArrayList<>();
-    private final ArrayList<Integer> mPrimaryImageResId = new ArrayList<>();
-    private final ArrayList<String> mSecondaryItemId = new ArrayList<>();
-    private final ArrayList<Integer> mSecondaryImageResId = new ArrayList<>();
     private final List<CarUiImeSearchListItem> mSearchItems = new ArrayList<>();
 
     private InputMethodManager mInputMethodManager;
@@ -86,12 +79,12 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
         mInputMethodManager = (InputMethodManager)
                 getSystemService(Context.INPUT_METHOD_SERVICE);
 
-        ToolbarController toolbar = CarUi.getToolbar(this);
+        ToolbarController toolbar = CarUi.requireToolbar(this);
         toolbar.setTitle(getTitle());
-        toolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
+        toolbar.setNavButtonMode(NavButtonMode.BACK);
         toolbar.setLogo(R.drawable.ic_launcher);
         boolean[] isSearching = new boolean[]{false};
-        toolbar.registerOnBackListener(
+        toolbar.registerBackListener(
                 () -> {
                     if (isSearching[0]) {
                         toolbar.setSearchMode(SearchMode.DISABLED);
@@ -144,15 +137,6 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
                 new EditTextElement("Add Desc to content area", this::addDescToContentArea));
         mWidescreenItems.add(new EditTextElement("Hide the content area", this::hideContentArea));
         mWidescreenItems.add(new EditTextElement("Hide extraction view", this::hideExtractionView));
-
-        for (int i = 0; i < 7; i++) {
-            mItemIdList.add("itemId" + i);
-            mTitleList.add("Title " + i);
-            mSubTitleList.add("subtitle " + i);
-            mPrimaryImageResId.add(R.drawable.ic_launcher);
-            mSecondaryItemId.add("imageId" + i);
-            mSecondaryImageResId.add(R.drawable.ic_launcher);
-        }
 
         mWidescreenItems.add(
                 new EditTextElement("Add icon to extracted view", this::addIconToExtractedView));
@@ -307,7 +291,7 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
 
     private static class EditTextElement extends ListElement {
 
-        private OnFocusChangeListener mListener;
+        private final OnFocusChangeListener mListener;
 
         EditTextElement(String text, OnFocusChangeListener listener) {
             super(text);
