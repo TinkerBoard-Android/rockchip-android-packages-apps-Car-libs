@@ -12,16 +12,23 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/toolbar_background"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/toolbar_row_height"
+        android:layout_height="wrap_content"
         android:background="#E0000000"
         android:tag="shared_lib_top_inset">
         <com.google.car.ui.sharedlibrary.toolbar.ClickBlockingView
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/toolbar_row_separator_guideline"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_begin="@dimen/toolbar_row_height" />
 
         <!-- The horizontal bias set to 0.0 here is so that when you set this view as GONE, it will
              be treated as if it's all the way to the left instead of centered in the margin -->
@@ -29,9 +36,9 @@
             android:id="@+id/toolbar_nav_icon_container"
             android:layout_width="@dimen/toolbar_margin"
             android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/toolbar_row_separator_guideline"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
@@ -56,29 +63,33 @@
             android:id="@+id/toolbar_title_logo"
             android:layout_width="44dp"
             android:layout_height="44dp"
+            android:layout_marginRight="34dp"
             android:layout_gravity="center"
             android:scaleType="fitXY"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/toolbar_nav_icon_container"
+            app:layout_constraintBottom_toTopOf="@id/toolbar_row_separator_guideline"
+            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
 
-        <LinearLayout android:layout_height="wrap_content"
+        <LinearLayout
+            android:layout_height="wrap_content"
             android:layout_width="0dp"
             android:id="@+id/toolbar_title_container"
             android:orientation="vertical"
-            android:layout_marginStart="16dp"
-            app:layout_goneMarginStart="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/toolbar_title_logo"
-            app:layout_constraintEnd_toStartOf="@+id/toolbar_menu_items_container"
+            android:layout_marginRight="@dimen/toolbar_margin"
+            android:gravity="right"
+            app:layout_constraintBottom_toTopOf="@id/toolbar_row_separator_guideline"
+            app:layout_constraintLeft_toRightOf="@id/toolbar_menu_items_container"
+            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent">
-            <TextView android:id="@+id/toolbar_title"
+            <TextView
+                android:id="@+id/toolbar_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
                 android:textAlignment="viewStart"
                 android:textAppearance="@style/TextAppearance.CarUi.Body1"/>
-            <TextView android:id="@+id/toolbar_subtitle"
+            <TextView
+                android:id="@+id/toolbar_subtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
@@ -88,14 +99,14 @@
 
         <com.google.car.ui.sharedlibrary.toolbar.TabLayout
             android:id="@+id/toolbar_tabs"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/toolbar_row_height"
             android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/toolbar_menu_items_container"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toEndOf="@+id/toolbar_title_logo"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/toolbar_row_separator_guideline"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"/>
 
         <LinearLayout
             android:id="@+id/toolbar_menu_items_container"
@@ -105,8 +116,8 @@
             android:layout_height="0dp"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/toolbar_row_separator_guideline"
+            app:layout_constraintLeft_toRightOf="@id/toolbar_nav_icon_container"
             app:layout_constraintTop_toTopOf="parent"/>
 
         <ViewStub
@@ -114,12 +125,10 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout="@layout/toolbar_search_view"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/toolbar_menu_items_container"
-            app:layout_constraintStart_toEndOf="@+id/toolbar_title_logo"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginStart="16dp"
-            app:layout_goneMarginStart="0dp"/>
+            app:layout_constraintBottom_toTopOf="@id/toolbar_row_separator_guideline"
+            app:layout_constraintLeft_toRightOf="@+id/toolbar_menu_items_container"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <ProgressBar
             android:id="@+id/toolbar_progress_bar"
@@ -129,8 +138,8 @@
             android:indeterminate="true"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"/>
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
