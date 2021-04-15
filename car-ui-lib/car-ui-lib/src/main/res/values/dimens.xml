@@ -29,11 +29,13 @@
     <!-- Paddings -->
     <dimen name="car_ui_padding_0">4dp</dimen>
     <dimen name="car_ui_padding_1">8dp</dimen>
-    <dimen name="car_ui_padding_2">16dp</dimen>
-    <dimen name="car_ui_padding_3">24dp</dimen>
-    <dimen name="car_ui_padding_4">32dp</dimen>
-    <dimen name="car_ui_padding_5">64dp</dimen>
-    <dimen name="car_ui_padding_6">96dp</dimen>
+    <dimen name="car_ui_padding_2">12dp</dimen>
+    <dimen name="car_ui_padding_3">16dp</dimen>
+    <dimen name="car_ui_padding_4">24dp</dimen>
+    <dimen name="car_ui_padding_5">32dp</dimen>
+    <dimen name="car_ui_padding_6">48dp</dimen>
+    <dimen name="car_ui_padding_7">64dp</dimen>
+    <dimen name="car_ui_padding_8">96dp</dimen>
 
     <!-- Type Sizings -->
     <dimen name="car_ui_body1_size">32sp</dimen>
@@ -82,11 +84,11 @@
     <!-- Margin between the logo and the title, when both logo and navigation icons are used -->
     <dimen name="car_ui_toolbar_title_logo_padding">0dp</dimen>
     <!-- Margin at the start of the title -->
-    <dimen name="car_ui_toolbar_title_margin_start">@dimen/car_ui_padding_2</dimen>
+    <dimen name="car_ui_toolbar_title_margin_start">@dimen/car_ui_padding_3</dimen>
     <!-- Margin at the start of the title when there is no logo present -->
     <dimen name="car_ui_toolbar_title_no_logo_margin_start">0dp</dimen>
     <!-- Space at the end and in between menu items -->
-    <dimen name="car_ui_toolbar_menu_item_margin">@dimen/car_ui_padding_2</dimen>
+    <dimen name="car_ui_toolbar_menu_item_margin">@dimen/car_ui_padding_3</dimen>
     <!-- Ripple effect radius for icon menu items -->
     <dimen name="car_ui_toolbar_menu_item_icon_ripple_radius">48dp</dimen>
     <!-- Icon size for icon menu items -->
