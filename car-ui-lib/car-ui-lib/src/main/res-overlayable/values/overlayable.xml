@@ -203,6 +203,8 @@ limitations under the License.-->
       <item type="dimen" name="car_ui_padding_4"/>
       <item type="dimen" name="car_ui_padding_5"/>
       <item type="dimen" name="car_ui_padding_6"/>
+      <item type="dimen" name="car_ui_padding_7"/>
+      <item type="dimen" name="car_ui_padding_8"/>
       <item type="dimen" name="car_ui_preference_category_icon_margin_end"/>
       <item type="dimen" name="car_ui_preference_category_icon_size"/>
       <item type="dimen" name="car_ui_preference_category_min_height"/>
