@@ -206,12 +206,16 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
         boolean visible = mode != NAV_BUTTON_MODE_DISABLED;
         if (visible != mBackButtonVisible) {
             mBackButtonVisible = visible;
-            mBackButtonView.setOnClickListener(mBackButtonVisible ? v -> {
+            mNavIconContainer.setOnClickListener(mBackButtonVisible ? v -> {
                 if (mBackListener != null) {
                     mBackListener.run();
                 }
             } : null);
-            mBackButtonView.setClickable(mBackButtonVisible);
+            mNavIconContainer.setClickable(mBackButtonVisible);
+
+            mNavIconContainer.setContentDescription(mBackButtonVisible
+                ? mSharedLibraryContext.getString(R.string.toolbar_nav_icon_content_description)
+                : null);
             update();
         }
 
