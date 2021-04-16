@@ -39,6 +39,7 @@ import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryFactoryOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.appstyledview.AppStyledViewControllerOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.recyclerview.LayoutStyleOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.recyclerview.RecyclerViewAttributesOEMV1;
+import com.android.car.ui.sharedlibrary.oemapis.recyclerview.RecyclerViewOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.recyclerview.SpanSizeLookupOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
 import com.android.car.ui.toolbar.ToolbarController;
@@ -101,10 +102,15 @@ public final class SharedLibraryFactoryAdapterV1 implements SharedLibraryFactory
     @Override
     public CarUiRecyclerView createRecyclerView(@NonNull Context context,
             @Nullable AttributeSet attrs) {
-        RecyclerViewAdapterV1 rv = new RecyclerViewAdapterV1(context, attrs);
         RecyclerViewAttributesOEMV1 oemAttrs = from(context, attrs);
-        rv.setRecyclerViewOEMV1(mOem.createRecyclerView(context, oemAttrs));
-        return rv;
+        RecyclerViewOEMV1 oemRecyclerView = mOem.createRecyclerView(context, oemAttrs);
+        if (oemRecyclerView != null) {
+            RecyclerViewAdapterV1 rv = new RecyclerViewAdapterV1(context, attrs);
+            rv.setRecyclerViewOEMV1(oemRecyclerView);
+            return rv;
+        } else {
+            return mFactoryStub.createRecyclerView(context, attrs);
+        }
     }
 
     private static RecyclerViewAttributesOEMV1 from(Context context, AttributeSet attrs) {
