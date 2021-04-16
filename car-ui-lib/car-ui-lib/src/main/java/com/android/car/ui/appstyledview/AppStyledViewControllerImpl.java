@@ -30,6 +30,7 @@ import android.widget.ImageView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.car.ui.CarUiLayoutInflaterFactory;
 import com.android.car.ui.R;
 
 /**
@@ -108,6 +109,9 @@ public class AppStyledViewControllerImpl implements AppStyledViewController {
         // create ContextThemeWrapper from the original Activity Context with the custom theme
         final Context contextThemeWrapper = new ContextThemeWrapper(mContext, R.style.Theme_CarUi);
         LayoutInflater inflater = LayoutInflater.from(mContext);
+        if (inflater.getFactory2() == null) {
+            inflater.setFactory2(new CarUiLayoutInflaterFactory());
+        }
         // clone the inflater using the ContextThemeWrapper
         LayoutInflater localInflater = inflater.cloneInContext(contextThemeWrapper);
 
