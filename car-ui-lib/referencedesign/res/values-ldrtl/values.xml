@@ -1,7 +1,4 @@
 <resources>
-    <bool name="car_ui_toolbar_nav_icon_reserve_space">false</bool>
-    <bool name="car_ui_toolbar_logo_fills_nav_icon_space">false</bool>
-
     <dimen name="car_ui_scrollbar_margin">112dp</dimen>
     <dimen name="car_ui_scrollbar_container_width">112dp</dimen>
     <dimen name="car_ui_scrollbar_button_size">76dp</dimen>

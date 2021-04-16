@@ -16,49 +16,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <style name="Widget.CarUi" parent="android:Widget.DeviceDefault"/>
 
-    <style name="Widget.CarUi.Toolbar"/>
-
-    <style name="Widget.CarUi.Toolbar.NavIconContainer">
-        <item name="android:layout_marginVertical">10dp</item>
-        <item name="android:layout_marginHorizontal">18dp</item>
-        <item name="android:background">@drawable/car_ui_toolbar_menu_item_icon_ripple</item>
-    </style>
-
-    <style name="Widget.CarUi.Toolbar.NavIcon">
-        <item name="android:tint">@color/car_ui_text_color_primary</item>
-        <item name="android:src">@drawable/car_ui_icon_arrow_back</item>
-    </style>
-
-    <style name="Widget.CarUi.Toolbar.MenuItem"/>
-
-    <style name="Widget.CarUi.Toolbar.MenuItem.IndividualContainer">
-        <item name="android:minHeight">76dp</item>
-        <item name="android:minWidth">76dp</item>
-        <item name="android:background">@drawable/car_ui_toolbar_menu_item_icon_ripple</item>
-        <item name="android:focusable">true</item>
-    </style>
-
     <style name="Widget.CarUi.Button.Borderless.Colored"
            parent="android:Widget.DeviceDefault.Button.Borderless.Colored"/>
 
     <style name="Widget.CarUi.Button"
            parent="android:Widget.DeviceDefault.Button"/>
-
-    <style name="Widget.CarUi.Toolbar.TextButton" parent="Widget.CarUi.Button.Borderless.Colored">
-        <item name="android:drawableTint">@color/car_ui_toolbar_menu_item_icon_color</item>
-        <item name="android:drawablePadding">10dp</item>
-        <item name="android:maxWidth">350dp</item>
-    </style>
-
-    <style name="Widget.CarUi.Toolbar.TextButton.WithIcon">
-        <item name="android:textColor">@color/car_ui_toolbar_menu_item_icon_color</item>
-    </style>
-
-    <style name="Widget.CarUi.Toolbar.TextButton.Primary" parent="Widget.CarUi.Button">
-        <item name="android:drawableTint">@color/car_ui_toolbar_menu_item_icon_color</item>
-        <item name="android:drawablePadding">10dp</item>
-        <item name="android:maxWidth">350dp</item>
-    </style>
 
     <style name="Widget.CarUi.SeekbarPreference"/>
 
