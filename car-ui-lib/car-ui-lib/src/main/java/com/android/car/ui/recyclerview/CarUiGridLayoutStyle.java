@@ -20,7 +20,6 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.LayoutManager;
-import androidx.recyclerview.widget.RecyclerView.Orientation;
 
 import com.android.car.ui.recyclerview.CarUiRecyclerView.CarUiRecyclerViewLayout;
 
@@ -33,7 +32,7 @@ public final class CarUiGridLayoutStyle implements CarUiLayoutStyle {
     @CarUiRecyclerViewLayout
     private  int mLayoutType = CarUiRecyclerViewLayout.GRID;
     @Orientation
-    private int mLayoutOrientation = RecyclerView.VERTICAL;
+    private int mLayoutOrientation = VERTICAL;
     private boolean mReverseLayout = false;
     private int mSize = CarUiRecyclerView.SIZE_LARGE;
     @Nullable

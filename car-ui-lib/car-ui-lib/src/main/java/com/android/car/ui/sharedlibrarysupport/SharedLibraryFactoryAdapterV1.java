@@ -30,6 +30,7 @@ import com.android.car.ui.appstyledview.AppStyledViewControllerAdapterV1;
 import com.android.car.ui.appstyledview.AppStyledViewControllerImpl;
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
+import com.android.car.ui.recyclerview.CarUiLayoutStyle;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.recyclerview.CarUiRecyclerView.CarUiRecyclerViewLayout;
 import com.android.car.ui.recyclerview.RecyclerViewAdapterV1;
@@ -124,7 +125,7 @@ public final class SharedLibraryFactoryAdapterV1 implements SharedLibraryFactory
                     /* defValue=*/ false);
             final int orientation = a.getInt(
                     R.styleable.CarUiRecyclerView_android_orientation,
-                    RecyclerView.VERTICAL);
+                    CarUiLayoutStyle.VERTICAL);
             final boolean reversed = a.getBoolean(
                     R.styleable.CarUiRecyclerView_reverseLayout, false);
             final int size = a.getInt(R.styleable.CarUiRecyclerView_carUiSize,
@@ -151,9 +152,9 @@ public final class SharedLibraryFactoryAdapterV1 implements SharedLibraryFactory
                 @Override
                 public int getOrientation() {
                     switch (orientation) {
-                        case RecyclerView.HORIZONTAL:
+                        case CarUiLayoutStyle.HORIZONTAL:
                             return LayoutStyleOEMV1.ORIENTATION_HORIZONTAL;
-                        case RecyclerView.VERTICAL:
+                        case CarUiLayoutStyle.VERTICAL:
                         default:
                             return LayoutStyleOEMV1.ORIENTATION_VERTICAL;
                     }

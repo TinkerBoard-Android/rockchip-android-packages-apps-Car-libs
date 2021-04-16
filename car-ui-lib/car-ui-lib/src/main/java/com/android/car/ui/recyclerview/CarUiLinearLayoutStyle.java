@@ -17,9 +17,7 @@ package com.android.car.ui.recyclerview;
 
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.LayoutManager;
-import androidx.recyclerview.widget.RecyclerView.Orientation;
 
 import com.android.car.ui.recyclerview.CarUiRecyclerView.CarUiRecyclerViewLayout;
 
@@ -31,7 +29,7 @@ public final class CarUiLinearLayoutStyle implements CarUiLayoutStyle {
     @CarUiRecyclerViewLayout
     private  int mLayoutType = CarUiRecyclerViewLayout.LINEAR;
     @Orientation
-    private int mLayoutOrientation = RecyclerView.VERTICAL;
+    private int mLayoutOrientation = VERTICAL;
     private boolean mReverseLayout = false;
     private int mSize = CarUiRecyclerView.SIZE_LARGE;
 
