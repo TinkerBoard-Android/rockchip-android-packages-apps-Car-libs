@@ -2,4 +2,7 @@
 <resources>
   <!-- Search hint, displayed inside the search box [CHAR LIMIT=50] -->
   <string name="toolbar_default_search_hint">Search&#8230;</string>
+
+  <!-- The content description on the toolbar back button [CHAR_LIMIT=100] -->
+  <string name="toolbar_nav_icon_content_description">Back</string>
 </resources>
