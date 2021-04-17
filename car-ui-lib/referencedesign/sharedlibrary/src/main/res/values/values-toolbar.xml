@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <bool name="toolbar_title_and_tabs_mutually_exclusive">true</bool>
+    <bool name="toolbar_logo_fills_nav_icon_space">true</bool>
+    <bool name="toolbar_nav_icon_space_reserved">true</bool>
+
     <dimen name="toolbar_margin">112dp</dimen>
     <dimen name="toolbar_row_height">96dp</dimen>
     <dimen name="toolbar_menu_item_icon_ripple_radius">48dp</dimen>

@@ -96,7 +96,6 @@ import com.android.car.ui.utils.CarUiUtils;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -157,11 +156,6 @@ public class CarUiImeWideScreenControllerTest {
         mScenario.onActivity(activity -> {
             mActivity = activity;
         });
-    }
-
-    @After
-    public void destroy() {
-        mActivity.finish();
     }
 
     @Test

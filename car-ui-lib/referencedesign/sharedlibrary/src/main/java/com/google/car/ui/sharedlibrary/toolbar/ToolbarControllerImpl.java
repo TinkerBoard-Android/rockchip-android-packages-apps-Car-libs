@@ -53,6 +53,11 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     private final TabLayout mTabContainer;
     private final ViewGroup mMenuItemsContainer;
     private final SearchController mSearchController;
+    private final ViewGroup mNavIconContainer;
+
+    private final boolean mTitleAndTabsMutuallyExclusive;
+    private final boolean mLogoFillsNavSpace;
+    private final boolean mNavIconSpaceReserved;
 
     private Runnable mBackListener;
 
@@ -64,6 +69,7 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     ToolbarControllerImpl(View view, Context sharedLibraryContext, Context activityContext) {
         mSharedLibraryContext = sharedLibraryContext;
         mBackButtonView = view.requireViewById(R.id.toolbar_nav_icon);
+        mNavIconContainer = view.requireViewById(R.id.toolbar_nav_icon_container);
         mTitleView = view.requireViewById(R.id.toolbar_title);
         mSubtitleView = view.requireViewById(R.id.toolbar_subtitle);
         mLogo = view.requireViewById(R.id.toolbar_title_logo);
@@ -75,6 +81,13 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
         mSearchController = new SearchController(
                 view.requireViewById(R.id.toolbar_search_view_stub));
         mOverflowMenuItem = new OverflowMenuItem(sharedLibraryContext, activityContext);
+
+        mTitleAndTabsMutuallyExclusive = sharedLibraryContext.getResources()
+                .getBoolean(R.bool.toolbar_title_and_tabs_mutually_exclusive);
+        mLogoFillsNavSpace = sharedLibraryContext.getResources()
+                .getBoolean(R.bool.toolbar_logo_fills_nav_icon_space);
+        mNavIconSpaceReserved = sharedLibraryContext.getResources()
+                .getBoolean(R.bool.toolbar_nav_icon_space_reserved);
     }
 
     @Override
@@ -193,12 +206,16 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
         boolean visible = mode != NAV_BUTTON_MODE_DISABLED;
         if (visible != mBackButtonVisible) {
             mBackButtonVisible = visible;
-            mBackButtonView.setOnClickListener(mBackButtonVisible ? v -> {
+            mNavIconContainer.setOnClickListener(mBackButtonVisible ? v -> {
                 if (mBackListener != null) {
                     mBackListener.run();
                 }
             } : null);
-            mBackButtonView.setClickable(mBackButtonVisible);
+            mNavIconContainer.setClickable(mBackButtonVisible);
+
+            mNavIconContainer.setContentDescription(mBackButtonVisible
+                ? mSharedLibraryContext.getString(R.string.toolbar_nav_icon_content_description)
+                : null);
             update();
         }
 
@@ -264,15 +281,20 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     }
 
     private void update() {
-        boolean isSearching = mSearchMode != SEARCH_MODE_DISABLED;
+        boolean isSearching = mSearchMode != ToolbarControllerOEMV1.SEARCH_MODE_DISABLED;
         boolean hasTabs = mTabContainer.hasTabs();
 
         setVisible(mBackButtonView, mBackButtonVisible);
-        setVisible(mLogoInNavIconSpace, mHasLogo && !mBackButtonVisible);
-        setVisible(mLogo, mHasLogo && mBackButtonVisible);
+        boolean hasLogoInNavIconSpace = mHasLogo && !mBackButtonVisible && mLogoFillsNavSpace;
+        setVisible(mLogoInNavIconSpace, hasLogoInNavIconSpace);
+        setVisible(mLogo, mHasLogo && (mBackButtonVisible || !mLogoFillsNavSpace));
+        setVisible(mNavIconContainer,
+                mNavIconSpaceReserved || hasLogoInNavIconSpace || mBackButtonVisible);
         setVisible(mTabContainer, hasTabs && !isSearching);
-        setVisible(mTitleView, !TextUtils.isEmpty(getTitle()) && !hasTabs && !isSearching);
-        setVisible(mSubtitleView, !TextUtils.isEmpty(getSubtitle()) && !hasTabs && !isSearching);
+        setVisible(mTitleView, !TextUtils.isEmpty(getTitle()) && !isSearching
+                && (!hasTabs || !mTitleAndTabsMutuallyExclusive));
+        setVisible(mSubtitleView, !TextUtils.isEmpty(getSubtitle()) && !isSearching
+                && (!hasTabs || !mTitleAndTabsMutuallyExclusive));
     }
 
     private static void setVisible(View view, boolean visible) {

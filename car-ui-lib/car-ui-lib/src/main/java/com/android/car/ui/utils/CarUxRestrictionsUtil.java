@@ -66,40 +66,48 @@ public class CarUxRestrictionsUtil {
                     }
                 };
 
-        // copybara:strip_begin
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            Car.createCar(context.getApplicationContext(), null, Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT,
+        try {
+            // copybara:strip_begin
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                Car.createCar(context.getApplicationContext(), null,
+                    Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT,
                     (Car car, boolean ready) -> {
                         if (ready) {
                             CarUxRestrictionsManager carUxRestrictionsManager =
-                                    (CarUxRestrictionsManager) car.getCarManager(
-                                            Car.CAR_UX_RESTRICTION_SERVICE);
+                                (CarUxRestrictionsManager) car.getCarManager(
+                                    Car.CAR_UX_RESTRICTION_SERVICE);
                             carUxRestrictionsManager.registerListener(listener);
                             listener.onUxRestrictionsChanged(
-                                    carUxRestrictionsManager.getCurrentCarUxRestrictions());
+                                carUxRestrictionsManager.getCurrentCarUxRestrictions());
                         } else {
                             Log.w(TAG, "Car service disconnected, assuming fully restricted uxr");
                             listener.onUxRestrictionsChanged(null);
                         }
                     });
-        } else {
-            // copybara:strip_end
-            Car carApi = Car.createCar(context.getApplicationContext());
+            } else {
+                // copybara:strip_end
+                Car carApi = Car.createCar(context.getApplicationContext());
 
-            try {
-                CarUxRestrictionsManager carUxRestrictionsManager =
+                try {
+                    CarUxRestrictionsManager carUxRestrictionsManager =
                         (CarUxRestrictionsManager) carApi.getCarManager(
-                                Car.CAR_UX_RESTRICTION_SERVICE);
-                carUxRestrictionsManager.registerListener(listener);
-                listener.onUxRestrictionsChanged(
+                            Car.CAR_UX_RESTRICTION_SERVICE);
+                    carUxRestrictionsManager.registerListener(listener);
+                    listener.onUxRestrictionsChanged(
                         carUxRestrictionsManager.getCurrentCarUxRestrictions());
-            } catch (NullPointerException e) {
-                Log.e(TAG, "Car not connected", e);
-                // mCarUxRestrictions will be the default
+                } catch (NullPointerException e) {
+                    Log.e(TAG, "Car not connected", e);
+                    // mCarUxRestrictions will be the default
+                }
+                // copybara:strip_begin
             }
-            // copybara:strip_begin
+            // copybara:strip_end
+        } catch (SecurityException e) {
+            Log.w(TAG, "Unable to connect to car service, assuming unrestricted", e);
+            listener.onUxRestrictionsChanged(new CarUxRestrictions.Builder(
+                false, CarUxRestrictions.UX_RESTRICTIONS_BASELINE, 0)
+                .build());
         }
-        // copybara:strip_end
     }
 
     @NonNull
