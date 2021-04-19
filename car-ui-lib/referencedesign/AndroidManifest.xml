@@ -3,6 +3,7 @@
     <application android:hasCode="false"/>
     <overlay android:priority="10"
         android:targetPackage="{{TARGET_PACKAGE_NAME}}"
+        android:targetName="car-ui-lib"
         android:resourcesMap="@xml/overlays"
         android:isStatic="true"
         android:requiredSystemPropertyName="ro.build.car_ui_rros_enabled"
