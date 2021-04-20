@@ -17,6 +17,7 @@
 package com.android.car.ui.toolbar;
 
 import static com.android.car.ui.utils.CarUiUtils.charSequenceToString;
+import static com.android.car.ui.utils.CarUiUtils.convertList;
 
 import static java.util.stream.Collectors.toList;
 
@@ -32,6 +33,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
+import com.android.car.ui.sharedlibrary.oemapis.toolbar.SearchCapabilitiesOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
 import com.android.car.ui.toolbar.TabLayout.Tab;
 import com.android.car.ui.toolbar.Toolbar.NavButtonMode;
@@ -49,7 +51,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 
 /**
  * Adapts a {@link com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1}
@@ -70,6 +71,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     private final Set<OnSearchCompletedListener> mOnSearchCompletedListeners = new HashSet<>();
     private final ProgressBarControllerAdapterV1 mProgressBar;
     private String mSearchHint;
+    private SearchConfig.SearchConfigBuilder mSearchConfigBuilder;
     private List<MenuItem> mClientMenuItems = Collections.emptyList();
 
     public ToolbarControllerAdapterV1(
@@ -78,7 +80,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
         mOemToolbar = oemToolbar;
         mProgressBar = new ProgressBarControllerAdapterV1(mOemToolbar.getProgressBar());
         mContext = context;
-
+        mSearchConfigBuilder = SearchConfig.builder();
         Activity activity = CarUiUtils.getActivity(mContext);
 
         oemToolbar.setBackListener(() -> {
@@ -458,28 +460,47 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     }
 
     @Override
+    public void setSearchConfig(SearchConfig searchConfig) {
+        mOemToolbar.setSearchConfig(new SearchConfigAdapterV1(searchConfig));
+    }
+
+    @Override
+    public SearchCapabilities getSearchCapabilities() {
+        SearchCapabilitiesOEMV1 searchCapabilitiesOEMV1 = mOemToolbar.getSearchCapabilities();
+        return SearchCapabilities.builder()
+                .setCanShowSearchResultItems(searchCapabilitiesOEMV1 != null
+                        && searchCapabilitiesOEMV1.canShowSearchResultItems())
+                .setCanShowSearchResultsView(searchCapabilitiesOEMV1 != null
+                        && searchCapabilitiesOEMV1.canShowSearchResultsView())
+                .build();
+    }
+
+    @Override
     public boolean canShowSearchResultItems() {
-        return mOemToolbar.canShowSearchResultItems();
+        return getSearchCapabilities().canShowSearchResultItems();
     }
 
     @Override
     public boolean canShowSearchResultsView() {
-        return mOemToolbar.canShowSearchResultsView();
+        return getSearchCapabilities().canShowSearchResultsView();
     }
 
     @Override
     public void setSearchResultsView(View view) {
-        mOemToolbar.setSearchResultsView(view);
+        mSearchConfigBuilder.setSearchResultsView(view);
+        setSearchConfig(mSearchConfigBuilder.build());
     }
 
     @Override
     public void setSearchResultsInputViewIcon(Drawable drawable) {
-        mOemToolbar.setSearchResultsInputViewIcon(drawable);
+        mSearchConfigBuilder.setSearchResultsInputViewIcon(drawable);
+        setSearchConfig(mSearchConfigBuilder.build());
     }
 
     @Override
     public void setSearchResultItems(List<? extends CarUiImeSearchListItem> searchItems) {
-        mOemToolbar.setSearchResultItems(convertList(searchItems, SearchItemAdapterV1::new));
+        mSearchConfigBuilder.setSearchResultItems(searchItems);
+        setSearchConfig(mSearchConfigBuilder.build());
     }
 
     @Override
@@ -505,23 +526,6 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     @Override
     public ProgressBarController getProgressBar() {
         return mProgressBar;
-    }
-
-    /**
-     * Given a list of T and a function to convert from T to U, return a list of U.
-     *
-     * This will create a new list.
-     */
-    private <T, U> List<U> convertList(List<T> list, Function<T, U> f) {
-        if (list == null) {
-            return null;
-        }
-
-        List<U> result = new ArrayList<>();
-        for (T item : list) {
-            result.add(f.apply(item));
-        }
-        return result;
     }
 
     private static class ToolbarAdapterState {
@@ -663,8 +667,8 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
                 return mShowMenuItemsWhileSearching ? mMenuItems : Collections.emptyList();
             } else if (searchMode == SearchMode.SEARCH) {
                 return mShowMenuItemsWhileSearching
-                    ? mMenuItems.stream().filter(i -> !i.isSearch()).collect(toList())
-                    : Collections.emptyList();
+                        ? mMenuItems.stream().filter(i -> !i.isSearch()).collect(toList())
+                        : Collections.emptyList();
             } else {
                 return mMenuItems;
             }

@@ -27,6 +27,7 @@ import androidx.annotation.XmlRes;
 
 import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
 import com.android.car.ui.recyclerview.CarUiListItem;
+import com.android.car.ui.toolbar.SearchConfig.SearchConfigBuilder;
 
 import java.util.List;
 
@@ -115,7 +116,7 @@ public interface ToolbarController {
      * Sets whether or not tabs should also be shown in the SUBPAGE {@link Toolbar.State}.
      *
      * @deprecated When not using {@link #setState(Toolbar.State)}, this method is not necessary.
-     *             Simply add tabs to the toolbar when they should be shown.
+     * Simply add tabs to the toolbar when they should be shown.
      */
     @Deprecated
     void setShowTabsInSubpage(boolean showTabs);
@@ -124,8 +125,8 @@ public interface ToolbarController {
      * Gets whether or not tabs should also be shown in the SUBPAGE {@link Toolbar.State}.
      *
      * @deprecated When not using {@link #setState(Toolbar.State)},
-     *             {@link #setShowTabsInSubpage(boolean)} is not necessary.
-     *             Simply add tabs to the toolbar when they should be shown.
+     * {@link #setShowTabsInSubpage(boolean)} is not necessary.
+     * Simply add tabs to the toolbar when they should be shown.
      */
     @Deprecated
     boolean getShowTabsInSubpage();
@@ -254,9 +255,9 @@ public interface ToolbarController {
      * for the desired state.
      *
      * @deprecated Instead of using setState(), simply add the elements you want to see when
-     *             you want to see them. The back button visibility can be controlled with the
-     *             {@link com.android.car.ui.toolbar.Toolbar.NavButtonMode#DISABLED} enum,
-     *             and the search bar can also be controlled with the {@link SearchMode} enum.
+     * you want to see them. The back button visibility can be controlled with the
+     * {@link com.android.car.ui.toolbar.Toolbar.NavButtonMode#DISABLED} enum,
+     * and the search bar can also be controlled with the {@link SearchMode} enum.
      */
     @Deprecated
     void setState(Toolbar.State state);
@@ -297,14 +298,30 @@ public interface ToolbarController {
     boolean unregisterOnSearchListener(Toolbar.OnSearchListener listener);
 
     /**
+     * Sets the search info to be displayed within the widescreen IME.
+     */
+    void setSearchConfig(@Nullable SearchConfig searchConfig);
+
+    /**
+     * Returns the capabilities of what toolbar can do with Search
+     */
+    SearchCapabilities getSearchCapabilities();
+
+    /**
      * Returns true if the toolbar can display search result items. One example of this is when the
      * system is configured to display search items in the IME instead of in the app.
+     *
+     * @deprecated See {@link SearchCapabilities#canShowSearchResultItems()} for details.
      */
+    @Deprecated
     boolean canShowSearchResultItems();
 
     /**
      * Returns true if the app is allowed to set search results view.
+     *
+     * @deprecated See {@link SearchCapabilities#canShowSearchResultsView()} for details.
      */
+    @Deprecated
     boolean canShowSearchResultsView();
 
     /**
@@ -313,24 +330,34 @@ public interface ToolbarController {
      *
      * <p>Note: Apps can only call this method if the package name is allowed via OEM to render
      * their view.  To check if the application have the permission to do so or not first call
-     * {@link #canShowSearchResultsView()}. If the app is not allowed this method will throw an
-     * {@link IllegalStateException}
+     * {@link SearchCapabilities#canShowSearchResultsView()}. If the app is not allowed this
+     * method
+     * will throw an {@link IllegalStateException}
      *
      * @param view to be added in the container.
+     * @deprecated See {@link SearchConfigBuilder#setSearchResultsView(View)} for details.
      */
+    @Deprecated
     void setSearchResultsView(@Nullable View view);
 
     /**
      * Set the icon to be displayed within the input field of IME window.
+     *
+     * @deprecated See {@link SearchConfigBuilder#setSearchResultsInputViewIcon(Drawable)} )} for
+     * details.
      */
+    @Deprecated
     void setSearchResultsInputViewIcon(@NonNull Drawable drawable);
 
     /**
      * Sets list of search item {@link CarUiListItem} to be displayed in the IMS
      * template. This method should be called when system is running in a wide screen mode. Apps
-     * can check that by using {@link #canShowSearchResultItems()}
+     * can check that by using {@link SearchCapabilities#canShowSearchResultItems()}
      * Else, this method will throw an {@link IllegalStateException}
+     *
+     * @deprecated See {@link SearchConfigBuilder#setSearchResultItems(List)} )} for details.
      */
+    @Deprecated
     void setSearchResultItems(List<? extends CarUiImeSearchListItem> searchItems);
 
     /** Registers a new {@link Toolbar.OnSearchCompletedListener} to the list of listeners. */

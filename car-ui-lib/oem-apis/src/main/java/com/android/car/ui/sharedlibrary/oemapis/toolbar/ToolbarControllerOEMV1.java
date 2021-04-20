@@ -17,7 +17,6 @@
 package com.android.car.ui.sharedlibrary.oemapis.toolbar;
 
 import android.graphics.drawable.Drawable;
-import android.view.View;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -88,41 +87,14 @@ public interface ToolbarControllerOEMV1 {
     void setSearchMode(int searchMode);
 
     /**
-     * Returns true if the toolbar can display search result items. One example of this is when the
-     * system is configured to display search items in the IME instead of in the app.
+     * Returns the capabilities of what toolbar can do with Search
      */
-    boolean canShowSearchResultItems();
+    SearchCapabilitiesOEMV1 getSearchCapabilities();
 
     /**
-     * Returns true if the app is allowed to set search results view.
+     * Sets the search info to be displayed within the widescreen IME.
      */
-    boolean canShowSearchResultsView();
-
-    /**
-     * Add a view within a container that will animate with the wide screen IME to display search
-     * results.
-     *
-     * <p>Note: Apps can only call this method if the package name is allowed via OEM to render
-     * their view.  To check if the application have the permission to do so or not first call
-     * {@link #canShowSearchResultsView()}. If the app is not allowed this method will throw an
-     * {@link IllegalStateException}
-     *
-     * @param view to be added in the container.
-     */
-    void setSearchResultsView(View view);
-
-    /**
-     * Set the icon to be displayed within the input field of IME window.
-     */
-    void setSearchResultsInputViewIcon(Drawable view);
-
-    /**
-     * Sets list of search item {@link SearchItemOEMV1} to be displayed in the IMS
-     * template. This method should be called when system is running in a wide screen mode. Apps
-     * can check that by using {@link #canShowSearchResultItems()}
-     * Else, this method will throw an {@link IllegalStateException}
-     */
-    void setSearchResultItems(List<? extends SearchItemOEMV1> searchItems);
+    void setSearchConfig(SearchConfigOEMV1 searchInfo);
 
     /** Don't show the nav button */
     int NAV_BUTTON_MODE_DISABLED = 0;
