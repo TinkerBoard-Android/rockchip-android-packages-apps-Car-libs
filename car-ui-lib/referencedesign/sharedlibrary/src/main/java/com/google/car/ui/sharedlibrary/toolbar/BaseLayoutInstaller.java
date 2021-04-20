@@ -21,13 +21,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
+import androidx.annotation.Nullable;
+
+import com.android.car.ui.sharedlibrary.oemapis.FocusAreaOEMV1;
+import com.android.car.ui.sharedlibrary.oemapis.FocusParkingViewOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.InsetsOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
 
 import com.google.car.ui.sharedlibrary.R;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * A helper class for implementing installBaseLayoutAround from
@@ -39,17 +45,24 @@ public class BaseLayoutInstaller {
      * Implementation of installBaseLayoutAround from
      * {@link com.android.car.ui.sharedlibrary.oemapis.SharedLibraryFactoryOEMV1}
      */
-    public static ToolbarControllerOEMV1 installBaseLayoutAround(Context sharedLibraryContext,
-            View contentView, Consumer<InsetsOEMV1> insetsChangedListener, boolean toolbarEnabled,
-            boolean fullscreen) {
+    public static ToolbarControllerOEMV1 installBaseLayoutAround(
+            Context sharedLibraryContext,
+            View contentView,
+            Consumer<InsetsOEMV1> insetsChangedListener,
+            boolean toolbarEnabled,
+            boolean fullscreen,
+            @Nullable Function<Context, FocusParkingViewOEMV1> focusParkingViewFactory,
+            @Nullable Function<Context, FocusAreaOEMV1> focusAreaFactory) {
 
         if (!toolbarEnabled) {
             // We don't need a toolbar-less base layout in this design, so we're done.
             return null;
         }
 
-        View baseLayout = LayoutInflater.from(sharedLibraryContext)
-                .inflate(R.layout.base_layout_toolbar, null, false);
+        Context activityContext = contentView.getContext();
+
+        FrameLayout baseLayout = (FrameLayout) LayoutInflater.from(sharedLibraryContext).inflate(
+                R.layout.base_layout_toolbar, null, false);
 
         // Replace the app's content view with a base layout
         ViewGroup contentViewParent = (ViewGroup) contentView.getParent();
@@ -64,8 +77,41 @@ public class BaseLayoutInstaller {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
 
+        // Add FocusParkingView to base layout.
+        // Make sure to use the application context here, not the shared library context,
+        // as the implementation of FocusParkingView/FocusArea is in the static car-ui-lib.
+        if (focusParkingViewFactory != null) {
+            View focusParkingView = focusParkingViewFactory.apply(activityContext).getView();
+            if (focusParkingView != null) {
+                baseLayout.addView(focusParkingView, 0,
+                        new FrameLayout.LayoutParams(
+                                ViewGroup.LayoutParams.WRAP_CONTENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT));
+            }
+        }
+
+        // Replace toolbar_background with a FocusArea.
+        // Note that FocusArea must be created like this, as opposed to using a custom
+        // layout inflater factory and specifying it in XML, because a LayoutInflater will
+        // use a parent view's context for creating all the child views. We have to create
+        // the FocusArea using the app's context, so that it can access it's resources,
+        // but we want children of the FocusArea to use the shared library context, so we can
+        // access shared library resources.
+        if (focusAreaFactory != null) {
+            LinearLayout focusArea = focusAreaFactory.apply(activityContext).getView();
+            if (focusArea != null) {
+                View toolbar = baseLayout.requireViewById(R.id.toolbar_background);
+                int toolbarIndex = baseLayout.indexOfChild(toolbar);
+                baseLayout.removeView(toolbar);
+                baseLayout.addView(focusArea, toolbarIndex, toolbar.getLayoutParams());
+                focusArea.addView(toolbar, new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            }
+        }
+
+
         ToolbarControllerOEMV1 toolbarController = new ToolbarControllerImpl(
-                baseLayout, sharedLibraryContext, contentView.getContext());
+                baseLayout, sharedLibraryContext, activityContext);
 
         InsetsUpdater updater = new InsetsUpdater(baseLayout, contentView);
         updater.replaceInsetsChangedListenerWith(insetsChangedListener);

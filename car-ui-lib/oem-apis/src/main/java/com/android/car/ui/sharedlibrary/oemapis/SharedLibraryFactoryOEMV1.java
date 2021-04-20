@@ -24,6 +24,7 @@ import com.android.car.ui.sharedlibrary.oemapis.recyclerview.RecyclerViewOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * This interface contains methods to create customizable carui components.
@@ -40,14 +41,30 @@ import java.util.function.Consumer;
 public interface SharedLibraryFactoryOEMV1 {
 
     /**
+     * Gives the shared library access to two factories that will create FocusParkingViews
+     * and FocusAreas. These views have their implementation in the static car-ui-lib.
+     *
+     * When {@link #installBaseLayoutAround} creates a base
+     * layout, it should include a FocusParkingView for rotary to work properly. If the base layout
+     * has a toolbar, it should also be wrapped in a FocusArea.
+     *
+     * @param focusParkingViewFactory a function that will infinitely return new instances of
+     *                                FocusParkingView
+     * @param focusAreaFactory a function that will infinitely return new instances of FocusArea
+     */
+    void setRotaryFactories(
+            Function<Context, FocusParkingViewOEMV1> focusParkingViewFactory,
+            Function<Context, FocusAreaOEMV1> focusAreaFactory);
+
+    /**
      * Creates the base layout, and optionally the toolbar.
      *
      * @param contentView The view to install the base layout around.
      * @param insetsChangedListener A method to call when the insets change.
      * @param toolbarEnabled Whether or not to add a toolbar to the base layout.
      * @param fullscreen Whether or not this base layout / toolbar is taking up the whole screen.
-     * This can be used to decide whether or not to add decorations around the
-     * edge of it.
+     *                   This can be used to decide whether or not to add decorations around the
+     *                   edge of it.
      * @return A {@link ToolbarControllerOEMV1} or null if {@code toolbarEnabled} was false.
      */
     ToolbarControllerOEMV1 installBaseLayoutAround(
