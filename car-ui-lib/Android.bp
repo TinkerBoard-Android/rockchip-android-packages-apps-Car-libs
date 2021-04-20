@@ -51,26 +51,6 @@ android_library {
     ],
 }
 
-// User this if your project includes overlayable.xml
-android_library {
-    name: "car-ui-lib-overlayable",
-
-    sdk_version: "current",
-    min_sdk_version: "28",
-    target_sdk_version: "30",
-
-    manifest: "car-ui-lib/src/main/AndroidManifest.xml",
-    static_libs: [
-        "car-ui-lib",
-    ],
-    // This is also needed for `car-ui-lib` build target.
-    // But it's not in explicitly added to the build rule,
-    // Because it's hardcoded in apex.go file under Soong.
-    apex_available: [
-        "com.android.permission",
-    ],
-}
-
 android_library {
     name: "car-ui-lib-testing-support",
 
