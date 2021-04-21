@@ -25,13 +25,10 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.car.ui.appstyledview.AppStyledDialogController;
 import com.android.car.ui.appstyledview.AppStyledViewController.AppStyledViewNavIcon;
-import com.android.car.ui.baselayout.Insets;
-import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.core.CarUi;
 import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.toolbar.Toolbar;
@@ -40,8 +37,7 @@ import com.android.car.ui.toolbar.ToolbarController;
 /**
  * Sample activity to show app styled Dialog fragment.
  */
-public class AppStyledViewSampleActivity extends AppCompatActivity implements
-        InsetsChangedListener {
+public class AppStyledViewSampleActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +46,7 @@ public class AppStyledViewSampleActivity extends AppCompatActivity implements
 
         setContentView(R.layout.app_styled_view_sample_activity);
 
-        ToolbarController toolbar = CarUi.getToolbar(this);
+        ToolbarController toolbar = CarUi.requireToolbar(this);
         toolbar.setTitle(getTitle());
         toolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
         toolbar.setLogo(R.drawable.ic_launcher);
@@ -78,13 +74,5 @@ public class AppStyledViewSampleActivity extends AppCompatActivity implements
             controller.setNavIcon(AppStyledViewNavIcon.CLOSE);
             controller.show();
         });
-    }
-
-    @Override
-    public void onCarUiInsetsChanged(@NonNull Insets insets) {
-        requireViewById(R.id.app_styled_sample_content)
-                .setPadding(0, insets.getTop(), 0, insets.getBottom());
-        requireViewById(android.R.id.content)
-                .setPadding(insets.getLeft(), 0, insets.getRight(), 0);
     }
 }

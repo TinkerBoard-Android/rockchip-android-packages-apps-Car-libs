@@ -14,17 +14,15 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<androidx.constraintlayout.widget.ConstraintLayout
+<com.android.car.ui.FocusArea
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:theme="@style/AppStyledDialogThemeSample"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
   <FrameLayout
-      android:id="@+id/app_styled_sample_content"
       android:layout_width="match_parent"
       android:layout_height="match_parent">
-
     <Button
         android:id="@+id/show_app_styled_fragment"
         android:layout_width="wrap_content"
@@ -32,4 +30,4 @@
         android:layout_gravity="center"
         android:text="show App Styled Fragment"/>
   </FrameLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>
+</com.android.car.ui.FocusArea>

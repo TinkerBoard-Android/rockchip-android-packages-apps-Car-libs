@@ -21,22 +21,37 @@
     android:layout_height="match_parent"
     android:background="@drawable/car_ui_activity_background">
 
-    <com.android.car.ui.recyclerview.CarUiRecyclerView
-        android:id="@+id/list"
+    <com.android.car.ui.FocusParkingView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <com.android.car.ui.FocusArea
+        android:id="@+id/focus_area"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent">
+        <com.android.car.ui.recyclerview.CarUiRecyclerView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"/>
+    </com.android.car.ui.FocusArea>
 
-    <com.android.car.ui.toolbar.Toolbar
-        android:id="@+id/toolbar"
+    <com.android.car.ui.FocusArea
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent">
+        <com.android.car.ui.toolbar.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </com.android.car.ui.FocusArea>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
