@@ -19,6 +19,7 @@ import android.os.Bundle;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.car.ui.FocusArea;
 import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.toolbar.Toolbar;
 
@@ -31,6 +32,9 @@ public class OldToolbarActivity extends ToolbarActivity {
         Toolbar toolbar = requireViewById(R.id.toolbar);
         RecyclerView rv = requireViewById(R.id.list);
         toolbar.registerToolbarHeightChangeListener(height -> {
+            FocusArea focusArea = requireViewById(R.id.focus_area);
+            focusArea.setBoundsOffset(0, height, 0, 0);
+            focusArea.setHighlightPadding(0, height, 0, 0);
             rv.setPadding(0, height, 0, 0);
         });
     }

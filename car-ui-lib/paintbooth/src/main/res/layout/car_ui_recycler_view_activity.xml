@@ -14,8 +14,9 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<FrameLayout
+<com.android.car.ui.FocusArea
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/focus_area"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/car_ui_activity_background">
@@ -23,6 +24,6 @@
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
-</FrameLayout>
+</com.android.car.ui.FocusArea>
 
 
