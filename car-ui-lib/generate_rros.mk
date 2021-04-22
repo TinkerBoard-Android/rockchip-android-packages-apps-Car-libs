@@ -26,6 +26,8 @@ define generate-rro
   LOCAL_RESOURCE_DIR := $(3)
   LOCAL_RRO_THEME := $$(rro_package_name)
   LOCAL_PACKAGE_NAME := $$(rro_package_name)
+  LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
+  LOCAL_LICENSE_CONDITIONS := notice
   LOCAL_CERTIFICATE := platform
   LOCAL_SDK_VERSION := current
   LOCAL_USE_AAPT2 := true

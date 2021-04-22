@@ -20,6 +20,11 @@ import static android.view.View.GONE;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
+import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
+
+import static com.android.car.ui.actions.ViewActions.waitForView;
 import static com.android.car.ui.utils.ViewUtils.DEFAULT_FOCUS;
 import static com.android.car.ui.utils.ViewUtils.FOCUSED_BY_DEFAULT;
 import static com.android.car.ui.utils.ViewUtils.IMPLICIT_DEFAULT_FOCUS;
@@ -88,6 +93,8 @@ public class ViewUtilsTest {
             mList5.setAdapter(new TestContentLimitingAdapter(/* numItems= */ 2));
             CarUiUtils.setRotaryScrollEnabled(mList5, /* isVertical= */ true);
         });
+        // If we don't wait for the recyclerview items to show up, some of the tests flake
+        onView(isRoot()).perform(waitForView(withText("Item 0"), 500));
     }
 
     @Test
