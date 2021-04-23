@@ -76,6 +76,7 @@
 
     <item target="style/TextAppearance.CarUi.Body1" value="@style/TextAppearance.CarUi.Body1"/>
     <item target="style/TextAppearance.CarUi.Body3" value="@style/TextAppearance.CarUi.Body3"/>
+    <item target="style/TextAppearance.CarUi.PreferenceCategoryTitle" value="@style/TextAppearance.CarUi.PreferenceCategoryTitle"/>
     <item target="style/TextAppearance.CarUi.PreferenceSummary" value="@style/TextAppearance.CarUi.PreferenceSummary"/>
     <item target="style/TextAppearance.CarUi.PreferenceTitle" value="@style/TextAppearance.CarUi.PreferenceTitle"/>
     <item target="style/TextAppearance.CarUi" value="@style/TextAppearance.CarUi"/>
