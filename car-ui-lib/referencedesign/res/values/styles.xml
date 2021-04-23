@@ -80,6 +80,10 @@
         <item name="android:textSize">32sp</item>
     </style>
 
+    <style name="TextAppearance.CarUi.PreferenceCategoryTitle" parent="TextAppearance.CarUi.Body3">
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
     <style name="TextAppearance.CarUi.PreferenceTitle" parent="TextAppearance.CarUi.Body1"/>
 
     <style name="TextAppearance.CarUi.Body3">
