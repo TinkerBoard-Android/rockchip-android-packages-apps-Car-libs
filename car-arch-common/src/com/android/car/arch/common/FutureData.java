@@ -16,6 +16,8 @@
 
 package com.android.car.arch.common;
 
+import androidx.annotation.Nullable;
+
 /**
  * Class that holds data with a loading state, and optionally the previous version of the data.
  *
@@ -40,6 +42,18 @@ public class FutureData<T> {
     /** Returns a loaded instance with the given previous and current data values. */
     public static <T> FutureData<T> newLoadedData(T oldData, T newData) {
         return new FutureData<>(false, oldData, newData);
+    }
+
+    /** Returns the data contained in the future or null (when loading or no future). */
+    @Nullable
+    public static <T> T getData(@Nullable FutureData<T> future) {
+        return (future != null) ? future.getData() : null;
+    }
+
+    /** Returns the past data contained in the future or null (when loading or no future). */
+    @Nullable
+    public static <T> T getPastData(@Nullable FutureData<T> future) {
+        return (future != null) ? future.getPastData() : null;
     }
 
     /**
