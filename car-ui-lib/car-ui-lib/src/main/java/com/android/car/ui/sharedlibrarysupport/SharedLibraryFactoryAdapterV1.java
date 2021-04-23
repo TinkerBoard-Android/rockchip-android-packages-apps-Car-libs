@@ -22,8 +22,11 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.car.ui.FocusArea;
+import com.android.car.ui.FocusAreaAdapterV1;
+import com.android.car.ui.FocusParkingView;
+import com.android.car.ui.FocusParkingViewAdapterV1;
 import com.android.car.ui.R;
 import com.android.car.ui.appstyledview.AppStyledViewController;
 import com.android.car.ui.appstyledview.AppStyledViewControllerAdapterV1;
@@ -62,6 +65,10 @@ public final class SharedLibraryFactoryAdapterV1 implements SharedLibraryFactory
         mOem = oem;
         mContext = context;
         mFactoryStub = new SharedLibraryFactoryStub(context);
+
+        mOem.setRotaryFactories(
+                c -> new FocusParkingViewAdapterV1(new FocusParkingView(c)),
+                c -> new FocusAreaAdapterV1(new FocusArea(c)));
     }
 
     @Override

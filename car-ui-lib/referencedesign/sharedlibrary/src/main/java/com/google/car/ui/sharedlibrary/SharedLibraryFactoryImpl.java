@@ -18,6 +18,10 @@ package com.google.car.ui.sharedlibrary;
 import android.content.Context;
 import android.view.View;
 
+import androidx.annotation.Nullable;
+
+import com.android.car.ui.sharedlibrary.oemapis.FocusAreaOEMV1;
+import com.android.car.ui.sharedlibrary.oemapis.FocusParkingViewOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.InsetsOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryFactoryOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.appstyledview.AppStyledViewControllerOEMV1;
@@ -30,6 +34,7 @@ import com.google.car.ui.sharedlibrary.recyclerview.RecyclerViewImpl;
 import com.google.car.ui.sharedlibrary.toolbar.BaseLayoutInstaller;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * An implementation of {@link SharedLibraryFactoryImpl} for creating the reference design
@@ -39,9 +44,21 @@ import java.util.function.Consumer;
 public class SharedLibraryFactoryImpl implements SharedLibraryFactoryOEMV1 {
 
     private final Context mSharedLibraryContext;
+    @Nullable
+    private Function<Context, FocusParkingViewOEMV1> mFocusParkingViewFactory;
+    @Nullable
+    private Function<Context, FocusAreaOEMV1> mFocusAreaFactory;
 
     public SharedLibraryFactoryImpl(Context sharedLibraryContext) {
         mSharedLibraryContext = sharedLibraryContext;
+    }
+
+    @Override
+    public void setRotaryFactories(
+            Function<Context, FocusParkingViewOEMV1> focusParkingViewFactory,
+            Function<Context, FocusAreaOEMV1> focusAreaFactory) {
+        mFocusParkingViewFactory = focusParkingViewFactory;
+        mFocusAreaFactory = focusAreaFactory;
     }
 
     @Override
@@ -49,8 +66,14 @@ public class SharedLibraryFactoryImpl implements SharedLibraryFactoryOEMV1 {
             Consumer<InsetsOEMV1> insetsChangedListener, boolean toolbarEnabled,
             boolean fullscreen) {
 
-        return BaseLayoutInstaller.installBaseLayoutAround(mSharedLibraryContext,
-                contentView, insetsChangedListener, toolbarEnabled, fullscreen);
+        return BaseLayoutInstaller.installBaseLayoutAround(
+                mSharedLibraryContext,
+                contentView,
+                insetsChangedListener,
+                toolbarEnabled,
+                fullscreen,
+                mFocusParkingViewFactory,
+                mFocusAreaFactory);
     }
 
     @Override
