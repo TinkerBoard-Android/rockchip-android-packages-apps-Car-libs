@@ -74,6 +74,14 @@ public interface SharedLibraryFactoryOEMV1 {
             boolean fullscreen);
 
     /**
+     * If implementation of the library would like to opt out of controlling the base layout
+     * and subsequently the toolbar they can do so by returning false from this method.
+     *
+     * @return false if {@link #installBaseLayoutAround} should not be called for this library
+     */
+    boolean customizesBaseLayout();
+
+    /**
      * Creates a app styled view.
      *
      * @return the view used for app styled view.
