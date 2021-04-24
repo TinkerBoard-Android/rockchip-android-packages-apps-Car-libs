@@ -49,6 +49,8 @@ import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.recyclerview.CarUiContentListItem;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.MenuItem;
+import com.android.car.ui.toolbar.SearchConfig;
+import com.android.car.ui.toolbar.SearchConfig.SearchConfigBuilder;
 import com.android.car.ui.toolbar.SearchMode;
 import com.android.car.ui.toolbar.Toolbar;
 import com.android.car.ui.toolbar.ToolbarController;
@@ -88,7 +90,7 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
         toolbar.setTitle(getTitle());
         toolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
         toolbar.setLogo(R.drawable.ic_launcher);
-        boolean[] isSearching = new boolean[] { false };
+        boolean[] isSearching = new boolean[]{false};
         toolbar.registerOnBackListener(
                 () -> {
                     if (isSearching[0]) {
@@ -125,11 +127,12 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
                 .setOnClickListener(i -> {
                     isSearching[0] = true;
                     toolbar.setSearchMode(SearchMode.SEARCH);
-                    if (toolbar.canShowSearchResultItems()) {
-                        toolbar.setSearchResultsView(null);
-                        toolbar.setSearchResultItems(mSearchItems);
-                        toolbar.setSearchResultsInputViewIcon(
-                                getDrawable(R.drawable.car_ui_icon_search));
+                    if (toolbar.getSearchCapabilities().canShowSearchResultItems()) {
+                        SearchConfigBuilder builder = SearchConfig.builder()
+                                .setSearchResultItems(mSearchItems)
+                                .setSearchResultsInputViewIcon(
+                                        getDrawable(R.drawable.car_ui_icon_search));
+                        toolbar.setSearchConfig(builder.build());
                     }
                 })
                 .build());
