@@ -196,6 +196,25 @@ public class SearchView extends ConstraintLayout {
         }
     }
 
+    void setSearchConfig(SearchConfig searchConfig, SearchCapabilities searchCapabilities) {
+        if (searchConfig != null && searchConfig.getSearchResultsView() != null
+                && searchCapabilities.canShowSearchResultsView()) {
+            setViewToImeWideScreenSurface(
+                    searchConfig.getSearchResultsView());
+        }
+
+        if (searchConfig != null && searchConfig.getSearchResultItems() != null) {
+            setSearchItemsForWideScreen(
+                    searchConfig.getSearchResultItems());
+        }
+
+        if (searchConfig != null
+                && searchConfig.getSearchResultsInputViewIcon() != null) {
+            setSearchResultsInputViewIcon(
+                    searchConfig.getSearchResultsInputViewIcon());
+        }
+    }
+
     /**
      * Apply window inset listener to the search container.
      */
@@ -278,7 +297,7 @@ public class SearchView extends ConstraintLayout {
         }
     }
 
-    void setSearchResultsInputViewIcon(Drawable drawable) {
+    private void setSearchResultsInputViewIcon(Drawable drawable) {
         Bitmap bitmap = CarUiUtils.drawableToBitmap(drawable);
         byte[] byteArray = bitmapToByteArray(bitmap);
 
@@ -287,7 +306,7 @@ public class SearchView extends ConstraintLayout {
         mInputMethodManager.sendAppPrivateCommand(mSearchText, WIDE_SCREEN_ACTION, bundle);
     }
 
-    void setViewToImeWideScreenSurface(View view) {
+    private void setViewToImeWideScreenSurface(View view) {
         if (view == null) {
             mWideScreenImeContentAreaViewContainer = null;
             return;
@@ -371,7 +390,7 @@ public class SearchView extends ConstraintLayout {
     /**
      * Sets list of search item {@link CarUiListItem} to be displayed in the IMS template.
      */
-    public void setSearchItemsForWideScreen(List<? extends CarUiImeSearchListItem> searchItems) {
+    private void setSearchItemsForWideScreen(List<? extends CarUiImeSearchListItem> searchItems) {
         mWideScreenSearchItemList = searchItems != null ? new ArrayList<>(searchItems) : null;
         displaySearchWideScreen();
     }
@@ -528,7 +547,7 @@ public class SearchView extends ConstraintLayout {
 
         @Override
         public void onSurfaceInfo(int displayId, IBinder binder, int height,
-                                  int width) {
+                int width) {
             if (Build.VERSION.SDK_INT < VERSION_CODES.R) {
                 // SurfaceControlViewHost is only available on R and above
                 return;

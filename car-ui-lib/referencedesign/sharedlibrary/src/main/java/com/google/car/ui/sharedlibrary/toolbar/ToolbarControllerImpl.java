@@ -28,7 +28,8 @@ import androidx.annotation.Nullable;
 
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.MenuItemOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ProgressBarControllerOEMV1;
-import com.android.car.ui.sharedlibrary.oemapis.toolbar.SearchItemOEMV1;
+import com.android.car.ui.sharedlibrary.oemapis.toolbar.SearchCapabilitiesOEMV1;
+import com.android.car.ui.sharedlibrary.oemapis.toolbar.SearchConfigOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.TabOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
 
@@ -177,28 +178,13 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     }
 
     @Override
-    public boolean canShowSearchResultItems() {
-        return false;
+    public SearchCapabilitiesOEMV1 getSearchCapabilities() {
+        return null;
     }
 
     @Override
-    public boolean canShowSearchResultsView() {
-        return false;
-    }
-
-    @Override
-    public void setSearchResultsView(View view) {
-        // Intentional no-op as canShowSearchResultsView returns false
-    }
-
-    @Override
-    public void setSearchResultsInputViewIcon(Drawable view) {
-        // Intentional no-op as canShowSearchResultsView returns false
-    }
-
-    @Override
-    public void setSearchResultItems(List<? extends SearchItemOEMV1> searchItems) {
-        // Intentional no-op as canShowSearchResultItems returns false
+    public void setSearchConfig(SearchConfigOEMV1 searchInfo) {
+        // Intentional no-op as getSearchCapabilities returns null
     }
 
     @Override
