@@ -52,6 +52,7 @@ import com.android.car.ui.utils.CarUiUtils;
 import com.android.car.ui.utils.ViewUtils;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +87,8 @@ public class FocusArea extends LinearLayout {
     private static final int INVALID_DIRECTION = -1;
 
     private static final List<Integer> NUDGE_DIRECTIONS =
-            Arrays.asList(FOCUS_LEFT, FOCUS_RIGHT, FOCUS_UP, FOCUS_DOWN);
+            Collections.unmodifiableList(Arrays.asList(
+                    FOCUS_LEFT, FOCUS_RIGHT, FOCUS_UP, FOCUS_DOWN));
 
     /** Whether the FocusArea's descendant has focus (the FocusArea itself is not focusable). */
     private boolean mHasFocus;
@@ -155,7 +157,7 @@ public class FocusArea extends LinearLayout {
      * Map of nudge target FocusArea IDs specified in {@code app:nudgeLeft}, {@code app:nudgRight},
      * {@code app:nudgeUp}, or {@code app:nudgeDown}.
      */
-    private Map<Integer, Integer> mSpecifiedNudgeIdMap;
+    private final Map<Integer, Integer> mSpecifiedNudgeIdMap = new HashMap<>();
 
     /** Map of specified nudge target FocusAreas. */
     private Map<Integer, FocusArea> mSpecifiedNudgeFocusAreaMap;
@@ -418,15 +420,22 @@ public class FocusArea extends LinearLayout {
                         + "be specified together");
             }
 
-            mSpecifiedNudgeIdMap = new HashMap<>();
-            mSpecifiedNudgeIdMap.put(FOCUS_LEFT,
-                    a.getResourceId(R.styleable.FocusArea_nudgeLeft, View.NO_ID));
-            mSpecifiedNudgeIdMap.put(FOCUS_RIGHT,
-                    a.getResourceId(R.styleable.FocusArea_nudgeRight, View.NO_ID));
-            mSpecifiedNudgeIdMap.put(FOCUS_UP,
-                    a.getResourceId(R.styleable.FocusArea_nudgeUp, View.NO_ID));
-            mSpecifiedNudgeIdMap.put(FOCUS_DOWN,
-                    a.getResourceId(R.styleable.FocusArea_nudgeDown, View.NO_ID));
+            if (a.hasValue(R.styleable.FocusArea_nudgeLeft)) {
+                mSpecifiedNudgeIdMap.put(FOCUS_LEFT,
+                        a.getResourceId(R.styleable.FocusArea_nudgeLeft, View.NO_ID));
+            }
+            if (a.hasValue(R.styleable.FocusArea_nudgeRight)) {
+                mSpecifiedNudgeIdMap.put(FOCUS_RIGHT,
+                        a.getResourceId(R.styleable.FocusArea_nudgeRight, View.NO_ID));
+            }
+            if (a.hasValue(R.styleable.FocusArea_nudgeUp)) {
+                mSpecifiedNudgeIdMap.put(FOCUS_UP,
+                        a.getResourceId(R.styleable.FocusArea_nudgeUp, View.NO_ID));
+            }
+            if (a.hasValue(R.styleable.FocusArea_nudgeDown)) {
+                mSpecifiedNudgeIdMap.put(FOCUS_DOWN,
+                        a.getResourceId(R.styleable.FocusArea_nudgeDown, View.NO_ID));
+            }
 
             mDefaultFocusOverridesHistory = a.getBoolean(
                     R.styleable.FocusArea_defaultFocusOverridesHistory, false);
@@ -543,6 +552,7 @@ public class FocusArea extends LinearLayout {
      *
      * @hidden
      */
+    @Nullable
     public View getDefaultFocusView() {
         return mDefaultFocusView;
     }
@@ -690,7 +700,7 @@ public class FocusArea extends LinearLayout {
         View root = getRootView();
         mSpecifiedNudgeFocusAreaMap = new HashMap<>();
         for (Integer direction : NUDGE_DIRECTIONS) {
-            int id = mSpecifiedNudgeIdMap.get(direction);
+            int id = mSpecifiedNudgeIdMap.getOrDefault(direction, View.NO_ID);
             mSpecifiedNudgeFocusAreaMap.put(direction, root.findViewById(id));
         }
     }
