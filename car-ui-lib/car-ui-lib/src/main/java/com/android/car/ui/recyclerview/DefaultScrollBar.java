@@ -18,6 +18,7 @@ package com.android.car.ui.recyclerview;
 import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
 import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 import android.content.res.Resources;
 import android.os.Handler;
@@ -245,7 +246,7 @@ class DefaultScrollBar implements ScrollBar {
     private int calculateScrollThumbLength(int range, int extent) {
         // Scale the length by the available space that the thumb can fill.
         return max(Math.round(((float) extent / range) * mScrollTrack.getHeight()),
-                mScrollbarThumbMinHeight);
+                min(mScrollbarThumbMinHeight, mScrollTrack.getHeight()));
     }
 
     /**
@@ -523,7 +524,11 @@ class DefaultScrollBar implements ScrollBar {
                 int trackMargin = trackLayoutParam.topMargin
                         + trackLayoutParam.bottomMargin;
                 margin += trackMargin;
-                if (screenSize < 3 * touchTargetSize + margin) {
+                // touchTargetSize (for up button) + touchTargetSize (for down button)
+                // + max(touchTargetSize, mScrollbarThumbMinHeight)
+                // + margin (all margins added together)
+                if (screenSize < 2 * touchTargetSize
+                        + max(touchTargetSize, mScrollbarThumbMinHeight) + margin) {
                     mScrollTrack.setVisibility(View.INVISIBLE);
                     mScrollThumb.setVisibility(View.INVISIBLE);
                 }
