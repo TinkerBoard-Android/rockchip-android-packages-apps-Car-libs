@@ -29,6 +29,7 @@ import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.paintbooth.caruirecyclerview.RecyclerViewAdapter;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.MenuItem;
+import com.android.car.ui.toolbar.SearchConfig;
 import com.android.car.ui.toolbar.SearchMode;
 import com.android.car.ui.toolbar.Toolbar;
 import com.android.car.ui.toolbar.ToolbarController;
@@ -54,7 +55,7 @@ public class WideScreenTestView extends AppCompatActivity implements InsetsChang
         toolbar.setTitle(getTitle());
         toolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
         toolbar.setLogo(R.drawable.ic_launcher);
-        boolean[] isSearching = new boolean[] { false };
+        boolean[] isSearching = new boolean[]{false};
         toolbar.registerOnBackListener(
                 () -> {
                     if (isSearching[0]) {
@@ -69,13 +70,13 @@ public class WideScreenTestView extends AppCompatActivity implements InsetsChang
                 .setOnClickListener(i -> {
                     isSearching[0] = true;
                     toolbar.setSearchMode(SearchMode.SEARCH);
-                    if (toolbar.canShowSearchResultsView()) {
-                        toolbar.setSearchResultsView(findViewById(R.id.list));
+                    if (toolbar.getSearchCapabilities().canShowSearchResultsView()) {
+                        toolbar.setSearchConfig(SearchConfig.builder()
+                                .setSearchResultsView(findViewById(R.id.list)).build());
                     }
                 }).build());
 
         toolbar.setMenuItems(mMenuItems);
-
         CarUiRecyclerView recyclerView = findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 

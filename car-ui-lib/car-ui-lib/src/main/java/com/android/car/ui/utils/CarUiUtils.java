@@ -42,10 +42,14 @@ import androidx.annotation.StyleRes;
 import androidx.annotation.UiThread;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 
 /**
  * Collection of utility methods
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public final class CarUiUtils {
 
     private static final String TAG = "CarUiUtils";
@@ -287,5 +291,22 @@ public final class CarUiUtils {
      */
     public static String charSequenceToString(@Nullable CharSequence charSequence) {
         return charSequence == null ? null : charSequence.toString();
+    }
+
+    /**
+     * Given a list of T and a function to convert from T to U, return a list of U.
+     *
+     * This will create a new list.
+     */
+    public static <T, U> List<U> convertList(List<T> list, Function<T, U> f) {
+        if (list == null) {
+            return null;
+        }
+
+        List<U> result = new ArrayList<>();
+        for (T item : list) {
+            result.add(f.apply(item));
+        }
+        return result;
     }
 }
