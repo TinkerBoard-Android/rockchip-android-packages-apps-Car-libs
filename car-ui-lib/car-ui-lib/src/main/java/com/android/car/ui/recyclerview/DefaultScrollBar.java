@@ -558,7 +558,8 @@ class DefaultScrollBar implements ScrollBar {
     /**
      * Returns {@code true} if the RecyclerView is completely displaying the first item.
      */
-    boolean isAtStart() {
+    @Override
+    public boolean isAtStart() {
         return mSnapHelper.isAtStart(getRecyclerView().getLayoutManager());
     }
 
