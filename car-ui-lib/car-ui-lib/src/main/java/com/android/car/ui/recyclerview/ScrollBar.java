@@ -43,4 +43,9 @@ public interface ScrollBar {
      * Called when recyclerview's setAdapter is called.
      */
     void adapterChanged(RecyclerView.Adapter adapter);
+
+    /**
+     * Returns {@code true} if the RecyclerView is completely displaying the first item.
+     */
+    boolean isAtStart();
 }

@@ -16,7 +16,6 @@
 package com.android.car.ui.toolbar;
 
 import static android.view.WindowInsets.Type.ime;
-import static android.view.WindowInsets.Type.systemBars;
 
 import static com.android.car.ui.core.SearchResultsProvider.CONTENT;
 import static com.android.car.ui.core.SearchResultsProvider.SEARCH_RESULTS_PROVIDER;
@@ -30,7 +29,6 @@ import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -255,8 +253,6 @@ public class SearchView extends ConstraintLayout {
                 }
 
                 displaySearchWideScreen();
-                Insets insetsSysBar = insets.getInsets(systemBars());
-
                 mHandler.post(() -> {
                     if (mSurfaceControlViewHost != null
                             && mWideScreenImeContentAreaViewContainer != null
@@ -289,10 +285,11 @@ public class SearchView extends ConstraintLayout {
                 if (mRectPadding != null) {
                     mOriginalView.setPadding(mRectPadding.left, mRectPadding.top,
                             mRectPadding.right, mRectPadding.bottom);
-                    mContentView.setPadding(0, 0, 0, 0);
+                    ((CarUiRecyclerView) mOriginalView).smoothScrollBy(0, -mRectPadding.top);
                 }
                 mRectPadding = null;
                 ((ViewGroup) mParent).addView(mContentView);
+                mParent.requestLayout();
             });
         }
     }
@@ -319,7 +316,7 @@ public class SearchView extends ConstraintLayout {
                     view.getPaddingTop(),
                     view.getPaddingRight(),
                     view.getPaddingBottom());
-            view.setPadding(0, 0, 0, 0);
+            mOriginalView.setPadding(0, 0, 0, 0);
             mContentView = ((CarUiRecyclerView) view).getContainer();
             ViewGroup parentView = (ViewGroup) mContentView.getParent();
             if (parentView != null) {
