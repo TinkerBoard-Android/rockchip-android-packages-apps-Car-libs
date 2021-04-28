@@ -420,8 +420,8 @@ public class CarUiListItemTest {
     @Test
     public void testTextTruncation_twoShortLines() {
         List<CarUiText> lines = new ArrayList<>();
-        lines.add(new CarUiText("Short text string", 2));
-        lines.add(new CarUiText("Second short string", 2));
+        lines.add(new CarUiText.Builder("Short text string").setMaxLines(2).build());
+        lines.add(new CarUiText.Builder("Second short string").setMaxLines(2).build());
 
         CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
         item.setBody(lines);
@@ -439,8 +439,8 @@ public class CarUiListItemTest {
     @Test
     public void testTextTruncation_oneLongOneShort_withMaxLines() {
         List<CarUiText> lines = new ArrayList<>();
-        lines.add(new CarUiText(LONG_CHAR_SEQUENCE, 2));
-        lines.add(new CarUiText("Second short string", 2));
+        lines.add(new CarUiText.Builder(LONG_CHAR_SEQUENCE).setMaxLines(2).build());
+        lines.add(new CarUiText.Builder("Second short string").setMaxLines(2).build());
 
         CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
         item.setBody(lines);
@@ -461,8 +461,8 @@ public class CarUiListItemTest {
     @Test
     public void testTextTruncation_oneLongOneShort_noMaxLines() {
         List<CarUiText> lines = new ArrayList<>();
-        lines.add(new CarUiText(LONG_CHAR_SEQUENCE, Integer.MAX_VALUE));
-        lines.add(new CarUiText("Second short string"));
+        lines.add(new CarUiText.Builder(LONG_CHAR_SEQUENCE).setMaxLines(Integer.MAX_VALUE).build());
+        lines.add(new CarUiText.Builder("Second short string").setMaxLines(2).build());
 
         CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
         item.setBody(lines);
@@ -480,8 +480,8 @@ public class CarUiListItemTest {
     @Test
     public void testTextTruncation_twoLong_withMaxLines() {
         List<CarUiText> lines = new ArrayList<>();
-        lines.add(new CarUiText(LONG_CHAR_SEQUENCE, 3));
-        lines.add(new CarUiText(LONG_CHAR_SEQUENCE, 3));
+        lines.add(new CarUiText.Builder(LONG_CHAR_SEQUENCE).setMaxLines(3).build());
+        lines.add(new CarUiText.Builder(LONG_CHAR_SEQUENCE).setMaxLines(3).build());
 
         CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
         item.setBody(lines);
@@ -502,7 +502,7 @@ public class CarUiListItemTest {
     @Test
     public void testTitleTextTruncation_withMaxLines() {
         CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
-        item.setTitle(new CarUiText(LONG_CHAR_SEQUENCE, 2));
+        item.setTitle(new CarUiText.Builder(LONG_CHAR_SEQUENCE).setMaxLines(2).build());
         List<CarUiListItem> items = new ArrayList<>();
         items.add(item);
 
@@ -546,9 +546,9 @@ public class CarUiListItemTest {
         CharSequence line3 = "Third short string";
 
         List<CarUiText> lines = new ArrayList<>();
-        lines.add(new CarUiText(line1));
-        lines.add(new CarUiText(line2));
-        lines.add(new CarUiText(line3));
+        lines.add(new CarUiText.Builder(line1).build());
+        lines.add(new CarUiText.Builder(line2).build());
+        lines.add(new CarUiText.Builder(line3).build());
 
         CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
         item.setBody(lines);
@@ -608,6 +608,52 @@ public class CarUiListItemTest {
 
         TextView bodyTextView = mCarUiRecyclerView.requireViewById(R.id.car_ui_list_item_body);
         assertEquals(1, bodyTextView.getLineCount());
+    }
+
+    @Test
+    public void testTextVariants_withCharLimit() {
+        List<CharSequence> variants = new ArrayList<>();
+        variants.add("Long string");
+        variants.add("Short");
+        CarUiText text = new CarUiText(variants, 1, 5);
+
+        CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
+        item.setBody(text);
+        List<CarUiListItem> items = new ArrayList<>();
+        items.add(item);
+
+        mCarUiRecyclerView.post(
+                () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items)));
+
+        // Check for no manual truncation ellipsis.
+        onView(withId(R.id.car_ui_list_item_body)).check(
+                matches(not(withText(containsString(ELLIPSIS)))));
+
+        onView(withId(R.id.car_ui_list_item_body)).check(
+                matches(withText(containsString("Short"))));
+    }
+
+    @Test
+    public void testTextVariants_withCharLimitNoMaxLines() {
+        List<CharSequence> variants = new ArrayList<>();
+        variants.add("Long string");
+        variants.add("Short");
+        CarUiText text = new CarUiText(variants, Integer.MAX_VALUE, 5);
+
+        CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
+        item.setBody(text);
+        List<CarUiListItem> items = new ArrayList<>();
+        items.add(item);
+
+        mCarUiRecyclerView.post(
+                () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items)));
+
+        // Check for no manual truncation ellipsis.
+        onView(withId(R.id.car_ui_list_item_body)).check(
+                matches(not(withText(containsString(ELLIPSIS)))));
+
+        onView(withId(R.id.car_ui_list_item_body)).check(
+                matches(withText(containsString("Short"))));
     }
 
     @Test
