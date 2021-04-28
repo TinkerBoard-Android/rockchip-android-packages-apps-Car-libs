@@ -217,13 +217,13 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
         LayoutManager layoutManager;
         if (layoutStyle.getLayoutType() == CarUiRecyclerViewLayout.LINEAR) {
             layoutManager = new LinearLayoutManager(getContext(),
-                layoutStyle.getOrientation(),
-                layoutStyle.getReverseLayout());
+                    layoutStyle.getOrientation(),
+                    layoutStyle.getReverseLayout());
         } else {
             layoutManager = new GridLayoutManager(getContext(),
-                layoutStyle.getSpanCount(),
-                layoutStyle.getOrientation(),
-                layoutStyle.getReverseLayout());
+                    layoutStyle.getSpanCount(),
+                    layoutStyle.getOrientation(),
+                    layoutStyle.getReverseLayout());
         }
         setLayoutManager(layoutManager);
     }
@@ -480,8 +480,9 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
     public void setPadding(int left, int top, int right, int bottom) {
         mContainerPaddingRelative = null;
         if (mScrollBarEnabled) {
+            boolean isAtStart = (mScrollBar != null && mScrollBar.isAtStart());
             super.setPadding(0, top, 0, bottom);
-            if (!mHasScrolled) {
+            if (!mHasScrolled || isAtStart) {
                 // If we haven't scrolled, and thus are still at the top of the screen,
                 // we should stay scrolled to the top after applying padding. Without this
                 // scroll, the padding will start scrolled offscreen. We need the padding
