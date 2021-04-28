@@ -17,11 +17,13 @@
 package com.android.car.ui.preference;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
@@ -41,24 +43,39 @@ public class CarUiEditTextPreference extends EditTextPreference
         implements UxRestrictablePreference {
 
     private Consumer<Preference> mRestrictedClickListener;
-    private boolean mUxRestricted = false;
-    private boolean mShowChevron = true;
+    private boolean mUxRestricted;
+    private boolean mShowChevron;
 
     public CarUiEditTextPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        init(attrs, defStyleAttr, defStyleRes);
     }
 
     public CarUiEditTextPreference(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public CarUiEditTextPreference(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, TypedArrayUtils.getAttr(context, R.attr.editTextPreferenceStyle,
+                android.R.attr.editTextPreferenceStyle));
     }
 
     public CarUiEditTextPreference(Context context) {
-        super(context);
+        this(context, null);
+    }
+
+    private void init(AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        TypedArray a = getContext().obtainStyledAttributes(
+                attrs,
+                R.styleable.CarUiPreference,
+                defStyleAttr,
+                defStyleRes);
+
+        mShowChevron = a.getBoolean(R.styleable.CarUiPreference_showChevron, true);
+        mUxRestricted = a.getBoolean(R.styleable.CarUiPreference_car_ui_ux_restricted, false);
+
+        a.recycle();
     }
 
     protected void setTwoActionLayout() {
