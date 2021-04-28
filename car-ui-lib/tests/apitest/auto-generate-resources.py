@@ -27,8 +27,8 @@ if sys.version_info[0] != 3:
     sys.exit(1)
 
 # path to 'packages/apps/Car/libs/car-ui-lib/'
-ROOT_FOLDER = os.path.dirname(os.path.abspath(__file__)) + '/../..'
-OUTPUT_FILE_PATH = ROOT_FOLDER + '/tests/apitest/'
+ROOT_FOLDER = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../'))
+OUTPUT_FILE_PATH = os.path.join(ROOT_FOLDER, 'tests/apitest/')
 
 
 COPYRIGHT_STR = """Copyright (C) %s The Android Open Source Project
@@ -67,14 +67,14 @@ def main():
         # Don't run because there were no chassis changes
         return
 
-    resources = get_all_resources(ROOT_FOLDER + '/car-ui-lib/src/main/res')
-    check_resource_names(resources, get_resources_from_single_file(OUTPUT_FILE_PATH + 'resource_name_allowed.xml'))
+    resources = get_all_resources(os.path.join(ROOT_FOLDER, 'car-ui-lib/src/main/res'))
+    check_resource_names(resources, get_resources_from_single_file(os.path.join(OUTPUT_FILE_PATH, 'resource_name_allowed.xml')))
 
-    OVERLAYABLE_OUTPUT_FILE_PATH = ROOT_FOLDER + '/car-ui-lib/src/main/res-overlayable/values/overlayable.xml'
+    OVERLAYABLE_OUTPUT_FILE_PATH = os.path.join(ROOT_FOLDER, 'car-ui-lib/src/main/res-overlayable/values/overlayable.xml')
     output_file = args.file or 'current.xml'
     if args.compare:
-        old_mapping = get_resources_from_single_file(OUTPUT_FILE_PATH + 'current.xml')
-        compare_resources(old_mapping, resources, OUTPUT_FILE_PATH + 'current.xml')
+        old_mapping = get_resources_from_single_file(os.path.join(OUTPUT_FILE_PATH, 'current.xml'))
+        compare_resources(old_mapping, resources, os.path.join(OUTPUT_FILE_PATH, 'current.xml'))
 
         old_mapping = get_resources_from_single_file(OVERLAYABLE_OUTPUT_FILE_PATH)
         add_constraintlayout_resources(resources)
@@ -100,7 +100,7 @@ def generate_current_file(resources, output_file='current.xml'):
 
     data = etree.ElementTree(root)
 
-    with open(OUTPUT_FILE_PATH + output_file, 'wb') as f:
+    with open(os.path.join(OUTPUT_FILE_PATH, output_file), 'wb') as f:
         data.write(f, pretty_print=True, xml_declaration=True, encoding='utf-8')
 
 def generate_overlayable_file(resources, output_file='overlayable.xml'):
@@ -215,7 +215,8 @@ def compare_resources(old_mapping, new_mapping, res_public_file):
 
     if len(added) + len(removed) > 0:
         print("Some resource have been modified. If this is intentional please " +
-              "run 'python auto-generate-resources.py' again and submit the new %s" % res_public_file)
+              "run 'python3 $ANDROID_BUILD_TOP/packages/apps/Car/libs/car-ui-lib/tests/apitest/" +
+              "auto-generate-resources.py' again and submit the new %s" % res_public_file)
         sys.exit(1)
 
 if __name__ == '__main__':
