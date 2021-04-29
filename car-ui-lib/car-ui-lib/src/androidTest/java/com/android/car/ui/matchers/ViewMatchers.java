@@ -42,4 +42,8 @@ public class ViewMatchers {
     public static Matcher<View> withPaddingAtLeast(Side side, int min) {
         return new PaddingMatcher(side, min, -1);
     }
+
+    public static Matcher<View> isActivated() {
+        return new IsActivatedMatcher();
+    }
 }
