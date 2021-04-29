@@ -20,7 +20,7 @@ limitations under the License.
     <string name="car_ui_scrollbar_page_down_button" msgid="2419547312871553905">"Pomak prema dolje"</string>
     <string name="car_ui_scrollbar_page_up_button" msgid="4152120100101092092">"Pomak prema gore"</string>
     <string name="car_ui_toolbar_nav_icon_content_description" msgid="2689756063478650269">"Natrag"</string>
-    <string name="car_ui_toolbar_menu_item_search_title" msgid="8705757227447034030">"Pretraži"</string>
+    <string name="car_ui_toolbar_menu_item_search_title" msgid="8705757227447034030">"Pretražite"</string>
     <string name="car_ui_toolbar_menu_item_settings_title" msgid="6694060516340354337">"Postavke"</string>
     <string name="car_ui_toolbar_menu_item_overflow_title" msgid="771643815366812499">"Dodatno"</string>
     <string name="car_ui_preference_switch_on" msgid="5512335363135043642">"Uključeno"</string>
