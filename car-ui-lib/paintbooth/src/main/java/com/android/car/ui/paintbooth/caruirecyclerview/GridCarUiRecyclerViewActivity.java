@@ -27,7 +27,7 @@ import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.core.CarUi;
 import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
-import com.android.car.ui.toolbar.Toolbar;
+import com.android.car.ui.toolbar.NavButtonMode;
 import com.android.car.ui.toolbar.ToolbarController;
 
 import java.util.ArrayList;
@@ -45,7 +45,7 @@ public class GridCarUiRecyclerViewActivity extends Activity implements
 
         ToolbarController toolbar = CarUi.requireToolbar(this);
         toolbar.setTitle(getTitle());
-        toolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
+        toolbar.setNavButtonMode(NavButtonMode.BACK);
 
         CarUiRecyclerView recyclerView = findViewById(R.id.list);
 

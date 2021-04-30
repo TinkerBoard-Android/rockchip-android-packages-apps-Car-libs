@@ -75,6 +75,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * A search view used by {@link Toolbar}.
@@ -103,8 +104,11 @@ public class SearchView extends ConstraintLayout {
     private List<? extends CarUiImeSearchListItem> mWideScreenSearchItemList;
     private final Map<String, CarUiImeSearchListItem> mIdToListItem = new HashMap<>();
 
-    private Set<Toolbar.OnSearchListener> mSearchListeners = Collections.emptySet();
-    private Set<Toolbar.OnSearchCompletedListener> mSearchCompletedListeners =
+    private Set<Consumer<String>> mSearchListeners = Collections.emptySet();
+    private Set<Runnable> mSearchCompletedListeners =
+            Collections.emptySet();
+    private Set<Toolbar.OnSearchListener> mDeprecatedSearchListeners = Collections.emptySet();
+    private Set<Toolbar.OnSearchCompletedListener> mDeprecatedSearchCompletedListeners =
             Collections.emptySet();
     private final TextWatcher mTextWatcher = new TextWatcher() {
         @Override
@@ -347,7 +351,10 @@ public class SearchView extends ConstraintLayout {
 
     private void notifyQuerySubmit() {
         mSearchText.clearFocus();
-        for (Toolbar.OnSearchCompletedListener listener : mSearchCompletedListeners) {
+        for (Runnable listener : mSearchCompletedListeners) {
+            listener.run();
+        }
+        for (Toolbar.OnSearchCompletedListener listener : mDeprecatedSearchCompletedListeners) {
             listener.onSearchCompleted();
         }
     }
@@ -371,17 +378,22 @@ public class SearchView extends ConstraintLayout {
     /**
      * Sets a listener for the search text changing.
      */
-    public void setSearchListeners(Set<Toolbar.OnSearchListener> listeners) {
+    public void setSearchListeners(
+            Set<Toolbar.OnSearchListener> deprecatedListeners,
+            Set<Consumer<String>> listeners) {
         mSearchListeners = listeners;
+        mDeprecatedSearchListeners = deprecatedListeners;
     }
 
     /**
      * Sets a listener for the user completing their search, for example by clicking the
-     * enter/search
-     * button on the keyboard.
+     * enter/search button on the keyboard.
      */
-    public void setSearchCompletedListeners(Set<Toolbar.OnSearchCompletedListener> listeners) {
+    public void setSearchCompletedListeners(
+            Set<Toolbar.OnSearchCompletedListener> deprecatedListeners,
+            Set<Runnable> listeners) {
         mSearchCompletedListeners = listeners;
+        mDeprecatedSearchCompletedListeners = deprecatedListeners;
     }
 
     /**
@@ -503,7 +515,10 @@ public class SearchView extends ConstraintLayout {
     private void onSearch(String query) {
         mCloseIcon.setVisibility(TextUtils.isEmpty(query) ? View.GONE : View.VISIBLE);
 
-        for (Toolbar.OnSearchListener listener : mSearchListeners) {
+        for (Consumer<String> listener : mSearchListeners) {
+            listener.accept(query);
+        }
+        for (Toolbar.OnSearchListener listener : mDeprecatedSearchListeners) {
             listener.onSearch(query);
         }
     }

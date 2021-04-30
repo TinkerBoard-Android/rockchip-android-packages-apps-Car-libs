@@ -33,7 +33,7 @@ import com.android.car.ui.recyclerview.CarUiHeaderListItem;
 import com.android.car.ui.recyclerview.CarUiListItem;
 import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
-import com.android.car.ui.toolbar.Toolbar;
+import com.android.car.ui.toolbar.NavButtonMode;
 import com.android.car.ui.toolbar.ToolbarController;
 
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public class CarUiListItemActivity extends Activity implements InsetsChangedList
 
         ToolbarController toolbar = CarUi.requireToolbar(this);
         toolbar.setTitle(getTitle());
-        toolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
+        toolbar.setNavButtonMode(NavButtonMode.BACK);
 
         CarUiRecyclerView recyclerView = findViewById(R.id.list);
         mAdapter = new CarUiListItemAdapter(generateSampleData());
