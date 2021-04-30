@@ -115,6 +115,7 @@ android_app {
     ],
     resource_dirs: [
         "paintbooth/src/main/res",
+        "paintbooth/src/main/res-overlayable",
         "paintbooth/src/main/res-public",
     ],
 
