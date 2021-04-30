@@ -28,7 +28,7 @@ import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.core.CarUi;
 import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
-import com.android.car.ui.toolbar.Toolbar;
+import com.android.car.ui.toolbar.NavButtonMode;
 import com.android.car.ui.toolbar.ToolbarController;
 
 import java.util.ArrayList;
@@ -38,7 +38,6 @@ import java.util.ArrayList;
  */
 public class CarUiRecyclerViewActivity extends Activity implements InsetsChangedListener {
     private final ArrayList<String> mData = new ArrayList<>();
-    private final int mDataToGenerate = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +46,7 @@ public class CarUiRecyclerViewActivity extends Activity implements InsetsChanged
 
         ToolbarController toolbar = CarUi.requireToolbar(this);
         toolbar.setTitle(getTitle());
-        toolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
+        toolbar.setNavButtonMode(NavButtonMode.BACK);
 
         CarUiRecyclerView recyclerView = findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -57,7 +56,7 @@ public class CarUiRecyclerViewActivity extends Activity implements InsetsChanged
     }
 
     private ArrayList<String> generateSampleData() {
-        for (int i = 0; i <= mDataToGenerate; i++) {
+        for (int i = 0; i <= 100; i++) {
             mData.add(getString(R.string.test_data) + i);
         }
         return mData;

@@ -51,7 +51,6 @@ import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
 import com.android.car.ui.recyclerview.CarUiContentListItem;
 import com.android.car.ui.recyclerview.CarUiListItem;
 import com.android.car.ui.recyclerview.CarUiListItemAdapter;
-import com.android.car.ui.toolbar.Toolbar.NavButtonMode;
 import com.android.car.ui.utils.CarUiUtils;
 
 import java.lang.ref.WeakReference;
@@ -64,6 +63,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * The implementation of {@link ToolbarController}. This class takes a ViewGroup, and looks
@@ -97,13 +98,15 @@ public final class ToolbarControllerImpl implements ToolbarController {
     private Drawable mSearchIcon;
     private String mSearchQuery;
     private final Context mContext;
-    private final Set<Toolbar.OnSearchListener> mOnSearchListeners = new HashSet<>();
-    private final Set<Toolbar.OnSearchCompletedListener> mOnSearchCompletedListeners =
+    private final Set<Consumer<String>> mOnSearchListeners = new HashSet<>();
+    private final Set<Runnable> mOnSearchCompletedListeners = new HashSet<>();
+    private final Set<Toolbar.OnSearchListener> mDeprecatedSearchListeners = new HashSet<>();
+    private final Set<Toolbar.OnSearchCompletedListener> mDeprecatedSearchCompletedListeners =
             new HashSet<>();
 
-    private final Set<Toolbar.OnBackListener> mOnBackListeners = new HashSet<>();
+    private final Set<Toolbar.OnBackListener> mDeprecatedBackListeners = new HashSet<>();
+    private final Set<Supplier<Boolean>> mBackListeners = new HashSet<>();
     private final Set<Toolbar.OnTabSelectedListener> mOnTabSelectedListeners = new HashSet<>();
-    private final Set<Toolbar.OnHeightChangedListener> mOnHeightChangedListeners = new HashSet<>();
 
     private final MenuItem mOverflowButton;
     private final boolean mIsTabsInSecondRow;
@@ -112,7 +115,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
     private boolean mShowMenuItemsWhileSearching;
     private Toolbar.State mState = Toolbar.State.HOME;
     private boolean mStateSet = false;
-    private Toolbar.NavButtonMode mNavButtonMode = Toolbar.NavButtonMode.DISABLED;
+    private NavButtonMode mNavButtonMode = NavButtonMode.DISABLED;
     private SearchMode mSearchMode = SearchMode.DISABLED;
     @NonNull
     private List<MenuItem> mMenuItems = Collections.emptyList();
@@ -120,6 +123,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
     private final List<CarUiListItem> mUiOverflowItems = new ArrayList<>();
     private final CarUiListItemAdapter mOverflowAdapter;
     private final List<MenuItemRenderer> mMenuItemRenderers = new ArrayList<>();
+    private final List<DeprecatedTabWrapper> mDeprecatedTabs = new ArrayList<>();
     private View[] mMenuItemViews;
     private int mMenuItemsXmlId = 0;
     private AlertDialog mOverflowDialog;
@@ -175,25 +179,6 @@ public final class ToolbarControllerImpl implements ToolbarController {
         mProgressBar = new ProgressBarControllerImpl(
                 requireViewByRefId(view, R.id.car_ui_toolbar_progress_bar));
         mSearchConfigBuilder = SearchConfig.builder();
-        mTabLayout.addListener(new TabLayout.Listener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                for (Toolbar.OnTabSelectedListener listener : mOnTabSelectedListeners) {
-                    listener.onTabSelected(tab);
-                }
-            }
-        });
-
-        if (mBackground != null) {
-            mBackground.addOnLayoutChangeListener((v, left, top, right, bottom,
-                    oldLeft, oldTop, oldRight, oldBottom) -> {
-                if (oldBottom - oldTop != bottom - top) {
-                    for (Toolbar.OnHeightChangedListener listener : mOnHeightChangedListeners) {
-                        listener.onHeightChanged(mBackground.getHeight());
-                    }
-                }
-            });
-        }
 
         setBackgroundShown(true);
 
@@ -319,49 +304,66 @@ public final class ToolbarControllerImpl implements ToolbarController {
         return mSubtitleText;
     }
 
+    @Override
+    public void setTabs(List<Tab> tabs) {
+        mDeprecatedTabs.clear();
+        setTabsInternal(tabs);
+    }
+
+    private void setTabsInternal(List<Tab> tabs) {
+        mTabLayout.setTabs(tabs);
+        update();
+    }
+
     /**
      * Gets the number of tabs in the toolbar. The tabs can be retrieved using
      * {@link #getTab(int)}.
      */
     @Override
     public int getTabCount() {
-        return mTabLayout.getTabCount();
+        return mDeprecatedTabs.size();
     }
 
-    /**
-     * Gets the index of the tab.
-     */
     @Override
     public int getTabPosition(TabLayout.Tab tab) {
-        return mTabLayout.getTabPosition(tab);
+        for (int i = 0; i < mDeprecatedTabs.size(); i++) {
+            if (mDeprecatedTabs.get(i).getDeprecatedTab() == tab) {
+                return i;
+            }
+        }
+        return -1;
     }
 
-    /**
-     * Adds a tab to this toolbar. You can listen for when it is selected via
-     * {@link #registerOnTabSelectedListener(Toolbar.OnTabSelectedListener)}.
-     */
     @Override
-    public void addTab(TabLayout.Tab tab) {
-        mTabLayout.addTab(tab);
-        update();
+    public void addTab(TabLayout.Tab newTab) {
+        mDeprecatedTabs.add(new DeprecatedTabWrapper(getContext(), newTab,
+                this::updateModernTabsFromDeprecatedOnes, (tab) -> {
+            for (Toolbar.OnTabSelectedListener listener : mOnTabSelectedListeners) {
+                listener.onTabSelected(newTab);
+            }
+        }));
+        updateModernTabsFromDeprecatedOnes();
     }
 
-    /**
-     * Removes all the tabs.
-     */
+    private void updateModernTabsFromDeprecatedOnes() {
+        List<Tab> modernTabs = new ArrayList<>();
+
+        for (DeprecatedTabWrapper tab : mDeprecatedTabs) {
+            modernTabs.add(tab.getModernTab());
+        }
+
+        setTabsInternal(modernTabs);
+    }
+
     @Override
     public void clearAllTabs() {
-        mTabLayout.clearAllTabs();
-        update();
+        mDeprecatedTabs.clear();
+        setTabs(null);
     }
 
-    /**
-     * Gets a tab added to this toolbar. See
-     * {@link #addTab(TabLayout.Tab)}.
-     */
     @Override
     public TabLayout.Tab getTab(int position) {
-        return mTabLayout.get(position);
+        return mDeprecatedTabs.get(position).getDeprecatedTab();
     }
 
     /**
@@ -503,6 +505,27 @@ public final class ToolbarControllerImpl implements ToolbarController {
      */
     @Override
     public void setNavButtonMode(Toolbar.NavButtonMode mode) {
+        NavButtonMode modernMode;
+        switch (mode) {
+            case BACK:
+                modernMode = NavButtonMode.BACK;
+                break;
+            case DOWN:
+                modernMode = NavButtonMode.DOWN;
+                break;
+            case CLOSE:
+                modernMode = NavButtonMode.CLOSE;
+                break;
+            case DISABLED:
+            default:
+                modernMode = NavButtonMode.DISABLED;
+                break;
+        }
+        setNavButtonMode(modernMode);
+    }
+
+    @Override
+    public void setNavButtonMode(NavButtonMode mode) {
         if (mode != mNavButtonMode) {
             mNavButtonMode = mode;
             update();
@@ -513,11 +536,22 @@ public final class ToolbarControllerImpl implements ToolbarController {
      * Gets the {@link Toolbar.NavButtonMode}
      */
     @Override
-    public NavButtonMode getNavButtonMode() {
-        if (mStateSet && mNavButtonMode == NavButtonMode.DISABLED && mState != Toolbar.State.HOME) {
+    public Toolbar.NavButtonMode getNavButtonMode() {
+        if (mStateSet && mNavButtonMode == NavButtonMode.DISABLED
+                && mState != Toolbar.State.HOME) {
             return Toolbar.NavButtonMode.BACK;
         }
-        return mNavButtonMode;
+        switch (mNavButtonMode) {
+            case BACK:
+                return Toolbar.NavButtonMode.BACK;
+            case DOWN:
+                return Toolbar.NavButtonMode.DOWN;
+            case CLOSE:
+                return Toolbar.NavButtonMode.CLOSE;
+            case DISABLED:
+            default:
+                return Toolbar.NavButtonMode.DISABLED;
+        }
     }
 
     /**
@@ -779,8 +813,11 @@ public final class ToolbarControllerImpl implements ToolbarController {
             mSearchView.setSearchQuery(query);
         } else {
             mSearchQuery = query;
-            for (Toolbar.OnSearchListener listener : mOnSearchListeners) {
+            for (Toolbar.OnSearchListener listener : mDeprecatedSearchListeners) {
                 listener.onSearch(query);
+            }
+            for (Consumer<String> listener : mOnSearchListeners) {
+                listener.accept(query);
             }
         }
     }
@@ -812,12 +849,12 @@ public final class ToolbarControllerImpl implements ToolbarController {
     private void update() {
         // Start by removing mState/mStateSet from the equation by incorporating them into other
         // variables.
-        Toolbar.NavButtonMode navButtonMode = mNavButtonMode;
+        NavButtonMode navButtonMode = mNavButtonMode;
         if (mStateSet) {
             if (mState == Toolbar.State.HOME) {
-                navButtonMode = Toolbar.NavButtonMode.DISABLED;
-            } else if (navButtonMode == Toolbar.NavButtonMode.DISABLED) {
-                navButtonMode = Toolbar.NavButtonMode.BACK;
+                navButtonMode = NavButtonMode.DISABLED;
+            } else if (navButtonMode == NavButtonMode.DISABLED) {
+                navButtonMode = NavButtonMode.BACK;
             }
         }
 
@@ -837,7 +874,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
             hasLogo = false;
         }
 
-        boolean hasTabs = mTabLayout.getTabCount() > 0;
+        boolean hasTabs = mTabLayout.hasTabs();
         if (mStateSet && mState != Toolbar.State.HOME
                 && !(mState == Toolbar.State.SUBPAGE && mShowTabsInSubpage)) {
             hasTabs = false;
@@ -854,9 +891,14 @@ public final class ToolbarControllerImpl implements ToolbarController {
 
         View.OnClickListener backClickListener = (v) -> {
             boolean absorbed = false;
-            List<Toolbar.OnBackListener> listenersCopy = new ArrayList<>(mOnBackListeners);
-            for (Toolbar.OnBackListener listener : listenersCopy) {
+            List<Toolbar.OnBackListener> deprecatedListenersCopy =
+                    new ArrayList<>(mDeprecatedBackListeners);
+            List<Supplier<Boolean>> listenersCopy = new ArrayList<>(mBackListeners);
+            for (Toolbar.OnBackListener listener : deprecatedListenersCopy) {
                 absorbed = absorbed || listener.onBack();
+            }
+            for (Supplier<Boolean> listener : listenersCopy) {
+                absorbed = absorbed || listener.get();
             }
 
             if (!absorbed) {
@@ -879,33 +921,33 @@ public final class ToolbarControllerImpl implements ToolbarController {
                 break;
         }
 
-        mNavIcon.setVisibility(navButtonMode != Toolbar.NavButtonMode.DISABLED
+        mNavIcon.setVisibility(navButtonMode != NavButtonMode.DISABLED
                 ? VISIBLE : GONE);
 
         // Show the logo in the nav space if that's enabled, we have a logo,
         // and we don't have a nav button.
         mLogoInNavIconSpace.setVisibility(hasLogo
-                && navButtonMode == Toolbar.NavButtonMode.DISABLED
+                && navButtonMode == NavButtonMode.DISABLED
                 && mLogoFillsNavIconSpace
                 ? VISIBLE : INVISIBLE);
 
         // Show logo next to the title if we have a back button or we're configured to not show
         // the logo in the nav icon space.
         mTitleLogoContainer.setVisibility(hasLogo
-                && (navButtonMode != Toolbar.NavButtonMode.DISABLED || !mLogoFillsNavIconSpace)
+                && (navButtonMode != NavButtonMode.DISABLED || !mLogoFillsNavIconSpace)
                 ? VISIBLE : GONE);
 
         // Show the nav icon container if we're not in the home space or the logo fills the nav icon
         // container. If car_ui_toolbar_nav_icon_reserve_space is true, hiding it will still reserve
         // its space
         mNavIconContainer.setVisibility(
-                navButtonMode != Toolbar.NavButtonMode.DISABLED
+                navButtonMode != NavButtonMode.DISABLED
                         || (hasLogo && mLogoFillsNavIconSpace)
                         ? VISIBLE : (mNavIconSpaceReserved ? INVISIBLE : GONE));
         mNavIconContainer.setOnClickListener(
-                navButtonMode != Toolbar.NavButtonMode.DISABLED ? backClickListener : null);
-        mNavIconContainer.setClickable(navButtonMode != Toolbar.NavButtonMode.DISABLED);
-        mNavIconContainer.setContentDescription(navButtonMode != Toolbar.NavButtonMode.DISABLED
+                navButtonMode != NavButtonMode.DISABLED ? backClickListener : null);
+        mNavIconContainer.setClickable(navButtonMode != NavButtonMode.DISABLED);
+        mNavIconContainer.setContentDescription(navButtonMode != NavButtonMode.DISABLED
                 ? getContext().getString(R.string.car_ui_toolbar_nav_icon_content_description)
                 : null);
 
@@ -938,8 +980,10 @@ public final class ToolbarControllerImpl implements ToolbarController {
         searchView.setHint(mSearchHint);
         searchView.setIcon(mSearchIcon);
         searchView.setSearchQuery(mSearchQuery);
-        searchView.setSearchListeners(mOnSearchListeners);
-        searchView.setSearchCompletedListeners(mOnSearchCompletedListeners);
+        searchView.setSearchListeners(
+                mDeprecatedSearchListeners, mOnSearchListeners);
+        searchView.setSearchCompletedListeners(
+                mDeprecatedSearchCompletedListeners, mOnSearchCompletedListeners);
         searchView.setVisibility(GONE);
 
         FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
@@ -1041,29 +1085,6 @@ public final class ToolbarControllerImpl implements ToolbarController {
     }
 
     /**
-     * Registers a new {@link Toolbar.OnHeightChangedListener} to the list of listeners. Register a
-     * {@link com.android.car.ui.recyclerview.CarUiRecyclerView} only if there is a toolbar at
-     * the top and a {@link com.android.car.ui.recyclerview.CarUiRecyclerView} in the view and
-     * nothing else. {@link com.android.car.ui.recyclerview.CarUiRecyclerView} will
-     * automatically adjust its height according to the height of the Toolbar.
-     */
-    @Override
-    public void registerToolbarHeightChangeListener(
-            Toolbar.OnHeightChangedListener listener) {
-        mOnHeightChangedListeners.add(listener);
-    }
-
-    /**
-     * Unregisters an existing {@link Toolbar.OnHeightChangedListener} from the list of
-     * listeners.
-     */
-    @Override
-    public boolean unregisterToolbarHeightChangeListener(
-            Toolbar.OnHeightChangedListener listener) {
-        return mOnHeightChangedListeners.remove(listener);
-    }
-
-    /**
      * Registers a new {@link Toolbar.OnTabSelectedListener} to the list of listeners.
      */
     @Override
@@ -1084,7 +1105,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
      */
     @Override
     public void registerOnSearchListener(Toolbar.OnSearchListener listener) {
-        mOnSearchListeners.add(listener);
+        mDeprecatedSearchListeners.add(listener);
     }
 
     /**
@@ -1092,6 +1113,16 @@ public final class ToolbarControllerImpl implements ToolbarController {
      */
     @Override
     public boolean unregisterOnSearchListener(Toolbar.OnSearchListener listener) {
+        return mDeprecatedSearchListeners.remove(listener);
+    }
+
+    @Override
+    public void registerSearchListener(Consumer<String> listener) {
+        mOnSearchListeners.add(listener);
+    }
+
+    @Override
+    public boolean unregisterSearchListener(Consumer<String> listener) {
         return mOnSearchListeners.remove(listener);
     }
 
@@ -1100,7 +1131,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
      */
     @Override
     public void registerOnSearchCompletedListener(Toolbar.OnSearchCompletedListener listener) {
-        mOnSearchCompletedListeners.add(listener);
+        mDeprecatedSearchCompletedListeners.add(listener);
     }
 
     /**
@@ -1109,6 +1140,16 @@ public final class ToolbarControllerImpl implements ToolbarController {
      */
     @Override
     public boolean unregisterOnSearchCompletedListener(Toolbar.OnSearchCompletedListener listener) {
+        return mDeprecatedSearchCompletedListeners.remove(listener);
+    }
+
+    @Override
+    public void registerSearchCompletedListener(Runnable listener) {
+        mOnSearchCompletedListeners.add(listener);
+    }
+
+    @Override
+    public boolean unregisterSearchCompletedListener(Runnable listener) {
         return mOnSearchCompletedListeners.remove(listener);
     }
 
@@ -1117,7 +1158,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
      */
     @Override
     public void registerOnBackListener(Toolbar.OnBackListener listener) {
-        mOnBackListeners.add(listener);
+        mDeprecatedBackListeners.add(listener);
     }
 
     /**
@@ -1125,7 +1166,17 @@ public final class ToolbarControllerImpl implements ToolbarController {
      */
     @Override
     public boolean unregisterOnBackListener(Toolbar.OnBackListener listener) {
-        return mOnBackListeners.remove(listener);
+        return mDeprecatedBackListeners.remove(listener);
+    }
+
+    @Override
+    public void registerBackListener(Supplier<Boolean> listener) {
+        mBackListeners.add(listener);
+    }
+
+    @Override
+    public boolean unregisterBackListener(Supplier<Boolean> listener) {
+        return mBackListeners.remove(listener);
     }
 
     /**

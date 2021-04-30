@@ -40,6 +40,7 @@ import com.android.car.ui.core.CarUi;
 import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.MenuItem;
+import com.android.car.ui.toolbar.NavButtonMode;
 import com.android.car.ui.toolbar.SearchMode;
 import com.android.car.ui.toolbar.TabLayout;
 import com.android.car.ui.toolbar.Toolbar;
@@ -53,8 +54,8 @@ import java.util.Map;
 
 public class ToolbarActivity extends AppCompatActivity implements InsetsChangedListener {
 
-    private List<MenuItem> mMenuItems = new ArrayList<>();
-    private List<Pair<CharSequence, View.OnClickListener>> mButtons = new ArrayList<>();
+    private final List<MenuItem> mMenuItems = new ArrayList<>();
+    private final List<Pair<CharSequence, View.OnClickListener>> mButtons = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,10 +68,10 @@ public class ToolbarActivity extends AppCompatActivity implements InsetsChangedL
         }
         ToolbarController toolbar = toolbarNonFinal;
         toolbar.setTitle(getTitle());
-        toolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
+        toolbar.setNavButtonMode(NavButtonMode.BACK);
         toolbar.setLogo(R.drawable.ic_launcher);
         boolean[] isSearching = new boolean[] { false };
-        toolbar.registerOnBackListener(
+        toolbar.registerBackListener(
                 () -> {
                     if (toolbar.getState() == Toolbar.State.SEARCH
                             || toolbar.getState() == Toolbar.State.EDIT) {
@@ -113,13 +114,13 @@ public class ToolbarActivity extends AppCompatActivity implements InsetsChangedL
         mButtons.add(Pair.create(getString(R.string.toolbar_cycle_nav_button), v -> {
             Toolbar.NavButtonMode mode = toolbar.getNavButtonMode();
             if (mode == Toolbar.NavButtonMode.DISABLED) {
-                toolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
+                toolbar.setNavButtonMode(NavButtonMode.BACK);
             } else if (mode == Toolbar.NavButtonMode.BACK) {
-                toolbar.setNavButtonMode(Toolbar.NavButtonMode.CLOSE);
+                toolbar.setNavButtonMode(NavButtonMode.CLOSE);
             } else if (mode == Toolbar.NavButtonMode.CLOSE) {
-                toolbar.setNavButtonMode(Toolbar.NavButtonMode.DOWN);
+                toolbar.setNavButtonMode(NavButtonMode.DOWN);
             } else {
-                toolbar.setNavButtonMode(Toolbar.NavButtonMode.DISABLED);
+                toolbar.setNavButtonMode(NavButtonMode.DISABLED);
             }
         }));
 

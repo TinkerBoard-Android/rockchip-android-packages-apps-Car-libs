@@ -20,12 +20,9 @@ import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -36,9 +33,9 @@ import androidx.annotation.Nullable;
 
 import com.android.car.ui.R;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Custom tab layout which supports adding tabs dynamically
@@ -58,27 +55,11 @@ import java.util.Set;
  * <p>Touch feedback is using @android:attr/selectableItemBackground.
  */
 public class TabLayout extends LinearLayout {
-
-    /**
-     * Listener that listens the tab selection change.
-     */
-    public interface Listener {
-        /** Callback triggered when a tab is selected. */
-        default void onTabSelected(Tab tab) {
-        }
-
-        /** Callback triggered when a tab is unselected. */
-        default void onTabUnselected(Tab tab) {
-        }
-
-        /** Callback triggered when a tab is reselected. */
-        default void onTabReselected(Tab tab) {
-        }
-    }
-
-    private final Set<Listener> mListeners = new ArraySet<>();
-
-    private final TabAdapter mTabAdapter;
+    @LayoutRes
+    private final int mTabLayoutRes;
+    @NonNull
+    private List<com.android.car.ui.toolbar.Tab> mTabs = Collections.emptyList();
+    private int mSelectedTab = -1;
 
     public TabLayout(@NonNull Context context) {
         this(context, null);
@@ -93,193 +74,86 @@ public class TabLayout extends LinearLayout {
         Resources resources = context.getResources();
 
         boolean tabFlexibleLayout = resources.getBoolean(R.bool.car_ui_toolbar_tab_flexible_layout);
-        @LayoutRes int tabLayoutRes = tabFlexibleLayout
+        mTabLayoutRes = tabFlexibleLayout
                 ? R.layout.car_ui_toolbar_tab_item_layout_flexible
                 : R.layout.car_ui_toolbar_tab_item_layout;
-        mTabAdapter = new TabAdapter(context, tabLayoutRes, this);
+    }
+
+    /** Sets the tabs to show */
+    public void setTabs(List<com.android.car.ui.toolbar.Tab> tabs) {
+        if (tabs == null) {
+            tabs = Collections.emptyList();
+        }
+        mTabs = tabs;
+        mSelectedTab = tabs.isEmpty() ? -1 : 0;
+        recreateViews();
     }
 
     /**
-     * Add a tab to this layout. The tab will be added at the end of the list. If this is the first
-     * tab to be added it will become the selected tab.
+     * Returns if this TabLayout has tabs. That is, if the most recent call to
+     * {@link #setTabs(List)} contained a non-empty list.
      */
-    public void addTab(Tab tab) {
-        mTabAdapter.add(tab);
-        // If there is only one tab in the group, set it to be selected.
-        if (mTabAdapter.getCount() == 1) {
-            mTabAdapter.selectTab(0);
-        }
-    }
-
-    /** Set the tab as the current selected tab. */
-    public void selectTab(Tab tab) {
-        mTabAdapter.selectTab(tab);
+    public boolean hasTabs() {
+        return !mTabs.isEmpty();
     }
 
     /** Set the tab at given position as the current selected tab. */
     public void selectTab(int position) {
-        mTabAdapter.selectTab(position);
-    }
-
-    /** Returns how tab items it has. */
-    public int getTabCount() {
-        return mTabAdapter.getCount();
-    }
-
-    /** Returns the position of the given tab. */
-    public int getTabPosition(Tab tab) {
-        return mTabAdapter.getPosition(tab);
-    }
-
-    /** Return the tab at the given position. */
-    public Tab get(int position) {
-        return mTabAdapter.getItem(position);
-    }
-
-    /** Clear all tabs. */
-    public void clearAllTabs() {
-        mTabAdapter.clear();
-    }
-
-    /** Register a {@link Listener}. Same listener will only be registered once. */
-    public void addListener(@NonNull Listener listener) {
-        mListeners.add(listener);
-    }
-
-    /** Unregister a {@link Listener} */
-    public void removeListener(@NonNull Listener listener) {
-        mListeners.remove(listener);
-    }
-
-    private void dispatchOnTabSelected(Tab tab) {
-        for (Listener listener : mListeners) {
-            listener.onTabSelected(tab);
+        if (position < 0 || position > mTabs.size()) {
+            position = mTabs.isEmpty() ? -1 : 0;
         }
-    }
-
-    private void dispatchOnTabUnselected(Tab tab) {
-        for (Listener listener : mListeners) {
-            listener.onTabUnselected(tab);
-        }
-    }
-
-    private void dispatchOnTabReselected(Tab tab) {
-        for (Listener listener : mListeners) {
-            listener.onTabReselected(tab);
-        }
-    }
-
-    private void addTabView(View tabView, int position) {
-        addView(tabView, position);
-    }
-
-    private static class TabAdapter extends BaseAdapter {
-        private final Context mContext;
-        private final TabLayout mTabLayout;
-        @LayoutRes
-        private final int mTabItemLayoutRes;
-        private final List<Tab> mTabList;
-
-        private TabAdapter(Context context, @LayoutRes int res, TabLayout tabLayout) {
-            mTabList = new ArrayList<>();
-            mContext = context;
-            mTabItemLayoutRes = res;
-            mTabLayout = tabLayout;
+        if (position == mSelectedTab) {
+            return;
         }
 
-        private void add(@NonNull Tab tab) {
-            mTabList.add(tab);
-            notifyItemInserted(mTabList.size() - 1);
-        }
+        int oldPosition = mSelectedTab;
+        mSelectedTab = position;
+        presentTabView(oldPosition);
+        presentTabView(position);
 
-        private void clear() {
-            mTabList.clear();
-            mTabLayout.removeAllViews();
-        }
-
-        private int getPosition(Tab tab) {
-            return mTabList.indexOf(tab);
-        }
-
-        @Override
-        public int getCount() {
-            return mTabList.size();
-        }
-
-        @Override
-        public Tab getItem(int position) {
-            return mTabList.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        @NonNull
-        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-            View tabItemView = LayoutInflater.from(mContext)
-                    .inflate(mTabItemLayoutRes, parent, false);
-
-            presentTabItemView(position, tabItemView);
-            return tabItemView;
-        }
-
-        private void selectTab(Tab tab) {
-            selectTab(getPosition(tab));
-        }
-
-        private void selectTab(int position) {
-            if (position < 0 || position >= getCount()) {
-                throw new IndexOutOfBoundsException("Invalid position");
-            }
-
-            for (int i = 0; i < getCount(); i++) {
-                Tab tab = mTabList.get(i);
-                boolean isTabSelected = position == i;
-                if (tab.mIsSelected != isTabSelected) {
-                    tab.mIsSelected = isTabSelected;
-                    notifyItemChanged(i);
-                    if (tab.mIsSelected) {
-                        mTabLayout.dispatchOnTabSelected(tab);
-                    } else {
-                        mTabLayout.dispatchOnTabUnselected(tab);
-                    }
-                } else if (tab.mIsSelected) {
-                    mTabLayout.dispatchOnTabReselected(tab);
-                }
+        if (position >= 0) {
+            com.android.car.ui.toolbar.Tab tab = mTabs.get(position);
+            Consumer<com.android.car.ui.toolbar.Tab> listener = tab.getSelectedListener();
+            if (listener != null) {
+                listener.accept(tab);
             }
         }
+    }
 
-        /** Represent the tab item at given position without destroying and recreating UI. */
-        private void notifyItemChanged(int position) {
-            View tabItemView = mTabLayout.getChildAt(position);
-            presentTabItemView(position, tabItemView);
-        }
-
-        private void notifyItemInserted(int position) {
-            View insertedView = getView(position, null, mTabLayout);
-            mTabLayout.addTabView(insertedView, position);
-        }
-
-        private void presentTabItemView(int position, @NonNull View tabItemView) {
-            Tab tab = mTabList.get(position);
-
-            ImageView iconView = requireViewByRefId(tabItemView, R.id.car_ui_toolbar_tab_item_icon);
-            TextView textView = requireViewByRefId(tabItemView, R.id.car_ui_toolbar_tab_item_text);
-
-            tabItemView.setOnClickListener(view -> selectTab(tab));
-            tab.bindText(textView);
-            tab.bindIcon(iconView);
-            tabItemView.setActivated(tab.mIsSelected);
-            textView.setTextAppearance(tab.mIsSelected
-                    ? R.style.TextAppearance_CarUi_Widget_Toolbar_Tab_Selected
-                    : R.style.TextAppearance_CarUi_Widget_Toolbar_Tab);
+    private void recreateViews() {
+        removeAllViews();
+        for (int i = 0; i < mTabs.size(); i++) {
+            View tabView = LayoutInflater.from(getContext())
+                    .inflate(mTabLayoutRes, this, false);
+            addView(tabView);
+            presentTabView(i);
         }
     }
 
-    /** Tab entity. */
+    private void presentTabView(int position) {
+        if (position < 0 || position > mTabs.size()) {
+            return;
+        }
+        View tabView = getChildAt(position);
+        com.android.car.ui.toolbar.Tab tab = mTabs.get(position);
+        ImageView iconView = requireViewByRefId(tabView, R.id.car_ui_toolbar_tab_item_icon);
+        TextView textView = requireViewByRefId(tabView, R.id.car_ui_toolbar_tab_item_text);
+
+        tabView.setOnClickListener(view -> selectTab(position));
+        textView.setText(tab.getText());
+        iconView.setImageDrawable(tab.getIcon());
+        tabView.setActivated(position == mSelectedTab);
+        textView.setTextAppearance(position == mSelectedTab
+                ? R.style.TextAppearance_CarUi_Widget_Toolbar_Tab_Selected
+                : R.style.TextAppearance_CarUi_Widget_Toolbar_Tab);
+    }
+
+    /**
+     * Tab entity.
+     *
+     * @deprecated Use {@link com.android.car.ui.toolbar.Tab} instead.
+     */
+    @Deprecated
     public static class Tab {
         private final Drawable mIcon;
         private final CharSequence mText;

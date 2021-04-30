@@ -35,10 +35,7 @@ import androidx.annotation.Nullable;
 import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.SearchCapabilitiesOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
-import com.android.car.ui.toolbar.TabLayout.Tab;
-import com.android.car.ui.toolbar.Toolbar.NavButtonMode;
 import com.android.car.ui.toolbar.Toolbar.OnBackListener;
-import com.android.car.ui.toolbar.Toolbar.OnHeightChangedListener;
 import com.android.car.ui.toolbar.Toolbar.OnSearchCompletedListener;
 import com.android.car.ui.toolbar.Toolbar.OnSearchListener;
 import com.android.car.ui.toolbar.Toolbar.OnTabSelectedListener;
@@ -51,6 +48,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Adapts a {@link com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1}
@@ -66,13 +65,18 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
     private ToolbarAdapterState mAdapterState = new ToolbarAdapterState();
     private final Set<OnTabSelectedListener> mOnTabSelectedListeners = new HashSet<>();
-    private final Set<OnBackListener> mOnBackListeners = new HashSet<>();
-    private final Set<OnSearchListener> mOnSearchListeners = new HashSet<>();
-    private final Set<OnSearchCompletedListener> mOnSearchCompletedListeners = new HashSet<>();
+    private final Set<OnBackListener> mDeprecatedBackListeners = new HashSet<>();
+    private final Set<Supplier<Boolean>> mBackListeners = new HashSet<>();
+    private final Set<OnSearchListener> mDeprecatedSearchListeners = new HashSet<>();
+    private final Set<OnSearchCompletedListener> mDeprecatedSearchCompletedListeners =
+            new HashSet<>();
+    private final Set<Consumer<String>> mSearchListeners = new HashSet<>();
+    private final Set<Runnable> mSearchCompletedListeners = new HashSet<>();
     private final ProgressBarControllerAdapterV1 mProgressBar;
     private String mSearchHint;
     private SearchConfig.SearchConfigBuilder mSearchConfigBuilder;
     private List<MenuItem> mClientMenuItems = Collections.emptyList();
+    private final List<DeprecatedTabWrapper> mDeprecatedTabs = new ArrayList<>();
 
     public ToolbarControllerAdapterV1(
             @NonNull Context context,
@@ -85,8 +89,11 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
         oemToolbar.setBackListener(() -> {
             boolean handled = false;
-            for (OnBackListener listener : mOnBackListeners) {
+            for (OnBackListener listener : mDeprecatedBackListeners) {
                 handled |= listener.onBack();
+            }
+            for (Supplier<Boolean> listener : mBackListeners) {
+                handled |= listener.get();
             }
             if (!handled && activity != null) {
                 activity.onBackPressed();
@@ -94,13 +101,19 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
         });
 
         oemToolbar.setSearchListener(query -> {
-            for (OnSearchListener listener : mOnSearchListeners) {
+            for (OnSearchListener listener : mDeprecatedSearchListeners) {
                 listener.onSearch(query);
+            }
+            for (Consumer<String> listener : mSearchListeners) {
+                listener.accept(query);
             }
         });
         oemToolbar.setSearchCompletedListener(() -> {
-            for (OnSearchCompletedListener listener : mOnSearchCompletedListeners) {
+            for (OnSearchCompletedListener listener : mDeprecatedSearchCompletedListeners) {
                 listener.onSearchCompleted();
+            }
+            for (Runnable listener : mSearchCompletedListeners) {
+                listener.run();
             }
         });
     }
@@ -142,15 +155,24 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     }
 
     @Override
-    public int getTabCount() {
-        return mAdapterState.getTabs().size();
+    public void setTabs(List<Tab> tabs) {
+        mDeprecatedTabs.clear();
+        setTabsInternal(tabs);
+    }
+
+    private void setTabsInternal(List<Tab> tabs) {
+        update(mAdapterState.copy().setTabs(convertList(tabs, TabAdapterV1::new)).build());
     }
 
     @Override
-    public int getTabPosition(Tab tab) {
-        List<TabAdapterV1> tabs = mAdapterState.getTabs();
-        for (int i = 0; i < tabs.size(); i++) {
-            if (tabs.get(i).getClientTab() == tab) {
+    public int getTabCount() {
+        return mDeprecatedTabs.size();
+    }
+
+    @Override
+    public int getTabPosition(TabLayout.Tab tab) {
+        for (int i = 0; i < mDeprecatedTabs.size(); i++) {
+            if (mDeprecatedTabs.get(i).getDeprecatedTab() == tab) {
                 return i;
             }
         }
@@ -158,47 +180,34 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     }
 
     @Override
-    public void addTab(Tab clientTab) {
-        ToolbarAdapterState.Builder newStateBuilder = mAdapterState.copy();
-        newStateBuilder.addTab(new TabAdapterV1(mContext, clientTab, () -> {
-            List<TabAdapterV1> tabs = mAdapterState.getTabs();
-            int selectedIndex = -1;
-            for (int i = 0; i < tabs.size(); i++) {
-                if (tabs.get(i).getClientTab() == clientTab) {
-                    selectedIndex = i;
-                    break;
-                }
-            }
-            // We need to update selectedIndex in our state, but don't need to call update(),
-            // as this change originated in the shared library so it already knows about it.
-            mAdapterState = mAdapterState.copy().setSelectedTab(selectedIndex).build();
-
-            for (OnTabSelectedListener listener : mOnTabSelectedListeners) {
+    public void addTab(TabLayout.Tab clientTab) {
+        mDeprecatedTabs.add(new DeprecatedTabWrapper(mContext, clientTab,
+                this::updateModernTabsFromDeprecatedOnes, (tab) -> {
+            for (Toolbar.OnTabSelectedListener listener : mOnTabSelectedListeners) {
                 listener.onTabSelected(clientTab);
             }
         }));
-        if (mAdapterState.getSelectedTab() < 0) {
-            newStateBuilder.setSelectedTab(0);
+        updateModernTabsFromDeprecatedOnes();
+    }
+
+    private void updateModernTabsFromDeprecatedOnes() {
+        List<Tab> modernTabs = new ArrayList<>();
+
+        for (DeprecatedTabWrapper tab : mDeprecatedTabs) {
+            modernTabs.add(tab.getModernTab());
         }
-        update(newStateBuilder.build());
+
+        setTabsInternal(modernTabs);
     }
 
     @Override
     public void clearAllTabs() {
-        update(mAdapterState.copy()
-                .setTabs(Collections.emptyList())
-                .setSelectedTab(-1)
-                .build());
+        setTabs(Collections.emptyList());
     }
 
     @Override
-    public Tab getTab(int position) {
-        List<TabAdapterV1> tabs = mAdapterState.getTabs();
-        if (position < 0 || position >= tabs.size()) {
-            throw new IllegalArgumentException("Tab position is invalid: " + position);
-        }
-        TabAdapterV1 tab = tabs.get(position);
-        return tab.getClientTab();
+    public TabLayout.Tab getTab(int position) {
+        return mDeprecatedTabs.get(position).getDeprecatedTab();
     }
 
     @Override
@@ -265,13 +274,43 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     }
 
     @Override
-    public void setNavButtonMode(NavButtonMode style) {
-        update(mAdapterState.copy().setNavButtonMode(style).build());
+    public void setNavButtonMode(Toolbar.NavButtonMode style) {
+        switch (style) {
+            case BACK:
+                setNavButtonMode(NavButtonMode.BACK);
+                break;
+            case DOWN:
+                setNavButtonMode(NavButtonMode.DOWN);
+                break;
+            case CLOSE:
+                setNavButtonMode(NavButtonMode.CLOSE);
+                break;
+            case DISABLED:
+            default:
+                setNavButtonMode(NavButtonMode.DISABLED);
+                break;
+        }
     }
 
     @Override
-    public NavButtonMode getNavButtonMode() {
-        return mAdapterState.getNavButtonMode();
+    public void setNavButtonMode(NavButtonMode mode) {
+        update(mAdapterState.copy().setNavButtonMode(mode).build());
+    }
+
+    @Override
+    public Toolbar.NavButtonMode getNavButtonMode() {
+        NavButtonMode mode = mAdapterState.getNavButtonMode();
+        switch (mode) {
+            case BACK:
+                return Toolbar.NavButtonMode.BACK;
+            case DOWN:
+                return Toolbar.NavButtonMode.DOWN;
+            case CLOSE:
+                return Toolbar.NavButtonMode.CLOSE;
+            case DISABLED:
+            default:
+                return Toolbar.NavButtonMode.DISABLED;
+        }
     }
 
     @Override
@@ -428,18 +467,6 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     }
 
     @Override
-    public void registerToolbarHeightChangeListener(OnHeightChangedListener listener) {
-        Log.w(TAG, "Unsupported operation registerToolbarHeightChangeListener() called, ignoring");
-    }
-
-    @Override
-    public boolean unregisterToolbarHeightChangeListener(OnHeightChangedListener listener) {
-        Log.w(TAG,
-                "Unsupported operation unregisterToolbarHeightChangeListener() called, ignoring");
-        return false;
-    }
-
-    @Override
     public void registerOnTabSelectedListener(OnTabSelectedListener listener) {
         mOnTabSelectedListeners.add(listener);
     }
@@ -451,12 +478,22 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
     @Override
     public void registerOnSearchListener(OnSearchListener listener) {
-        mOnSearchListeners.add(listener);
+        mDeprecatedSearchListeners.add(listener);
     }
 
     @Override
     public boolean unregisterOnSearchListener(OnSearchListener listener) {
-        return mOnSearchListeners.remove(listener);
+        return mDeprecatedSearchListeners.remove(listener);
+    }
+
+    @Override
+    public void registerSearchListener(Consumer<String> listener) {
+        mSearchListeners.add(listener);
+    }
+
+    @Override
+    public boolean unregisterSearchListener(Consumer<String> listener) {
+        return mSearchListeners.remove(listener);
     }
 
     @Override
@@ -505,22 +542,42 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
     @Override
     public void registerOnSearchCompletedListener(OnSearchCompletedListener listener) {
-        mOnSearchCompletedListeners.add(listener);
+        mDeprecatedSearchCompletedListeners.add(listener);
     }
 
     @Override
     public boolean unregisterOnSearchCompletedListener(OnSearchCompletedListener listener) {
-        return mOnSearchCompletedListeners.add(listener);
+        return mDeprecatedSearchCompletedListeners.remove(listener);
+    }
+
+    @Override
+    public void registerSearchCompletedListener(Runnable listener) {
+        mSearchCompletedListeners.add(listener);
+    }
+
+    @Override
+    public boolean unregisterSearchCompletedListener(Runnable listener) {
+        return mSearchCompletedListeners.remove(listener);
     }
 
     @Override
     public void registerOnBackListener(OnBackListener listener) {
-        mOnBackListeners.add(listener);
+        mDeprecatedBackListeners.add(listener);
     }
 
     @Override
     public boolean unregisterOnBackListener(OnBackListener listener) {
-        return mOnBackListeners.remove(listener);
+        return mDeprecatedBackListeners.remove(listener);
+    }
+
+    @Override
+    public void registerBackListener(Supplier<Boolean> listener) {
+        mBackListeners.add(listener);
+    }
+
+    @Override
+    public boolean unregisterBackListener(Supplier<Boolean> listener) {
+        return mBackListeners.remove(listener);
     }
 
     @Override
@@ -647,7 +704,8 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
         }
 
         public NavButtonMode getNavButtonMode() {
-            if (mStateSet && mNavButtonMode == NavButtonMode.DISABLED && mState != State.HOME) {
+            if (mStateSet && mNavButtonMode == NavButtonMode.DISABLED
+                    && mState != State.HOME) {
                 return NavButtonMode.BACK;
             }
             return mNavButtonMode;
@@ -759,6 +817,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
                     @NonNull List<TabAdapterV1> tabs) {
                 if (!Objects.equals(tabs, mTabs)) {
                     mTabs = Collections.unmodifiableList(tabs);
+                    mSelectedTab = mTabs.isEmpty() ? -1 : 0;
                     mWasChanged = true;
                     mTabsDirty = true;
                 }
