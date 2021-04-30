@@ -250,29 +250,6 @@ public class TelecomUtils {
      */
     public static CompletableFuture<PhoneNumberInfo> getPhoneNumberInfo(
             Context context, String number) {
-
-        if (TextUtils.isEmpty(number)) {
-            return CompletableFuture.completedFuture(new PhoneNumberInfo(
-                    number,
-                    context.getString(R.string.unknown),
-                    context.getString(R.string.unknown),
-                    null,
-                    null,
-                    "",
-                    null));
-        }
-
-        if (isVoicemailNumber(context, number)) {
-            return CompletableFuture.completedFuture(new PhoneNumberInfo(
-                    number,
-                    context.getString(R.string.voicemail),
-                    context.getString(R.string.voicemail),
-                    null,
-                    makeResourceUri(context, R.drawable.ic_voicemail),
-                    "",
-                    null));
-        }
-
         return CompletableFuture.supplyAsync(() -> lookupNumberInBackground(context, number));
     }
 
@@ -283,6 +260,28 @@ public class TelecomUtils {
                 != PackageManager.PERMISSION_GRANTED) {
             String readableNumber = getReadableNumber(context, number);
             return new PhoneNumberInfo(number, readableNumber, readableNumber, null, null, null,
+                    null);
+        }
+
+        if (TextUtils.isEmpty(number)) {
+            return new PhoneNumberInfo(
+                    number,
+                    context.getString(R.string.unknown),
+                    context.getString(R.string.unknown),
+                    null,
+                    null,
+                    "",
+                    null);
+        }
+
+        if (isVoicemailNumber(context, number)) {
+            return new PhoneNumberInfo(
+                    number,
+                    context.getString(R.string.voicemail),
+                    context.getString(R.string.voicemail),
+                    null,
+                    makeResourceUri(context, R.drawable.ic_voicemail),
+                    "",
                     null);
         }
 
