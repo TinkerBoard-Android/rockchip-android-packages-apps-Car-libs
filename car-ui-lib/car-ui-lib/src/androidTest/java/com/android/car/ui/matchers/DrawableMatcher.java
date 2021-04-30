@@ -16,21 +16,28 @@
 
 package com.android.car.ui.matchers;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.ImageView;
 
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 
 /* package */ class DrawableMatcher extends TypeSafeMatcher<View> {
 
-    private final int mDrawableId;
+    private final Bitmap mBitmap;
 
-    DrawableMatcher(int drawableId) {
-        mDrawableId = drawableId;
+    DrawableMatcher(@NonNull Context context, @DrawableRes int drawableId) {
+        this(context.getDrawable(drawableId));
+    }
+    DrawableMatcher(Drawable drawable) {
+        mBitmap = drawableToBitmap(drawable);
     }
 
     @Override
@@ -42,7 +49,7 @@ import org.hamcrest.TypeSafeMatcher;
         ImageView imageView = (ImageView) item;
 
         Bitmap bitmap = drawableToBitmap(imageView.getDrawable());
-        Bitmap otherBitmap = drawableToBitmap(imageView.getContext().getDrawable(mDrawableId));
+        Bitmap otherBitmap = mBitmap;
 
         if (bitmap == null && otherBitmap == null) {
             return true;
@@ -68,6 +75,6 @@ import org.hamcrest.TypeSafeMatcher;
 
     @Override
     public void describeTo(Description description) {
-        description.appendText("has drawable with id " + mDrawableId);
+        description.appendText("has a certain drawable");
     }
 }

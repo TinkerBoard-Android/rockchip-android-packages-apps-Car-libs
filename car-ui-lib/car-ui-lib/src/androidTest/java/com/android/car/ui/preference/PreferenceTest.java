@@ -22,6 +22,7 @@ import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isChecked;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isNotChecked;
+import static androidx.test.espresso.matcher.ViewMatchers.withContentDescription;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
@@ -101,7 +102,7 @@ public class PreferenceTest {
                 .check(matches(isNotChecked()));
 
         // Press back to save selection.
-        onView(withId(R.id.car_ui_toolbar_nav_icon)).perform(click());
+        onView(withContentDescription("Back")).perform(click());
         // Verify preference value was updated.
         verify(mockListener, times(1)).onPreferenceChange(any(), eq(mEntriesValues[0]));
 
@@ -126,7 +127,7 @@ public class PreferenceTest {
                 .check(matches(isNotChecked()));
 
         // Press back to save selection.
-        onView(withId(R.id.car_ui_toolbar_nav_icon)).perform(click());
+        onView(withContentDescription("Back")).perform(click());
         // Verify preference value was updated.
         verify(mockListener, times(1)).onPreferenceChange(any(), eq(mEntriesValues[1]));
         // Return to list preference screen.
@@ -175,7 +176,7 @@ public class PreferenceTest {
                 .check(matches(isChecked()));
 
         // Press back to save selection.
-        onView(withId(R.id.car_ui_toolbar_nav_icon)).perform(click());
+        onView(withContentDescription("Back")).perform(click());
         Set<String> expectedUpdate = new HashSet<>();
         expectedUpdate.add(mEntriesValues[0]);
         expectedUpdate.add(mEntriesValues[2]);
@@ -318,7 +319,7 @@ public class PreferenceTest {
                 .check(matches(isChecked()));
 
         // Press back to save selection.
-        onView(withId(R.id.car_ui_toolbar_nav_icon)).perform(click());
+        onView(withContentDescription("Back")).perform(click());
         // Verify preference value was updated.
         verify(mockListener, times(1)).onPreferenceChange(any(), eq(mEntriesValues[2]));
 
