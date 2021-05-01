@@ -29,7 +29,6 @@ import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
@@ -75,6 +74,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * A search view used by {@link Toolbar}.
@@ -91,6 +91,7 @@ public class SearchView extends ConstraintLayout {
     private View mContentView;
     private View mOriginalView;
     private View mParent;
+    private ViewGroup.LayoutParams mLayoutParams;
     private boolean mIsImeWidescreenViewSet;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
 
@@ -99,12 +100,14 @@ public class SearchView extends ConstraintLayout {
     private Uri mContentUri;
     private int mSurfaceHeight;
     private int mSurfaceWidth;
-    private Rect mRectPadding;
     private List<? extends CarUiImeSearchListItem> mWideScreenSearchItemList;
     private final Map<String, CarUiImeSearchListItem> mIdToListItem = new HashMap<>();
 
-    private Set<Toolbar.OnSearchListener> mSearchListeners = Collections.emptySet();
-    private Set<Toolbar.OnSearchCompletedListener> mSearchCompletedListeners =
+    private Set<Consumer<String>> mSearchListeners = Collections.emptySet();
+    private Set<Runnable> mSearchCompletedListeners =
+            Collections.emptySet();
+    private Set<Toolbar.OnSearchListener> mDeprecatedSearchListeners = Collections.emptySet();
+    private Set<Toolbar.OnSearchCompletedListener> mDeprecatedSearchCompletedListeners =
             Collections.emptySet();
     private final TextWatcher mTextWatcher = new TextWatcher() {
         @Override
@@ -226,10 +229,12 @@ public class SearchView extends ConstraintLayout {
 
             if (insets.isVisible(ime())) {
                 if (!mIsImeWidescreenViewSet && mContentView != null) {
-                    // when the IME is closed and opened again by clicking on the EditText and
-                    // setViewToImeWideScreenSurface is not called by the app then we need to reset
-                    // the container as the previous instance would be attached to the surface and
-                    // we cannot dettatch it. It will be removed automatically by GC.
+                    // When the IME first time opens after the setViewToImeWideScreenSurface(View)
+                    // call, setup a container and attach the view to the IME surface.
+                    // When the IME is closed and opened again by clicking on the EditText, we
+                    // also need to reset the container as the previous instance would be
+                    // attached to the surface and we cannot detach it. It will be removed
+                    // automatically by GC.
                     mWideScreenImeContentAreaViewContainer = new FrameLayout(getContext());
                     FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
@@ -238,18 +243,16 @@ public class SearchView extends ConstraintLayout {
                     if (parent != null) {
                         parent.removeView(mContentView);
                     }
-                    mWideScreenImeContentAreaViewContainer.addView(mContentView, params);
-                }
 
-                if (mRectPadding == null && mOriginalView instanceof CarUiRecyclerView) {
-                    // When the IME is re-open by clicking the EditText and
-                    // setViewToImeWideScreenSurface is not called by the app then we need to reset
-                    // the padding.
-                    mRectPadding = new Rect(mOriginalView.getPaddingLeft(),
-                            mOriginalView.getPaddingTop(),
-                            mOriginalView.getPaddingRight(),
-                            mOriginalView.getPaddingBottom());
-                    mOriginalView.setPadding(0, 0, 0, 0);
+                    if (mOriginalView instanceof CarUiRecyclerView) {
+                        // We need to use a negative layout margin to have the list take the full
+                        // content area.
+                        params.topMargin = -mOriginalView.getPaddingTop();
+                        params.bottomMargin = -mOriginalView.getPaddingBottom();
+                        params.leftMargin = -mOriginalView.getPaddingLeft();
+                        params.rightMargin = -mOriginalView.getPaddingRight();
+                    }
+                    mWideScreenImeContentAreaViewContainer.addView(mContentView, params);
                 }
 
                 displaySearchWideScreen();
@@ -282,13 +285,7 @@ public class SearchView extends ConstraintLayout {
                 if (parent != null) {
                     parent.removeView(mContentView);
                 }
-                if (mRectPadding != null) {
-                    mOriginalView.setPadding(mRectPadding.left, mRectPadding.top,
-                            mRectPadding.right, mRectPadding.bottom);
-                    ((CarUiRecyclerView) mOriginalView).smoothScrollBy(0, -mRectPadding.top);
-                }
-                mRectPadding = null;
-                ((ViewGroup) mParent).addView(mContentView);
+                ((ViewGroup) mParent).addView(mContentView, mLayoutParams);
                 mParent.requestLayout();
             });
         }
@@ -312,26 +309,14 @@ public class SearchView extends ConstraintLayout {
         mOriginalView = view;
 
         if (view instanceof CarUiRecyclerView) {
-            mRectPadding = new Rect(view.getPaddingLeft(),
-                    view.getPaddingTop(),
-                    view.getPaddingRight(),
-                    view.getPaddingBottom());
-            mOriginalView.setPadding(0, 0, 0, 0);
             mContentView = ((CarUiRecyclerView) view).getContainer();
-            ViewGroup parentView = (ViewGroup) mContentView.getParent();
-            if (parentView != null) {
-                parentView.removeView(mContentView);
-            }
-            mParent = parentView;
-            return;
+        } else {
+            mContentView = view;
         }
 
-        mContentView = view;
-        ViewGroup parentView = (ViewGroup) view.getParent();
-        if (parentView != null) {
-            parentView.removeView(view);
-        }
+        ViewGroup parentView = (ViewGroup) mContentView.getParent();
         mParent = parentView;
+        mLayoutParams = mContentView.getLayoutParams();
     }
 
     private boolean isEnter(KeyEvent event) {
@@ -347,7 +332,10 @@ public class SearchView extends ConstraintLayout {
 
     private void notifyQuerySubmit() {
         mSearchText.clearFocus();
-        for (Toolbar.OnSearchCompletedListener listener : mSearchCompletedListeners) {
+        for (Runnable listener : mSearchCompletedListeners) {
+            listener.run();
+        }
+        for (Toolbar.OnSearchCompletedListener listener : mDeprecatedSearchCompletedListeners) {
             listener.onSearchCompleted();
         }
     }
@@ -371,17 +359,22 @@ public class SearchView extends ConstraintLayout {
     /**
      * Sets a listener for the search text changing.
      */
-    public void setSearchListeners(Set<Toolbar.OnSearchListener> listeners) {
+    public void setSearchListeners(
+            Set<Toolbar.OnSearchListener> deprecatedListeners,
+            Set<Consumer<String>> listeners) {
         mSearchListeners = listeners;
+        mDeprecatedSearchListeners = deprecatedListeners;
     }
 
     /**
      * Sets a listener for the user completing their search, for example by clicking the
-     * enter/search
-     * button on the keyboard.
+     * enter/search button on the keyboard.
      */
-    public void setSearchCompletedListeners(Set<Toolbar.OnSearchCompletedListener> listeners) {
+    public void setSearchCompletedListeners(
+            Set<Toolbar.OnSearchCompletedListener> deprecatedListeners,
+            Set<Runnable> listeners) {
         mSearchCompletedListeners = listeners;
+        mDeprecatedSearchCompletedListeners = deprecatedListeners;
     }
 
     /**
@@ -503,7 +496,10 @@ public class SearchView extends ConstraintLayout {
     private void onSearch(String query) {
         mCloseIcon.setVisibility(TextUtils.isEmpty(query) ? View.GONE : View.VISIBLE);
 
-        for (Toolbar.OnSearchListener listener : mSearchListeners) {
+        for (Consumer<String> listener : mSearchListeners) {
+            listener.accept(query);
+        }
+        for (Toolbar.OnSearchListener listener : mDeprecatedSearchListeners) {
             listener.onSearch(query);
         }
     }

@@ -18,16 +18,16 @@ package com.android.car.ui.toolbar;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
-import static androidx.test.espresso.matcher.ViewMatchers.hasChildCount;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
+import static androidx.test.espresso.matcher.ViewMatchers.withContentDescription;
 import static androidx.test.espresso.matcher.ViewMatchers.withHint;
-import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
 import static com.android.car.ui.actions.ViewActions.waitForView;
-import static com.android.car.ui.matchers.ViewMatchers.nthChildOfView;
+import static com.android.car.ui.matchers.ViewMatchers.doesNotExistOrIsNotDisplayed;
 import static com.android.car.ui.matchers.ViewMatchers.withDrawable;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -38,28 +38,45 @@ import static org.hamcrest.core.IsNot.not;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import android.content.Context;
 import android.view.View;
 
-import androidx.test.rule.ActivityTestRule;
+import androidx.test.ext.junit.rules.ActivityScenarioRule;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.car.ui.core.CarUi;
+import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
 import com.android.car.ui.test.R;
 
-import org.hamcrest.Matcher;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /** Unit test for {@link ToolbarController}. */
 @SuppressWarnings("AndroidJdkLibsChecker")
+@RunWith(Parameterized.class)
 public class ToolbarTest {
 
+    @Parameterized.Parameters(name = "With shared library? {0}")
+    public static Object[] data() {
+        // It's important to do no shared library first, so that the shared library will
+        // still be enabled when this test finishes
+        return new Object[] { false, true };
+    }
+
+    public ToolbarTest(boolean sharedLibEnabled) {
+        SharedLibraryFactorySingleton.setSharedLibEnabled(sharedLibEnabled);
+    }
+
     @Rule
-    public ActivityTestRule<ToolbarTestActivity> mActivityRule =
-            new ActivityTestRule<>(ToolbarTestActivity.class);
+    public final ActivityScenarioRule<ToolbarTestActivity> mScenarioRule =
+            new ActivityScenarioRule<>(ToolbarTestActivity.class);
 
     @Test
     public void test_setTitle_displaysTitle() throws Throwable {
@@ -135,157 +152,187 @@ public class ToolbarTest {
     public void test_setLogo_displaysLogo() throws Throwable {
         runWithToolbar((toolbar) -> toolbar.setLogo(R.drawable.ic_launcher));
 
-        onView(withDrawable(R.drawable.ic_launcher)).check(matches(isDisplayed()));
+        Context context = InstrumentationRegistry.getInstrumentation().getContext();
+        onView(withDrawable(context, R.drawable.ic_launcher)).check(matches(isDisplayed()));
     }
 
     @Test
     public void pressBack_withoutListener_callsActivityOnBack() throws Throwable {
-        runWithToolbar((toolbar) -> toolbar.setState(Toolbar.State.SUBPAGE));
+        ToolbarTestActivity[] savedActivity = new ToolbarTestActivity[] { null };
+        runWithActivityAndToolbar((activity, toolbar) -> {
+            toolbar.setState(Toolbar.State.SUBPAGE);
+            savedActivity[0] = activity;
+        });
 
-        onView(withId(R.id.car_ui_toolbar_nav_icon_container)).perform(click());
+        onView(withContentDescription("Back")).perform(click());
 
-        assertEquals(1, mActivityRule.getActivity().getTimesOnBackPressed());
+        assertEquals(1, savedActivity[0].getTimesOnBackPressed());
     }
 
     @Test
     public void pressBack_withListenerThatReturnsFalse_callsActivityOnBack() throws Throwable {
-        runWithToolbar((toolbar) -> {
+        ToolbarTestActivity[] savedActivity = new ToolbarTestActivity[] { null };
+        runWithActivityAndToolbar((activity, toolbar) -> {
             toolbar.setState(Toolbar.State.SUBPAGE);
             toolbar.registerOnBackListener(() -> false);
+            savedActivity[0] = activity;
         });
 
-        onView(withId(R.id.car_ui_toolbar_nav_icon_container)).perform(click());
+        onView(withContentDescription("Back")).perform(click());
 
-        assertEquals(1, mActivityRule.getActivity().getTimesOnBackPressed());
+        assertEquals(1, savedActivity[0].getTimesOnBackPressed());
     }
 
     @Test
     public void pressBack_withListenerThatReturnsTrue_doesntCallActivityOnBack() throws Throwable {
-        runWithToolbar((toolbar) -> {
+        ToolbarTestActivity[] savedActivity = new ToolbarTestActivity[] { null };
+        runWithActivityAndToolbar((activity, toolbar) -> {
             toolbar.setState(Toolbar.State.SUBPAGE);
             toolbar.registerOnBackListener(() -> true);
+            savedActivity[0] = activity;
         });
 
-        onView(withId(R.id.car_ui_toolbar_nav_icon_container)).perform(click());
+        onView(withContentDescription("Back")).perform(click());
 
-        assertEquals(0, mActivityRule.getActivity().getTimesOnBackPressed());
+        assertEquals(0, savedActivity[0].getTimesOnBackPressed());
     }
 
     @Test
     public void pressBack_withUnregisteredListener_doesntCallActivityOnBack() throws Throwable {
-        runWithToolbar((toolbar) -> {
+        ToolbarTestActivity[] savedActivity = new ToolbarTestActivity[] { null };
+        runWithActivityAndToolbar((activity, toolbar) -> {
             toolbar.setState(Toolbar.State.SUBPAGE);
             Toolbar.OnBackListener listener = () -> true;
             toolbar.registerOnBackListener(listener);
             toolbar.registerOnBackListener(listener);
             toolbar.unregisterOnBackListener(listener);
+            savedActivity[0] = activity;
         });
 
-        onView(withId(R.id.car_ui_toolbar_nav_icon_container)).perform(click());
+        onView(withContentDescription("Back")).perform(click());
 
-        assertEquals(1, mActivityRule.getActivity().getTimesOnBackPressed());
+        assertEquals(1, savedActivity[0].getTimesOnBackPressed());
     }
 
     @Test
-    public void menuItems_setId_shouldWork() {
-        MenuItem item = MenuItem.builder(mActivityRule.getActivity()).build();
+    public void menuItems_setId_shouldWork() throws Throwable {
+        runWithActivityAndToolbar((activity, toolbar) -> {
+            MenuItem item = MenuItem.builder(activity).build();
 
-        assertThat(item.getId()).isEqualTo(View.NO_ID);
+            assertThat(item.getId()).isEqualTo(View.NO_ID);
 
-        item.setId(7);
+            item.setId(7);
 
-        assertThat(item.getId()).isEqualTo(7);
+            assertThat(item.getId()).isEqualTo(7);
+        });
     }
 
     @Test
     public void menuItems_whenClicked_shouldCallListener() throws Throwable {
         MenuItem.OnClickListener callback = mock(MenuItem.OnClickListener.class);
-        MenuItem menuItem = MenuItem.builder(mActivityRule.getActivity())
-                .setTitle("Button!")
-                .setOnClickListener(callback)
-                .build();
-        runWithToolbar((toolbar) -> toolbar.setMenuItems(Collections.singletonList(menuItem)));
+        MenuItem[] menuItem = new MenuItem[] { null };
+        runWithActivityAndToolbar((activity, toolbar) -> {
+            menuItem[0] = MenuItem.builder(activity)
+                    .setTitle("Button!")
+                    .setOnClickListener(callback)
+                    .build();
+            toolbar.setMenuItems(Collections.singletonList(menuItem[0]));
+        });
 
-        waitForMenuItems();
+        waitForViewWithText("Button!");
 
-        onView(firstMenuItem()).perform(click());
+        onView(withText("Button!")).perform(click());
 
-        verify(callback).onClick(menuItem);
+        verify(callback).onClick(menuItem[0]);
     }
 
     @Test
     public void menuItems_null_shouldRemoveExistingMenuItems() throws Throwable {
-        runWithToolbar((toolbar) ->
+        runWithActivityAndToolbar((activity, toolbar) ->
                 toolbar.setMenuItems(Arrays.asList(
-                        MenuItem.builder(mActivityRule.getActivity())
+                        MenuItem.builder(activity)
                                 .setTitle("Button!")
                                 .build(),
-                        MenuItem.builder(mActivityRule.getActivity())
+                        MenuItem.builder(activity)
                                 .setTitle("Button2!")
                                 .build()
                 )));
-        waitForMenuItems();
+        waitForViewWithText("Button!");
+        waitForViewWithText("Button2!");
 
-        onView(withId(R.id.car_ui_toolbar_menu_items_container)).check(matches(hasChildCount(2)));
+        onView(withText("Button!")).check(matches(isDisplayed()));
+        onView(withText("Button2!")).check(matches(isDisplayed()));
 
         runWithToolbar((toolbar) -> toolbar.setMenuItems(null));
 
-        onView(withId(R.id.car_ui_toolbar_menu_items_container)).check(matches(hasChildCount(0)));
+        onView(withText("Button!")).check(doesNotExist());
+        onView(withText("Button2!")).check(doesNotExist());
     }
 
     @Test
     public void menuItems_setVisibility_shouldHide() throws Throwable {
-        MenuItem menuItem = MenuItem.builder(mActivityRule.getActivity())
-                .setTitle("Button!")
-                .build();
-        runWithToolbar((toolbar) -> toolbar.setMenuItems(Collections.singletonList(menuItem)));
-        waitForMenuItems();
+        MenuItem[] menuItem = new MenuItem[] { null };
+        runWithActivityAndToolbar((activity, toolbar) -> {
+            menuItem[0] = MenuItem.builder(activity)
+                    .setTitle("Button!")
+                    .build();
+            toolbar.setMenuItems(Collections.singletonList(menuItem[0]));
+        });
 
+        waitForViewWithText("Button!");
         onView(withText("Button!")).check(matches(isDisplayed()));
 
-        runWithToolbar((toolbar) -> menuItem.setVisible(false));
+        runWithToolbar((toolbar) -> menuItem[0].setVisible(false));
 
         onView(withText("Button!")).check(matches(not(isDisplayed())));
     }
 
     @Test
     public void menuItems_searchScreen_shouldHideMenuItems() throws Throwable {
-        runWithToolbar((toolbar) -> {
+        runWithActivityAndToolbar((activity, toolbar) -> {
             toolbar.setMenuItems(Arrays.asList(
-                    MenuItem.builder(mActivityRule.getActivity())
+                    MenuItem.builder(activity)
                             .setToSearch()
                             .build(),
-                    MenuItem.builder(mActivityRule.getActivity())
+                    MenuItem.builder(activity)
                             .setTitle("Button!")
                             .build()));
-            toolbar.setShowMenuItemsWhileSearching(false);
+            toolbar.setShowMenuItemsWhileSearching(true);
             toolbar.setState(Toolbar.State.SEARCH);
         });
-        waitForMenuItems();
 
-        // All menuitems should be hidden if we're hiding menuitems while searching
-        onView(withText("Button!")).check(matches(not(isDisplayed())));
-        onView(firstMenuItem()).check(matches(not(isDisplayed())));
-
-        runWithToolbar((toolbar) -> toolbar.setShowMenuItemsWhileSearching(true));
+        waitForViewWithText("Button!");
 
         // Even if not hiding MenuItems while searching, the search MenuItem should still be hidden
         onView(withText("Button!")).check(matches(isDisplayed()));
-        onView(firstMenuItem()).check(matches(not(isDisplayed())));
+        onView(withContentDescription(R.string.car_ui_toolbar_menu_item_search_title))
+                .check(doesNotExistOrIsNotDisplayed());
+
+        runWithToolbar((toolbar) -> toolbar.setShowMenuItemsWhileSearching(false));
+
+        // All menuitems should be hidden if we're hiding menuitems while searching
+        onView(withText("Button!")).check(doesNotExistOrIsNotDisplayed());
+        onView(withContentDescription(R.string.car_ui_toolbar_menu_item_search_title))
+                .check(doesNotExistOrIsNotDisplayed());
+
     }
 
     private void runWithToolbar(Consumer<ToolbarController> toRun) throws Throwable {
-        mActivityRule.runOnUiThread(() -> {
-            ToolbarController toolbar = CarUi.requireToolbar(mActivityRule.getActivity());
+        mScenarioRule.getScenario().onActivity(activity -> {
+            ToolbarController toolbar = CarUi.requireToolbar(activity);
             toRun.accept(toolbar);
         });
     }
 
-    private Matcher<View> firstMenuItem() {
-        return nthChildOfView(withId(R.id.car_ui_toolbar_menu_items_container), 0);
+    private void runWithActivityAndToolbar(BiConsumer<ToolbarTestActivity, ToolbarController> toRun)
+            throws Throwable {
+        mScenarioRule.getScenario().onActivity(activity -> {
+            ToolbarController toolbar = CarUi.requireToolbar(activity);
+            toRun.accept(activity, toolbar);
+        });
     }
 
-    private void waitForMenuItems() {
-        onView(isRoot()).perform(waitForView(firstMenuItem(), 500));
+    private void waitForViewWithText(String text) {
+        onView(isRoot()).perform(waitForView(withText(text), 500));
     }
 }

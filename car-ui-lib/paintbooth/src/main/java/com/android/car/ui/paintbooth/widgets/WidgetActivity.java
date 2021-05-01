@@ -21,7 +21,7 @@ import android.os.Bundle;
 
 import com.android.car.ui.core.CarUi;
 import com.android.car.ui.paintbooth.R;
-import com.android.car.ui.toolbar.Toolbar;
+import com.android.car.ui.toolbar.NavButtonMode;
 import com.android.car.ui.toolbar.ToolbarController;
 
 /**
@@ -35,6 +35,6 @@ public class WidgetActivity extends Activity {
         setContentView(R.layout.widgets_activity);
         ToolbarController toolbar = CarUi.requireToolbar(this);
         toolbar.setTitle(getTitle());
-        toolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
+        toolbar.setNavButtonMode(NavButtonMode.BACK);
     }
 }

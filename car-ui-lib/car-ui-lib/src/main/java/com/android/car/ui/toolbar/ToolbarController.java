@@ -30,6 +30,8 @@ import com.android.car.ui.recyclerview.CarUiListItem;
 import com.android.car.ui.toolbar.SearchConfig.SearchConfigBuilder;
 
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * An interface for accessing a Chassis Toolbar, regardless of how the underlying
@@ -81,29 +83,54 @@ public interface ToolbarController {
     CharSequence getSubtitle();
 
     /**
+     * Sets the tabs to display.
+     * @param tabs A list of {@link Tab}
+     */
+    void setTabs(List<Tab> tabs);
+
+    /**
      * Gets the number of tabs in the toolbar. The tabs can be retrieved using
      * {@link #getTab(int)}.
+     *
+     * @deprecated No equivalent function. Maintain a local count of tabs if needed.
      */
+    @Deprecated
     int getTabCount();
 
     /**
      * Gets the index of the tab.
+     *
+     * @deprecated No equivalent replacement. Search for the tab in a locally maintained list
+     * if necessary.
      */
+    @Deprecated
     int getTabPosition(TabLayout.Tab tab);
 
     /**
      * Adds a tab to this toolbar. You can listen for when it is selected via
      * {@link #registerOnTabSelectedListener(Toolbar.OnTabSelectedListener)}.
+     *
+     * @deprecated Use {@link #setTabs(List)} instead.
      */
+    @Deprecated
     void addTab(TabLayout.Tab tab);
 
-    /** Removes all the tabs. */
+    /**
+     * Removes all the tabs.
+     *
+     * @deprecated Use {{@link #setTabs(List)}} instead, passing it
+     * {@link java.util.Collections#emptyList()}
+     */
+    @Deprecated
     void clearAllTabs();
 
     /**
      * Gets a tab added to this toolbar. See
      * {@link #addTab(TabLayout.Tab)}.
+     *
+     * @deprecated No equivalent function. Maintain local references to tab objects if needed.
      */
+    @Deprecated
     TabLayout.Tab getTab(int position);
 
     /**
@@ -175,10 +202,26 @@ public interface ToolbarController {
      */
     void setSearchMode(SearchMode mode);
 
-    /** Sets the {@link Toolbar.NavButtonMode} */
+    /**
+     * Sets the {@link Toolbar.NavButtonMode}
+     *
+     * @deprecated Use {@link #setNavButtonMode(NavButtonMode)} instead.
+     */
+    @Deprecated
     void setNavButtonMode(Toolbar.NavButtonMode style);
 
-    /** Gets the {@link Toolbar.NavButtonMode} */
+    /** Sets the {@link NavButtonMode} */
+    void setNavButtonMode(NavButtonMode mode);
+
+    /**
+     * Gets the {@link Toolbar.NavButtonMode}.
+     *
+     * @deprecated No equivalent replacement. Maintain the current mode locally in the app if
+     * needed. If this is for a test, you can use this espresso code to check that the toolbar
+     * back button is shown:
+     * {@code onView(withContentDescription("Back")).check(matches(isDisplayed()));}
+     */
+    @Deprecated
     Toolbar.NavButtonMode getNavButtonMode();
 
     /** Show/hide the background. When hidden, the toolbar is completely transparent. */
@@ -271,24 +314,19 @@ public interface ToolbarController {
     Toolbar.State getState();
 
     /**
-     * Registers a new {@link Toolbar.OnHeightChangedListener} to the list of listeners. Register a
-     * {@link com.android.car.ui.recyclerview.CarUiRecyclerView} only if there is a toolbar at
-     * the top and a {@link com.android.car.ui.recyclerview.CarUiRecyclerView} in the view and
-     * nothing else. {@link com.android.car.ui.recyclerview.CarUiRecyclerView} will
-     * automatically adjust its height according to the height of the Toolbar.
+     * Registers a new {@link Toolbar.OnTabSelectedListener} to the list of listeners.
+     *
+     * @deprecated The tabs set via {@link #setTabs(List)} have their own selected callbacks.
      */
-    void registerToolbarHeightChangeListener(Toolbar.OnHeightChangedListener listener);
-
-    /**
-     * Unregisters an existing {@link Toolbar.OnHeightChangedListener} from the list of
-     * listeners.
-     */
-    boolean unregisterToolbarHeightChangeListener(Toolbar.OnHeightChangedListener listener);
-
-    /** Registers a new {@link Toolbar.OnTabSelectedListener} to the list of listeners. */
+    @Deprecated
     void registerOnTabSelectedListener(Toolbar.OnTabSelectedListener listener);
 
-    /** Unregisters an existing {@link Toolbar.OnTabSelectedListener} from the list of listeners. */
+    /**
+     * Unregisters an existing {@link Toolbar.OnTabSelectedListener} from the list of listeners.
+     *
+     * @deprecated The tabs set via {@link #setTabs(List)} have their own selected callbacks.
+     */
+    @Deprecated
     boolean unregisterOnTabSelectedListener(Toolbar.OnTabSelectedListener listener);
 
     /** Registers a new {@link Toolbar.OnSearchListener} to the list of listeners. */
@@ -296,6 +334,12 @@ public interface ToolbarController {
 
     /** Unregisters an existing {@link Toolbar.OnSearchListener} from the list of listeners. */
     boolean unregisterOnSearchListener(Toolbar.OnSearchListener listener);
+
+    /** Registers a new {@link Consumer} to the list of listeners. */
+    void registerSearchListener(Consumer<String> listener);
+
+    /** Unregisters an existing {@link Consumer} from the list of listeners. */
+    boolean unregisterSearchListener(Consumer<String> listener);
 
     /**
      * Sets the search info to be displayed within the widescreen IME.
@@ -360,20 +404,53 @@ public interface ToolbarController {
     @Deprecated
     void setSearchResultItems(List<? extends CarUiImeSearchListItem> searchItems);
 
-    /** Registers a new {@link Toolbar.OnSearchCompletedListener} to the list of listeners. */
+    /**
+     * Registers a new {@link Toolbar.OnSearchCompletedListener} to the list of listeners.
+     *
+     * @deprecated Use {@link #registerSearchCompletedListener(Runnable)} instead.
+     */
+    @Deprecated
     void registerOnSearchCompletedListener(Toolbar.OnSearchCompletedListener listener);
 
     /**
      * Unregisters an existing {@link Toolbar.OnSearchCompletedListener} from the list of
      * listeners.
+     *
+     * @deprecated Use {@link #unregisterSearchCompletedListener(Runnable)} instead.
      */
+    @Deprecated
     boolean unregisterOnSearchCompletedListener(Toolbar.OnSearchCompletedListener listener);
 
-    /** Registers a new {@link Toolbar.OnBackListener} to the list of listeners. */
+    /** Registers a new {@link Runnable} to the list of listeners. */
+    void registerSearchCompletedListener(Runnable listener);
+
+    /**
+     * Unregisters an existing {@link Runnable} from the list of
+     * listeners.
+     */
+    boolean unregisterSearchCompletedListener(Runnable listener);
+
+    /**
+     * Registers a new {@link Toolbar.OnBackListener} to the list of listeners.
+     *
+     * @deprecated Use {@link #registerBackListener(Supplier)} instead.
+     */
+    @Deprecated
     void registerOnBackListener(Toolbar.OnBackListener listener);
 
-    /** Unregisters an existing {@link Toolbar.OnBackListener} from the list of listeners. */
+    /**
+     * Unregisters an existing {@link Toolbar.OnBackListener} from the list of listeners.
+     *
+     * @deprecated Use {@link #unregisterBackListener(Supplier)} instead.
+     */
+    @Deprecated
     boolean unregisterOnBackListener(Toolbar.OnBackListener listener);
+
+    /** Registers a new {@link Supplier<Boolean>} to the list of listeners. */
+    void registerBackListener(Supplier<Boolean> listener);
+
+    /** Unregisters an existing {@link Runnable} from the list of listeners. */
+    boolean unregisterBackListener(Supplier<Boolean> listener);
 
     /** Gets a {@link ProgressBarController} */
     ProgressBarController getProgressBar();

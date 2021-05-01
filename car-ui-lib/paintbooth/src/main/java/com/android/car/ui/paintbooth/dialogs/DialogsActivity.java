@@ -42,7 +42,7 @@ import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.recyclerview.CarUiRadioButtonListItem;
 import com.android.car.ui.recyclerview.CarUiRadioButtonListItemAdapter;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
-import com.android.car.ui.toolbar.Toolbar;
+import com.android.car.ui.toolbar.NavButtonMode;
 import com.android.car.ui.toolbar.ToolbarController;
 
 import java.util.ArrayList;
@@ -61,7 +61,7 @@ public class DialogsActivity extends Activity implements InsetsChangedListener {
         setContentView(R.layout.car_ui_recycler_view_activity);
         ToolbarController toolbar = CarUi.requireToolbar(this);
         toolbar.setTitle(getTitle());
-        toolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
+        toolbar.setNavButtonMode(NavButtonMode.BACK);
 
         mButtons.add(Pair.create(R.string.dialog_show_dialog,
                 v -> showDialog()));

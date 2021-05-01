@@ -24,7 +24,7 @@ import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.core.CarUi;
 import com.android.car.ui.paintbooth.R;
-import com.android.car.ui.toolbar.Toolbar;
+import com.android.car.ui.toolbar.NavButtonMode;
 import com.android.car.ui.toolbar.ToolbarController;
 
 /**
@@ -40,7 +40,7 @@ public class SplitPreferenceActivity extends AppCompatActivity implements Insets
 
         ToolbarController mainToolbar = CarUi.getToolbar(this);
         if (mainToolbar != null) {
-            mainToolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
+            mainToolbar.setNavButtonMode(NavButtonMode.BACK);
             mainToolbar.setTitle("Split preferences sample");
         }
 

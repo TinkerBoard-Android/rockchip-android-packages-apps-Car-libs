@@ -29,9 +29,9 @@ import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.paintbooth.caruirecyclerview.RecyclerViewAdapter;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.MenuItem;
+import com.android.car.ui.toolbar.NavButtonMode;
 import com.android.car.ui.toolbar.SearchConfig;
 import com.android.car.ui.toolbar.SearchMode;
-import com.android.car.ui.toolbar.Toolbar;
 import com.android.car.ui.toolbar.ToolbarController;
 
 import java.util.ArrayList;
@@ -44,7 +44,6 @@ public class WideScreenTestView extends AppCompatActivity implements InsetsChang
 
     private final ArrayList<String> mData = new ArrayList<>();
     private final List<MenuItem> mMenuItems = new ArrayList<>();
-    private final int mDataToGenerate = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,10 +52,10 @@ public class WideScreenTestView extends AppCompatActivity implements InsetsChang
 
         ToolbarController toolbar = CarUi.requireToolbar(this);
         toolbar.setTitle(getTitle());
-        toolbar.setNavButtonMode(Toolbar.NavButtonMode.BACK);
+        toolbar.setNavButtonMode(NavButtonMode.BACK);
         toolbar.setLogo(R.drawable.ic_launcher);
         boolean[] isSearching = new boolean[]{false};
-        toolbar.registerOnBackListener(
+        toolbar.registerBackListener(
                 () -> {
                     if (isSearching[0]) {
                         toolbar.setSearchMode(SearchMode.DISABLED);
@@ -85,7 +84,7 @@ public class WideScreenTestView extends AppCompatActivity implements InsetsChang
     }
 
     private ArrayList<String> generateSampleData() {
-        for (int i = 0; i <= mDataToGenerate; i++) {
+        for (int i = 0; i <= 100; i++) {
             mData.add(getString(R.string.test_data) + i);
         }
         return mData;

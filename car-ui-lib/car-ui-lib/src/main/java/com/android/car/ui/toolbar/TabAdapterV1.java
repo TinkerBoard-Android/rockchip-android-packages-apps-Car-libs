@@ -16,35 +16,18 @@
 
 package com.android.car.ui.toolbar;
 
-import static com.android.car.ui.utils.CarUiUtils.charSequenceToString;
-
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.TabOEMV1;
-import com.android.car.ui.toolbar.TabLayout.Tab;
 
 import java.util.function.Consumer;
 
 @SuppressWarnings("AndroidJdkLibsChecker")
 class TabAdapterV1 implements TabOEMV1 {
 
-    private final Runnable mOnClickListener;
     private final Tab mClientTab;
-    private Drawable mIcon;
-    private String mText;
-    private Consumer<TabOEMV1> mUpdateListener;
 
-    TabAdapterV1(Context context, Tab clientTab, Runnable onClickListener) {
-        ImageViewListener imageView = new ImageViewListener(context);
-        imageView.setImageDrawableListener(this::setIcon);
-        clientTab.bindIconPublic(imageView);
-
-        TextViewListener textView = new TextViewListener(context);
-        textView.setTextListener(this::setTitle);
-        clientTab.bindTextPublic(textView);
-
-        mOnClickListener = onClickListener;
+    TabAdapterV1(Tab clientTab) {
         mClientTab = clientTab;
     }
 
@@ -53,37 +36,24 @@ class TabAdapterV1 implements TabOEMV1 {
     }
 
     @Override
-    public void setUpdateListener(Consumer<TabOEMV1> listener) {
-        mUpdateListener = listener;
-    }
-
-    @Override
     public String getTitle() {
-        return mText;
-    }
-
-    public void setTitle(CharSequence title) {
-        mText = charSequenceToString(title);
-        if (mUpdateListener != null) {
-            mUpdateListener.accept(this);
-        }
+        return mClientTab.getText();
     }
 
     @Override
     public Drawable getIcon() {
-        return mIcon;
+        return mClientTab.getIcon();
     }
 
-    public void setIcon(Drawable icon) {
-        mIcon = icon;
-        if (mUpdateListener != null) {
-            mUpdateListener.accept(this);
-        }
-    }
 
     @Override
     public Runnable getOnClickListener() {
-        return mOnClickListener;
+        Consumer<Tab> selectedListener = mClientTab.getSelectedListener();
+        if (selectedListener == null) {
+            return null;
+        } else {
+            return () -> selectedListener.accept(mClientTab);
+        }
     }
 
     @Override

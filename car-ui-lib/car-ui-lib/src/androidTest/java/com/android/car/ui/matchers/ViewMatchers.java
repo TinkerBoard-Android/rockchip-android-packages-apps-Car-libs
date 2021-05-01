@@ -16,15 +16,26 @@
 
 package com.android.car.ui.matchers;
 
+import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+
+import static org.hamcrest.Matchers.not;
+
+import android.content.Context;
 import android.view.View;
+
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.test.espresso.ViewAssertion;
 
 import com.android.car.ui.matchers.PaddingMatcher.Side;
 
 import org.hamcrest.Matcher;
 
 public class ViewMatchers {
-    public static Matcher<View> withDrawable(int drawableId) {
-        return new DrawableMatcher(drawableId);
+    public static Matcher<View> withDrawable(
+            @NonNull Context context, @DrawableRes int drawableId) {
+        return new DrawableMatcher(context, drawableId);
     }
 
     public static Matcher<View> nthChildOfView(Matcher<View> parentMatcher, int n) {
@@ -45,5 +56,13 @@ public class ViewMatchers {
 
     public static Matcher<View> isActivated() {
         return new IsActivatedMatcher();
+    }
+
+    public static ViewAssertion doesNotExistOrIsNotDisplayed() {
+        return (view, noViewFoundException) -> {
+            if (view != null) {
+                matches(not(isDisplayed())).check(view, noViewFoundException);
+            }
+        };
     }
 }

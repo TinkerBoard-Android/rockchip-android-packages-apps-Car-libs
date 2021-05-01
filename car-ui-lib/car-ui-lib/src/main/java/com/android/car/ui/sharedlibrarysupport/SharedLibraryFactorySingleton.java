@@ -27,6 +27,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.car.ui.R;
 import com.android.car.ui.utils.CarUiUtils;
@@ -47,6 +48,7 @@ public final class SharedLibraryFactorySingleton {
 
     private static final String TAG = "carui";
     private static SharedLibraryFactory sInstance;
+    private static boolean sSharedLibEnabled = true;
 
     /**
      * Get the {@link SharedLibraryFactory}.
@@ -61,6 +63,11 @@ public final class SharedLibraryFactorySingleton {
         }
 
         context = context.getApplicationContext();
+
+        if (!sSharedLibEnabled) {
+            sInstance = new SharedLibraryFactoryStub(context);
+            return sInstance;
+        }
 
         String sharedLibPackageName = CarUiUtils.getSystemProperty(context.getResources(),
                 R.string.car_ui_shared_library_package_system_property_name);
@@ -136,6 +143,23 @@ public final class SharedLibraryFactorySingleton {
                 + " for package " + context.getPackageName());
 
         return sInstance;
+    }
+
+    /**
+     * This method globally enables/disables the shared library. It only applies upon the next
+     * call to {@link #get}, components that have already been created won't switch between
+     * the shared/static library implementations.
+     * <p>
+     * This method is @VisibleForTesting so that unit tests can run both with and without
+     * the shared library. Since it's tricky to use correctly, real apps shouldn't use it.
+     * Instead, apps should use {@link SharedLibraryConfigProvider} to control if their
+     * shared library is disabled.
+     */
+    @VisibleForTesting
+    public static void setSharedLibEnabled(boolean sharedLibEnabled) {
+        sSharedLibEnabled = sharedLibEnabled;
+        // Cause the next call to get() to reinitialize the shared library
+        sInstance = null;
     }
 
     private SharedLibraryFactorySingleton() {}
