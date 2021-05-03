@@ -39,7 +39,7 @@ android_library {
         "libphonenumber",
     ],
 
-    libs: ["android.car"],
+    libs: ["android.car-system-stubs"],
 }
 
 // Used by instrumented test
