@@ -191,12 +191,6 @@ public class CarUiInstaller extends ContentProvider {
                     }
                 });
 
-        // Check only if we are in debug mode.
-        if (IS_DEBUG_DEVICE) {
-            CheckCarUiComponents checkCarUiComponents = new CheckCarUiComponents(application);
-            application.registerActivityLifecycleCallbacks(checkCarUiComponents);
-        }
-
         return true;
     }
 
