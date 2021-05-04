@@ -92,9 +92,11 @@ public final class CarUiTextViewImpl extends CarUiTextView {
         requireNonNull(mText);
         mOneShotPreDrawListener = null;
 
-        // If all lines of text have no maxLines limit, the preferred text set at invocation of
+        // If all lines of text have no limits, the preferred text set at invocation of
         // setText(List<CarUiText>)/ setText(CarUiText) does not need updating
-        if (mText.stream().allMatch(line -> line.getMaxLines() == Integer.MAX_VALUE)) {
+        if (mText.stream().allMatch(line ->
+                line.getMaxLines() == Integer.MAX_VALUE
+                        && line.getMaxChars() == Integer.MAX_VALUE)) {
             return;
         }
 
@@ -113,7 +115,8 @@ public final class CarUiTextViewImpl extends CarUiTextView {
     private CharSequence getBestVariant(CarUiText text) {
         if (text.getTextVariants().size() > 1) {
             for (CharSequence variant : text.getTextVariants()) {
-                if (getLineCount(variant) <= text.getMaxLines()) {
+                if (variant.length() <= text.getMaxChars() && getLineCount(variant)
+                        <= text.getMaxLines()) {
                     return variant;
                 }
             }
