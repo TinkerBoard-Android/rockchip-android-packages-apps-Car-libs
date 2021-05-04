@@ -779,6 +779,26 @@ public class CarUiListItemTest {
     }
 
     @Test
+    public void testTextWithLineBreak() {
+        List<CarUiText> lines = new ArrayList<>();
+        String firstTwoLines = "This is first line\nThis is the second line";
+        String thirdLine = "\nThis is the third line";
+        lines.add(new CarUiText(firstTwoLines + thirdLine, 2));
+
+        CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
+        item.setBody(lines);
+        List<CarUiListItem> items = new ArrayList<>();
+        items.add(item);
+
+        mCarUiRecyclerView.post(
+                () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items)));
+
+        onView(withId(R.id.car_ui_list_item_body)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_list_item_body)).check(matches(withText(firstTwoLines)));
+        onView(withId(R.id.car_ui_list_item_body)).check(matches(not(withText(thirdLine))));
+    }
+
+    @Test
     public void testTextVariants() {
         List<CharSequence> variants = new ArrayList<>();
         variants.add(LONG_CHAR_SEQUENCE);
