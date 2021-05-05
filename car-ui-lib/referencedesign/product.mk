@@ -41,6 +41,7 @@ PRODUCT_PACKAGES += \
     googlecarui-com-google-android-permissioncontroller \
     googlecarui-com-google-android-carassistant \
     googlecarui-com-google-android-tts \
+    googlecarui-com-android-htmlviewer \
     googlecarui-com-android-vending \
 
 # This system property is used to enable the RROs on startup via
