@@ -27,6 +27,7 @@
         android:id="@+id/show_app_styled_fragment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/button_background_for_rotary"
         android:layout_gravity="center"
         android:text="show App Styled Fragment"/>
   </FrameLayout>
