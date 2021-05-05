@@ -68,6 +68,7 @@ public class FocusAreaTest {
     private TestFocusArea mFocusArea3;
     private TestFocusArea mFocusArea4;
     private TestFocusArea mFocusArea5;
+    private TestFocusArea mFocusArea6;
     private FocusParkingView mFpv;
     private View mView1;
     private Button mButton1;
@@ -78,6 +79,8 @@ public class FocusAreaTest {
     private View mView4;
     private View mView5;
     private Button mButton5;
+    private View mView6;
+    private View mNudgeShortcut6;
 
     @Before
     public void setUp() {
@@ -87,6 +90,7 @@ public class FocusAreaTest {
         mFocusArea3 = mActivity.findViewById(R.id.focus_area3);
         mFocusArea4 = mActivity.findViewById(R.id.focus_area4);
         mFocusArea5 = mActivity.findViewById(R.id.focus_area5);
+        mFocusArea6 = mActivity.findViewById(R.id.focus_area6);
         mFpv = mActivity.findViewById(R.id.fpv);
         mView1 = mActivity.findViewById(R.id.view1);
         mButton1 = mActivity.findViewById(R.id.button1);
@@ -97,6 +101,8 @@ public class FocusAreaTest {
         mView4 = mActivity.findViewById(R.id.view4);
         mView5 = mActivity.findViewById(R.id.view5);
         mButton5 = mActivity.findViewById(R.id.button5);
+        mView6 = mActivity.findViewById(R.id.view6);
+        mNudgeShortcut6 = mActivity.findViewById(R.id.nudge_shortcut6);
     }
 
     @Test
@@ -121,7 +127,7 @@ public class FocusAreaTest {
     }
 
     @Test
-    public void testPerformAccessibilityAction_actionNudgeShortcut() {
+    public void testPerformAccessibilityAction_actionNudgeShortcut_legacy() {
         mFocusArea1.post(() -> {
             // Nudge to the nudgeShortcut view.
             mView3.requestFocus();
@@ -147,6 +153,63 @@ public class FocusAreaTest {
         });
     }
 
+    @Test
+    public void testPerformAccessibilityAction_actionNudgeShortcut_new() {
+        mFocusArea1.post(() -> {
+            // Nudge to the nudgeShortcut view.
+            mView6.requestFocus();
+            assertThat(mView6.isFocused()).isTrue();
+            Bundle arguments = new Bundle();
+            arguments.putInt(NUDGE_DIRECTION, FOCUS_RIGHT);
+            mFocusArea6.performAccessibilityAction(ACTION_NUDGE_SHORTCUT, arguments);
+            assertThat(mNudgeShortcut6.isFocused()).isTrue();
+
+            // No shortcut specified for given direction. The focus should stay the same.
+            mView6.requestFocus();
+            assertThat(mView6.isFocused()).isTrue();
+            arguments.putInt(NUDGE_DIRECTION, FOCUS_DOWN);
+            mFocusArea6.performAccessibilityAction(ACTION_NUDGE_SHORTCUT, arguments);
+            assertThat(mView6.isFocused()).isTrue();
+
+            // No shortcut specified for any direction. The focus should stay the same.
+            mView1.requestFocus();
+            assertThat(mView1.isFocused()).isTrue();
+            arguments.putInt(NUDGE_DIRECTION, FOCUS_RIGHT);
+            mFocusArea1.performAccessibilityAction(ACTION_NUDGE_SHORTCUT, arguments);
+            assertThat(mView1.isFocused()).isTrue();
+        });
+    }
+
+    @Test
+    public void testPerformAccessibilityAction_actionNudgeShortcut_programmatic() {
+        mFocusArea1.post(() -> {
+            // Programmatically change the nudge shortcut from right to left.
+            mFocusArea6.setNudgeShortcut(FOCUS_RIGHT, null);
+            mFocusArea6.setNudgeShortcut(FOCUS_LEFT, mNudgeShortcut3);
+
+            // Nudge to the nudgeShortcut view.
+            mView6.requestFocus();
+            assertThat(mView6.isFocused()).isTrue();
+            Bundle arguments = new Bundle();
+            arguments.putInt(NUDGE_DIRECTION, FOCUS_LEFT);
+            mFocusArea6.performAccessibilityAction(ACTION_NUDGE_SHORTCUT, arguments);
+            assertThat(mNudgeShortcut3.isFocused()).isTrue();
+
+            // No shortcut specified for given direction. The focus should stay the same.
+            mView6.requestFocus();
+            assertThat(mView6.isFocused()).isTrue();
+            arguments.putInt(NUDGE_DIRECTION, FOCUS_RIGHT);
+            mFocusArea6.performAccessibilityAction(ACTION_NUDGE_SHORTCUT, arguments);
+            assertThat(mView6.isFocused()).isTrue();
+
+            // No shortcut specified for any direction. The focus should stay the same.
+            mView1.requestFocus();
+            assertThat(mView1.isFocused()).isTrue();
+            arguments.putInt(NUDGE_DIRECTION, FOCUS_RIGHT);
+            mFocusArea1.performAccessibilityAction(ACTION_NUDGE_SHORTCUT, arguments);
+            assertThat(mView1.isFocused()).isTrue();
+        });
+    }
 
     @Test
     public void testPerformAccessibilityAction_actionFocus() {
