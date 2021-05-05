@@ -33,6 +33,7 @@ import com.android.car.ui.CarUiText;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Scanner;
 
 /**
  * Extension of {@link TextView} that supports {@link CarUiText}.
@@ -92,9 +93,11 @@ public final class CarUiTextViewImpl extends CarUiTextView {
         requireNonNull(mText);
         mOneShotPreDrawListener = null;
 
-        // If all lines of text have no maxLines limit, the preferred text set at invocation of
+        // If all lines of text have no limits, the preferred text set at invocation of
         // setText(List<CarUiText>)/ setText(CarUiText) does not need updating
-        if (mText.stream().allMatch(line -> line.getMaxLines() == Integer.MAX_VALUE)) {
+        if (mText.stream().allMatch(line ->
+                line.getMaxLines() == Integer.MAX_VALUE
+                        && line.getMaxChars() == Integer.MAX_VALUE)) {
             return;
         }
 
@@ -113,7 +116,8 @@ public final class CarUiTextViewImpl extends CarUiTextView {
     private CharSequence getBestVariant(CarUiText text) {
         if (text.getTextVariants().size() > 1) {
             for (CharSequence variant : text.getTextVariants()) {
-                if (getLineCount(variant) <= text.getMaxLines()) {
+                if (variant.length() <= text.getMaxChars() && TextUtils.equals(variant,
+                        getTruncatedText(variant, text.getMaxLines()))) {
                     return variant;
                 }
             }
@@ -121,41 +125,6 @@ public final class CarUiTextViewImpl extends CarUiTextView {
 
         // If no text variant can be rendered without truncation, use the preferred text
         return getTruncatedText(text.getPreferredText(), text.getMaxLines());
-    }
-
-    private int getLineCount(CharSequence text) {
-        Layout layout = requireNonNull(getLayout());
-        int lineCount = 0;
-        int index = 0;
-        int length = text.length();
-
-        while (index <= length - 1) {
-            int lastLineEnd = index;
-            // Measure the text, stopping early if the measured width exceeds textView width
-            index += getPaint().breakText(text, index, length, true, layout.getWidth(), null);
-
-            lineCount++;
-
-            // Reached end of text
-            if (index == length) {
-                break;
-            }
-
-            // Account for word wrapping by removing partial words at end of line by moving index
-            // back to last whitespace character
-            int offset = 0;
-            while (!Character.isWhitespace(text.charAt(index - offset))) {
-                offset++;
-
-                if (index - offset == lastLineEnd || offset >= index) {
-                    offset = 0;
-                    break;
-                }
-            }
-            index -= offset;
-        }
-
-        return lineCount;
     }
 
     private CharSequence getTruncatedText(CharSequence text, int maxLines) {
@@ -168,14 +137,20 @@ public final class CarUiTextViewImpl extends CarUiTextView {
 
         int lineCount = 0;
         int index = 0;
-        int lastLineEnd = 0;
+        int lastLineStart = 0;
         int length = text.length();
         boolean isTruncationComplete = false;
 
         while (!isTruncationComplete) {
-            lastLineEnd = index;
+            lastLineStart = index;
             // Measure the text, stopping early if the measured width exceeds textView width
             index += getPaint().breakText(text, index, length, true, maxWidth, null);
+
+            // Break early if manual line break is present
+            int lineBreak = TextUtils.indexOf(text, "\n", lastLineStart, index);
+            if (lineBreak != -1) {
+                index = Math.min(index, lineBreak + 1);
+            }
 
             lineCount++;
             // Hitting maxLine limit or reaching the end of the CharSequence means truncation is
@@ -186,13 +161,12 @@ public final class CarUiTextViewImpl extends CarUiTextView {
 
             // Account for word wrapping by removing partial words at end of line by moving index
             // back to last whitespace character
-            if (!isTruncationComplete) {
+            if (!isTruncationComplete && !Character.isWhitespace(text.charAt(index))) {
                 int offset = 0;
-                while (!Character.isWhitespace(text.charAt(index - offset))) {
+                while (!Character.isWhitespace(text.charAt(index - offset - 1))) {
                     offset++;
-
                     // partial word reaches to the start of line, so it must be kept
-                    if (index - offset == lastLineEnd || offset >= index) {
+                    if (index - offset == lastLineStart || offset >= index) {
                         offset = 0;
                         break;
                     }
@@ -204,12 +178,14 @@ public final class CarUiTextViewImpl extends CarUiTextView {
 
         SpannableStringBuilder builder = new SpannableStringBuilder();
         // Get text up until the last line
-        builder.append(text.subSequence(0, lastLineEnd));
+        builder.append(text.subSequence(0, lastLineStart));
         // Add space to separate last word of 2nd last line and first word of last line
-        if (!TextUtils.isEmpty(builder)) {
+        if (!TextUtils.isEmpty(builder) && !Character.isWhitespace(
+                builder.charAt(builder.length() - 1))) {
             builder.append(" ");
         }
-        CharSequence lastLine = text.subSequence(lastLineEnd, length);
+        CharSequence lastLine = new Scanner(
+                text.subSequence(lastLineStart, length).toString()).nextLine();
         // Add truncation ellipsis to last line if required
         builder.append(
                 TextUtils.ellipsize(lastLine, getPaint(), maxWidth, TextUtils.TruncateAt.END));
