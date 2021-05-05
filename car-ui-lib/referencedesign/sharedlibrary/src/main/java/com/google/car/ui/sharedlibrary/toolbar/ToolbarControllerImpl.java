@@ -17,6 +17,7 @@ package com.google.car.ui.sharedlibrary.toolbar;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,10 +27,9 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
+import com.android.car.ui.sharedlibrary.oemapis.toolbar.ImeSearchInterfaceOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.MenuItemOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ProgressBarControllerOEMV1;
-import com.android.car.ui.sharedlibrary.oemapis.toolbar.SearchCapabilitiesOEMV1;
-import com.android.car.ui.sharedlibrary.oemapis.toolbar.SearchConfigOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.TabOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
 
@@ -37,6 +37,7 @@ import com.google.car.ui.sharedlibrary.R;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -66,6 +67,7 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     private boolean mHasLogo = false;
     private int mSearchMode = ToolbarControllerOEMV1.SEARCH_MODE_DISABLED;
     private final OverflowMenuItem mOverflowMenuItem;
+
 
     ToolbarControllerImpl(View view, Context sharedLibraryContext, Context activityContext) {
         mSharedLibraryContext = sharedLibraryContext;
@@ -178,13 +180,19 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     }
 
     @Override
-    public SearchCapabilitiesOEMV1 getSearchCapabilities() {
-        return null;
-    }
+    public ImeSearchInterfaceOEMV1 getImeSearchInterface() {
+        return new ImeSearchInterfaceOEMV1() {
+            @Override
+            public void setSearchTextViewConsumer(Consumer<TextView> textViewConsumer) {
+                mSearchController.setSearchTextViewConsumer(textViewConsumer);
+            }
 
-    @Override
-    public void setSearchConfig(SearchConfigOEMV1 searchInfo) {
-        // Intentional no-op as getSearchCapabilities returns null
+            @Override
+            public void setOnPrivateImeCommandListener(
+                    BiConsumer<String, Bundle> onPrivateImeCommandListener) {
+                mSearchController.setOnPrivateImeCommandListener(onPrivateImeCommandListener);
+            }
+        };
     }
 
     @Override

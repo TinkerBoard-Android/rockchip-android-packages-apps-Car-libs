@@ -26,7 +26,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.paintbooth.R;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Implementation of {@link RecyclerViewAdapter} that can be used with RecyclerViews.
@@ -34,9 +34,9 @@ import java.util.ArrayList;
 public class RecyclerViewAdapter extends
         RecyclerView.Adapter<RecyclerViewAdapter.RecyclerViewHolder> {
 
-    private ArrayList<String> mData;
+    private List<String> mData;
 
-    public RecyclerViewAdapter(ArrayList<String> data) {
+    public RecyclerViewAdapter(List<String> data) {
         this.mData = data;
     }
 

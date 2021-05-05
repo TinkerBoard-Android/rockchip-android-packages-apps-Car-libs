@@ -21,14 +21,12 @@ import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
 import static com.android.car.ui.utils.CarUiUtils.findViewByRefId;
-import static com.android.car.ui.utils.CarUiUtils.getBooleanSystemProperty;
 import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.text.PrecomputedText;
 import android.text.TextUtils;
 import android.util.Log;
@@ -55,7 +53,6 @@ import com.android.car.ui.utils.CarUiUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -184,24 +181,6 @@ public final class ToolbarControllerImpl implements ToolbarController {
         setBackgroundShown(true);
 
         mOverflowAdapter = new CarUiListItemAdapter(mUiOverflowItems);
-    }
-
-    /**
-     * Returns whether or not system is running in a wide screen mode.
-     */
-    boolean isWideScreenMode(Context context) {
-        return getBooleanSystemProperty(context.getResources(),
-                R.string.car_ui_ime_wide_screen_system_property_name, false)
-                && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R;
-    }
-
-    /**
-     * Return the list of package names allowed to hide the content area in wide screen IME.
-     */
-    private List<String> allowPackageList(Context context) {
-        String[] packages = context.getResources()
-                .getStringArray(R.array.car_ui_ime_wide_screen_allowed_package_list);
-        return Arrays.asList(packages);
     }
 
     private Context getContext() {
@@ -992,10 +971,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
                 ViewGroup.LayoutParams.MATCH_PARENT);
         mSearchViewContainer.addView(searchView, layoutParams);
 
-        if (isWideScreenMode(mContext)) {
-            searchView.installWindowInsetsListener(mSearchViewContainer);
-            searchView.setSearchConfig(mSearchConfigForWidescreen, getSearchCapabilities());
-        }
+        searchView.setSearchConfig(mSearchConfigForWidescreen);
 
         mSearchView = searchView;
     }
@@ -1024,7 +1000,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
     }
 
     @Override
-    public void setSearchResultsInputViewIcon(Drawable drawable) {
+    public void setSearchResultsInputViewIcon(@NonNull Drawable drawable) {
         setSearchConfig(mSearchConfigBuilder.setSearchResultsInputViewIcon(drawable).build());
     }
 
@@ -1048,23 +1024,13 @@ public final class ToolbarControllerImpl implements ToolbarController {
     public void setSearchConfig(SearchConfig searchConfig) {
         mSearchConfigForWidescreen = searchConfig;
         if (mSearchView != null) {
-            mSearchView.setSearchConfig(mSearchConfigForWidescreen, getSearchCapabilities());
+            mSearchView.setSearchConfig(mSearchConfigForWidescreen);
         }
     }
 
     @Override
     public SearchCapabilities getSearchCapabilities() {
-        boolean allowAppsToHideContentArea = mContext.getResources().getBoolean(
-                R.bool.car_ui_ime_wide_screen_allow_app_hide_content_area);
-
-        boolean canShowSearchResultsView = isWideScreenMode(mContext)
-                && (allowPackageList(mContext).contains(mContext.getPackageName())
-                || allowAppsToHideContentArea);
-
-        return SearchCapabilities.builder()
-                .setCanShowSearchResultsView(canShowSearchResultsView)
-                .setCanShowSearchResultItems(isWideScreenMode(mContext))
-                .build();
+        return SearchWidescreenController.getSearchCapabilities(mContext);
     }
 
     @Override
