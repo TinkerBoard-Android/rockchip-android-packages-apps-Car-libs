@@ -38,9 +38,14 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 /** Unit test for {@link FocusParkingView} not in touch mode. */
+// TODO(b/187553946): Improve this test.
 public class FocusParkingViewTest {
 
+    private static final long WAIT_TIME_MS = 3000;
     private static final int NUM_ITEMS = 40;
 
     @Rule
@@ -77,88 +82,150 @@ public class FocusParkingViewTest {
     }
 
     @Test
-    public void testRequestFocus_focusOnDefaultFocus() {
-        mFpv.post(() -> {
+    public void testRequestFocus_focusOnDefaultFocus() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mView1.post(() -> {
             mView1.requestFocus();
-            assertThat(mView1.isFocused()).isTrue();
+            mView1.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
 
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mFpv.post(() -> {
             mFpv.requestFocus();
-            assertThat(mFocusedByDefault.isFocused()).isTrue();
+            mFpv.post(() -> latch2.countDown());
         });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mFocusedByDefault.isFocused()).isTrue();
     }
 
     @Test
-    public void testRestoreDefaultFocus_focusOnDefaultFocus() {
-        mFpv.post(() -> {
+    public void testRestoreDefaultFocus_focusOnDefaultFocus() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mView1.post(() -> {
             mView1.requestFocus();
-            assertThat(mView1.isFocused()).isTrue();
+            mView1.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
 
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mFpv.post(() -> {
             mFpv.restoreDefaultFocus();
-            assertThat(mFocusedByDefault.isFocused()).isTrue();
+            mFpv.post(() -> latch2.countDown());
         });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mFocusedByDefault.isFocused()).isTrue();
     }
 
     @Test
-    public void testOnWindowFocusChanged_loseFocus() {
-        mFpv.post(() -> {
+    public void testOnWindowFocusChanged_loseFocus() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mView1.post(() -> {
             mView1.requestFocus();
-            assertThat(mView1.isFocused()).isTrue();
+            mView1.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
 
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mFpv.post(() -> {
             mFpv.onWindowFocusChanged(false);
-            assertThat(mFpv.isFocused()).isTrue();
+            mFpv.post(() -> latch2.countDown());
         });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mFpv.isFocused()).isTrue();
     }
 
     @Test
-    public void testOnWindowFocusChanged_focusOnDefaultFocus() {
+    public void testOnWindowFocusChanged_focusOnDefaultFocus() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
         mFpv.post(() -> {
             mFpv.performAccessibilityAction(ACTION_FOCUS, null);
-            assertThat(mFpv.isFocused()).isTrue();
+            mFpv.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mFpv.isFocused()).isTrue();
 
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mFpv.post(() -> {
             mFpv.onWindowFocusChanged(true);
-            assertThat(mFocusedByDefault.isFocused()).isTrue();
+            mFpv.post(() -> latch2.countDown());
         });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mFocusedByDefault.isFocused()).isTrue();
     }
 
     @Test
-    public void testPerformAccessibilityAction_actionRestoreDefaultFocus() {
-        mFpv.post(() -> {
+    public void testPerformAccessibilityAction_actionRestoreDefaultFocus() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mView1.post(() -> {
             mView1.requestFocus();
-            assertThat(mView1.isFocused()).isTrue();
+            mView1.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
 
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mFpv.post(() -> {
             mFpv.performAccessibilityAction(ACTION_RESTORE_DEFAULT_FOCUS, null);
-            assertThat(mFocusedByDefault.isFocused()).isTrue();
+            mFpv.post(() -> latch2.countDown());
         });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mFocusedByDefault.isFocused()).isTrue();
     }
 
     @Test
-    public void testPerformAccessibilityAction_actionFocus() {
-        mFpv.post(() -> {
+    public void testPerformAccessibilityAction_actionFocus() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mView1.post(() -> {
             mView1.requestFocus();
-            assertThat(mView1.isFocused()).isTrue();
-
-            mFpv.performAccessibilityAction(ACTION_FOCUS, null);
-            assertThat(mFpv.isFocused()).isTrue();
+            mView1.post(() -> latch1.countDown());
         });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
+
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mFpv.post(() -> {
+            mFpv.performAccessibilityAction(ACTION_FOCUS, null);
+            mFpv.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mFpv.isFocused()).isTrue();
     }
 
     @Test
-    public void testRestoreFocusInRoot_recyclerViewItemRemoved() {
+    public void testRestoreFocusInRoot_recyclerViewItemRemoved() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
         mList.post(() -> mList.getViewTreeObserver().addOnGlobalLayoutListener(
                 new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
                         mList.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        View firstItem = mList.getLayoutManager().findViewByPosition(0);
-                        firstItem.requestFocus();
-                        assertThat(firstItem.isFocused()).isTrue();
-
-                        ViewGroup parent = (ViewGroup) firstItem.getParent();
-                        parent.removeView(firstItem);
-                        assertThat(mFocusedByDefault.isFocused()).isTrue();
+                        mList.post(() -> latch1.countDown());
                     }
                 })
         );
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+
+        View firstItem = mList.getLayoutManager().findViewByPosition(0);
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mList.post(() -> {
+            firstItem.requestFocus();
+            mList.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(firstItem.isFocused()).isTrue();
+
+        ViewGroup parent = (ViewGroup) firstItem.getParent();
+        CountDownLatch latch3 = new CountDownLatch(1);
+        parent.post(() -> {
+            parent.removeView(firstItem);
+            parent.post(() -> latch3.countDown());
+        });
+        latch3.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mFocusedByDefault.isFocused()).isTrue();
     }
 
     // TODO(b/179734335) Reenable this test, and remove the asserts inside of layout listeners.
@@ -191,71 +258,119 @@ public class FocusParkingViewTest {
 //    }
 
     @Test
-    public void testRestoreFocusInRoot_focusedViewRemoved() {
-        mFpv.post(() -> {
+    public void testRestoreFocusInRoot_focusedViewRemoved() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mView1.post(() -> {
             mView1.requestFocus();
-            assertThat(mView1.isFocused()).isTrue();
+            mView1.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
 
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mView1.post(() -> {
             ViewGroup parent = (ViewGroup) mView1.getParent();
             parent.removeView(mView1);
-            assertThat(mFocusedByDefault.isFocused()).isTrue();
+            mView1.post(() -> latch2.countDown());
         });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mFocusedByDefault.isFocused()).isTrue();
     }
 
     @Test
-    public void testRestoreFocusInRoot_focusedViewDisabled() {
-        mFpv.post(() -> {
+    public void testRestoreFocusInRoot_focusedViewDisabled() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mView1.post(() -> {
             mView1.requestFocus();
-            assertThat(mView1.isFocused()).isTrue();
+            mView1.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
 
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mView1.post(() -> {
             mView1.setEnabled(false);
-            assertThat(mFocusedByDefault.isFocused()).isTrue();
+            mView1.post(() -> latch2.countDown());
         });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mFocusedByDefault.isFocused()).isTrue();
     }
 
     @Test
-    public void testRestoreFocusInRoot_focusedViewBecomesInvisible() {
-        mFpv.post(() -> {
+    public void testRestoreFocusInRoot_focusedViewBecomesInvisible() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mView1.post(() -> {
             mView1.requestFocus();
-            assertThat(mView1.isFocused()).isTrue();
+            mView1.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
 
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mView1.post(() -> {
             mView1.setVisibility(View.INVISIBLE);
-            assertThat(mFocusedByDefault.isFocused()).isTrue();
+            mView1.post(() -> latch2.countDown());
         });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mFocusedByDefault.isFocused()).isTrue();
     }
 
     @Test
-    public void testRestoreFocusInRoot_focusedViewParentBecomesInvisible() {
-        mFpv.post(() -> {
+    public void testRestoreFocusInRoot_focusedViewParentBecomesInvisible() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mView1.post(() -> {
             mView1.requestFocus();
-            assertThat(mView1.isFocused()).isTrue();
+            mView1.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
 
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mParent1.post(() -> {
             mParent1.setVisibility(View.INVISIBLE);
-            assertThat(mFocusedByDefault.isFocused()).isTrue();
+            mParent1.post(() -> latch2.countDown());
         });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mFocusedByDefault.isFocused()).isTrue();
     }
 
     @Test
-    public void testRequestFocus_focusesFpvWhenShouldRestoreFocusIsFalse() {
-        mFpv.post(() -> {
+    public void testRequestFocus_focusesFpvWhenShouldRestoreFocusIsFalse() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mView1.post(() -> {
             mView1.requestFocus();
-            assertThat(mView1.isFocused()).isTrue();
-            mFpv.setShouldRestoreFocus(false);
+            mView1.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
 
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mFpv.post(() -> {
+            mFpv.setShouldRestoreFocus(false);
             mFpv.requestFocus();
-            assertThat(mFpv.isFocused()).isTrue();
+            mFpv.post(() -> latch2.countDown());
         });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mFpv.isFocused()).isTrue();
     }
 
     @Test
-    public void testRestoreDefaultFocus_focusesFpvWhenShouldRestoreFocusIsFalse() {
-        mFpv.post(() -> {
+    public void testRestoreDefaultFocus_focusesFpvWhenShouldRestoreFocusIsFalse() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mView1.post(() -> {
             mView1.requestFocus();
-            assertThat(mView1.isFocused()).isTrue();
-            mFpv.setShouldRestoreFocus(false);
-
-            mFpv.restoreDefaultFocus();
-            assertThat(mFpv.isFocused()).isTrue();
+            mView1.post(() -> latch1.countDown());
         });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
+
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mFpv.post(() -> {
+            mFpv.setShouldRestoreFocus(false);
+            mFpv.restoreDefaultFocus();
+            mFpv.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mFpv.isFocused()).isTrue();
     }
 }

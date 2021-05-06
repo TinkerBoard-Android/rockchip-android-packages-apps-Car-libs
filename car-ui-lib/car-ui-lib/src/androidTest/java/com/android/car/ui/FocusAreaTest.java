@@ -55,6 +55,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /** Unit tests for {@link FocusArea} not in touch mode. */
+// TODO(b/187553946): Improve this test.
 public class FocusAreaTest {
     private static final long WAIT_TIME_MS = 3000;
 
@@ -127,158 +128,303 @@ public class FocusAreaTest {
     }
 
     @Test
-    public void testPerformAccessibilityAction_actionNudgeShortcut_legacy() {
-        mFocusArea1.post(() -> {
-            // Nudge to the nudgeShortcut view.
+    public void testPerformAccessibilityAction_actionNudgeShortcut_legacy() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mView3.post(() -> {
             mView3.requestFocus();
-            assertThat(mView3.isFocused()).isTrue();
-            Bundle arguments = new Bundle();
+            mView3.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView3.isFocused()).isTrue();
+
+        CountDownLatch latch2 = new CountDownLatch(1);
+        Bundle arguments = new Bundle();
+        mFocusArea3.post(() -> {
+            // Nudge to the nudgeShortcut view.
             arguments.putInt(NUDGE_DIRECTION, FOCUS_RIGHT);
             mFocusArea3.performAccessibilityAction(ACTION_NUDGE_SHORTCUT, arguments);
-            assertThat(mNudgeShortcut3.isFocused()).isTrue();
+            mFocusArea3.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mNudgeShortcut3.isFocused()).isTrue();
 
-            // nudgeShortcutDirection doesn't match. The focus should stay the same.
+        CountDownLatch latch3 = new CountDownLatch(1);
+        mView3.post(() -> {
             mView3.requestFocus();
-            assertThat(mView3.isFocused()).isTrue();
+            mView3.post(() -> latch3.countDown());
+        });
+        latch3.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView3.isFocused()).isTrue();
+
+        CountDownLatch latch4 = new CountDownLatch(1);
+        mFocusArea3.post(() -> {
             arguments.putInt(NUDGE_DIRECTION, FOCUS_DOWN);
             mFocusArea3.performAccessibilityAction(ACTION_NUDGE_SHORTCUT, arguments);
-            assertThat(mView3.isFocused()).isTrue();
+            mFocusArea3.post(() -> latch4.countDown());
+        });
+        latch4.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        // nudgeShortcutDirection doesn't match. The focus should stay the same.
+        assertThat(mView3.isFocused()).isTrue();
 
-            // No nudgeShortcut view in the current FocusArea. The focus should stay the same.
+        CountDownLatch latch5 = new CountDownLatch(1);
+        mFocusArea1.post(() -> {
             mView1.requestFocus();
-            assertThat(mView1.isFocused()).isTrue();
+            mView1.post(() -> latch5.countDown());
+        });
+        latch5.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
+
+        CountDownLatch latch6 = new CountDownLatch(1);
+        mFocusArea1.post(() -> {
             arguments.putInt(NUDGE_DIRECTION, FOCUS_RIGHT);
             mFocusArea1.performAccessibilityAction(ACTION_NUDGE_SHORTCUT, arguments);
-            assertThat(mView1.isFocused()).isTrue();
+            mFocusArea1.post(() -> latch6.countDown());
         });
+        latch6.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        // No nudgeShortcut view in the current FocusArea. The focus should stay the same.
+        assertThat(mView1.isFocused()).isTrue();
     }
 
     @Test
-    public void testPerformAccessibilityAction_actionNudgeShortcut_new() {
-        mFocusArea1.post(() -> {
-            // Nudge to the nudgeShortcut view.
+    public void testPerformAccessibilityAction_actionNudgeShortcut_new()throws Exception  {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mView6.post(() -> {
             mView6.requestFocus();
-            assertThat(mView6.isFocused()).isTrue();
-            Bundle arguments = new Bundle();
+            mView6.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView6.isFocused()).isTrue();
+
+        Bundle arguments = new Bundle();
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mFocusArea6.post(() -> {
+            // Nudge to the nudgeShortcut view.
             arguments.putInt(NUDGE_DIRECTION, FOCUS_RIGHT);
             mFocusArea6.performAccessibilityAction(ACTION_NUDGE_SHORTCUT, arguments);
-            assertThat(mNudgeShortcut6.isFocused()).isTrue();
+            mFocusArea6.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mNudgeShortcut6.isFocused()).isTrue();
 
-            // No shortcut specified for given direction. The focus should stay the same.
+        CountDownLatch latch3 = new CountDownLatch(1);
+        mView6.post(() -> {
             mView6.requestFocus();
-            assertThat(mView6.isFocused()).isTrue();
+            mView6.post(() -> latch3.countDown());
+        });
+        latch3.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView6.isFocused()).isTrue();
+
+        CountDownLatch latch4 = new CountDownLatch(1);
+        mFocusArea6.post(() -> {
             arguments.putInt(NUDGE_DIRECTION, FOCUS_DOWN);
             mFocusArea6.performAccessibilityAction(ACTION_NUDGE_SHORTCUT, arguments);
-            assertThat(mView6.isFocused()).isTrue();
+            mFocusArea6.post(() -> latch4.countDown());
+        });
+        latch4.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        // No shortcut specified for given direction. The focus should stay the same.
+        assertThat(mView6.isFocused()).isTrue();
 
-            // No shortcut specified for any direction. The focus should stay the same.
+        CountDownLatch latch5 = new CountDownLatch(1);
+        mView1.post(() -> {
             mView1.requestFocus();
-            assertThat(mView1.isFocused()).isTrue();
+            mView1.post(() -> latch5.countDown());
+        });
+        latch5.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
+
+        CountDownLatch latch6 = new CountDownLatch(1);
+        mFocusArea1.post(() -> {
             arguments.putInt(NUDGE_DIRECTION, FOCUS_RIGHT);
             mFocusArea1.performAccessibilityAction(ACTION_NUDGE_SHORTCUT, arguments);
-            assertThat(mView1.isFocused()).isTrue();
+            mFocusArea1.post(() -> latch6.countDown());
         });
+        latch6.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        // No shortcut specified for any direction. The focus should stay the same.
+        assertThat(mView1.isFocused()).isTrue();
     }
 
     @Test
-    public void testPerformAccessibilityAction_actionNudgeShortcut_programmatic() {
-        mFocusArea1.post(() -> {
+    public void testPerformAccessibilityAction_actionNudgeShortcut_programmatic()throws Exception  {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mView6.post(() -> {
             // Programmatically change the nudge shortcut from right to left.
             mFocusArea6.setNudgeShortcut(FOCUS_RIGHT, null);
             mFocusArea6.setNudgeShortcut(FOCUS_LEFT, mNudgeShortcut3);
 
-            // Nudge to the nudgeShortcut view.
             mView6.requestFocus();
-            assertThat(mView6.isFocused()).isTrue();
-            Bundle arguments = new Bundle();
+            mView6.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView6.isFocused()).isTrue();
+
+        CountDownLatch latch2 = new CountDownLatch(1);
+        Bundle arguments = new Bundle();
+        mFocusArea6.post(() -> {
+            // Nudge to the nudgeShortcut view.
             arguments.putInt(NUDGE_DIRECTION, FOCUS_LEFT);
             mFocusArea6.performAccessibilityAction(ACTION_NUDGE_SHORTCUT, arguments);
-            assertThat(mNudgeShortcut3.isFocused()).isTrue();
+            mFocusArea6.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mNudgeShortcut3.isFocused()).isTrue();
 
-            // No shortcut specified for given direction. The focus should stay the same.
+        CountDownLatch latch3 = new CountDownLatch(1);
+        mView6.post(() -> {
             mView6.requestFocus();
-            assertThat(mView6.isFocused()).isTrue();
+            mView6.post(() -> latch3.countDown());
+        });
+        latch3.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView6.isFocused()).isTrue();
+
+        CountDownLatch latch4 = new CountDownLatch(1);
+        mFocusArea6.post(() -> {
             arguments.putInt(NUDGE_DIRECTION, FOCUS_RIGHT);
             mFocusArea6.performAccessibilityAction(ACTION_NUDGE_SHORTCUT, arguments);
-            assertThat(mView6.isFocused()).isTrue();
+            mFocusArea6.post(() -> latch4.countDown());
+        });
+        latch4.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        // No shortcut specified for given direction. The focus should stay the same.
+        assertThat(mView6.isFocused()).isTrue();
 
-            // No shortcut specified for any direction. The focus should stay the same.
+        CountDownLatch latch5 = new CountDownLatch(1);
+        mView1.post(() -> {
             mView1.requestFocus();
-            assertThat(mView1.isFocused()).isTrue();
+            mView1.post(() -> latch5.countDown());
+        });
+        latch5.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
+
+        CountDownLatch latch6 = new CountDownLatch(1);
+        mFocusArea1.post(() -> {
             arguments.putInt(NUDGE_DIRECTION, FOCUS_RIGHT);
             mFocusArea1.performAccessibilityAction(ACTION_NUDGE_SHORTCUT, arguments);
-            assertThat(mView1.isFocused()).isTrue();
+            mFocusArea1.post(() -> latch6.countDown());
         });
+        latch6.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        // No shortcut specified for any direction. The focus should stay the same.
+        assertThat(mView1.isFocused()).isTrue();
     }
 
     @Test
-    public void testPerformAccessibilityAction_actionFocus() {
+    public void testPerformAccessibilityAction_actionFocus() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
         mFocusArea1.post(() -> {
             mFocusArea1.performAccessibilityAction(ACTION_FOCUS, null);
-            assertThat(mView1.isFocused()).isTrue();
+            mFocusArea1.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
 
-            // It should focus on the default or the first view in the FocusArea.
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mFocusArea2.post(() -> {
             mFocusArea2.performAccessibilityAction(ACTION_FOCUS, null);
-            assertThat(mDefaultFocus2.isFocused()).isTrue();
+            mFocusArea2.post(() -> latch2.countDown());
         });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        // It should focus on the default or the first view in the FocusArea.
+        assertThat(mDefaultFocus2.isFocused()).isTrue();
     }
 
     @Test
-    public void testPerformAccessibilityAction_actionFocus_enabledFocusCache() {
-        mFocusArea1.post(() -> {
-            RotaryCache cache =
-                    new RotaryCache(CACHE_TYPE_NEVER_EXPIRE, 0, CACHE_TYPE_NEVER_EXPIRE, 0);
+    public void testPerformAccessibilityAction_actionFocus_enabledFocusCache() throws Exception {
+        RotaryCache cache =
+                new RotaryCache(CACHE_TYPE_NEVER_EXPIRE, 0, CACHE_TYPE_NEVER_EXPIRE, 0);
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mButton1.post(() -> {
             mFocusArea1.setRotaryCache(cache);
-
             mButton1.requestFocus();
-            assertThat(mButton1.isFocused()).isTrue();
-            mView2.requestFocus();
-            assertThat(mView2.isFocused()).isTrue();
+            mButton1.post(() -> latch1.countDown());
 
-            // With cache, it should focus on the lastly focused view in the FocusArea.
-            mFocusArea1.performAccessibilityAction(ACTION_FOCUS, null);
-            assertThat(mButton1.isFocused()).isTrue();
         });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mButton1.isFocused()).isTrue();
+
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mView2.post(() -> {
+            mView2.requestFocus();
+            mView2.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView2.isFocused()).isTrue();
+
+        CountDownLatch latch3 = new CountDownLatch(1);
+        mFocusArea1.post(() -> {
+            mFocusArea1.performAccessibilityAction(ACTION_FOCUS, null);
+            mFocusArea1.post(() -> latch3.countDown());
+
+        });
+        latch3.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        // With cache, it should focus on the lastly focused view in the FocusArea.
+        assertThat(mButton1.isFocused()).isTrue();
     }
 
     @Test
-    public void testPerformAccessibilityAction_actionFocus_disabledFocusCache() {
-        mFocusArea1.post(() -> {
-            RotaryCache cache = new RotaryCache(CACHE_TYPE_DISABLED, 0, CACHE_TYPE_NEVER_EXPIRE, 0);
+    public void testPerformAccessibilityAction_actionFocus_disabledFocusCache() throws Exception {
+        RotaryCache cache = new RotaryCache(CACHE_TYPE_DISABLED, 0, CACHE_TYPE_NEVER_EXPIRE, 0);
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mButton1.post(() -> {
             mFocusArea1.setRotaryCache(cache);
-
             mButton1.requestFocus();
-            assertThat(mButton1.isFocused()).isTrue();
-            mView2.requestFocus();
-            assertThat(mView2.isFocused()).isTrue();
-
-            // Without cache, it should focus on the default or the first view in the FocusArea.
-            mFocusArea1.performAccessibilityAction(ACTION_FOCUS, null);
-            assertThat(mView1.isFocused()).isTrue();
+            mButton1.post(() -> latch1.countDown());
         });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mButton1.isFocused()).isTrue();
+
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mView2.post(() -> {
+            mView2.requestFocus();
+            mView2.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView2.isFocused()).isTrue();
+
+        CountDownLatch latch3 = new CountDownLatch(1);
+        mFocusArea1.post(() -> {
+            mFocusArea1.performAccessibilityAction(ACTION_FOCUS, null);
+            mFocusArea1.post(() -> latch3.countDown());
+        });
+        latch3.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        // Without cache, it should focus on the default or the first view in the FocusArea.
+        assertThat(mView1.isFocused()).isTrue();
     }
 
     @Test
-    public void testPerformAccessibilityAction_actionFocus_lastFocusedViewRemoved() {
-        mFocusArea1.post(() -> {
-            // Focus on mDefaultFocus2 in mFocusArea2, then mView1 in mFocusArea21.
+    public void testPerformAccessibilityAction_actionFocus_lastFocusedViewRemoved()
+            throws Exception {
+        // Focus on mDefaultFocus2 in mFocusArea2, then mView1 in mFocusArea1.
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mDefaultFocus2.post(() -> {
             mDefaultFocus2.requestFocus();
-            assertThat(mDefaultFocus2.isFocused()).isTrue();
-            mView1.requestFocus();
-            assertThat(mView1.isFocused()).isTrue();
+            mDefaultFocus2.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mDefaultFocus2.isFocused()).isTrue();
 
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mView1.post(() -> {
+            mView1.requestFocus();
+            mView1.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
+
+        CountDownLatch latch3 = new CountDownLatch(1);
+        mFocusArea2.post(() -> {
             // Remove mDefaultFocus2, then Perform ACTION_FOCUS on mFocusArea2.
             mFocusArea2.removeView(mDefaultFocus2);
             mFocusArea2.performAccessibilityAction(ACTION_FOCUS, null);
-
-            // mView2 in mFocusArea2 should get focused.
-            assertThat(mView2.isFocused()).isTrue();
+            mFocusArea2.post(() -> latch3.countDown());
         });
+        // mView2 in mFocusArea2 should get focused.
+        latch3.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView2.isFocused()).isTrue();
     }
 
     @Test
-    public void testPerformAccessibilityAction_actionNudgeToAnotherFocusArea_enabledCache() {
-        mFocusArea1.post(() -> {
+    public void testPerformAccessibilityAction_actionNudgeToAnotherFocusArea_enabledCache()
+            throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mButton1.post(() -> {
             RotaryCache cache1 =
                     new RotaryCache(CACHE_TYPE_NEVER_EXPIRE, 0, CACHE_TYPE_NEVER_EXPIRE, 0);
             mFocusArea1.setRotaryCache(cache1);
@@ -286,31 +432,53 @@ public class FocusAreaTest {
                     new RotaryCache(CACHE_TYPE_NEVER_EXPIRE, 0, CACHE_TYPE_NEVER_EXPIRE, 0);
             mFocusArea2.setRotaryCache(cache2);
 
-            // Focus on the second view in mFocusArea1, then nudge to mFocusArea2.
+            // Focus on the second view in mFocusArea1.
             mButton1.requestFocus();
-            assertThat(mButton1.isFocused()).isTrue();
-            Bundle arguments = new Bundle();
+            mButton1.post(() -> latch1.countDown());
+
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mButton1.isFocused()).isTrue();
+
+        CountDownLatch latch2 = new CountDownLatch(1);
+        Bundle arguments = new Bundle();
+        mFocusArea2.post(() -> {
+            // Nudge to mFocusArea2.
             arguments.putInt(NUDGE_DIRECTION, FOCUS_DOWN);
             mFocusArea2.performAccessibilityAction(ACTION_FOCUS, arguments);
-            assertThat(mDefaultFocus2.isFocused()).isTrue();
+            mFocusArea2.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mDefaultFocus2.isFocused()).isTrue();
 
+        CountDownLatch latch3 = new CountDownLatch(1);
+        mFocusArea2.post(() -> {
             // Nudge back. It should focus on the cached view (mButton1) in the cached
             // FocusArea (mFocusArea1).
             arguments.putInt(NUDGE_DIRECTION, FOCUS_UP);
             mFocusArea2.performAccessibilityAction(ACTION_NUDGE_TO_ANOTHER_FOCUS_AREA, arguments);
-            assertThat(mButton1.isFocused()).isTrue();
+            mFocusArea2.post(() -> latch3.countDown());
+        });
+        latch3.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mButton1.isFocused()).isTrue();
 
+        CountDownLatch latch4 = new CountDownLatch(1);
+        mFocusArea1.post(() -> {
             // Nudge back. It should fail and the focus should stay the same because of one-way
             // nudge history.
             arguments.putInt(NUDGE_DIRECTION, FOCUS_DOWN);
             mFocusArea1.performAccessibilityAction(ACTION_NUDGE_TO_ANOTHER_FOCUS_AREA, arguments);
-            assertThat(mButton1.isFocused()).isTrue();
+            mFocusArea1.post(() -> latch4.countDown());
         });
+        latch4.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mButton1.isFocused()).isTrue();
     }
 
     @Test
-    public void testPerformAccessibilityAction_actionNudgeToAnotherFocusArea_mixedCache() {
-        mFocusArea1.post(() -> {
+    public void testPerformAccessibilityAction_actionNudgeToAnotherFocusArea_mixedCache()
+            throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mButton1.post(() -> {
             // Disabled FocusCache but enabled FocusAreaCache.
             RotaryCache cache1 =
                     new RotaryCache(CACHE_TYPE_DISABLED, 0, CACHE_TYPE_NEVER_EXPIRE, 0);
@@ -319,25 +487,41 @@ public class FocusAreaTest {
                     new RotaryCache(CACHE_TYPE_DISABLED, 0, CACHE_TYPE_NEVER_EXPIRE, 0);
             mFocusArea2.setRotaryCache(cache2);
 
-            // Focus on the second view in mFocusArea1, then nudge to mFocusArea2.
+            // Focus on the second view in mFocusArea1.
             mButton1.requestFocus();
-            assertThat(mButton1.isFocused()).isTrue();
-            Bundle arguments = new Bundle();
+            mButton1.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mButton1.isFocused()).isTrue();
+
+        CountDownLatch latch2 = new CountDownLatch(1);
+        Bundle arguments = new Bundle();
+        mFocusArea2.post(() -> {
+            // Nudge to mFocusArea2.
             arguments.putInt(NUDGE_DIRECTION, FOCUS_DOWN);
             mFocusArea2.performAccessibilityAction(ACTION_FOCUS, arguments);
-            assertThat(mDefaultFocus2.isFocused()).isTrue();
+            mFocusArea2.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mDefaultFocus2.isFocused()).isTrue();
 
+        CountDownLatch latch3 = new CountDownLatch(1);
+        mFocusArea2.post(() -> {
             // Nudge back. Since FocusCache is disabled, it should focus on the default or the first
             // view (mView1) in the cached FocusArea (mFocusArea1).
             arguments.putInt(NUDGE_DIRECTION, FOCUS_UP);
             mFocusArea2.performAccessibilityAction(ACTION_NUDGE_TO_ANOTHER_FOCUS_AREA, arguments);
-            assertThat(mView1.isFocused()).isTrue();
+            mFocusArea2.post(() -> latch3.countDown());
         });
+        latch3.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
     }
 
     @Test
-    public void testPerformAccessibilityAction_actionNudgeToAnotherFocusArea_mixedCache2() {
-        mFocusArea1.post(() -> {
+    public void testPerformAccessibilityAction_actionNudgeToAnotherFocusArea_mixedCache2()
+            throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mButton1.post(() -> {
             // Enabled FocusCache but disabled FocusAreaCache.
             RotaryCache cache1 =
                     new RotaryCache(CACHE_TYPE_NEVER_EXPIRE, 0, CACHE_TYPE_DISABLED, 0);
@@ -348,87 +532,157 @@ public class FocusAreaTest {
 
             // Focus on the second view in mFocusArea1, then nudge to mFocusArea2.
             mButton1.requestFocus();
-            assertThat(mButton1.isFocused()).isTrue();
-            Bundle arguments = new Bundle();
+            mButton1.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mButton1.isFocused()).isTrue();
+
+        CountDownLatch latch2 = new CountDownLatch(1);
+        Bundle arguments = new Bundle();
+        mFocusArea2.post(() -> {
             arguments.putInt(NUDGE_DIRECTION, FOCUS_DOWN);
             mFocusArea2.performAccessibilityAction(ACTION_FOCUS, arguments);
-            assertThat(mDefaultFocus2.isFocused()).isTrue();
+            mFocusArea2.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mDefaultFocus2.isFocused()).isTrue();
 
+        CountDownLatch latch3 = new CountDownLatch(1);
+        mFocusArea2.post(() -> {
             // Nudge back. Since FocusAreaCache is disabled, nudge should fail and the focus should
             // stay the same.
             arguments.putInt(NUDGE_DIRECTION, FOCUS_UP);
             mFocusArea2.performAccessibilityAction(ACTION_NUDGE_TO_ANOTHER_FOCUS_AREA, arguments);
-            assertThat(mDefaultFocus2.isFocused()).isTrue();
+            mFocusArea2.post(() -> latch3.countDown());
         });
+        latch3.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mDefaultFocus2.isFocused()).isTrue();
     }
 
     @Test
-    public void testPerformAccessibilityAction_actionNudgeToAnotherFocusArea_specifiedTarget() {
-        mFocusArea1.post(() -> {
-            // Nudge to specified FocusArea.
+    public void testPerformAccessibilityAction_actionNudgeToAnotherFocusArea_specifiedTarget()
+            throws Exception {
+        // Nudge to specified FocusArea.
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mView4.post(() -> {
             mView4.requestFocus();
-            assertThat(mView4.isFocused()).isTrue();
-            Bundle arguments = new Bundle();
+            mView4.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView4.isFocused()).isTrue();
+        CountDownLatch latch2 = new CountDownLatch(1);
+        Bundle arguments = new Bundle();
+        mFocusArea4.post(() -> {
             arguments.putInt(NUDGE_DIRECTION, FOCUS_LEFT);
             mFocusArea4.performAccessibilityAction(ACTION_NUDGE_TO_ANOTHER_FOCUS_AREA, arguments);
-            assertThat(mDefaultFocus2.isFocused()).isTrue();
+            mFocusArea4.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mDefaultFocus2.isFocused()).isTrue();
 
-            // Direction doesn't match specified FocusArea. The focus should stay the same.
+        // Direction doesn't match specified FocusArea. The focus should stay the same.
+        CountDownLatch latch3 = new CountDownLatch(1);
+        mView4.post(() -> {
             mView4.requestFocus();
-            assertThat(mView4.isFocused()).isTrue();
+            mView4.post(() -> latch3.countDown());
+        });
+        latch3.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView4.isFocused()).isTrue();
+        CountDownLatch latch4 = new CountDownLatch(1);
+        mFocusArea4.post(() -> {
             arguments.putInt(NUDGE_DIRECTION, FOCUS_UP);
             mFocusArea4.performAccessibilityAction(ACTION_NUDGE_TO_ANOTHER_FOCUS_AREA, arguments);
-            assertThat(mView4.isFocused()).isTrue();
+            mFocusArea4.post(() -> latch4.countDown());
+        });
+        latch4.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView4.isFocused()).isTrue();
 
-            // The FocusArea doesn't specify a target FocusArea. The focus should stay the same.
+        // The FocusArea doesn't specify a target FocusArea. The focus should stay the same.
+        CountDownLatch latch5 = new CountDownLatch(1);
+        mView1.post(() -> {
             mView1.requestFocus();
-            assertThat(mView1.isFocused()).isTrue();
+            mView1.post(() -> latch5.countDown());
+        });
+        latch5.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
+        CountDownLatch latch6 = new CountDownLatch(1);
+        mFocusArea1.post(() -> {
             arguments.putInt(NUDGE_DIRECTION, FOCUS_LEFT);
             mFocusArea1.performAccessibilityAction(ACTION_NUDGE_TO_ANOTHER_FOCUS_AREA, arguments);
-            assertThat(mView1.isFocused()).isTrue();
+            mFocusArea1.post(() -> latch6.countDown());
         });
+        latch6.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
     }
 
     @Test
-    public void testDefaultFocusOverridesHistory_override() {
-        mFocusArea1.post(() -> {
+    public void testDefaultFocusOverridesHistory_override() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mView2.post(() -> {
             RotaryCache cache =
                     new RotaryCache(CACHE_TYPE_NEVER_EXPIRE, 0, CACHE_TYPE_NEVER_EXPIRE, 0);
             mFocusArea2.setRotaryCache(cache);
             mFocusArea2.setDefaultFocusOverridesHistory(true);
-
             mView2.requestFocus();
-            assertThat(mView2.isFocused()).isTrue();
-            mView1.requestFocus();
-            assertThat(mView1.isFocused()).isTrue();
+            mView2.post(() -> latch1.countDown());
 
-            // The focused view should be the default focus view rather than the cached view.
-            mFocusArea2.performAccessibilityAction(ACTION_FOCUS, null);
-            assertThat(mDefaultFocus2.isFocused()).isTrue();
         });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView2.isFocused()).isTrue();
+
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mView1.post(() -> {
+            mView1.requestFocus();
+            mView1.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
+
+        CountDownLatch latch3 = new CountDownLatch(1);
+        mFocusArea2.post(() -> {
+            mFocusArea2.performAccessibilityAction(ACTION_FOCUS, null);
+            mFocusArea2.post(() -> latch3.countDown());
+        });
+        latch3.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        // The focused view should be the default focus view rather than the cached view.
+        assertThat(mDefaultFocus2.isFocused()).isTrue();
     }
 
     @Test
-    public void testDefaultFocusOverridesHistory_notOverride() {
-        mFocusArea1.post(() -> {
+    public void testDefaultFocusOverridesHistory_notOverride() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mView2.post(() -> {
             RotaryCache cache =
                     new RotaryCache(CACHE_TYPE_NEVER_EXPIRE, 0, CACHE_TYPE_NEVER_EXPIRE, 0);
             mFocusArea2.setRotaryCache(cache);
-
             mView2.requestFocus();
-            assertThat(mView2.isFocused()).isTrue();
-            mView1.requestFocus();
-            assertThat(mView1.isFocused()).isTrue();
-
-            // The focused view should be the cached view rather than the default focus view.
-            mFocusArea2.performAccessibilityAction(ACTION_FOCUS, null);
-            assertThat(mView2.isFocused()).isTrue();
+            mView2.post(() -> latch1.countDown());
         });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView2.isFocused()).isTrue();
+
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mView1.post(() -> {
+            mView1.requestFocus();
+            mView1.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
+
+        CountDownLatch latch3 = new CountDownLatch(1);
+        mFocusArea2.post(() -> {
+            mFocusArea2.performAccessibilityAction(ACTION_FOCUS, null);
+            mFocusArea2.post(() -> latch3.countDown());
+        });
+        latch3.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        // The focused view should be the cached view rather than the default focus view.
+        assertThat(mView2.isFocused()).isTrue();
     }
 
     @Test
-    public void testClearFocusAreaHistoryWhenRotating_clear() {
-        mFocusArea1.post(() -> {
+    public void testClearFocusAreaHistoryWhenRotating_clear() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mView1.post(() -> {
             RotaryCache cache1 =
                     new RotaryCache(CACHE_TYPE_NEVER_EXPIRE, 0, CACHE_TYPE_NEVER_EXPIRE, 0);
             mFocusArea1.setRotaryCache(cache1);
@@ -437,29 +691,48 @@ public class FocusAreaTest {
                     new RotaryCache(CACHE_TYPE_NEVER_EXPIRE, 0, CACHE_TYPE_NEVER_EXPIRE, 0);
             mFocusArea2.setRotaryCache(cache2);
             mFocusArea2.setClearFocusAreaHistoryWhenRotating(true);
-
             mView1.requestFocus();
-            assertThat(mView1.isFocused()).isTrue();
+            mView1.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
 
+        CountDownLatch latch2 = new CountDownLatch(1);
+        Bundle arguments = new Bundle();
+        mFocusArea2.post(() -> {
             // Nudging down from mFocusArea1 to mFocusArea2.
-            Bundle arguments = new Bundle();
             arguments.putInt(NUDGE_DIRECTION, FOCUS_DOWN);
             mFocusArea2.performAccessibilityAction(ACTION_FOCUS, arguments);
-            assertThat(mDefaultFocus2.isFocused()).isTrue();
+            mFocusArea2.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mDefaultFocus2.isFocused()).isTrue();
+
+        CountDownLatch latch3 = new CountDownLatch(1);
+        mView2.post(() -> {
             // Rotate.
             mView2.requestFocus();
-            assertThat(mView2.isFocused()).isTrue();
-            // Since nudge history is cleared, nudging up should fail and the focus should stay
-            // the same.
+            mView2.post(() -> latch3.countDown());
+        });
+        latch3.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView2.isFocused()).isTrue();
+
+        CountDownLatch latch4 = new CountDownLatch(1);
+        mFocusArea2.post(() -> {
             arguments.putInt(NUDGE_DIRECTION, FOCUS_UP);
             mFocusArea2.performAccessibilityAction(ACTION_NUDGE_TO_ANOTHER_FOCUS_AREA, arguments);
-            assertThat(mView2.isFocused()).isTrue();
+            mFocusArea2.post(() -> latch4.countDown());
         });
+        latch4.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        // Since nudge history is cleared, nudging up should fail and the focus should stay
+        // the same.
+        assertThat(mView2.isFocused()).isTrue();
     }
 
     @Test
-    public void testClearFocusAreaHistoryWhenRotating_notClear() {
-        mFocusArea1.post(() -> {
+    public void testClearFocusAreaHistoryWhenRotating_notClear() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mView1.post(() -> {
             RotaryCache cache1 =
                     new RotaryCache(CACHE_TYPE_NEVER_EXPIRE, 0, CACHE_TYPE_NEVER_EXPIRE, 0);
             mFocusArea1.setRotaryCache(cache1);
@@ -468,23 +741,41 @@ public class FocusAreaTest {
                     new RotaryCache(CACHE_TYPE_NEVER_EXPIRE, 0, CACHE_TYPE_NEVER_EXPIRE, 0);
             mFocusArea2.setRotaryCache(cache2);
             mFocusArea2.setClearFocusAreaHistoryWhenRotating(false);
-
             mView1.requestFocus();
-            assertThat(mView1.isFocused()).isTrue();
+            mView1.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
 
+        CountDownLatch latch2 = new CountDownLatch(1);
+        Bundle arguments = new Bundle();
+        mFocusArea2.post(() -> {
             // Nudging down from mFocusArea1 to mFocusArea2.
-            Bundle arguments = new Bundle();
             arguments.putInt(NUDGE_DIRECTION, FOCUS_DOWN);
             mFocusArea2.performAccessibilityAction(ACTION_FOCUS, arguments);
-            assertThat(mDefaultFocus2.isFocused()).isTrue();
+            mFocusArea2.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mDefaultFocus2.isFocused()).isTrue();
+
+        CountDownLatch latch3 = new CountDownLatch(1);
+        mView2.post(() -> {
             // Rotate.
             mView2.requestFocus();
-            assertThat(mView2.isFocused()).isTrue();
+            mView2.post(() -> latch3.countDown());
+        });
+        latch3.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView2.isFocused()).isTrue();
+
+        CountDownLatch latch4 = new CountDownLatch(1);
+        mFocusArea2.post(() -> {
             // Nudging up should move focus to mFocusArea1 according to nudge history.
             arguments.putInt(NUDGE_DIRECTION, FOCUS_UP);
             mFocusArea2.performAccessibilityAction(ACTION_NUDGE_TO_ANOTHER_FOCUS_AREA, arguments);
-            assertThat(mView1.isFocused()).isTrue();
+            mFocusArea2.post(() -> latch4.countDown());
         });
+        latch4.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
     }
 
     @Test
@@ -503,21 +794,24 @@ public class FocusAreaTest {
     }
 
     @Test
-    public void testBoundsOffsetWithRtl() {
+    public void testBoundsOffsetWithRtl() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
         mFocusArea1.post(() -> {
             mFocusArea1.setLayoutDirection(LAYOUT_DIRECTION_RTL);
-            assertThat(mFocusArea1.getLayoutDirection()).isEqualTo(LAYOUT_DIRECTION_RTL);
-
-            // FocusArea highlight padding specified in layout file:
-            // 10dp(start), 20dp(end), 30dp(top), 40dp(bottom).
-            int left = dp2Px(20);
-            int right = dp2Px(10);
-            int top = dp2Px(30);
-            int bottom = dp2Px(40);
-            AccessibilityNodeInfo node = mFocusArea1.createAccessibilityNodeInfo();
-            assertBoundsOffset(node, left, top, right, bottom);
-            node.recycle();
+            mFocusArea1.post(() -> latch.countDown());
         });
+        latch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mFocusArea1.getLayoutDirection()).isEqualTo(LAYOUT_DIRECTION_RTL);
+
+        // FocusArea highlight padding specified in layout file:
+        // 10dp(start), 20dp(end), 30dp(top), 40dp(bottom).
+        int left = dp2Px(20);
+        int right = dp2Px(10);
+        int top = dp2Px(30);
+        int bottom = dp2Px(40);
+        AccessibilityNodeInfo node = mFocusArea1.createAccessibilityNodeInfo();
+        assertBoundsOffset(node, left, top, right, bottom);
+        node.recycle();
     }
 
     @Test
@@ -542,76 +836,111 @@ public class FocusAreaTest {
     }
 
     @Test
-    public void testBug170423337() {
-        mFocusArea1.post(() -> {
+    public void testBug170423337() throws Exception {
+        Bundle arguments = new Bundle();
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mFocusArea2.post(() -> {
             // Focus on app bar (assume mFocusArea1 is app bar).
             mView1.requestFocus();
 
             // Nudge down to browse list (assume mFocusArea2 is browse list).
-            Bundle arguments = new Bundle();
             arguments.putInt(NUDGE_DIRECTION, FOCUS_DOWN);
             mFocusArea2.performAccessibilityAction(ACTION_FOCUS, arguments);
-            assertThat(mDefaultFocus2.isFocused()).isTrue();
+            mFocusArea2.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mDefaultFocus2.isFocused()).isTrue();
 
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mFocusArea3.post(() -> {
             // Nudge down to playback control bar (assume mFocusArea3 is playback control bar).
             mFocusArea3.performAccessibilityAction(ACTION_FOCUS, arguments);
-            assertThat(mView3.isFocused()).isTrue();
+            mFocusArea3.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView3.isFocused()).isTrue();
 
+        CountDownLatch latch3 = new CountDownLatch(1);
+        mFocusArea3.post(() -> {
             // Nudge down to navigation bar (navigation bar is in system window without FocusAreas).
             mFpv.performAccessibilityAction(ACTION_FOCUS, null);
 
             // Nudge up to playback control bar.
             arguments.putInt(NUDGE_DIRECTION, FOCUS_UP);
             mFocusArea3.performAccessibilityAction(ACTION_FOCUS, arguments);
-            assertThat(mView3.isFocused()).isTrue();
+            mFocusArea3.post(() -> latch3.countDown());
+        });
+        latch3.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView3.isFocused()).isTrue();
 
+        CountDownLatch latch4 = new CountDownLatch(1);
+        mFocusArea3.post(() -> {
             // Nudge up to browse list.
             arguments.putInt(NUDGE_DIRECTION, FOCUS_UP);
             mFocusArea3.performAccessibilityAction(ACTION_NUDGE_TO_ANOTHER_FOCUS_AREA, arguments);
-            assertThat(mDefaultFocus2.isFocused()).isTrue();
+            mFocusArea3.post(() -> latch4.countDown());
+        });
+        latch4.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mDefaultFocus2.isFocused()).isTrue();
 
+        CountDownLatch latch5 = new CountDownLatch(1);
+        mFocusArea2.post(() -> {
             // Nudge up, and it should focus on app bar.
             mFocusArea2.performAccessibilityAction(ACTION_NUDGE_TO_ANOTHER_FOCUS_AREA, arguments);
-            assertThat(mView1.isFocused()).isTrue();
+            mFocusArea2.post(() -> latch5.countDown());
         });
+        latch5.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
     }
 
     @Test
-    public void testWrapAround() {
-        mFocusArea1.post(() -> {
+    public void testWrapAround() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mView5.post(() -> {
             mView5.requestFocus();
-            assertThat(mView5.isFocused()).isTrue();
-
-            View focusSearch = mView5.focusSearch(View.FOCUS_FORWARD);
-
-            assertWithMessage("Forward wrap-around").that(focusSearch).isEqualTo(mButton5);
-
-            mButton5.requestFocus();
-            assertThat(mButton5.isFocused()).isTrue();
-
-            focusSearch = mButton5.focusSearch(View.FOCUS_BACKWARD);
-
-            assertWithMessage("Backward wrap-around").that(focusSearch).isEqualTo(mView5);
+            mView5.post(() -> latch1.countDown());
         });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView5.isFocused()).isTrue();
+
+        View focusSearch = mView5.focusSearch(View.FOCUS_FORWARD);
+        assertWithMessage("Forward wrap-around").that(focusSearch).isEqualTo(mButton5);
+
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mButton5.post(() -> {
+            mButton5.requestFocus();
+            mButton5.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mButton5.isFocused()).isTrue();
+
+        focusSearch = mButton5.focusSearch(View.FOCUS_BACKWARD);
+        assertWithMessage("Backward wrap-around").that(focusSearch).isEqualTo(mView5);
     }
 
     @Test
-    public void testNoWrapAround() {
-        mFocusArea1.post(() -> {
+    public void testNoWrapAround() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mButton1.post(() -> {
             mButton1.requestFocus();
-            assertThat(mButton1.isFocused()).isTrue();
-
-            View focusSearch = mButton1.focusSearch(View.FOCUS_FORWARD);
-
-            assertWithMessage("Forward wrap-around").that(focusSearch).isNotEqualTo(mView1);
-
-            mView1.requestFocus();
-            assertThat(mView1.isFocused()).isTrue();
-
-            focusSearch = mView1.focusSearch(View.FOCUS_BACKWARD);
-
-            assertWithMessage("Backward wrap-around").that(focusSearch).isNotEqualTo(mButton1);
+            mButton1.post(() -> latch1.countDown());
         });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mButton1.isFocused()).isTrue();
+
+        View focusSearch = mButton1.focusSearch(View.FOCUS_FORWARD);
+        assertWithMessage("Forward wrap-around").that(focusSearch).isNotEqualTo(mView1);
+
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mView1.post(() -> {
+            mView1.requestFocus();
+            mView1.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
+
+        focusSearch = mView1.focusSearch(View.FOCUS_BACKWARD);
+        assertWithMessage("Backward wrap-around").that(focusSearch).isNotEqualTo(mButton1);
     }
 
     private void assertBoundsOffset(
