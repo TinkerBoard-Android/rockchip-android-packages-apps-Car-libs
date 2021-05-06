@@ -51,6 +51,11 @@ public class FocusAreaAdapterV1 implements FocusAreaOEMV1 {
     }
 
     @Override
+    public void setNudgeShortcut(int direction, View view) {
+        mFocusArea.setNudgeShortcut(direction, view);
+    }
+
+    @Override
     public LinearLayout getView() {
         return mFocusArea;
     }
