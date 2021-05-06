@@ -36,6 +36,8 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.view.FocusFinder;
 import android.view.KeyEvent;
 import android.view.View;
@@ -53,9 +55,7 @@ import com.android.car.ui.utils.ViewUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * A {@link LinearLayout} used as a navigation block for the rotary controller.
@@ -144,23 +144,24 @@ public class FocusArea extends LinearLayout {
      */
     private boolean mDefaultFocusOverridesHistory;
 
-    /** The ID of the view specified in {@code app:nudgeShortcut}. */
-    private int mNudgeShortcutId;
-    /** The view specified in {@code app:nudgeShortcut}. */
-    @Nullable
-    private View mNudgeShortcutView;
+    /**
+     * Map from direction to nudge shortcut IDs specified in {@code app:nudgeLeftShortcut},
+     * {@code app:nudgRightShortcut}, {@code app:nudgeUpShortcut}, and {@code app
+     * :nudgeDownShortcut}.
+     */
+    private final SparseIntArray mSpecifiedNudgeShortcutIdMap = new SparseIntArray();
 
-    /** The direction specified in {@code app:nudgeShortcutDirection}. */
-    private int mNudgeShortcutDirection;
+    /** Map from direction to specified nudge shortcut views. */
+    private SparseArray<View> mSpecifiedNudgeShortcutMap;
 
     /**
-     * Map of nudge target FocusArea IDs specified in {@code app:nudgeLeft}, {@code app:nudgRight},
-     * {@code app:nudgeUp}, or {@code app:nudgeDown}.
+     * Map from direction to nudge target FocusArea IDs specified in {@code app:nudgeLeft},
+     * {@code app:nudgRight}, {@code app:nudgeUp}, or {@code app:nudgeDown}.
      */
-    private final Map<Integer, Integer> mSpecifiedNudgeIdMap = new HashMap<>();
+    private final SparseIntArray mSpecifiedNudgeIdMap = new SparseIntArray();
 
-    /** Map of specified nudge target FocusAreas. */
-    private Map<Integer, FocusArea> mSpecifiedNudgeFocusAreaMap;
+    /** Map from direction to specified nudge target FocusAreas. */
+    private SparseArray<FocusArea> mSpecifiedNudgeFocusAreaMap;
 
     /** Whether wrap-around is enabled. */
     private boolean mWrapAround;
@@ -412,14 +413,42 @@ public class FocusArea extends LinearLayout {
                         R.styleable.FocusArea_verticalBoundOffset, mPaddingBottom);
             }
 
-            mNudgeShortcutId = a.getResourceId(R.styleable.FocusArea_nudgeShortcut, View.NO_ID);
-            mNudgeShortcutDirection = a.getInt(
+            // Handle new nudge shortcut attributes.
+            if (a.hasValue(R.styleable.FocusArea_nudgeLeftShortcut)) {
+                mSpecifiedNudgeShortcutIdMap.put(FOCUS_LEFT,
+                        a.getResourceId(R.styleable.FocusArea_nudgeLeftShortcut, View.NO_ID));
+            }
+            if (a.hasValue(R.styleable.FocusArea_nudgeRightShortcut)) {
+                mSpecifiedNudgeShortcutIdMap.put(FOCUS_RIGHT,
+                        a.getResourceId(R.styleable.FocusArea_nudgeRightShortcut, View.NO_ID));
+            }
+            if (a.hasValue(R.styleable.FocusArea_nudgeUpShortcut)) {
+                mSpecifiedNudgeShortcutIdMap.put(FOCUS_UP,
+                        a.getResourceId(R.styleable.FocusArea_nudgeUpShortcut, View.NO_ID));
+            }
+            if (a.hasValue(R.styleable.FocusArea_nudgeDownShortcut)) {
+                mSpecifiedNudgeShortcutIdMap.put(FOCUS_DOWN,
+                        a.getResourceId(R.styleable.FocusArea_nudgeDownShortcut, View.NO_ID));
+            }
+
+            // Handle legacy nudge shortcut attributes.
+            int nudgeShortcutId = a.getResourceId(R.styleable.FocusArea_nudgeShortcut, View.NO_ID);
+            int nudgeShortcutDirection = a.getInt(
                     R.styleable.FocusArea_nudgeShortcutDirection, INVALID_DIRECTION);
-            if ((mNudgeShortcutId == View.NO_ID) ^ (mNudgeShortcutDirection == INVALID_DIRECTION)) {
+            if ((nudgeShortcutId == View.NO_ID) ^ (nudgeShortcutDirection == INVALID_DIRECTION)) {
                 throw new IllegalStateException("nudgeShortcut and nudgeShortcutDirection must "
                         + "be specified together");
             }
+            if (nudgeShortcutId != View.NO_ID) {
+                if (mSpecifiedNudgeShortcutIdMap.size() > 0) {
+                    throw new IllegalStateException(
+                            "Don't use nudgeShortcut/nudgeShortcutDirection and nudge*Shortcut in "
+                                    + "the same FocusArea. Use nudge*Shortcut only.");
+                }
+                mSpecifiedNudgeShortcutIdMap.put(nudgeShortcutDirection, nudgeShortcutId);
+            }
 
+            // Handle nudge targets.
             if (a.hasValue(R.styleable.FocusArea_nudgeLeft)) {
                 mSpecifiedNudgeIdMap.put(FOCUS_LEFT,
                         a.getResourceId(R.styleable.FocusArea_nudgeLeft, View.NO_ID));
@@ -451,9 +480,6 @@ public class FocusArea extends LinearLayout {
         super.onFinishInflate();
         if (mDefaultFocusId != View.NO_ID) {
             mDefaultFocusView = CarUiUtils.requireViewByRefId(this, mDefaultFocusId);
-        }
-        if (mNudgeShortcutId != View.NO_ID) {
-            mNudgeShortcutView = CarUiUtils.requireViewByRefId(this, mNudgeShortcutId);
         }
     }
 
@@ -558,22 +584,18 @@ public class FocusArea extends LinearLayout {
     }
 
     private boolean nudgeToShortcutView(Bundle arguments) {
-        if (mNudgeShortcutDirection == INVALID_DIRECTION) {
-            // No nudge shortcut configured for this FocusArea.
+        int direction = getNudgeDirection(arguments);
+        View targetView = getSpecifiedShortcut(direction);
+        if (targetView == null) {
+            // No nudge shortcut configured for the given direction.
             return false;
         }
-        if (arguments == null
-                || arguments.getInt(NUDGE_DIRECTION, INVALID_DIRECTION)
-                    != mNudgeShortcutDirection) {
-            // The user is not nudging in the nudge shortcut direction.
-            return false;
-        }
-        if (mNudgeShortcutView.isFocused()) {
+        if (targetView.isFocused()) {
             // The nudge shortcut view is already focused; return false so that the user can
             // nudge to another FocusArea.
             return false;
         }
-        return ViewUtils.requestFocus(mNudgeShortcutView);
+        return ViewUtils.requestFocus(targetView);
     }
 
     private boolean nudgeToAnotherFocusArea(Bundle arguments) {
@@ -631,6 +653,12 @@ public class FocusArea extends LinearLayout {
     private FocusArea getSpecifiedFocusArea(int direction) {
         maybeInitializeSpecifiedFocusAreas();
         return mSpecifiedNudgeFocusAreaMap.get(direction);
+    }
+
+    @Nullable
+    private View getSpecifiedShortcut(int direction) {
+        maybeInitializeSpecifiedShortcuts();
+        return mSpecifiedNudgeShortcutMap.get(direction);
     }
 
     @Override
@@ -698,10 +726,22 @@ public class FocusArea extends LinearLayout {
             return;
         }
         View root = getRootView();
-        mSpecifiedNudgeFocusAreaMap = new HashMap<>();
-        for (Integer direction : NUDGE_DIRECTIONS) {
-            int id = mSpecifiedNudgeIdMap.getOrDefault(direction, View.NO_ID);
+        mSpecifiedNudgeFocusAreaMap = new SparseArray<>();
+        for (int direction : NUDGE_DIRECTIONS) {
+            int id = mSpecifiedNudgeIdMap.get(direction, View.NO_ID);
             mSpecifiedNudgeFocusAreaMap.put(direction, root.findViewById(id));
+        }
+    }
+
+    private void maybeInitializeSpecifiedShortcuts() {
+        if (mSpecifiedNudgeShortcutMap != null) {
+            return;
+        }
+        View root = getRootView();
+        mSpecifiedNudgeShortcutMap = new SparseArray<>();
+        for (int direction : NUDGE_DIRECTIONS) {
+            int id = mSpecifiedNudgeShortcutIdMap.get(direction, View.NO_ID);
+            mSpecifiedNudgeShortcutMap.put(direction, root.findViewById(id));
         }
     }
 
@@ -744,6 +784,23 @@ public class FocusArea extends LinearLayout {
     /** Sets the default focus view in this FocusArea. */
     public void setDefaultFocus(@NonNull View defaultFocus) {
         mDefaultFocusView = defaultFocus;
+    }
+
+    /**
+     * Sets the nudge shortcut for the given {@code direction}. Removes the nudge shortcut if {@code
+     * view} is {@code null}.
+     */
+    public void setNudgeShortcut(int direction, @Nullable View view) {
+        if (!NUDGE_DIRECTIONS.contains(direction)) {
+            throw new IllegalArgumentException("direction must be "
+                    + "FOCUS_UP, FOCUS_DOWN, FOCUS_LEFT, or FOCUS_RIGHT.");
+        }
+        maybeInitializeSpecifiedShortcuts();
+        if (view == null) {
+            mSpecifiedNudgeShortcutMap.remove(direction);
+        } else {
+            mSpecifiedNudgeShortcutMap.put(direction, view);
+        }
     }
 
     /**

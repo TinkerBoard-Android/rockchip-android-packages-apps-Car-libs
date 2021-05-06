@@ -54,6 +54,12 @@ public interface FocusAreaOEMV1 {
     void setDefaultFocus(View defaultFocus);
 
     /**
+     * Sets the nudge shortcut for the given {@code direction}. Removes the nudge shortcut if {@code
+     * view} is {@code null}.
+     */
+    void setNudgeShortcut(int direction, View view);
+
+    /**
      * Gets the underlying view that this object represents. This is just for adding the view
      * to the rest of the view hierarchy; no methods that change the appearance/behavior of the
      * view should be called on it.
