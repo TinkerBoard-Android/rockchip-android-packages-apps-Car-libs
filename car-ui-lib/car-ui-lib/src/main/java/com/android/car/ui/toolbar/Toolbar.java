@@ -53,6 +53,7 @@ import java.util.function.Supplier;
  * via {@link com.android.car.ui.core.CarUi#requireToolbar(android.app.Activity)}
  */
 @Deprecated
+@SuppressWarnings("AndroidJdkLibsChecker")
 public final class Toolbar extends FrameLayout implements ToolbarController {
 
     /** Callback that will be issued whenever the height of toolbar is changed. */

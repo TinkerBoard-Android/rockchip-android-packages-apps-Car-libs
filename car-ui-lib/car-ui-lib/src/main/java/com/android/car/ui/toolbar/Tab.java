@@ -27,6 +27,7 @@ import java.util.function.Consumer;
  * This is a data class the represents a tab in the toolbar. They can be added to the
  * toolbar via {@link ToolbarController#setTabs(List)}.
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public final class Tab {
     @Nullable
     private final String mText;
