@@ -91,6 +91,11 @@ public final class CarUiTextViewImpl extends CarUiTextView {
 
     private void updateText() {
         requireNonNull(mText);
+        if (getLayout() == null) {
+            mOneShotPreDrawListener = OneShotPreDrawListener.add(this, this::updateText);
+            return;
+        }
+
         mOneShotPreDrawListener = null;
 
         // If all lines of text have no limits, the preferred text set at invocation of
