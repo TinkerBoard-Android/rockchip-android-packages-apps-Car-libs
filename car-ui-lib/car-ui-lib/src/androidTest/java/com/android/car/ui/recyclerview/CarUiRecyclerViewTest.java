@@ -64,6 +64,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static java.lang.Math.max;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -1091,13 +1093,20 @@ public class CarUiRecyclerViewTest {
     public void testScrollbarVisibility_enoughToShowEverything() {
         doReturn(true).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
 
-        // R.dimen.car_ui_touch_target_size
-        float minTouchSize = mTestableResources.getDimension(R.dimen.car_ui_touch_target_size);
+        int minTouchSize = (int) mTestableResources.getDimension(R.dimen.car_ui_touch_target_size);
+        int mScrollbarThumbMinHeight = (int) mTestableResources
+                .getDimension(R.dimen.car_ui_scrollbar_min_thumb_height);
         // This value is hardcoded to 15dp in the layout.
         int margin = (int) dpToPixel(mTestableContext, 15)
                 + (int) mTestableResources.getDimension(R.dimen.car_ui_scrollbar_separator_margin);
-        // Set to anything greater or equal to 3 * minTouchSize + 2 * margin
-        int recyclerviewHeight = 3 * (int) minTouchSize + 2 * (int) margin;
+        int trackMargin = 2 * (int) mTestableResources
+                .getDimension(R.dimen.car_ui_scrollbar_separator_margin);
+        // Set to anything greater or equal to
+        // 2 * minTouchSize + max(minTouchSize, mScrollbarThumbMinHeight) + 2 * margin
+        int recyclerviewHeight =
+                2 *  minTouchSize
+                + max(minTouchSize, mScrollbarThumbMinHeight)
+                + 2 * margin + trackMargin;
 
         CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
 
