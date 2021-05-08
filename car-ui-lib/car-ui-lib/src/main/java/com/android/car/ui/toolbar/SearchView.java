@@ -79,6 +79,7 @@ import java.util.function.Consumer;
 /**
  * A search view used by {@link Toolbar}.
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public class SearchView extends ConstraintLayout {
 
     private final InputMethodManager mInputMethodManager;

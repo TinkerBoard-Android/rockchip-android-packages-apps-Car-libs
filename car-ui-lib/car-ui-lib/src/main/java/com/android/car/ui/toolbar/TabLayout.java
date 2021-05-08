@@ -54,6 +54,7 @@ import java.util.function.Consumer;
  *
  * <p>Touch feedback is using @android:attr/selectableItemBackground.
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public class TabLayout extends LinearLayout {
     @LayoutRes
     private final int mTabLayoutRes;

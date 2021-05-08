@@ -26,6 +26,7 @@ import java.util.function.Consumer;
 /**
  * Do not use, this class is only public so that it can be accessed from a different classloader.
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public class DeprecatedTabWrapper {
     private final TabLayout.Tab mTab;
     private final Consumer<Tab> mOnSelectedListener;

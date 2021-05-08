@@ -22,6 +22,7 @@ import static java.lang.Math.min;
 
 import android.content.res.Resources;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,7 +61,7 @@ class DefaultScrollBar implements ScrollBar {
 
     private final Interpolator mPaginationInterpolator = new AccelerateDecelerateInterpolator();
 
-    private final Handler mHandler = new Handler();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
 
     private OrientationHelper mOrientationHelper;
 
@@ -76,8 +77,8 @@ class DefaultScrollBar implements ScrollBar {
         Resources res = rv.getContext().getResources();
 
         mButtonDisabledAlpha = CarUiUtils.getFloat(res, R.dimen.car_ui_button_disabled_alpha);
-        mScrollbarThumbMinHeight = rv.getContext().getResources()
-                .getDimensionPixelSize(R.dimen.car_ui_scrollbar_min_thumb_height);
+        mScrollbarThumbMinHeight = (int) rv.getContext().getResources()
+                .getDimension(R.dimen.car_ui_scrollbar_min_thumb_height);
 
         getRecyclerView().addOnScrollListener(mRecyclerViewOnScrollListener);
         getRecyclerView().getRecycledViewPool().setMaxRecycledViews(0, 12);
@@ -531,6 +532,9 @@ class DefaultScrollBar implements ScrollBar {
                         + max(touchTargetSize, mScrollbarThumbMinHeight) + margin) {
                     mScrollTrack.setVisibility(View.INVISIBLE);
                     mScrollThumb.setVisibility(View.INVISIBLE);
+                } else {
+                    mScrollTrack.setVisibility(View.VISIBLE);
+                    mScrollThumb.setVisibility(View.VISIBLE);
                 }
                 mScrollView.setVisibility(View.VISIBLE);
             }

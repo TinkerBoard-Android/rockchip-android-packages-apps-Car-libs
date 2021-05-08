@@ -16,6 +16,8 @@
 
 package com.android.car.ui.preference;
 
+import static com.android.car.ui.utils.CarUiUtils.getAttr;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -23,7 +25,6 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
@@ -57,7 +58,7 @@ public class CarUiEditTextPreference extends EditTextPreference
     }
 
     public CarUiEditTextPreference(Context context, AttributeSet attrs) {
-        this(context, attrs, TypedArrayUtils.getAttr(context, R.attr.editTextPreferenceStyle,
+        this(context, attrs, getAttr(context, R.attr.editTextPreferenceStyle,
                 android.R.attr.editTextPreferenceStyle));
     }
 

@@ -37,6 +37,7 @@ import java.util.function.Supplier;
  * An interface for accessing a Chassis Toolbar, regardless of how the underlying
  * views are represented.
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public interface ToolbarController {
 
     /**
