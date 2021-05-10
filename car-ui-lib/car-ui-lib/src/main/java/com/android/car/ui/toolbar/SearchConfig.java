@@ -19,7 +19,6 @@ package com.android.car.ui.toolbar;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
@@ -34,29 +33,34 @@ import java.util.List;
  */
 public final class SearchConfig {
 
+    @Nullable
     private final View mSearchResultsView;
+    @Nullable
     private final Drawable mSearchResultsInputViewIcon;
+    @Nullable
     private final List<? extends CarUiImeSearchListItem> mSearchResultItems;
-
 
     /**
      * Returns the view set by {@link SearchConfigBuilder#setSearchResultsView(View)}
      */
-    View getSearchResultsView() {
+    @Nullable
+    public View getSearchResultsView() {
         return mSearchResultsView;
     }
 
     /**
-     * Returns the icon set by {@link #getSearchResultsInputViewIcon()} )}
+     * Returns the icon set by {@link SearchConfigBuilder#setSearchResultsInputViewIcon} )}
      */
-    Drawable getSearchResultsInputViewIcon() {
+    @Nullable
+    public Drawable getSearchResultsInputViewIcon() {
         return mSearchResultsInputViewIcon;
     }
 
     /**
      * Returns the search results set by {@link SearchConfigBuilder#setSearchResultItems(List)}
      */
-    List<? extends CarUiImeSearchListItem> getSearchResultItems() {
+    @Nullable
+    public List<? extends CarUiImeSearchListItem> getSearchResultItems() {
         return mSearchResultItems;
     }
 
@@ -78,8 +82,11 @@ public final class SearchConfig {
      */
     public static final class SearchConfigBuilder {
 
+        @Nullable
         private View mSearchResultsView;
+        @Nullable
         private Drawable mSearchResultsInputViewIcon;
+        @Nullable
         private List<? extends CarUiImeSearchListItem> mSearchResultItems;
 
         private SearchConfigBuilder() {
@@ -89,7 +96,7 @@ public final class SearchConfig {
         /**
          * Set the icon to be displayed within the input field of IME window.
          */
-        public SearchConfigBuilder setSearchResultsInputViewIcon(@NonNull Drawable drawable) {
+        public SearchConfigBuilder setSearchResultsInputViewIcon(@Nullable Drawable drawable) {
             mSearchResultsInputViewIcon = drawable;
             return this;
         }
@@ -103,7 +110,11 @@ public final class SearchConfig {
          */
         public SearchConfigBuilder setSearchResultItems(
                 @Nullable List<? extends CarUiImeSearchListItem> searchItems) {
-            mSearchResultItems = Collections.unmodifiableList(new ArrayList(searchItems));
+            if (searchItems == null || searchItems.size() == 0) {
+                mSearchResultItems = null;
+            } else {
+                mSearchResultItems = Collections.unmodifiableList(new ArrayList<>(searchItems));
+            }
             return this;
         }
 
@@ -128,7 +139,7 @@ public final class SearchConfig {
         public SearchConfig build() {
             if (mSearchResultsView != null && mSearchResultItems != null) {
                 throw new RuntimeException(
-                        "both searchResultItems and searchResultsView can't be set at the same "
+                        "Both searchResultItems and searchResultsView can't be set at the same "
                                 + "time");
             }
             return new SearchConfig(this);

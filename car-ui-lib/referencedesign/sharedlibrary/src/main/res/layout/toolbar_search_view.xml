@@ -9,7 +9,7 @@
     app:layout_constraintStart_toEndOf="@+id/toolbar_nav_icon_container"
     app:layout_constraintTop_toTopOf="parent">
 
-  <EditText
+  <com.google.car.ui.sharedlibrary.toolbar.OnPrivateImeCommandEditText
       android:id="@+id/toolbar_search_bar"
       android:layout_height="match_parent"
       android:layout_width="match_parent"

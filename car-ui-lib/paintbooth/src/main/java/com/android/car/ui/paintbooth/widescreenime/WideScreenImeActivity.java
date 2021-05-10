@@ -28,6 +28,7 @@ import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
@@ -38,6 +39,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.FocusArea;
@@ -51,7 +53,6 @@ import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.MenuItem;
 import com.android.car.ui.toolbar.NavButtonMode;
 import com.android.car.ui.toolbar.SearchConfig;
-import com.android.car.ui.toolbar.SearchConfig.SearchConfigBuilder;
 import com.android.car.ui.toolbar.SearchMode;
 import com.android.car.ui.toolbar.ToolbarController;
 
@@ -62,8 +63,7 @@ import java.util.List;
  * Activity that shows different scenarios for wide screen ime.
  */
 public class WideScreenImeActivity extends AppCompatActivity implements InsetsChangedListener {
-
-    private static final String TAG = "WideScreenImeActivity";
+    private static final String TAG = "PaintBooth";
 
     private final List<MenuItem> mMenuItems = new ArrayList<>();
     private final List<ListElement> mWidescreenItems = new ArrayList<>();
@@ -94,14 +94,19 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
                     return false;
                 });
 
-        CarUiContentListItem.OnClickListener mainClickListener = i ->
-                Toast.makeText(this, "Item clicked! " + (i.getTitle() != null
-                                ? i.getTitle().getPreferredText() : null),
-                        Toast.LENGTH_SHORT).show();
-        CarUiContentListItem.OnClickListener secondaryClickListener = i ->
-                Toast.makeText(this, "Item's secondary action clicked!", Toast.LENGTH_SHORT).show();
+        CarUiContentListItem.OnClickListener mainClickListener = i -> {
+            CharSequence title = i.getTitle() != null
+                    ? i.getTitle().getPreferredText()
+                    : null;
+            Toast.makeText(this, "Item clicked! " + title, Toast.LENGTH_SHORT).show();
+            Log.i(TAG, "Item clicked! " + title);
+        };
+        CarUiContentListItem.OnClickListener secondaryClickListener = i -> {
+            Toast.makeText(this, "Item's secondary action clicked!", Toast.LENGTH_SHORT).show();
+            Log.i(TAG, "Item's secondary action clicked!");
+        };
 
-        Drawable icon = getDrawable(R.drawable.ic_launcher);
+        Drawable icon = ContextCompat.getDrawable(this, R.drawable.ic_launcher);
 
         for (int i = 1; i <= 100; i++) {
             CarUiImeSearchListItem item = new CarUiImeSearchListItem(
@@ -121,11 +126,11 @@ public class WideScreenImeActivity extends AppCompatActivity implements InsetsCh
                     isSearching[0] = true;
                     toolbar.setSearchMode(SearchMode.SEARCH);
                     if (toolbar.getSearchCapabilities().canShowSearchResultItems()) {
-                        SearchConfigBuilder builder = SearchConfig.builder()
+                        toolbar.setSearchConfig(SearchConfig.builder()
                                 .setSearchResultItems(mSearchItems)
-                                .setSearchResultsInputViewIcon(
-                                        getDrawable(R.drawable.car_ui_icon_search));
-                        toolbar.setSearchConfig(builder.build());
+                                .setSearchResultsInputViewIcon(ContextCompat.getDrawable(
+                                        this, R.drawable.car_ui_icon_search))
+                                .build());
                     }
                 })
                 .build());

@@ -16,9 +16,6 @@
 
 package com.android.car.ui.imewidescreen;
 
-import static com.android.car.ui.core.SearchResultsProvider.CONTENT;
-import static com.android.car.ui.core.SearchResultsProvider.SEARCH_RESULTS_PROVIDER;
-
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -440,8 +437,8 @@ public class CarUiImeWideScreenController {
             Log.w(TAG, "Result can't be loaded, input InputEditorInfo not available ");
             return;
         }
-        String url = CONTENT + getPackageName(mInputEditorInfo) + SEARCH_RESULTS_PROVIDER;
-        Uri contentUrl = Uri.parse(url);
+        Uri contentUrl = Uri.parse(SearchResultsProvider.getAuthority(
+                getPackageName(mInputEditorInfo)));
         ContentResolver cr = mContext.getContentResolver();
         try (Cursor c = cr.query(contentUrl, null, null, null, null)) {
             mAutomotiveSearchItems = new ArrayList<>();
@@ -450,9 +447,7 @@ public class CarUiImeWideScreenController {
                     CarUiContentListItem searchItem = new CarUiContentListItem(
                             CarUiContentListItem.Action.ICON);
                     String itemId = c.getString(c.getColumnIndex(SearchResultsProvider.ITEM_ID));
-                    searchItem.setOnItemClickedListener(v -> {
-                        onItemClicked(itemId);
-                    });
+                    searchItem.setOnItemClickedListener(v -> onItemClicked(itemId));
                     searchItem.setTitle(c.getString(
                             c.getColumnIndex(SearchResultsProvider.TITLE)));
                     searchItem.setBody(c.getString(
