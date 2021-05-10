@@ -33,7 +33,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
-import com.android.car.ui.sharedlibrary.oemapis.toolbar.SearchCapabilitiesOEMV1;
+import com.android.car.ui.sharedlibrary.oemapis.toolbar.ImeSearchInterfaceOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
 import com.android.car.ui.toolbar.Toolbar.OnBackListener;
 import com.android.car.ui.toolbar.Toolbar.OnSearchCompletedListener;
@@ -74,9 +74,11 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     private final Set<Runnable> mSearchCompletedListeners = new HashSet<>();
     private final ProgressBarControllerAdapterV1 mProgressBar;
     private String mSearchHint;
-    private SearchConfig.SearchConfigBuilder mSearchConfigBuilder;
+    private final SearchConfig.SearchConfigBuilder mSearchConfigBuilder;
     private List<MenuItem> mClientMenuItems = Collections.emptyList();
     private final List<DeprecatedTabWrapper> mDeprecatedTabs = new ArrayList<>();
+    private final SearchWidescreenController mSearchWidescreenController;
+    private final boolean mSupportsImeSearch;
 
     public ToolbarControllerAdapterV1(
             @NonNull Context context,
@@ -86,6 +88,15 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
         mContext = context;
         mSearchConfigBuilder = SearchConfig.builder();
         Activity activity = CarUiUtils.getActivity(mContext);
+
+        mSearchWidescreenController = new SearchWidescreenController(context);
+        ImeSearchInterfaceOEMV1 imeSearchInterface = mOemToolbar.getImeSearchInterface();
+        mSupportsImeSearch = imeSearchInterface != null;
+        if (imeSearchInterface != null) {
+            imeSearchInterface.setOnPrivateImeCommandListener(
+                    mSearchWidescreenController.getOnPrivateImeCommandListener());
+            imeSearchInterface.setSearchTextViewConsumer(mSearchWidescreenController::setTextView);
+        }
 
         oemToolbar.setBackListener(() -> {
             boolean handled = false;
@@ -498,18 +509,16 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
     @Override
     public void setSearchConfig(SearchConfig searchConfig) {
-        mOemToolbar.setSearchConfig(new SearchConfigAdapterV1(searchConfig));
+        mSearchWidescreenController.setSearchConfig(searchConfig);
     }
 
     @Override
     public SearchCapabilities getSearchCapabilities() {
-        SearchCapabilitiesOEMV1 searchCapabilitiesOEMV1 = mOemToolbar.getSearchCapabilities();
-        return SearchCapabilities.builder()
-                .setCanShowSearchResultItems(searchCapabilitiesOEMV1 != null
-                        && searchCapabilitiesOEMV1.canShowSearchResultItems())
-                .setCanShowSearchResultsView(searchCapabilitiesOEMV1 != null
-                        && searchCapabilitiesOEMV1.canShowSearchResultsView())
-                .build();
+        if (!mSupportsImeSearch) {
+            return SearchCapabilities.builder().build();
+        } else {
+            return mSearchWidescreenController.getSearchCapabilities();
+        }
     }
 
     @Override

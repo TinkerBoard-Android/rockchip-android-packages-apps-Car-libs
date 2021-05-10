@@ -18,6 +18,7 @@ package com.google.car.ui.sharedlibrary.toolbar;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -26,8 +27,8 @@ import android.view.View;
 import android.view.ViewStub;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -39,6 +40,7 @@ import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
 import com.google.car.ui.sharedlibrary.R;
 
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 class SearchController {
@@ -50,7 +52,7 @@ class SearchController {
     private final ViewStub mStub;
     private View mInflatedView;
     private ImageView mSearchIconView;
-    private EditText mEditText;
+    private OnPrivateImeCommandEditText mEditText;
     private View mCloseIcon;
 
     private int mStartPaddingWithoutIcon;
@@ -66,6 +68,11 @@ class SearchController {
     private Consumer<String> mSearchListener = null;
     @Nullable
     private Runnable mSearchCompletedListener = null;
+
+    @Nullable
+    private Consumer<TextView> mSearchTextViewConsumer;
+    @Nullable
+    private BiConsumer<String, Bundle> mOnPrivateImeCommandListener;
 
     private final TextWatcher mTextWatcher = new TextWatcher() {
         @Override
@@ -90,12 +97,31 @@ class SearchController {
         mSearchHint = mStub.getContext().getString(R.string.toolbar_default_search_hint);
     }
 
+    public void setSearchTextViewConsumer(@Nullable Consumer<TextView> textViewConsumer) {
+        mSearchTextViewConsumer = textViewConsumer;
+        if (mEditText != null && textViewConsumer != null) {
+            mSearchTextViewConsumer.accept(mEditText);
+        }
+    }
+
+    public void setOnPrivateImeCommandListener(
+            @Nullable BiConsumer<String, Bundle> onPrivateImeCommandListener) {
+        mOnPrivateImeCommandListener = onPrivateImeCommandListener;
+        if (mEditText != null) {
+            mEditText.setOnPrivateImeCommandListener(mOnPrivateImeCommandListener);
+        }
+    }
+
     public void setSearchMode(int searchMode) {
         if (searchMode != ToolbarControllerOEMV1.SEARCH_MODE_DISABLED && mInflatedView == null) {
             mInflatedView = mStub.inflate();
             mSearchIconView = mInflatedView.requireViewById(R.id.toolbar_search_icon);
             mEditText = mInflatedView.requireViewById(R.id.toolbar_search_bar);
             mCloseIcon = mInflatedView.requireViewById(R.id.toolbar_search_close);
+            if (mSearchTextViewConsumer != null) {
+                mSearchTextViewConsumer.accept(mEditText);
+            }
+            mEditText.setOnPrivateImeCommandListener(mOnPrivateImeCommandListener);
 
             mInflatedView.setVisibility(View.GONE); // So our later check if it's showing will pass
             mSearchIconView.setImageDrawable(mSearchIcon);
