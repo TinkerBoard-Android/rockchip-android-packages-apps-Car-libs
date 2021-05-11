@@ -84,6 +84,25 @@ public class FocusParkingViewTest {
     @Test
     public void testRequestFocus_focusOnDefaultFocus() throws Exception {
         CountDownLatch latch1 = new CountDownLatch(1);
+        mFpv.post(() -> {
+            mFpv.performAccessibilityAction(ACTION_FOCUS, null);
+            mFpv.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mFpv.isFocused()).isTrue();
+
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mFpv.post(() -> {
+            mFpv.requestFocus();
+            mFpv.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mFocusedByDefault.isFocused()).isTrue();
+    }
+
+    @Test
+    public void testRequestFocus_doNothing() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
         mView1.post(() -> {
             mView1.requestFocus();
             mView1.post(() -> latch1.countDown());
@@ -97,11 +116,30 @@ public class FocusParkingViewTest {
             mFpv.post(() -> latch2.countDown());
         });
         latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
-        assertThat(mFocusedByDefault.isFocused()).isTrue();
+        assertThat(mView1.isFocused()).isTrue();
     }
 
     @Test
     public void testRestoreDefaultFocus_focusOnDefaultFocus() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mFpv.post(() -> {
+            mFpv.performAccessibilityAction(ACTION_FOCUS, null);
+            mFpv.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mFpv.isFocused()).isTrue();
+
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mFpv.post(() -> {
+            mFpv.restoreDefaultFocus();
+            mFpv.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mFocusedByDefault.isFocused()).isTrue();
+    }
+
+    @Test
+    public void testRestoreDefaultFocus_doNothing() throws Exception {
         CountDownLatch latch1 = new CountDownLatch(1);
         mView1.post(() -> {
             mView1.requestFocus();
@@ -116,7 +154,7 @@ public class FocusParkingViewTest {
             mFpv.post(() -> latch2.countDown());
         });
         latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
-        assertThat(mFocusedByDefault.isFocused()).isTrue();
+        assertThat(mView1.isFocused()).isTrue();
     }
 
     @Test
@@ -160,6 +198,25 @@ public class FocusParkingViewTest {
     @Test
     public void testPerformAccessibilityAction_actionRestoreDefaultFocus() throws Exception {
         CountDownLatch latch1 = new CountDownLatch(1);
+        mFpv.post(() -> {
+            mFpv.performAccessibilityAction(ACTION_FOCUS, null);
+            mFpv.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mFpv.isFocused()).isTrue();
+
+        CountDownLatch latch2 = new CountDownLatch(1);
+        mFpv.post(() -> {
+            mFpv.performAccessibilityAction(ACTION_RESTORE_DEFAULT_FOCUS, null);
+            mFpv.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mFocusedByDefault.isFocused()).isTrue();
+    }
+
+    @Test
+    public void testPerformAccessibilityAction_doNothing() throws Exception {
+        CountDownLatch latch1 = new CountDownLatch(1);
         mView1.post(() -> {
             mView1.requestFocus();
             mView1.post(() -> latch1.countDown());
@@ -173,7 +230,7 @@ public class FocusParkingViewTest {
             mFpv.post(() -> latch2.countDown());
         });
         latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
-        assertThat(mFocusedByDefault.isFocused()).isTrue();
+        assertThat(mView1.isFocused()).isTrue();
     }
 
     @Test
