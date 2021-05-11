@@ -29,8 +29,6 @@ import com.android.car.ui.sharedlibrary.oemapis.recyclerview.RecyclerViewAttribu
 import com.android.car.ui.sharedlibrary.oemapis.recyclerview.RecyclerViewOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
 
-import com.google.car.ui.sharedlibrary.appstyleview.AppStyleViewControllerImpl;
-import com.google.car.ui.sharedlibrary.recyclerview.RecyclerViewImpl;
 import com.google.car.ui.sharedlibrary.toolbar.BaseLayoutInstaller;
 
 import java.util.function.Consumer;
@@ -78,12 +76,14 @@ public class SharedLibraryFactoryImpl implements SharedLibraryFactoryOEMV1 {
 
     @Override
     public AppStyledViewControllerOEMV1 createAppStyledView() {
-        return new AppStyleViewControllerImpl(mSharedLibraryContext);
+        //return new AppStyleViewControllerImpl(mSharedLibraryContext);
+        return null;
     }
 
     @Override
     public RecyclerViewOEMV1 createRecyclerView(Context context,
             RecyclerViewAttributesOEMV1 attrs) {
-        return new RecyclerViewImpl(context, attrs);
+        //return new RecyclerViewImpl(context, attrs);
+        return null;
     }
 }
