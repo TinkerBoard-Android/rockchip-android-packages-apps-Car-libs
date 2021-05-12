@@ -87,14 +87,11 @@ public interface ToolbarControllerOEMV1 {
     void setSearchMode(int searchMode);
 
     /**
-     * Returns the capabilities of what toolbar can do with Search
+     * Gets a {@link ImeSearchInterfaceOEMV1}, which contains methods for interfacing
+     * with the static library to support showing search results in the IME. It should return
+     * the same object every time it's called. It may return null if this feature is not supported.
      */
-    SearchCapabilitiesOEMV1 getSearchCapabilities();
-
-    /**
-     * Sets the search info to be displayed within the widescreen IME.
-     */
-    void setSearchConfig(SearchConfigOEMV1 searchInfo);
+    ImeSearchInterfaceOEMV1 getImeSearchInterface();
 
     /** Don't show the nav button */
     int NAV_BUTTON_MODE_DISABLED = 0;

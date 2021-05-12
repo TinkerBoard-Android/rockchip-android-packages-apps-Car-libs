@@ -16,10 +16,8 @@
 
 package com.android.car.ui.core;
 
-import static com.android.car.ui.core.SearchResultsProvider.CONTENT;
 import static com.android.car.ui.core.SearchResultsProvider.ITEM_ID;
 import static com.android.car.ui.core.SearchResultsProvider.PRIMARY_IMAGE_BLOB;
-import static com.android.car.ui.core.SearchResultsProvider.SEARCH_RESULTS_PROVIDER;
 import static com.android.car.ui.core.SearchResultsProvider.SECONDARY_IMAGE_BLOB;
 import static com.android.car.ui.core.SearchResultsProvider.SECONDARY_IMAGE_ID;
 import static com.android.car.ui.core.SearchResultsProvider.SUBTITLE;
@@ -51,7 +49,7 @@ import org.junit.runner.RunWith;
 public class SearchResultsProviderTest extends ProviderTestCase2<SearchResultsProvider> {
 
     public static final String AUTHORITY =
-            CONTENT + "com.android.car.ui.test" + SEARCH_RESULTS_PROVIDER;
+            SearchResultsProvider.getAuthority("com.android.car.ui.test");
 
     private final Context mContext = ApplicationProvider.getApplicationContext();
     private ResolverRenamingMockContext mProviderContext;

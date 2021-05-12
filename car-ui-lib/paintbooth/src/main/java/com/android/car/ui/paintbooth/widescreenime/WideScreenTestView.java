@@ -35,15 +35,13 @@ import com.android.car.ui.toolbar.SearchMode;
 import com.android.car.ui.toolbar.ToolbarController;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * Activity that the custom view inflated in IME window.
  */
 public class WideScreenTestView extends AppCompatActivity implements InsetsChangedListener {
-
-    private final ArrayList<String> mData = new ArrayList<>();
-    private final List<MenuItem> mMenuItems = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +62,8 @@ public class WideScreenTestView extends AppCompatActivity implements InsetsChang
                     }
                     return false;
                 });
-        mMenuItems.add(MenuItem.builder(this)
+
+        toolbar.setMenuItems(Collections.singletonList(MenuItem.builder(this)
                 .setToSearch()
                 .setOnClickListener(i -> {
                     isSearching[0] = true;
@@ -73,9 +72,8 @@ public class WideScreenTestView extends AppCompatActivity implements InsetsChang
                         toolbar.setSearchConfig(SearchConfig.builder()
                                 .setSearchResultsView(findViewById(R.id.list)).build());
                     }
-                }).build());
+                }).build()));
 
-        toolbar.setMenuItems(mMenuItems);
         CarUiRecyclerView recyclerView = findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -83,11 +81,12 @@ public class WideScreenTestView extends AppCompatActivity implements InsetsChang
         recyclerView.setAdapter(adapter);
     }
 
-    private ArrayList<String> generateSampleData() {
+    private List<String> generateSampleData() {
+        List<String> data = new ArrayList<>();
         for (int i = 0; i <= 100; i++) {
-            mData.add(getString(R.string.test_data) + i);
+            data.add(getString(R.string.test_data) + i);
         }
-        return mData;
+        return data;
     }
 
     @Override

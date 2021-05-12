@@ -19,9 +19,12 @@ package com.android.car.ui.core;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
+
+import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,34 +40,43 @@ public class SearchResultsProvider extends ContentProvider {
     public static final String SECONDARY_IMAGE_BLOB = "secondary_image";
     public static final String TITLE = "title";
     public static final String SUBTITLE = "subtitle";
-    public static final String CONTENT = "content://";
-    public static final String SEARCH_RESULTS_PROVIDER = ".SearchResultsProvider";
 
-    private Uri mContentUri;
-    private List<ContentValues> mSearchResults = new ArrayList<>();
+    private final List<ContentValues> mSearchResults = new ArrayList<>();
 
     /**
      * Database specific constant declarations
      */
-    public static final String SEARCH_RESULTS_TABLE_NAME = "search_results";
+    private static final String SEARCH_RESULTS_TABLE_NAME = "search_results";
+
+    /**
+     * Gets the authority of this Content Provider.
+     * @param packageName The package name of the current application.
+     */
+    @NonNull
+    public static String getAuthority(@NonNull String packageName) {
+        return "content://" + packageName + "." + SearchResultsProvider.class.getSimpleName();
+    }
+
+    /**
+     * Gets the Uri to the search results table.
+     * @param context A context used to get the package name of the app.
+     */
+    @NonNull
+    public static Uri getSearchResultsTableUri(@NonNull Context context) {
+        return Uri.parse(getAuthority(context.getPackageName()) + "/" + SEARCH_RESULTS_TABLE_NAME);
+    }
 
     @Override
     public boolean onCreate() {
-        String url = CONTENT + getProviderName() + "/" + SEARCH_RESULTS_TABLE_NAME;
-        mContentUri = Uri.parse(url);
-
         return true;
-    }
-
-    private String getProviderName() {
-        return getContext().getPackageName() + SEARCH_RESULTS_PROVIDER;
     }
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         mSearchResults.add(values);
 
-        Uri contentUri = ContentUris.withAppendedId(mContentUri, mSearchResults.size() - 1);
+        Uri contentUri = getSearchResultsTableUri(getContext());
+        contentUri = ContentUris.withAppendedId(contentUri, mSearchResults.size() - 1);
         getContext().getContentResolver().notifyChange(contentUri, null);
         return contentUri;
     }

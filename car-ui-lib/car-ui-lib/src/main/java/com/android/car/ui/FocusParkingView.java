@@ -267,6 +267,14 @@ public class FocusParkingView extends View {
         if (checkForTouchMode && isInTouchMode()) {
             return false;
         }
+
+        // When initializing the focus, if there is a focused view already, do nothing rather than
+        // moving focus to the view with highest priority. For example, when an item in
+        // RecyclerView is focused, and the RecyclerView does a full layout. See b/175630971.
+        if (mFocusedView != null && mFocusedView.isFocused() && mFocusedView.isAttachedToWindow()) {
+            return true;
+        }
+
         // The focused view was in a scrollable container and the Framework unfocused it because it
         // was scrolled off the screen. In this case focus on the scrollable container so that the
         // rotary controller can scroll the scrollable container.
