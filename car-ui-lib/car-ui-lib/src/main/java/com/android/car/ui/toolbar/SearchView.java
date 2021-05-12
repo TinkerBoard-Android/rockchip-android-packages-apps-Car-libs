@@ -238,17 +238,6 @@ public class SearchView extends ConstraintLayout {
     }
 
     /**
-     * Sets a custom icon to display in the search box.
-     */
-    public void setIcon(int resId) {
-        if (resId == 0) {
-            mIcon.setImageResource(R.drawable.car_ui_icon_search);
-        } else {
-            mIcon.setImageResource(resId);
-        }
-    }
-
-    /**
      * Sets whether or not the search bar should look like a regular text box instead of a search
      * box.
      */

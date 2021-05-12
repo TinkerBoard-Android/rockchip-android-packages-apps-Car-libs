@@ -134,7 +134,7 @@ class OverflowMenuItem implements MenuItemOEMV1 {
 
     @Override
     public String getTitle() {
-        return null;
+        return mSharedLibraryContext.getString(R.string.toolbar_menu_item_overflow_title);
     }
 
     @Override

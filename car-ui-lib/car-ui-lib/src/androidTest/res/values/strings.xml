@@ -16,6 +16,8 @@
   -->
 
 <resources>
+    <string name="test_string_test_title">Test title!</string>
+
     <string name="preferences_screen_title">Preferences</string>
     <string name="preference_dialog_category">Dialog preferences</string>
     <string name="title_list_preference">List preference</string>
