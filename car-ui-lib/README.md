@@ -43,6 +43,12 @@ Once you've set up paintbooth as described above, just open one of the test clas
 
 The tests can also be run from the command line via `atest CarUILibUnitTests`, but that's much slower than running them through Android Studio.
 
+### Getting coverage reports
+
+Coverage reports must be generated from the command line as opposed to Android Studio. Run `./gradlew createDebugCoverageReport` to generate a coverate report under `packages/apps/Car/libs/car-ui-lib/car-ui-lib/build/reports/coverage/debug/index.html`. Currently, you must first run `adb shell am switch-user 0` due to b/183903243
+
+To only run certain tests, run `./gradlew clean createDebugCoverageReport -Pandroid.testInstrumentationRunnerArguments.tests_regex=CarUiIme*`, changing the regex as necessary.
+
 ## Updating Google3
 
 This library is developed in Gerrit and copied as source to Google3 using
