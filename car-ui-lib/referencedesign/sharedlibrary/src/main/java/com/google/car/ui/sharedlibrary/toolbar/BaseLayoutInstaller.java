@@ -61,6 +61,12 @@ public class BaseLayoutInstaller {
 
         Context activityContext = contentView.getContext();
 
+        // Add the configuration from the activity context to the shared library context,
+        // or else when inflating views with the shared library context, they won't have access
+        // to stuff like the screen size. It will also cause a StrictMode violation without this.
+        sharedLibraryContext = sharedLibraryContext.createConfigurationContext(
+                activityContext.getResources().getConfiguration());
+
         FrameLayout baseLayout = (FrameLayout) LayoutInflater.from(sharedLibraryContext).inflate(
                 R.layout.base_layout_toolbar, null, false);
 
