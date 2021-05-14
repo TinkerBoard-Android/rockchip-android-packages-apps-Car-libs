@@ -15,9 +15,18 @@
   public void * (com.android.car.ui.toolbar.MenuItem);
 }
 
+# We dynamically link the oem apis, and proguard can't see them
+# when running, so it errors out without -dontwarn
 -dontwarn com.android.car.ui.sharedlibrary.oemapis.**
 
-# requried for accessing oem apis
+# Required because the static lib doesn't call most of the methods
+# on adapters, but instead passes it to the shared lib, where they
+# are called. Since proguard can't even see that those methods are
+# overriding oem api interfaces (since the oem apis are dynmically
+# linked and marked with -dontwarn), it thinks they're unused.
+-keep class com.android.car.ui.**AdapterV* {*;}
+
+# required for accessing oem apis
 -keep class com.android.car.ui.sharedlibrarysupport.OemApiUtil {*;}
 
 # Required for AppCompat instantiating our layout inflater factory,
