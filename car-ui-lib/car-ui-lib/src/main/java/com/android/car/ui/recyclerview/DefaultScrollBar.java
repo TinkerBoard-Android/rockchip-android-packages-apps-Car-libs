@@ -218,7 +218,7 @@ class DefaultScrollBar implements ScrollBar {
         }
 
         // If the scroll bars aren't visible, then no need to update.
-        if (mScrollView.getVisibility() == View.GONE || range == 0) {
+        if (mScrollView.getVisibility() != View.VISIBLE || range == 0) {
             return;
         }
 
