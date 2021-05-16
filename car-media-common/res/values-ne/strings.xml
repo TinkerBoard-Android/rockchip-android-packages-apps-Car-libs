@@ -21,7 +21,7 @@
     <string name="metadata_default_title" msgid="5902775732281325081">"शीर्षक छैन"</string>
     <string name="default_error_message" msgid="4044331619453864482">"केही चिज गडबड छ। पछि प्रयास गर्नुहोस्।"</string>
     <string name="error_code_app_error" msgid="3608680401453743688">"त्यो कार्य अहिले नै गर्न सकिँदैन"</string>
-    <string name="error_code_not_supported" msgid="8004310657548193089">"यस अनुप्रयोगले उक्त कार्य गर्न सक्दैन"</string>
+    <string name="error_code_not_supported" msgid="8004310657548193089">"यस एपले उक्त कार्य गर्न सक्दैन"</string>
     <string name="error_code_authentication_expired" msgid="1727285213286610186">"यो एप प्रयोग गर्न साइन इन गर्नुहोस्"</string>
     <string name="error_code_premium_account_required" msgid="2328664287270814966">"यसका लागि प्रिमियम खातामाथिको पहुँच आवश्यक हुन्छ"</string>
     <string name="error_code_concurrent_stream_limit" msgid="493048763425570552">"अत्यधिक यन्त्रहरूबाट सुनिँदै छ"</string>
