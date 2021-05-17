@@ -22,7 +22,6 @@ import android.graphics.drawable.Drawable;
 import androidx.annotation.Nullable;
 
 import com.android.car.ui.recyclerview.CarUiContentListItem;
-import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 
 /**
  * Definition of list items that can be inserted into {@link CarUiListItemAdapter}. This class is

@@ -25,12 +25,16 @@ import com.android.car.ui.sharedlibrary.oemapis.FocusParkingViewOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.InsetsOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryFactoryOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.appstyledview.AppStyledViewControllerOEMV1;
+import com.android.car.ui.sharedlibrary.oemapis.recyclerview.AdapterOEMV1;
+import com.android.car.ui.sharedlibrary.oemapis.recyclerview.ListItemOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.recyclerview.RecyclerViewAttributesOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.recyclerview.RecyclerViewOEMV1;
+import com.android.car.ui.sharedlibrary.oemapis.recyclerview.ViewHolderOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
 
 import com.chassis.car.ui.sharedlibrary.toolbar.BaseLayoutInstaller;
 
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -89,6 +93,13 @@ public class SharedLibraryFactoryImpl implements SharedLibraryFactoryOEMV1 {
     public RecyclerViewOEMV1 createRecyclerView(Context context,
             RecyclerViewAttributesOEMV1 attrs) {
         //return new RecyclerViewImpl(context, attrs);
+        return null;
+    }
+
+    @Override
+    public AdapterOEMV1<? extends ViewHolderOEMV1> createListItemAdapter(
+            List<ListItemOEMV1> items) {
+        //return new ListItemAdapter(items);
         return null;
     }
 }
