@@ -78,6 +78,12 @@ public final class SharedLibraryFactoryAdapterV1 implements SharedLibraryFactory
             InsetsChangedListener insetsChangedListener,
             boolean toolbarEnabled,
             boolean fullscreen) {
+
+        if (!mOem.customizesBaseLayout()) {
+            return mFactoryStub.installBaseLayoutAround(contentView,
+                insetsChangedListener, toolbarEnabled, fullscreen);
+        }
+
         ToolbarControllerOEMV1 toolbar = mOem.installBaseLayoutAround(contentView,
                 insets -> insetsChangedListener.onCarUiInsetsChanged(adaptInsets(insets)),
                 toolbarEnabled, fullscreen);

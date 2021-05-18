@@ -75,6 +75,11 @@ public class SharedLibraryFactoryImpl implements SharedLibraryFactoryOEMV1 {
     }
 
     @Override
+    public boolean customizesBaseLayout() {
+        return true;
+    }
+
+    @Override
     public AppStyledViewControllerOEMV1 createAppStyledView() {
         //return new AppStyleViewControllerImpl(mSharedLibraryContext);
         return null;
