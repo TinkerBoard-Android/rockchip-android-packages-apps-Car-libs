@@ -74,6 +74,76 @@ public class RangeFilterImplTest {
         verifyRemoveFilterBothEnds(mMockAdapter, pivotPosition, ODD_MAX_ITEMS, UNRESTRICTED_COUNT);
     }
 
+    @Test
+    public void testRecompute_pivotPointInTheSecondHalf_clampsHeadOnly() {
+        RangeFilterImpl rangeFilter = new RangeFilterImpl(mMockAdapter, 20);
+        int pivotPosition = 20;
+        rangeFilter.recompute(30, pivotPosition);
+
+        RangeFilterImpl.ListRange range = rangeFilter.getRange();
+        assertThat(range.mClampedHead).isEqualTo(1);
+        assertThat(range.mClampedTail).isEqualTo(0);
+        assertThat(range.mStartIndex).isEqualTo(10);
+        assertThat(range.mEndIndex).isEqualTo(30);
+        assertThat(range.mEndIndex - range.mStartIndex).isEqualTo(20);
+        assertThat(range.mLimitedCount).isEqualTo(20 + 1);
+
+        rangeFilter.applyFilter();
+
+        int firstHalfRemainingItems = 20 / 2;
+        int clampedHeadItemCount = pivotPosition - firstHalfRemainingItems;
+
+        verify(mMockAdapter).notifyItemRangeRemoved(0, clampedHeadItemCount);
+        verify(mMockAdapter).notifyItemInserted(0);
+
+        rangeFilter.removeFilter();
+
+        verify(mMockAdapter).notifyItemRangeInserted(1, clampedHeadItemCount);
+        verify(mMockAdapter).notifyItemRemoved(0);
+    }
+
+    @Test
+    public void testRecompute_pivotPointInTheFirstHalf_clampsTailOnly() {
+        RangeFilterImpl rangeFilter = new RangeFilterImpl(mMockAdapter, 20);
+        int pivotPosition = 10;
+        rangeFilter.recompute(40, pivotPosition);
+
+        RangeFilterImpl.ListRange range = rangeFilter.getRange();
+        assertThat(range.mClampedHead).isEqualTo(0);
+        assertThat(range.mClampedTail).isEqualTo(1);
+        assertThat(range.mStartIndex).isEqualTo(0);
+        assertThat(range.mEndIndex).isEqualTo(20);
+        assertThat(range.mEndIndex - range.mStartIndex).isEqualTo(20);
+        assertThat(range.mLimitedCount).isEqualTo(20 + 1);
+
+        rangeFilter.applyFilter();
+
+        int firstHalfRemainingItems = 20 / 2;
+        int secondHalfRemainingItems = 20 - firstHalfRemainingItems;
+        int clampedHeadItemCount = pivotPosition - firstHalfRemainingItems;
+        int clampedTailItemCount = 40 - clampedHeadItemCount - 20;
+
+        verify(mMockAdapter).notifyItemInserted(40);
+        verify(mMockAdapter).notifyItemRangeRemoved(
+                pivotPosition + secondHalfRemainingItems, clampedTailItemCount);
+
+        rangeFilter.removeFilter();
+
+        verify(mMockAdapter).notifyItemRemoved(20 + 1 - 1);
+        verify(mMockAdapter).notifyItemRangeInserted(20 + 1 - 1, clampedTailItemCount);
+    }
+
+    @Test
+    public void testRecompute_invalidPivotPoint_getsCorrected() {
+        RangeFilterImpl rangeFilter = new RangeFilterImpl(mMockAdapter, 10);
+
+        rangeFilter.recompute(20, -1);
+        assertThat(rangeFilter.mPivotIndex).isEqualTo(0);
+
+        rangeFilter.recompute(20, 30);
+        assertThat(rangeFilter.mPivotIndex).isEqualTo(0);
+    }
+
     private void verifyClampedBothEnds(
             RangeFilterImpl rangeFilter, int pivotPoint, int maxItemCount) {
         RangeFilterImpl.ListRange range = rangeFilter.getRange();

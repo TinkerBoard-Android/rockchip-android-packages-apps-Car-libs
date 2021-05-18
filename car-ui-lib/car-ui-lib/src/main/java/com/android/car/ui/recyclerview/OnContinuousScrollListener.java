@@ -18,6 +18,7 @@ package com.android.car.ui.recyclerview;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -34,7 +35,7 @@ import com.android.car.ui.R;
  */
 public class OnContinuousScrollListener implements OnTouchListener {
 
-    private final Handler mHandler = new Handler();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final int mInitialDelay;
     private final int mRepeatInterval;
     private final OnClickListener mOnClickListener;

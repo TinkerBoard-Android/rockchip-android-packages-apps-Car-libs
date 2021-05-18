@@ -37,4 +37,6 @@
         <item>Item 2</item>
         <item>Item 3</item>
     </string-array>
+
+    <string name="scrolling_limited_message">Test message for Scrolling limited while driving</string>
 </resources>

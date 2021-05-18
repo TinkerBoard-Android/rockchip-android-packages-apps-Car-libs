@@ -52,6 +52,7 @@ import java.util.Objects;
     private static final float LONG_ITEM_END_VISIBLE_THRESHOLD = 0.3f;
 
     private final Context mContext;
+    @Nullable
     private RecyclerView mRecyclerView;
 
     public CarUiSnapHelper(Context context) {
@@ -319,7 +320,7 @@ import java.util.Objects;
         if (distancePerChild <= 0) {
             return 0;
         }
-        return (int) Math.round(scrollDistance / distancePerChild);
+        return Math.round(scrollDistance / distancePerChild);
     }
 
     /**
