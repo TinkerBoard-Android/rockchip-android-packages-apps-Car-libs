@@ -469,12 +469,13 @@ public class CarUiImeWideScreenController {
                     if (secondaryBlob != null) {
                         Bitmap secondaryBitmap = Bitmap.CREATOR.createFromParcel(
                                 byteArrayToParcel(secondaryBlob));
+                        String secondaryItemId = c.getString(c.getColumnIndex(
+                                SearchResultsProvider.SECONDARY_IMAGE_ID));
                         searchItem.setSupplementalIcon(
                                 new BitmapDrawable(mContext.getResources(), secondaryBitmap), v -> {
                                     Bundle bundle = new Bundle();
                                     bundle.putString(SEARCH_RESULT_SUPPLEMENTAL_ICON_ID_LIST,
-                                            c.getString(c.getColumnIndex(
-                                                    SearchResultsProvider.SECONDARY_IMAGE_ID)));
+                                            secondaryItemId);
                                     mInputConnection.performPrivateCommand(WIDE_SCREEN_ACTION,
                                             bundle);
                                 });
