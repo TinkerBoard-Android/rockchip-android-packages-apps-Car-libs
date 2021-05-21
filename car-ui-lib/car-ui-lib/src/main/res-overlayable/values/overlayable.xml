@@ -108,7 +108,9 @@ limitations under the License.-->
       <item type="color" name="car_ui_rotary_focus_fill_color"/>
       <item type="color" name="car_ui_rotary_focus_fill_secondary_color"/>
       <item type="color" name="car_ui_rotary_focus_pressed_fill_color"/>
+      <item type="color" name="car_ui_rotary_focus_pressed_fill_secondary_color"/>
       <item type="color" name="car_ui_rotary_focus_pressed_stroke_color"/>
+      <item type="color" name="car_ui_rotary_focus_pressed_stroke_secondary_color"/>
       <item type="color" name="car_ui_rotary_focus_stroke_color"/>
       <item type="color" name="car_ui_rotary_focus_stroke_secondary_color"/>
       <item type="color" name="car_ui_scrollbar_thumb"/>
