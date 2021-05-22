@@ -35,7 +35,7 @@
             android:id="@id/car_ui_imeWideScreenInputArea"
             android:layout_width="match_parent"
             android:layout_height="@dimen/car_ui_ime_wide_screen_input_area_height"
-            android:layout_marginTop="@dimen/car_ui_ime_wide_screen_input_area_margin_top"
+            android:layout_marginTop="@dimen/car_ui_ime_wide_screen_input_area_padding_top"
             android:layout_alignParentTop="true">
             <ImageView
                 android:id="@id/car_ui_closeKeyboard"
@@ -135,7 +135,7 @@
         android:layout_height="match_parent"
         android:visibility="gone"
         android:focusable="false"
-        android:layout_marginTop="@dimen/car_ui_ime_wide_screen_input_area_margin_top"
+        android:paddingTop="@dimen/car_ui_ime_wide_screen_input_area_padding_top"
         android:paddingBottom="@dimen/car_ui_ime_wide_screen_keyboard_area_padding_bottom"
         android:background="@drawable/car_ui_ime_wide_screen_content_area_background"/>
 
@@ -148,7 +148,7 @@
         <com.android.car.ui.recyclerview.CarUiRecyclerView
             android:id="@id/car_ui_wideScreenSearchResultList"
             android:requiresFadingEdge="vertical"
-            android:paddingTop="@dimen/car_ui_ime_wide_screen_input_area_margin_top"
+            android:paddingTop="@dimen/car_ui_ime_wide_screen_input_area_padding_top"
             android:layout_width="match_parent"
             android:visibility="gone"
             android:layout_height="match_parent"/>

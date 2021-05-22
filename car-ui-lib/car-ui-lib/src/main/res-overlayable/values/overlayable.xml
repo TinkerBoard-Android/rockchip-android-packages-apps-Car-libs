@@ -152,8 +152,8 @@ limitations under the License.-->
       <item type="dimen" name="car_ui_ime_wide_screen_error_text_padding_start"/>
       <item type="dimen" name="car_ui_ime_wide_screen_error_text_size"/>
       <item type="dimen" name="car_ui_ime_wide_screen_input_area_height"/>
-      <item type="dimen" name="car_ui_ime_wide_screen_input_area_margin_top"/>
       <item type="dimen" name="car_ui_ime_wide_screen_input_area_padding_end"/>
+      <item type="dimen" name="car_ui_ime_wide_screen_input_area_padding_top"/>
       <item type="dimen" name="car_ui_ime_wide_screen_input_edit_text_padding_left"/>
       <item type="dimen" name="car_ui_ime_wide_screen_input_edit_text_padding_right"/>
       <item type="dimen" name="car_ui_ime_wide_screen_input_edit_text_size"/>
