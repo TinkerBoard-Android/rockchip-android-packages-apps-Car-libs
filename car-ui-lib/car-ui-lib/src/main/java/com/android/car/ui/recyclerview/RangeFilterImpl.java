@@ -34,7 +34,8 @@ public class RangeFilterImpl implements RangeFilter {
     private final int mMaxItemsSecondHalf;
 
     private int mUnlimitedCount;
-    private int mPivotIndex;
+    @VisibleForTesting
+    int mPivotIndex;
     private final ListRange mRange = new ListRange();
 
     /**
@@ -225,13 +226,6 @@ public class RangeFilterImpl implements RangeFilter {
                     + ", mClampedTail=" + mClampedTail
                     + ", mLimitedCount=" + mLimitedCount
                     + '}';
-        }
-
-        /**
-         * Returns true if two ranges intersect.
-         */
-        public boolean intersects(ListRange range) {
-            return ((range.mEndIndex > mStartIndex) && (mEndIndex > range.mStartIndex));
         }
 
         /**
