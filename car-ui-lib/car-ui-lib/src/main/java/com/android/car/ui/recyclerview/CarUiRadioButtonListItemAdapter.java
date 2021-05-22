@@ -134,7 +134,7 @@ public class CarUiRadioButtonListItemAdapter extends CarUiListItemAdapter {
             super(itemView);
         }
 
-        void setOnCheckedChangeListener(@Nullable OnCheckedChangeListener listener) {
+        public void setOnCheckedChangeListener(@Nullable OnCheckedChangeListener listener) {
             mListener = listener;
         }
 

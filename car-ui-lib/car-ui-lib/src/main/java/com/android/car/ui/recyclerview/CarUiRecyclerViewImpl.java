@@ -27,7 +27,6 @@ import android.graphics.Rect;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.InputDevice;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -224,6 +223,8 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
                     layoutStyle.getSpanCount(),
                     layoutStyle.getOrientation(),
                     layoutStyle.getReverseLayout());
+            ((GridLayoutManager) layoutManager).setSpanSizeLookup(
+                    ((CarUiGridLayoutStyle) layoutStyle).getSpanSizeLookup());
         }
         setLayoutManager(layoutManager);
     }
@@ -440,15 +441,17 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
             cls = !TextUtils.isEmpty(mScrollBarClass)
                     ? getContext().getClassLoader().loadClass(mScrollBarClass)
                     : DefaultScrollBar.class;
-        } catch (Throwable t) {
-            throw andLog("Error loading scroll bar component: " + mScrollBarClass, t);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalArgumentException("Error loading scroll bar component: "
+                    + mScrollBarClass, e);
         }
         try {
             Constructor<?> cnst = cls.getDeclaredConstructor();
             cnst.setAccessible(true);
             mScrollBar = (ScrollBar) cnst.newInstance();
-        } catch (Throwable t) {
-            throw andLog("Error creating scroll bar component: " + mScrollBarClass, t);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalArgumentException("Error creating scroll bar component: "
+                    + mScrollBarClass, e);
         }
 
         mScrollBar.initialize(this, scrollView);
@@ -551,11 +554,6 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
             mScrollBar.adapterChanged(adapter);
         }
         super.setAdapter(adapter);
-    }
-
-    private static RuntimeException andLog(String msg, Throwable t) {
-        Log.e(TAG, msg, t);
-        throw new RuntimeException(msg, t);
     }
 
     private class UxRestrictionChangedListener implements

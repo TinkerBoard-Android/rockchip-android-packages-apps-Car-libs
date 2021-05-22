@@ -32,7 +32,9 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -43,7 +45,8 @@ import android.text.style.ForegroundColorSpan;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
-import androidx.test.rule.ActivityTestRule;
+import androidx.test.core.app.ActivityScenario;
+import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
 import com.android.car.ui.CarUiText;
 import com.android.car.ui.R;
@@ -77,12 +80,20 @@ public class CarUiListItemTest {
     private CarUiRecyclerView mCarUiRecyclerView;
 
     @Rule
-    public ActivityTestRule<CarUiRecyclerViewTestActivity> mActivityRule =
-            new ActivityTestRule<>(CarUiRecyclerViewTestActivity.class);
+    public ActivityScenarioRule<CarUiRecyclerViewTestActivity> mActivityRule =
+            new ActivityScenarioRule<>(CarUiRecyclerViewTestActivity.class);
+
+    private ActivityScenario<CarUiRecyclerViewTestActivity> mScenario;
+
+    private CarUiRecyclerViewTestActivity mActivity;
 
     @Before
     public void setUp() {
-        mCarUiRecyclerView = mActivityRule.getActivity().requireViewById(R.id.list);
+        mScenario = mActivityRule.getScenario();
+        mScenario.onActivity(activity -> {
+            mActivity = activity;
+            mCarUiRecyclerView = mActivity.requireViewById(R.id.list);
+        });
     }
 
     @Test
@@ -196,7 +207,7 @@ public class CarUiListItemTest {
         CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
         item.setTitle("Test title");
         item.setBody("Test body");
-        item.setIcon(mActivityRule.getActivity().getDrawable(R.drawable.car_ui_icon_close));
+        item.setIcon(mActivity.getDrawable(R.drawable.car_ui_icon_close));
         item.setPrimaryIconType(CarUiContentListItem.IconType.CONTENT);
         items.add(item);
 
@@ -360,7 +371,7 @@ public class CarUiListItemTest {
 
         CarUiContentListItem item = new CarUiContentListItem(
                 CarUiContentListItem.Action.NONE);
-        item.setIcon(mActivityRule.getActivity().getDrawable(R.drawable.car_ui_icon_close));
+        item.setIcon(mActivity.getDrawable(R.drawable.car_ui_icon_close));
         item.setPrimaryIconType(CarUiContentListItem.IconType.AVATAR);
         item.setTitle("Test item with listener");
         item.setBody("Body text");
@@ -397,7 +408,7 @@ public class CarUiListItemTest {
         item.setTitle("Test item with two listeners");
         item.setOnItemClickedListener(clickListener);
         item.setSupplementalIcon(
-                mActivityRule.getActivity().getDrawable(R.drawable.car_ui_icon_close),
+                mActivity.getDrawable(R.drawable.car_ui_icon_close),
                 supplementalIconClickListener);
         items.add(item);
 
@@ -429,8 +440,7 @@ public class CarUiListItemTest {
 
         CarUiContentListItem item = new CarUiContentListItem(
                 CarUiContentListItem.Action.ICON);
-        item.setSupplementalIcon(
-                mActivityRule.getActivity().getDrawable(R.drawable.car_ui_icon_close));
+        item.setSupplementalIcon(mActivity.getDrawable(R.drawable.car_ui_icon_close));
         item.setOnItemClickedListener(mockedItemOnClickListener);
         item.setTitle("Test item with listener");
         items.add(item);
@@ -450,8 +460,7 @@ public class CarUiListItemTest {
         List<CarUiListItem> items = new ArrayList<>();
         CarUiContentListItem item = new CarUiContentListItem(
                 CarUiContentListItem.Action.SWITCH);
-        item.setSupplementalIcon(
-                mActivityRule.getActivity().getDrawable(R.drawable.car_ui_icon_close));
+        item.setSupplementalIcon(mActivity.getDrawable(R.drawable.car_ui_icon_close));
         item.setTitle("Test item with listener");
         items.add(item);
 
@@ -471,7 +480,7 @@ public class CarUiListItemTest {
         CarUiContentListItem item = new CarUiContentListItem(
                 CarUiContentListItem.Action.ICON);
         item.setSupplementalIcon(
-                mActivityRule.getActivity().getDrawable(R.drawable.car_ui_icon_close),
+                mActivity.getDrawable(R.drawable.car_ui_icon_close),
                 mockedIconListener);
         item.setOnItemClickedListener(mockedItemOnClickListener);
         item.setTitle("Test item with listeners");
@@ -894,4 +903,53 @@ public class CarUiListItemTest {
         onView(withId(R.id.car_ui_list_item_body)).check(
                 matches(withText(containsString(marker))));
     }
+
+    @Test()
+    public void testListItemAdapter_getCount() {
+        List<CarUiRadioButtonListItem> items = new ArrayList<>();
+
+        CarUiRadioButtonListItem itemOne = new CarUiRadioButtonListItem();
+        String itemOneTitle = "Item 1";
+        itemOne.setTitle(itemOneTitle);
+        items.add(itemOne);
+
+        CarUiRadioButtonListItem itemTwo = new CarUiRadioButtonListItem();
+        String itemTwoTitle = "Item 2";
+        itemTwo.setTitle(itemTwoTitle);
+        items.add(itemTwo);
+
+        CarUiRadioButtonListItem itemThree = new CarUiRadioButtonListItem();
+        String itemThreeTitle = "Item 3";
+        itemThree.setTitle(itemThreeTitle);
+        items.add(itemThree);
+
+        CarUiRadioButtonListItemAdapter adapter = new CarUiRadioButtonListItemAdapter(items);
+        mCarUiRecyclerView.post(
+                () -> mCarUiRecyclerView.setAdapter(adapter));
+
+        onView(withText(itemOneTitle)).check(matches(isDisplayed()));
+        onView(withText(itemTwoTitle)).check(matches(isDisplayed()));
+        onView(withText(itemThreeTitle)).check(matches(isDisplayed()));
+
+        assertEquals(adapter.getItemCount(), 3);
+
+        adapter.setMaxItems(2);
+
+        assertEquals(adapter.getItemCount(), 2);
+    }
+
+    @Test
+    public void testUnknownCarUiListItemType_throwsException() {
+        List<CarUiListItem> items = new ArrayList<>();
+
+        CarUiListItem item = new UnknownCarUiListItem();
+        items.add(item);
+
+        CarUiListItemAdapter adapter = new CarUiListItemAdapter(items);
+
+        assertThrows("Unknown view type.", IllegalStateException.class,
+                () -> adapter.getItemViewType(anyInt()));
+    }
+
+    private static class UnknownCarUiListItem extends CarUiListItem {}
 }

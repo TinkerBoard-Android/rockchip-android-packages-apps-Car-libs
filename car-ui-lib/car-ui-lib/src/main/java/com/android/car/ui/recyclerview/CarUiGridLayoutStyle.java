@@ -15,10 +15,11 @@
  */
 package com.android.car.ui.recyclerview;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.GridLayoutManager.DefaultSpanSizeLookup;
 import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.LayoutManager;
 
 import com.android.car.ui.recyclerview.CarUiRecyclerView.CarUiRecyclerViewLayout;
@@ -36,7 +37,7 @@ public final class CarUiGridLayoutStyle implements CarUiLayoutStyle {
     private boolean mReverseLayout = false;
     private int mSize = CarUiRecyclerView.SIZE_LARGE;
     @Nullable
-    private SpanSizeLookup mSpanSizeLookup;
+    private SpanSizeLookup mSpanSizeLookup = new DefaultSpanSizeLookup();
 
     /**
      * @param layoutManager
@@ -103,12 +104,8 @@ public final class CarUiGridLayoutStyle implements CarUiLayoutStyle {
     }
 
     /** Returns a wrapper {@link androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup} */
-    public void setSpanSizeLookup(@Nullable SpanSizeLookup spanSizeLookup) {
+    public void setSpanSizeLookup(@NonNull SpanSizeLookup spanSizeLookup) {
         mSpanSizeLookup = spanSizeLookup;
-        if (mSpanSizeLookup != null) {
-            mLayoutType = CarUiRecyclerViewLayout.GRID;
-            mLayoutOrientation = RecyclerView.VERTICAL;
-        }
     }
 
     /**
