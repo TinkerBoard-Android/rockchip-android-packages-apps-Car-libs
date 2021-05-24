@@ -25,13 +25,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center">
-        <com.google.car.ui.sharedlibrary.uxr.DrawableStateImageView
+        <com.chassis.car.ui.sharedlibrary.uxr.DrawableStateImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:src="@drawable/toolbar_menu_item_icon_background"
             android:background="@drawable/toolbar_menu_item_icon_ripple"
             android:scaleType="center"/>
-        <com.google.car.ui.sharedlibrary.uxr.DrawableStateImageView
+        <com.chassis.car.ui.sharedlibrary.uxr.DrawableStateImageView
             android:id="@+id/car_ui_toolbar_menu_item_icon"
             android:layout_width="@dimen/primary_icon_size"
             android:layout_height="@dimen/primary_icon_size"
@@ -39,7 +39,7 @@
             android:tint="@color/toolbar_menu_item_icon_color"
             android:tintMode="src_in"/>
     </FrameLayout>
-    <com.google.car.ui.sharedlibrary.uxr.DrawableStateSwitch
+    <com.chassis.car.ui.sharedlibrary.uxr.DrawableStateSwitch
         android:id="@+id/car_ui_toolbar_menu_item_switch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -47,14 +47,14 @@
         android:clickable="false"/>
 
     <!-- These buttons must have clickable="false" or they will steal the click events from the container -->
-    <com.google.car.ui.sharedlibrary.uxr.DrawableStateButton
+    <com.chassis.car.ui.sharedlibrary.uxr.DrawableStateButton
         android:id="@+id/car_ui_toolbar_menu_item_text"
         style="@style/Toolbar.MenuItem.Text"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:clickable="false"/>
-    <com.google.car.ui.sharedlibrary.uxr.DrawableStateButton
+    <com.chassis.car.ui.sharedlibrary.uxr.DrawableStateButton
         android:id="@+id/car_ui_toolbar_menu_item_text_with_icon"
         style="@style/Toolbar.MenuItem.Text"
         android:drawableTint="@color/toolbar_menu_item_icon_color"

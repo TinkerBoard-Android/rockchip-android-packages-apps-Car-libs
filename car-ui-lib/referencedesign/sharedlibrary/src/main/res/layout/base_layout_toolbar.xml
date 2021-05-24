@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
@@ -13,9 +14,9 @@
         android:id="@+id/toolbar_background"
         android:layout_width="match_parent"
         android:layout_height="@dimen/toolbar_row_height"
-        android:background="#E0000000"
+        android:background="#E000ff00"
         android:tag="shared_lib_top_inset">
-        <com.google.car.ui.sharedlibrary.toolbar.ClickBlockingView
+        <com.chassis.car.ui.sharedlibrary.toolbar.ClickBlockingView
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintStart_toStartOf="parent"
@@ -42,7 +43,8 @@
                 android:layout_width="44dp"
                 android:layout_height="44dp"
                 android:layout_gravity="center"
-                android:scaleType="fitXY"/>
+                android:scaleType="fitXY"
+                tools:ignore="UseAppTint" />
 
             <ImageView
                 android:id="@+id/toolbar_logo"
@@ -86,7 +88,7 @@
                 android:textAppearance="?android:attr/textAppearanceSmall"/>
         </LinearLayout>
 
-        <com.google.car.ui.sharedlibrary.toolbar.TabLayout
+        <com.chassis.car.ui.sharedlibrary.toolbar.TabLayout
             android:id="@+id/toolbar_tabs"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
