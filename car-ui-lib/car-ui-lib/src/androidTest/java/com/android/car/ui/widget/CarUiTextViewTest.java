@@ -19,8 +19,15 @@ package com.android.car.ui.widget;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.withHint;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
+import static org.junit.Assert.assertEquals;
+
+import android.graphics.Color;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -82,5 +89,39 @@ public class CarUiTextViewTest {
         container.post(() -> container.setVisibility(View.VISIBLE));
 
         onView(withText(variant)).check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void testSpanOverLastLine() {
+        CarUiTextView textView = CarUiTextView.create(mActivity);
+        String hint = "Test textView";
+        textView.setHint(hint);
+        SpannableString text = new SpannableString(LONG_CHAR_SEQUENCE);
+        ForegroundColorSpan span = new ForegroundColorSpan(Color.RED);
+        text.setSpan(span, 0, text.length() - 1, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+        textView.setText(new CarUiText.Builder(text).setMaxLines(3).build());
+        ViewGroup container = mActivity.findViewById(
+                com.android.car.ui.test.R.id.test_container);
+        container.post(() -> container.addView(textView));
+
+        onView(withHint(hint)).check(matches(isDisplayed()));
+
+        Spanned displayedText = (Spanned) textView.getText();
+        assertEquals(displayedText.length() - 1, displayedText.getSpanEnd(span));
+    }
+
+    @Test
+    public void testLineBreaks_lineBreakAtEnd() {
+        CarUiTextView textView = CarUiTextView.create(mActivity);
+        String hint = "Test textView";
+        textView.setHint(hint);
+        CharSequence text = "This is line 1\nline2\nand then line\n";
+        textView.setText(new CarUiText.Builder(text).setMaxLines(3).build());
+        ViewGroup container = mActivity.findViewById(
+                com.android.car.ui.test.R.id.test_container);
+        container.post(() -> container.addView(textView));
+
+        onView(withHint(hint)).check(matches(isDisplayed()));
+        assertEquals(3, textView.getLineCount());
     }
 }

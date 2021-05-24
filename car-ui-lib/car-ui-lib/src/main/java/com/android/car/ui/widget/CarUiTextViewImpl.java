@@ -21,6 +21,7 @@ import static java.util.Objects.requireNonNull;
 import android.content.Context;
 import android.text.Layout;
 import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.widget.TextView;
@@ -58,7 +59,7 @@ public final class CarUiTextViewImpl extends CarUiTextView {
     }
 
     public CarUiTextViewImpl(Context context, @Nullable AttributeSet attrs, int defStyleAttr,
-            int defStyleRes) {
+                             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
@@ -184,16 +185,19 @@ public final class CarUiTextViewImpl extends CarUiTextView {
         SpannableStringBuilder builder = new SpannableStringBuilder();
         // Get text up until the last line
         builder.append(text.subSequence(0, lastLineStart));
-        // Add space to separate last word of 2nd last line and first word of last line
-        if (!TextUtils.isEmpty(builder) && !Character.isWhitespace(
-                builder.charAt(builder.length() - 1))) {
-            builder.append(" ");
+
+        Scanner scanner = new Scanner(text.subSequence(lastLineStart, length).toString());
+        if (scanner.hasNextLine()) {
+            String lastLine = scanner.nextLine();
+            // Add truncation ellipsis to last line if required
+            builder.append(
+                    TextUtils.ellipsize(lastLine, getPaint(), maxWidth, TextUtils.TruncateAt.END));
+            if (text instanceof Spanned) {
+                TextUtils.copySpansFrom(
+                        (Spanned) text, 0, builder.length() - 1, Object.class, builder, 0);
+            }
         }
-        CharSequence lastLine = new Scanner(
-                text.subSequence(lastLineStart, length).toString()).nextLine();
-        // Add truncation ellipsis to last line if required
-        builder.append(
-                TextUtils.ellipsize(lastLine, getPaint(), maxWidth, TextUtils.TruncateAt.END));
+
         return builder;
     }
 }
