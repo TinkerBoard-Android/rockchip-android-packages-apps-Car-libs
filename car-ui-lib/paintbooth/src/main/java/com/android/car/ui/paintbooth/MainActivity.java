@@ -298,7 +298,7 @@ public class MainActivity extends Activity implements InsetsChangedListener {
         getSharedPreferences(SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
                 .edit()
                 .putStringSet(SHARED_PREFERENCES_SHARED_LIB_DENYLIST,
-                        checked ? null : Collections.singleton("com.google.car.ui.sharedlibrary"))
+                        checked ? null : Collections.singleton("com.chassis.car.ui.sharedlibrary"))
                 .apply();
         Toast.makeText(this, "Relaunch PaintBooth to see effects", Toast.LENGTH_SHORT).show();
     }
