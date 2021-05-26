@@ -88,7 +88,7 @@ public class FocusParkingView extends View {
      * allows itself to be focused instead. This should be false for the {@code FocusParkingView} in
      * an {@code ActivityView}. The default value is true.
      */
-    private boolean mShouldRestoreFocus;
+    private boolean mShouldRestoreFocus = true;
 
     /**
      * Whether to focus on the default focus view when nudging to the explicit focus area containing
