@@ -14,18 +14,9 @@
   See the License for the specific language governing permissions and
   limitations under the License.
   -->
-<!-- The same as @color/car_ui_text_color_primary but with an activated state.
-     ColorStateLists don't support switching to complex colors, so we have to repeat
-     car_ui_text_color_primary here. -->
-<selector xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:app="http://schemas.android.com/apk/res-auto">
+<!-- The same as @color/car_ui_text_color_primary but with an activated state -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_activated="true"
           android:color="?android:attr/colorBackground"/>
-    <item android:state_enabled="false"
-          android:alpha="?android:attr/disabledAlpha"
-          android:color="?android:attr/colorForeground"/>
-    <item app:state_ux_restricted="true"
-          android:alpha="?android:attr/disabledAlpha"
-          android:color="?android:attr/colorForeground"/>
-    <item android:color="?android:attr/colorForeground" />
+    <item android:color="@color/car_ui_text_color_primary" />
 </selector>
