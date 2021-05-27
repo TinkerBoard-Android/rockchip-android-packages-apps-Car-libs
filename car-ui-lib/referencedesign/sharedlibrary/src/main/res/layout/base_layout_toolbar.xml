@@ -14,7 +14,7 @@
         android:id="@+id/toolbar_background"
         android:layout_width="match_parent"
         android:layout_height="@dimen/toolbar_row_height"
-        android:background="#E000ff00"
+        android:background="#E0000000"
         android:tag="shared_lib_top_inset">
         <com.chassis.car.ui.sharedlibrary.toolbar.ClickBlockingView
             android:layout_width="0dp"
