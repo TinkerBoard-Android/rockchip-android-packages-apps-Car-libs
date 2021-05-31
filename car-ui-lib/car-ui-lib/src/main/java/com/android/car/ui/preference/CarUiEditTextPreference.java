@@ -31,7 +31,6 @@ import androidx.preference.PreferenceViewHolder;
 
 import com.android.car.ui.R;
 import com.android.car.ui.utils.CarUiUtils;
-import com.android.car.ui.utils.ViewUtils;
 
 import java.util.function.Consumer;
 
@@ -113,7 +112,7 @@ public class CarUiEditTextPreference extends EditTextPreference
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
 
-        ViewUtils.makeAllViewsUxRestricted(holder.itemView, isUxRestricted());
+        CarUiUtils.makeAllViewsUxRestricted(holder.itemView, isUxRestricted());
     }
 
     @Override
