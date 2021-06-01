@@ -470,6 +470,11 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     }
 
     @Override
+    public boolean isStateSet() {
+        return mAdapterState.isStateSet();
+    }
+
+    @Override
     public void registerOnTabSelectedListener(OnTabSelectedListener listener) {
         mOnTabSelectedListeners.add(listener);
     }
