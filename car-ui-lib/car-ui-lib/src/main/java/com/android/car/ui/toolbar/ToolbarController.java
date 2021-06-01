@@ -41,11 +41,6 @@ import java.util.function.Supplier;
 public interface ToolbarController {
 
     /**
-     * Returns {@code true} if a two row layout in enabled for the toolbar.
-     */
-    boolean isTabsInSecondRow();
-
-    /**
      * Sets the title of the toolbar to a string resource.
      *
      * <p>The title may not always be shown, for example with one row layout with tabs.

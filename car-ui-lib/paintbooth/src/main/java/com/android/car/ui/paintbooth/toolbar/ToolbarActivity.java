@@ -60,13 +60,9 @@ public class ToolbarActivity extends AppCompatActivity implements InsetsChangedL
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(getLayout());
+        setContentView(R.layout.car_ui_recycler_view_activity);
 
-        ToolbarController toolbarNonFinal = CarUi.getToolbar(this);
-        if (toolbarNonFinal == null) {
-            toolbarNonFinal = requireViewById(R.id.toolbar);
-        }
-        ToolbarController toolbar = toolbarNonFinal;
+        ToolbarController toolbar = CarUi.requireToolbar(this);
         toolbar.setTitle(getTitle());
         toolbar.setNavButtonMode(NavButtonMode.BACK);
         toolbar.setLogo(R.drawable.ic_launcher);
@@ -365,11 +361,6 @@ public class ToolbarActivity extends AppCompatActivity implements InsetsChangedL
 
         CarUiRecyclerView prv = requireViewById(R.id.list);
         prv.setAdapter(mAdapter);
-    }
-
-    /** Override in subclasses to change the layout */
-    protected int getLayout() {
-        return R.layout.car_ui_recycler_view_activity;
     }
 
     @Override

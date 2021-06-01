@@ -5,4 +5,7 @@
 
   <!-- The content description on the toolbar back button [CHAR_LIMIT=100] -->
   <string name="toolbar_nav_icon_content_description">Back</string>
+
+  <!-- The content description of the toolber menu item overflow button [CHAR_LIMIT=50] -->
+  <string name="toolbar_menu_item_overflow_title">Overflow</string>
 </resources>

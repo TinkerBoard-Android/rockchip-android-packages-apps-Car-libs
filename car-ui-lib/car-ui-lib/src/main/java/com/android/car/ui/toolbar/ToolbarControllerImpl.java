@@ -188,15 +188,11 @@ public final class ToolbarControllerImpl implements ToolbarController {
     }
 
     private Drawable getDrawable(@DrawableRes int resId) {
-        return ContextCompat.getDrawable(getContext(), resId);
-    }
-
-    /**
-     * Returns {@code true} if a two row layout in enabled for the toolbar.
-     */
-    @Override
-    public boolean isTabsInSecondRow() {
-        return mIsTabsInSecondRow;
+        if (resId == 0) {
+            return null;
+        } else {
+            return ContextCompat.getDrawable(getContext(), resId);
+        }
     }
 
     /**
@@ -206,10 +202,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
      */
     @Override
     public void setTitle(@StringRes int title) {
-        String titleText = getContext().getString(title);
-        mTitleText = titleText == null ? "" : titleText;
-        asyncSetText(mTitle, mTitleText, Runnable::run);
-        update();
+        setTitle(title == 0 ? null : getContext().getString(title));
     }
 
     /**
@@ -230,14 +223,14 @@ public final class ToolbarControllerImpl implements ToolbarController {
         WeakReference<TextView> textViewRef = new WeakReference<>(textView);
         bgExecutor.execute(() -> {
             // background thread
-            TextView tv = (TextView) textViewRef.get();
+            TextView tv = textViewRef.get();
             if (tv == null) {
                 return;
             }
             PrecomputedText precomputedText = PrecomputedText.create(title, params);
             tv.post(() -> {
                 // UI thread
-                TextView tvUi = (TextView) textViewRef.get();
+                TextView tvUi = textViewRef.get();
                 if (tvUi == null) return;
                 try {
                     tvUi.setTextMetricsParams(precomputedText.getParams());
@@ -261,10 +254,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
      */
     @Override
     public void setSubtitle(@StringRes int subTitle) {
-        String subTitleText = getContext().getString(subTitle);
-        mSubtitleText = subTitleText;
-        asyncSetText(mSubtitle, subTitleText == null ? "" : subTitleText, Runnable::run);
-        update();
+        setSubtitle(subTitle == 0 ? null : getContext().getString(subTitle));
     }
 
     /**
