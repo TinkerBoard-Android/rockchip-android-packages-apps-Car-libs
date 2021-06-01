@@ -18,15 +18,11 @@ package com.android.car.ui.toolbar;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
-import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withContentDescription;
-import static androidx.test.espresso.matcher.ViewMatchers.withHint;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
-import static com.android.car.ui.actions.ViewActions.waitForView;
 import static com.android.car.ui.matchers.ViewMatchers.doesNotExistOrIsNotDisplayed;
 import static com.android.car.ui.matchers.ViewMatchers.withDrawable;
 
@@ -34,13 +30,9 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.TestCase.assertEquals;
 
-import static org.hamcrest.core.IsNot.not;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
 import android.content.Context;
-import android.view.View;
 
+import androidx.core.content.ContextCompat;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -53,8 +45,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -63,14 +53,17 @@ import java.util.function.Consumer;
 @RunWith(Parameterized.class)
 public class ToolbarTest {
 
-    @Parameterized.Parameters(name = "With shared library? {0}")
+    @Parameterized.Parameters
     public static Object[] data() {
         // It's important to do no shared library first, so that the shared library will
         // still be enabled when this test finishes
         return new Object[] { false, true };
     }
 
+    private final boolean mSharedLibEnabled;
+
     public ToolbarTest(boolean sharedLibEnabled) {
+        mSharedLibEnabled = sharedLibEnabled;
         SharedLibraryFactorySingleton.setSharedLibEnabled(sharedLibEnabled);
     }
 
@@ -79,17 +72,25 @@ public class ToolbarTest {
             new ActivityScenarioRule<>(ToolbarTestActivity.class);
 
     @Test
-    public void test_setTitle_displaysTitle() throws Throwable {
+    public void test_setTitle_displaysTitle() {
         runWithToolbar((toolbar) -> toolbar.setTitle("Test title"));
-
         onView(withText("Test title")).check(matches(isDisplayed()));
+
+        // withText() uses the target context, not the instrumentation test's context.
+        String toolbarTitle = InstrumentationRegistry.getInstrumentation().getContext()
+                .getString(R.string.test_string_test_title);
+        runWithToolbar(toolbar -> toolbar.setTitle(R.string.test_string_test_title));
+        onView(withText(toolbarTitle)).check(matches(isDisplayed()));
+
+        runWithToolbar(toolbar -> toolbar.setTitle(0));
+        onView(withText(toolbarTitle)).check(doesNotExistOrIsNotDisplayed());
     }
 
     /**
      * This is somewhat of a bug, but various tests in other apps rely on this functionality.
      */
     @Test
-    public void test_setTitle_null_returns_nonNull() throws Throwable {
+    public void test_setTitle_null_returns_nonNull() {
         CharSequence[] getTitleResult = new CharSequence[] {"Something obviously incorrect"};
         runWithToolbar((toolbar) -> {
             toolbar.setTitle(null);
@@ -103,7 +104,7 @@ public class ToolbarTest {
      * This is somewhat of a bug, but various tests in other apps rely on this functionality.
      */
     @Test
-    public void test_setSubtitle_null_returns_nonNull() throws Throwable {
+    public void test_setSubtitle_null_returns_nonNull() {
         CharSequence[] getTitleResult = new CharSequence[] {"Something obviously incorrect"};
         runWithToolbar((toolbar) -> {
             toolbar.setSubtitle(null);
@@ -114,24 +115,19 @@ public class ToolbarTest {
     }
 
     @Test
-    public void test_setSubtitle_displaysSubtitle() throws Throwable {
+    public void test_setSubtitle_displaysSubtitle() {
         runWithToolbar((toolbar) -> toolbar.setSubtitle("Test subtitle"));
-
         onView(withText("Test subtitle")).check(matches(isDisplayed()));
+
+        runWithToolbar((toolbar) -> toolbar.setSubtitle(R.string.test_string_test_title));
+        onView(withText("Test title!")).check(matches(isDisplayed()));
+
+        runWithToolbar((toolbar) -> toolbar.setSubtitle(0));
+        onView(withText("Test title!")).check(doesNotExistOrIsNotDisplayed());
     }
 
     @Test
-    public void test_setSearchHint_isDisplayed() throws Throwable {
-        runWithToolbar((toolbar) -> {
-            toolbar.setSearchHint("Test search hint");
-            toolbar.setState(Toolbar.State.SEARCH);
-        });
-
-        onView(withHint("Test search hint")).check(matches(isDisplayed()));
-    }
-
-    @Test
-    public void setters_and_getters_test() throws Throwable {
+    public void setters_and_getters_test() {
         runWithToolbar((toolbar) -> {
             toolbar.setTitle("Foo");
             toolbar.setSearchHint("Foo2");
@@ -149,7 +145,7 @@ public class ToolbarTest {
     }
 
     @Test
-    public void test_setLogo_displaysLogo() throws Throwable {
+    public void test_setLogo_displaysLogo() {
         runWithToolbar((toolbar) -> toolbar.setLogo(R.drawable.ic_launcher));
 
         Context context = InstrumentationRegistry.getInstrumentation().getContext();
@@ -157,7 +153,20 @@ public class ToolbarTest {
     }
 
     @Test
-    public void pressBack_withoutListener_callsActivityOnBack() throws Throwable {
+    public void test_setLogoDrawable_displaysLogo() {
+        Context context = InstrumentationRegistry.getInstrumentation().getContext();
+        runWithToolbar((toolbar) ->
+                toolbar.setLogo(ContextCompat.getDrawable(context, R.drawable.ic_launcher)));
+
+        onView(withDrawable(context, R.drawable.ic_launcher)).check(matches(isDisplayed()));
+
+        runWithToolbar((toolbar) -> toolbar.setLogo(null));
+
+        onView(withDrawable(context, R.drawable.ic_launcher)).check(doesNotExistOrIsNotDisplayed());
+    }
+
+    @Test
+    public void pressBack_withoutListener_callsActivityOnBack() {
         ToolbarTestActivity[] savedActivity = new ToolbarTestActivity[] { null };
         runWithActivityAndToolbar((activity, toolbar) -> {
             toolbar.setState(Toolbar.State.SUBPAGE);
@@ -170,7 +179,7 @@ public class ToolbarTest {
     }
 
     @Test
-    public void pressBack_withListenerThatReturnsFalse_callsActivityOnBack() throws Throwable {
+    public void pressBack_withListenerThatReturnsFalse_callsActivityOnBack() {
         ToolbarTestActivity[] savedActivity = new ToolbarTestActivity[] { null };
         runWithActivityAndToolbar((activity, toolbar) -> {
             toolbar.setState(Toolbar.State.SUBPAGE);
@@ -184,7 +193,7 @@ public class ToolbarTest {
     }
 
     @Test
-    public void pressBack_withListenerThatReturnsTrue_doesntCallActivityOnBack() throws Throwable {
+    public void pressBack_withListenerThatReturnsTrue_doesntCallActivityOnBack() {
         ToolbarTestActivity[] savedActivity = new ToolbarTestActivity[] { null };
         runWithActivityAndToolbar((activity, toolbar) -> {
             toolbar.setState(Toolbar.State.SUBPAGE);
@@ -198,7 +207,7 @@ public class ToolbarTest {
     }
 
     @Test
-    public void pressBack_withUnregisteredListener_doesntCallActivityOnBack() throws Throwable {
+    public void pressBack_withUnregisteredListener_doesntCallActivityOnBack() {
         ToolbarTestActivity[] savedActivity = new ToolbarTestActivity[] { null };
         runWithActivityAndToolbar((activity, toolbar) -> {
             toolbar.setState(Toolbar.State.SUBPAGE);
@@ -215,124 +224,38 @@ public class ToolbarTest {
     }
 
     @Test
-    public void menuItems_setId_shouldWork() throws Throwable {
-        runWithActivityAndToolbar((activity, toolbar) -> {
-            MenuItem item = MenuItem.builder(activity).build();
+    public void test_backgroundShown_worksAsExpected() {
+        boolean[] backgroundShown = new boolean[] { false };
+        runWithToolbar((toolbar) -> backgroundShown[0] = toolbar.getBackgroundShown());
 
-            assertThat(item.getId()).isEqualTo(View.NO_ID);
+        assertThat(backgroundShown[0]).isTrue();
 
-            item.setId(7);
-
-            assertThat(item.getId()).isEqualTo(7);
-        });
-    }
-
-    @Test
-    public void menuItems_whenClicked_shouldCallListener() throws Throwable {
-        MenuItem.OnClickListener callback = mock(MenuItem.OnClickListener.class);
-        MenuItem[] menuItem = new MenuItem[] { null };
-        runWithActivityAndToolbar((activity, toolbar) -> {
-            menuItem[0] = MenuItem.builder(activity)
-                    .setTitle("Button!")
-                    .setOnClickListener(callback)
-                    .build();
-            toolbar.setMenuItems(Collections.singletonList(menuItem[0]));
+        runWithToolbar((toolbar) -> {
+            toolbar.setBackgroundShown(false);
+            backgroundShown[0] = toolbar.getBackgroundShown();
         });
 
-        waitForViewWithText("Button!");
-
-        onView(withText("Button!")).perform(click());
-
-        verify(callback).onClick(menuItem[0]);
+        if (mSharedLibEnabled) {
+            // Shared lib doesn't support hiding the background
+            assertThat(backgroundShown[0]).isTrue();
+        } else {
+            assertThat(backgroundShown[0]).isFalse();
+        }
     }
 
-    @Test
-    public void menuItems_null_shouldRemoveExistingMenuItems() throws Throwable {
-        runWithActivityAndToolbar((activity, toolbar) ->
-                toolbar.setMenuItems(Arrays.asList(
-                        MenuItem.builder(activity)
-                                .setTitle("Button!")
-                                .build(),
-                        MenuItem.builder(activity)
-                                .setTitle("Button2!")
-                                .build()
-                )));
-        waitForViewWithText("Button!");
-        waitForViewWithText("Button2!");
 
-        onView(withText("Button!")).check(matches(isDisplayed()));
-        onView(withText("Button2!")).check(matches(isDisplayed()));
-
-        runWithToolbar((toolbar) -> toolbar.setMenuItems(null));
-
-        onView(withText("Button!")).check(doesNotExist());
-        onView(withText("Button2!")).check(doesNotExist());
-    }
-
-    @Test
-    public void menuItems_setVisibility_shouldHide() throws Throwable {
-        MenuItem[] menuItem = new MenuItem[] { null };
-        runWithActivityAndToolbar((activity, toolbar) -> {
-            menuItem[0] = MenuItem.builder(activity)
-                    .setTitle("Button!")
-                    .build();
-            toolbar.setMenuItems(Collections.singletonList(menuItem[0]));
-        });
-
-        waitForViewWithText("Button!");
-        onView(withText("Button!")).check(matches(isDisplayed()));
-
-        runWithToolbar((toolbar) -> menuItem[0].setVisible(false));
-
-        onView(withText("Button!")).check(matches(not(isDisplayed())));
-    }
-
-    @Test
-    public void menuItems_searchScreen_shouldHideMenuItems() throws Throwable {
-        runWithActivityAndToolbar((activity, toolbar) -> {
-            toolbar.setMenuItems(Arrays.asList(
-                    MenuItem.builder(activity)
-                            .setToSearch()
-                            .build(),
-                    MenuItem.builder(activity)
-                            .setTitle("Button!")
-                            .build()));
-            toolbar.setShowMenuItemsWhileSearching(true);
-            toolbar.setState(Toolbar.State.SEARCH);
-        });
-
-        waitForViewWithText("Button!");
-
-        // Even if not hiding MenuItems while searching, the search MenuItem should still be hidden
-        onView(withText("Button!")).check(matches(isDisplayed()));
-        onView(withContentDescription(R.string.car_ui_toolbar_menu_item_search_title))
-                .check(doesNotExistOrIsNotDisplayed());
-
-        runWithToolbar((toolbar) -> toolbar.setShowMenuItemsWhileSearching(false));
-
-        // All menuitems should be hidden if we're hiding menuitems while searching
-        onView(withText("Button!")).check(doesNotExistOrIsNotDisplayed());
-        onView(withContentDescription(R.string.car_ui_toolbar_menu_item_search_title))
-                .check(doesNotExistOrIsNotDisplayed());
-
-    }
-
-    private void runWithToolbar(Consumer<ToolbarController> toRun) throws Throwable {
+    private void runWithToolbar(Consumer<ToolbarController> toRun) {
         mScenarioRule.getScenario().onActivity(activity -> {
             ToolbarController toolbar = CarUi.requireToolbar(activity);
             toRun.accept(toolbar);
         });
     }
 
-    private void runWithActivityAndToolbar(BiConsumer<ToolbarTestActivity, ToolbarController> toRun)
-            throws Throwable {
+    private void runWithActivityAndToolbar(
+            BiConsumer<ToolbarTestActivity, ToolbarController> toRun) {
         mScenarioRule.getScenario().onActivity(activity -> {
             ToolbarController toolbar = CarUi.requireToolbar(activity);
             toRun.accept(activity, toolbar);
         });
-    }
-
-    private void waitForViewWithText(String text) {
-        onView(isRoot()).perform(waitForView(withText(text), 500));
     }
 }

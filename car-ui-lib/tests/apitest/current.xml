@@ -301,7 +301,6 @@
   <public type="id" name="car_ui_second_action_container"/>
   <public type="id" name="car_ui_secondary_action"/>
   <public type="id" name="car_ui_secondary_action_concrete"/>
-  <public type="id" name="car_ui_toolbar"/>
   <public type="id" name="car_ui_toolbar_background"/>
   <public type="id" name="car_ui_toolbar_bottom_guideline"/>
   <public type="id" name="car_ui_toolbar_bottom_styleable"/>
@@ -367,7 +366,6 @@
   <public type="layout" name="car_ui_alert_dialog_title_with_subtitle"/>
   <public type="layout" name="car_ui_base_layout"/>
   <public type="layout" name="car_ui_base_layout_toolbar"/>
-  <public type="layout" name="car_ui_base_layout_toolbar_legacy"/>
   <public type="layout" name="car_ui_header_list_item"/>
   <public type="layout" name="car_ui_ims_wide_screen_input_view"/>
   <public type="layout" name="car_ui_list_item"/>

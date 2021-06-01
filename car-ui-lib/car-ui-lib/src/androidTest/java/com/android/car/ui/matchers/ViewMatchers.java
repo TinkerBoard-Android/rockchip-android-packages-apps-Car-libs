@@ -19,6 +19,7 @@ package com.android.car.ui.matchers;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.not;
 
 import android.content.Context;
@@ -64,5 +65,14 @@ public class ViewMatchers {
                 matches(not(isDisplayed())).check(view, noViewFoundException);
             }
         };
+    }
+
+    public static Matcher<View> isDisplayedAnd(Matcher<View> another) {
+        return allOf(isDisplayed(), another);
+    }
+
+
+    public static Matcher<View> hasIndeterminateProgress() {
+        return new ProgressBarIndeterminateMatcher();
     }
 }

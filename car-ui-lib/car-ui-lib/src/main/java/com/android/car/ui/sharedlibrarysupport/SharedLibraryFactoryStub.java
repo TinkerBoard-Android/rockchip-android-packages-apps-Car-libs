@@ -69,9 +69,15 @@ public final class SharedLibraryFactoryStub implements SharedLibraryFactory {
         @LayoutRes final int baseLayoutRes;
 
         if (toolbarEnabled) {
-            baseLayoutRes = legacyToolbar
-                    ? R.layout.car_ui_base_layout_toolbar_legacy
-                    : R.layout.car_ui_base_layout_toolbar;
+            if (legacyToolbar) {
+                boolean twoRow = contentView.getResources()
+                        .getBoolean(R.bool.car_ui_toolbar_tabs_on_second_row);
+                baseLayoutRes = twoRow
+                        ? R.layout.car_ui_base_layout_toolbar_legacy_two_row
+                        : R.layout.car_ui_base_layout_toolbar_legacy;
+            } else {
+                baseLayoutRes = R.layout.car_ui_base_layout_toolbar;
+            }
         } else {
             baseLayoutRes = R.layout.car_ui_base_layout;
         }
@@ -95,7 +101,8 @@ public final class SharedLibraryFactoryStub implements SharedLibraryFactory {
         ToolbarController toolbarController = null;
         if (toolbarEnabled) {
             if (legacyToolbar) {
-                toolbarController = requireViewByRefId(baseLayout, R.id.car_ui_toolbar);
+                toolbarController = new ToolbarControllerImpl(
+                        requireViewByRefId(baseLayout, R.id.car_ui_toolbar));
             } else {
                 toolbarController = new ToolbarControllerImpl(baseLayout);
             }
