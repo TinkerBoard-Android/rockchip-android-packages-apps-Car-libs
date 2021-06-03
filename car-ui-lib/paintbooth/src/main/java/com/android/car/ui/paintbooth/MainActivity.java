@@ -53,7 +53,6 @@ import com.android.car.ui.paintbooth.overlays.OverlayActivity;
 import com.android.car.ui.paintbooth.preferences.PreferenceActivity;
 import com.android.car.ui.paintbooth.preferences.SplitPreferenceActivity;
 import com.android.car.ui.paintbooth.toolbar.NoCarUiToolbarActivity;
-import com.android.car.ui.paintbooth.toolbar.OldToolbarActivity;
 import com.android.car.ui.paintbooth.toolbar.ToolbarActivity;
 import com.android.car.ui.paintbooth.widescreenime.WideScreenImeActivity;
 import com.android.car.ui.paintbooth.widescreenime.WideScreenTestView;
@@ -89,7 +88,6 @@ public class MainActivity extends Activity implements InsetsChangedListener {
             new ActivityElement("Split preferences sample", SplitPreferenceActivity.class),
             new ActivityElement("Overlays", OverlayActivity.class),
             new ActivityElement("Toolbar sample", ToolbarActivity.class),
-            new ActivityElement("Old toolbar sample", OldToolbarActivity.class),
             new ActivityElement("No CarUiToolbar sample", NoCarUiToolbarActivity.class),
             new ActivityElement("Widget sample", WidgetActivity.class),
             new ActivityElement("Wide Screen IME", WideScreenImeActivity.class),

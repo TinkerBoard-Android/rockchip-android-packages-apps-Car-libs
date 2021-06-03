@@ -28,9 +28,11 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ImeSearchInterfaceOEMV1;
@@ -130,14 +132,8 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     }
 
     @Override
-    public boolean isTabsInSecondRow() {
-        Log.w(TAG, "Unsupported operation isTabsInSecondRow() called, ignoring");
-        return false;
-    }
-
-    @Override
     public void setTitle(int title) {
-        setTitle(mContext.getString(title));
+        setTitle(title == 0 ? null : mContext.getString(title));
     }
 
     @Override
@@ -152,7 +148,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
     @Override
     public void setSubtitle(int title) {
-        setSubtitle(mContext.getString(title));
+        setSubtitle(title == 0 ? null : mContext.getString(title));
     }
 
     @Override
@@ -241,11 +237,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
     @Override
     public void setLogo(@IdRes int resId) {
-        if (resId == 0) {
-            setLogo(null);
-        } else {
-            setLogo(mContext.getDrawable(resId));
-        }
+        setLogo(getDrawable(resId));
     }
 
     @Override
@@ -271,7 +263,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
     @Override
     public void setSearchIcon(int resId) {
-        setSearchIcon(mContext.getDrawable(resId));
+        setSearchIcon(getDrawable(resId));
     }
 
     @Override
@@ -592,6 +584,14 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     @Override
     public ProgressBarController getProgressBar() {
         return mProgressBar;
+    }
+
+    private Drawable getDrawable(@DrawableRes int drawable) {
+        if (drawable == 0) {
+            return null;
+        } else {
+            return ContextCompat.getDrawable(mContext, drawable);
+        }
     }
 
     private static class ToolbarAdapterState {
