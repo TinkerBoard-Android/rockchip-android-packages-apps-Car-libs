@@ -310,6 +310,14 @@ public interface ToolbarController {
     Toolbar.State getState();
 
     /**
+     * Returns whether or not the state of the toolbar was previously set.
+     *
+     * @deprecated See {@link #setState(Toolbar.State)} for details.
+     */
+    @Deprecated
+    boolean isStateSet();
+
+    /**
      * Registers a new {@link Toolbar.OnTabSelectedListener} to the list of listeners.
      *
      * @deprecated The tabs set via {@link #setTabs(List)} have their own selected callbacks.

@@ -1042,6 +1042,14 @@ public final class ToolbarControllerImpl implements ToolbarController {
     }
 
     /**
+     * Returns whether or not the state of the toolbar was previously set.
+     */
+    @Override
+    public boolean isStateSet() {
+        return mStateSet;
+    }
+
+    /**
      * Registers a new {@link Toolbar.OnTabSelectedListener} to the list of listeners.
      */
     @Override
