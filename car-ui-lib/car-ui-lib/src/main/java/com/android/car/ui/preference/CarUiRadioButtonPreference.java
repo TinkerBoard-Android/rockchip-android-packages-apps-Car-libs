@@ -27,7 +27,6 @@ import androidx.preference.TwoStatePreference;
 
 import com.android.car.ui.R;
 import com.android.car.ui.utils.CarUiUtils;
-import com.android.car.ui.utils.ViewUtils;
 
 import java.util.function.Consumer;
 
@@ -85,7 +84,7 @@ public class CarUiRadioButtonPreference extends TwoStatePreference
                 R.id.radio_button);
         radioButton.setChecked(isChecked());
 
-        ViewUtils.makeAllViewsUxRestricted(holder.itemView, mUxRestricted);
+        CarUiUtils.makeAllViewsUxRestricted(holder.itemView, mUxRestricted);
     }
 
     @Override

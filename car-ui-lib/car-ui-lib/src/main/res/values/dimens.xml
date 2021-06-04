@@ -209,11 +209,6 @@
     <dimen name="car_ui_list_item_check_box_end_inset">@dimen/car_ui_list_item_end_inset</dimen>
     <dimen name="car_ui_list_item_check_box_icon_container_width">@dimen/car_ui_list_item_icon_container_width</dimen>
 
-    <!-- Rotary focus highlight  -->
-
-    <dimen name="car_ui_rotary_focus_stroke_width">8dp</dimen>
-    <dimen name="car_ui_rotary_focus_pressed_stroke_width">4dp</dimen>
-
     <!-- IME wide screen -->
     <dimen name="car_ui_ime_wide_screen_keyboard_width">1250dp</dimen>
     <dimen name="car_ui_ime_wide_screen_keyboard_area_padding_start">36dp</dimen>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-include ':car-ui-lib'
-project(':car-ui-lib').projectDir = new File('./car-ui-lib')
-include ':PaintBooth'
-project(':PaintBooth').projectDir = new File('./paintbooth')
-include ':oem-apis'
-project(':oem-apis').projectDir = new File('./oem-apis')
-include ':shared-library'
-project(':shared-library').projectDir = new File('./referencedesign/sharedlibrary')
+package com.android.car.ui.actions;
 
-rootProject.name='Chassis'
-include ':car-rotary-lib'
+import android.view.View;
+
+import androidx.test.espresso.ViewAction;
+
+import org.hamcrest.Matcher;
+
+public class ViewActions {
+
+    public static ViewAction waitForView(Matcher<View> matcher, long waitTimeMillis) {
+        return new WaitForViewAction(matcher, waitTimeMillis);
+    }
+}

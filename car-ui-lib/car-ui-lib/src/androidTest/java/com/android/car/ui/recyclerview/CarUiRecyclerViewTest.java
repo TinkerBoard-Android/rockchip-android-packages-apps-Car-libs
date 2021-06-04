@@ -47,6 +47,7 @@ import static com.android.car.ui.actions.LowLevelActions.release;
 import static com.android.car.ui.actions.LowLevelActions.touchDownAndUp;
 import static com.android.car.ui.actions.ViewActions.waitForView;
 import static com.android.car.ui.recyclerview.CarUiRecyclerView.ItemCap.UNLIMITED;
+import static com.android.car.ui.utils.ViewUtils.setRotaryScrollEnabled;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
@@ -104,7 +105,6 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import com.android.car.ui.TestActivity;
 import com.android.car.ui.recyclerview.decorations.grid.GridDividerItemDecoration;
 import com.android.car.ui.test.R;
-import com.android.car.ui.utils.CarUiUtils;
 import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
 import org.junit.After;
@@ -275,7 +275,7 @@ public class CarUiRecyclerViewTest {
         CarUiRecyclerView carUiRecyclerView = mActivity.requireViewById(R.id.list);
         TestAdapter adapter = new TestAdapter(3);
         mActivity.runOnUiThread(() -> {
-            CarUiUtils.setRotaryScrollEnabled(carUiRecyclerView, /* isVertical= */ true);
+            setRotaryScrollEnabled(carUiRecyclerView, /* isVertical= */ true);
             carUiRecyclerView.setAdapter(adapter);
             carUiRecyclerView.setVisibility(View.VISIBLE);
         });

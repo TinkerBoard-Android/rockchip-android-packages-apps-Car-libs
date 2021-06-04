@@ -48,6 +48,7 @@ android_library {
         "androidx.recyclerview_recyclerview",
         "androidx-constraintlayout_constraintlayout-solver",
         "androidx.asynclayoutinflater_asynclayoutinflater",
+        "car-rotary-lib",
     ],
 }
 

@@ -19,6 +19,7 @@ package com.android.car.ui;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_FOCUS;
 
 import static com.android.car.ui.utils.RotaryConstants.ACTION_RESTORE_DEFAULT_FOCUS;
+import static com.android.car.ui.utils.ViewUtils.setRotaryScrollEnabled;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -30,9 +31,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.rule.ActivityTestRule;
 
-import com.android.car.ui.recyclerview.TestContentLimitingAdapter;
 import com.android.car.ui.test.R;
-import com.android.car.ui.utils.CarUiUtils;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -70,8 +69,8 @@ public class FocusParkingViewTest {
 
         mList.post(() -> {
             mList.setLayoutManager(new LinearLayoutManager(mActivity));
-            mList.setAdapter(new TestContentLimitingAdapter(NUM_ITEMS));
-            CarUiUtils.setRotaryScrollEnabled(mList, /* isVertical= */ true);
+            mList.setAdapter(new TestAdapter(NUM_ITEMS));
+            setRotaryScrollEnabled(mList, /* isVertical= */ true);
         });
     }
 
