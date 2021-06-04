@@ -19,6 +19,7 @@ import static com.android.car.ui.utils.CarUiUtils.findViewByRefId;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_CONTAINER;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_HORIZONTALLY_SCROLLABLE;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_VERTICALLY_SCROLLABLE;
+import static com.android.car.ui.utils.ViewUtils.setRotaryScrollEnabled;
 
 import android.car.drivingstate.CarUxRestrictions;
 import android.content.Context;
@@ -48,7 +49,6 @@ import com.android.car.ui.recyclerview.decorations.grid.GridOffsetItemDecoration
 import com.android.car.ui.recyclerview.decorations.linear.LinearDividerItemDecoration;
 import com.android.car.ui.recyclerview.decorations.linear.LinearOffsetItemDecoration;
 import com.android.car.ui.recyclerview.decorations.linear.LinearOffsetItemDecoration.OffsetPosition;
-import com.android.car.ui.utils.CarUiUtils;
 import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
 import java.lang.reflect.Constructor;
@@ -273,7 +273,7 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
             int orientation = styledAttributes
                     .getInt(R.styleable.CarUiRecyclerView_android_orientation,
                             LinearLayout.VERTICAL);
-            CarUiUtils.setRotaryScrollEnabled(
+            setRotaryScrollEnabled(
                     this, /* isVertical= */ orientation == LinearLayout.VERTICAL);
         } else {
             CharSequence contentDescription = getContentDescription();

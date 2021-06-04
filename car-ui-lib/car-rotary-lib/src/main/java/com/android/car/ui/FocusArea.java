@@ -50,7 +50,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.car.ui.utils.CarUiUtils;
 import com.android.car.ui.utils.ViewUtils;
 
 import java.util.Arrays;
@@ -479,7 +478,7 @@ public class FocusArea extends LinearLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         if (mDefaultFocusId != View.NO_ID) {
-            mDefaultFocusView = CarUiUtils.requireViewByRefId(this, mDefaultFocusId);
+            mDefaultFocusView = requireViewById(mDefaultFocusId);
         }
     }
 
