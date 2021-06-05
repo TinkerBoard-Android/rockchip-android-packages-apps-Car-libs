@@ -38,11 +38,13 @@ import com.android.car.ui.recyclerview.CarUiContentListItem;
 import com.android.car.ui.recyclerview.CarUiListItem;
 import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
+import com.android.car.ui.toolbar.NavButtonMode;
 import com.android.car.ui.toolbar.Toolbar;
 import com.android.car.ui.toolbar.ToolbarController;
 import com.android.car.ui.utils.CarUiUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -93,10 +95,14 @@ public class ListPreferenceFragment extends Fragment implements InsetsChangedLis
         if (toolbar != null) {
             toolbar.setTitle(mPreference.getTitle());
             toolbar.setSubtitle(null);
-            toolbar.setState(Toolbar.State.SUBPAGE);
+            if (toolbar.isStateSet()) {
+                toolbar.setState(Toolbar.State.SUBPAGE);
+            } else {
+                toolbar.setNavButtonMode(NavButtonMode.BACK);
+            }
             toolbar.setLogo(null);
             toolbar.setMenuItems(null);
-            toolbar.clearAllTabs();
+            toolbar.setTabs(Collections.emptyList());
         }
 
         CharSequence[] entries = mPreference.getEntries();
