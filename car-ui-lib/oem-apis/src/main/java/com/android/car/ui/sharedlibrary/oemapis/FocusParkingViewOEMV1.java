@@ -29,7 +29,7 @@ public interface FocusParkingViewOEMV1 {
     /**
      * Sets whether this view should restore focus when the framework wants to focus this view. When
      * set to false, this view allows itself to be focused instead. This should be set to false for
-     * the {@code FocusParkingView} in an {@code ActivityView}.  The default value is true.
+     * the {@code FocusParkingView} in a {@code TaskView}. The default value is true.
      */
     void setShouldRestoreFocus(boolean shouldRestoreFocus);
 

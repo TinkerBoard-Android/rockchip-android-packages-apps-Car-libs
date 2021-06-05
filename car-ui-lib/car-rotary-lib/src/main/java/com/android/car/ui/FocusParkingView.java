@@ -86,7 +86,7 @@ public class FocusParkingView extends View {
     /**
      * Whether to restore focus when the frameworks wants to focus this view. When false, this view
      * allows itself to be focused instead. This should be false for the {@code FocusParkingView} in
-     * an {@code ActivityView}. The default value is true.
+     * a {@code TaskView}. The default value is true.
      */
     private boolean mShouldRestoreFocus = true;
 
@@ -256,7 +256,7 @@ public class FocusParkingView extends View {
     /**
      * Sets whether this view should restore focus when the framework wants to focus this view. When
      * set to false, this view allows itself to be focused instead. This should be set to false for
-     * the {@code FocusParkingView} in an {@code ActivityView}.  The default value is true.
+     * the {@code FocusParkingView} in a {@code TaskView}.  The default value is true.
      */
     public void setShouldRestoreFocus(boolean shouldRestoreFocus) {
         mShouldRestoreFocus = shouldRestoreFocus;
