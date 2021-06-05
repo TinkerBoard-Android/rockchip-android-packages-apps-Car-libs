@@ -31,6 +31,7 @@ import static com.android.car.ui.utils.ViewUtils.IMPLICIT_DEFAULT_FOCUS;
 import static com.android.car.ui.utils.ViewUtils.NO_FOCUS;
 import static com.android.car.ui.utils.ViewUtils.REGULAR_FOCUS;
 import static com.android.car.ui.utils.ViewUtils.SCROLLABLE_CONTAINER_FOCUS;
+import static com.android.car.ui.utils.ViewUtils.setRotaryScrollEnabled;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -39,12 +40,12 @@ import android.view.ViewTreeObserver;
 
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.rule.ActivityTestRule;
 
 import com.android.car.ui.FocusArea;
 import com.android.car.ui.FocusParkingView;
-import com.android.car.ui.recyclerview.CarUiRecyclerView;
-import com.android.car.ui.recyclerview.TestContentLimitingAdapter;
+import com.android.car.ui.TestAdapter;
 import com.android.car.ui.test.R;
 
 import org.junit.Before;
@@ -69,7 +70,7 @@ public class ViewUtilsTest {
     private View mFocusedByDefault3;
     private View mView4;
     private View mDefaultFocus4;
-    private CarUiRecyclerView mList5;
+    private RecyclerView mList5;
     private View mRoot;
 
     @Before
@@ -90,8 +91,8 @@ public class ViewUtilsTest {
 
         mRoot.post(() -> {
             mList5.setLayoutManager(new LinearLayoutManager(mActivity));
-            mList5.setAdapter(new TestContentLimitingAdapter(/* numItems= */ 2));
-            CarUiUtils.setRotaryScrollEnabled(mList5, /* isVertical= */ true);
+            mList5.setAdapter(new TestAdapter(/* numItems= */ 2));
+            setRotaryScrollEnabled(mList5, /* isVertical= */ true);
         });
         // If we don't wait for the recyclerview items to show up, some of the tests flake
         onView(isRoot()).perform(waitForView(withText("Item 0"), 500));

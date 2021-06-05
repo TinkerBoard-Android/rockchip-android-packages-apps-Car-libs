@@ -8,11 +8,7 @@
   <public type="attr" name="preferenceStyle"/>
   <public type="attr" name="state_ux_restricted"/>
   <public type="bool" name="car_ui_alert_dialog_force_dismiss_button"/>
-  <public type="bool" name="car_ui_clear_focus_area_history_when_rotating"/>
-  <public type="bool" name="car_ui_enable_focus_area_background_highlight"/>
-  <public type="bool" name="car_ui_enable_focus_area_foreground_highlight"/>
   <public type="bool" name="car_ui_escrow_check_components_automatically"/>
-  <public type="bool" name="car_ui_focus_area_default_focus_overrides_history"/>
   <public type="bool" name="car_ui_ime_wide_screen_aligned_left"/>
   <public type="bool" name="car_ui_ime_wide_screen_allow_app_hide_content_area"/>
   <public type="bool" name="car_ui_list_item_single_line_title"/>
@@ -40,14 +36,6 @@
   <public type="color" name="car_ui_preference_two_action_divider_color"/>
   <public type="color" name="car_ui_recyclerview_divider_color"/>
   <public type="color" name="car_ui_ripple_color"/>
-  <public type="color" name="car_ui_rotary_focus_fill_color"/>
-  <public type="color" name="car_ui_rotary_focus_fill_secondary_color"/>
-  <public type="color" name="car_ui_rotary_focus_pressed_fill_color"/>
-  <public type="color" name="car_ui_rotary_focus_pressed_fill_secondary_color"/>
-  <public type="color" name="car_ui_rotary_focus_pressed_stroke_color"/>
-  <public type="color" name="car_ui_rotary_focus_pressed_stroke_secondary_color"/>
-  <public type="color" name="car_ui_rotary_focus_stroke_color"/>
-  <public type="color" name="car_ui_rotary_focus_stroke_secondary_color"/>
   <public type="color" name="car_ui_scrollbar_arrow"/>
   <public type="color" name="car_ui_scrollbar_thumb"/>
   <public type="color" name="car_ui_text_color_hint"/>
@@ -164,8 +152,6 @@
   <public type="dimen" name="car_ui_recyclerview_divider_height"/>
   <public type="dimen" name="car_ui_recyclerview_divider_start_margin"/>
   <public type="dimen" name="car_ui_recyclerview_divider_top_margin"/>
-  <public type="dimen" name="car_ui_rotary_focus_pressed_stroke_width"/>
-  <public type="dimen" name="car_ui_rotary_focus_stroke_width"/>
   <public type="dimen" name="car_ui_scrollbar_button_size"/>
   <public type="dimen" name="car_ui_scrollbar_container_width"/>
   <public type="dimen" name="car_ui_scrollbar_decelerate_interpolator_factor"/>
@@ -215,8 +201,6 @@
   <public type="dimen" name="wrap_content"/>
   <public type="drawable" name="car_ui_activity_background"/>
   <public type="drawable" name="car_ui_divider"/>
-  <public type="drawable" name="car_ui_focus_area_background_highlight"/>
-  <public type="drawable" name="car_ui_focus_area_foreground_highlight"/>
   <public type="drawable" name="car_ui_icon_add"/>
   <public type="drawable" name="car_ui_icon_arrow_back"/>
   <public type="drawable" name="car_ui_icon_chevron"/>
@@ -355,10 +339,6 @@
   <public type="id" name="textbox"/>
   <public type="id" name="title_template"/>
   <public type="integer" name="car_ui_default_max_string_length"/>
-  <public type="integer" name="car_ui_focus_area_history_cache_type"/>
-  <public type="integer" name="car_ui_focus_area_history_expiration_period_ms"/>
-  <public type="integer" name="car_ui_focus_history_cache_type"/>
-  <public type="integer" name="car_ui_focus_history_expiration_period_ms"/>
   <public type="integer" name="car_ui_scrollbar_longpress_initial_delay"/>
   <public type="integer" name="car_ui_scrollbar_longpress_repeat_interval"/>
   <public type="layout" name="car_ui_alert_dialog_edit_text"/>
