@@ -21,7 +21,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import android.view.View;
 
@@ -79,7 +79,7 @@ public class DelegatingContentLimitingAdapterTest {
         boolean isAtStart = orientationHelper.getDecoratedStart(firstChild)
                 >= orientationHelper.getStartAfterPadding()
                 && layoutManager.getPosition(firstChild) == 0;
-        assertEquals(isAtStart, true);
+        assertTrue(isAtStart);
     }
 
     @Test
@@ -106,7 +106,7 @@ public class DelegatingContentLimitingAdapterTest {
         boolean isAtStart = orientationHelper.getDecoratedStart(firstChild)
                 >= orientationHelper.getStartAfterPadding()
                 && layoutManager.getPosition(firstChild) == 0;
-        assertEquals(isAtStart, true);
+        assertTrue(isAtStart);
     }
 
     @Test
