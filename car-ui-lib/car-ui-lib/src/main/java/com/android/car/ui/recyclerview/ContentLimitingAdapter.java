@@ -278,10 +278,10 @@ public abstract class ContentLimitingAdapter<T extends RecyclerView.ViewHolder>
 
     private void autoScrollWhenRestricted() {
         int scrollToPosition = getScrollToPositionWhenRestricted();
-        if (scrollToPosition >= 0) {
+        if (scrollToPosition >= 0 && mRecyclerView != null) {
             RecyclerView.LayoutManager layoutManager = mRecyclerView.getLayoutManager();
             if (layoutManager != null) {
-                mRecyclerView.getLayoutManager().scrollToPosition(scrollToPosition);
+                layoutManager.scrollToPosition(scrollToPosition);
             }
         }
     }
