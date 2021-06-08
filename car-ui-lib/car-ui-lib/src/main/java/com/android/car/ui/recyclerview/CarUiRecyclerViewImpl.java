@@ -223,8 +223,11 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
                     layoutStyle.getSpanCount(),
                     layoutStyle.getOrientation(),
                     layoutStyle.getReverseLayout());
-            ((GridLayoutManager) layoutManager).setSpanSizeLookup(
-                    ((CarUiGridLayoutStyle) layoutStyle).getSpanSizeLookup());
+            // TODO(b/190444037): revisit usage of LayoutStyles and their casting
+            if (layoutStyle instanceof CarUiGridLayoutStyle) {
+                ((GridLayoutManager) layoutManager).setSpanSizeLookup(
+                        ((CarUiGridLayoutStyle) layoutStyle).getSpanSizeLookup());
+            }
         }
         setLayoutManager(layoutManager);
     }
