@@ -25,6 +25,7 @@ import java.util.function.Consumer;
  * This is an interface (as in "bridge") between the static lib and the shared lib, so that
  * the static lib can handle showing search results inside the IME.
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public interface ImeSearchInterfaceOEMV1 {
     /**
      * Sets a consumer that should be called when the search TextView is ready.
