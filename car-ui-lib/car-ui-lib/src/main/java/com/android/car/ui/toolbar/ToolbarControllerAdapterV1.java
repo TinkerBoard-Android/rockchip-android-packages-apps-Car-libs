@@ -162,13 +162,22 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     }
 
     @Override
-    public void setTabs(List<Tab> tabs) {
-        mDeprecatedTabs.clear();
-        setTabsInternal(tabs);
+    public void setTabs(@Nullable List<Tab> tabs) {
+        setTabs(tabs, 0);
     }
 
-    private void setTabsInternal(List<Tab> tabs) {
-        update(mAdapterState.copy().setTabs(convertList(tabs, TabAdapterV1::new)).build());
+    @Override
+    public void setTabs(@Nullable List<Tab> tabs, int selectedTab) {
+        mDeprecatedTabs.clear();
+        if (tabs == null || tabs.isEmpty()) {
+            selectedTab = 0;
+        } else if (selectedTab < 0 || selectedTab >= tabs.size()) {
+            throw new IllegalArgumentException("Tab position is invalid: " + selectedTab);
+        }
+        update(mAdapterState.copy()
+                .setTabs(convertList(tabs, TabAdapterV1::new))
+                .setSelectedTab(selectedTab)
+                .build());
     }
 
     @Override
@@ -204,7 +213,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             modernTabs.add(tab.getModernTab());
         }
 
-        setTabsInternal(modernTabs);
+        update(mAdapterState.copy().setTabs(convertList(modernTabs, TabAdapterV1::new)).build());
     }
 
     @Override
@@ -828,7 +837,10 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             }
 
             public Builder setTabs(
-                    @NonNull List<TabAdapterV1> tabs) {
+                    @Nullable List<TabAdapterV1> tabs) {
+                if (tabs == null) {
+                    tabs = Collections.emptyList();
+                }
                 if (!Objects.equals(tabs, mTabs)) {
                     mTabs = Collections.unmodifiableList(tabs);
                     mSelectedTab = mTabs.isEmpty() ? -1 : 0;

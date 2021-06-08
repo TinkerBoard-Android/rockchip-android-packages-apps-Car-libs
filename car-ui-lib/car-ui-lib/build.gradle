@@ -73,7 +73,7 @@ android {
 
 dependencies {
     compileOnly project(':oem-apis')
-    implementation project(':car-rotary-lib')
+    api project(':car-rotary-lib')
     api 'androidx.annotation:annotation:1.2.0'
     api 'androidx.appcompat:appcompat:1.2.0'
     api 'androidx.constraintlayout:constraintlayout:2.0.4'

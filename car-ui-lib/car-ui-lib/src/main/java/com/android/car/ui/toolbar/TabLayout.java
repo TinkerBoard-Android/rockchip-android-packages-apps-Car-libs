@@ -81,12 +81,12 @@ public class TabLayout extends LinearLayout {
     }
 
     /** Sets the tabs to show */
-    public void setTabs(List<com.android.car.ui.toolbar.Tab> tabs) {
+    public void setTabs(List<com.android.car.ui.toolbar.Tab> tabs, int selectedTab) {
         if (tabs == null) {
             tabs = Collections.emptyList();
         }
         mTabs = tabs;
-        mSelectedTab = tabs.isEmpty() ? -1 : 0;
+        mSelectedTab = selectedTab;
         recreateViews();
     }
 
