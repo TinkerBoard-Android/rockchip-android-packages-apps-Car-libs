@@ -74,6 +74,7 @@ import java.util.function.BiConsumer;
  * SearchWidescreenController will still accept calls to {@link #setSearchConfig} even before
  * the TextView has been set, it will just wait for the TextView before doing anything.
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public class SearchWidescreenController {
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
