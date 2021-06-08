@@ -42,7 +42,7 @@ public final class AppStyledDialogController {
     public AppStyledDialogController(@NonNull Context context) {
         Objects.requireNonNull(context);
         mAppStyledViewController = SharedLibraryFactorySingleton.get(context)
-                .createAppStyledView();
+                .createAppStyledView(context);
         mDialog = new AppStyledDialog(context, mAppStyledViewController);
     }
 

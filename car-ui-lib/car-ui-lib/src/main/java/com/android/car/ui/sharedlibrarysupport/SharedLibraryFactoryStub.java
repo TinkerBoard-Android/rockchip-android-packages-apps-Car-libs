@@ -125,8 +125,8 @@ public final class SharedLibraryFactoryStub implements SharedLibraryFactory {
     }
 
     @Override
-    public AppStyledViewController createAppStyledView() {
-        return new AppStyledViewControllerImpl(mContext);
+    public AppStyledViewController createAppStyledView(Context activityContext) {
+        return new AppStyledViewControllerImpl(activityContext);
     }
 
     /**
