@@ -56,9 +56,9 @@ public class PreferenceTestFragment extends PreferenceFragment {
      */
     public static class TestDataStore extends PreferenceDataStore {
 
-        private Map<String, String> mStringStore = new HashMap<>();
-        private Map<String, Boolean> mBooleanStore = new HashMap<>();
-        private Map<String, Set<String>> mStringSetStore = new HashMap<>();
+        private final Map<String, String> mStringStore = new HashMap<>();
+        private final Map<String, Boolean> mBooleanStore = new HashMap<>();
+        private final Map<String, Set<String>> mStringSetStore = new HashMap<>();
 
         @Override
         public void putString(String key, @Nullable String value) {
