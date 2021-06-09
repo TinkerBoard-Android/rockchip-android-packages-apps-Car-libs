@@ -19,7 +19,7 @@ package com.android.car.ui;
 import android.app.Activity;
 import android.os.Bundle;
 
-import com.android.car.ui.test.R;
+import com.android.car.rotary.test.R;
 
 /** An Activity used for testing {@link FocusParkingView}. */
 public class FocusParkingViewTestActivity extends Activity {
