@@ -48,4 +48,7 @@ public interface ScrollBar {
      * Returns {@code true} if the RecyclerView is completely displaying the first item.
      */
     boolean isAtStart();
+
+    /** Highlights or unhighlight the scrollbar's thumb. */
+    void setHighlightThumb(boolean highlight);
 }

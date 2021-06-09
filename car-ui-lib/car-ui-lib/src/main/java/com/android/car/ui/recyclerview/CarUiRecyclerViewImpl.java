@@ -312,6 +312,12 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
         // focused.
         setDefaultFocusHighlightEnabled(false);
 
+        // If rotary scrolling is enabled, set a focus change listener to highlight the scrollbar
+        // thumb when this recycler view is focused, i.e. when no focusable descendant is visible.
+        setOnFocusChangeListener(rotaryScrollEnabled ? (v, hasFocus) -> {
+            if (mScrollBar != null) mScrollBar.setHighlightThumb(hasFocus);
+        } : null);
+
         // This view is a rotary container if it's not a scrollable container.
         if (!rotaryScrollEnabled) {
             super.setContentDescription(ROTARY_CONTAINER);
