@@ -31,7 +31,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.rule.ActivityTestRule;
 
-import com.android.car.ui.test.R;
+import com.android.car.rotary.test.R;
 
 import org.junit.Before;
 import org.junit.Rule;
