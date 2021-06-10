@@ -285,6 +285,11 @@ public final class ToolbarControllerImpl implements ToolbarController {
         setTabsInternal(tabs, selectedTab);
     }
 
+    @Override
+    public List<Tab> getTabs() {
+        return mTabLayout.getTabs();
+    }
+
     private void setTabsInternal(@Nullable List<Tab> tabs, int selectedTab) {
         if (tabs == null || tabs.isEmpty()) {
             selectedTab = -1;
@@ -353,6 +358,11 @@ public final class ToolbarControllerImpl implements ToolbarController {
     @Override
     public void selectTab(int position) {
         mTabLayout.selectTab(position);
+    }
+
+    @Override
+    public int getSelectedTab() {
+        return mTabLayout.getSelectedTab();
     }
 
     /**

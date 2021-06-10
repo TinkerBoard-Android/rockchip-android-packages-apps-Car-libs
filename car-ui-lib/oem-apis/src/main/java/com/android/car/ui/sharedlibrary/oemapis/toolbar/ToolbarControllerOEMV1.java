@@ -50,9 +50,10 @@ public interface ToolbarControllerOEMV1 {
 
     /**
      * Selects a tab added to this toolbar. See
-     * {@link #setTabs(List, int)}.
+     * {@link #setTabs(List, int)}. The tab's callback should also be called if {@code sendCallback}
+     * is true.
      */
-    void selectTab(int position);
+    void selectTab(int position, boolean sendCallback);
 
     /**
      * Sets the logo to display in this toolbar. If navigation icon is being displayed, this logo

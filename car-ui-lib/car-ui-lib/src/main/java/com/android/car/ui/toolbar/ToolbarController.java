@@ -97,10 +97,15 @@ public interface ToolbarController {
     void setTabs(@Nullable List<Tab> tabs, int selectedTab);
 
     /**
+     * Gets the list of tabs being displayed. The returned list will be unmodifiable.
+     */
+    List<Tab> getTabs();
+
+    /**
      * Gets the number of tabs in the toolbar. The tabs can be retrieved using
      * {@link #getTab(int)}.
      *
-     * @deprecated No equivalent function. Maintain a local count of tabs if needed.
+     * @deprecated Use {@link #getTabs getTabs().size()} instead.
      */
     @Deprecated
     int getTabCount();
@@ -108,8 +113,7 @@ public interface ToolbarController {
     /**
      * Gets the index of the tab.
      *
-     * @deprecated No equivalent replacement. Search for the tab in a locally maintained list
-     * if necessary.
+     * @deprecated Use {@link #getTabs getTabs().indexOf(tab)} instead.
      */
     @Deprecated
     int getTabPosition(TabLayout.Tab tab);
@@ -136,16 +140,23 @@ public interface ToolbarController {
      * Gets a tab added to this toolbar. See
      * {@link #addTab(TabLayout.Tab)}.
      *
-     * @deprecated No equivalent function. Maintain local references to tab objects if needed.
+     * @deprecated Use {@link #getTabs getTabs().get(position)} instead.
      */
     @Deprecated
     TabLayout.Tab getTab(int position);
 
     /**
-     * Selects a tab added to this toolbar. See
-     * {@link #addTab(TabLayout.Tab)}.
+     * Selects a tab added to this toolbar.
+     *
+     * @see #setTabs(List)
      */
     void selectTab(int position);
+
+    /**
+     * Returns the index of the currently selected tab. If there are no tabs, this method returns
+     * -1.
+     */
+    int getSelectedTab();
 
     /**
      * Sets whether or not tabs should also be shown in the SUBPAGE {@link Toolbar.State}.

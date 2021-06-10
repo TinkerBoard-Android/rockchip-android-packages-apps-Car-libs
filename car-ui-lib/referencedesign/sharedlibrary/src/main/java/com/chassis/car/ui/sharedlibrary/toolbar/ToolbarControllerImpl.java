@@ -139,8 +139,8 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     }
 
     @Override
-    public void selectTab(int position) {
-        mTabContainer.selectTab(position);
+    public void selectTab(int position, boolean sendCallback) {
+        mTabContainer.selectTab(position, sendCallback);
     }
 
     @Override
