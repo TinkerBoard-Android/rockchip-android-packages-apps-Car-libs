@@ -25,7 +25,7 @@ import android.view.View;
 
 import androidx.test.rule.ActivityTestRule;
 
-import com.android.car.ui.test.R;
+import com.android.car.rotary.test.R;
 
 import org.junit.Before;
 import org.junit.Rule;

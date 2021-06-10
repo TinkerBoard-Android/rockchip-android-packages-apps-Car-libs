@@ -32,10 +32,6 @@ android_library {
     optimize: {
         enabled: false,
     },
-    libs: [
-        "android.car-stubs",
-        "car-ui-lib-oem-apis",
-    ],
     static_libs: [
         "androidx.annotation_annotation",
         "androidx.recyclerview_recyclerview",
@@ -44,4 +40,38 @@ android_library {
         "com.android.permission",
         "//apex_available:platform",
     ],
+}
+
+android_test {
+    name: "CarRotaryLibUnitTests",
+    certificate: "platform",
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+        "android.car-stubs",
+        "android.test.mock.stubs"
+    ],
+    manifest: "src/androidTest/AndroidManifest.xml",
+    resource_dirs: ["src/androidTest/res"],
+    // Include all test java files.
+    srcs: ["src/androidTest/java/**/*.java"],
+    static_libs: [
+        "androidx.test.rules",
+        "androidx.test.espresso.core",
+        "androidx.test.espresso.contrib",
+        "androidx.test.ext.junit",
+        "car-rotary-lib",
+        "car-ui-lib",
+        "platform-test-annotations",
+        "mockito-target-inline-minus-junit4",
+        "truth-prebuilt",
+    ],
+    jni_libs: [
+        // For mockito extended
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
+    ],
+
+    platform_apis: true,
+    test_suites: ["device-tests"],
 }
