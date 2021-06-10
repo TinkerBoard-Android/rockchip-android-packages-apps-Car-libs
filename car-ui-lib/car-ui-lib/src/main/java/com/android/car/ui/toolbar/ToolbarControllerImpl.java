@@ -275,13 +275,23 @@ public final class ToolbarControllerImpl implements ToolbarController {
     }
 
     @Override
-    public void setTabs(List<Tab> tabs) {
-        mDeprecatedTabs.clear();
-        setTabsInternal(tabs);
+    public void setTabs(@Nullable List<Tab> tabs) {
+        setTabs(tabs, 0);
     }
 
-    private void setTabsInternal(List<Tab> tabs) {
-        mTabLayout.setTabs(tabs);
+    @Override
+    public void setTabs(@Nullable List<Tab> tabs, int selectedTab) {
+        mDeprecatedTabs.clear();
+        setTabsInternal(tabs, selectedTab);
+    }
+
+    private void setTabsInternal(@Nullable List<Tab> tabs, int selectedTab) {
+        if (tabs == null || tabs.isEmpty()) {
+            selectedTab = -1;
+        } else if (selectedTab < 0 || selectedTab >= tabs.size()) {
+            throw new IllegalArgumentException("Tab position is invalid: " + selectedTab);
+        }
+        mTabLayout.setTabs(tabs, selectedTab);
         update();
     }
 
@@ -322,7 +332,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
             modernTabs.add(tab.getModernTab());
         }
 
-        setTabsInternal(modernTabs);
+        setTabsInternal(modernTabs, 0);
     }
 
     @Override

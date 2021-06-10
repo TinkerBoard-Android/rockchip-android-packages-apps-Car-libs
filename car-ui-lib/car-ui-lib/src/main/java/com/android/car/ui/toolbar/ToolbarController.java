@@ -80,9 +80,21 @@ public interface ToolbarController {
 
     /**
      * Sets the tabs to display.
+     *
      * @param tabs A list of {@link Tab}
+     * @see #setTabs(List, int)
      */
-    void setTabs(List<Tab> tabs);
+    void setTabs(@Nullable List<Tab> tabs);
+
+    /**
+     * Sets the tabs to display. This version will also take the index of a tab to start selected.
+     * This will not cause a callback to the tab's selected listener, unlike using
+     * {@link #setTabs(List)} followed by {@link #selectTab(int)}.
+     *
+     * @param tabs A list of {@link Tab}
+     * @param selectedTab The index of the tab to be initially selected
+     */
+    void setTabs(@Nullable List<Tab> tabs, int selectedTab);
 
     /**
      * Gets the number of tabs in the toolbar. The tabs can be retrieved using

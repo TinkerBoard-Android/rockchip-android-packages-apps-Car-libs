@@ -29,6 +29,7 @@ import java.util.function.BiConsumer;
  * Edit text supporting the callbacks from the IMS. This will be useful in widescreen IME mode to
  * allow car-ui-lib to receive responses (like onClick events) from the IMS
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 class CarUiEditText extends EditText {
 
     @Nullable
