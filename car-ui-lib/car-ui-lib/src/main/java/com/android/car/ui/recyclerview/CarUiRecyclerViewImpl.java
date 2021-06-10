@@ -15,7 +15,7 @@
  */
 package com.android.car.ui.recyclerview;
 
-import static com.android.car.ui.utils.CarUiUtils.findViewByRefId;
+import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_CONTAINER;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_HORIZONTALLY_SCROLLABLE;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_VERTICALLY_SCROLLABLE;
@@ -436,15 +436,14 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
 
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        ((CarUiRecyclerViewContainer) Objects.requireNonNull(
-                findViewByRefId(mContainer, R.id.car_ui_recycler_view)))
+        ((CarUiRecyclerViewContainer) requireViewByRefId(mContainer, R.id.car_ui_recycler_view))
                 .addRecyclerView(this, params);
         parent.addView(mContainer, index);
 
-        createScrollBarFromConfig(findViewByRefId(mContainer, R.id.car_ui_scroll_bar));
+        createScrollBarFromConfig(requireViewByRefId(mContainer, R.id.car_ui_scroll_bar));
     }
 
-    private void createScrollBarFromConfig(View scrollView) {
+    private void createScrollBarFromConfig(@NonNull View scrollView) {
         Class<?> cls;
         try {
             cls = !TextUtils.isEmpty(mScrollBarClass)
