@@ -567,6 +567,11 @@ class DefaultScrollBar implements ScrollBar {
         return mSnapHelper.isAtStart(getLayoutManager());
     }
 
+    @Override
+    public void setHighlightThumb(boolean highlight) {
+        mScrollThumb.setActivated(highlight);
+    }
+
     /**
      * Returns {@code true} if the RecyclerView is completely displaying the last item.
      */

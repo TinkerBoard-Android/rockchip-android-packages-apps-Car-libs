@@ -101,10 +101,6 @@
   <public type="dimen" name="car_ui_list_item_action_divider_width"/>
   <public type="dimen" name="car_ui_list_item_avatar_icon_height"/>
   <public type="dimen" name="car_ui_list_item_avatar_icon_width"/>
-  <public type="dimen" name="car_ui_list_item_check_box_end_inset"/>
-  <public type="dimen" name="car_ui_list_item_check_box_height"/>
-  <public type="dimen" name="car_ui_list_item_check_box_icon_container_width"/>
-  <public type="dimen" name="car_ui_list_item_check_box_start_inset"/>
   <public type="dimen" name="car_ui_list_item_content_icon_height"/>
   <public type="dimen" name="car_ui_list_item_content_icon_width"/>
   <public type="dimen" name="car_ui_list_item_end_inset"/>
@@ -113,10 +109,6 @@
   <public type="dimen" name="car_ui_list_item_height"/>
   <public type="dimen" name="car_ui_list_item_icon_container_width"/>
   <public type="dimen" name="car_ui_list_item_icon_size"/>
-  <public type="dimen" name="car_ui_list_item_radio_button_end_inset"/>
-  <public type="dimen" name="car_ui_list_item_radio_button_height"/>
-  <public type="dimen" name="car_ui_list_item_radio_button_icon_container_width"/>
-  <public type="dimen" name="car_ui_list_item_radio_button_start_inset"/>
   <public type="dimen" name="car_ui_list_item_start_inset"/>
   <public type="dimen" name="car_ui_list_item_supplemental_icon_size"/>
   <public type="dimen" name="car_ui_list_item_text_no_icon_start_margin"/>

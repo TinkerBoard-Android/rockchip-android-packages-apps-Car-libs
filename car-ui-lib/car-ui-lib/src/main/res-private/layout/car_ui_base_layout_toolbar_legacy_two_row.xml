@@ -40,6 +40,7 @@
 
     <FrameLayout
         android:id="@+id/car_ui_toolbar"
+        android:tag="car_ui_top_inset"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent">

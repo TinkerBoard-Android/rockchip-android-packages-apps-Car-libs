@@ -43,10 +43,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.rule.ActivityTestRule;
 
+import com.android.car.rotary.test.R;
 import com.android.car.ui.FocusArea;
 import com.android.car.ui.FocusParkingView;
 import com.android.car.ui.TestAdapter;
-import com.android.car.ui.test.R;
 
 import org.junit.Before;
 import org.junit.Rule;

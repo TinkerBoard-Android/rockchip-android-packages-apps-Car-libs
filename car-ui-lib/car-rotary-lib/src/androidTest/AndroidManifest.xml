@@ -14,15 +14,18 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
+<!-- The package name shouldn't be "com.android.car.ui.test" because it's already defined in
+     car-ui-lib. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.car.ui.test">
+          package="com.android.car.rotary.test">
     <application android:debuggable="true">
         <uses-library android:name="android.test.runner" />
         <activity android:name="com.android.car.ui.FocusAreaTestActivity" />
         <activity android:name="com.android.car.ui.FocusParkingViewTestActivity" />
+        <activity android:name="com.android.car.ui.utils.ViewUtilsTestActivity" />
     </application>
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
-        android:targetPackage="com.android.car.ui.test"
-        android:label="Rotary Test Cases">
+        android:targetPackage="com.android.car.rotary.test"
+        android:label="Car Rotary Lib Test Cases">
     </instrumentation>
 </manifest>
