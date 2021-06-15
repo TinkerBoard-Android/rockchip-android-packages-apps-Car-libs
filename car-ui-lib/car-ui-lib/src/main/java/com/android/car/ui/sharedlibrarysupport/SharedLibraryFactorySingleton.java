@@ -48,7 +48,7 @@ public final class SharedLibraryFactorySingleton {
 
     private static final String TAG = "carui";
     private static SharedLibraryFactory sInstance;
-    private static boolean sSharedLibEnabled = true;
+    private static boolean sSharedLibEnabled = false;
 
     /**
      * Get the {@link SharedLibraryFactory}.

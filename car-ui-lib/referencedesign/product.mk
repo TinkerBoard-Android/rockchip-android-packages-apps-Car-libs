@@ -1,8 +1,7 @@
 # Inherit from this product to include the "Reference Design" RROs for CarUi
 
-# Include shared library, commented out until fully implemented
-#PRODUCT_PACKAGES += \
-#    car-ui-lib-sharedlibrary \
+PRODUCT_PACKAGES += \
+   car-ui-lib-sharedlibrary \
 
 PRODUCT_PRODUCT_PROPERTIES += ro.build.automotive.car.ui.shared.library.package.name=com.chassis.car.ui.sharedlibrary
 
