@@ -42,6 +42,15 @@ android {
         animationsDisabled = true
     }
 
+    // Disable the tests because they don't build correctly with gradle
+    // at the moment. See b/191089526
+    sourceSets {
+        androidTest {
+            java.srcDirs = []
+            resources.srcDirs = []
+        }
+    }
+
     buildTypes {
         debug {
             testCoverageEnabled = true
