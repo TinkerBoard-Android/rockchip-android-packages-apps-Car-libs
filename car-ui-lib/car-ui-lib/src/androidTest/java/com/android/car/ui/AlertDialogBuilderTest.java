@@ -22,6 +22,10 @@ import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import android.app.AlertDialog;
 import android.database.Cursor;
 import android.view.View;
@@ -202,23 +206,24 @@ public class AlertDialogBuilderTest {
 
     private AlertDialog checkDefaultButtonExists(boolean shouldExist, AlertDialogBuilder builder)
             throws Throwable {
-        AtomicBoolean done = new AtomicBoolean(false);
+        AtomicBoolean didThrowException = new AtomicBoolean(false);
         AlertDialog[] result = new AlertDialog[1];
+        RuntimeException[] exception = new RuntimeException[1];
         mActivityRule.runOnUiThread(() -> {
             try {
                 result[0] = builder.create();
                 result[0].show();
             } catch (RuntimeException e) {
-                assert e.getMessage() != null;
-                assert e.getMessage().contains(
-                        "must have at least one button to disable the dismiss button");
-
-                assert shouldExist;
-                done.set(true);
+                exception[0] = e;
+                didThrowException.set(true);
             }
         });
 
-        if (done.get()) {
+        if (didThrowException.get()) {
+            assertNotNull(exception[0]);
+            assertEquals("The dialog must have at least one button to disable the dismiss button",
+                    exception[0].getMessage());
+            assertTrue(shouldExist);
             return result[0];
         }
 
