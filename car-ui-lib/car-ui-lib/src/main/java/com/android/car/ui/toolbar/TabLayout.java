@@ -33,6 +33,7 @@ import androidx.annotation.Nullable;
 
 import com.android.car.ui.R;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -83,11 +84,24 @@ public class TabLayout extends LinearLayout {
     /** Sets the tabs to show */
     public void setTabs(List<com.android.car.ui.toolbar.Tab> tabs, int selectedTab) {
         if (tabs == null) {
-            tabs = Collections.emptyList();
+            mTabs = Collections.emptyList();
+        } else {
+            mTabs = Collections.unmodifiableList(new ArrayList<>(tabs));
         }
-        mTabs = tabs;
         mSelectedTab = selectedTab;
         recreateViews();
+    }
+
+    public List<com.android.car.ui.toolbar.Tab> getTabs() {
+        return mTabs;
+    }
+
+    /** Returns the currently selected tab, or -1 if no tabs exist */
+    public int getSelectedTab() {
+        if (mTabs.isEmpty() && mSelectedTab != -1) {
+            throw new IllegalStateException("mSelectedTab should've been -1");
+        }
+        return mSelectedTab;
     }
 
     /**

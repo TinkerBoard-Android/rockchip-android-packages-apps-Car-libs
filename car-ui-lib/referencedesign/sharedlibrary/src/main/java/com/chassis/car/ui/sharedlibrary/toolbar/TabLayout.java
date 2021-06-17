@@ -88,7 +88,7 @@ public class TabLayout extends LinearLayout {
         ImageView iconView = view.requireViewById(R.id.car_ui_toolbar_tab_item_icon);
         TextView textView = view.requireViewById(R.id.car_ui_toolbar_tab_item_text);
 
-        view.setOnClickListener(v -> selectTab(tab));
+        view.setOnClickListener(v -> selectTab(tab, true));
         iconView.setImageDrawable(tab.getIcon());
         textView.setText(tab.getTitle());
 
@@ -102,7 +102,7 @@ public class TabLayout extends LinearLayout {
     /**
      * Selects a particular tab.
      */
-    private void selectTab(TabOEMV1 tab) {
+    private void selectTab(TabOEMV1 tab, boolean sendCallback) {
         if (mSelectedTab == tab) {
             return;
         }
@@ -113,7 +113,7 @@ public class TabLayout extends LinearLayout {
         bindTab(mSelectedTab);
 
         Runnable onClickListener = tab.getOnClickListener();
-        if (onClickListener != null) {
+        if (onClickListener != null && sendCallback) {
             onClickListener.run();
         }
     }
@@ -121,8 +121,8 @@ public class TabLayout extends LinearLayout {
     /**
      * Selects a particular tab by its position in the list.
      */
-    public void selectTab(int position) {
-        selectTab(mTabs.get(position));
+    public void selectTab(int position, boolean sendCallback) {
+        selectTab(mTabs.get(position), sendCallback);
     }
 
     /**

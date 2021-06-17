@@ -181,6 +181,13 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     }
 
     @Override
+    public List<Tab> getTabs() {
+        return Collections.unmodifiableList(mAdapterState.getTabs().stream()
+                .map(TabAdapterV1::getClientTab)
+                .collect(toList()));
+    }
+
+    @Override
     public int getTabCount() {
         return mDeprecatedTabs.size();
     }
@@ -231,7 +238,18 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
         if (position < 0 || position >= mAdapterState.getTabs().size()) {
             throw new IllegalArgumentException("Tab position is invalid: " + position);
         }
-        update(mAdapterState.copy().setSelectedTab(position).build());
+        update(mAdapterState.copy()
+                .setSelectedTab(position)
+                .build());
+    }
+
+    @Override
+    public int getSelectedTab() {
+        int selectedTab = mAdapterState.getSelectedTab();
+        if (mAdapterState.getTabs().isEmpty() && selectedTab != -1) {
+            throw new IllegalStateException("mSelectedTab should've been -1");
+        }
+        return selectedTab;
     }
 
     @Override
@@ -464,7 +482,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
             mOemToolbar.setTabs(newAdapterState.getTabs(), newAdapterState.getSelectedTab());
         } else if (newAdapterState.hasTabs()
                 && newAdapterState.getSelectedTab() != oldAdapterState.getSelectedTab()) {
-            mOemToolbar.selectTab(newAdapterState.getSelectedTab());
+            mOemToolbar.selectTab(newAdapterState.getSelectedTab(), true);
         }
 
         if (!Objects.equals(
