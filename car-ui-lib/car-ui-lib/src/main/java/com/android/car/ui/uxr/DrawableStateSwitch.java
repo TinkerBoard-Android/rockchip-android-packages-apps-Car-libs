@@ -40,11 +40,6 @@ public class DrawableStateSwitch extends Switch implements DrawableStateView {
         super(context, attrs, defStyleAttr);
     }
 
-    public DrawableStateSwitch(
-            Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-    }
-
     @Override
     public void setExtraDrawableState(@Nullable int[] stateToAdd, @Nullable int[] stateToRemove) {
         if (mUtil == null) {
