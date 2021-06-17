@@ -22,8 +22,8 @@ import java.util.List;
 
 public class FakeCursor extends AbstractCursor {
 
-    private List<String> mRows;
-    private String mColumnName;
+    private final List<String> mRows;
+    private final String mColumnName;
 
     public FakeCursor(List<String> rows, String columnName) {
         mRows = rows;
@@ -37,12 +37,16 @@ public class FakeCursor extends AbstractCursor {
 
     @Override
     public String[] getColumnNames() {
-        return new String[] { mColumnName };
+        return new String[] { "_id", mColumnName };
     }
 
     @Override
     public String getString(int column) {
-        return mRows.get(getPosition());
+        if (column == 1) {
+            return mRows.get(getPosition());
+        }
+
+        return null;
     }
 
     @Override
@@ -57,6 +61,10 @@ public class FakeCursor extends AbstractCursor {
 
     @Override
     public long getLong(int column) {
+        if (column == 0) {
+            return getPosition();
+        }
+
         return 0;
     }
 
@@ -72,6 +80,6 @@ public class FakeCursor extends AbstractCursor {
 
     @Override
     public boolean isNull(int column) {
-        return mRows.get(getPosition()) == null;
+        return getString(column) == null;
     }
 }
