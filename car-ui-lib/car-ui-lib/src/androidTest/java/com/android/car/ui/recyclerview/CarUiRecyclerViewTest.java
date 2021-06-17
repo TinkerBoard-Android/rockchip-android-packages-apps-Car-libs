@@ -179,6 +179,21 @@ public class CarUiRecyclerViewTest {
     }
 
     @Test
+    public void testPadding() {
+        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        ViewGroup container = mActivity.findViewById(R.id.test_container);
+        int padding = 100;
+        carUiRecyclerView.setPadding(padding, 0, padding, 0);
+        container.post(() -> {
+            container.addView(carUiRecyclerView);
+            carUiRecyclerView.setAdapter(new TestAdapter(100));
+        });
+
+        assertEquals(padding, carUiRecyclerView.getPaddingLeft());
+        assertEquals(padding, carUiRecyclerView.getPaddingRight());
+    }
+
+    @Test
     public void testGridLayout() {
         TypedArray typedArray = spy(mActivity.getBaseContext().obtainStyledAttributes(
                 null, R.styleable.CarUiRecyclerView));
