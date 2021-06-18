@@ -24,6 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
 
+import com.android.car.rotary.test.R;
 import com.android.car.ui.TestAdapter.TestViewHolder;
 
 import java.util.ArrayList;
