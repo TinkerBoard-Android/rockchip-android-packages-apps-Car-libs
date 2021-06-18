@@ -317,8 +317,8 @@ public final class CarUiUtils {
                     sRestrictedState = new int[] { R.attr.state_ux_restricted };
                 } else {
                     sRestrictedState = new int[] {
-                        R.attr.state_ux_restricted,
-                        androidStateUxRestricted
+                            R.attr.state_ux_restricted,
+                            androidStateUxRestricted
                     };
                 }
             }

@@ -21,12 +21,16 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.appstyledview.AppStyledViewController;
 import com.android.car.ui.baselayout.InsetsChangedListener;
+import com.android.car.ui.recyclerview.CarUiListItem;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.ToolbarController;
 import com.android.car.ui.widget.CarUiTextView;
+
+import java.util.List;
 
 /**
  * This interface contains methods to create customizable carui components.
@@ -36,12 +40,12 @@ public interface SharedLibraryFactory {
     /**
      * Creates the base layout, and optionally the toolbar.
      *
-     * @param contentView The view to install the base layout around.
+     * @param contentView           The view to install the base layout around.
      * @param insetsChangedListener A method to call when the insets change.
-     * @param toolbarEnabled Whether or not to add a toolbar to the base layout.
-     * @param fullscreen A hint specifying whether this view we're installing around takes up
-     *                   the whole screen or not. Used to know if putting decorations around
-     *                   the edges is appropriate.
+     * @param toolbarEnabled        Whether or not to add a toolbar to the base layout.
+     * @param fullscreen            A hint specifying whether this view we're installing around
+     *                              takes up the whole screen or not. Used to know if putting
+     *                              decorations around the edges is appropriate.
      * @return A {@link ToolbarController} or null if {@code toolbarEnabled} was false.
      */
     @Nullable
@@ -71,7 +75,13 @@ public interface SharedLibraryFactory {
      * Creates an instance of CarUiRecyclerView
      *
      * @param context The visual context to create views with.
-     * @param attrs An object containing initial attributes for the button.
+     * @param attrs   An object containing initial attributes for the button.
      */
     CarUiRecyclerView createRecyclerView(Context context, AttributeSet attrs);
+
+    /**
+     * Creates an instance of list item adapter
+     */
+    RecyclerView.Adapter<? extends RecyclerView.ViewHolder> createListItemAdapter(
+            List<? extends CarUiListItem> items);
 }
