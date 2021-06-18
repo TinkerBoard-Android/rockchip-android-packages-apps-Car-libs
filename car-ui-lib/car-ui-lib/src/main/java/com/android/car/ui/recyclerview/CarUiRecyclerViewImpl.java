@@ -488,6 +488,24 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
     }
 
     @Override
+    public int getPaddingLeft() {
+        if (mContainerPadding != null) {
+            return mContainerPadding.left;
+        }
+
+        return super.getPaddingLeft();
+    }
+
+    @Override
+    public int getPaddingRight() {
+        if (mContainerPadding != null) {
+            return mContainerPadding.right;
+        }
+
+        return super.getPaddingRight();
+    }
+
+    @Override
     public void setPadding(int left, int top, int right, int bottom) {
         mContainerPaddingRelative = null;
         if (mScrollBarEnabled) {
