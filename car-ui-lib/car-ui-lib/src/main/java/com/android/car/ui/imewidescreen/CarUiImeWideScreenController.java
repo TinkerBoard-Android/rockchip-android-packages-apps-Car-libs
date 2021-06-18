@@ -112,6 +112,9 @@ public class CarUiImeWideScreenController {
     // Action name of action that will be used by IMS to notify the application to clear the data
     // in the EditText.
     public static final String WIDE_SCREEN_CLEAR_DATA_ACTION = "automotive_wide_screen_clear_data";
+    // Action name when user clicks on the back button to close the IME.
+    public static final String WIDE_SCREEN_ON_BACK_CLICKED_ACTION =
+            "automotive_wide_screen_back_clicked";
     public static final String WIDE_SCREEN_POST_LOAD_SEARCH_RESULTS_ACTION =
             "automotive_wide_screen_post_load_search_results";
     // Action name used by applications to notify that new search results are available.
@@ -247,7 +250,7 @@ public class CarUiImeWideScreenController {
 
             @Override
             public void surfaceChanged(SurfaceHolder holder, int format,
-                                       int width, int height) {
+                    int width, int height) {
                 Bundle bundle = new Bundle();
                 bundle.putInt(CONTENT_AREA_SURFACE_HEIGHT,
                         mContentAreaSurfaceView.getHeight());
@@ -330,7 +333,7 @@ public class CarUiImeWideScreenController {
      * {@link #resetAutomotiveWideScreenViews()}.
      *
      * @param action Name of the command to be performed.
-     * @param data   Any data to include with the command.
+     * @param data Any data to include with the command.
      */
     @RequiresApi(api = VERSION_CODES.R)
     public void onAppPrivateCommand(String action, Bundle data) {
@@ -519,8 +522,8 @@ public class CarUiImeWideScreenController {
      */
     @RequiresApi(api = VERSION_CODES.R)
     public void onStartInputView(@NonNull EditorInfo editorInfo,
-                                 @Nullable InputConnection inputConnection,
-                                 @Nullable CharSequence textForImeAction) {
+            @Nullable InputConnection inputConnection,
+            @Nullable CharSequence textForImeAction) {
         if (!isWideScreenMode()) {
             return;
         }
@@ -563,6 +566,8 @@ public class CarUiImeWideScreenController {
             close.setOnClickListener(
                     (v) -> {
                         mInputMethodService.requestHideSelf(0);
+                        mInputConnection.performPrivateCommand(WIDE_SCREEN_ON_BACK_CLICKED_ACTION,
+                                null);
                     });
         }
 
@@ -651,7 +656,7 @@ public class CarUiImeWideScreenController {
      */
     @Nullable
     private static PackageInfo getPackageInfo(Context context,
-                                              String packageName) {
+            String packageName) {
         PackageManager packageManager = context.getPackageManager();
         PackageInfo packageInfo = null;
         try {

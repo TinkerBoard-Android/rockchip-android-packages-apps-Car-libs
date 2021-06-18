@@ -33,12 +33,24 @@ import java.util.List;
  */
 public final class SearchConfig {
 
+    /**
+     * Callback to be invoked when user clicks the back button on IME to close.
+     */
+    public interface OnBackClickedListener {
+        /**
+         * Called when user clicks the back button on widescreen IME.
+         */
+        void onClick();
+    }
+
     @Nullable
     private final View mSearchResultsView;
     @Nullable
     private final Drawable mSearchResultsInputViewIcon;
     @Nullable
     private final List<? extends CarUiImeSearchListItem> mSearchResultItems;
+    @Nullable
+    private OnBackClickedListener mOnBackClickedListener;
 
     /**
      * Returns the view set by {@link SearchConfigBuilder#setSearchResultsView(View)}
@@ -64,10 +76,20 @@ public final class SearchConfig {
         return mSearchResultItems;
     }
 
+    /**
+     * Returns the listeners set by
+     * {@link SearchConfigBuilder#setOnBackClickedListener(OnBackClickedListener)}
+     */
+    @Nullable
+    public OnBackClickedListener getOnBackClickedListener() {
+        return mOnBackClickedListener;
+    }
+
     private SearchConfig(SearchConfigBuilder builder) {
         mSearchResultItems = builder.mSearchResultItems;
         mSearchResultsInputViewIcon = builder.mSearchResultsInputViewIcon;
         mSearchResultsView = builder.mSearchResultsView;
+        mOnBackClickedListener = builder.mOnBackClickedListener;
     }
 
     /**
@@ -88,6 +110,8 @@ public final class SearchConfig {
         private Drawable mSearchResultsInputViewIcon;
         @Nullable
         private List<? extends CarUiImeSearchListItem> mSearchResultItems;
+        @Nullable
+        private OnBackClickedListener mOnBackClickedListener;
 
         private SearchConfigBuilder() {
 
@@ -98,6 +122,14 @@ public final class SearchConfig {
          */
         public SearchConfigBuilder setSearchResultsInputViewIcon(@Nullable Drawable drawable) {
             mSearchResultsInputViewIcon = drawable;
+            return this;
+        }
+
+        /**
+         * Set the {@link OnBackClickedListener}
+         */
+        public SearchConfigBuilder setOnBackClickedListener(OnBackClickedListener listener) {
+            mOnBackClickedListener = listener;
             return this;
         }
 

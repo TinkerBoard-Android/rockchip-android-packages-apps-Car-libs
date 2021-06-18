@@ -26,6 +26,7 @@ import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEAR
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SUPPLEMENTAL_ICON_ID_LIST;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_ACTION;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_CLEAR_DATA_ACTION;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_ON_BACK_CLICKED_ACTION;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_POST_LOAD_SEARCH_RESULTS_ACTION;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_SEARCH_RESULTS;
 import static com.android.car.ui.utils.CarUiUtils.getBooleanSystemProperty;
@@ -59,6 +60,7 @@ import com.android.car.ui.core.SearchResultsProvider;
 import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
 import com.android.car.ui.recyclerview.CarUiContentListItem;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
+import com.android.car.ui.toolbar.SearchConfig.OnBackClickedListener;
 
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -361,6 +363,13 @@ public class SearchWidescreenController {
 
             if (WIDE_SCREEN_POST_LOAD_SEARCH_RESULTS_ACTION.equals(action)) {
                 onPostLoadSearchResults();
+            }
+
+            if (WIDE_SCREEN_ON_BACK_CLICKED_ACTION.equals(action)) {
+                OnBackClickedListener listener = mSearchConfig.getOnBackClickedListener();
+                if (listener != null) {
+                    listener.onClick();
+                }
             }
 
             if (data == null) {
