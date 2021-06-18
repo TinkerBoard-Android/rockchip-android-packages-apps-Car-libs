@@ -28,6 +28,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testApplicationId "com.android.car.rotary.test"
     }
 
     compileOptions {
@@ -40,15 +41,6 @@ android {
             includeAndroidResources = true
         }
         animationsDisabled = true
-    }
-
-    // Disable the tests because they don't build correctly with gradle
-    // at the moment. See b/191089526
-    sourceSets {
-        androidTest {
-            java.srcDirs = []
-            resources.srcDirs = []
-        }
     }
 
     buildTypes {
