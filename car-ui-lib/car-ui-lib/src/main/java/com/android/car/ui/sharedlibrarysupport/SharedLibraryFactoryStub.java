@@ -36,12 +36,16 @@ import com.android.car.ui.appstyledview.AppStyledViewController;
 import com.android.car.ui.appstyledview.AppStyledViewControllerImpl;
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
+import com.android.car.ui.recyclerview.CarUiListItem;
+import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.recyclerview.CarUiRecyclerViewImpl;
 import com.android.car.ui.toolbar.ToolbarController;
 import com.android.car.ui.toolbar.ToolbarControllerImpl;
 import com.android.car.ui.widget.CarUiTextView;
 import com.android.car.ui.widget.CarUiTextViewImpl;
+
+import java.util.List;
 
 /**
  * This is the stub implementation of {@link SharedLibraryFactory}, used when there is no shared
@@ -293,5 +297,10 @@ public final class SharedLibraryFactoryStub implements SharedLibraryFactory {
     @Override
     public CarUiRecyclerView createRecyclerView(Context context, AttributeSet attrs) {
         return new CarUiRecyclerViewImpl(context, attrs);
+    }
+
+    @Override
+    public CarUiListItemAdapter createListItemAdapter(List<? extends CarUiListItem> items) {
+        return new CarUiListItemAdapter(items);
     }
 }

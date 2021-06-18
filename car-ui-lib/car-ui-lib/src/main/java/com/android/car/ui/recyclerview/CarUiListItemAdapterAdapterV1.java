@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.chassis.car.ui.sharedlibrary.recyclerview;
+package com.android.car.ui.recyclerview;
 
 import android.view.ViewGroup;
 
@@ -23,79 +23,84 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.sharedlibrary.oemapis.recyclerview.AdapterDataObserverOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.recyclerview.AdapterOEMV1;
-import com.android.car.ui.sharedlibrary.oemapis.recyclerview.RecyclerViewOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.recyclerview.ViewHolderOEMV1;
-
-import com.chassis.car.ui.sharedlibrary.recyclerview.AdapterWrapper.ViewHolderWrapper;
 
 /**
  * Wrapper class that passes the data to car-ui via AdapterOEMV1 interface
  */
-public final class AdapterWrapper extends RecyclerView.Adapter<ViewHolderWrapper> {
+public final class CarUiListItemAdapterAdapterV1 extends
+        RecyclerView.Adapter<CarUiListItemAdapterAdapterV1.ViewHolderWrapper> {
 
     @NonNull
     private AdapterOEMV1 mAdapter;
 
     @NonNull
-    private AdapterDataObserverOEMV1 mAdapterDataObserver = new AdapterDataObserverOEMV1() {
+    private final AdapterDataObserverOEMV1 mAdapterDataObserver = new AdapterDataObserverOEMV1() {
         @Override
         public void onChanged() {
-            AdapterWrapper.super.notifyDataSetChanged();
+            CarUiListItemAdapterAdapterV1.super.notifyDataSetChanged();
         }
 
         @Override
         public void onItemRangeChanged(int positionStart, int itemCount) {
-            AdapterWrapper.super.notifyItemRangeChanged(positionStart, itemCount);
+            CarUiListItemAdapterAdapterV1.super.notifyItemRangeChanged(positionStart, itemCount);
         }
 
         @Override
         public void onItemRangeChanged(int positionStart, int itemCount,
                 @Nullable Object payload) {
-            AdapterWrapper.super.notifyItemRangeChanged(positionStart, itemCount, payload);
+            CarUiListItemAdapterAdapterV1.super.notifyItemRangeChanged(positionStart, itemCount,
+                    payload);
         }
 
         @Override
         public void onItemRangeInserted(int positionStart, int itemCount) {
-            AdapterWrapper.super.notifyItemRangeInserted(positionStart, itemCount);
+            CarUiListItemAdapterAdapterV1.super.notifyItemRangeInserted(positionStart, itemCount);
         }
 
         @Override
         public void onItemRangeRemoved(int positionStart, int itemCount) {
-            AdapterWrapper.super.notifyItemRangeRemoved(positionStart, itemCount);
+            CarUiListItemAdapterAdapterV1.super.notifyItemRangeRemoved(positionStart, itemCount);
         }
 
         @Override
         public void onItemMoved(int fromPosition, int toPosition) {
-            AdapterWrapper.super.notifyItemMoved(fromPosition, toPosition);
+            CarUiListItemAdapterAdapterV1.super.notifyItemMoved(fromPosition, toPosition);
         }
 
         @Override
         public void onStateRestorationPolicyChanged() {
-            AdapterWrapper.this.updateStateRestorationPolicy();
+            CarUiListItemAdapterAdapterV1.this.updateStateRestorationPolicy();
         }
     };
 
-    public AdapterWrapper(@NonNull AdapterOEMV1 adapter) {
+    public CarUiListItemAdapterAdapterV1(@NonNull AdapterOEMV1 adapter) {
         this.mAdapter = adapter;
-        AdapterWrapper.super.setHasStableIds(adapter.hasStableIds());
+        CarUiListItemAdapterAdapterV1.super.setHasStableIds(adapter.hasStableIds());
         updateStateRestorationPolicy();
     }
 
     private void updateStateRestorationPolicy() {
         switch (mAdapter.getStateRestorationPolicyInt()) {
             case 2:
-                AdapterWrapper.super.setStateRestorationPolicy(
+                CarUiListItemAdapterAdapterV1.super.setStateRestorationPolicy(
                         RecyclerView.Adapter.StateRestorationPolicy.PREVENT);
                 break;
             case 1:
-                AdapterWrapper.super.setStateRestorationPolicy(
+                CarUiListItemAdapterAdapterV1.super.setStateRestorationPolicy(
                         RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
                 break;
             case 0:
             default:
-                AdapterWrapper.super.setStateRestorationPolicy(
+                CarUiListItemAdapterAdapterV1.super.setStateRestorationPolicy(
                         RecyclerView.Adapter.StateRestorationPolicy.ALLOW);
         }
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        throw new IllegalStateException(
+                "OEM implementation of adapter can only be used with an OEM list view");
     }
 
     @Override
@@ -114,23 +119,13 @@ public final class AdapterWrapper extends RecyclerView.Adapter<ViewHolderWrapper
     }
 
     @Override
-    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
-        mAdapter.onAttachedToRecyclerView((RecyclerViewOEMV1) recyclerView);
-    }
-
-    @Override
     public void onBindViewHolder(ViewHolderWrapper holder, int position) {
         mAdapter.bindViewHolder(holder.getViewHolder(), position);
     }
 
     @Override
-    public ViewHolderWrapper onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolderWrapper onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new ViewHolderWrapper(mAdapter.createViewHolder(parent, viewType));
-    }
-
-    @Override
-    public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
-        mAdapter.onDetachedFromRecyclerView((RecyclerViewOEMV1) recyclerView);
     }
 
     @Override
@@ -154,7 +149,7 @@ public final class AdapterWrapper extends RecyclerView.Adapter<ViewHolderWrapper
     }
 
     @Override
-    public void registerAdapterDataObserver(RecyclerView.AdapterDataObserver observer) {
+    public void registerAdapterDataObserver(@NonNull RecyclerView.AdapterDataObserver observer) {
         if (!super.hasObservers()) {
             mAdapter.registerAdapterDataObserver(mAdapterDataObserver);
         }
@@ -162,10 +157,10 @@ public final class AdapterWrapper extends RecyclerView.Adapter<ViewHolderWrapper
     }
 
     @Override
-    public void unregisterAdapterDataObserver(RecyclerView.AdapterDataObserver observer) {
+    public void unregisterAdapterDataObserver(@NonNull RecyclerView.AdapterDataObserver observer) {
         super.unregisterAdapterDataObserver(observer);
         if (!super.hasObservers()) {
-            mAdapter.registerAdapterDataObserver(mAdapterDataObserver);
+            mAdapter.unregisterAdapterDataObserver(mAdapterDataObserver);
         }
     }
 
@@ -174,7 +169,7 @@ public final class AdapterWrapper extends RecyclerView.Adapter<ViewHolderWrapper
      */
     public static class ViewHolderWrapper extends RecyclerView.ViewHolder {
         @NonNull
-        private ViewHolderOEMV1 mViewHolder;
+        private final ViewHolderOEMV1 mViewHolder;
 
         ViewHolderWrapper(@NonNull ViewHolderOEMV1 viewHolder) {
             super(viewHolder.getItemView());

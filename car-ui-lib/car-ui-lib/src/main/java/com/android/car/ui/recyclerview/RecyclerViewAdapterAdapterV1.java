@@ -127,7 +127,7 @@ public final class RecyclerViewAdapterAdapterV1
     }
 
     @Override
-    public int getStateRestorationPolicy() {
+    public int getStateRestorationPolicyInt() {
         switch (mAdapter.getStateRestorationPolicy()) {
             case PREVENT:
                 return AdapterOEMV1.PREVENT;

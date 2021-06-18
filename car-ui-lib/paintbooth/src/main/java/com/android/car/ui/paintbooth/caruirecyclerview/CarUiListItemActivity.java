@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.FocusArea;
 import com.android.car.ui.baselayout.Insets;
@@ -31,7 +32,6 @@ import com.android.car.ui.paintbooth.R;
 import com.android.car.ui.recyclerview.CarUiContentListItem;
 import com.android.car.ui.recyclerview.CarUiHeaderListItem;
 import com.android.car.ui.recyclerview.CarUiListItem;
-import com.android.car.ui.recyclerview.CarUiListItemAdapter;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.NavButtonMode;
 import com.android.car.ui.toolbar.ToolbarController;
@@ -44,7 +44,7 @@ import java.util.ArrayList;
 public class CarUiListItemActivity extends Activity implements InsetsChangedListener {
 
     private final ArrayList<CarUiListItem> mData = new ArrayList<>();
-    private CarUiListItemAdapter mAdapter;
+    private RecyclerView.Adapter<? extends RecyclerView.ViewHolder> mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +56,7 @@ public class CarUiListItemActivity extends Activity implements InsetsChangedList
         toolbar.setNavButtonMode(NavButtonMode.BACK);
 
         CarUiRecyclerView recyclerView = findViewById(R.id.list);
-        mAdapter = new CarUiListItemAdapter(generateSampleData());
+        mAdapter = CarUi.createListItemAdapter(this, generateSampleData());
         recyclerView.setAdapter(mAdapter);
     }
 
@@ -76,7 +76,7 @@ public class CarUiListItemActivity extends Activity implements InsetsChangedList
         mData.add(item);
 
         header = new CarUiHeaderListItem(getString(R.string.random_header),
-            getString(R.string.header_with_body));
+                getString(R.string.header_with_body));
         mData.add(header);
 
         item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);

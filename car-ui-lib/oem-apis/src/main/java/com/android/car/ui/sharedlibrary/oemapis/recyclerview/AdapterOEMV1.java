@@ -39,7 +39,7 @@ public interface AdapterOEMV1<V extends ViewHolderOEMV1> {
     int getItemViewType(int position);
 
     /** See {@link androidx.recyclerview.widget.RecyclerView.Adapter#getStateRestorationPolicy()} */
-    int getStateRestorationPolicy();
+    int getStateRestorationPolicyInt();
 
     /** See {@link androidx.recyclerview.widget.RecyclerView.Adapter#onAttachedToRecyclerView} */
     void onAttachedToRecyclerView(RecyclerViewOEMV1 recyclerView);

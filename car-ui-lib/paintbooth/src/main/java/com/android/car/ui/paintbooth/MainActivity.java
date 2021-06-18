@@ -148,7 +148,7 @@ public class MainActivity extends Activity implements InsetsChangedListener {
                 @NonNull
                 @Override
                 public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                    LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+                    LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
                     if (viewType == ListElement.TYPE_ACTIVITY) {
                         return new ActivityViewHolder(
                                 inflater.inflate(R.layout.list_item, parent, false));
