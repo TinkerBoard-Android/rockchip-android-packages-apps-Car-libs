@@ -47,4 +47,14 @@
     <style name="TextAppearance.CarUi.Sub3">
         <item name="android:textSize">18sp</item>
     </style>
+
+    <style name="TextAppearance.CarUi.ListItem" parent="TextAppearance.CarUi.Body1"/>
+
+    <style name="TextAppearance.CarUi.ListItem.Body" parent="TextAppearance.CarUi.Body3">
+        <item name="android:textColor">@color/text_color_secondary</item>
+    </style>
+
+    <style name="TextAppearance.CarUi.ListItem.Header" parent="TextAppearance.CarUi.Body3">
+        <item name="android:textColor">?android:attr/colorAccent</item>
+    </style>
 </resources>

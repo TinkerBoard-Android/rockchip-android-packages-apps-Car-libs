@@ -19,4 +19,24 @@
     <dimen name="app_styled_dialog_height">600dp</dimen>
     <dimen name="app_styled_dialog_position_x">20dp</dimen>
     <dimen name="app_styled_dialog_position_y">40dp</dimen>
+
+    <!-- Rotary focus highlight  -->
+    <dimen name="rotary_focus_stroke_width">8dp</dimen>
+    <dimen name="rotary_focus_pressed_stroke_width">4dp</dimen>
+
+    <!-- List item  -->
+    <dimen name="list_item_height">116dp</dimen>
+    <dimen name="list_item_header_height">76dp</dimen>
+    <dimen name="list_item_icon_size">44dp</dimen>
+    <dimen name="list_item_content_icon_width">@dimen/list_item_icon_container_width</dimen>
+    <dimen name="list_item_content_icon_height">@dimen/list_item_icon_container_width</dimen>
+    <dimen name="list_item_avatar_icon_width">@dimen/list_item_icon_size</dimen>
+    <dimen name="list_item_avatar_icon_height">@dimen/list_item_icon_size</dimen>
+    <dimen name="list_item_supplemental_icon_size">@dimen/list_item_icon_size</dimen>
+    <dimen name="list_item_icon_container_width">112dp</dimen>
+    <dimen name="list_item_action_divider_width">1dp</dimen>
+    <dimen name="list_item_action_divider_height">60dp</dimen>
+    <dimen name="header_list_item_text_start_margin">0dp</dimen>
+    <dimen name="list_item_text_start_margin">24dp</dimen>
+    <dimen name="list_item_text_no_icon_start_margin">24dp</dimen>
 </resources>

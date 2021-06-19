@@ -18,17 +18,21 @@ package com.android.car.ui.core;
 import static com.android.car.ui.core.BaseLayoutController.getBaseLayoutController;
 
 import android.app.Activity;
+import android.content.Context;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.R;
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
+import com.android.car.ui.recyclerview.CarUiListItem;
 import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
 import com.android.car.ui.toolbar.ToolbarController;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -85,6 +89,16 @@ public class CarUi {
         }
         return null;
     }
+
+    /**
+     * Use this method to create an instance of a {@link RecyclerView.Adapter} for a list of {@link
+     * CarUiListItem} objects.
+     */
+    public static RecyclerView.Adapter<? extends RecyclerView.ViewHolder> createListItemAdapter(
+            Context context, List<? extends CarUiListItem> items) {
+        return SharedLibraryFactorySingleton.get(context).createListItemAdapter(items);
+    }
+
 
     /**
      * Gets the {@link ToolbarController} for an activity. Requires that the Activity uses
