@@ -41,6 +41,8 @@ public class DelegatingContentLimitingAdapter<T extends RecyclerView.ViewHolder>
     private final int mScrollingLimitedMessagePositionOffset;
     @IdRes
     private final int mConfigId;
+    @NonNull
+    private final Observer mAdapterDataObserver;
 
     /**
      * Provides the abilities to delegate {@link ContentLimitingAdapter} callback functions.
@@ -102,7 +104,24 @@ public class DelegatingContentLimitingAdapter<T extends RecyclerView.ViewHolder>
         mConfigId = configId;
         mScrollingLimitedMessageViewType = viewType;
         mScrollingLimitedMessagePositionOffset = offset;
-        mDelegate.registerAdapterDataObserver(new Observer());
+        mAdapterDataObserver = new Observer();
+    }
+
+    @Override
+    public void registerAdapterDataObserver(@NonNull RecyclerView.AdapterDataObserver observer) {
+        if (!hasObservers()) {
+            mDelegate.registerAdapterDataObserver(mAdapterDataObserver);
+        }
+        super.registerAdapterDataObserver(observer);
+    }
+
+    @Override
+    public void unregisterAdapterDataObserver(@NonNull RecyclerView.AdapterDataObserver observer) {
+        super.unregisterAdapterDataObserver(observer);
+
+        if (!hasObservers()) {
+            mDelegate.unregisterAdapterDataObserver(mAdapterDataObserver);
+        }
     }
 
     private class Observer extends RecyclerView.AdapterDataObserver {
