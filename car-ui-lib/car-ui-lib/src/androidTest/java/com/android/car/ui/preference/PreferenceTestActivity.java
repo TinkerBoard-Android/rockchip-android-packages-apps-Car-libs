@@ -52,4 +52,8 @@ public class PreferenceTestActivity extends AppCompatActivity {
     public void addPreference(Preference preference) {
         mPreferenceFragment.addPreference(preference);
     }
+
+    public Preference findPreference(CharSequence key) {
+        return mPreferenceFragment.findPreference(key);
+    }
 }

@@ -38,6 +38,25 @@
             android:key="multi_select_list"
             android:summary="@string/summary_multi_list_preference"
             android:title="@string/title_multi_list_preference"/>
+
+        <com.android.car.ui.preference.CarUiListPreference
+            android:dialogTitle="@string/dialog_title_list_preference"
+            android:entries="@array/entries"
+            android:entryValues="@array/entry_values"
+            android:key="list_ux_restricted"
+            android:title="@string/title_list_preference_ux_restricted"
+            app:car_ui_ux_restricted="true"
+            app:useSimpleSummaryProvider="true"/>
+
+        <com.android.car.ui.preference.CarUiMultiSelectListPreference
+            android:dialogTitle="@string/dialog_title_multi_list_preference"
+            android:entries="@array/entries"
+            android:entryValues="@array/entry_values"
+            android:key="multi_select_list_ux_restricted"
+            android:summary="@string/summary_multi_list_preference"
+            android:title="@string/title_multi_list_preference_ux_restricted"
+            app:car_ui_ux_restricted="true" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>
