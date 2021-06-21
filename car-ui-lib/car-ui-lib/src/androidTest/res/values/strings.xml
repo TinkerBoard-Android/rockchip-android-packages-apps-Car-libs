@@ -21,18 +21,26 @@
     <string name="preferences_screen_title">Preferences</string>
     <string name="preference_dialog_category">Dialog preferences</string>
     <string name="title_list_preference">List preference</string>
+    <string name="title_list_preference_ux_restricted">List preference UX restricted</string>
+    <string name="title_edit_text_preference">EditText preference</string>
+    <string name="dialog_title_edit_text_preference">Enter text</string>
+    <string name="title_seek_bar_preference">SeekBar preference</string>
+    <string name="dialog_title_seek_bar_preference">Select required value</string>
     <string name="dialog_title_list_preference">Choose one option!</string>
     <string name="title_multi_list_preference">Multi-select list preference</string>
+    <string name="title_multi_list_preference_ux_restricted">Multi-select list preference UX restricted</string>
     <string name="summary_multi_list_preference">Shows a dialog with multiple choice options</string>
     <string name="dialog_title_multi_list_preference">Choose some options!</string>
     <string name="preference_widgets_category">Widgets</string>
     <string name="title_checkbox_preference">Checkbox preference</string>
-    <string name="summary_checkbox_preference">Tap anywhere in this preference to toggle state</string>
+    <string name="summary_compound_button_preference">Tap anywhere in this preference to toggle state</string>
     <string name="title_switch_preference">Switch preference</string>
-    <string name="summary_switch_preference">Tap anywhere in this preference to toggle state</string>
+    <string name="title_radio_button_preference">Radio button preference</string>
     <string name="title_dropdown_preference">Dropdown preference</string>
     <string name="title_twoaction_preference">TwoAction preference</string>
     <string name="summary_twoaction_preference">A widget should be visible on the right</string>
+    <string name="twoaction_secondary_text">Secondary text</string>
+
 
     <string-array name="test_string_array">
         <item>Item 1</item>
