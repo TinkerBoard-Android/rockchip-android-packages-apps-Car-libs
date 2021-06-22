@@ -107,7 +107,7 @@ public class CarUiTextViewTest {
         onView(withHint(hint)).check(matches(isDisplayed()));
 
         Spanned displayedText = (Spanned) textView.getText();
-        assertEquals(displayedText.length() - 1, displayedText.getSpanEnd(span));
+        assertEquals(displayedText.length(), displayedText.getSpanEnd(span));
     }
 
     @Test
@@ -123,5 +123,22 @@ public class CarUiTextViewTest {
 
         onView(withHint(hint)).check(matches(isDisplayed()));
         assertEquals(3, textView.getLineCount());
+    }
+
+    @Test
+    public void testSpan() {
+        CarUiTextView textView = CarUiTextView.create(mActivity);
+        String hint = "Test textView";
+        SpannableString text = new SpannableString("Test");
+        ForegroundColorSpan span = new ForegroundColorSpan(Color.RED);
+        text.setSpan(span, 0, 4, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+        textView.setHint(hint);
+        textView.setText(new CarUiText.Builder(text).setMaxLines(3).build());
+        ViewGroup container = mActivity.findViewById(
+                com.android.car.ui.test.R.id.test_container);
+        container.post(() -> container.addView(textView));
+
+        onView(withHint(hint)).check(matches(isDisplayed()));
+        assertEquals(text, new SpannableString(textView.getText()));
     }
 }
