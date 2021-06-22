@@ -194,7 +194,7 @@ public final class CarUiTextViewImpl extends CarUiTextView {
                     TextUtils.ellipsize(lastLine, getPaint(), maxWidth, TextUtils.TruncateAt.END));
             if (text instanceof Spanned) {
                 TextUtils.copySpansFrom(
-                        (Spanned) text, 0, builder.length() - 1, Object.class, builder, 0);
+                        (Spanned) text, 0, builder.length(), Object.class, builder, 0);
             }
         }
 
