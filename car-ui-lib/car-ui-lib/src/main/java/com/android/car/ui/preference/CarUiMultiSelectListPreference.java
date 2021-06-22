@@ -17,6 +17,7 @@
 package com.android.car.ui.preference;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 
 import androidx.annotation.Nullable;
@@ -41,20 +42,32 @@ public class CarUiMultiSelectListPreference extends MultiSelectListPreference
     private boolean mUxRestricted = false;
 
     public CarUiMultiSelectListPreference(Context context) {
-        super(context);
+        this(context, null);
     }
 
     public CarUiMultiSelectListPreference(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, R.attr.carUiPreferenceStyle);
     }
 
     public CarUiMultiSelectListPreference(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+        this(context, attrs, defStyle, R.style.Preference_CarUi_Preference);
     }
 
     public CarUiMultiSelectListPreference(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        init(attrs, defStyleAttr, defStyleRes);
+    }
+
+    private void init(AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        TypedArray a = getContext().obtainStyledAttributes(
+                attrs,
+                R.styleable.CarUiPreference,
+                defStyleAttr,
+                defStyleRes);
+
+        mUxRestricted = a.getBoolean(R.styleable.CarUiPreference_car_ui_ux_restricted, false);
+        a.recycle();
     }
 
     /**
