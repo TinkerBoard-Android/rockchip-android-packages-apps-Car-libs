@@ -25,6 +25,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -132,8 +133,10 @@ public class AppStyledViewControllerImpl implements AppStyledViewController {
             close.setImageResource(R.drawable.car_ui_icon_close);
         }
 
-        if (mAppStyledVCloseClickListener != null) {
-            close.setOnClickListener((v) -> {
+        FrameLayout navContainer =
+                appStyleView.findViewById(R.id.car_ui_app_styled_view_nav_icon_container);
+        if (mAppStyledVCloseClickListener != null && navContainer != null) {
+            navContainer.setOnClickListener((v) -> {
                 mAppStyledVCloseClickListener.onClick();
             });
         }
