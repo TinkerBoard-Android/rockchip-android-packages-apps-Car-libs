@@ -19,6 +19,7 @@ import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_CONTAINER;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_HORIZONTALLY_SCROLLABLE;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_VERTICALLY_SCROLLABLE;
+import static com.android.car.ui.utils.ViewUtils.LazyLayoutView;
 import static com.android.car.ui.utils.ViewUtils.setRotaryScrollEnabled;
 
 import android.car.drivingstate.CarUxRestrictions;
@@ -52,14 +53,16 @@ import com.android.car.ui.recyclerview.decorations.linear.LinearOffsetItemDecora
 import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
 import java.lang.reflect.Constructor;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * View that extends a {@link RecyclerView} and wraps itself into a {@link LinearLayout} which could
  * potentially include a scrollbar that has page up and down arrows. Interaction with this view is
  * similar to a {@code RecyclerView} as it takes the same adapter and the layout manager.
  */
-public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
+public final class CarUiRecyclerViewImpl extends CarUiRecyclerView implements LazyLayoutView {
 
     private static final String TAG = "CarUiRecyclerView";
 
@@ -105,6 +108,9 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
     private boolean mEnableDividers;
 
     private boolean mHasScrolled = false;
+
+    @NonNull
+    private final Set<Runnable> mOnLayoutCompletedListeners = new HashSet<>();
 
     private OnScrollListener mOnScrollListener = new OnScrollListener() {
         @Override
@@ -179,10 +185,34 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
         boolean isLayoutMangerSet = getLayoutManager() != null;
         if (!isLayoutMangerSet && carUiRecyclerViewLayout
                 == CarUiRecyclerView.CarUiRecyclerViewLayout.LINEAR) {
-            setLayoutManager(new LinearLayoutManager(getContext()));
+            setLayoutManager(new LinearLayoutManager(getContext()) {
+                @Override
+                public void onLayoutCompleted(RecyclerView.State state) {
+                    super.onLayoutCompleted(state);
+                    // Iterate through a copied set instead of the original set because the original
+                    // set might be modified during iteration.
+                    Set<Runnable> onLayoutCompletedListeners =
+                        new HashSet<>(mOnLayoutCompletedListeners);
+                    for (Runnable runnable : onLayoutCompletedListeners) {
+                        runnable.run();
+                    }
+                }
+            });
         } else if (!isLayoutMangerSet && carUiRecyclerViewLayout
                 == CarUiRecyclerView.CarUiRecyclerViewLayout.GRID) {
-            setLayoutManager(new GridLayoutManager(getContext(), mNumOfColumns));
+            setLayoutManager(new GridLayoutManager(getContext(), mNumOfColumns) {
+                @Override
+                public void onLayoutCompleted(RecyclerView.State state) {
+                    super.onLayoutCompleted(state);
+                    // Iterate through a copied set instead of the original set because the original
+                    // set might be modified during iteration.
+                    Set<Runnable> onLayoutCompletedListeners =
+                        new HashSet<>(mOnLayoutCompletedListeners);
+                    for (Runnable runnable : onLayoutCompletedListeners) {
+                        runnable.run();
+                    }
+                }
+            });
         }
         addOnScrollListener(mOnScrollListener);
 
@@ -217,12 +247,36 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
         if (layoutStyle.getLayoutType() == CarUiRecyclerViewLayout.LINEAR) {
             layoutManager = new LinearLayoutManager(getContext(),
                     layoutStyle.getOrientation(),
-                    layoutStyle.getReverseLayout());
+                    layoutStyle.getReverseLayout()) {
+                @Override
+                public void onLayoutCompleted(RecyclerView.State state) {
+                    super.onLayoutCompleted(state);
+                    // Iterate through a copied set instead of the original set because the original
+                    // set might be modified during iteration.
+                    Set<Runnable> onLayoutCompletedListeners =
+                        new HashSet<>(mOnLayoutCompletedListeners);
+                    for (Runnable runnable : onLayoutCompletedListeners) {
+                        runnable.run();
+                    }
+                }
+            };
         } else {
             layoutManager = new GridLayoutManager(getContext(),
                     layoutStyle.getSpanCount(),
                     layoutStyle.getOrientation(),
-                    layoutStyle.getReverseLayout());
+                    layoutStyle.getReverseLayout()) {
+                @Override
+                public void onLayoutCompleted(RecyclerView.State state) {
+                    super.onLayoutCompleted(state);
+                    // Iterate through a copied set instead of the original set because the original
+                    // set might be modified during iteration.
+                    Set<Runnable> onLayoutCompletedListeners =
+                        new HashSet<>(mOnLayoutCompletedListeners);
+                    for (Runnable runnable : onLayoutCompletedListeners) {
+                        runnable.run();
+                    }
+                }
+            };
             // TODO(b/190444037): revisit usage of LayoutStyles and their casting
             if (layoutStyle instanceof CarUiGridLayoutStyle) {
                 ((GridLayoutManager) layoutManager).setSpanSizeLookup(
@@ -230,6 +284,32 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView {
             }
         }
         setLayoutManager(layoutManager);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Note that this method will never return true if this view has no items in it's adapter. This
+     * is fine since an RecyclerView with empty items is not able to restore focus inside it.
+     */
+    @Override
+    public boolean isLayoutCompleted() {
+        RecyclerView.Adapter adapter = getAdapter();
+        return adapter != null && adapter.getItemCount() > 0 && !isComputingLayout();
+    }
+
+    @Override
+    public void addOnLayoutCompleteListener(@Nullable Runnable runnable) {
+        if (runnable != null) {
+            mOnLayoutCompletedListeners.add(runnable);
+        }
+    }
+
+    @Override
+    public void removeOnLayoutCompleteListener(@Nullable Runnable runnable) {
+        if (runnable != null) {
+            mOnLayoutCompletedListeners.remove(runnable);
+        }
     }
 
     @Override
