@@ -105,22 +105,30 @@ public class CarUiContentListItem extends CarUiListItem {
         CHEVRON
     }
 
+    @Nullable
     private Drawable mIcon;
     @Nullable
     private Drawable mSupplementalIcon;
+    @Nullable
     private CarUiText mTitle;
+    @Nullable
     private List<CarUiText> mBody;
+    @NonNull
     private final Action mAction;
+    @NonNull
     private IconType mPrimaryIconType;
     private boolean mIsActionDividerVisible;
     private boolean mIsChecked;
     private boolean mIsEnabled = true;
     private boolean mIsActivated;
+    @Nullable
     private OnClickListener mOnClickListener;
+    @Nullable
     private OnCheckedChangeListener mOnCheckedChangeListener;
+    @Nullable
     private OnClickListener mSupplementalIconOnClickListener;
 
-    public CarUiContentListItem(Action action) {
+    public CarUiContentListItem(@NonNull Action action) {
         mAction = action;
         mPrimaryIconType = IconType.STANDARD;
     }
@@ -138,8 +146,8 @@ public class CarUiContentListItem extends CarUiListItem {
      *
      * @param title text to display as title.
      */
-    public void setTitle(@NonNull CharSequence title) {
-        mTitle = new CarUiText(title);
+    public void setTitle(@Nullable CharSequence title) {
+        mTitle = new CarUiText.Builder(title).build();
     }
 
     /**
@@ -147,7 +155,7 @@ public class CarUiContentListItem extends CarUiListItem {
      *
      * @param text text to display as title
      */
-    public void setTitle(@NonNull CarUiText text) {
+    public void setTitle(@Nullable CarUiText text) {
         mTitle = text;
     }
 
@@ -164,8 +172,13 @@ public class CarUiContentListItem extends CarUiListItem {
      *
      * @param body text to display as body text.
      */
-    public void setBody(@NonNull CharSequence body) {
-        mBody = Collections.singletonList(new CarUiText(body));
+    public void setBody(@Nullable CharSequence body) {
+        if (body == null) {
+            mBody = null;
+            return;
+        }
+
+        mBody = Collections.singletonList(new CarUiText.Builder(body).build());
     }
 
     /**
@@ -173,7 +186,12 @@ public class CarUiContentListItem extends CarUiListItem {
      *
      * @param body text to display as body text.
      */
-    public void setBody(@NonNull CarUiText body) {
+    public void setBody(@Nullable CarUiText body) {
+        if (body == null) {
+            mBody = null;
+            return;
+        }
+
         mBody = Collections.singletonList(body);
     }
 
@@ -183,7 +201,7 @@ public class CarUiContentListItem extends CarUiListItem {
      * @param textList list of text to display as body text. Each {@link CarUiText} in the list will
      *                 be rendered on a new line, separated by a line break.
      */
-    public void setBody(@NonNull List<CarUiText> textList) {
+    public void setBody(@Nullable List<CarUiText> textList) {
         mBody = textList;
     }
 
@@ -207,6 +225,7 @@ public class CarUiContentListItem extends CarUiListItem {
     /**
      * Returns the primary icon type for the item.
      */
+    @NonNull
     public IconType getPrimaryIconType() {
         return mPrimaryIconType;
     }
@@ -216,7 +235,7 @@ public class CarUiContentListItem extends CarUiListItem {
      *
      * @param icon the icon type for the item.
      */
-    public void setPrimaryIconType(IconType icon) {
+    public void setPrimaryIconType(@NonNull IconType icon) {
         mPrimaryIconType = icon;
     }
 
@@ -300,6 +319,7 @@ public class CarUiContentListItem extends CarUiListItem {
     /**
      * Returns the action type for the item.
      */
+    @NonNull
     public Action getAction() {
         return mAction;
     }
