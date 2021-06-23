@@ -69,7 +69,7 @@ public interface SharedLibraryFactory {
      *
      * @return the view used for app styled view.
      */
-    AppStyledViewController createAppStyledView();
+    AppStyledViewController createAppStyledView(Context activityContext);
 
     /**
      * Creates an instance of CarUiRecyclerView
