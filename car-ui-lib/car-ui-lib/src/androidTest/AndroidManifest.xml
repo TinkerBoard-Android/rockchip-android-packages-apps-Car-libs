@@ -18,6 +18,8 @@
           package="com.android.car.ui.test">
     <application android:debuggable="true" android:theme="@style/Theme.CarUi.NoToolbar">
         <uses-library android:name="android.test.runner" />
+        <activity android:name="com.android.car.ui.TrulyEmptyActivity"
+            android:theme="@android:style/Theme.Material.NoActionBar"/>
         <activity android:name="com.android.car.ui.TestActivity" />
         <activity android:name="com.android.car.ui.recyclerview.CarUiRecyclerViewTestActivity" />
         <activity android:name="com.android.car.ui.imewidescreen.CarUiImeWideScreenTestActivity" />
