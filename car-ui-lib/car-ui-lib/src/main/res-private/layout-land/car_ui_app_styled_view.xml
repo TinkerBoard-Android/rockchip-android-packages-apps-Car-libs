@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="utf-8"?>
+<!--
   ~ Copyright (C) 2021 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,30 +17,28 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="0dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="20dp"
     android:background="@drawable/car_ui_app_styled_view_background">
-
-    <!-- When not in touch mode, if we clear focus in current window, Android will re-focus the
-         first focusable view in the window automatically. Adding a FocusParkingView to the window
-         can fix this issue, because it can take focus, and it is transparent and its default focus
-         highlight is disabled, so it's invisible to the user no matter whether it's focused or not.
-         -->
     <com.android.car.ui.FocusParkingView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
     <com.android.car.ui.FocusArea
         android:id="@+id/car_ui_focus_area"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/car_ui_toolbar_first_row_height"
+        android:layout_width="@dimen/car_ui_toolbar_first_row_height"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/car_ui_app_styled_content"
         style="@style/Widget.CarUi.Toolbar.Container">
         <FrameLayout
             android:id="@+id/car_ui_app_styled_view_nav_icon_container"
-            android:layout_width="@dimen/car_ui_toolbar_margin"
-            android:layout_height="match_parent"
+            android:layout_width="76dp"
+            android:layout_height="76dp"
+            android:layout_gravity="center"
             app:layout_constraintHorizontal_bias="0.0"
             style="@style/Widget.CarUi.Toolbar.NavIconContainer">
             <ImageView
@@ -55,9 +54,8 @@
     <com.android.car.ui.recyclerview.CarUiRecyclerView
         android:id="@+id/car_ui_app_styled_content"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="match_parent"
         app:carUiSize="small"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/car_ui_focus_area"/>
+        android:layout_marginLeft="@dimen/car_ui_toolbar_first_row_height"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

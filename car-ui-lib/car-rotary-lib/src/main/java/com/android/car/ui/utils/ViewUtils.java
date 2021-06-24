@@ -48,6 +48,12 @@ import java.lang.annotation.RetentionPolicy;
 public final class ViewUtils {
 
     /**
+     * How many milliseconds to wait before trying to restore the focus inside the LazyLayoutView
+     * the second time.
+     */
+    private static final int RESTORE_FOCUS_RETRY_DELAY_MS = 3000;
+
+    /**
      * No view is focused, the focused view is not shown, or the focused view is a FocusParkingView.
      */
     @VisibleForTesting
@@ -102,6 +108,29 @@ public final class ViewUtils {
     private interface Predicate<T> {
         /** Evaluates this predicate on the given argument. */
         boolean test(@NonNull T t);
+    }
+
+    /**
+     * An interface used to restore focus inside a view when its layout is completed.
+     * <p>
+     * The view that needs to restore focus lazily should implement this interface.
+     */
+    public interface LazyLayoutView {
+
+        /**
+         * Returnes whether the view's layout is completed and ready to restore focus inside it.
+         */
+        boolean isLayoutCompleted();
+
+        /**
+         * Adds a listener to be called when the view's layout is completed.
+         */
+        void addOnLayoutCompleteListener(@Nullable Runnable runnable);
+
+        /**
+         * Removes a listener to be called when the view's layout is completed.
+         */
+        void removeOnLayoutCompleteListener(@Nullable Runnable runnable);
     }
 
     /** Gets the ancestor FocusArea of the {@code view}, if any. Returns null if not found. */
@@ -159,7 +188,8 @@ public final class ViewUtils {
     /**
      * Searches the {@code root}'s descendants for a view with the highest {@link FocusLevel}. If
      * the view's FocusLevel is higher than the {@code currentFocus}'s FocusLevel, focuses on the
-     * view.
+     * view. If it tried to focus on a LazyLayoutView but failed, requests to adjust the focus
+     * inside the LazyLayoutView later.
      *
      * @return whether the view is focused
      */
@@ -167,6 +197,16 @@ public final class ViewUtils {
         @FocusLevel int currentLevel = getFocusLevel(currentFocus);
         return adjustFocus(root, currentLevel, /* cachedFocusedView= */ null,
                 /* defaultFocusOverridesHistory= */ false);
+    }
+
+    /**
+     * Similar to {@link #adjustFocus(View, View)} but without requesting to adjust the focus
+     * inside the LazyLayoutView later.
+     */
+    public static boolean adjustFocusImmediately(@NonNull View root, @Nullable View currentFocus) {
+        @FocusLevel int currentLevel = getFocusLevel(currentFocus);
+        return adjustFocus(root, currentLevel, /* cachedFocusedView= */ null,
+                /* defaultFocusOverridesHistory= */ false, /* delayed= */ false);
     }
 
     /**
@@ -208,6 +248,14 @@ public final class ViewUtils {
         return adjustFocus(root, NO_FOCUS, cachedFocusedView, defaultFocusOverridesHistory);
     }
 
+    private static boolean adjustFocus(@NonNull View root,
+            @FocusLevel int currentLevel,
+            @Nullable View cachedFocusedView,
+            boolean defaultFocusOverridesHistory) {
+        return adjustFocus(root, currentLevel, cachedFocusedView, defaultFocusOverridesHistory,
+                /* delayed= */true);
+    }
+
     /**
      * Searches the {@code root}'s descendants for a view with the highest {@link FocusLevel}. If
      * the view's FocusLevel is higher than {@code currentLevel}, focuses on the view or {@code
@@ -218,7 +266,8 @@ public final class ViewUtils {
     private static boolean adjustFocus(@NonNull View root,
             @FocusLevel int currentLevel,
             @Nullable View cachedFocusedView,
-            boolean defaultFocusOverridesHistory) {
+            boolean defaultFocusOverridesHistory,
+            boolean delayed) {
         // If the previously focused view has higher priority than the default focus, try to focus
         // on the previously focused view.
         if (!defaultFocusOverridesHistory && requestFocus(cachedFocusedView)) {
@@ -236,6 +285,17 @@ public final class ViewUtils {
             return true;
         }
 
+        // When delayed is true, if there is a LazyLayoutView but it failed to adjust focus
+        // inside it because it is not loaded yet or it's loaded but has no descendnats, request to
+        // restore focus inside it later, and return false for now.
+        if (delayed && currentLevel < IMPLICIT_DEFAULT_FOCUS) {
+            LazyLayoutView lazyLayoutView = findLazyLayoutView(root);
+            if (lazyLayoutView != null && !lazyLayoutView.isLayoutCompleted()) {
+                initFocusDelayed(lazyLayoutView);
+                return false;
+            }
+        }
+
         // If the previously focused view has lower priority than the default focus, try to focus
         // on the previously focused view.
         if (defaultFocusOverridesHistory && requestFocus(cachedFocusedView)) {
@@ -250,6 +310,59 @@ public final class ViewUtils {
             return focusOnScrollableContainer(root);
         }
         return false;
+    }
+
+    /**
+     * If the {code lazyLayoutView} has a focusable descendant and no visible view is focused,
+     * focuses on the descendant. Otherwise tries again when the {code lazyLayoutView} completes
+     * layout or after a timeout, whichever comes first.
+     */
+    public static void initFocus(@NonNull LazyLayoutView lazyLayoutView) {
+        if (initFocusImmediately(lazyLayoutView)) {
+            return;
+        }
+        initFocusDelayed(lazyLayoutView);
+    }
+
+    private static void initFocusDelayed(@NonNull LazyLayoutView lazyLayoutView) {
+        if (!(lazyLayoutView instanceof View)) {
+            return;
+        }
+        View lazyView = (View) lazyLayoutView;
+        Runnable[] onLayoutCompleteListener = new Runnable[1];
+        Runnable delayedTask = () -> {
+            lazyLayoutView.removeOnLayoutCompleteListener(onLayoutCompleteListener[0]);
+            initFocusImmediately(lazyLayoutView);
+        };
+        onLayoutCompleteListener[0] = () -> {
+            if (initFocusImmediately(lazyLayoutView)) {
+                // Remove the delayedTask only when onLayoutCompleteListener has initialized the
+                // focus succefully, because the delayedTask needs to kick in when it fails, such
+                // as the lazyLayoutView is still loading after a timeout, or it's loaded but has
+                // no descendants to take focus.
+                lazyView.removeCallbacks(delayedTask);
+                lazyLayoutView.removeOnLayoutCompleteListener(onLayoutCompleteListener[0]);
+            }
+        };
+        lazyLayoutView.addOnLayoutCompleteListener(onLayoutCompleteListener[0]);
+        lazyView.postDelayed(delayedTask, RESTORE_FOCUS_RETRY_DELAY_MS);
+    }
+
+    private static boolean initFocusImmediately(@NonNull LazyLayoutView lazyLayoutView) {
+        if (!(lazyLayoutView instanceof View)) {
+            return false;
+        }
+        View lazyView = (View) lazyLayoutView;
+        View focusedView = lazyView.getRootView().findFocus();
+        // If the currently focused view won't draw, it's not a valid focus.
+        View visibleFocusedView =
+                focusedView != null && !focusedView.willNotDraw() ? focusedView : null;
+        // If there is a visible view focused, just return true.
+        if (visibleFocusedView != null && !(visibleFocusedView instanceof FocusParkingView)) {
+            return true;
+        }
+
+        return ViewUtils.adjustFocusImmediately(lazyView, visibleFocusedView);
     }
 
     @VisibleForTesting
@@ -474,6 +587,17 @@ public final class ViewUtils {
     private static View findRotaryContainer(@NonNull View view) {
         return depthFirstSearch(view,
                 /* targetPredicate= */ v -> isRotaryContainer(v),
+                /* skipPredicate= */ v -> !v.isShown());
+    }
+
+    /**
+     * Searches the {@code view} and its descendants in depth first order, and returns the first
+     * LazyLayoutView shown on the screen. Returns null if not found.
+     */
+    @Nullable
+    private static LazyLayoutView findLazyLayoutView(@NonNull View view) {
+        return (LazyLayoutView) depthFirstSearch(view,
+                /* targetPredicate= */ v -> v instanceof LazyLayoutView,
                 /* skipPredicate= */ v -> !v.isShown());
     }
 

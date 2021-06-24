@@ -72,15 +72,15 @@ import java.util.function.Consumer;
  */
 public final class SharedLibraryFactoryAdapterV1 implements SharedLibraryFactory {
 
-    private final Context mContext;
+    private final Context mSharedLibContext;
 
     SharedLibraryFactoryOEMV1 mOem;
     SharedLibraryFactoryStub mFactoryStub;
 
-    public SharedLibraryFactoryAdapterV1(SharedLibraryFactoryOEMV1 oem, Context context) {
+    public SharedLibraryFactoryAdapterV1(SharedLibraryFactoryOEMV1 oem, Context sharedLibContext) {
         mOem = oem;
-        mContext = context;
-        mFactoryStub = new SharedLibraryFactoryStub(context);
+        mSharedLibContext = sharedLibContext;
+        mFactoryStub = new SharedLibraryFactoryStub(sharedLibContext);
 
         mOem.setRotaryFactories(
                 c -> new FocusParkingViewAdapterV1(new FocusParkingView(c)),
@@ -117,10 +117,11 @@ public final class SharedLibraryFactoryAdapterV1 implements SharedLibraryFactory
 
 
     @Override
-    public AppStyledViewController createAppStyledView() {
+    public AppStyledViewController createAppStyledView(Context activityContext) {
         AppStyledViewControllerOEMV1 appStyledViewControllerOEMV1 = mOem.createAppStyledView();
-        return appStyledViewControllerOEMV1 == null ? new AppStyledViewControllerImpl(mContext)
-                : new AppStyledViewControllerAdapterV1(appStyledViewControllerOEMV1);
+        return appStyledViewControllerOEMV1 == null ? new AppStyledViewControllerImpl(
+                activityContext) : new AppStyledViewControllerAdapterV1(
+                appStyledViewControllerOEMV1);
     }
 
     private Insets adaptInsets(InsetsOEMV1 insetsOEM) {
