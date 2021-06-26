@@ -88,6 +88,9 @@ public class MediaButtonController {
                 R.id.circular_progress_bar);
         mPlayPauseStopImageView.setAction(PlayPauseStopImageView.ACTION_DISABLED);
         mPlayPauseStopImageView.setOnClickListener(this::onPlayPauseStopClicked);
+        // In non-touch mode, a browse list will request focus explicitly and its first element
+        // will get focused instead of this button
+        mPlayPauseStopImageView.setFocusedByDefault(true);
 
         mShowCircularProgressBar = context.getResources().getBoolean(
                 R.bool.show_circular_progress_bar);
