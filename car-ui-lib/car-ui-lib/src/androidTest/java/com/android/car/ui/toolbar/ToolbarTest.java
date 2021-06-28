@@ -28,6 +28,7 @@ import static com.android.car.ui.matchers.ViewMatchers.withDrawable;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.TestCase.assertEquals;
 
 import android.content.Context;
@@ -36,6 +37,7 @@ import androidx.core.content.ContextCompat;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.core.CarUi;
 import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
 import com.android.car.ui.test.R;
@@ -244,6 +246,13 @@ public class ToolbarTest {
         }
     }
 
+    @Test
+    public void test_requireInsets_returnsInsets() {
+        Insets[] insets = new Insets[] { null };
+        mScenarioRule.getScenario().onActivity(activity ->
+                insets[0] = CarUi.requireInsets(activity));
+        assertNotNull(insets[0]);
+    }
 
     private void runWithToolbar(Consumer<ToolbarController> toRun) {
         mScenarioRule.getScenario().onActivity(activity -> {
