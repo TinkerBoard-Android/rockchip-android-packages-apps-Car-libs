@@ -62,6 +62,45 @@ class TestDelegatingContentLimitingAdapter
         return "Item " + i;
     }
 
+    public void changeItemRange(int positionStart, int itemCount) {
+        for (int i = 0; i < itemCount; i++) {
+            mItems.set(i + positionStart, mItems.get(i + positionStart) + "-changed");
+        }
+        notifyItemRangeChanged(positionStart, itemCount);
+    }
+
+    public void insertItemRange(int position, String... items) {
+        for (int i = 0; i < items.length; i++) {
+            mItems.add(position, items[i]);
+        }
+        notifyItemRangeInserted(position, items.length);
+    }
+
+    public void removeItemRange(int positionStart, int itemCount) {
+        for (int i = 0; i < itemCount; i++) {
+            mItems.remove(positionStart + i);
+        }
+        notifyItemRangeRemoved(positionStart, itemCount);
+    }
+
+    public void moveItem(int fromPosition, int toPosition) {
+        String item = mItems.get(fromPosition);
+        if (fromPosition > toPosition) {
+            mItems.remove(fromPosition);
+            mItems.add(toPosition, item);
+        } else {
+            mItems.add(toPosition, item);
+            mItems.remove(fromPosition);
+        }
+        notifyItemMoved(fromPosition, toPosition);
+    }
+
+    public void changeList(List<String> newItems) {
+        mItems.clear();
+        mItems.addAll(newItems);
+        notifyDataSetChanged();
+    }
+
     static class WithContentLimiting extends TestDelegatingContentLimitingAdapter
             implements DelegatingContentLimitingAdapter.ContentLimiting {
 
