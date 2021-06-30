@@ -17,7 +17,7 @@ android_app {
     manifest: "src/main/AndroidManifest.xml",
     srcs: ["src/main/java/**/*.java"],
     resource_dirs: ["src/main/res"],
-
+    libs: ["android.car-stubs"],
     static_libs: [
         "car-ui-lib-oem-apis",
         "androidx.annotation_annotation",
