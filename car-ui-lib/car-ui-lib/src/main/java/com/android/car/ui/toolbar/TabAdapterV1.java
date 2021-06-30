@@ -16,48 +16,33 @@
 
 package com.android.car.ui.toolbar;
 
-import android.graphics.drawable.Drawable;
-
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.TabOEMV1;
 
 import java.util.function.Consumer;
 
 @SuppressWarnings("AndroidJdkLibsChecker")
-class TabAdapterV1 implements TabOEMV1 {
+class TabAdapterV1 {
 
     private final Tab mClientTab;
+    private final TabOEMV1 mSharedLibraryTab;
 
     TabAdapterV1(Tab clientTab) {
         mClientTab = clientTab;
+        Consumer<Tab> selectedListener = mClientTab.getSelectedListener();
+        mSharedLibraryTab = TabOEMV1.builder()
+                .setIcon(mClientTab.getIcon())
+                .setTitle(mClientTab.getText())
+                .setOnSelectedListener(selectedListener == null
+                        ? null
+                        : () -> selectedListener.accept(mClientTab))
+                .build();
     }
 
     public Tab getClientTab() {
         return mClientTab;
     }
 
-    @Override
-    public String getTitle() {
-        return mClientTab.getText();
-    }
-
-    @Override
-    public Drawable getIcon() {
-        return mClientTab.getIcon();
-    }
-
-
-    @Override
-    public Runnable getOnClickListener() {
-        Consumer<Tab> selectedListener = mClientTab.getSelectedListener();
-        if (selectedListener == null) {
-            return null;
-        } else {
-            return () -> selectedListener.accept(mClientTab);
-        }
-    }
-
-    @Override
-    public boolean shouldTint() {
-        return true;
+    public TabOEMV1 getSharedLibraryTab() {
+        return mSharedLibraryTab;
     }
 }

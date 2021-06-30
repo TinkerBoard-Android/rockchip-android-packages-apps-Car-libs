@@ -150,7 +150,7 @@ public class BaseLayoutInstaller {
         private Consumer<InsetsOEMV1> mInsetsChangedListenerDelegate;
 
         private boolean mInsetsDirty = true;
-        private InsetsOEMV1 mInsets = new Insets();
+        private InsetsOEMV1 mInsets = new InsetsOEMV1();
 
         /**
          * Constructs an InsetsUpdater that calculates and dispatches insets to the method provided
@@ -253,7 +253,7 @@ public class BaseLayoutInstaller {
                 right += Math.max(0,
                         getRightOfView(mContentViewContainer) - getLeftOfView(mRightInsetView));
             }
-            InsetsOEMV1 insets = new Insets(left, top, right, bottom);
+            InsetsOEMV1 insets = new InsetsOEMV1(left, top, right, bottom);
 
             mInsetsDirty = false;
             if (!insets.equals(mInsets)) {
