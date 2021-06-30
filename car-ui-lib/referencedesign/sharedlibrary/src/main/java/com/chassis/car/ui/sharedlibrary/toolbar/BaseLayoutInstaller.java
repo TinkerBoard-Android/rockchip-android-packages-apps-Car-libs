@@ -23,6 +23,7 @@ import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
+import androidx.annotation.LayoutRes;
 import androidx.annotation.Nullable;
 
 import com.android.car.ui.sharedlibrary.oemapis.FocusAreaOEMV1;
@@ -54,11 +55,6 @@ public class BaseLayoutInstaller {
             @Nullable Function<Context, FocusParkingViewOEMV1> focusParkingViewFactory,
             @Nullable Function<Context, FocusAreaOEMV1> focusAreaFactory) {
 
-        if (!toolbarEnabled) {
-            // We don't need a toolbar-less base layout in this design, so we're done.
-            return null;
-        }
-
         Context activityContext = contentView.getContext();
 
         // Add the configuration from the activity context to the shared library context,
@@ -67,8 +63,11 @@ public class BaseLayoutInstaller {
         sharedLibraryContext = sharedLibraryContext.createConfigurationContext(
                 activityContext.getResources().getConfiguration());
 
+        @LayoutRes int layout = toolbarEnabled
+                ? R.layout.base_layout_toolbar
+                : R.layout.base_layout;
         FrameLayout baseLayout = (FrameLayout) LayoutInflater.from(sharedLibraryContext).inflate(
-                R.layout.base_layout_toolbar, null, false);
+                layout, null, false);
 
         // Replace the app's content view with a base layout
         ViewGroup contentViewParent = (ViewGroup) contentView.getParent();
@@ -103,7 +102,7 @@ public class BaseLayoutInstaller {
         // the FocusArea using the app's context, so that it can access it's resources,
         // but we want children of the FocusArea to use the shared library context, so we can
         // access shared library resources.
-        if (focusAreaFactory != null) {
+        if (focusAreaFactory != null && toolbarEnabled) {
             LinearLayout focusArea = focusAreaFactory.apply(activityContext).getView();
             if (focusArea != null) {
                 View toolbar = baseLayout.requireViewById(R.id.toolbar_background);
@@ -116,8 +115,11 @@ public class BaseLayoutInstaller {
         }
 
 
-        ToolbarControllerOEMV1 toolbarController = new ToolbarControllerImpl(
-                baseLayout, sharedLibraryContext, activityContext);
+        ToolbarControllerOEMV1 toolbarController = null;
+        if (toolbarEnabled) {
+            toolbarController = new ToolbarControllerImpl(
+                    baseLayout, sharedLibraryContext, activityContext);
+        }
 
         InsetsUpdater updater = new InsetsUpdater(baseLayout, contentView);
         updater.replaceInsetsChangedListenerWith(insetsChangedListener);
