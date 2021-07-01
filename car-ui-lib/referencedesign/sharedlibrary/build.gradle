@@ -33,16 +33,15 @@ android {
 
     // In order to adb install a new version of an app over it's preinstalled version, the new
     // version must be signed with the same key as the preinstalled version. If you don't specify
-    // a certificate in the Android.bp file (which we don't), the default certificate that will
+    // a certificate in the Android.bp file, the default certificate that will
     // be used is build/target/product/security/testkey.{pk8,x509.pem}. Android studio doesn't
     // support signing apps using individual pk8 and x509.pem files, it requires a keystore file.
-    // So the keystore in this project is just a repackaging of the testkey key.
     signingConfigs {
         debug {
-            storeFile file('keystore')
-            storePassword 'android'
-            keyAlias 'testkey'
-            keyPassword 'android'
+            storeFile file('chassis_upload_key.pepk')
+            storePassword 'chassis'
+            keyAlias 'chassis'
+            keyPassword 'chassis'
         }
     }
 }
