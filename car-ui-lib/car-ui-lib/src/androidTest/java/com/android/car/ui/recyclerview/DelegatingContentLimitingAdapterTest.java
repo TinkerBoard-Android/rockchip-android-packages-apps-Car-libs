@@ -21,12 +21,16 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import android.view.View;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.OrientationHelper;
+import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
@@ -36,6 +40,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class DelegatingContentLimitingAdapterTest {
@@ -126,5 +131,151 @@ public class DelegatingContentLimitingAdapterTest {
         });
 
         onView(withText(mDelegateAdapter.getItemText(15))).check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void testChangeItem_callsObservers() {
+        mDelegateAdapter = new TestDelegatingContentLimitingAdapter(50);
+        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter, 1);
+
+        AdapterDataObserver observer = mock(AdapterDataObserver.class);
+        mContentLimitingAdapter.registerAdapterDataObserver(observer);
+
+        onView(withId(R.id.list)).check(matches(isDisplayed()));
+
+        CarUiRecyclerView carUiRecyclerView = mActivity.requireViewById(R.id.list);
+        mActivity.runOnUiThread(() -> {
+            carUiRecyclerView.setAdapter(mContentLimitingAdapter);
+            carUiRecyclerView.setVisibility(View.VISIBLE);
+            mContentLimitingAdapter.setMaxItems(10);
+            mDelegateAdapter.changeItemRange(5, 3);
+        });
+
+        onView(withText(mDelegateAdapter.getItemText(0))).check(matches(isDisplayed()));
+
+        verify(observer).onItemRangeChanged(5, 3, null);
+    }
+
+    @Test
+    public void testInsertItem_callsObservers() {
+        mDelegateAdapter = new TestDelegatingContentLimitingAdapter(50);
+        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter, 1);
+
+        AdapterDataObserver observer = mock(AdapterDataObserver.class);
+        mContentLimitingAdapter.registerAdapterDataObserver(observer);
+
+        onView(withId(R.id.list)).check(matches(isDisplayed()));
+
+        CarUiRecyclerView carUiRecyclerView = mActivity.requireViewById(R.id.list);
+        mActivity.runOnUiThread(() -> {
+            carUiRecyclerView.setAdapter(mContentLimitingAdapter);
+            carUiRecyclerView.setVisibility(View.VISIBLE);
+            mContentLimitingAdapter.setMaxItems(10);
+            mDelegateAdapter.insertItemRange(5, "new item 1", "new item 2");
+        });
+
+        onView(withText(mDelegateAdapter.getItemText(0))).check(matches(isDisplayed()));
+
+        verify(observer).onItemRangeInserted(5, 2);
+    }
+
+    @Test
+    public void testRemoveItem_callsObservers() {
+        mDelegateAdapter = new TestDelegatingContentLimitingAdapter(50);
+        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter, 1);
+
+        AdapterDataObserver observer = mock(AdapterDataObserver.class);
+        mContentLimitingAdapter.registerAdapterDataObserver(observer);
+
+        onView(withId(R.id.list)).check(matches(isDisplayed()));
+
+        CarUiRecyclerView carUiRecyclerView = mActivity.requireViewById(R.id.list);
+        mActivity.runOnUiThread(() -> {
+            carUiRecyclerView.setAdapter(mContentLimitingAdapter);
+            carUiRecyclerView.setVisibility(View.VISIBLE);
+            mContentLimitingAdapter.setMaxItems(10);
+            mDelegateAdapter.removeItemRange(5, 2);
+        });
+
+        onView(withText(mDelegateAdapter.getItemText(0))).check(matches(isDisplayed()));
+
+        verify(observer).onItemRangeRemoved(5, 2);
+    }
+
+    @Test
+    public void testMoveItem_callsObservers() {
+        mDelegateAdapter = new TestDelegatingContentLimitingAdapter(50);
+        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter, 1);
+
+        AdapterDataObserver observer = mock(AdapterDataObserver.class);
+        mContentLimitingAdapter.registerAdapterDataObserver(observer);
+
+        onView(withId(R.id.list)).check(matches(isDisplayed()));
+
+        CarUiRecyclerView carUiRecyclerView = mActivity.requireViewById(R.id.list);
+        mActivity.runOnUiThread(() -> {
+            carUiRecyclerView.setAdapter(mContentLimitingAdapter);
+            carUiRecyclerView.setVisibility(View.VISIBLE);
+            mContentLimitingAdapter.setMaxItems(10);
+            mDelegateAdapter.moveItem(5, 2);
+        });
+
+        onView(withText(mDelegateAdapter.getItemText(0))).check(matches(isDisplayed()));
+
+        verify(observer).onChanged();
+    }
+
+    @Test
+    public void testChangeDataSet_callsObservers() {
+        mDelegateAdapter = new TestDelegatingContentLimitingAdapter(50);
+        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter, 1);
+
+        AdapterDataObserver observer = mock(AdapterDataObserver.class);
+        mContentLimitingAdapter.registerAdapterDataObserver(observer);
+
+        onView(withId(R.id.list)).check(matches(isDisplayed()));
+
+        CarUiRecyclerView carUiRecyclerView = mActivity.requireViewById(R.id.list);
+        mActivity.runOnUiThread(() -> {
+            carUiRecyclerView.setAdapter(mContentLimitingAdapter);
+            carUiRecyclerView.setVisibility(View.VISIBLE);
+            mContentLimitingAdapter.setMaxItems(10);
+        });
+
+        onView(withText(mDelegateAdapter.getItemText(0))).check(matches(isDisplayed()));
+
+        mActivity.runOnUiThread(() -> {
+            ArrayList<String> newItems = new ArrayList<>();
+            for (int i = 0; i < 40; i++) {
+                newItems.add("New Item " + i);
+            }
+            mDelegateAdapter.changeList(newItems);
+        });
+
+        onView(withText("New Item 0")).check(matches(isDisplayed()));
+
+        verify(observer).onChanged();
+    }
+
+    @Test
+    public void testSetHasStableId_setsDelegateToo() {
+        mDelegateAdapter = new TestDelegatingContentLimitingAdapter(50);
+        mDelegateAdapter.setHasStableIds(false);
+
+        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter, 1);
+
+        mContentLimitingAdapter.setHasStableIds(true);
+
+        assertTrue(mDelegateAdapter.hasStableIds());
+    }
+
+    @Test
+    public void testGetIds_callsDelegate() {
+        mDelegateAdapter = new TestDelegatingContentLimitingAdapter(50);
+        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter, 1);
+
+        for (int i = 0; i < 50; i++) {
+            assertEquals(mDelegateAdapter.getItemId(i), mContentLimitingAdapter.getItemId(i));
+        }
     }
 }
