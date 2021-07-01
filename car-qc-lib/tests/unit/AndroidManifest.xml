@@ -19,6 +19,22 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.car.qc.tests.unit">
 
+    <application android:debuggable="true">
+        <uses-library android:name="android.test.runner" />
+
+        <provider
+            android:name="com.android.car.qc.provider.AllowedTestQCProvider"
+            android:authorities="com.android.car.qc.provider.AllowedTestQCProvider"
+            android:exported="true">
+        </provider>
+
+        <provider
+            android:name="com.android.car.qc.provider.DeniedTestQCProvider"
+            android:authorities="com.android.car.qc.provider.DeniedTestQCProvider"
+            android:exported="true">
+        </provider>
+    </application>
+
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
                      android:targetPackage="com.android.car.qc.tests.unit"
                      android:label="Quick Controls Library Unit Tests"/>
