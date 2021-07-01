@@ -2,6 +2,11 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
+android_app_certificate {
+    name: "car-ui-lib-sharedlibrary-certificate",
+    certificate: "chassis_upload_key"
+}
+
 android_app {
     name: "car-ui-lib-sharedlibrary",
 
@@ -27,4 +32,6 @@ android_app {
     optimize: {
         enabled: false,
     },
+
+    certificate: ":car-ui-lib-sharedlibrary-certificate",
 }
