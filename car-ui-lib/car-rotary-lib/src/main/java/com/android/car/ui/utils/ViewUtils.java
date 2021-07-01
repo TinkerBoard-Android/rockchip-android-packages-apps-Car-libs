@@ -133,6 +133,27 @@ public final class ViewUtils {
         void removeOnLayoutCompleteListener(@Nullable Runnable runnable);
     }
 
+    /**
+     * Hides the focus by searching the view tree for the {@link FocusParkingView}
+     * and focusing on it.
+     *
+     * @param root the root view to search from
+     * @return true if the FocusParkingView was successfully found and focused
+     *         or if it was already focused
+     */
+    public static boolean hideFocus(@NonNull View root) {
+        FocusParkingView fpv = (FocusParkingView) depthFirstSearch(root,
+                /* targetPredicate= */ v -> v instanceof FocusParkingView,
+                /* skipPredicate= */ null);
+        if (fpv == null) {
+            return false;
+        }
+        if (fpv.isFocused()) {
+            return true;
+        }
+        return fpv.performAccessibilityAction(ACTION_FOCUS, /* arguments= */ null);
+    }
+
     /** Gets the ancestor FocusArea of the {@code view}, if any. Returns null if not found. */
     @Nullable
     public static FocusArea getAncestorFocusArea(@NonNull View view) {
