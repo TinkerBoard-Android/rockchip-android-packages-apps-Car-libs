@@ -19,6 +19,7 @@ package com.android.car.ui.preference;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.typeText;
+import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isChecked;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
@@ -43,7 +44,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.res.Resources;
+import android.view.View;
 
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.DropDownPreference;
@@ -790,7 +794,7 @@ public class PreferenceTest {
         preference.setKey("editText");
         preference.setTitle(R.string.title_edit_text_preference);
         preference.setOrder(0);
-        CharSequence positiveButtonText = "Ok";
+        String positiveButtonText = "Ok";
         preference.setPositiveButtonText(positiveButtonText);
         preference.setDialogTitle(R.string.dialog_title_edit_text_preference);
         preference.setSummaryProvider(EditTextPreference.SimpleSummaryProvider.getInstance());
@@ -805,12 +809,12 @@ public class PreferenceTest {
         onView(withText(R.string.dialog_title_edit_text_preference)).check(matches(isDisplayed()));
 
         // Enter value
-        CharSequence value = "test value";
-        onView(withId(android.R.id.edit)).perform(typeText(value.toString()));
-        onView(withText(positiveButtonText.toString())).perform(click());
+        String value = "test value";
+        onView(withId(android.R.id.edit)).perform(typeText(value));
+        onView(withText(positiveButtonText)).perform(click());
 
         // Confirm value updated by simple summary provider
-        onView(withText(value.toString())).check(matches(isDisplayed()));
+        onView(withText(value)).check(matches(isDisplayed()));
     }
 
     @Test
@@ -849,9 +853,9 @@ public class PreferenceTest {
         preference.setKey("seek_bar");
         preference.setTitle(R.string.title_seek_bar_preference);
         preference.setOrder(0);
-        CharSequence positiveButtonText = "Ok";
+        String positiveButtonText = "Ok";
         preference.setPositiveButtonText(positiveButtonText);
-        CharSequence negativeButtonText = "Cancel";
+        String negativeButtonText = "Cancel";
         preference.setNegativeButtonText(negativeButtonText);
         preference.setDialogTitle(R.string.dialog_title_seek_bar_preference);
         preference.setMaxProgress(20);
@@ -863,8 +867,8 @@ public class PreferenceTest {
         // Click on preference
         onView(withText(R.string.title_seek_bar_preference)).perform(click());
         onView(withText(R.string.dialog_title_seek_bar_preference)).check(matches(isDisplayed()));
-        onView(withText(positiveButtonText.toString())).check(matches(isDisplayed()));
-        onView(withText(negativeButtonText.toString())).check(matches(isDisplayed()));
+        onView(withText(positiveButtonText)).check(matches(isDisplayed()));
+        onView(withText(negativeButtonText)).check(matches(isDisplayed()));
 
         // Confirm progress is set to 0
         assertEquals(0, preference.getProgress());
@@ -877,16 +881,91 @@ public class PreferenceTest {
     }
 
     @Test
+    public void testSeekBarPreference_clickOk_valueSaved() {
+        // Create CarUiSeekBarDialogPreference preference and add it to screen.
+        CarUiSeekBarDialogPreference preference = new CarUiSeekBarDialogPreference(mActivity);
+        preference.setKey("seek_bar");
+        preference.setTitle(R.string.title_seek_bar_preference);
+        preference.setOrder(0);
+        String positiveButtonText = "Ok";
+        preference.setPositiveButtonText(positiveButtonText);
+        String negativeButtonText = "Cancel";
+        preference.setNegativeButtonText(negativeButtonText);
+        preference.setDialogTitle(R.string.dialog_title_seek_bar_preference);
+        preference.setMaxProgress(20);
+        mActivity.addPreference(preference);
+
+        // Check title is displayed as expected.
+        onView(withText(R.string.title_seek_bar_preference)).check(matches(isDisplayed()));
+
+        // Click on preference, set progress, then hit ok
+        onView(withText(R.string.title_seek_bar_preference)).perform(click());
+        onView(withId(R.id.seek_bar)).perform(setProgress(10));
+        onView(withText(positiveButtonText)).perform(click());
+        onView(withText(R.string.dialog_title_seek_bar_preference)).check(doesNotExist());
+
+        // Confirm progress is set to 0
+        assertEquals(10, preference.getProgress());
+        assertEquals(20, preference.getMaxProgress());
+    }
+
+    @Test
+    public void testSeekBarPreference_clickCancel_valueNotSaved() {
+        // Create CarUiSeekBarDialogPreference preference and add it to screen.
+        CarUiSeekBarDialogPreference preference = new CarUiSeekBarDialogPreference(mActivity);
+        preference.setKey("seek_bar");
+        preference.setTitle(R.string.title_seek_bar_preference);
+        preference.setOrder(0);
+        String positiveButtonText = "Ok";
+        preference.setPositiveButtonText(positiveButtonText);
+        String negativeButtonText = "Cancel";
+        preference.setNegativeButtonText(negativeButtonText);
+        preference.setDialogTitle(R.string.dialog_title_seek_bar_preference);
+        preference.setMaxProgress(20);
+        mActivity.addPreference(preference);
+
+        // Check title is displayed as expected.
+        onView(withText(R.string.title_seek_bar_preference)).check(matches(isDisplayed()));
+
+        // Click on preference, set progress, then hit cancel
+        onView(withText(R.string.title_seek_bar_preference)).perform(click());
+        onView(withId(R.id.seek_bar)).perform(setProgress(10));
+        onView(withText(negativeButtonText)).perform(click());
+        onView(withText(R.string.dialog_title_seek_bar_preference)).check(doesNotExist());
+
+        // Confirm progress is set to 0
+        assertEquals(0, preference.getProgress());
+        assertEquals(20, preference.getMaxProgress());
+    }
+
+    @Test
+    public void test_defaultDialogFragmentCallbacks_doNothing() {
+        DialogFragmentCallbacks callbacks = new DialogFragmentCallbacks() {
+        };
+
+        callbacks.onBindDialogView(new View(mActivity));
+        callbacks.onClick(new DialogInterface() {
+            @Override
+            public void cancel() {
+            }
+
+            @Override
+            public void dismiss() {
+            }
+        }, 0);
+        callbacks.onDialogClosed(true);
+        callbacks.onPrepareDialogBuilder(new AlertDialog.Builder(mActivity));
+    }
+
+    @Test
     public void testSeekBarPreference_uxRestricted() {
         // Create CarUiSeekBarDialogPreference preference and add it to screen.
         CarUiSeekBarDialogPreference preference = new CarUiSeekBarDialogPreference(mActivity);
         preference.setKey("seek_bar");
         preference.setTitle(R.string.title_seek_bar_preference);
         preference.setOrder(0);
-        CharSequence positiveButtonText = "Ok";
-        preference.setPositiveButtonText(positiveButtonText);
-        CharSequence negativeButtonText = "Cancel";
-        preference.setNegativeButtonText(negativeButtonText);
+        preference.setPositiveButtonText("Ok");
+        preference.setNegativeButtonText("Cancel");
         preference.setDialogTitle(R.string.dialog_title_seek_bar_preference);
         preference.setMaxProgress(20);
         preference.setUxRestricted(true);
