@@ -112,9 +112,9 @@ public class TabLayout extends LinearLayout {
         bindTab(oldSelectedTab);
         bindTab(mSelectedTab);
 
-        Runnable onClickListener = tab.getOnClickListener();
-        if (onClickListener != null && sendCallback) {
-            onClickListener.run();
+        Runnable onSelectedListener = tab.getOnSelectedListener();
+        if (onSelectedListener != null && sendCallback) {
+            onSelectedListener.run();
         }
     }
 

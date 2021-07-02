@@ -475,11 +475,19 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
         boolean gainingTabs = newAdapterState.hasTabs() && !oldAdapterState.hasTabs();
         boolean losingTabs = !newAdapterState.hasTabs() && oldAdapterState.hasTabs();
         if (gainingTabs) {
-            mOemToolbar.setTabs(newAdapterState.getTabs(), newAdapterState.getSelectedTab());
+            mOemToolbar.setTabs(newAdapterState.getTabs()
+                    .stream()
+                    .map(TabAdapterV1::getSharedLibraryTab)
+                    .collect(toList()),
+                    newAdapterState.getSelectedTab());
         } else if (losingTabs) {
             mOemToolbar.setTabs(Collections.emptyList(), -1);
         } else if (newAdapterState.hasTabs() && newAdapterState.getTabsDirty()) {
-            mOemToolbar.setTabs(newAdapterState.getTabs(), newAdapterState.getSelectedTab());
+            mOemToolbar.setTabs(newAdapterState.getTabs()
+                            .stream()
+                            .map(TabAdapterV1::getSharedLibraryTab)
+                            .collect(toList()),
+                    newAdapterState.getSelectedTab());
         } else if (newAdapterState.hasTabs()
                 && newAdapterState.getSelectedTab() != oldAdapterState.getSelectedTab()) {
             mOemToolbar.selectTab(newAdapterState.getSelectedTab(), true);
