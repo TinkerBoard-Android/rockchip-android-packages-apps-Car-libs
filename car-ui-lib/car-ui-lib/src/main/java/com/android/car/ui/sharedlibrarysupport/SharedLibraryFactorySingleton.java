@@ -48,6 +48,20 @@ public final class SharedLibraryFactorySingleton {
 
     private static final String TAG = "carui";
     private static SharedLibraryFactory sInstance;
+
+    /*
+     ********************************************
+     *               WARNING                    *
+     ********************************************
+     * The OEM APIs as they appear on this      *
+     * branch of android are not finalized!     *
+     * If a shared library is built using them, *
+     * it will cause apps to crash!             *
+     *                                          *
+     * Please only use a shared library with    *
+     * a later version of car-ui-lib.           *
+     ********************************************
+     */
     private static boolean sSharedLibEnabled = false;
 
     /**

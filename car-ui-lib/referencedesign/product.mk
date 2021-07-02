@@ -1,7 +1,18 @@
 # Inherit from this product to include the "Reference Design" RROs for CarUi
 
-PRODUCT_PACKAGES += \
-   car-ui-lib-sharedlibrary \
+#############################################
+#                  WARNING                  #
+#############################################
+# The OEM APIs as they appear on this       #
+# branch of android are not finalized!      #
+# If a shared library is built using them,  #
+# it will cause apps to crash!              #
+#                                           #
+# Please only use a shared library with     #
+# a later version of car-ui-lib.            #
+#############################################
+#PRODUCT_PACKAGES += \
+#   car-ui-lib-sharedlibrary \
 
 PRODUCT_PRODUCT_PROPERTIES += ro.build.automotive.car.ui.shared.library.package.name=com.chassis.car.ui.sharedlibrary
 
