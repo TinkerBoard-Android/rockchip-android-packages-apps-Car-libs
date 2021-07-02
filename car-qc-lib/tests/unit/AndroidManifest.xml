@@ -23,14 +23,14 @@
         <uses-library android:name="android.test.runner" />
 
         <provider
-            android:name="com.android.car.qc.provider.AllowedTestQCProvider"
-            android:authorities="com.android.car.qc.provider.AllowedTestQCProvider"
+            android:name="com.android.car.qc.testutils.AllowedTestQCProvider"
+            android:authorities="com.android.car.qc.testutils.AllowedTestQCProvider"
             android:exported="true">
         </provider>
 
         <provider
-            android:name="com.android.car.qc.provider.DeniedTestQCProvider"
-            android:authorities="com.android.car.qc.provider.DeniedTestQCProvider"
+            android:name="com.android.car.qc.testutils.DeniedTestQCProvider"
+            android:authorities="com.android.car.qc.testutils.DeniedTestQCProvider"
             android:exported="true">
         </provider>
     </application>

@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.car.qc.provider;
+package com.android.car.qc.controller;
 
-import java.util.HashSet;
-import java.util.Set;
+import androidx.annotation.Nullable;
 
-public class DeniedTestQCProvider extends TestQCProvider {
-    @Override
-    protected Set<String> getAllowlistedPackages() {
-        return new HashSet<>();
-    }
+import com.android.car.qc.QCItem;
+
+/**
+ * Callback to be executed when a QCItem changes.
+ */
+public interface QCItemCallback {
+    /**
+     * Called when QCItem is updated.
+     *
+     * @param item The updated QCItem.
+     */
+    void onQCItemUpdated(@Nullable QCItem item);
 }

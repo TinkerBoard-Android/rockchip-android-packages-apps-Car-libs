@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.car.qc.provider;
+package com.android.car.qc.testutils;
 
 import android.R;
 import android.graphics.Bitmap;
@@ -29,6 +29,7 @@ import androidx.annotation.NonNull;
 
 import com.android.car.qc.QCItem;
 import com.android.car.qc.QCTile;
+import com.android.car.qc.provider.BaseQCProvider;
 
 import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
@@ -37,11 +38,11 @@ import java.util.Set;
 
 public abstract class TestQCProvider extends BaseQCProvider {
 
-    static final String METHOD_IS_SUBSCRIBED = "METHOD_IS_SUBSCRIBED";
-    static final String IS_SUBSCRIBED_KEY = "IS_SUBSCRIBED";
+    public static final String METHOD_IS_SUBSCRIBED = "METHOD_IS_SUBSCRIBED";
+    public static final String IS_SUBSCRIBED_KEY = "IS_SUBSCRIBED";
 
-    static final String KEY_DEFAULT = "DEFAULT";
-    static final String KEY_SLOW = "SLOW";
+    public static final String KEY_DEFAULT = "DEFAULT";
+    public static final String KEY_SLOW = "SLOW";
 
     private final Set<Uri> mSubscribedUris = new HashSet<>();
 

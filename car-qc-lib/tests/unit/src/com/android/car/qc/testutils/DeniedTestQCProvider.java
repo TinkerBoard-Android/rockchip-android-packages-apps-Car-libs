@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.car.qc.provider;
+package com.android.car.qc.testutils;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class AllowedTestQCProvider extends TestQCProvider {
+public class DeniedTestQCProvider extends TestQCProvider {
     @Override
     protected Set<String> getAllowlistedPackages() {
-        Set<String> allowlist = new HashSet<>();
-        allowlist.add("com.android.car.qc.tests.unit");
-        return allowlist;
+        return new HashSet<>();
     }
 }

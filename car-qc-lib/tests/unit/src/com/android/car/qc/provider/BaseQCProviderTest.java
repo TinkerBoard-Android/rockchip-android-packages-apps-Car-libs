@@ -21,10 +21,10 @@ import static com.android.car.qc.provider.BaseQCProvider.EXTRA_URI;
 import static com.android.car.qc.provider.BaseQCProvider.METHOD_BIND;
 import static com.android.car.qc.provider.BaseQCProvider.METHOD_SUBSCRIBE;
 import static com.android.car.qc.provider.BaseQCProvider.METHOD_UNSUBSCRIBE;
-import static com.android.car.qc.provider.TestQCProvider.IS_SUBSCRIBED_KEY;
-import static com.android.car.qc.provider.TestQCProvider.KEY_DEFAULT;
-import static com.android.car.qc.provider.TestQCProvider.KEY_SLOW;
-import static com.android.car.qc.provider.TestQCProvider.METHOD_IS_SUBSCRIBED;
+import static com.android.car.qc.testutils.TestQCProvider.IS_SUBSCRIBED_KEY;
+import static com.android.car.qc.testutils.TestQCProvider.KEY_DEFAULT;
+import static com.android.car.qc.testutils.TestQCProvider.KEY_SLOW;
+import static com.android.car.qc.testutils.TestQCProvider.METHOD_IS_SUBSCRIBED;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -49,12 +49,12 @@ import org.junit.runner.RunWith;
 public class BaseQCProviderTest {
 
     private final Context mContext = ApplicationProvider.getApplicationContext();
-    private final Uri mDefaultUri =
-            Uri.parse("content://com.android.car.qc.provider.AllowedTestQCProvider/" + KEY_DEFAULT);
+    private final Uri mDefaultUri = Uri.parse(
+            "content://com.android.car.qc.testutils.AllowedTestQCProvider/" + KEY_DEFAULT);
     private final Uri mSlowUri =
-            Uri.parse("content://com.android.car.qc.provider.AllowedTestQCProvider/" + KEY_SLOW);
+            Uri.parse("content://com.android.car.qc.testutils.AllowedTestQCProvider/" + KEY_SLOW);
     private final Uri mDeniedUri =
-            Uri.parse("content://com.android.car.qc.provider.DeniedTestQCProvider");
+            Uri.parse("content://com.android.car.qc.testutils.DeniedTestQCProvider");
 
     @Test
     public void callOnBind_allowed_returnsItem() throws RemoteException {
