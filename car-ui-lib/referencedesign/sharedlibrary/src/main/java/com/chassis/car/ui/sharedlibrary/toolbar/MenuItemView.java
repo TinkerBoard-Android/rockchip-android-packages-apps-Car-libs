@@ -65,13 +65,10 @@ class MenuItemView extends FrameLayout {
         mTextWithIconView = requireViewById(R.id.car_ui_toolbar_menu_item_text_with_icon);
 
         mMenuItem = menuItem;
-        mMenuItem.setUpdateListener(this::onMenuItemUpdated);
         onMenuItemUpdated(mMenuItem);
     }
 
     public void onMenuItemUpdated(MenuItemOEMV1 menuItem) {
-        setId(mMenuItem.getId());
-
         boolean hasIcon = mMenuItem.getIcon() != null;
         boolean hasText = !TextUtils.isEmpty(mMenuItem.getTitle());
         boolean textAndIcon = mMenuItem.isShowingIconAndTitle();
@@ -114,11 +111,17 @@ class MenuItemView extends FrameLayout {
         recursiveSetEnabledAndDrawableState(this);
         setActivated(mMenuItem.isActivated());
 
-        clickTarget.setOnClickListener(v -> {
-            if (mMenuItem.isEnabled()) {
-                mMenuItem.performClick();
-            }
-        });
+        Runnable onClickListener = mMenuItem.getOnClickListener();
+        if (onClickListener != null) {
+            clickTarget.setOnClickListener(v -> {
+                if (mMenuItem.isEnabled()) {
+                    onClickListener.run();
+                }
+            });
+        } else {
+            clickTarget.setOnClickListener(null);
+            clickTarget.setClickable(false);
+        }
     }
 
     private void recursiveSetEnabledAndDrawableState(View view) {

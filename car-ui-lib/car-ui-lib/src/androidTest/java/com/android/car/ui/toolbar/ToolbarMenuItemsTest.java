@@ -31,7 +31,6 @@ import static com.android.car.ui.matchers.ViewMatchers.doesNotExistOrIsNotDispla
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.hamcrest.core.IsNot.not;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -250,6 +249,20 @@ public class ToolbarMenuItemsTest {
     }
 
     @Test
+    public void menuItems_noOverflow_buttonDoesntExist() {
+        runWithActivityAndToolbar((activity, toolbar) -> {
+            MenuItem menuItem = MenuItem.builder(activity)
+                    .setTitle("Test title!")
+                    .build();
+            toolbar.setMenuItems(Collections.singletonList(menuItem));
+        });
+
+        // Wait for regular MenuItem to show up, then check that the overflow button doesn't exist.
+        onView(isRoot()).perform(waitForView(withText("Test title!")));
+        onView(withContentDescription("Overflow")).check(doesNotExistOrIsNotDisplayed());
+    }
+
+    @Test
     public void menuItems_overflowIconAndText_shouldWork() {
         MenuItem.OnClickListener callback = mock(MenuItem.OnClickListener.class);
         MenuItem[] menuItem = new MenuItem[] { null };
@@ -332,7 +345,7 @@ public class ToolbarMenuItemsTest {
 
         runWithToolbar((toolbar) -> menuItem[0].setVisible(false));
 
-        onView(withText("Button!")).check(matches(not(isDisplayed())));
+        onView(withText("Button!")).check(doesNotExistOrIsNotDisplayed());
     }
 
     @Test

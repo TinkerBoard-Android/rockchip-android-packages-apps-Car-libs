@@ -39,7 +39,7 @@ import java.util.Map;
  * A view that can show tabs via the {@link #setTabs(List, int)} method.
  */
 public class TabLayout extends LinearLayout {
-    private List<? extends TabOEMV1> mTabs = new ArrayList<>();
+    private List<TabOEMV1> mTabs = new ArrayList<>();
     private TabOEMV1 mSelectedTab;
     private final Map<TabOEMV1, View> mTabViews = new HashMap<>();
 
@@ -61,7 +61,7 @@ public class TabLayout extends LinearLayout {
      * @param tabs The tabs to show.
      * @param selectedTab Which tab is selected.
      */
-    public void setTabs(@NonNull List<? extends TabOEMV1> tabs, int selectedTab) {
+    public void setTabs(@NonNull List<TabOEMV1> tabs, int selectedTab) {
         removeAllViews();
         mTabViews.clear();
         mSelectedTab = null;

@@ -46,7 +46,7 @@ public interface ToolbarControllerOEMV1 {
      * @param tabs Nullable. Must not be mutated. List of tabs to show.
      * @param selectedTab The index of the tab that is initially selected.
      */
-    void setTabs(List<? extends TabOEMV1> tabs, int selectedTab);
+    void setTabs(List<TabOEMV1> tabs, int selectedTab);
 
     /**
      * Selects a tab added to this toolbar. See
@@ -119,7 +119,7 @@ public interface ToolbarControllerOEMV1 {
     /**
      * Sets the {@link MenuItemOEMV1 Menuitems} to display.
      */
-    void setMenuItems(List<? extends MenuItemOEMV1> items);
+    void setMenuItems(List<MenuItemOEMV1> items);
 
     /**
      * Sets a {@link Consumer<String>} to be called whenever the text in the search box

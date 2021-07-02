@@ -124,7 +124,7 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     }
 
     @Override
-    public void setTabs(List<? extends TabOEMV1> tabs, int selectedTab) {
+    public void setTabs(List<TabOEMV1> tabs, int selectedTab) {
         if (tabs == null) {
             tabs = Collections.emptyList();
         }
@@ -228,22 +228,22 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     }
 
     @Override
-    public void setMenuItems(List<? extends MenuItemOEMV1> menuItems) {
+    public void setMenuItems(List<MenuItemOEMV1> menuItems) {
         if (menuItems == null) {
             menuItems = Collections.emptyList();
         }
 
-        List<? extends MenuItemOEMV1> overflowMenuItems = menuItems.stream()
+        List<MenuItemOEMV1> overflowMenuItems = menuItems.stream()
                 .filter(i -> i.getDisplayBehavior() != MenuItemOEMV1.DISPLAY_BEHAVIOR_ALWAYS)
                 .collect(Collectors.toList());
 
-        List<? extends MenuItemOEMV1> regularMenuItems = Stream.concat(
+        mOverflowMenuItem.setOverflowMenuItems(overflowMenuItems);
+
+        List<MenuItemOEMV1> regularMenuItems = Stream.concat(
                 menuItems.stream(),
-                Stream.of(mOverflowMenuItem))
+                Stream.of(mOverflowMenuItem.getMenuItem()))
                 .filter(i -> i.getDisplayBehavior() == MenuItemOEMV1.DISPLAY_BEHAVIOR_ALWAYS)
                 .collect(Collectors.toList());
-
-        mOverflowMenuItem.setOverflowMenuItems(overflowMenuItems);
 
         mMenuItemsContainer.removeAllViews();
         for (MenuItemOEMV1 menuItem : regularMenuItems) {
