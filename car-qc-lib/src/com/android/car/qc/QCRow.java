@@ -39,23 +39,23 @@ public class QCRow extends QCItem {
     private final String mTitle;
     private final String mSubtitle;
     private final Icon mStartIcon;
+    private final QCSlider mSlider;
     private final List<QCActionItem> mStartItems;
     private final List<QCActionItem> mEndItems;
-    private final List<QCSlider> mSliders;
     private final PendingIntent mPrimaryAction;
 
     public QCRow(@Nullable String title, @Nullable String subtitle,
             @Nullable PendingIntent primaryAction, @Nullable Icon startIcon,
-            @NonNull List<QCActionItem> startItems, @NonNull List<QCActionItem> endItems,
-            @NonNull List<QCSlider> sliders) {
+            @Nullable QCSlider slider, @NonNull List<QCActionItem> startItems,
+            @NonNull List<QCActionItem> endItems) {
         super(QC_TYPE_ROW);
         mTitle = title;
         mSubtitle = subtitle;
         mPrimaryAction = primaryAction;
         mStartIcon = startIcon;
+        mSlider = slider;
         mStartItems = Collections.unmodifiableList(startItems);
         mEndItems = Collections.unmodifiableList(endItems);
-        mSliders = Collections.unmodifiableList(sliders);
     }
 
     public QCRow(@NonNull Parcel in) {
@@ -67,6 +67,12 @@ public class QCRow extends QCItem {
             mStartIcon = Icon.CREATOR.createFromParcel(in);
         } else {
             mStartIcon = null;
+        }
+        boolean hasSlider = in.readBoolean();
+        if (hasSlider) {
+            mSlider = QCSlider.CREATOR.createFromParcel(in);
+        } else {
+            mSlider = null;
         }
         List<QCActionItem> startItems = new ArrayList<>();
         int startItemCount = in.readInt();
@@ -80,12 +86,6 @@ public class QCRow extends QCItem {
             endItems.add(QCActionItem.CREATOR.createFromParcel(in));
         }
         mEndItems = Collections.unmodifiableList(endItems);
-        List<QCSlider> sliders = new ArrayList<>();
-        int sliderCount = in.readInt();
-        for (int i = 0; i < sliderCount; i++) {
-            sliders.add(QCSlider.CREATOR.createFromParcel(in));
-        }
-        mSliders = Collections.unmodifiableList(sliders);
         boolean hasPrimaryAction = in.readBoolean();
         if (hasPrimaryAction) {
             mPrimaryAction = PendingIntent.CREATOR.createFromParcel(in);
@@ -104,6 +104,11 @@ public class QCRow extends QCItem {
         if (hasStartIcon) {
             mStartIcon.writeToParcel(dest, flags);
         }
+        boolean hasSlider = mSlider != null;
+        dest.writeBoolean(hasSlider);
+        if (hasSlider) {
+            mSlider.writeToParcel(dest, flags);
+        }
         dest.writeInt(mStartItems.size());
         for (QCActionItem startItem : mStartItems) {
             startItem.writeToParcel(dest, flags);
@@ -111,10 +116,6 @@ public class QCRow extends QCItem {
         dest.writeInt(mEndItems.size());
         for (QCActionItem endItem : mEndItems) {
             endItem.writeToParcel(dest, flags);
-        }
-        dest.writeInt(mSliders.size());
-        for (QCSlider slider : mSliders) {
-            slider.writeToParcel(dest, flags);
         }
         dest.writeBoolean(mPrimaryAction != null);
         boolean hasPrimaryAction = mPrimaryAction != null;
@@ -143,6 +144,11 @@ public class QCRow extends QCItem {
         return mStartIcon;
     }
 
+    @Nullable
+    public QCSlider getSlider() {
+        return mSlider;
+    }
+
     @NonNull
     public List<QCActionItem> getStartItems() {
         return mStartItems;
@@ -151,11 +157,6 @@ public class QCRow extends QCItem {
     @NonNull
     public List<QCActionItem> getEndItems() {
         return mEndItems;
-    }
-
-    @NonNull
-    public List<QCSlider> getSliders() {
-        return mSliders;
     }
 
     public static Creator<QCRow> CREATOR = new Creator<QCRow>() {
@@ -176,10 +177,10 @@ public class QCRow extends QCItem {
     public static class Builder {
         private final List<QCActionItem> mStartItems = new ArrayList<>();
         private final List<QCActionItem> mEndItems = new ArrayList<>();
-        private final List<QCSlider> mSliders = new ArrayList<>();
         private Icon mStartIcon;
         private String mTitle;
         private String mSubtitle;
+        private QCSlider mSlider;
         private PendingIntent mPrimaryAction;
 
         /**
@@ -203,6 +204,14 @@ public class QCRow extends QCItem {
          */
         public Builder setIcon(@Nullable Icon icon) {
             mStartIcon = icon;
+            return this;
+        }
+
+        /**
+         * Adds a {@link QCSlider} to the slider area.
+         */
+        public Builder addSlider(@Nullable QCSlider slider) {
+            mSlider = slider;
             return this;
         }
 
@@ -231,19 +240,11 @@ public class QCRow extends QCItem {
         }
 
         /**
-         * Adds a {@link QCSlider} to the slider area.
-         */
-        public Builder addSlider(@NonNull QCSlider slider) {
-            mSliders.add(slider);
-            return this;
-        }
-
-        /**
          * Builds the final {@link QCRow}.
          */
         public QCRow build() {
-            return new QCRow(mTitle, mSubtitle, mPrimaryAction, mStartIcon, mStartItems, mEndItems,
-                    mSliders);
+            return new QCRow(mTitle, mSubtitle, mPrimaryAction, mStartIcon, mSlider, mStartItems,
+                    mEndItems);
         }
     }
 }

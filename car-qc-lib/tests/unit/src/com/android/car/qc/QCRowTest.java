@@ -93,7 +93,7 @@ public class QCRowTest extends QCItemTestCase<QCRow> {
         QCRow row = createRow(/* action= */ null, /* icon= */ null, Collections.emptyList(),
                 Collections.emptyList(), Collections.singletonList(slider));
         QCRow newRow = writeAndLoadFromBundle(row);
-        assertThat(newRow.getSliders().size()).isEqualTo(1);
+        assertThat(newRow.getSlider()).isNotNull();
     }
 
     private QCRow createRow(PendingIntent action, Icon icon) {
