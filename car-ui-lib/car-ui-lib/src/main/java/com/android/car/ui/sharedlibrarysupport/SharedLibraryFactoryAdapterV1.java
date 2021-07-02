@@ -71,15 +71,11 @@ import java.util.function.Consumer;
  * SharedLibraryFactory.
  */
 public final class SharedLibraryFactoryAdapterV1 implements SharedLibraryFactory {
-
-    private final Context mSharedLibContext;
-
     SharedLibraryFactoryOEMV1 mOem;
     SharedLibraryFactoryStub mFactoryStub;
 
     public SharedLibraryFactoryAdapterV1(SharedLibraryFactoryOEMV1 oem, Context sharedLibContext) {
         mOem = oem;
-        mSharedLibContext = sharedLibContext;
         mFactoryStub = new SharedLibraryFactoryStub(sharedLibContext);
 
         mOem.setRotaryFactories(
