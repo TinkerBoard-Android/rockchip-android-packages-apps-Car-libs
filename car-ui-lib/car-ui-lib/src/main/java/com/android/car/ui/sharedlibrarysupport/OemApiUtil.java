@@ -18,7 +18,10 @@ package com.android.car.ui.sharedlibrarysupport;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryFactoryOEMV1;
+import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryFactoryOEMV2;
 import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryVersionProviderOEMV1;
 
 /**
@@ -78,7 +81,12 @@ final class OemApiUtil {
                     1, sharedLibraryContext, appPackageName);
             if (factory instanceof SharedLibraryFactoryOEMV1) {
                 oemSharedLibraryFactory = new SharedLibraryFactoryAdapterV1(
-                        (SharedLibraryFactoryOEMV1) factory, sharedLibraryContext);
+                        (SharedLibraryFactoryOEMV1) factory);
+            } else if (classExists(
+                    "com.android.car.ui.sharedlibrary.oemapis.SharedLibraryFactoryOEMV2")
+                    && factory instanceof SharedLibraryFactoryOEMV2) {
+                oemSharedLibraryFactory = new SharedLibraryFactoryAdapterV2(
+                        (SharedLibraryFactoryOEMV2) factory);
             } else {
                 Log.e(TAG, "SharedLibraryVersionProvider found, but did not provide a"
                         + " factory implementing any known interfaces!");
@@ -86,6 +94,18 @@ final class OemApiUtil {
         }
 
         return oemSharedLibraryFactory;
+    }
+
+    private static boolean classExists(@Nullable String className) {
+        if (className == null) {
+            return false;
+        }
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
     private OemApiUtil() {}
