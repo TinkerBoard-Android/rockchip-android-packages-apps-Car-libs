@@ -34,6 +34,7 @@ import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.contrib.RecyclerViewActions.scrollToPosition;
 import static androidx.test.espresso.matcher.ViewMatchers.assertThat;
+import static androidx.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isEnabled;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
@@ -275,6 +276,80 @@ public class CarUiRecyclerViewTest {
                 isCompletelyAbove(withText(adapter.getItemText(2))));
         onView(withText(adapter.getItemText(2))).check(
                 isCompletelyAbove(withText(adapter.getItemText(3))));
+    }
+
+    @Test
+    public void testStartAtFirstPosition() {
+        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        ViewGroup container = mActivity.findViewById(R.id.test_container);
+        TestAdapter adapter = new TestAdapter(100);
+        container.post(() -> {
+            container.addView(carUiRecyclerView);
+            carUiRecyclerView.setAdapter(adapter);
+        });
+
+        // Check that the first item is completely displayed.
+        onView(withText(adapter.getItemText(0))).check(matches(isCompletelyDisplayed()));
+        assertEquals(0,
+                ((LinearLayoutManager) carUiRecyclerView.getLayoutManager())
+                        .findFirstCompletelyVisibleItemPosition());
+    }
+
+    @Test
+    public void testPositionAfterPadding() {
+        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        ViewGroup container = mActivity.findViewById(R.id.test_container);
+        TestAdapter adapter = new TestAdapter(100);
+        int testPosition = 40;
+        container.post(() -> {
+            container.addView(carUiRecyclerView);
+            carUiRecyclerView.setAdapter(adapter);
+            carUiRecyclerView.scrollToPosition(testPosition);
+        });
+
+        // Check that the scrolled to item is completely displayed.
+        onView(withText(adapter.getItemText(testPosition))).check(matches(isCompletelyDisplayed()));
+        assertEquals(testPosition,
+                ((LinearLayoutManager) carUiRecyclerView.getLayoutManager())
+                        .findFirstCompletelyVisibleItemPosition());
+
+        int padding = 150;
+        container.post(() -> carUiRecyclerView.setPadding(padding, padding, padding, padding));
+
+        // Check that the scrolled to item is completely displayed.
+        onView(withText(adapter.getItemText(testPosition))).check(matches(isCompletelyDisplayed()));
+        assertEquals(testPosition,
+                ((LinearLayoutManager) carUiRecyclerView.getLayoutManager())
+                        .findFirstCompletelyVisibleItemPosition());
+    }
+
+    @Test
+    public void testPositionAfterPaddingRelative() {
+        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        ViewGroup container = mActivity.findViewById(R.id.test_container);
+        TestAdapter adapter = new TestAdapter(100);
+        int testPosition = 40;
+        container.post(() -> {
+            container.addView(carUiRecyclerView);
+            carUiRecyclerView.setAdapter(adapter);
+            carUiRecyclerView.scrollToPosition(testPosition);
+        });
+
+        // Check that the scrolled to item is completely displayed.
+        onView(withText(adapter.getItemText(testPosition))).check(matches(isCompletelyDisplayed()));
+        assertEquals(testPosition,
+                ((LinearLayoutManager) carUiRecyclerView.getLayoutManager())
+                        .findFirstCompletelyVisibleItemPosition());
+
+        int padding = 150;
+        container.post(
+                () -> carUiRecyclerView.setPaddingRelative(padding, padding, padding, padding));
+
+        // Check that the scrolled to item is completely displayed.
+        onView(withText(adapter.getItemText(testPosition))).check(matches(isCompletelyDisplayed()));
+        assertEquals(testPosition,
+                ((LinearLayoutManager) carUiRecyclerView.getLayoutManager())
+                        .findFirstCompletelyVisibleItemPosition());
     }
 
     @Test
@@ -1120,9 +1195,9 @@ public class CarUiRecyclerViewTest {
         // Set to anything greater or equal to
         // 2 * minTouchSize + max(minTouchSize, mScrollbarThumbMinHeight) + 2 * margin
         int recyclerviewHeight =
-                2 *  minTouchSize
-                + max(minTouchSize, mScrollbarThumbMinHeight)
-                + 2 * margin + trackMargin;
+                2 * minTouchSize
+                        + max(minTouchSize, mScrollbarThumbMinHeight)
+                        + 2 * margin + trackMargin;
 
         CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
 
@@ -1278,7 +1353,7 @@ public class CarUiRecyclerViewTest {
 
         int firstViewHeight = layoutManager.getChildAt(0).getHeight();
         int itemsToScroll = 10;
-        CarUiSnapHelper snapHelper  = new CarUiSnapHelper(mActivity);
+        CarUiSnapHelper snapHelper = new CarUiSnapHelper(mActivity);
         // Get an estimate of how many items CarUiSnaphelpwer says we need to scroll. The scroll
         // distance is set to 10 * height of the first item. Since all items have the items have
         // the same height, we're expecting to get exactly 10 back from CarUiSnapHelper.
@@ -1310,7 +1385,7 @@ public class CarUiRecyclerViewTest {
         // the scroll distance has to be less than half of the size of the first view so that
         // recyclerview doesn't snap to the next view
         int distantToScroll = (firstViewHeight / 2) - 1;
-        CarUiSnapHelper snapHelper  = new CarUiSnapHelper(mActivity);
+        CarUiSnapHelper snapHelper = new CarUiSnapHelper(mActivity);
         int estimate = snapHelper.estimateNextPositionDiffForScrollDistance(orientationHelper,
                 distantToScroll);
 
@@ -1340,7 +1415,7 @@ public class CarUiRecyclerViewTest {
 
         // 10 is an arbitrary number
         int distantToScroll = 10;
-        CarUiSnapHelper snapHelper  = new CarUiSnapHelper(mActivity);
+        CarUiSnapHelper snapHelper = new CarUiSnapHelper(mActivity);
         int estimate = snapHelper.estimateNextPositionDiffForScrollDistance(orientationHelper,
                 distantToScroll);
 
@@ -1364,7 +1439,7 @@ public class CarUiRecyclerViewTest {
 
         LayoutManager layoutManager = carUiRecyclerView.getLayoutManager();
         OrientationHelper orientationHelper = OrientationHelper.createVerticalHelper(layoutManager);
-        CarUiSnapHelper snapHelper  = new CarUiSnapHelper(mActivity);
+        CarUiSnapHelper snapHelper = new CarUiSnapHelper(mActivity);
         int estimate = snapHelper.estimateNextPositionDiffForScrollDistance(orientationHelper, 50);
 
         assertEquals(estimate, 50);
@@ -1458,7 +1533,7 @@ public class CarUiRecyclerViewTest {
     public void testContinuousScrollListenerConstructor_negativeInitialDelay() {
         doReturn(true).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
         doReturn(-1).when(mTestableResources)
-            .getInteger(R.integer.car_ui_scrollbar_longpress_initial_delay);
+                .getInteger(R.integer.car_ui_scrollbar_longpress_initial_delay);
 
         CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
@@ -1502,7 +1577,7 @@ public class CarUiRecyclerViewTest {
     public void testWrongType_createScrollBarFromConfig() {
         // Basically return any class that exists but doesn't extend ScrollBar
         doReturn(CarUiRecyclerViewImpl.class.getName()).when(mTestableResources)
-            .getString(R.string.car_ui_scrollbar_component);
+                .getString(R.string.car_ui_scrollbar_component);
 
         CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
@@ -1510,7 +1585,7 @@ public class CarUiRecyclerViewTest {
 
         container.post(() -> carUiRecyclerView.setAdapter(adapter));
         container.post(() -> assertThrows("Error loading scroll bar component: "
-                + CarUiRecyclerViewImpl.class.getName(),
+                        + CarUiRecyclerViewImpl.class.getName(),
                 RuntimeException.class, () -> container.addView(carUiRecyclerView)));
     }
 
@@ -1575,7 +1650,7 @@ public class CarUiRecyclerViewTest {
         SpanSizeLookup spanSizeLookup = new SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
-                switch(position) {
+                switch (position) {
                     case 0:
                         return 10;
                     case 1:
@@ -1614,7 +1689,7 @@ public class CarUiRecyclerViewTest {
         layoutManager.setSpanSizeLookup(new SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
-                switch(position) {
+                switch (position) {
                     case 0:
                         return 10;
                     case 1:
@@ -1762,7 +1837,7 @@ public class CarUiRecyclerViewTest {
     public void testPageUp_returnsWhen_verticalScrollOffsetIsZero() {
         doReturn(true).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
         doReturn(TestScrollBar.class.getName()).when(mTestableResources)
-            .getString(R.string.car_ui_scrollbar_component);
+                .getString(R.string.car_ui_scrollbar_component);
 
         CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
 
@@ -1828,7 +1903,7 @@ public class CarUiRecyclerViewTest {
     public void testPageDown_returnsWhen_layoutManagerIsNullOrEmpty() {
         doReturn(true).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
         doReturn(TestScrollBar.class.getName()).when(mTestableResources)
-            .getString(R.string.car_ui_scrollbar_component);
+                .getString(R.string.car_ui_scrollbar_component);
 
         CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
 
@@ -2150,7 +2225,8 @@ public class CarUiRecyclerViewTest {
 
     private static class NotLinearLayoutManager extends LayoutManager {
 
-        NotLinearLayoutManager(Context mTestableContext) {}
+        NotLinearLayoutManager(Context mTestableContext) {
+        }
 
         @Override
         public LayoutParams generateDefaultLayoutParams() {
