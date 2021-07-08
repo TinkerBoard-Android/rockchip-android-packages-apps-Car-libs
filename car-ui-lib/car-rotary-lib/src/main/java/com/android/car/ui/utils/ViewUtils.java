@@ -70,27 +70,31 @@ public final class ViewUtils {
     @VisibleForTesting
     static final int REGULAR_FOCUS = 3;
 
+    /** The selected view is focused. */
+    @VisibleForTesting
+    static final int SELECTED_FOCUS = 4;
+
     /**
      * An implicit default focus view (i.e., the selected item or the first focusable item in a
      * scrollable container) is focused.
      */
     @VisibleForTesting
-    static final int IMPLICIT_DEFAULT_FOCUS = 4;
+    static final int IMPLICIT_DEFAULT_FOCUS = 5;
 
     /** The {@code app:defaultFocus} view is focused. */
     @VisibleForTesting
-    static final int DEFAULT_FOCUS = 5;
+    static final int DEFAULT_FOCUS = 6;
 
     /** The {@code android:focusedByDefault} view is focused. */
     @VisibleForTesting
-    static final int FOCUSED_BY_DEFAULT = 6;
+    static final int FOCUSED_BY_DEFAULT = 7;
 
     /**
      * Focus level of a view. When adjusting the focus, the view with the highest focus level will
      * be focused.
      */
     @IntDef(flag = true, value = {NO_FOCUS, SCROLLABLE_CONTAINER_FOCUS, REGULAR_FOCUS,
-            IMPLICIT_DEFAULT_FOCUS, DEFAULT_FOCUS, FOCUSED_BY_DEFAULT})
+            SELECTED_FOCUS, IMPLICIT_DEFAULT_FOCUS, DEFAULT_FOCUS, FOCUSED_BY_DEFAULT})
     @Retention(RetentionPolicy.SOURCE)
     private @interface FocusLevel {
     }
@@ -305,6 +309,9 @@ public final class ViewUtils {
         if (currentLevel < IMPLICIT_DEFAULT_FOCUS && focusOnImplicitDefaultFocusView(root)) {
             return true;
         }
+        if (currentLevel < SELECTED_FOCUS && focusOnSelectedView(root)) {
+            return true;
+        }
 
         // When delayed is true, if there is a LazyLayoutView but it failed to adjust focus
         // inside it because it is not loaded yet or it's loaded but has no descendnats, request to
@@ -401,6 +408,9 @@ public final class ViewUtils {
         if (isImplicitDefaultFocusView(view)) {
             return IMPLICIT_DEFAULT_FOCUS;
         }
+        if (view.isSelected()) {
+            return SELECTED_FOCUS;
+        }
         if (isScrollableContainer(view)) {
             return SCROLLABLE_CONTAINER_FOCUS;
         }
@@ -485,6 +495,17 @@ public final class ViewUtils {
     private static boolean focusOnImplicitDefaultFocusView(@NonNull View root) {
         View implicitDefaultFocus = findImplicitDefaultFocusView(root);
         return requestFocus(implicitDefaultFocus);
+    }
+
+    /**
+     * Focuses on the first selected view in the view tree, if any.
+     *
+     * @param root the root of the view tree
+     * @return whether succeeded
+     */
+    private static boolean focusOnSelectedView(@NonNull View root) {
+        View selectedView = findFirstSelectedFocusableDescendant(root);
+        return requestFocus(selectedView);
     }
 
     /**
