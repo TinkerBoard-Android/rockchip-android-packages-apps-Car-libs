@@ -23,8 +23,8 @@ import android.view.View;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatViewInflater;
 
+import com.android.car.ui.pluginsupport.PluginFactorySingleton;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
-import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
 
 /**
  * A custom {@link LayoutInflater.Factory2} that will create CarUi components such as {@link
@@ -41,10 +41,10 @@ public class CarUiLayoutInflaterFactory extends AppCompatViewInflater
         // Don't use CarUiTextView.class.getSimpleName(), as when proguard obfuscates the class name
         // it will no longer match what's in xml.
         if (CarUiRecyclerView.class.getName().equals(name)) {
-            view = SharedLibraryFactorySingleton.get(context)
+            view = PluginFactorySingleton.get(context)
                     .createRecyclerView(context, attrs);
         } else if (name.contentEquals("CarUiTextView")) {
-            view = SharedLibraryFactorySingleton.get(context).createTextView(context, attrs);
+            view = PluginFactorySingleton.get(context).createTextView(context, attrs);
         }
 
         return view;

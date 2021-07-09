@@ -26,7 +26,7 @@ import androidx.annotation.Nullable;
 
 import com.android.car.ui.CarUiLayoutInflaterFactory;
 import com.android.car.ui.CarUiText;
-import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
+import com.android.car.ui.pluginsupport.PluginFactorySingleton;
 
 import java.util.List;
 
@@ -56,7 +56,7 @@ public abstract class CarUiTextView extends TextView {
      * The CarUiTextView xml tag is enabled by the usage of {@link CarUiLayoutInflaterFactory}.
      */
     static CarUiTextView create(@NonNull Context context, @Nullable AttributeSet attrs) {
-        return SharedLibraryFactorySingleton.get(context).createTextView(context, attrs);
+        return PluginFactorySingleton.get(context).createTextView(context, attrs);
     }
 
     public CarUiTextView(Context context) {

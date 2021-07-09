@@ -20,7 +20,7 @@ import android.view.WindowManager.LayoutParams;
 
 import androidx.annotation.NonNull;
 
-import com.android.car.ui.sharedlibrary.oemapis.appstyledview.AppStyledViewControllerOEMV1;
+import com.android.car.ui.plugin.oemapis.appstyledview.AppStyledViewControllerOEMV1;
 
 /**
  * Adapts a {@link AppStyledViewControllerOEMV1} into a {@link AppStyledViewController}

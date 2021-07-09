@@ -31,7 +31,7 @@ import android.widget.ProgressBar;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
 import com.android.car.ui.core.CarUi;
-import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
+import com.android.car.ui.pluginsupport.PluginFactorySingleton;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -46,16 +46,16 @@ public class ToolbarProgressBarTest {
 
     @Parameterized.Parameters
     public static Object[] data() {
-        // It's important to do no shared library first, so that the shared library will
+        // It's important to do no plugin first, so that the plugin will
         // still be enabled when this test finishes
         return new Object[] { false, true };
     }
 
-    private final boolean mSharedLibEnabled;
+    private final boolean mPluginEnabled;
 
-    public ToolbarProgressBarTest(boolean sharedLibEnabled) {
-        mSharedLibEnabled = sharedLibEnabled;
-        SharedLibraryFactorySingleton.setSharedLibEnabled(sharedLibEnabled);
+    public ToolbarProgressBarTest(boolean pluginEnabled) {
+        mPluginEnabled = pluginEnabled;
+        PluginFactorySingleton.setPluginEnabled(pluginEnabled);
     }
 
     @Rule
@@ -66,8 +66,8 @@ public class ToolbarProgressBarTest {
     public void test_showProgressBar_works() {
         runWithProgressBar((progressBar) -> progressBar.setVisible(true));
 
-        // We don't want to enforce that the shared lib use a ProgressBar class
-        if (!mSharedLibEnabled) {
+        // We don't want to enforce that the plugin use a ProgressBar class
+        if (!mPluginEnabled) {
             onView(isAssignableFrom(ProgressBar.class)).check(matches(
                     allOf(isDisplayed(), hasIndeterminateProgress())));
         }

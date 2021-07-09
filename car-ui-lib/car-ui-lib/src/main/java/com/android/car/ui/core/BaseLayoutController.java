@@ -29,7 +29,7 @@ import androidx.fragment.app.FragmentActivity;
 import com.android.car.ui.R;
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
-import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
+import com.android.car.ui.pluginsupport.PluginFactorySingleton;
 import com.android.car.ui.toolbar.ToolbarController;
 
 import java.util.Map;
@@ -117,7 +117,7 @@ public final class BaseLayoutController {
                 requireViewByRefId(activity.getWindow().getDecorView(), android.R.id.content);
 
         mInsetsUpdater = new InsetsUpdater(activity, contentView);
-        mToolbarController = SharedLibraryFactorySingleton.get(activity)
+        mToolbarController = PluginFactorySingleton.get(activity)
                 .installBaseLayoutAround(
                         contentView,
                         mInsetsUpdater,

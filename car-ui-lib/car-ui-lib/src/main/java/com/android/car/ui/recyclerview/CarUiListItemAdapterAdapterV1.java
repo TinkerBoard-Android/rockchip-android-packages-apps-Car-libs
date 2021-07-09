@@ -21,9 +21,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.car.ui.sharedlibrary.oemapis.recyclerview.AdapterDataObserverOEMV1;
-import com.android.car.ui.sharedlibrary.oemapis.recyclerview.AdapterOEMV1;
-import com.android.car.ui.sharedlibrary.oemapis.recyclerview.ViewHolderOEMV1;
+import com.android.car.ui.plugin.oemapis.recyclerview.AdapterDataObserverOEMV1;
+import com.android.car.ui.plugin.oemapis.recyclerview.AdapterOEMV1;
+import com.android.car.ui.plugin.oemapis.recyclerview.ViewHolderOEMV1;
 
 /**
  * Wrapper class that passes the data to car-ui via AdapterOEMV1 interface

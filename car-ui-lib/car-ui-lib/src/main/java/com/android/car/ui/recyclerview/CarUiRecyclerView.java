@@ -27,7 +27,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
+import com.android.car.ui.pluginsupport.PluginFactorySingleton;
 
 import java.lang.annotation.Retention;
 
@@ -43,7 +43,7 @@ public abstract class CarUiRecyclerView extends RecyclerView {
      * Use this method to create an instance of CarUiRecyclerView at runtime.
      */
     public static CarUiRecyclerView create(Context context) {
-        return SharedLibraryFactorySingleton.get(context)
+        return PluginFactorySingleton.get(context)
                 .createRecyclerView(context, null);
     }
 
@@ -51,7 +51,7 @@ public abstract class CarUiRecyclerView extends RecyclerView {
      * Use this method to create an instance of CarUiRecyclerView at runtime.
      */
     public static CarUiRecyclerView create(Context context, AttributeSet attributeSet) {
-        return SharedLibraryFactorySingleton.get(context)
+        return PluginFactorySingleton.get(context)
                 .createRecyclerView(context, attributeSet);
     }
 

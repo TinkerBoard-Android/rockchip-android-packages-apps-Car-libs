@@ -19,7 +19,7 @@
           package="com.android.car.ui">
     <queries>
         <intent>
-            <action android:name="com.android.car.ui.intent.action.SHARED_LIBRARY"/>
+            <action android:name="com.android.car.ui.intent.action.PLUGIN"/>
         </intent>
     </queries>
     <application>
