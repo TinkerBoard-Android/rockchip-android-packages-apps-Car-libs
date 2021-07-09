@@ -15,6 +15,7 @@
  */
 package com.chassis.car.ui.sharedlibrary.toolbar;
 
+import android.car.drivingstate.CarUxRestrictions;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -38,6 +39,7 @@ import androidx.core.content.ContextCompat;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
 
 import com.chassis.car.ui.sharedlibrary.R;
+import com.chassis.car.ui.sharedlibrary.uxr.CarUxRestrictionsUtil;
 
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -54,6 +56,7 @@ class SearchController {
     private ImageView mSearchIconView;
     private OnPrivateImeCommandEditText mEditText;
     private View mCloseIcon;
+    private boolean mIsRestricted;
 
     private int mStartPaddingWithoutIcon;
     private int mStartPadding;
@@ -73,6 +76,9 @@ class SearchController {
     private Consumer<TextView> mSearchTextViewConsumer;
     @Nullable
     private BiConsumer<String, Bundle> mOnPrivateImeCommandListener;
+    @NonNull
+    private final CarUxRestrictionsUtil.OnUxRestrictionsChangedListener mListener =
+            new UxRestrictionChangedListener();
 
     private final TextWatcher mTextWatcher = new TextWatcher() {
         @Override
@@ -95,6 +101,7 @@ class SearchController {
         mStub = Objects.requireNonNull(searchStub);
         mSearchIcon = getDrawable(R.drawable.icon_search);
         mSearchHint = mStub.getContext().getString(R.string.toolbar_default_search_hint);
+        CarUxRestrictionsUtil.getInstance(mStub.getContext()).register(mListener);
     }
 
     public void setSearchTextViewConsumer(@Nullable Consumer<TextView> textViewConsumer) {
@@ -171,6 +178,10 @@ class SearchController {
             mEndPadding = resources.getDimensionPixelSize(
                     R.dimen.toolbar_search_close_icon_container_width);
             mEditText.setPaddingRelative(mStartPadding, 0, mEndPadding, 0);
+
+            if (mIsRestricted) {
+                enableRestriction();
+            }
         }
 
         boolean showingSearch = !mInflatedView.isShown()
@@ -219,7 +230,7 @@ class SearchController {
         }
         mSearchHint = hint;
 
-        if (mEditText != null) {
+        if (mEditText != null && !mIsRestricted) {
             mEditText.setHint(hint);
         }
     }
@@ -266,5 +277,43 @@ class SearchController {
                     || keyCode == KeyEvent.KEYCODE_SEARCH;
         }
         return result;
+    }
+
+    private void enableRestriction() {
+        mIsRestricted = true;
+
+        if (mEditText == null) {
+            return;
+        }
+
+        mEditText.setHint(mEditText.getContext().getString(
+                R.string.toolbar_ux_restricted_search_hint));
+        mEditText.setEnabled(false);
+    }
+
+    private void disableRestriction() {
+        mIsRestricted = false;
+
+        if (mEditText == null) {
+            return;
+        }
+
+        mEditText.setHint(mSearchHint);
+        mEditText.setEnabled(true);
+    }
+
+    private class UxRestrictionChangedListener implements
+            CarUxRestrictionsUtil.OnUxRestrictionsChangedListener {
+
+        @Override
+        public void onRestrictionsChanged(@NonNull CarUxRestrictions carUxRestrictions) {
+            boolean isKeyboardRestricted = (carUxRestrictions.getActiveRestrictions()
+                    & CarUxRestrictions.UX_RESTRICTIONS_NO_KEYBOARD) != 0;
+            if (isKeyboardRestricted) {
+                enableRestriction();
+            } else if (!isKeyboardRestricted) {
+                disableRestriction();
+            }
+        }
     }
 }

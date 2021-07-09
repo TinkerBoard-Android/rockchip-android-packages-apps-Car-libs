@@ -44,6 +44,8 @@ android {
             keyPassword 'chassis'
         }
     }
+
+    useLibrary 'android.car'
 }
 
 dependencies {
