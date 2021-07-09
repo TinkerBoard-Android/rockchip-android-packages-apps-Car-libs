@@ -57,10 +57,7 @@ import java.util.List;
 //TODO(b/179092760) Find a way to prevent apps from using this
 public final class SharedLibraryFactoryStub implements SharedLibraryFactory {
 
-    private final Context mContext;
-
-    public SharedLibraryFactoryStub(Context context) {
-        mContext = context;
+    public SharedLibraryFactoryStub() {
     }
 
     @Nullable

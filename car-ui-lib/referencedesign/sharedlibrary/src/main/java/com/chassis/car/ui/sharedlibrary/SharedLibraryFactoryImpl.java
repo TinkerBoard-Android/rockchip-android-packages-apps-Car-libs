@@ -23,7 +23,7 @@ import androidx.annotation.Nullable;
 import com.android.car.ui.sharedlibrary.oemapis.FocusAreaOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.FocusParkingViewOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.InsetsOEMV1;
-import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryFactoryOEMV1;
+import com.android.car.ui.sharedlibrary.oemapis.SharedLibraryFactoryOEMV2;
 import com.android.car.ui.sharedlibrary.oemapis.appstyledview.AppStyledViewControllerOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.recyclerview.AdapterOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.recyclerview.ListItemOEMV1;
@@ -43,7 +43,7 @@ import java.util.function.Function;
  * car-ui-lib components.
  */
 @SuppressWarnings("AndroidJdkLibsChecker")
-public class SharedLibraryFactoryImpl implements SharedLibraryFactoryOEMV1 {
+public class SharedLibraryFactoryImpl implements SharedLibraryFactoryOEMV2 {
 
     private final Context mSharedLibraryContext;
     @Nullable
