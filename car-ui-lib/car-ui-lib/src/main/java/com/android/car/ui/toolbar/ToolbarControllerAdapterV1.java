@@ -36,6 +36,7 @@ import androidx.core.content.ContextCompat;
 
 import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ImeSearchInterfaceOEMV1;
+import com.android.car.ui.sharedlibrary.oemapis.toolbar.MenuItemOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
 import com.android.car.ui.toolbar.Toolbar.OnBackListener;
 import com.android.car.ui.toolbar.Toolbar.OnSearchCompletedListener;
@@ -52,6 +53,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * Adapts a {@link com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1}
@@ -357,7 +359,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     public void setMenuItems(@Nullable List<MenuItem> items) {
         mClientMenuItems = items;
         update(mAdapterState.copy()
-                .setMenuItems(convertList(items, MenuItemAdapterV1::new))
+                .setMenuItems(convertList(items, item -> new MenuItemAdapterV1(this, item)))
                 .build());
     }
 
@@ -497,6 +499,11 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
                 newAdapterState.getShownMenuItems(), oldAdapterState.getShownMenuItems())) {
             mOemToolbar.setMenuItems(newAdapterState.getShownMenuItems());
         }
+    }
+
+    /** Called by {@link MenuItemAdapterV1} whenever a MenuItem changes. */
+    public void updateMenuItems() {
+        mOemToolbar.setMenuItems(mAdapterState.getShownMenuItems());
     }
 
     @Override
@@ -768,17 +775,24 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
                     && !getTabs().isEmpty();
         }
 
-        private List<MenuItemAdapterV1> getShownMenuItems() {
+        private List<MenuItemOEMV1> getShownMenuItems() {
             SearchMode searchMode = getSearchMode();
-            if (searchMode == SearchMode.EDIT) {
-                return mShowMenuItemsWhileSearching ? mMenuItems : Collections.emptyList();
+            Stream<MenuItemAdapterV1> stream = mMenuItems.stream();
+            if (searchMode == SearchMode.EDIT && !mShowMenuItemsWhileSearching) {
+                stream = Stream.empty();
             } else if (searchMode == SearchMode.SEARCH) {
-                return mShowMenuItemsWhileSearching
-                        ? mMenuItems.stream().filter(i -> !i.isSearch()).collect(toList())
-                        : Collections.emptyList();
-            } else {
-                return mMenuItems;
+                if (mShowMenuItemsWhileSearching) {
+                    stream = mMenuItems.stream()
+                            .filter(item -> !item.getClientMenuItem().isSearch());
+                } else {
+                    stream = Stream.empty();
+                }
             }
+
+            return Collections.unmodifiableList(stream
+                    .filter(MenuItemAdapterV1::isVisible)
+                    .map(MenuItemAdapterV1::getSharedMenuItem)
+                    .collect(toList()));
         }
 
         private SearchMode getSearchMode() {
