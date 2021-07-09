@@ -56,20 +56,19 @@ public abstract class CarUiTextView extends TextView {
      * The CarUiTextView xml tag is enabled by the usage of {@link CarUiLayoutInflaterFactory}.
      */
     static CarUiTextView create(@NonNull Context context, @Nullable AttributeSet attrs) {
-        return SharedLibraryFactorySingleton.get(context)
-                .createTextView(context, attrs);
+        return SharedLibraryFactorySingleton.get(context).createTextView(context, attrs);
     }
 
     public CarUiTextView(Context context) {
-        super(context);
+        this(context, null);
     }
 
     public CarUiTextView(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, android.R.attr.textViewStyle);
     }
 
     public CarUiTextView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public CarUiTextView(Context context, @Nullable AttributeSet attrs, int defStyleAttr,
