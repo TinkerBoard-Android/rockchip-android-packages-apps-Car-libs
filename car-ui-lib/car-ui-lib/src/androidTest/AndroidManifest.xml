@@ -33,7 +33,9 @@
         <activity android:name="com.android.car.ui.utils.ViewUtilsTestActivity" />
         <activity
             android:name="com.android.car.ui.toolbar.ToolbarTestActivity"
-            android:theme="@style/Theme.CarUi.WithToolbar"/>
+            android:theme="@style/Theme.CarUi.WithToolbar">
+            <meta-data android:name="distractionOptimized" android:value="true"/>
+        </activity>
         <provider
             android:name="com.android.car.ui.core.SearchResultsProvider"
             android:authorities="${applicationId}.SearchResultsProvider"

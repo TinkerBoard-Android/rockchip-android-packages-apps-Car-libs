@@ -26,7 +26,6 @@ import android.car.drivingstate.CarUxRestrictions;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
-import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.InputDevice;
@@ -107,20 +106,8 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView implements La
     private boolean mIsInitialized;
     private boolean mEnableDividers;
 
-    private boolean mHasScrolled = false;
-
     @NonNull
     private final Set<Runnable> mOnLayoutCompletedListeners = new HashSet<>();
-
-    private OnScrollListener mOnScrollListener = new OnScrollListener() {
-        @Override
-        public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-            if (dx > 0 || dy > 0) {
-                mHasScrolled = true;
-                removeOnScrollListener(this);
-            }
-        }
-    };
 
     public CarUiRecyclerViewImpl(@NonNull Context context) {
         this(context, null);
@@ -214,7 +201,6 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView implements La
                 }
             });
         }
-        addOnScrollListener(mOnScrollListener);
 
         mSize = a.getInt(R.styleable.CarUiRecyclerView_carUiSize, SIZE_LARGE);
 
@@ -405,15 +391,6 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView implements La
     }
 
     @Override
-    protected void onRestoreInstanceState(Parcelable state) {
-        super.onRestoreInstanceState(state);
-
-        // If we're restoring an existing RecyclerView, consider
-        // it as having already scrolled some.
-        mHasScrolled = true;
-    }
-
-    @Override
     public void requestLayout() {
         super.requestLayout();
         if (mScrollBar != null) {
@@ -585,19 +562,22 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView implements La
         return super.getPaddingRight();
     }
 
+    private int findFirstVisibleItemPosition() {
+        if (getLayoutManager() instanceof LinearLayoutManager) {
+            return ((LinearLayoutManager) getLayoutManager()).findFirstVisibleItemPosition();
+        }
+
+        return RecyclerView.NO_POSITION;
+    }
+
     @Override
     public void setPadding(int left, int top, int right, int bottom) {
         mContainerPaddingRelative = null;
         if (mScrollBarEnabled) {
-            boolean isAtStart = (mScrollBar != null && mScrollBar.isAtStart());
+            int currentPosition = findFirstVisibleItemPosition();
             super.setPadding(0, top, 0, bottom);
-            if (!mHasScrolled || isAtStart) {
-                // If we haven't scrolled, and thus are still at the top of the screen,
-                // we should stay scrolled to the top after applying padding. Without this
-                // scroll, the padding will start scrolled offscreen. We need the padding
-                // to be onscreen to shift the content into a good visible range.
-                scrollToPosition(0);
-            }
+            // Maintain same index position after setting padding
+            scrollToPosition(currentPosition);
             mContainerPadding = new Rect(left, 0, right, 0);
             if (mContainer != null) {
                 mContainer.setPadding(left, 0, right, 0);
@@ -612,14 +592,10 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView implements La
     public void setPaddingRelative(int start, int top, int end, int bottom) {
         mContainerPadding = null;
         if (mScrollBarEnabled) {
+            int currentPosition = findFirstVisibleItemPosition();
             super.setPaddingRelative(0, top, 0, bottom);
-            if (!mHasScrolled) {
-                // If we haven't scrolled, and thus are still at the top of the screen,
-                // we should stay scrolled to the top after applying padding. Without this
-                // scroll, the padding will start scrolled offscreen. We need the padding
-                // to be onscreen to shift the content into a good visible range.
-                scrollToPosition(0);
-            }
+            // Maintain same index position after setting padding
+            scrollToPosition(currentPosition);
             mContainerPaddingRelative = new Rect(start, 0, end, 0);
             if (mContainer != null) {
                 mContainer.setPaddingRelative(start, 0, end, 0);

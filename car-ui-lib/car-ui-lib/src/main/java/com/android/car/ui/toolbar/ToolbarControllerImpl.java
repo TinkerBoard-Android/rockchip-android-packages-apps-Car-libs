@@ -181,6 +181,7 @@ public final class ToolbarControllerImpl implements ToolbarController {
         setBackgroundShown(true);
 
         mOverflowAdapter = new CarUiListItemAdapter(mUiOverflowItems);
+        update();
     }
 
     private Context getContext() {

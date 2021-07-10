@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,25 +19,23 @@ import android.content.Context;
 import android.view.View;
 
 import com.android.car.ui.sharedlibrary.oemapis.appstyledview.AppStyledViewControllerOEMV1;
+import com.android.car.ui.sharedlibrary.oemapis.recyclerview.AdapterOEMV1;
+import com.android.car.ui.sharedlibrary.oemapis.recyclerview.ListItemOEMV1;
+import com.android.car.ui.sharedlibrary.oemapis.recyclerview.RecyclerViewAttributesOEMV1;
+import com.android.car.ui.sharedlibrary.oemapis.recyclerview.RecyclerViewOEMV1;
+import com.android.car.ui.sharedlibrary.oemapis.recyclerview.ViewHolderOEMV1;
 import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
 
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * This interface contains methods to create customizable carui components.
- * <p>
- * It returns them as their OEM-versioned interfaces (i.e. ToolbarControllerOEMV1) and is versioned
- * itself so that no additional reflection or casting is necessary once the SharedLibraryFactory has
- * been created.
- * <p>
- * Multiple of these can be provided via {@link SharedLibraryVersionProviderOEMV1} to allow shared
- * libraries to provide an old implementation for old apps, and a newer implementation for newer
- * apps.
+ * This shared library factory is not finalized and thus not ready for production use.
+ * Please use {@link SharedLibraryFactoryOEMV1} instead.
  */
 @SuppressWarnings("AndroidJdkLibsChecker")
-public interface SharedLibraryFactoryOEMV1 {
-
+public interface SharedLibraryFactoryOEMV2 {
     /**
      * Gives the shared library access to two factories that will create FocusParkingViews and
      * FocusAreas. These views have their implementation in the static car-ui-lib.
@@ -86,4 +84,17 @@ public interface SharedLibraryFactoryOEMV1 {
      * @return the view used for app styled view.
      */
     AppStyledViewControllerOEMV1 createAppStyledView();
+
+    /**
+     * Creates an instance of CarUiRecyclerView
+     *
+     * @param context The visual context to create views with.
+     * @param attrs   An object containing initial attributes for the button.
+     */
+    RecyclerViewOEMV1 createRecyclerView(Context context, RecyclerViewAttributesOEMV1 attrs);
+
+    /**
+     * Creates an instance of list item adapter
+     */
+    AdapterOEMV1<? extends ViewHolderOEMV1> createListItemAdapter(List<ListItemOEMV1> items);
 }
