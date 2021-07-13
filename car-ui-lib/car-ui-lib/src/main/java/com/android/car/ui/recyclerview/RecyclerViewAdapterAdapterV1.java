@@ -25,10 +25,10 @@ import androidx.recyclerview.widget.RecyclerView.Adapter;
 import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
-import com.android.car.ui.sharedlibrary.oemapis.recyclerview.AdapterDataObserverOEMV1;
-import com.android.car.ui.sharedlibrary.oemapis.recyclerview.AdapterOEMV1;
-import com.android.car.ui.sharedlibrary.oemapis.recyclerview.RecyclerViewOEMV1;
-import com.android.car.ui.sharedlibrary.oemapis.recyclerview.ViewHolderOEMV1;
+import com.android.car.ui.plugin.oemapis.recyclerview.AdapterDataObserverOEMV1;
+import com.android.car.ui.plugin.oemapis.recyclerview.AdapterOEMV1;
+import com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewOEMV1;
+import com.android.car.ui.plugin.oemapis.recyclerview.ViewHolderOEMV1;
 
 import java.util.ArrayList;
 import java.util.List;

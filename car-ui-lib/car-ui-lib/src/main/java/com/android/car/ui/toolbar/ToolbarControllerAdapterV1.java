@@ -35,9 +35,9 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
-import com.android.car.ui.sharedlibrary.oemapis.toolbar.ImeSearchInterfaceOEMV1;
-import com.android.car.ui.sharedlibrary.oemapis.toolbar.MenuItemOEMV1;
-import com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1;
+import com.android.car.ui.plugin.oemapis.toolbar.ImeSearchInterfaceOEMV1;
+import com.android.car.ui.plugin.oemapis.toolbar.MenuItemOEMV1;
+import com.android.car.ui.plugin.oemapis.toolbar.ToolbarControllerOEMV1;
 import com.android.car.ui.toolbar.Toolbar.OnBackListener;
 import com.android.car.ui.toolbar.Toolbar.OnSearchCompletedListener;
 import com.android.car.ui.toolbar.Toolbar.OnSearchListener;
@@ -56,7 +56,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
- * Adapts a {@link com.android.car.ui.sharedlibrary.oemapis.toolbar.ToolbarControllerOEMV1}
+ * Adapts a {@link com.android.car.ui.plugin.oemapis.toolbar.ToolbarControllerOEMV1}
  * into a {@link ToolbarController}
  */
 @SuppressWarnings("AndroidJdkLibsChecker")
@@ -421,13 +421,13 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
     /**
      * This method takes a new {@link ToolbarAdapterState} and compares it to the current
-     * {@link #mAdapterState}. It then sends any differences it detects to the shared library
-     * toolbar.
+     * {@link #mAdapterState}. It then sends any differences it detects to the plugin toolbar.
      *
      * This is also the core of the logic that adapts from the client's toolbar interface to
      * the OEM apis toolbar interface. For example, when you are in the HOME state and add tabs,
-     * it will call setTitle(null) on the shared library toolbar. This is because the client
-     * interface
+     * it will call setTitle(null) on the plugin toolbar. This is because the plugin interface
+     * doesn't have a setState(), and the title is expected to not be present when there are
+     * tabs and a HOME state.
      */
     private void update(ToolbarAdapterState newAdapterState) {
         ToolbarAdapterState oldAdapterState = mAdapterState;
@@ -479,7 +479,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
         if (gainingTabs) {
             mOemToolbar.setTabs(newAdapterState.getTabs()
                     .stream()
-                    .map(TabAdapterV1::getSharedLibraryTab)
+                    .map(TabAdapterV1::getPluginTab)
                     .collect(toList()),
                     newAdapterState.getSelectedTab());
         } else if (losingTabs) {
@@ -487,7 +487,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
         } else if (newAdapterState.hasTabs() && newAdapterState.getTabsDirty()) {
             mOemToolbar.setTabs(newAdapterState.getTabs()
                             .stream()
-                            .map(TabAdapterV1::getSharedLibraryTab)
+                            .map(TabAdapterV1::getPluginTab)
                             .collect(toList()),
                     newAdapterState.getSelectedTab());
         } else if (newAdapterState.hasTabs()
@@ -791,7 +791,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
             return Collections.unmodifiableList(stream
                     .filter(MenuItemAdapterV1::isVisible)
-                    .map(MenuItemAdapterV1::getSharedMenuItem)
+                    .map(MenuItemAdapterV1::getPluginMenuItem)
                     .collect(toList()));
         }
 

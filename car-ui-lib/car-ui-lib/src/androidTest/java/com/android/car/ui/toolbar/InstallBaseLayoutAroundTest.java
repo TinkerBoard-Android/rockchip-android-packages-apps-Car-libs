@@ -32,7 +32,7 @@ import com.android.car.ui.FocusParkingView;
 import com.android.car.ui.TrulyEmptyActivity;
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.core.CarUi;
-import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
+import com.android.car.ui.pluginsupport.PluginFactorySingleton;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -45,16 +45,13 @@ public class InstallBaseLayoutAroundTest {
 
     @Parameterized.Parameters
     public static Object[] data() {
-        // It's important to do no shared library first, so that the shared library will
+        // It's important to do no plugin first, so that the plugin will
         // still be enabled when this test finishes
         return new Object[] { false, true };
     }
 
-    private final boolean mSharedLibEnabled;
-
-    public InstallBaseLayoutAroundTest(boolean sharedLibEnabled) {
-        mSharedLibEnabled = sharedLibEnabled;
-        SharedLibraryFactorySingleton.setSharedLibEnabled(sharedLibEnabled);
+    public InstallBaseLayoutAroundTest(boolean pluginEnabled) {
+        PluginFactorySingleton.setPluginEnabled(pluginEnabled);
     }
 
     @Rule

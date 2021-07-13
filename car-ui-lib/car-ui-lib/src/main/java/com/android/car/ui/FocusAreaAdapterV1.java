@@ -18,7 +18,7 @@ package com.android.car.ui;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import com.android.car.ui.sharedlibrary.oemapis.FocusAreaOEMV1;
+import com.android.car.ui.plugin.oemapis.FocusAreaOEMV1;
 
 /**
  * Adapter from {@link FocusArea} to {@link FocusAreaOEMV1}.

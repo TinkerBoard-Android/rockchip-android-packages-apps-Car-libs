@@ -444,6 +444,7 @@ limitations under the License.-->
       <item type="string" name="car_ui_ellipsis"/>
       <item type="string" name="car_ui_ime_wide_screen_system_property_name"/>
       <item type="string" name="car_ui_installer_process_name"/>
+      <item type="string" name="car_ui_plugin_package_system_property_name"/>
       <item type="string" name="car_ui_preference_switch_off"/>
       <item type="string" name="car_ui_preference_switch_on"/>
       <item type="string" name="car_ui_restricted_while_driving"/>
@@ -451,7 +452,6 @@ limitations under the License.-->
       <item type="string" name="car_ui_scrollbar_page_down_button"/>
       <item type="string" name="car_ui_scrollbar_page_up_button"/>
       <item type="string" name="car_ui_scrolling_limited_message"/>
-      <item type="string" name="car_ui_shared_library_package_system_property_name"/>
       <item type="string" name="car_ui_toolbar_default_search_hint"/>
       <item type="string" name="car_ui_toolbar_menu_item_overflow_title"/>
       <item type="string" name="car_ui_toolbar_menu_item_search_title"/>

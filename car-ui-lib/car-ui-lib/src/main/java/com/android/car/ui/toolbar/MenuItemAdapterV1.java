@@ -18,12 +18,12 @@ package com.android.car.ui.toolbar;
 
 import androidx.annotation.NonNull;
 
-import com.android.car.ui.sharedlibrary.oemapis.toolbar.MenuItemOEMV1;
+import com.android.car.ui.plugin.oemapis.toolbar.MenuItemOEMV1;
 import com.android.car.ui.utils.CarUiUtils;
 
 /**
  * Adapts a {@link com.android.car.ui.toolbar.MenuItem} into a
- * {@link com.android.car.ui.sharedlibrary.oemapis.toolbar.MenuItemOEMV1}
+ * {@link com.android.car.ui.plugin.oemapis.toolbar.MenuItemOEMV1}
  */
 @SuppressWarnings("AndroidJdkLibsChecker")
 public class MenuItemAdapterV1 {
@@ -33,7 +33,7 @@ public class MenuItemAdapterV1 {
     @NonNull
     private final MenuItem mClientMenuItem;
     @NonNull
-    private MenuItemOEMV1 mSharedMenuItem = MenuItemOEMV1.builder().build();
+    private MenuItemOEMV1 mPluginMenuItem = MenuItemOEMV1.builder().build();
 
     @SuppressWarnings("FieldCanBeLocal") // Used with weak references
     private final MenuItem.Listener mClientListener = menuItem -> {
@@ -52,9 +52,9 @@ public class MenuItemAdapterV1 {
         mToolbar.updateMenuItems();
     }
 
-    // Recreates mSharedMenuItem from mClientMenuItem
+    // Recreates mPluginMenuItem from mClientMenuItem
     private void updateMenuItem() {
-        MenuItemOEMV1.Builder builder = mSharedMenuItem.copy()
+        MenuItemOEMV1.Builder builder = mPluginMenuItem.copy()
                 .setKey(mClientMenuItem.hashCode())
                 .setTitle(CarUiUtils.charSequenceToString(mClientMenuItem.getTitle()))
                 .setIcon(mClientMenuItem.getIcon())
@@ -82,12 +82,12 @@ public class MenuItemAdapterV1 {
             builder.setOnClickListener(null);
         }
 
-        mSharedMenuItem = builder.build();
+        mPluginMenuItem = builder.build();
     }
 
     @NonNull
-    public MenuItemOEMV1 getSharedMenuItem() {
-        return mSharedMenuItem;
+    public MenuItemOEMV1 getPluginMenuItem() {
+        return mPluginMenuItem;
     }
 
     @NonNull

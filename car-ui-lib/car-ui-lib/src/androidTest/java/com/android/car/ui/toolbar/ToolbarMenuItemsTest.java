@@ -46,7 +46,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.car.ui.core.CarUi;
 import com.android.car.ui.matchers.ViewMatchers;
-import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
+import com.android.car.ui.pluginsupport.PluginFactorySingleton;
 import com.android.car.ui.test.R;
 
 import org.hamcrest.Matcher;
@@ -68,16 +68,16 @@ import java.util.function.Consumer;
 public class ToolbarMenuItemsTest {
     @Parameterized.Parameters
     public static Object[] data() {
-        // It's important to do no shared library first, so that the shared library will
+        // It's important to do no plugin first, so that the plugin will
         // still be enabled when this test finishes
         return new Object[] { false, true };
     }
 
-    private final boolean mSharedLibEnabled;
+    private final boolean mPluginEnabled;
 
-    public ToolbarMenuItemsTest(boolean sharedLibEnabled) {
-        mSharedLibEnabled = sharedLibEnabled;
-        SharedLibraryFactorySingleton.setSharedLibEnabled(sharedLibEnabled);
+    public ToolbarMenuItemsTest(boolean pluginEnabled) {
+        mPluginEnabled = pluginEnabled;
+        PluginFactorySingleton.setPluginEnabled(pluginEnabled);
     }
 
     @Rule
@@ -238,8 +238,8 @@ public class ToolbarMenuItemsTest {
         onView(withText("Test title!")).perform(click());
         verify(callback).onClick(menuItem[0]);
 
-        // TODO(b/188925810): this currently isn't supported in the referencedesign shared library.
-        if (!mSharedLibEnabled) {
+        // TODO(b/188925810): this currently isn't supported in the referencedesign plugin.
+        if (!mPluginEnabled) {
             // Open overflow menu, change MenuItem's title, then click on the MenuItem
             onView(withContentDescription("Overflow")).perform(click());
             runWithToolbar(toolbar -> menuItem[0].setTitle("Test title 2!"));

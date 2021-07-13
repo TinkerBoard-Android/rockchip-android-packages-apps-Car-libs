@@ -34,7 +34,7 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.car.ui.core.CarUi;
-import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
+import com.android.car.ui.pluginsupport.PluginFactorySingleton;
 import com.android.car.ui.test.R;
 
 import org.junit.Rule;
@@ -52,13 +52,13 @@ public class ToolbarTabTest {
 
     @Parameterized.Parameters
     public static Object[] data() {
-        // It's important to do no shared library first, so that the shared library will
+        // It's important to do no plugin first, so that the plugin will
         // still be enabled when this test finishes
         return new Object[] { false, true };
     }
 
-    public ToolbarTabTest(boolean sharedLibEnabled) {
-        SharedLibraryFactorySingleton.setSharedLibEnabled(sharedLibEnabled);
+    public ToolbarTabTest(boolean pluginEnabled) {
+        PluginFactorySingleton.setPluginEnabled(pluginEnabled);
     }
 
     @Rule

@@ -25,7 +25,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.car.ui.appstyledview.AppStyledViewController.AppStyledDismissListener;
 import com.android.car.ui.appstyledview.AppStyledViewController.AppStyledVCloseClickListener;
 import com.android.car.ui.appstyledview.AppStyledViewController.AppStyledViewNavIcon;
-import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
+import com.android.car.ui.pluginsupport.PluginFactorySingleton;
 
 import java.util.Objects;
 
@@ -41,7 +41,7 @@ public final class AppStyledDialogController {
 
     public AppStyledDialogController(@NonNull Context context) {
         Objects.requireNonNull(context);
-        mAppStyledViewController = SharedLibraryFactorySingleton.get(context)
+        mAppStyledViewController = PluginFactorySingleton.get(context)
                 .createAppStyledView(context);
         mDialog = new AppStyledDialog(context, mAppStyledViewController);
     }

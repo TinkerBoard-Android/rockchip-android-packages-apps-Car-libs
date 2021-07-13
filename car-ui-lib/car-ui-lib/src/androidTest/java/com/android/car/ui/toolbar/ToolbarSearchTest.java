@@ -42,7 +42,7 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.car.ui.core.CarUi;
-import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
+import com.android.car.ui.pluginsupport.PluginFactorySingleton;
 import com.android.car.ui.test.R;
 import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
@@ -62,7 +62,7 @@ import java.util.function.Consumer;
 public class ToolbarSearchTest {
     @Parameterized.Parameters
     public static Object[][] data() {
-        // It's important to do no shared library first, so that the shared library will
+        // It's important to do no plugin first, so that the plugin will
         // still be enabled when this test finishes
         return new Object[][]{
                 new Object[]{false, SearchMode.SEARCH},
@@ -73,12 +73,12 @@ public class ToolbarSearchTest {
     }
 
     private final SearchMode mSearchMode;
-    private final boolean mIsSharedLibraryEnabled;
+    private final boolean mIsPluginEnabled;
 
-    public ToolbarSearchTest(boolean sharedLibEnabled, SearchMode searchMode) {
-        SharedLibraryFactorySingleton.setSharedLibEnabled(sharedLibEnabled);
+    public ToolbarSearchTest(boolean pluginEnabled, SearchMode searchMode) {
+        PluginFactorySingleton.setPluginEnabled(pluginEnabled);
         mSearchMode = searchMode;
-        mIsSharedLibraryEnabled = sharedLibEnabled;
+        mIsPluginEnabled = pluginEnabled;
     }
 
     @Rule
@@ -180,8 +180,8 @@ public class ToolbarSearchTest {
 
     @Test
     public void test_setSearchHint_uxRestricted() {
-        // Rely on test_setSearchHint_uxRestricted_injectedEvents for shared library testing
-        if (mIsSharedLibraryEnabled) {
+        // Rely on test_setSearchHint_uxRestricted_injectedEvents for plugin testing
+        if (mIsPluginEnabled) {
             return;
         }
 

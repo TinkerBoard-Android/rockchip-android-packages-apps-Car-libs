@@ -39,7 +39,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.core.CarUi;
-import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
+import com.android.car.ui.pluginsupport.PluginFactorySingleton;
 import com.android.car.ui.test.R;
 
 import org.junit.Rule;
@@ -57,16 +57,16 @@ public class ToolbarTest {
 
     @Parameterized.Parameters
     public static Object[] data() {
-        // It's important to do no shared library first, so that the shared library will
+        // It's important to do no plugin first, so that the plugin will
         // still be enabled when this test finishes
         return new Object[] { false, true };
     }
 
-    private final boolean mSharedLibEnabled;
+    private final boolean mPluginEnabled;
 
-    public ToolbarTest(boolean sharedLibEnabled) {
-        mSharedLibEnabled = sharedLibEnabled;
-        SharedLibraryFactorySingleton.setSharedLibEnabled(sharedLibEnabled);
+    public ToolbarTest(boolean pluginEnabled) {
+        mPluginEnabled = pluginEnabled;
+        PluginFactorySingleton.setPluginEnabled(pluginEnabled);
     }
 
     @Rule
@@ -237,9 +237,9 @@ public class ToolbarTest {
             backgroundShown[0] = toolbar.getBackgroundShown();
         });
 
-        if (mSharedLibEnabled) {
-            // Shared lib doesn't support hiding the background
-            // Temporarily disabled while we're not using the shared lib
+        if (mPluginEnabled) {
+            // The plugin doesn't support hiding the background
+            // Temporarily disabled while we're not using the plugin
             // assertThat(backgroundShown[0]).isTrue();
         } else {
             assertThat(backgroundShown[0]).isFalse();

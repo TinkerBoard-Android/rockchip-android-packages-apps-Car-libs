@@ -28,8 +28,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.car.ui.R;
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
+import com.android.car.ui.pluginsupport.PluginFactorySingleton;
 import com.android.car.ui.recyclerview.CarUiListItem;
-import com.android.car.ui.sharedlibrarysupport.SharedLibraryFactorySingleton;
 import com.android.car.ui.toolbar.ToolbarController;
 
 import java.util.List;
@@ -96,7 +96,7 @@ public class CarUi {
      */
     public static RecyclerView.Adapter<? extends RecyclerView.ViewHolder> createListItemAdapter(
             Context context, List<? extends CarUiListItem> items) {
-        return SharedLibraryFactorySingleton.get(context).createListItemAdapter(items);
+        return PluginFactorySingleton.get(context).createListItemAdapter(items);
     }
 
 
@@ -217,7 +217,7 @@ public class CarUi {
             InsetsChangedListener insetsChangedListener,
             boolean hasToolbar,
             boolean fullscreen) {
-        return SharedLibraryFactorySingleton.get(view.getContext())
+        return PluginFactorySingleton.get(view.getContext())
                 .installBaseLayoutAround(view, insetsChangedListener, hasToolbar, fullscreen);
     }
 }

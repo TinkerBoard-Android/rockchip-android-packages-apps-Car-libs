@@ -17,7 +17,7 @@ package com.android.car.ui;
 
 import android.view.View;
 
-import com.android.car.ui.sharedlibrary.oemapis.FocusParkingViewOEMV1;
+import com.android.car.ui.plugin.oemapis.FocusParkingViewOEMV1;
 
 /**
  * Adapter from {@link FocusParkingView} to {@link FocusParkingViewOEMV1}.
