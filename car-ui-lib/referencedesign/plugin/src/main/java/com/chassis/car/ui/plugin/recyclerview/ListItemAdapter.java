@@ -40,6 +40,7 @@ import com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.ViewHolderOEMV1;
 
 import com.chassis.car.ui.plugin.R;
+import com.chassis.car.ui.plugin.SecureView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -263,9 +264,9 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemAdapter.BaseVi
         final CheckBox mCheckBox;
         final RadioButton mRadioButton;
         final ImageView mSupplementalIcon;
-        final View mTouchInterceptor;
-        final View mReducedTouchInterceptor;
-        final View mActionContainerTouchInterceptor;
+        final SecureView mTouchInterceptor;
+        final SecureView mReducedTouchInterceptor;
+        final SecureView mActionContainerTouchInterceptor;
 
         ListItemViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -303,6 +304,10 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemAdapter.BaseVi
             } else {
                 mBody.setVisibility(View.GONE);
             }
+
+            mTouchInterceptor.setSecure(item.isSecure());
+            mReducedTouchInterceptor.setSecure(item.isSecure());
+            mActionContainerTouchInterceptor.setSecure(item.isSecure());
 
             mIcon.setVisibility(View.GONE);
             mContentIcon.setVisibility(View.GONE);
