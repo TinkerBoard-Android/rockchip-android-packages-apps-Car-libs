@@ -28,23 +28,27 @@ import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
 import static com.android.car.ui.matchers.ViewMatchers.isActivated;
 
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.graphics.PixelFormat;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.view.Gravity;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
-import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
 import com.android.car.ui.CarUiText;
@@ -55,6 +59,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -82,14 +87,11 @@ public class CarUiListItemTest {
     public ActivityScenarioRule<CarUiRecyclerViewTestActivity> mActivityRule =
             new ActivityScenarioRule<>(CarUiRecyclerViewTestActivity.class);
 
-    private ActivityScenario<CarUiRecyclerViewTestActivity> mScenario;
-
     private CarUiRecyclerViewTestActivity mActivity;
 
     @Before
     public void setUp() {
-        mScenario = mActivityRule.getScenario();
-        mScenario.onActivity(activity -> {
+        mActivityRule.getScenario().onActivity(activity -> {
             mActivity = activity;
             mCarUiRecyclerView = mActivity.requireViewById(R.id.list);
         });
@@ -428,6 +430,61 @@ public class CarUiListItemTest {
 
         // Verify that the standard click listener wasn't also fired.
         verify(clickListener, times(1)).onClick(item);
+    }
+
+    @Test
+    public void test_secureListItem_doesntCallOnClickListeners() {
+        CarUiContentListItem.OnClickListener clickListener = mock(
+                CarUiContentListItem.OnClickListener.class);
+
+        CarUiContentListItem item1 = new CarUiContentListItem(CarUiContentListItem.Action.ICON);
+        item1.setTitle("Test 1!");
+        item1.setOnItemClickedListener(clickListener);
+        item1.setSupplementalIcon(
+                mActivity.getDrawable(R.drawable.car_ui_icon_close),
+                clickListener);
+        item1.setSecure(true);
+
+        CarUiContentListItem item2 = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
+        item2.setTitle("Test 2!");
+        item2.setOnItemClickedListener(clickListener);
+        item2.setSecure(true);
+
+        CarUiContentListItem item3 = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
+        item3.setTitle("Insecure!");
+        item3.setOnItemClickedListener(clickListener);
+
+        TextView[] overlayView = new TextView[] { null };
+        mActivityRule.getScenario().onActivity(activity -> {
+            mCarUiRecyclerView.setAdapter(
+                    new CarUiListItemAdapter(Arrays.asList(item1, item2, item3)));
+
+            overlayView[0] = new TextView(activity);
+            overlayView[0].setText("Overlay!");
+            WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                            | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                    PixelFormat.TRANSLUCENT);
+            params.gravity = Gravity.RIGHT | Gravity.TOP;
+            WindowManager wm = activity.getSystemService(WindowManager.class);
+            wm.addView(overlayView[0], params);
+        });
+
+        try {
+            onView(withText("Test 1!")).perform(click());
+            onView(withText("Test 2!")).perform(click());
+            onView(allOf(withId(R.id.car_ui_list_item_supplemental_icon), isDisplayed()))
+                    .perform(click());
+            verify(clickListener, times(0)).onClick(any());
+            onView(withText("Insecure!")).perform(click());
+            verify(clickListener, times(1)).onClick(item3);
+        } finally {
+            mActivityRule.getScenario().onActivity(activity -> {
+                WindowManager wm = mActivity.getSystemService(WindowManager.class);
+                wm.removeView(overlayView[0]);
+            });
+        }
     }
 
     @Test

@@ -288,12 +288,12 @@ public final class PluginFactoryAdapterV2 implements PluginFactory {
                 builder.setOnItemClickedListener(listener);
             }
 
-            builder.setOnCheckedChangeListener(
-                    oemItem -> contentItem.setChecked(oemItem.isChecked()))
+            builder.setOnCheckedChangeListener(oem -> contentItem.setChecked(oem.isChecked()))
                     .setActionDividerVisible(contentItem.isActionDividerVisible())
                     .setEnabled(contentItem.isEnabled())
                     .setChecked(contentItem.isChecked())
-                    .setActivated(contentItem.isActivated());
+                    .setActivated(contentItem.isActivated())
+                    .setSecure(contentItem.isSecure());
             return builder.build();
         } else {
             throw new IllegalStateException("Unexpected list item type");

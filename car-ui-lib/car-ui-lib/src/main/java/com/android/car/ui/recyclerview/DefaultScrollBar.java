@@ -20,6 +20,7 @@ import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Looper;
@@ -76,30 +77,31 @@ class DefaultScrollBar implements ScrollBar {
 
         mScrollView = scrollView;
 
-        Resources res = rv.getContext().getResources();
+        Context context = rv.getContext();
+        Resources res = context.getResources();
 
         mButtonDisabledAlpha = CarUiUtils.getFloat(res, R.dimen.car_ui_button_disabled_alpha);
-        mScrollbarThumbMinHeight = (int) rv.getContext().getResources()
-                .getDimension(R.dimen.car_ui_scrollbar_min_thumb_height);
+        mScrollbarThumbMinHeight =
+                res.getDimensionPixelSize(R.dimen.car_ui_scrollbar_min_thumb_height);
 
         mUpButton = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_page_up);
         View.OnClickListener paginateUpButtonOnClickListener = v -> pageUp();
         mUpButton.setOnClickListener(paginateUpButtonOnClickListener);
-        mPageUpOnContinuousScrollListener = new OnContinuousScrollListener(rv.getContext(),
+        mPageUpOnContinuousScrollListener = new OnContinuousScrollListener(context,
                 paginateUpButtonOnClickListener);
         mUpButton.setOnTouchListener(mPageUpOnContinuousScrollListener);
 
         mDownButton = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_page_down);
         View.OnClickListener paginateDownButtonOnClickListener = v -> pageDown();
         mDownButton.setOnClickListener(paginateDownButtonOnClickListener);
-        mPageDownOnContinuousScrollListener = new OnContinuousScrollListener(rv.getContext(),
+        mPageDownOnContinuousScrollListener = new OnContinuousScrollListener(context,
                 paginateDownButtonOnClickListener);
         mDownButton.setOnTouchListener(mPageDownOnContinuousScrollListener);
 
         mScrollTrack = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_track);
         mScrollThumb = requireViewByRefId(mScrollView, R.id.car_ui_scrollbar_thumb);
 
-        mSnapHelper = new CarUiSnapHelper(rv.getContext());
+        mSnapHelper = new CarUiSnapHelper(context);
         getRecyclerView().setOnFlingListener(null);
         mSnapHelper.attachToRecyclerView(getRecyclerView());
 
@@ -510,8 +512,8 @@ class DefaultScrollBar implements ScrollBar {
         } else {
             OrientationHelper orientationHelper = getOrientationHelper(layoutManager);
             int screenSize = orientationHelper.getTotalSpace();
-            int touchTargetSize = (int) getRecyclerView().getContext().getResources()
-                    .getDimension(R.dimen.car_ui_touch_target_size);
+            int touchTargetSize = getRecyclerView().getContext().getResources()
+                    .getDimensionPixelSize(R.dimen.car_ui_touch_target_size);
             ViewGroup.MarginLayoutParams upButtonLayoutParam =
                     (ViewGroup.MarginLayoutParams) mUpButton.getLayoutParams();
             int upButtonMargin = upButtonLayoutParam.topMargin

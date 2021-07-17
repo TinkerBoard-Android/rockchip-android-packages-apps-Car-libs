@@ -87,6 +87,7 @@ public final class ContentListItemOEMV1 implements ListItemOEMV1 {
     private final boolean mIsEnabled;
     private final boolean mIsActivated;
     private final boolean mIsActionDividerVisible;
+    private final boolean mIsSecure;
     private final Consumer<ContentListItemOEMV1> mOnClickListener;
     private final Consumer<ContentListItemOEMV1> mOnCheckedChangeListener;
     private final Consumer<ContentListItemOEMV1> mSupplementalIconOnClickListener;
@@ -102,6 +103,7 @@ public final class ContentListItemOEMV1 implements ListItemOEMV1 {
         mIsEnabled = builder.mIsEnabled;
         mIsActivated = builder.mIsActivated;
         mIsActionDividerVisible = builder.mIsActionDividerVisible;
+        mIsSecure = builder.mIsSecure;
         mOnClickListener = builder.mOnClickListener;
         mOnCheckedChangeListener = builder.mOnCheckedChangeListener;
         mSupplementalIconOnClickListener = builder.mSupplementalIconOnClickListener;
@@ -162,6 +164,14 @@ public final class ContentListItemOEMV1 implements ListItemOEMV1 {
      */
     public boolean isActionDividerVisible() {
         return mIsActionDividerVisible;
+    }
+
+    /**
+     * Returns {@code true} if list item is secure. A secure list item must not call
+     * it's click listeners when there is a full or partial overlay on the window.
+     */
+    public boolean isSecure() {
+        return mIsSecure;
     }
 
     /**
@@ -233,7 +243,8 @@ public final class ContentListItemOEMV1 implements ListItemOEMV1 {
         private boolean mIsChecked = false;
         private boolean mIsEnabled = true;
         private boolean mIsActivated = false;
-        private boolean mIsActionDividerVisible;
+        private boolean mIsActionDividerVisible = false;
+        private boolean mIsSecure = false;
         private Consumer<ContentListItemOEMV1> mOnClickListener;
         private Consumer<ContentListItemOEMV1> mOnCheckedChangeListener;
         private Consumer<ContentListItemOEMV1> mSupplementalIconOnClickListener;
@@ -325,6 +336,18 @@ public final class ContentListItemOEMV1 implements ListItemOEMV1 {
          */
         public Builder setActionDividerVisible(boolean visible) {
             mIsActionDividerVisible = visible;
+            return this;
+        }
+
+        /**
+         * Sets if the list item is secure or not. If it is secure, it won't sent any
+         * click events if there is a full or partial overlay on the screen when
+         * they're clicked.
+         *
+         * @param secure If the list item is secure or not.
+         */
+        public Builder setSecure(boolean secure) {
+            mIsSecure = secure;
             return this;
         }
 
