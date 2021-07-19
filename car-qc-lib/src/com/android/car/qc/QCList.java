@@ -31,12 +31,12 @@ import java.util.List;
 public class QCList extends QCItem {
     private final List<QCRow> mRows;
 
-    public QCList(List<QCRow> rows) {
+    public QCList(@NonNull List<QCRow> rows) {
         super(QC_TYPE_LIST);
         mRows = Collections.unmodifiableList(rows);
     }
 
-    public QCList(Parcel in) {
+    public QCList(@NonNull Parcel in) {
         super(in);
         int rowCount = in.readInt();
         List<QCRow> rows = new ArrayList<>();

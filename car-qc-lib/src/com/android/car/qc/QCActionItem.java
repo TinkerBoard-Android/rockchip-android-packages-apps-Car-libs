@@ -32,8 +32,8 @@ public class QCActionItem extends QCItem {
     private Icon mIcon;
     private PendingIntent mAction;
 
-    public QCActionItem(@QCItemType String type, boolean isChecked, boolean isEnabled,
-            Icon icon, PendingIntent action) {
+    public QCActionItem(@NonNull @QCItemType String type, boolean isChecked, boolean isEnabled,
+            @Nullable Icon icon, @Nullable PendingIntent action) {
         super(type);
         mIsEnabled = isEnabled;
         mIsChecked = isChecked;
@@ -41,7 +41,7 @@ public class QCActionItem extends QCItem {
         mAction = action;
     }
 
-    public QCActionItem(Parcel in) {
+    public QCActionItem(@NonNull Parcel in) {
         super(in);
         mIsChecked = in.readBoolean();
         mIsEnabled = in.readBoolean();

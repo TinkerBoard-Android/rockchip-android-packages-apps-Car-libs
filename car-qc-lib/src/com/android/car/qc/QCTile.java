@@ -20,6 +20,7 @@ import android.app.PendingIntent;
 import android.graphics.drawable.Icon;
 import android.os.Parcel;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 /**
@@ -38,8 +39,8 @@ public class QCTile extends QCItem {
     private Icon mIcon;
     private PendingIntent mAction;
 
-    public QCTile(boolean isChecked, boolean isEnabled, String subtitle, Icon icon,
-            PendingIntent action) {
+    public QCTile(boolean isChecked, boolean isEnabled, @Nullable String subtitle,
+            @Nullable Icon icon, @Nullable PendingIntent action) {
         super(QC_TYPE_TILE);
         mIsEnabled = isEnabled;
         mIsChecked = isChecked;
@@ -48,7 +49,7 @@ public class QCTile extends QCItem {
         mAction = action;
     }
 
-    public QCTile(Parcel in) {
+    public QCTile(@NonNull Parcel in) {
         super(in);
         mIsChecked = in.readBoolean();
         mIsEnabled = in.readBoolean();

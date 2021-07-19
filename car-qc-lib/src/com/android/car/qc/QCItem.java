@@ -59,11 +59,11 @@ public abstract class QCItem implements Parcelable {
     private final String mType;
     private ActionHandler mActionHandler;
 
-    public QCItem(@QCItemType String type) {
+    public QCItem(@NonNull @QCItemType String type) {
         mType = type;
     }
 
-    public QCItem(Parcel in) {
+    public QCItem(@NonNull Parcel in) {
         mType = in.readString();
     }
 
@@ -108,7 +108,7 @@ public abstract class QCItem implements Parcelable {
          * @param context the context for the action
          * @param intent the intent that was sent with the action
          */
-        void onAction(QCItem item, Context context, Intent intent);
+        void onAction(@NonNull QCItem item, @NonNull Context context, @NonNull Intent intent);
 
         default boolean isActivity() {
             return false;

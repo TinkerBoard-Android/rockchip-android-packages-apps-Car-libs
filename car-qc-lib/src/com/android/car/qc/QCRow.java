@@ -44,9 +44,10 @@ public class QCRow extends QCItem {
     private final List<QCSlider> mSliders;
     private final PendingIntent mPrimaryAction;
 
-    public QCRow(String title, String subtitle, PendingIntent primaryAction, Icon startIcon,
-            List<QCActionItem> startItems, List<QCActionItem> endItems,
-            List<QCSlider> sliders) {
+    public QCRow(@Nullable String title, @Nullable String subtitle,
+            @Nullable PendingIntent primaryAction, @Nullable Icon startIcon,
+            @NonNull List<QCActionItem> startItems, @NonNull List<QCActionItem> endItems,
+            @NonNull List<QCSlider> sliders) {
         super(QC_TYPE_ROW);
         mTitle = title;
         mSubtitle = subtitle;
@@ -57,7 +58,7 @@ public class QCRow extends QCItem {
         mSliders = Collections.unmodifiableList(sliders);
     }
 
-    public QCRow(Parcel in) {
+    public QCRow(@NonNull Parcel in) {
         super(in);
         mTitle = in.readString();
         mSubtitle = in.readString();

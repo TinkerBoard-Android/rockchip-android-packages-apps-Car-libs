@@ -19,6 +19,7 @@ package com.android.car.qc;
 import android.app.PendingIntent;
 import android.os.Parcel;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 /**
@@ -30,7 +31,7 @@ public class QCSlider extends QCItem {
     private int mValue = 0;
     private PendingIntent mInputAction;
 
-    public QCSlider(int min, int max, int value, PendingIntent inputAction) {
+    public QCSlider(int min, int max, int value, @Nullable PendingIntent inputAction) {
         super(QC_TYPE_SLIDER);
         mMin = min;
         mMax = max;
@@ -38,7 +39,7 @@ public class QCSlider extends QCItem {
         mInputAction = inputAction;
     }
 
-    public QCSlider(Parcel in) {
+    public QCSlider(@NonNull Parcel in) {
         super(in);
         mMin = in.readInt();
         mMax = in.readInt();
