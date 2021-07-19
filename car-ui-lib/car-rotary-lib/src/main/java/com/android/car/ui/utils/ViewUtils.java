@@ -465,9 +465,10 @@ public final class ViewUtils {
     }
 
     /**
-     * Focuses on the first {@code app:defaultFocus} view in the view tree, if any.
+     * Searches the {@code root}'s descendants for the first {@code app:defaultFocus} view and
+     * focuses on it, if any.
      *
-     * @param root the root of the view tree
+     * @param root the root view to search from
      * @return whether succeeded
      */
     private static boolean focusOnDefaultFocusView(@NonNull View root) {
@@ -476,9 +477,10 @@ public final class ViewUtils {
     }
 
     /**
-     * Focuses on the first {@code android:focusedByDefault} view in the view tree, if any.
+     * Searches the {@code root}'s descendants for the first {@code android:focusedByDefault} view
+     * and focuses on it if any.
      *
-     * @param root the root of the view tree
+     * @param root the root view to search from
      * @return whether succeeded
      */
     private static boolean focusOnFocusedByDefaultView(@NonNull View root) {
@@ -487,9 +489,10 @@ public final class ViewUtils {
     }
 
     /**
-     * Focuses on the first implicit default focus view in the view tree, if any.
+     * Searches the {@code root}'s descendants for the first implicit default focus view and focuses
+     * on it, if any.
      *
-     * @param root the root of the view tree
+     * @param root the root view to search from
      * @return whether succeeded
      */
     private static boolean focusOnImplicitDefaultFocusView(@NonNull View root) {
@@ -498,9 +501,10 @@ public final class ViewUtils {
     }
 
     /**
-     * Focuses on the first selected view in the view tree, if any.
+     * Searches the {@code root}'s descendants for the first selected view and focuses on it, if
+     * any.
      *
-     * @param root the root of the view tree
+     * @param root the root view to search from
      * @return whether succeeded
      */
     private static boolean focusOnSelectedView(@NonNull View root) {
@@ -509,23 +513,27 @@ public final class ViewUtils {
     }
 
     /**
-     * Tries to focus on the first focusable view in the view tree in depth first order, excluding
-     * the FocusParkingView and scrollable containers. If focusing on the first such view fails,
-     * keeps trying other views in depth first order until succeeds or there are no more such views.
+     * Searches the {@code root}'s descendants for the focusable view in depth first order
+     * (excluding the FocusParkingView and scrollable containers), and tries to focus on it.
+     * If focusing on the first such view fails, keeps trying other views in depth first order
+     * until succeeds or there are no more such views.
      *
-     * @param root the root of the view tree
+     * @param root the root view to search from
      * @return whether succeeded
      */
     private static boolean focusOnFirstRegularView(@NonNull View root) {
         View focusedView = ViewUtils.depthFirstSearch(root,
                 /* targetPredicate= */
-                v -> !isScrollableContainer(v) && canTakeFocus(v) && requestFocus(v),
+                v -> v != root && !isScrollableContainer(v) && canTakeFocus(v) && requestFocus(v),
                 /* skipPredicate= */ v -> !v.isShown());
         return focusedView != null;
     }
 
     /**
      * Focuses on the first scrollable container in the view tree, if any.
+     *<p>
+     * Unlike other similar methods, don't skip the {@code root} because some callers may pass
+     * a scrollable container as parameter.
      *
      * @param root the root of the view tree
      * @return whether succeeded
@@ -566,19 +574,19 @@ public final class ViewUtils {
     }
 
     /**
-     * Searches the {@code view} and its descendants in depth first order, and returns the first
+     * Searches the {@code view}'s descendants in depth first order, and returns the first
      * {@code android:focusedByDefault} view that can take focus. Returns null if not found.
      */
     @VisibleForTesting
     @Nullable
     static View findFocusedByDefaultView(@NonNull View view) {
         return depthFirstSearch(view,
-                /* targetPredicate= */ v -> v.isFocusedByDefault() && canTakeFocus(v),
+                /* targetPredicate= */ v -> v != view && v.isFocusedByDefault() && canTakeFocus(v),
                 /* skipPredicate= */ v -> !v.isShown());
     }
 
     /**
-     * Searches the {@code view} and its descendants in depth first order, and returns the first
+     * Searches the {@code view}'s descendants in depth first order, and returns the first
      * implicit default focus view, i.e., the selected item or the first focusable item in the
      * first rotary container. Returns null if not found.
      */
@@ -624,6 +632,9 @@ public final class ViewUtils {
     /**
      * Searches the {@code view} and its descendants in depth first order, and returns the first
      * rotary container shown on the screen. Returns null if not found.
+     * <p>
+     * Unlike other similar methods, don't skip the {@code root} because some callers may pass
+     * a rotary container as parameter.
      */
     @Nullable
     private static View findRotaryContainer(@NonNull View view) {
@@ -635,6 +646,9 @@ public final class ViewUtils {
     /**
      * Searches the {@code view} and its descendants in depth first order, and returns the first
      * LazyLayoutView shown on the screen. Returns null if not found.
+     * <p>
+     * Unlike other similar methods, don't skip the {@code root} because some callers may pass
+     * a LazyLayoutView as parameter.
      */
     @Nullable
     private static LazyLayoutView findLazyLayoutView(@NonNull View view) {
