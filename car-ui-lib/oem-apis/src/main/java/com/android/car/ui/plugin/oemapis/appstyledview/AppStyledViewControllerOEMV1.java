@@ -23,20 +23,29 @@ import android.view.WindowManager;
 public interface AppStyledViewControllerOEMV1 {
 
     /**
-     * Creates a app styled view.
+     * Gets the view to display. This view will contain the content view set in {@link #setContent}.
      *
-     * @param content app content view.
      * @return the view used for app styled view.
      */
-    View getAppStyledView(View content);
+    View getView();
+
+    /**
+     * Sets the content view to be contained within this AppStyledView.
+     */
+    void setContent(View content);
 
     /**
      * Sets a {@link Runnable} to be called whenever the close icon is clicked.
      */
     void setOnBackClickListener(Runnable listener);
 
+    int NAV_ICON_DISABLED = 0;
+    int NAV_ICON_BACK = 1;
+    int NAV_ICON_CLOSE = 2;
+
     /**
-     * Sets the nav icon to be used.
+     * Sets the nav icon to be used. Can be set to one of {@link #NAV_ICON_DISABLED},
+     * {@link #NAV_ICON_BACK} or {@link #NAV_ICON_CLOSE}.
      */
     void setNavIcon(int navIcon);
 

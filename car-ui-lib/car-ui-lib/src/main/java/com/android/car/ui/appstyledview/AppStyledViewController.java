@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.WindowManager;
 
 import androidx.annotation.IntDef;
+import androidx.annotation.Nullable;
 
 import java.lang.annotation.Retention;
 
@@ -57,7 +58,7 @@ public interface AppStyledViewController {
      *
      * @return the view used for app styled view.
      */
-    View getAppStyledView(View contentView);
+    View getAppStyledView(@Nullable View contentView);
 
     /**
      * Sets the nav icon to be used.

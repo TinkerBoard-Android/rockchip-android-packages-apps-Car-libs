@@ -28,6 +28,7 @@ import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -106,7 +107,7 @@ public class AppStyledViewControllerImpl implements AppStyledViewController {
     }
 
     @Override
-    public View getAppStyledView(View contentView) {
+    public View getAppStyledView(@Nullable View contentView) {
         // create ContextThemeWrapper from the original Activity Context with the custom theme
         final Context contextThemeWrapper = new ContextThemeWrapper(mContext, R.style.Theme_CarUi);
         LayoutInflater inflater = LayoutInflater.from(mContext);

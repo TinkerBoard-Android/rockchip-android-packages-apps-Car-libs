@@ -33,7 +33,7 @@ import androidx.annotation.NonNull;
  *
  * Apps should not use this directly. App's should use {@link AppStyledDialogController}.
  */
-public class AppStyledDialog extends Dialog implements DialogInterface.OnDismissListener {
+/* package */ class AppStyledDialog extends Dialog implements DialogInterface.OnDismissListener {
 
     private final AppStyledViewController mController;
     private Runnable mOnDismissListener;

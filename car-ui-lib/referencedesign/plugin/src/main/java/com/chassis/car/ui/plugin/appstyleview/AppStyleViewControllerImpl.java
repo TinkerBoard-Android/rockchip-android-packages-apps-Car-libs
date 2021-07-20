@@ -33,62 +33,61 @@ import com.chassis.car.ui.plugin.R;
  */
 public class AppStyleViewControllerImpl implements AppStyledViewControllerOEMV1 {
 
-    private final Context mContext;
-    private View mAppStyleView;
-    private int mNavIcon;
-    private Runnable mBackClickedListener = null;
+    private final Context mPluginContext;
+    private final View mAppStyleView;
 
-    public AppStyleViewControllerImpl(Context context) {
-        mContext = context;
+    public AppStyleViewControllerImpl(Context pluginContext) {
+        mPluginContext = pluginContext;
+        LayoutInflater inflater = LayoutInflater.from(mPluginContext);
+        mAppStyleView = inflater.inflate(R.layout.app_styled_view, null, false);
     }
 
     @Override
-    public View getAppStyledView(View content) {
-        LayoutInflater inflater = LayoutInflater.from(mContext);
-        mAppStyleView = inflater.inflate(R.layout.app_styled_view, null, false);
-
-        ScrollView scrollview = mAppStyleView.findViewById(R.id.app_styled_content);
-        scrollview.addView(content);
-
-        ImageView navIcon = mAppStyleView.findViewById(R.id.app_styled_view_icon_close);
-        if (mNavIcon == 0) {
-            navIcon.setImageResource(R.drawable.icon_back);
-        } else if (mNavIcon == 1) {
-            navIcon.setImageResource(R.drawable.icon_close);
-        } else {
-            navIcon.setImageResource(R.drawable.icon_close);
-        }
-
-        if (mBackClickedListener != null) {
-            navIcon.setOnClickListener((v) -> {
-                mBackClickedListener.run();
-            });
-        }
-
+    public View getView() {
         return mAppStyleView;
     }
 
     @Override
+    public void setContent(View content) {
+        ScrollView scrollview = mAppStyleView.requireViewById(R.id.app_styled_content);
+        scrollview.removeAllViews();
+        scrollview.addView(content);
+    }
+
+    @Override
     public void setOnBackClickListener(Runnable listener) {
-        mBackClickedListener = listener;
+        ImageView navIconView = mAppStyleView.requireViewById(R.id.app_styled_view_icon_close);
+        if (listener == null) {
+            navIconView.setOnClickListener(null);
+            navIconView.setClickable(false);
+        } else {
+            navIconView.setOnClickListener(v -> listener.run());
+        }
     }
 
     @Override
     public void setNavIcon(int navIcon) {
-        mNavIcon = navIcon;
+        ImageView navIconView = mAppStyleView.requireViewById(R.id.app_styled_view_icon_close);
+        navIconView.setVisibility(navIcon == AppStyledViewControllerOEMV1.NAV_ICON_DISABLED
+                ? View.INVISIBLE : View.VISIBLE);
+        if (navIcon == AppStyledViewControllerOEMV1.NAV_ICON_BACK) {
+            navIconView.setImageResource(R.drawable.icon_back);
+        } else if (navIcon == AppStyledViewControllerOEMV1.NAV_ICON_CLOSE) {
+            navIconView.setImageResource(R.drawable.icon_close);
+        }
     }
 
     @Override
     public LayoutParams getDialogWindowLayoutParam(LayoutParams params) {
         params.width = Math.round(
-                mContext.getResources().getDimension(R.dimen.app_styled_dialog_width));
+                mPluginContext.getResources().getDimension(R.dimen.app_styled_dialog_width));
         params.height = Math.round(
-                mContext.getResources().getDimension(R.dimen.app_styled_dialog_height));
+                mPluginContext.getResources().getDimension(R.dimen.app_styled_dialog_height));
         params.gravity = Gravity.TOP | Gravity.START;
         params.x = Math.round(
-                mContext.getResources().getDimension(R.dimen.app_styled_dialog_position_x));
+                mPluginContext.getResources().getDimension(R.dimen.app_styled_dialog_position_x));
         params.y = Math.round(
-                mContext.getResources().getDimension(R.dimen.app_styled_dialog_position_y));
+                mPluginContext.getResources().getDimension(R.dimen.app_styled_dialog_position_y));
         return params;
     }
 }

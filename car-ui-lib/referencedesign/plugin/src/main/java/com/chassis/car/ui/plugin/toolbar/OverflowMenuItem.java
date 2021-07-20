@@ -33,7 +33,7 @@ import java.util.List;
 class OverflowMenuItem {
 
     @NonNull
-    private final Context mActivityContext;
+    private final Context mSourceContext;
 
     @NonNull
     private List<MenuItemOEMV1> mOverflowMenuItems = Collections.emptyList();
@@ -45,8 +45,8 @@ class OverflowMenuItem {
 
     OverflowMenuItem(
             @NonNull Context pluginContext,
-            @NonNull Context activityContext) {
-        mActivityContext = activityContext;
+            @NonNull Context sourceContext) {
+        mSourceContext = sourceContext;
 
         mMenuItem = MenuItemOEMV1.builder()
                 .setTitle(pluginContext.getString(R.string.toolbar_menu_item_overflow_title))
@@ -58,7 +58,11 @@ class OverflowMenuItem {
                             .map(MenuItemOEMV1::getTitle)
                             .toArray(String[]::new);
 
-                    mDialog = new AlertDialog.Builder(mActivityContext)
+                    // TODO(b/194233067) Do not create dialogs using the source context, it is
+                    //                   not always an activity context and will crash in cases
+                    //                   where it isn't. Replace this with a layer in the base
+                    //                   layout that looks like a dialog.
+                    mDialog = new AlertDialog.Builder(sourceContext)
                             .setItems(titles, (dialog, which) -> {
                                 Runnable onClickListener = mOverflowMenuItems.get(which)
                                         .getOnClickListener();
