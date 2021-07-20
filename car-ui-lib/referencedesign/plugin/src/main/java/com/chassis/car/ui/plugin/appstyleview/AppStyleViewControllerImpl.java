@@ -36,7 +36,7 @@ public class AppStyleViewControllerImpl implements AppStyledViewControllerOEMV1 
     private final Context mContext;
     private View mAppStyleView;
     private int mNavIcon;
-    private Runnable mCloseListener = null;
+    private Runnable mBackClickedListener = null;
 
     public AppStyleViewControllerImpl(Context context) {
         mContext = context;
@@ -59,9 +59,9 @@ public class AppStyleViewControllerImpl implements AppStyledViewControllerOEMV1 
             navIcon.setImageResource(R.drawable.icon_close);
         }
 
-        if (mCloseListener != null) {
+        if (mBackClickedListener != null) {
             navIcon.setOnClickListener((v) -> {
-                mCloseListener.run();
+                mBackClickedListener.run();
             });
         }
 
@@ -69,8 +69,8 @@ public class AppStyleViewControllerImpl implements AppStyledViewControllerOEMV1 
     }
 
     @Override
-    public void setOnCloseClickListener(Runnable listener) {
-        mCloseListener = listener;
+    public void setOnBackClickListener(Runnable listener) {
+        mBackClickedListener = listener;
     }
 
     @Override

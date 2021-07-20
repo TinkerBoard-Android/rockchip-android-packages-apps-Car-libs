@@ -48,8 +48,8 @@ public class AppStyledViewControllerAdapterV1 implements AppStyledViewController
     }
 
     @Override
-    public void setOnCloseClickListener(AppStyledVCloseClickListener listener) {
-        mOemController.setOnCloseClickListener(listener::onClick);
+    public void setOnNavIconClickListener(Runnable listener) {
+        mOemController.setOnBackClickListener(listener::run);
     }
 
     @Override

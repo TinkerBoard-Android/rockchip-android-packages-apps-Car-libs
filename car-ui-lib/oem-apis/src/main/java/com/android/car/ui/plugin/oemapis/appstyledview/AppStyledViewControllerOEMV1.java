@@ -33,7 +33,7 @@ public interface AppStyledViewControllerOEMV1 {
     /**
      * Sets a {@link Runnable} to be called whenever the close icon is clicked.
      */
-    void setOnCloseClickListener(Runnable listener);
+    void setOnBackClickListener(Runnable listener);
 
     /**
      * Sets the nav icon to be used.

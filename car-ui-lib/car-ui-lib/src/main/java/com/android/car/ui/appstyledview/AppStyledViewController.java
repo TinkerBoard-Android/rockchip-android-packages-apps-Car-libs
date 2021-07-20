@@ -32,28 +32,6 @@ import java.lang.annotation.Retention;
 public interface AppStyledViewController {
 
     /**
-     * Callback to be invoked when the close icon is clicked.
-     */
-    interface AppStyledVCloseClickListener {
-
-        /**
-         * Called when the close icon is clicked.
-         */
-        void onClick();
-    }
-
-    /**
-     * Callback to be invoked when the dialog is dismissed.
-     */
-    interface AppStyledDismissListener {
-
-        /**
-         * Called when the dialog is dismissed.
-         */
-        void onDismiss();
-    }
-
-    /**
      * The possible values for AppStyledViewNavIcon.
      */
     @IntDef({
@@ -87,9 +65,9 @@ public interface AppStyledViewController {
     void setNavIcon(@AppStyledViewNavIcon int navIcon);
 
     /**
-     * Sets the {@link AppStyledVCloseClickListener}
+     * Sets a runnable that will be invoked when a nav icon is clicked.
      */
-    void setOnCloseClickListener(AppStyledVCloseClickListener listener);
+    void setOnNavIconClickListener(Runnable listener);
 
     /**
      * Returns the layout params for the AppStyledView dialog
