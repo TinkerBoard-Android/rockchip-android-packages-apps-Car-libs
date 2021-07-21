@@ -26,6 +26,7 @@ import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEAR
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.SEARCH_RESULT_SUPPLEMENTAL_ICON_ID_LIST;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_ACTION;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_CLEAR_DATA_ACTION;
+import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_EXTRACTED_TEXT_ICON;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_ON_BACK_CLICKED_ACTION;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_POST_LOAD_SEARCH_RESULTS_ACTION;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_SEARCH_RESULTS;
@@ -35,6 +36,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
 import android.net.Uri;
 import android.os.Build;
@@ -61,6 +63,7 @@ import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
 import com.android.car.ui.recyclerview.CarUiContentListItem;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.SearchConfig.OnBackClickedListener;
+import com.android.car.ui.utils.CarUiUtils;
 
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -179,6 +182,9 @@ public class SearchWidescreenController {
                 }
 
                 displaySearchWideScreen();
+                if (mSearchConfig.getSearchResultsInputViewIcon() != null) {
+                    setSearchResultsInputViewIcon(mSearchConfig.getSearchResultsInputViewIcon());
+                }
                 mHandler.post(() -> {
                     if (mSurfaceControlViewHost != null
                             && wideScreenImeContentAreaViewContainer != null
@@ -220,6 +226,15 @@ public class SearchWidescreenController {
                 });
             }
         }
+    }
+
+    private void setSearchResultsInputViewIcon(Drawable drawable) {
+        Bitmap bitmap = CarUiUtils.drawableToBitmap(drawable);
+        byte[] byteArray = bitmapToByteArray(bitmap);
+
+        Bundle bundle = new Bundle();
+        bundle.putByteArray(WIDE_SCREEN_EXTRACTED_TEXT_ICON, byteArray);
+        mInputMethodManager.sendAppPrivateCommand(mTextView, WIDE_SCREEN_ACTION, bundle);
     }
 
     private void displaySearchWideScreen() {
