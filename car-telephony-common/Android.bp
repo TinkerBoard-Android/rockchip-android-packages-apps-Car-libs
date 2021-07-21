@@ -36,6 +36,7 @@ android_library {
         "androidx.legacy_legacy-support-v4",
         "car-apps-common",
         "glide-prebuilt",
+        "guava",
         "libphonenumber",
     ],
 
@@ -46,15 +47,8 @@ android_library {
 android_app {
     name: "CarTelephonyLibTestsApp",
 
-    resource_dirs: ["res"],
-
-    srcs: ["src/**/*.java"],
-
     static_libs: [
-        "androidx.legacy_legacy-support-v4",
-        "car-apps-common",
-        "glide-prebuilt",
-        "libphonenumber",
+        "car-telephony-common",
     ],
 
     optimize: {
