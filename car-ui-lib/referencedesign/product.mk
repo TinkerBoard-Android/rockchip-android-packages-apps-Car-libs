@@ -28,6 +28,7 @@ PRODUCT_PACKAGES += \
     googlecarui-com-android-car-settings \
     googlecarui-com-android-car-voicecontrol \
     googlecarui-com-android-car-faceenroll \
+    googlecarui-com-android-car-developeroptions \
     googlecarui-com-android-managedprovisioning \
     googlecarui-com-android-settings-intelligence \
     googlecarui-com-google-android-apps-automotive-inputmethod \
