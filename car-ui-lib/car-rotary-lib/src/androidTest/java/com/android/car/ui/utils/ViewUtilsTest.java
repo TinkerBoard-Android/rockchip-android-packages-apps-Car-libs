@@ -31,6 +31,7 @@ import static com.android.car.ui.utils.ViewUtils.IMPLICIT_DEFAULT_FOCUS;
 import static com.android.car.ui.utils.ViewUtils.NO_FOCUS;
 import static com.android.car.ui.utils.ViewUtils.REGULAR_FOCUS;
 import static com.android.car.ui.utils.ViewUtils.SCROLLABLE_CONTAINER_FOCUS;
+import static com.android.car.ui.utils.ViewUtils.SELECTED_FOCUS;
 import static com.android.car.ui.utils.ViewUtils.setRotaryScrollEnabled;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -466,7 +467,11 @@ public class ViewUtilsTest {
             assertThat(ViewUtils.adjustFocus(mFocusArea2, SCROLLABLE_CONTAINER_FOCUS)).isTrue();
             assertThat(ViewUtils.adjustFocus(mFocusArea2, REGULAR_FOCUS)).isFalse();
 
-            assertThat(ViewUtils.adjustFocus(mFocusArea5, REGULAR_FOCUS)).isTrue();
+            mView2.setSelected(true);
+            assertThat(ViewUtils.adjustFocus(mFocusArea2, REGULAR_FOCUS)).isTrue();
+            assertThat(ViewUtils.adjustFocus(mFocusArea2, SELECTED_FOCUS)).isFalse();
+
+            assertThat(ViewUtils.adjustFocus(mFocusArea5, SELECTED_FOCUS)).isTrue();
             assertThat(ViewUtils.adjustFocus(mFocusArea5, IMPLICIT_DEFAULT_FOCUS)).isFalse();
 
             assertThat(ViewUtils.adjustFocus(mFocusArea4, IMPLICIT_DEFAULT_FOCUS)).isTrue();
@@ -495,6 +500,9 @@ public class ViewUtilsTest {
             assertThat(ViewUtils.getFocusLevel(mList5)).isEqualTo(SCROLLABLE_CONTAINER_FOCUS);
 
             assertThat(ViewUtils.getFocusLevel(mView4)).isEqualTo(REGULAR_FOCUS);
+
+            mView4.setSelected(true);
+            assertThat(ViewUtils.getFocusLevel(mView4)).isEqualTo(SELECTED_FOCUS);
 
             mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
                     new ViewTreeObserver.OnGlobalLayoutListener() {
