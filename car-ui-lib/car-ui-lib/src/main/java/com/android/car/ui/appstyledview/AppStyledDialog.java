@@ -26,8 +26,6 @@ import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 
-import com.android.car.ui.appstyledview.AppStyledViewController.AppStyledDismissListener;
-
 /**
  * App styled dialog used to display a view that cannot be customized via OEM. Dialog will inflate a
  * layout and add the view provided by the application into the layout. Everything other than the
@@ -38,7 +36,7 @@ import com.android.car.ui.appstyledview.AppStyledViewController.AppStyledDismiss
 public class AppStyledDialog extends Dialog implements DialogInterface.OnDismissListener {
 
     private final AppStyledViewController mController;
-    private AppStyledDismissListener mOnDismissListener;
+    private Runnable mOnDismissListener;
     private View mContent;
 
     public AppStyledDialog(@NonNull Context context, AppStyledViewController controller) {
@@ -60,7 +58,7 @@ public class AppStyledDialog extends Dialog implements DialogInterface.OnDismiss
     @Override
     public void onDismiss(DialogInterface dialog) {
         if (mOnDismissListener != null) {
-            mOnDismissListener.onDismiss();
+            mOnDismissListener.run();
         }
     }
 
@@ -68,7 +66,7 @@ public class AppStyledDialog extends Dialog implements DialogInterface.OnDismiss
         mContent = contentView;
     }
 
-    void setOnDismissListener(AppStyledDismissListener listener) {
+    void setOnDismissListener(Runnable listener) {
         mOnDismissListener = listener;
     }
 

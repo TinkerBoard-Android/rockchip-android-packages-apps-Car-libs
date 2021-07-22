@@ -44,7 +44,7 @@ public class AppStyledViewControllerImpl implements AppStyledViewController {
     private final Context mContext;
     @AppStyledViewNavIcon
     private int mAppStyleViewNavIcon;
-    private AppStyledVCloseClickListener mAppStyledVCloseClickListener = null;
+    private Runnable mAppStyledVCloseClickListener = null;
 
     public AppStyledViewControllerImpl(Context context) {
         mContext = context;
@@ -59,7 +59,7 @@ public class AppStyledViewControllerImpl implements AppStyledViewController {
      * Sets the AppStyledVCloseClickListener on the close icon.
      */
     @Override
-    public void setOnCloseClickListener(AppStyledVCloseClickListener listener) {
+    public void setOnNavIconClickListener(Runnable listener) {
         mAppStyledVCloseClickListener = listener;
     }
 
@@ -137,7 +137,7 @@ public class AppStyledViewControllerImpl implements AppStyledViewController {
                 appStyleView.findViewById(R.id.car_ui_app_styled_view_nav_icon_container);
         if (mAppStyledVCloseClickListener != null && navContainer != null) {
             navContainer.setOnClickListener((v) -> {
-                mAppStyledVCloseClickListener.onClick();
+                mAppStyledVCloseClickListener.run();
             });
         }
 
