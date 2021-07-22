@@ -22,6 +22,7 @@ CAR_UI_RRO_TARGETS := \
     com.android.car.settings \
     com.android.car.voicecontrol \
     com.android.car.faceenroll \
+    com.android.car.developeroptions \
     com.android.managedprovisioning \
     com.android.settings.intelligence \
     com.google.android.apps.automotive.inputmethod \
