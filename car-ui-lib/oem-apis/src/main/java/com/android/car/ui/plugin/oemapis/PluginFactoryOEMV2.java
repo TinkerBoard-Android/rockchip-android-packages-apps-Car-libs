@@ -56,6 +56,13 @@ public interface PluginFactoryOEMV2 {
     /**
      * Creates the base layout, and optionally the toolbar.
      *
+     * @param sourceContext The context that will end up using this component. This context must not
+     *                      be used for inflating views, use the plugin context for that. This
+     *                      is used for two purposes: to add the correct configuration to the plugin
+     *                      context via {@code pluginContext.createConfigurationContext(
+     *                      sourceContext.getResources().getConfiguration()} before inflating views,
+     *                      and to pass to the rotary factories provided via
+     *                      {@link #setRotaryFactories}.
      * @param contentView           The view to install the base layout around.
      * @param insetsChangedListener A method to call when the insets change.
      * @param toolbarEnabled        Whether or not to add a toolbar to the base layout.
@@ -65,6 +72,7 @@ public interface PluginFactoryOEMV2 {
      * @return A {@link ToolbarControllerOEMV1} or null if {@code toolbarEnabled} was false.
      */
     ToolbarControllerOEMV1 installBaseLayoutAround(
+            Context sourceContext,
             View contentView,
             Consumer<InsetsOEMV1> insetsChangedListener,
             boolean toolbarEnabled,
@@ -81,17 +89,32 @@ public interface PluginFactoryOEMV2 {
     /**
      * Creates a app styled view.
      *
+     * @param sourceContext The context that will end up using this component. This context must not
+     *                      be used for inflating views, use the plugin context for that. This
+     *                      is used for two purposes: to add the correct configuration to the plugin
+     *                      context via {@code pluginContext.createConfigurationContext(
+     *                      sourceContext.getResources().getConfiguration()} before inflating views,
+     *                      and to pass to the rotary factories provided via
+     *                      {@link #setRotaryFactories}.
      * @return the view used for app styled view.
      */
-    AppStyledViewControllerOEMV1 createAppStyledView();
+    AppStyledViewControllerOEMV1 createAppStyledView(Context sourceContext);
 
     /**
      * Creates an instance of CarUiRecyclerView
      *
-     * @param context The visual context to create views with.
+     * @param sourceContext The context that will end up using this component. This context must not
+     *                      be used for inflating views, use the plugin context for that. This
+     *                      is used for two purposes: to add the correct configuration to the plugin
+     *                      context via {@code pluginContext.createConfigurationContext(
+     *                      sourceContext.getResources().getConfiguration()} before inflating views,
+     *                      and to pass to the rotary factories provided via
+     *                      {@link #setRotaryFactories}.
      * @param attrs   An object containing initial attributes for the button.
      */
-    RecyclerViewOEMV1 createRecyclerView(Context context, RecyclerViewAttributesOEMV1 attrs);
+    RecyclerViewOEMV1 createRecyclerView(
+            Context sourceContext,
+            RecyclerViewAttributesOEMV1 attrs);
 
     /**
      * Creates an instance of list item adapter

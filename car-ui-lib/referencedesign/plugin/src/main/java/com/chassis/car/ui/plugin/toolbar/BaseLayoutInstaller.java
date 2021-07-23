@@ -48,6 +48,7 @@ public class BaseLayoutInstaller {
      * {@link PluginFactoryOEMV1}
      */
     public static ToolbarControllerOEMV1 installBaseLayoutAround(
+            Context sourceContext,
             Context pluginContext,
             View contentView,
             Consumer<InsetsOEMV1> insetsChangedListener,
@@ -56,13 +57,11 @@ public class BaseLayoutInstaller {
             @Nullable Function<Context, FocusParkingViewOEMV1> focusParkingViewFactory,
             @Nullable Function<Context, FocusAreaOEMV1> focusAreaFactory) {
 
-        Context activityContext = contentView.getContext();
-
-        // Add the configuration from the activity context to the plugin context,
+        // Add the configuration from the source context to the plugin context,
         // or else when inflating views with the plugin context, they won't have access
         // to stuff like the screen size. It will also cause a StrictMode violation without this.
         pluginContext = pluginContext.createConfigurationContext(
-                activityContext.getResources().getConfiguration());
+                sourceContext.getResources().getConfiguration());
 
         @LayoutRes int layout = toolbarEnabled
                 ? R.layout.base_layout_toolbar
@@ -87,7 +86,7 @@ public class BaseLayoutInstaller {
         // Make sure to use the activity context here, not the plugin context,
         // as the implementation of FocusParkingView/FocusArea is in the static car-ui-lib.
         if (focusParkingViewFactory != null) {
-            View focusParkingView = focusParkingViewFactory.apply(activityContext).getView();
+            View focusParkingView = focusParkingViewFactory.apply(sourceContext).getView();
             if (focusParkingView != null) {
                 baseLayout.addView(focusParkingView, 0,
                         new FrameLayout.LayoutParams(
@@ -104,7 +103,7 @@ public class BaseLayoutInstaller {
         // but we want children of the FocusArea to use the plugin context, so we can
         // access plugin resources.
         if (focusAreaFactory != null && toolbarEnabled) {
-            LinearLayout focusArea = focusAreaFactory.apply(activityContext).getView();
+            LinearLayout focusArea = focusAreaFactory.apply(sourceContext).getView();
             if (focusArea != null) {
                 View toolbar = baseLayout.requireViewById(R.id.toolbar_background);
                 int toolbarIndex = baseLayout.indexOfChild(toolbar);
@@ -119,7 +118,7 @@ public class BaseLayoutInstaller {
         ToolbarControllerOEMV1 toolbarController = null;
         if (toolbarEnabled) {
             toolbarController = new ToolbarControllerImpl(
-                    baseLayout, pluginContext, activityContext);
+                    baseLayout, pluginContext, sourceContext);
         }
 
         InsetsUpdater updater = new InsetsUpdater(baseLayout, contentView);

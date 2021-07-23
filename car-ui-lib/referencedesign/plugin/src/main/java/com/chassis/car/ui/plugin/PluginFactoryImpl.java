@@ -64,11 +64,15 @@ public class PluginFactoryImpl implements PluginFactoryOEMV2 {
     }
 
     @Override
-    public ToolbarControllerOEMV1 installBaseLayoutAround(View contentView,
-            Consumer<InsetsOEMV1> insetsChangedListener, boolean toolbarEnabled,
+    public ToolbarControllerOEMV1 installBaseLayoutAround(
+            Context sourceContext,
+            View contentView,
+            Consumer<InsetsOEMV1> insetsChangedListener,
+            boolean toolbarEnabled,
             boolean fullscreen) {
 
         return BaseLayoutInstaller.installBaseLayoutAround(
+                sourceContext,
                 mPluginContext,
                 contentView,
                 insetsChangedListener,
@@ -84,15 +88,16 @@ public class PluginFactoryImpl implements PluginFactoryOEMV2 {
     }
 
     @Override
-    public AppStyledViewControllerOEMV1 createAppStyledView() {
+    public AppStyledViewControllerOEMV1 createAppStyledView(Context sourceContext) {
         //return new AppStyleViewControllerImpl(mPluginContext);
         return null;
     }
 
     @Override
-    public RecyclerViewOEMV1 createRecyclerView(Context context,
+    public RecyclerViewOEMV1 createRecyclerView(
+            Context sourceContext,
             RecyclerViewAttributesOEMV1 attrs) {
-        //return new RecyclerViewImpl(context, attrs);
+        //return new RecyclerViewImpl(mPluginContext, attrs);
         return null;
     }
 

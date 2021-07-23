@@ -28,6 +28,7 @@ import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -44,7 +45,7 @@ public class AppStyledViewControllerImpl implements AppStyledViewController {
     private final Context mContext;
     @AppStyledViewNavIcon
     private int mAppStyleViewNavIcon;
-    private AppStyledVCloseClickListener mAppStyledVCloseClickListener = null;
+    private Runnable mAppStyledVCloseClickListener = null;
 
     public AppStyledViewControllerImpl(Context context) {
         mContext = context;
@@ -59,7 +60,7 @@ public class AppStyledViewControllerImpl implements AppStyledViewController {
      * Sets the AppStyledVCloseClickListener on the close icon.
      */
     @Override
-    public void setOnCloseClickListener(AppStyledVCloseClickListener listener) {
+    public void setOnNavIconClickListener(Runnable listener) {
         mAppStyledVCloseClickListener = listener;
     }
 
@@ -106,7 +107,7 @@ public class AppStyledViewControllerImpl implements AppStyledViewController {
     }
 
     @Override
-    public View getAppStyledView(View contentView) {
+    public View getAppStyledView(@Nullable View contentView) {
         // create ContextThemeWrapper from the original Activity Context with the custom theme
         final Context contextThemeWrapper = new ContextThemeWrapper(mContext, R.style.Theme_CarUi);
         LayoutInflater inflater = LayoutInflater.from(mContext);
@@ -137,7 +138,7 @@ public class AppStyledViewControllerImpl implements AppStyledViewController {
                 appStyleView.findViewById(R.id.car_ui_app_styled_view_nav_icon_container);
         if (mAppStyledVCloseClickListener != null && navContainer != null) {
             navContainer.setOnClickListener((v) -> {
-                mAppStyledVCloseClickListener.onClick();
+                mAppStyledVCloseClickListener.run();
             });
         }
 

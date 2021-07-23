@@ -69,7 +69,7 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     private final OverflowMenuItem mOverflowMenuItem;
 
 
-    ToolbarControllerImpl(View view, Context pluginContext, Context activityContext) {
+    ToolbarControllerImpl(View view, Context pluginContext, Context sourceContext) {
         mPluginContext = pluginContext;
         mBackButtonView = view.requireViewById(R.id.toolbar_nav_icon);
         mNavIconContainer = view.requireViewById(R.id.toolbar_nav_icon_container);
@@ -83,7 +83,7 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
         mMenuItemsContainer = view.requireViewById(R.id.toolbar_menu_items_container);
         mSearchController = new SearchController(
                 view.requireViewById(R.id.toolbar_search_view_stub));
-        mOverflowMenuItem = new OverflowMenuItem(pluginContext, activityContext);
+        mOverflowMenuItem = new OverflowMenuItem(pluginContext, sourceContext);
 
         mTitleAndTabsMutuallyExclusive = pluginContext.getResources()
                 .getBoolean(R.bool.toolbar_title_and_tabs_mutually_exclusive);
