@@ -375,7 +375,7 @@ public class TelecomUtils {
     private static String getReadableNumber(Context context, String number) {
         String readableNumber = getFormattedNumber(context, number);
 
-        if (readableNumber == null) {
+        if (TextUtils.isEmpty(readableNumber)) {
             readableNumber = context.getString(R.string.unknown);
         }
         return readableNumber;
