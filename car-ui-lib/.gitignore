@@ -1,21 +1,2 @@
-# Local configuration
-local.properties
-gradle-wrapper.properties
-
-# Gradle
+# We have android studio regenerate the gradle wrapper
 gradle/
-.gradle/
-build/
-
-# IntelliJ
-.idea/
-*.iml
-
-# Python
-*.pyc
-
-# Android studio's layout inspector captures
-captures/
-
-# A file created when launching android emulators
-read-snapshot.txt
