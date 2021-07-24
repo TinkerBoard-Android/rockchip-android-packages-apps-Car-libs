@@ -25,7 +25,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.DrawableRes;
@@ -83,6 +82,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     private final List<DeprecatedTabWrapper> mDeprecatedTabs = new ArrayList<>();
     private final SearchWidescreenController mSearchWidescreenController;
     private final boolean mSupportsImeSearch;
+    private boolean mBackgroundShown = true;
 
     public ToolbarControllerAdapterV1(
             @NonNull Context context,
@@ -347,12 +347,13 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
     @Override
     public void setBackgroundShown(boolean shown) {
-        Log.w(TAG, "Unsupported operation setBackgroundShown() called, ignoring");
+        mBackgroundShown = shown;
+        mOemToolbar.setBackgroundShown(shown);
     }
 
     @Override
     public boolean getBackgroundShown() {
-        return true;
+        return mBackgroundShown;
     }
 
     @Override

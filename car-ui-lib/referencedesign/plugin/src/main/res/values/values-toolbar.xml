@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <drawable name="toolbar_background">#E0000000</drawable>
+
     <bool name="toolbar_title_and_tabs_mutually_exclusive">true</bool>
     <bool name="toolbar_logo_fills_nav_icon_space">true</bool>
     <bool name="toolbar_nav_icon_space_reserved">true</bool>
