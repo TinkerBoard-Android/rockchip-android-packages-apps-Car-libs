@@ -43,17 +43,3 @@ android_library {
     libs: ["android.car-system-stubs"],
 }
 
-// Used by instrumented test
-android_app {
-    name: "CarTelephonyLibTestsApp",
-
-    static_libs: [
-        "car-telephony-common",
-    ],
-
-    optimize: {
-        enabled: false,
-    },
-
-    sdk_version: "system_current",
-}
