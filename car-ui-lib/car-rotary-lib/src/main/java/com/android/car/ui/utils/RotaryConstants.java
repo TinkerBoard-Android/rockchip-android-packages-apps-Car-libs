@@ -64,6 +64,42 @@ public final class RotaryConstants {
     public static final String ROTARY_FOCUS_DELEGATING_CONTAINER =
             "com.android.car.ui.utils.FOCUS_DELEGATING_CONTAINER";
 
+    /**
+     * The key to store the offset of the view's left bound for nudge in the node's extras.
+     * <p>
+     * Usually this value is positive in order to shrink the bounds. But a negative value can also
+     * be used to extend the bounds if needed.
+     */
+    public static final String LEFT_BOUND_OFFSET_FOR_NUDGE =
+            "com.android.car.ui.utils.LEFT_BOUND_OFFSET_FOR_NUDGE";
+
+    /**
+     * The key to store the offset of the view's right bound for nudge in the node's extras.
+     * <p>
+     * Usually this value is positive in order to shrink the bounds. But a negative value can also
+     * be used to extend the bounds if needed.
+     */
+    public static final String RIGHT_BOUND_OFFSET_FOR_NUDGE =
+            "com.android.car.ui.utils.RIGHT_BOUND_OFFSET_FOR_NUDGE";
+
+    /**
+     * The key to store the offset of the view's top bound for nudge in the node's extras.
+     * <p>
+     * Usually this value is positive in order to shrink the bounds. But a negative value can also
+     * be used to extend the bounds if needed.
+     */
+    public static final String TOP_BOUND_OFFSET_FOR_NUDGE =
+            "com.android.car.ui.utils.TOP_BOUND_OFFSET_FOR_NUDGE";
+
+    /**
+     * The key to store the offset of the view's bottom bound for nudge in the node's extras.
+     * <p>
+     * Usually this value is positive in order to shrink the bounds. But a negative value can also
+     * be used to extend the bounds if needed.
+     */
+    public static final String BOTTOM_BOUND_OFFSET_FOR_NUDGE =
+            "com.android.car.ui.utils.BOTTOM_BOUND_OFFSET_FOR_NUDGE";
+
     /** The key to store the offset of the FocusArea's left bound in the node's extras. */
     public static final String FOCUS_AREA_LEFT_BOUND_OFFSET =
             "com.android.car.ui.utils.FOCUS_AREA_LEFT_BOUND_OFFSET";
