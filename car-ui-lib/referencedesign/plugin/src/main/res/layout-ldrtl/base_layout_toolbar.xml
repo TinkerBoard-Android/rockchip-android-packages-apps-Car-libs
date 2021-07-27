@@ -136,4 +136,9 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <ViewStub
+        android:id="@+id/toolbar_dialog_stub"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/toolbar_dialog"/>
 </FrameLayout>
