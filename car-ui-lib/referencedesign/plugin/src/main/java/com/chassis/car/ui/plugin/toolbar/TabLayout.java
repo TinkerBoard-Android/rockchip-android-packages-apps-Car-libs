@@ -89,11 +89,17 @@ public class TabLayout extends LinearLayout {
         TextView textView = view.requireViewById(R.id.car_ui_toolbar_tab_item_text);
 
         view.setOnClickListener(v -> selectTab(tab, true));
+        if (tab.isTinted()) {
+            iconView.setImageTintList(getContext()
+                    .getColorStateList(R.color.toolbar_tab_item_selector));
+        } else {
+            iconView.setImageTintList(null);
+        }
         iconView.setImageDrawable(tab.getIcon());
-        textView.setText(tab.getTitle());
 
         boolean selected = tab == mSelectedTab;
         view.setActivated(selected);
+        textView.setText(tab.getTitle());
         textView.setTextAppearance(selected
                 ? R.style.TextAppearance_CarUi_Widget_Toolbar_Tab_Selected
                 : R.style.TextAppearance_CarUi_Widget_Toolbar_Tab);

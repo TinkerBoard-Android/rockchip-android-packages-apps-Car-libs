@@ -35,6 +35,7 @@ class TabAdapterV1 {
                 .setOnSelectedListener(selectedListener == null
                         ? null
                         : () -> selectedListener.accept(mClientTab))
+                .setTinted(mClientTab.isTinted())
                 .build();
     }
 

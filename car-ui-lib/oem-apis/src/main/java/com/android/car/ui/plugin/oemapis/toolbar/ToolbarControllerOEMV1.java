@@ -147,4 +147,10 @@ public interface ToolbarControllerOEMV1 {
 
     /** Gets a {@link ProgressBarControllerOEMV1 ProgressBarController} */
     ProgressBarControllerOEMV1 getProgressBar();
+
+    /**
+     * This is a hint that indicates the app would like the toolbar drawn without a background,
+     * so that the toolbar blends in with the app more.
+     */
+    void setBackgroundShown(boolean shown);
 }
