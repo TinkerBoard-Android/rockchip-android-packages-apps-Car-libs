@@ -26,6 +26,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 
 import com.android.car.ui.plugin.oemapis.toolbar.ImeSearchInterfaceOEMV1;
 import com.android.car.ui.plugin.oemapis.toolbar.MenuItemOEMV1;
@@ -56,6 +57,7 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     private final ViewGroup mMenuItemsContainer;
     private final SearchController mSearchController;
     private final ViewGroup mNavIconContainer;
+    private final View mBackground;
 
     private final boolean mTitleAndTabsMutuallyExclusive;
     private final boolean mLogoFillsNavSpace;
@@ -81,6 +83,7 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
                 view.requireViewById(R.id.toolbar_progress_bar));
         mTabContainer = view.requireViewById(R.id.toolbar_tabs);
         mMenuItemsContainer = view.requireViewById(R.id.toolbar_menu_items_container);
+        mBackground = view.requireViewById(R.id.toolbar_background);
         mSearchController = new SearchController(
                 view.requireViewById(R.id.toolbar_search_view_stub));
         mOverflowMenuItem = new OverflowMenuItem(pluginContext, sourceContext);
@@ -273,6 +276,16 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
     @Override
     public ProgressBarControllerOEMV1 getProgressBar() {
         return mProgressBar;
+    }
+
+    @Override
+    public void setBackgroundShown(boolean shown) {
+        if (shown) {
+            mBackground.setBackground(
+                    AppCompatResources.getDrawable(mPluginContext, R.drawable.toolbar_background));
+        } else {
+            mBackground.setBackground(null);
+        }
     }
 
     private void update() {
