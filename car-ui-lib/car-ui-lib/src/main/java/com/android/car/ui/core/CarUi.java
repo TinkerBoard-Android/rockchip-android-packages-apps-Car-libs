@@ -71,6 +71,7 @@ public class CarUi {
      * if the result is null.
      */
     @NonNull
+    @SuppressWarnings("TypeParameterUnusedInFormals")
     public static <T> T requireCarUiComponentById(View view, int id) {
         return Objects.requireNonNull(findCarUiComponentById(view, id));
     }

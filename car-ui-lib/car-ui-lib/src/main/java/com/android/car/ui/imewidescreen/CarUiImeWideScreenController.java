@@ -84,8 +84,8 @@ import java.util.regex.Pattern;
  *      from {@link InputMethodService#onCreateInputView()}</li>
  *      <li>{@link #onComputeInsets(InputMethodService.Insets) should be called from
  *      {@link InputMethodService#onComputeInsets(InputMethodService.Insets)}</li>
- *      <li>{@link #onAppPrivateCommand(String, Bundle) should be called from {
- *      @link InputMethodService#onAppPrivateCommand(String, Bundle)}}</li>
+ *      <li>{@link #onAppPrivateCommand(String, Bundle) should be called from
+ *      {@link InputMethodService#onAppPrivateCommand(String, Bundle)}}</li>
  *      <li>{@link #setExtractViewShown(boolean)} should be called from
  *      {@link InputMethodService#setExtractViewShown(boolean)}</li>
  *      <li>{@link #onStartInputView(EditorInfo, InputConnection, CharSequence)} should be called
@@ -614,10 +614,9 @@ public class CarUiImeWideScreenController {
         }
         // Dispatch the window visibility change for IME window as soon as its displayed.
         mRootView.dispatchWindowVisibilityChanged(View.VISIBLE);
-        IBinder hostToken = null;
         int displayId = mContentAreaSurfaceView.getDisplay() == null
                 ? 0 : mContentAreaSurfaceView.getDisplay().getDisplayId();
-        hostToken = mContentAreaSurfaceView.getHostToken();
+        IBinder hostToken = mContentAreaSurfaceView.getHostToken();
 
         Bundle bundle = new Bundle();
         bundle.putBinder(CONTENT_AREA_SURFACE_HOST_TOKEN, hostToken);
@@ -699,7 +698,7 @@ public class CarUiImeWideScreenController {
      * <p>
      * For example, within the IMS service call
      * <pre>
-     *   @Override
+     *   &#64;Override
      *   public void setExtractViewShown(boolean shown) {
      *     if (!carUiImeWideScreenController.isWideScreenMode()) {
      *         super.setExtractViewShown(shown);
