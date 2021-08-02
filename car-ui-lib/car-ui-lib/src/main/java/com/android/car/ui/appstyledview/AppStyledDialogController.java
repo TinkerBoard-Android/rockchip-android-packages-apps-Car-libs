@@ -85,7 +85,7 @@ public final class AppStyledDialogController {
      * Sets a runnable that will be invoked when a nav icon is clicked.
      */
     public void setOnNavIconClickListener(@NonNull Runnable listener) {
-        mAppStyledViewController.setOnNavIconClickListener(listener::run);
+        mAppStyledViewController.setOnNavIconClickListener(listener);
     }
 
     /**

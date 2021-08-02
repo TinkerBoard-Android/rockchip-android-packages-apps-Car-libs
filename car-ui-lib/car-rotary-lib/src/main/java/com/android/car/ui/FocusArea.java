@@ -574,8 +574,6 @@ public class FocusArea extends LinearLayout {
 
     /**
      * Gets the {@code app:defaultFocus} view.
-     *
-     * @hidden
      */
     @Nullable
     public View getDefaultFocusView() {
@@ -803,7 +801,7 @@ public class FocusArea extends LinearLayout {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      * <p>
      * When {@link #mWrapAround} is true, the search is restricted to descendants of this
      * {@link FocusArea}.

@@ -264,7 +264,7 @@ public interface ToolbarController {
      * child tags. See CarUiToolbarMenuItem in CarUi's attrs.xml for a list of available attributes.
      *
      * Example:
-     * <pre>
+     * <pre>{@code
      * <MenuItems>
      *     <MenuItem
      *         app:title="Foo"/>
@@ -278,7 +278,7 @@ public interface ToolbarController {
      *         app:uxRestrictions="FULLY_RESTRICTED"
      *         app:onClick="xmlMenuItemClicked"/>
      * </MenuItems>
-     * </pre>
+     * }</pre>
      *
      * @return The MenuItems that were loaded from XML.
      * @see #setMenuItems(List)

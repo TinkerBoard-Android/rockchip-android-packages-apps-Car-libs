@@ -122,6 +122,7 @@ public final class CarUiUtils {
      */
     @Nullable
     @UiThread
+    @SuppressWarnings("TypeParameterUnusedInFormals")
     public static <T extends View> T findViewByRefId(@NonNull View root, @IdRes int id) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             return root.findViewById(id);
@@ -148,6 +149,7 @@ public final class CarUiUtils {
      */
     @NonNull
     @UiThread
+    @SuppressWarnings("TypeParameterUnusedInFormals")
     public static <T extends View> T requireViewByRefId(@NonNull View root, @IdRes int id) {
         T view = findViewByRefId(root, id);
         if (view == null) {
