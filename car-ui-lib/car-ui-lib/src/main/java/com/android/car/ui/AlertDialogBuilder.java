@@ -122,7 +122,7 @@ public class AlertDialogBuilder {
         return v.onApplyWindowInsets(insets);
     };
 
-    private final AlertDialog.OnDismissListener mOnDismissListener = dialog -> {
+    private final DialogInterface.OnDismissListener mOnDismissListener = dialog -> {
         if (mRoot != null) {
             mRoot.setOnApplyWindowInsetsListener(null);
         }

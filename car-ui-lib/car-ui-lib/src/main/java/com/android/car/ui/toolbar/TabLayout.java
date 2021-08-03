@@ -180,7 +180,6 @@ public class TabLayout extends LinearLayout {
     public static class Tab {
         private final Drawable mIcon;
         private final CharSequence mText;
-        private boolean mIsSelected;
 
         public Tab(@Nullable Drawable icon, @Nullable CharSequence text) {
             mIcon = icon;

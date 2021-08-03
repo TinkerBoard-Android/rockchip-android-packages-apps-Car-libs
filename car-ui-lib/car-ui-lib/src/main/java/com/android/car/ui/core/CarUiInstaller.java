@@ -22,7 +22,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -37,7 +36,6 @@ import com.android.car.ui.baselayout.Insets;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Locale;
 
 /**
  * {@link ContentProvider ContentProvider's} onCreate() methods are "called for all registered
@@ -61,10 +59,6 @@ public class CarUiInstaller extends ContentProvider {
     private static final String CAR_UI_INSET_RIGHT = "CAR_UI_INSET_RIGHT";
     private static final String CAR_UI_INSET_TOP = "CAR_UI_INSET_TOP";
     private static final String CAR_UI_INSET_BOTTOM = "CAR_UI_INSET_BOTTOM";
-
-    private static final boolean IS_DEBUG_DEVICE =
-            Build.TYPE.toLowerCase(Locale.ROOT).contains("debug")
-                    || Build.TYPE.toLowerCase(Locale.ROOT).equals("eng");
 
     @Override
     public boolean onCreate() {
