@@ -86,7 +86,8 @@ class ToolbarControllerImpl implements ToolbarControllerOEMV1 {
         mBackground = view.requireViewById(R.id.toolbar_background);
         mSearchController = new SearchController(
                 view.requireViewById(R.id.toolbar_search_view_stub));
-        mOverflowMenuItem = new OverflowMenuItem(pluginContext, sourceContext);
+        mOverflowMenuItem = new OverflowMenuItem(pluginContext,
+                view.requireViewById(R.id.toolbar_dialog_stub));
 
         mTitleAndTabsMutuallyExclusive = pluginContext.getResources()
                 .getBoolean(R.bool.toolbar_title_and_tabs_mutually_exclusive);
