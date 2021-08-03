@@ -45,6 +45,8 @@ android_library {
 android_library {
     name: "car-messaging-models",
 
+    manifest: "AndroidManifest-unbundled.xml",
+
     srcs: [
       "src/com/android/car/messenger/common/Conversation.java",
     ],
