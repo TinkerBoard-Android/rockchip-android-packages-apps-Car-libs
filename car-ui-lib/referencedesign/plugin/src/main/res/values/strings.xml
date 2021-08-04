@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+  <!-- The text on a dialog's dismiss button. [CHAR_LIMIT=50] -->
+  <string name="dialog_dismiss_button">Close</string>
+
   <!-- Search hint, displayed inside the search box [CHAR LIMIT=50] -->
   <string name="toolbar_default_search_hint">Search&#8230;</string>
 

@@ -73,10 +73,7 @@ public class ToolbarMenuItemsTest {
         return new Object[] { false, true };
     }
 
-    private final boolean mPluginEnabled;
-
     public ToolbarMenuItemsTest(boolean pluginEnabled) {
-        mPluginEnabled = pluginEnabled;
         PluginFactorySingleton.setPluginEnabled(pluginEnabled);
     }
 
@@ -238,14 +235,11 @@ public class ToolbarMenuItemsTest {
         onView(withText("Test title!")).perform(click());
         verify(callback).onClick(menuItem[0]);
 
-        // TODO(b/188925810): this currently isn't supported in the referencedesign plugin.
-        if (!mPluginEnabled) {
-            // Open overflow menu, change MenuItem's title, then click on the MenuItem
-            onView(withContentDescription("Overflow")).perform(click());
-            runWithToolbar(toolbar -> menuItem[0].setTitle("Test title 2!"));
-            onView(withText("Test title 2!")).perform(click());
-            verify(callback, times(2)).onClick(menuItem[0]);
-        }
+        // Open overflow menu, change MenuItem's title, then click on the MenuItem
+        onView(withContentDescription("Overflow")).perform(click());
+        runWithToolbar(toolbar -> menuItem[0].setTitle("Test title 2!"));
+        onView(withText("Test title 2!")).perform(click());
+        verify(callback, times(2)).onClick(menuItem[0]);
     }
 
     @Test
@@ -282,6 +276,37 @@ public class ToolbarMenuItemsTest {
         onView(withText("Test title!")).perform(click());
 
         verify(callback).onClick(menuItem[0]);
+    }
+
+    @Test
+    public void menuItems_overflow2To1_shouldWork() {
+        MenuItem[] menuItem = new MenuItem[] { null, null };
+        runWithActivityAndToolbar((activity, toolbar) -> {
+            menuItem[0] = MenuItem.builder(activity)
+                    .setTitle("Overflow MenuItem 1!")
+                    .setDisplayBehavior(MenuItem.DisplayBehavior.NEVER)
+                    .setOnClickListener(i -> {})
+                    .build();
+            menuItem[1] = MenuItem.builder(activity)
+                    .setTitle("Overflow MenuItem 2!")
+                    .setDisplayBehavior(MenuItem.DisplayBehavior.NEVER)
+                    .setOnClickListener(i -> {})
+                    .build();
+            toolbar.setMenuItems(Arrays.asList(menuItem));
+        });
+
+        onView(isRoot()).perform(waitForView(withContentDescription("Overflow")));
+        onView(withContentDescription("Overflow")).perform(click());
+        onView(withText("Overflow MenuItem 1!")).check(matches(isDisplayed()));
+        onView(withText("Overflow MenuItem 2!")).check(matches(isDisplayed()));
+        onView(withText("Overflow MenuItem 1!")).perform(click());
+
+        runWithToolbar(toolbar -> toolbar.setMenuItems(Collections.singletonList(menuItem[0])));
+
+        onView(isRoot()).perform(waitForView(withContentDescription("Overflow")));
+        onView(withContentDescription("Overflow")).perform(click());
+        onView(withText("Overflow MenuItem 1!")).check(matches(isDisplayed()));
+        onView(withText("Overflow MenuItem 2!")).check(doesNotExistOrIsNotDisplayed());
     }
 
     @Test
