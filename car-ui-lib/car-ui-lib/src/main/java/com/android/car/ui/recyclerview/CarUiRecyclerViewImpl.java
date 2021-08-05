@@ -460,8 +460,8 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView implements La
 
         switch (mSize) {
             case SIZE_SMALL:
-                // Small layout is rendered without scrollbar
-                return;
+                inflater.inflate(R.layout.car_ui_recycler_view_small, mContainer, true);
+                break;
             case SIZE_MEDIUM:
                 inflater.inflate(R.layout.car_ui_recycler_view_medium, mContainer, true);
                 break;

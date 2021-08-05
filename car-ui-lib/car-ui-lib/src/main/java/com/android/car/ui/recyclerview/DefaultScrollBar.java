@@ -44,30 +44,57 @@ import com.android.car.ui.utils.CarUiUtils;
 /**
  * The default scroll bar widget for the {@link CarUiRecyclerView}.
  *
- * <p>Inspired by {@link androidx.car.widget.PagedListView}. Most pagination and scrolling logic
+ * <p>Inspired by {@code androidx.car.widget.PagedListView}. Most pagination and scrolling logic
  * has been ported from the PLV with minor updates.
  */
 class DefaultScrollBar implements ScrollBar {
-
+    private final SparseArray<Integer> mChildHeightByAdapterPosition = new SparseArray();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
+    private final Interpolator mPaginationInterpolator = new AccelerateDecelerateInterpolator();
+    private final RecyclerView.AdapterDataObserver mAdapterChangeObserver =
+            new RecyclerView.AdapterDataObserver() {
+                @Override
+                public void onChanged() {
+                    clearCachedHeights();
+                    updatePaginationButtons();
+                }
+                @Override
+                public void onItemRangeChanged(int positionStart, int itemCount, Object payload) {
+                    clearCachedHeights();
+                    updatePaginationButtons();
+                }
+                @Override
+                public void onItemRangeChanged(int positionStart, int itemCount) {
+                    clearCachedHeights();
+                    updatePaginationButtons();
+                }
+                @Override
+                public void onItemRangeInserted(int positionStart, int itemCount) {
+                    clearCachedHeights();
+                    updatePaginationButtons();
+                }
+                @Override
+                public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+                    clearCachedHeights();
+                    updatePaginationButtons();
+                }
+                @Override
+                public void onItemRangeRemoved(int positionStart, int itemCount) {
+                    clearCachedHeights();
+                    updatePaginationButtons();
+                }
+            };
 
     private float mButtonDisabledAlpha;
     private CarUiSnapHelper mSnapHelper;
-
     private View mScrollView;
     private View mScrollTrack;
     private View mScrollThumb;
     private View mUpButton;
     private View mDownButton;
     private int mScrollbarThumbMinHeight;
-
     private RecyclerView mRecyclerView;
-
-    private final Interpolator mPaginationInterpolator = new AccelerateDecelerateInterpolator();
-
-    private final Handler mHandler = new Handler(Looper.getMainLooper());
-
     private OrientationHelper mOrientationHelper;
-
     private OnContinuousScrollListener mPageUpOnContinuousScrollListener;
     private OnContinuousScrollListener mPageDownOnContinuousScrollListener;
 
@@ -111,7 +138,7 @@ class DefaultScrollBar implements ScrollBar {
 
         getRecyclerView().addOnScrollListener(mRecyclerViewOnScrollListener);
 
-        mScrollView.setVisibility(View.INVISIBLE);
+        mScrollView.setVisibility(View.GONE);
         mScrollView.addOnLayoutChangeListener(
                 (View v,
                         int left,
@@ -122,6 +149,10 @@ class DefaultScrollBar implements ScrollBar {
                         int oldTop,
                         int oldRight,
                         int oldBottom) -> mHandler.post(this::updatePaginationButtons));
+
+        if (mRecyclerView.getAdapter() != null) {
+            adapterChanged(mRecyclerView.getAdapter());
+        }
     }
 
     public RecyclerView getRecyclerView() {
@@ -145,13 +176,16 @@ class DefaultScrollBar implements ScrollBar {
             if (mRecyclerView.getAdapter() != null) {
                 mRecyclerView.getAdapter().unregisterAdapterDataObserver(mAdapterChangeObserver);
             }
+        } catch (IllegalStateException e) {
+            // adapter was not registered and we're trying to unregister again. ignore.
+        }
+
+        try {
             if (adapter != null) {
                 adapter.registerAdapterDataObserver(mAdapterChangeObserver);
             }
         } catch (IllegalStateException e) {
-            // adapter is already registered. and we're trying to register again.
-            // or adapter was not registered and we're trying to unregister again.
-            // ignore.
+            // adapter is already registered. and we're trying to register again. ignore.
         }
     }
 
@@ -290,35 +324,6 @@ class DefaultScrollBar implements ScrollBar {
                 public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                     updatePaginationButtons();
                     cacheChildrenHeight(recyclerView.getLayoutManager());
-                }
-            };
-    private final SparseArray<Integer> mChildHeightByAdapterPosition = new SparseArray();
-
-    private final RecyclerView.AdapterDataObserver mAdapterChangeObserver =
-            new RecyclerView.AdapterDataObserver() {
-                @Override
-                public void onChanged() {
-                    clearCachedHeights();
-                }
-                @Override
-                public void onItemRangeChanged(int positionStart, int itemCount, Object payload) {
-                    clearCachedHeights();
-                }
-                @Override
-                public void onItemRangeChanged(int positionStart, int itemCount) {
-                    clearCachedHeights();
-                }
-                @Override
-                public void onItemRangeInserted(int positionStart, int itemCount) {
-                    clearCachedHeights();
-                }
-                @Override
-                public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-                    clearCachedHeights();
-                }
-                @Override
-                public void onItemRangeRemoved(int positionStart, int itemCount) {
-                    clearCachedHeights();
                 }
             };
 
@@ -496,7 +501,7 @@ class DefaultScrollBar implements ScrollBar {
         RecyclerView.LayoutManager layoutManager = getLayoutManager();
 
         if (layoutManager == null) {
-            mScrollView.setVisibility(View.INVISIBLE);
+            mScrollView.setVisibility(View.GONE);
             return;
         }
 
@@ -507,8 +512,11 @@ class DefaultScrollBar implements ScrollBar {
         setUpEnabled(!isAtStart);
         setDownEnabled(!isAtEnd);
 
+        boolean isScrollViewVisiblePreUpdate = mScrollView.getVisibility() == View.VISIBLE;
+        boolean isLayoutRequired = false;
+
         if ((isAtStart && isAtEnd) || layoutManager.getItemCount() == 0) {
-            mScrollView.setVisibility(View.INVISIBLE);
+            mScrollView.setVisibility(View.GONE);
         } else {
             OrientationHelper orientationHelper = getOrientationHelper(layoutManager);
             int screenSize = orientationHelper.getTotalSpace();
@@ -524,7 +532,10 @@ class DefaultScrollBar implements ScrollBar {
                     + downButtonLayoutParam.bottomMargin;
             int margin = upButtonMargin + downButtonMargin;
             if (screenSize < 2 * touchTargetSize + margin) {
-                mScrollView.setVisibility(View.INVISIBLE);
+                if (isScrollViewVisiblePreUpdate) {
+                    isLayoutRequired = true;
+                }
+                mScrollView.setVisibility(View.GONE);
             } else {
                 ViewGroup.MarginLayoutParams trackLayoutParam =
                         (ViewGroup.MarginLayoutParams) mScrollTrack.getLayoutParams();
@@ -541,6 +552,10 @@ class DefaultScrollBar implements ScrollBar {
                 } else {
                     mScrollTrack.setVisibility(View.VISIBLE);
                     mScrollThumb.setVisibility(View.VISIBLE);
+                }
+
+                if (!isScrollViewVisiblePreUpdate) {
+                    isLayoutRequired = true;
                 }
                 mScrollView.setVisibility(View.VISIBLE);
             }
@@ -559,6 +574,13 @@ class DefaultScrollBar implements ScrollBar {
         }
 
         mScrollView.invalidate();
+        // updatePaginationButtons() is called from onLayoutChangeListener, request layout only when
+        // required to avoid infinite loop.
+        if (isLayoutRequired) {
+            // If currently performing a layout pass, layout update may not be picked up until the
+            // next layout pass. Schedule another layout pass to ensure changes take affect.
+            mScrollView.post(() -> mScrollView.requestLayout());
+        }
     }
 
     /**
