@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="toolbar_default_search_hint" msgid="6578675564376946707">"Søg…"</string>
-    <!-- no translation found for toolbar_ux_restricted_search_hint (5245584432669202806) -->
+    <!-- no translation found for dialog_dismiss_button (2252701669002484829) -->
     <skip />
-    <string name="toolbar_nav_icon_content_description" msgid="8248279753772474028">"Tilbage"</string>
-    <string name="toolbar_menu_item_overflow_title" msgid="3385684550451820919">"Prikmenu"</string>
+    <string name="toolbar_default_search_hint" msgid="5517905201169820324">"Søg…"</string>
+    <string name="toolbar_ux_restricted_search_hint" msgid="4107155717310782144">"Ikke tilgængelig under kørsel"</string>
+    <string name="toolbar_nav_icon_content_description" msgid="2480730986615479860">"Tilbage"</string>
+    <string name="toolbar_menu_item_overflow_title" msgid="5386814151990860080">"Prikmenu"</string>
 </resources>
