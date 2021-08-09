@@ -16,6 +16,7 @@
 
 package com.android.car.qc.view;
 
+import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
@@ -35,13 +36,19 @@ public class QCViewUtils {
 
     private final Context mContext;
     private final Drawable mDefaultToggleBackground;
+    private final Drawable mUnavailableToggleBackground;
     private final ColorStateList mDefaultToggleIconTint;
+    @ColorInt
+    private final int mUnavailableToggleIconTint;
     private final int mToggleForegroundIconInset;
 
     private QCViewUtils(@NonNull Context context) {
         mContext = context.getApplicationContext();
         mDefaultToggleBackground = mContext.getDrawable(R.drawable.qc_toggle_background);
+        mUnavailableToggleBackground = mContext.getDrawable(
+                R.drawable.qc_toggle_unavailable_background);
         mDefaultToggleIconTint = mContext.getColorStateList(R.color.qc_toggle_icon_fill_color);
+        mUnavailableToggleIconTint = mContext.getColor(R.color.qc_toggle_unavailable_color);
         mToggleForegroundIconInset = mContext.getResources()
                 .getDimensionPixelSize(R.dimen.qc_toggle_foreground_icon_inset);
     }
@@ -59,16 +66,25 @@ public class QCViewUtils {
     /**
      * Create a return a Quick Control toggle icon - used for tiles and action toggles.
      */
-    public Drawable getToggleIcon(@Nullable Icon icon) {
-        Drawable background = mDefaultToggleBackground.getConstantState().newDrawable().mutate();
+    public Drawable getToggleIcon(@Nullable Icon icon, boolean available) {
+        Drawable background = available
+                ? mDefaultToggleBackground.getConstantState().newDrawable().mutate()
+                : mUnavailableToggleBackground.getConstantState().newDrawable().mutate();
         if (icon == null) {
             return background;
         }
 
         Drawable iconDrawable = icon.loadDrawable(mContext);
-        if (iconDrawable != null) {
+        if (iconDrawable == null) {
+            return background;
+        }
+
+        if (!available) {
+            iconDrawable.setTint(mUnavailableToggleIconTint);
+        } else {
             iconDrawable.setTintList(mDefaultToggleIconTint);
         }
+
         Drawable[] layers = {background, iconDrawable};
         LayerDrawable drawable = new LayerDrawable(layers);
         drawable.setLayerInsetRelative(/* index= */ 1, mToggleForegroundIconInset,

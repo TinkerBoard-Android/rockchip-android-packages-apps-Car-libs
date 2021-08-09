@@ -35,15 +35,17 @@ import androidx.annotation.Nullable;
 public class QCTile extends QCItem {
     private final boolean mIsChecked;
     private final boolean mIsEnabled;
+    private final boolean mIsAvailable;
     private final String mSubtitle;
     private Icon mIcon;
     private PendingIntent mAction;
 
-    public QCTile(boolean isChecked, boolean isEnabled, @Nullable String subtitle,
-            @Nullable Icon icon, @Nullable PendingIntent action) {
+    public QCTile(boolean isChecked, boolean isEnabled, boolean isAvailable,
+            @Nullable String subtitle, @Nullable Icon icon, @Nullable PendingIntent action) {
         super(QC_TYPE_TILE);
         mIsEnabled = isEnabled;
         mIsChecked = isChecked;
+        mIsAvailable = isAvailable;
         mSubtitle = subtitle;
         mIcon = icon;
         mAction = action;
@@ -53,6 +55,7 @@ public class QCTile extends QCItem {
         super(in);
         mIsChecked = in.readBoolean();
         mIsEnabled = in.readBoolean();
+        mIsAvailable = in.readBoolean();
         mSubtitle = in.readString();
         boolean hasIcon = in.readBoolean();
         if (hasIcon) {
@@ -69,6 +72,7 @@ public class QCTile extends QCItem {
         super.writeToParcel(dest, flags);
         dest.writeBoolean(mIsChecked);
         dest.writeBoolean(mIsEnabled);
+        dest.writeBoolean(mIsAvailable);
         dest.writeString(mSubtitle);
         boolean hasIcon = mIcon != null;
         dest.writeBoolean(hasIcon);
@@ -93,6 +97,10 @@ public class QCTile extends QCItem {
 
     public boolean isEnabled() {
         return mIsEnabled;
+    }
+
+    public boolean isAvailable() {
+        return mIsAvailable;
     }
 
     @Nullable
@@ -123,6 +131,7 @@ public class QCTile extends QCItem {
     public static class Builder {
         private boolean mIsChecked;
         private boolean mIsEnabled = true;
+        private boolean mIsAvailable = true;
         private String mSubtitle;
         private Icon mIcon;
         private PendingIntent mAction;
@@ -140,6 +149,14 @@ public class QCTile extends QCItem {
          */
         public Builder setEnabled(boolean enabled) {
             mIsEnabled = enabled;
+            return this;
+        }
+
+        /**
+         * Sets whether or not the action item is available.
+         */
+        public Builder setAvailable(boolean available) {
+            mIsAvailable = available;
             return this;
         }
 
@@ -171,7 +188,7 @@ public class QCTile extends QCItem {
          * Builds the final {@link QCTile}.
          */
         public QCTile build() {
-            return new QCTile(mIsChecked, mIsEnabled, mSubtitle, mIcon, mAction);
+            return new QCTile(mIsChecked, mIsEnabled, mIsAvailable, mSubtitle, mIcon, mAction);
         }
     }
 }

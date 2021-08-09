@@ -22,7 +22,6 @@ import static com.android.car.qc.view.QCView.QCActionListener;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -47,9 +46,6 @@ public class QCTileView extends FrameLayout implements Observer<QCItem> {
     private DrawableStateToggleButton mToggleButton;
     private TextView mSubtitle;
     private QCActionListener mActionListener;
-    private Drawable mDefaultBackground;
-    private ColorStateList mDefaultIconTint;
-    private int mForegroundIconInset;
 
     public QCTileView(Context context) {
         super(context);
@@ -86,10 +82,6 @@ public class QCTileView extends FrameLayout implements Observer<QCItem> {
         mToggleButton.setText(null);
         mToggleButton.setTextOn(null);
         mToggleButton.setTextOff(null);
-        mDefaultBackground = context.getDrawable(R.drawable.qc_toggle_background);
-        mDefaultIconTint = context.getColorStateList(R.color.qc_toggle_icon_fill_color);
-        mForegroundIconInset = getResources()
-                .getDimensionPixelSize(R.dimen.qc_toggle_foreground_icon_inset);
 
     }
 
@@ -108,9 +100,10 @@ public class QCTileView extends FrameLayout implements Observer<QCItem> {
         mToggleButton.setOnCheckedChangeListener(null);
         mToggleButton.setChecked(qcTile.isChecked());
         mToggleButton.setEnabled(qcTile.isEnabled());
-        mTileWrapper.setEnabled(qcTile.isEnabled());
+        mTileWrapper.setEnabled(qcTile.isEnabled() && qcTile.isAvailable());
         mTileWrapper.setOnClickListener(v -> mToggleButton.toggle());
-        Drawable icon = QCViewUtils.getInstance(mContext).getToggleIcon(qcTile.getIcon());
+        Drawable icon = QCViewUtils.getInstance(mContext).getToggleIcon(
+                qcTile.getIcon(), qcTile.isAvailable());
         mToggleButton.setButtonDrawable(icon);
         mToggleButton.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> {

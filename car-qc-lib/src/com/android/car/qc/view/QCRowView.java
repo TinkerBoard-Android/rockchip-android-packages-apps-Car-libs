@@ -170,9 +170,9 @@ public class QCRowView extends FrameLayout {
         mLayoutInflater = LayoutInflater.from(context);
         mLayoutInflater.inflate(R.layout.qc_row_view, /* root= */ this);
         mContentView = findViewById(R.id.qc_row_content);
-        mTitle = findViewById(android.R.id.title);
-        mSubtitle = findViewById(android.R.id.summary);
-        mStartIcon = findViewById(android.R.id.icon);
+        mTitle = findViewById(R.id.qc_title);
+        mSubtitle = findViewById(R.id.qc_summary);
+        mStartIcon = findViewById(R.id.qc_icon);
         mStartItemsContainer = findViewById(R.id.qc_row_start_items);
         mEndItemsContainer = findViewById(R.id.qc_row_end_items);
         mSeekBarContainer = findViewById(R.id.qc_seekbar_wrapper);
@@ -285,10 +285,11 @@ public class QCRowView extends FrameLayout {
         toggleButton.setTextOn(null);
         toggleButton.setTextOff(null);
         toggleButton.setOnCheckedChangeListener(null);
-        Drawable icon = QCViewUtils.getInstance(mContext).getToggleIcon(action.getIcon());
+        Drawable icon = QCViewUtils.getInstance(mContext).getToggleIcon(
+                action.getIcon(), action.isAvailable());
         toggleButton.setButtonDrawable(icon);
         toggleButton.setChecked(action.isChecked());
-        toggleButton.setEnabled(action.isEnabled());
+        toggleButton.setEnabled(action.isEnabled() && action.isAvailable());
         toggleButton.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> {
                     Intent intent = new Intent();

@@ -29,14 +29,16 @@ import androidx.annotation.Nullable;
 public class QCActionItem extends QCItem {
     private final boolean mIsChecked;
     private final boolean mIsEnabled;
+    private final boolean mIsAvailable;
     private Icon mIcon;
     private PendingIntent mAction;
 
     public QCActionItem(@NonNull @QCItemType String type, boolean isChecked, boolean isEnabled,
-            @Nullable Icon icon, @Nullable PendingIntent action) {
+            boolean isAvailable, @Nullable Icon icon, @Nullable PendingIntent action) {
         super(type);
         mIsEnabled = isEnabled;
         mIsChecked = isChecked;
+        mIsAvailable = isAvailable;
         mIcon = icon;
         mAction = action;
     }
@@ -45,6 +47,7 @@ public class QCActionItem extends QCItem {
         super(in);
         mIsChecked = in.readBoolean();
         mIsEnabled = in.readBoolean();
+        mIsAvailable = in.readBoolean();
         boolean hasIcon = in.readBoolean();
         if (hasIcon) {
             mIcon = Icon.CREATOR.createFromParcel(in);
@@ -60,6 +63,7 @@ public class QCActionItem extends QCItem {
         super.writeToParcel(dest, flags);
         dest.writeBoolean(mIsChecked);
         dest.writeBoolean(mIsEnabled);
+        dest.writeBoolean(mIsAvailable);
         boolean includeIcon = getType().equals(QC_TYPE_ACTION_TOGGLE) && mIcon != null;
         dest.writeBoolean(includeIcon);
         if (includeIcon) {
@@ -83,6 +87,10 @@ public class QCActionItem extends QCItem {
 
     public boolean isEnabled() {
         return mIsEnabled;
+    }
+
+    public boolean isAvailable() {
+        return mIsAvailable;
     }
 
     @Nullable
@@ -109,6 +117,7 @@ public class QCActionItem extends QCItem {
         private final String mType;
         private boolean mIsChecked;
         private boolean mIsEnabled = true;
+        private boolean mIsAvailable = true;
         private Icon mIcon;
         private PendingIntent mAction;
 
@@ -136,6 +145,14 @@ public class QCActionItem extends QCItem {
         }
 
         /**
+         * Sets whether or not the action item is available.
+         */
+        public Builder setAvailable(boolean available) {
+            mIsAvailable = available;
+            return this;
+        }
+
+        /**
          * Sets the icon for {@link QC_TYPE_ACTION_TOGGLE} actions
          */
         public Builder setIcon(@Nullable Icon icon) {
@@ -155,7 +172,7 @@ public class QCActionItem extends QCItem {
          * Builds the final {@link QCActionItem}.
          */
         public QCActionItem build() {
-            return new QCActionItem(mType, mIsChecked, mIsEnabled, mIcon, mAction);
+            return new QCActionItem(mType, mIsChecked, mIsEnabled, mIsAvailable, mIcon, mAction);
         }
 
         private boolean isValidType(String type) {

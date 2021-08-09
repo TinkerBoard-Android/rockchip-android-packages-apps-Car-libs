@@ -16,6 +16,6 @@
 
 <resources>
     <color name="qc_toggle_off_background_color">#626262</color>
-    <color name="qc_toggle_disabled_background_color">@android:color/transparent</color>
-    <color name="qc_toggle_disabled_color">#75FFFFFF</color>
+    <color name="qc_toggle_unavailable_background_color">@android:color/transparent</color>
+    <color name="qc_toggle_unavailable_color">#75FFFFFF</color>
 </resources>
