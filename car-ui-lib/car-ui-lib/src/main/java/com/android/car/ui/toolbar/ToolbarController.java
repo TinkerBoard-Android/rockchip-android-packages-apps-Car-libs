@@ -222,6 +222,11 @@ public interface ToolbarController {
     void setSearchMode(SearchMode mode);
 
     /**
+     * Returns the current search mode, set by {@link #setSearchMode}.
+     */
+    SearchMode getSearchMode();
+
+    /**
      * Sets the {@link Toolbar.NavButtonMode}
      *
      * @deprecated Use {@link #setNavButtonMode(NavButtonMode)} instead.
@@ -233,15 +238,9 @@ public interface ToolbarController {
     void setNavButtonMode(NavButtonMode mode);
 
     /**
-     * Gets the {@link Toolbar.NavButtonMode}.
-     *
-     * @deprecated No equivalent replacement. Maintain the current mode locally in the app if
-     * needed. If this is for a test, you can use this espresso code to check that the toolbar
-     * back button is shown:
-     * {@code onView(withContentDescription("Back")).check(matches(isDisplayed()));}
+     * Gets the {@link NavButtonMode}.
      */
-    @Deprecated
-    Toolbar.NavButtonMode getNavButtonMode();
+    NavButtonMode getNavButtonMode();
 
     /** Show/hide the background. When hidden, the toolbar is completely transparent. */
     void setBackgroundShown(boolean shown);

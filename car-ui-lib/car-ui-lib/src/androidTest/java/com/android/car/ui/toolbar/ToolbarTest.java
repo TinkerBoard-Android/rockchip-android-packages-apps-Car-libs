@@ -135,14 +135,14 @@ public class ToolbarTest {
             toolbar.setSearchHint("Foo2");
             toolbar.setShowMenuItemsWhileSearching(true);
             toolbar.setState(Toolbar.State.SUBPAGE);
-            toolbar.setNavButtonMode(Toolbar.NavButtonMode.CLOSE);
+            toolbar.setNavButtonMode(NavButtonMode.CLOSE);
 
             assertThat(toolbar.getTitle().toString()).isEqualTo("Foo");
             assertThat(toolbar.getSearchHint().toString()).isEqualTo("Foo2");
             assertThat(toolbar.getShowMenuItemsWhileSearching()).isEqualTo(true);
             assertThat(toolbar.getState()).isEquivalentAccordingToCompareTo(Toolbar.State.SUBPAGE);
             assertThat(toolbar.getNavButtonMode()).isEquivalentAccordingToCompareTo(
-                    Toolbar.NavButtonMode.CLOSE);
+                    NavButtonMode.CLOSE);
         });
     }
 
