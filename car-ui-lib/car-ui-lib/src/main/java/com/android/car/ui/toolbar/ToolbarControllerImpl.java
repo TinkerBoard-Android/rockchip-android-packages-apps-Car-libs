@@ -527,22 +527,8 @@ public final class ToolbarControllerImpl implements ToolbarController {
      * Gets the {@link Toolbar.NavButtonMode}
      */
     @Override
-    public Toolbar.NavButtonMode getNavButtonMode() {
-        if (mStateSet && mNavButtonMode == NavButtonMode.DISABLED
-                && mState != Toolbar.State.HOME) {
-            return Toolbar.NavButtonMode.BACK;
-        }
-        switch (mNavButtonMode) {
-            case BACK:
-                return Toolbar.NavButtonMode.BACK;
-            case DOWN:
-                return Toolbar.NavButtonMode.DOWN;
-            case CLOSE:
-                return Toolbar.NavButtonMode.CLOSE;
-            case DISABLED:
-            default:
-                return Toolbar.NavButtonMode.DISABLED;
-        }
+    public NavButtonMode getNavButtonMode() {
+        return mNavButtonMode;
     }
 
     /**
@@ -835,6 +821,11 @@ public final class ToolbarControllerImpl implements ToolbarController {
             mSearchMode = mode;
             update();
         }
+    }
+
+    @Override
+    public SearchMode getSearchMode() {
+        return mSearchMode;
     }
 
     private void update() {
