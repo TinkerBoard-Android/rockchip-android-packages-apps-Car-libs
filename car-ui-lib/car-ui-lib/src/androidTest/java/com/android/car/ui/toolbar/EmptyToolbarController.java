@@ -164,6 +164,11 @@ public class EmptyToolbarController implements ToolbarController {
     }
 
     @Override
+    public SearchMode getSearchMode() {
+        return null;
+    }
+
+    @Override
     public void setNavButtonMode(Toolbar.NavButtonMode style) {
 
     }
@@ -174,7 +179,7 @@ public class EmptyToolbarController implements ToolbarController {
     }
 
     @Override
-    public Toolbar.NavButtonMode getNavButtonMode() {
+    public NavButtonMode getNavButtonMode() {
         return null;
     }
 

@@ -306,6 +306,11 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     }
 
     @Override
+    public SearchMode getSearchMode() {
+        return mAdapterState.getSearchMode();
+    }
+
+    @Override
     public void setNavButtonMode(Toolbar.NavButtonMode style) {
         switch (style) {
             case BACK:
@@ -330,19 +335,8 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     }
 
     @Override
-    public Toolbar.NavButtonMode getNavButtonMode() {
-        NavButtonMode mode = mAdapterState.getNavButtonMode();
-        switch (mode) {
-            case BACK:
-                return Toolbar.NavButtonMode.BACK;
-            case DOWN:
-                return Toolbar.NavButtonMode.DOWN;
-            case CLOSE:
-                return Toolbar.NavButtonMode.CLOSE;
-            case DISABLED:
-            default:
-                return Toolbar.NavButtonMode.DISABLED;
-        }
+    public NavButtonMode getNavButtonMode() {
+        return mAdapterState.getNavButtonMode();
     }
 
     @Override
