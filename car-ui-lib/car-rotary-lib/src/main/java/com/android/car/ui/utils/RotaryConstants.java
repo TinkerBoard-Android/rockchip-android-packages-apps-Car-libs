@@ -140,6 +140,9 @@ public final class RotaryConstants {
     /** Action performed on a FocusParkingView to hide the IME. */
     public static final int ACTION_HIDE_IME = 0x08000000;
 
+    /** Action performed on a FocusParkingView to dismiss a popup window. */
+    public static final int ACTION_DISMISS_POPUP_WINDOW = 0x10000000;
+
     /** Prevent instantiation. */
     private RotaryConstants() {
     }

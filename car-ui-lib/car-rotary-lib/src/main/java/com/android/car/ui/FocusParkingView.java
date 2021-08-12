@@ -18,6 +18,7 @@ package com.android.car.ui;
 import static android.view.accessibility.AccessibilityEvent.TYPE_VIEW_FOCUSED;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_FOCUS;
 
+import static com.android.car.ui.utils.RotaryConstants.ACTION_DISMISS_POPUP_WINDOW;
 import static com.android.car.ui.utils.RotaryConstants.ACTION_HIDE_IME;
 import static com.android.car.ui.utils.RotaryConstants.ACTION_RESTORE_DEFAULT_FOCUS;
 
@@ -68,6 +69,14 @@ import com.android.car.ui.utils.ViewUtils;
  * FocusParkingView, or the window has lost focus.
  */
 public class FocusParkingView extends View {
+
+    /** Interface used to dismiss a popup window. */
+    public interface OnDismissPopupWindow {
+        void onDismiss();
+    }
+
+    @Nullable
+    private OnDismissPopupWindow mOnDismissPopupWindow;
 
     /**
      * The focused view in the window containing this FocusParkingView. It's null if no view is
@@ -229,6 +238,12 @@ public class FocusParkingView extends View {
                     return super.requestFocus(FOCUS_DOWN, null);
                 }
                 return false;
+            case ACTION_DISMISS_POPUP_WINDOW:
+                if (mOnDismissPopupWindow != null) {
+                    mOnDismissPopupWindow.onDismiss();
+                    return true;
+                }
+                return false;
         }
         return super.performAccessibilityAction(action, arguments);
     }
@@ -260,6 +275,14 @@ public class FocusParkingView extends View {
      */
     public void setShouldRestoreFocus(boolean shouldRestoreFocus) {
         mShouldRestoreFocus = shouldRestoreFocus;
+    }
+
+    /**
+     * Sets an {@link OnDismissPopupWindow} callback. Removes the existing callback if
+     * {@code onDismissPopupWindow} is null.
+     */
+    public void setOnPopupWindowDismiss(@Nullable OnDismissPopupWindow onDismissPopupWindow) {
+        mOnDismissPopupWindow = onDismissPopupWindow;
     }
 
     private boolean restoreFocusInRoot(boolean checkForTouchMode) {
