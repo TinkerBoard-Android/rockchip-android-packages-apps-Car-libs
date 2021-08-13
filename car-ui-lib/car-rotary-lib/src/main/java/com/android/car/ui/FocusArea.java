@@ -159,7 +159,12 @@ public class FocusArea extends LinearLayout {
      */
     private final SparseIntArray mSpecifiedNudgeIdMap = new SparseIntArray();
 
-    /** Map from direction to specified nudge target FocusAreas. */
+    /**
+     * Map from direction to specified nudge target FocusAreas.
+     * <p>
+     * It's null if {@link #maybeInitializeSpecifiedFocusAreas} hasn't been called yet.
+     */
+    @Nullable
     private SparseArray<FocusArea> mSpecifiedNudgeFocusAreaMap;
 
     /** Whether wrap-around is enabled. */
@@ -797,6 +802,23 @@ public class FocusArea extends LinearLayout {
             mSpecifiedNudgeShortcutMap.remove(direction);
         } else {
             mSpecifiedNudgeShortcutMap.put(direction, view);
+        }
+    }
+
+     /**
+     * Sets the nudge target FocusArea for the given {@code direction}. Removes the existing
+     * target if {@code target} is {@code null}.
+     */
+    public void setNudgeTargetFocusArea(int direction, @Nullable FocusArea target) {
+        if (!NUDGE_DIRECTIONS.contains(direction)) {
+            throw new IllegalArgumentException("direction must be "
+                    + "FOCUS_UP, FOCUS_DOWN, FOCUS_LEFT, or FOCUS_RIGHT.");
+        }
+        maybeInitializeSpecifiedFocusAreas();
+        if (target == null) {
+            mSpecifiedNudgeFocusAreaMap.remove(direction);
+        } else {
+            mSpecifiedNudgeFocusAreaMap.put(direction, target);
         }
     }
 
