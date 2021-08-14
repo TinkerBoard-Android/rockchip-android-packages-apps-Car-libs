@@ -15,8 +15,10 @@
  */
 package com.android.car.ui.recyclerview;
 
+import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -39,26 +41,26 @@ import java.util.List;
 public final class RecyclerViewAdapterAdapterV1
         implements AdapterOEMV1<RecyclerViewAdapterAdapterV1.ViewHolderAdapterV1> {
 
-    @Nullable
-    private RecyclerView mRecyclerView;
-
     @NonNull
     private final Adapter mAdapter;
-
+    @NonNull
+    private final Context mAppContext;
+    @Nullable
+    private RecyclerView mRecyclerView;
     @NonNull
     private List<AdapterDataObserverOEMV1> mAdapterDataObservers = new ArrayList<>();
 
     private AdapterDataObserver mAdapterDataObserver = new AdapterDataObserver() {
         @Override
         public void onChanged() {
-            for (AdapterDataObserverOEMV1 observer: mAdapterDataObservers) {
+            for (AdapterDataObserverOEMV1 observer : mAdapterDataObservers) {
                 observer.onChanged();
             }
         }
 
         @Override
         public void onItemRangeChanged(int positionStart, int itemCount) {
-            for (AdapterDataObserverOEMV1 observer: mAdapterDataObservers) {
+            for (AdapterDataObserverOEMV1 observer : mAdapterDataObservers) {
                 observer.onItemRangeChanged(positionStart, itemCount);
             }
         }
@@ -66,28 +68,28 @@ public final class RecyclerViewAdapterAdapterV1
         @Override
         public void onItemRangeChanged(int positionStart, int itemCount,
                 @Nullable Object payload) {
-            for (AdapterDataObserverOEMV1 observer: mAdapterDataObservers) {
+            for (AdapterDataObserverOEMV1 observer : mAdapterDataObservers) {
                 observer.onItemRangeChanged(positionStart, itemCount, payload);
             }
         }
 
         @Override
         public void onItemRangeInserted(int positionStart, int itemCount) {
-            for (AdapterDataObserverOEMV1 observer: mAdapterDataObservers) {
+            for (AdapterDataObserverOEMV1 observer : mAdapterDataObservers) {
                 observer.onItemRangeInserted(positionStart, itemCount);
             }
         }
 
         @Override
         public void onItemRangeRemoved(int positionStart, int itemCount) {
-            for (AdapterDataObserverOEMV1 observer: mAdapterDataObservers) {
+            for (AdapterDataObserverOEMV1 observer : mAdapterDataObservers) {
                 observer.onItemRangeRemoved(positionStart, itemCount);
             }
         }
 
         @Override
         public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-            for (AdapterDataObserverOEMV1 observer: mAdapterDataObservers) {
+            for (AdapterDataObserverOEMV1 observer : mAdapterDataObservers) {
                 for (int i = 0; i < itemCount; i++) {
                     observer.onItemMoved(fromPosition + i, toPosition + i);
                 }
@@ -96,13 +98,15 @@ public final class RecyclerViewAdapterAdapterV1
 
         @Override
         public void onStateRestorationPolicyChanged() {
-            for (AdapterDataObserverOEMV1 observer: mAdapterDataObservers) {
+            for (AdapterDataObserverOEMV1 observer : mAdapterDataObservers) {
                 observer.onStateRestorationPolicyChanged();
             }
         }
     };
 
-    public RecyclerViewAdapterAdapterV1(@NonNull RecyclerView.Adapter adapter) {
+    public RecyclerViewAdapterAdapterV1(@NonNull Context appContext,
+            @NonNull RecyclerView.Adapter adapter) {
+        mAppContext = appContext;
         mAdapter = adapter;
     }
 
@@ -154,7 +158,10 @@ public final class RecyclerViewAdapterAdapterV1
 
     @Override
     public ViewHolderAdapterV1 createViewHolder(ViewGroup parent, int viewType) {
-        return new ViewHolderAdapterV1(mAdapter.createViewHolder(parent, viewType));
+        // Return a view created with the app context so that a LayoutInflator created from this
+        // view can find resources as expected.
+        FrameLayout fakeParent = new FrameLayout(mAppContext);
+        return new ViewHolderAdapterV1(mAdapter.createViewHolder(fakeParent, viewType));
     }
 
     @Override

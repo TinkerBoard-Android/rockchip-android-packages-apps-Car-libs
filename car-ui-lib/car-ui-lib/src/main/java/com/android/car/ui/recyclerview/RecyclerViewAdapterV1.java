@@ -103,7 +103,7 @@ public final class RecyclerViewAdapterV1 extends CarUiRecyclerView
         if (adapter == null) {
             mOEMRecyclerView.setAdapter(null);
         } else {
-            mOEMAdapter = new RecyclerViewAdapterAdapterV1(adapter);
+            mOEMAdapter = new RecyclerViewAdapterAdapterV1(getContext(), adapter);
             mOEMRecyclerView.setAdapter(mOEMAdapter);
             mOEMAdapter.setRecyclerView(this);
         }
