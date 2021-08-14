@@ -35,17 +35,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import android.graphics.PixelFormat;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
-import android.view.Gravity;
-import android.view.WindowManager;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
@@ -61,6 +63,8 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Unit tests for {@link CarUiListItem}.
@@ -454,22 +458,34 @@ public class CarUiListItemTest {
         item3.setTitle("Insecure!");
         item3.setOnItemClickedListener(clickListener);
 
-        TextView[] overlayView = new TextView[] { null };
+        final String overlayWindowAdded = "com.android.car.ui.OVERLAY_WINDOW_ADDED";
+        final CountDownLatch latch = new CountDownLatch(1);
+        final Intent intent = new Intent();
+        intent.setClassName(
+                "com.android.car.ui.overlayservice", "com.android.car.ui.OverlayTestService");
+        final BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().contentEquals(overlayWindowAdded)) {
+                    latch.countDown();
+                }
+            }
+        };
         mActivityRule.getScenario().onActivity(activity -> {
             mCarUiRecyclerView.setAdapter(
                     new CarUiListItemAdapter(Arrays.asList(item1, item2, item3)));
-
-            overlayView[0] = new TextView(activity);
-            overlayView[0].setText("Overlay!");
-            WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                            | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                    PixelFormat.TRANSLUCENT);
-            params.gravity = Gravity.RIGHT | Gravity.TOP;
-            WindowManager wm = activity.getSystemService(WindowManager.class);
-            wm.addView(overlayView[0], params);
+            mActivity.registerReceiver(receiver, new IntentFilter(overlayWindowAdded));
+            mActivity.startForegroundService(intent);
         });
+
+        try {
+            // Wait until overlay window could be added in service.
+            assertTrue(latch.await(5000, TimeUnit.MILLISECONDS));
+            // Wait for a while to make sure the overlay window could be visible completely.
+            Thread.sleep(300);
+        } catch (InterruptedException e) {
+            fail("Overlay window didn't be added.");
+        }
 
         try {
             onView(withText("Test 1!")).perform(click());
@@ -481,8 +497,8 @@ public class CarUiListItemTest {
             verify(clickListener, times(1)).onClick(item3);
         } finally {
             mActivityRule.getScenario().onActivity(activity -> {
-                WindowManager wm = mActivity.getSystemService(WindowManager.class);
-                wm.removeView(overlayView[0]);
+                mActivity.unregisterReceiver(receiver);
+                mActivity.stopService(intent);
             });
         }
     }

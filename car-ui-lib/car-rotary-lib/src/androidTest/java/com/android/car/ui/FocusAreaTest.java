@@ -616,6 +616,56 @@ public class FocusAreaTest {
     }
 
     @Test
+    public void testPerformAccessibilityAction_actionNudgeToAnotherFocusArea_specifiedTarget2()
+            throws Exception {
+        // Nudge to specified FocusArea.
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mView4.post(() -> {
+            mView4.requestFocus();
+            mView4.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView4.isFocused()).isTrue();
+
+        // Clear the attribute specified in the XML file.
+        CountDownLatch latch2 = new CountDownLatch(1);
+        Bundle arguments = new Bundle();
+        mFocusArea4.post(() -> {
+            mFocusArea4.setNudgeTargetFocusArea(FOCUS_LEFT, null);
+            arguments.putInt(NUDGE_DIRECTION, FOCUS_LEFT);
+            mFocusArea4.performAccessibilityAction(ACTION_NUDGE_TO_ANOTHER_FOCUS_AREA, arguments);
+            mFocusArea4.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView4.isFocused()).isTrue();
+    }
+
+    @Test
+    public void testPerformAccessibilityAction_actionNudgeToAnotherFocusArea_specifiedTarget3()
+            throws Exception {
+        // Nudge to specified FocusArea.
+        CountDownLatch latch1 = new CountDownLatch(1);
+        mView4.post(() -> {
+            mView4.requestFocus();
+            mView4.post(() -> latch1.countDown());
+        });
+        latch1.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView4.isFocused()).isTrue();
+
+        // Set the attribute programmatically.
+        CountDownLatch latch2 = new CountDownLatch(1);
+        Bundle arguments = new Bundle();
+        mFocusArea4.post(() -> {
+            mFocusArea4.setNudgeTargetFocusArea(FOCUS_LEFT, mFocusArea1);
+            arguments.putInt(NUDGE_DIRECTION, FOCUS_LEFT);
+            mFocusArea4.performAccessibilityAction(ACTION_NUDGE_TO_ANOTHER_FOCUS_AREA, arguments);
+            mFocusArea4.post(() -> latch2.countDown());
+        });
+        latch2.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+        assertThat(mView1.isFocused()).isTrue();
+    }
+
+    @Test
     public void testDefaultFocusOverridesHistory_override() throws Exception {
         CountDownLatch latch1 = new CountDownLatch(1);
         mView2.post(() -> {
