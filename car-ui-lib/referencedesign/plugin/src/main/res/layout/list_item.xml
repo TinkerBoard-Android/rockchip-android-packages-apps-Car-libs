@@ -49,6 +49,7 @@
 
     <FrameLayout
         android:id="@+id/list_item_icon_container"
+        android:tag="icon_container"
         android:layout_width="112dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -83,6 +84,7 @@
 
     <TextView
         android:id="@+id/list_item_title"
+        android:tag="title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/list_item_text_start_margin"
@@ -96,6 +98,7 @@
         app:layout_goneMarginStart="@dimen/list_item_text_no_icon_start_margin" />
     <TextView
         android:id="@+id/list_item_body"
+        android:tag="body"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/list_item_text_start_margin"
@@ -121,6 +124,7 @@
 
     <FrameLayout
         android:id="@+id/list_item_action_container"
+        android:tag="action_container"
         android:layout_width="wrap_content"
         android:minWidth="@dimen/list_item_icon_container_width"
         android:layout_height="0dp"
@@ -130,6 +134,7 @@
 
         <View
             android:id="@+id/list_item_action_divider"
+            android:tag="action_divider"
             android:layout_width="@dimen/list_item_action_divider_width"
             android:layout_height="@dimen/list_item_action_divider_height"
             android:layout_gravity="start|center_vertical"
@@ -137,6 +142,7 @@
 
         <Switch
             android:id="@+id/list_item_switch_widget"
+            android:tag="switch_widget"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -145,6 +151,7 @@
 
         <CheckBox
             android:id="@+id/list_item_checkbox_widget"
+            android:tag="checkbox_widget"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -153,6 +160,7 @@
 
         <RadioButton
             android:id="@+id/list_item_radio_button_widget"
+            android:tag="radio_button_widget"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -161,6 +169,7 @@
 
         <ImageView
             android:id="@+id/list_item_supplemental_icon"
+            android:tag="supplemental_icon"
             android:layout_width="@dimen/list_item_icon_size"
             android:layout_height="@dimen/list_item_icon_size"
             android:layout_gravity="center"
