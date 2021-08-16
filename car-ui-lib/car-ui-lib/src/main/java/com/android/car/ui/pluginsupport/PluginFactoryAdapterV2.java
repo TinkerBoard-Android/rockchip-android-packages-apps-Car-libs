@@ -67,9 +67,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * This class is an wrapper around {@link PluginFactoryOEMV1} that implements {@link
- * PluginFactory}, to provide a version-agnostic way of interfacing with the OEM's
- * PluginFactory.
+ * This class is an wrapper around {@link PluginFactoryOEMV1} that implements {@link PluginFactory},
+ * to provide a version-agnostic way of interfacing with the OEM's PluginFactory.
  */
 @SuppressWarnings("AndroidJdkLibsChecker")
 public final class PluginFactoryAdapterV2 implements PluginFactory {
@@ -152,8 +151,62 @@ public final class PluginFactoryAdapterV2 implements PluginFactory {
                 PluginFactoryAdapterV2::toOemListItem);
 
         AdapterOEMV1<? extends ViewHolderOEMV1> oemAdapter = mOem.createListItemAdapter(oemItems);
-        return oemAdapter != null ? new CarUiListItemAdapterAdapterV1(oemAdapter)
-                : mFactoryStub.createListItemAdapter(items);
+
+        if (oemAdapter == null) {
+            return mFactoryStub.createListItemAdapter(items);
+        }
+
+        RecyclerView.Adapter<? extends RecyclerView.ViewHolder> adapter =
+                new CarUiListItemAdapterAdapterV1(oemAdapter);
+        adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onChanged() {
+                oemItems.clear();
+                oemItems.addAll(
+                        CarUiUtils.convertList(items, PluginFactoryAdapterV2::toOemListItem));
+            }
+
+            @Override
+            public void onItemRangeChanged(int positionStart, int itemCount) {
+                for (int i = positionStart; i <= positionStart + itemCount; i++) {
+                    oemItems.set(i, toOemListItem(items.get(i)));
+                }
+            }
+
+            @Override
+            public void onItemRangeChanged(int positionStart, int itemCount,
+                    @Nullable Object payload) {
+                for (int i = positionStart; i <= positionStart + itemCount; i++) {
+                    oemItems.set(i, toOemListItem(items.get(i)));
+                }
+            }
+
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                for (int i = positionStart; i <= positionStart + itemCount; i++) {
+                    oemItems.add(i, toOemListItem(items.get(i)));
+                }
+            }
+
+            @Override
+            public void onItemRangeRemoved(int positionStart, int itemCount) {
+                for (int i = positionStart; i <= positionStart + itemCount; i++) {
+                    oemItems.remove(i);
+                }
+
+            }
+
+            @Override
+            public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+                for (int i = fromPosition; i <= fromPosition + itemCount; i++) {
+                    ListItemOEMV1 item = oemItems.remove(i);
+                    oemItems.add(toPosition, item);
+                    toPosition++;
+                }
+            }
+        });
+
+        return adapter;
     }
 
     private static RecyclerViewAttributesOEMV1 from(Context context, AttributeSet attrs) {
@@ -299,7 +352,7 @@ public final class PluginFactoryAdapterV2 implements PluginFactory {
                     .setSecure(contentItem.isSecure());
             return builder.build();
         } else {
-            throw new IllegalStateException("Unexpected list item type");
+            throw new IllegalStateException("Unknown view type.");
         }
     }
 

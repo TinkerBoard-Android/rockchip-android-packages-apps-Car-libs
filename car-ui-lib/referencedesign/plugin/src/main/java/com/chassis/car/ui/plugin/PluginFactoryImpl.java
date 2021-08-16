@@ -104,7 +104,7 @@ public class PluginFactoryImpl implements PluginFactoryOEMV2 {
     @Override
     public AdapterOEMV1<? extends ViewHolderOEMV1> createListItemAdapter(
             List<ListItemOEMV1> items) {
-        //return new ListItemAdapter(items);
+        //return new ListItemAdapter(mPluginContext, items);
         return null;
     }
 }

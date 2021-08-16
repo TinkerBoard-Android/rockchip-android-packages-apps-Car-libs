@@ -145,10 +145,8 @@ public final class RecyclerViewAdapterAdapterV1
 
     @Override
     public void onAttachedToRecyclerView(RecyclerViewOEMV1 recyclerView) {
-        if (mRecyclerView != null) {
-            mAdapter.onAttachedToRecyclerView(mRecyclerView);
-            mAdapter.registerAdapterDataObserver(mAdapterDataObserver);
-        }
+        mAdapter.onAttachedToRecyclerView(mRecyclerView);
+        mAdapter.registerAdapterDataObserver(mAdapterDataObserver);
     }
 
     @Override
@@ -166,10 +164,8 @@ public final class RecyclerViewAdapterAdapterV1
 
     @Override
     public void onDetachedFromRecyclerView(RecyclerViewOEMV1 recyclerView) {
-        if (mRecyclerView != null) {
-            mAdapter.unregisterAdapterDataObserver(mAdapterDataObserver);
-            mAdapter.onDetachedFromRecyclerView(mRecyclerView);
-        }
+        mAdapter.unregisterAdapterDataObserver(mAdapterDataObserver);
+        mAdapter.onDetachedFromRecyclerView(mRecyclerView);
     }
 
     @Override
