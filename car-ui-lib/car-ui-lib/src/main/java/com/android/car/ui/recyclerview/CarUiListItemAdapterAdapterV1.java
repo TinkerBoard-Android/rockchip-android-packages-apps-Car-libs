@@ -18,12 +18,13 @@ package com.android.car.ui.recyclerview;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.car.ui.plugin.oemapis.recyclerview.AdapterDataObserverOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.AdapterOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.ViewHolderOEMV1;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Wrapper class that passes the data to car-ui via AdapterOEMV1 interface
@@ -33,74 +34,12 @@ public final class CarUiListItemAdapterAdapterV1 extends
 
     @NonNull
     private AdapterOEMV1 mAdapter;
-
     @NonNull
-    private final AdapterDataObserverOEMV1 mAdapterDataObserver = new AdapterDataObserverOEMV1() {
-        @Override
-        public void onChanged() {
-            CarUiListItemAdapterAdapterV1.super.notifyDataSetChanged();
-        }
-
-        @Override
-        public void onItemRangeChanged(int positionStart, int itemCount) {
-            CarUiListItemAdapterAdapterV1.super.notifyItemRangeChanged(positionStart, itemCount);
-        }
-
-        @Override
-        public void onItemRangeChanged(int positionStart, int itemCount,
-                @Nullable Object payload) {
-            CarUiListItemAdapterAdapterV1.super.notifyItemRangeChanged(positionStart, itemCount,
-                    payload);
-        }
-
-        @Override
-        public void onItemRangeInserted(int positionStart, int itemCount) {
-            CarUiListItemAdapterAdapterV1.super.notifyItemRangeInserted(positionStart, itemCount);
-        }
-
-        @Override
-        public void onItemRangeRemoved(int positionStart, int itemCount) {
-            CarUiListItemAdapterAdapterV1.super.notifyItemRangeRemoved(positionStart, itemCount);
-        }
-
-        @Override
-        public void onItemMoved(int fromPosition, int toPosition) {
-            CarUiListItemAdapterAdapterV1.super.notifyItemMoved(fromPosition, toPosition);
-        }
-
-        @Override
-        public void onStateRestorationPolicyChanged() {
-            CarUiListItemAdapterAdapterV1.this.updateStateRestorationPolicy();
-        }
-    };
+    private Set<RecyclerView.AdapterDataObserver> mDataObservers = new HashSet<>();
 
     public CarUiListItemAdapterAdapterV1(@NonNull AdapterOEMV1 adapter) {
         this.mAdapter = adapter;
         CarUiListItemAdapterAdapterV1.super.setHasStableIds(adapter.hasStableIds());
-        updateStateRestorationPolicy();
-    }
-
-    private void updateStateRestorationPolicy() {
-        switch (mAdapter.getStateRestorationPolicyInt()) {
-            case 2:
-                CarUiListItemAdapterAdapterV1.super.setStateRestorationPolicy(
-                        RecyclerView.Adapter.StateRestorationPolicy.PREVENT);
-                break;
-            case 1:
-                CarUiListItemAdapterAdapterV1.super.setStateRestorationPolicy(
-                        RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
-                break;
-            case 0:
-            default:
-                CarUiListItemAdapterAdapterV1.super.setStateRestorationPolicy(
-                        RecyclerView.Adapter.StateRestorationPolicy.ALLOW);
-        }
-    }
-
-    @Override
-    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
-        throw new IllegalStateException(
-                "OEM implementation of adapter can only be used with an OEM list view");
     }
 
     @Override
@@ -150,18 +89,29 @@ public final class CarUiListItemAdapterAdapterV1 extends
 
     @Override
     public void registerAdapterDataObserver(@NonNull RecyclerView.AdapterDataObserver observer) {
-        if (!super.hasObservers()) {
-            mAdapter.registerAdapterDataObserver(mAdapterDataObserver);
-        }
+        mDataObservers.add(observer);
         super.registerAdapterDataObserver(observer);
     }
 
     @Override
     public void unregisterAdapterDataObserver(@NonNull RecyclerView.AdapterDataObserver observer) {
+        mDataObservers.remove(observer);
         super.unregisterAdapterDataObserver(observer);
-        if (!super.hasObservers()) {
-            mAdapter.unregisterAdapterDataObserver(mAdapterDataObserver);
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        // TODO: can we return something other than null here?
+        mAdapter.onAttachedToRecyclerView(null);
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
+        for (RecyclerView.AdapterDataObserver observer: mDataObservers) {
+            super.unregisterAdapterDataObserver(observer);
         }
+        // TODO: can we return something other than null here?
+        mAdapter.onDetachedFromRecyclerView(null);
     }
 
     /**
