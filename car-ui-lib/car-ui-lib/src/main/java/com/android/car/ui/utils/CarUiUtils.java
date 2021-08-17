@@ -94,6 +94,20 @@ public final class CarUiUtils {
     }
 
     /**
+     * Gets the boolean value of an Attribute from an {@link Activity Activity's}
+     * {@link android.content.res.Resources.Theme}.
+     */
+    public static boolean getThemeBoolean(Activity activity, int attr) {
+        TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]{attr});
+
+        try {
+            return a.getBoolean(0, false);
+        } finally {
+            a.recycle();
+        }
+    }
+
+    /**
      * Gets the {@link Activity} for a certain {@link Context}.
      *
      * <p>It is possible the Context is not associated with an Activity, in which case
