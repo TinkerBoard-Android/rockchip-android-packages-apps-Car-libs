@@ -74,7 +74,7 @@ public class ToolbarMenuItemsTest {
     }
 
     public ToolbarMenuItemsTest(boolean pluginEnabled) {
-        PluginFactorySingleton.setPluginEnabled(pluginEnabled);
+        PluginFactorySingleton.setPluginEnabledForTesting(pluginEnabled);
     }
 
     @Rule

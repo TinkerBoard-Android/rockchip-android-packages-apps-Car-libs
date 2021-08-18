@@ -58,7 +58,7 @@ public class ToolbarTabTest {
     }
 
     public ToolbarTabTest(boolean pluginEnabled) {
-        PluginFactorySingleton.setPluginEnabled(pluginEnabled);
+        PluginFactorySingleton.setPluginEnabledForTesting(pluginEnabled);
     }
 
     @Rule

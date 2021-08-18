@@ -51,7 +51,7 @@ public class ToolbarTabDeprecatedTest {
     }
 
     public ToolbarTabDeprecatedTest(boolean pluginEnabled) {
-        PluginFactorySingleton.setPluginEnabled(pluginEnabled);
+        PluginFactorySingleton.setPluginEnabledForTesting(pluginEnabled);
     }
 
     @Rule

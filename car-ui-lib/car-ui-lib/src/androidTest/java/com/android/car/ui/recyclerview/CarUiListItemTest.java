@@ -85,7 +85,7 @@ public class CarUiListItemTest {
     private CarUiRecyclerViewTestActivity mActivity;
 
     public CarUiListItemTest(boolean pluginEnabled) {
-        PluginFactorySingleton.setPluginEnabled(pluginEnabled);
+        PluginFactorySingleton.setPluginEnabledForTesting(pluginEnabled);
     }
 
     @Before
