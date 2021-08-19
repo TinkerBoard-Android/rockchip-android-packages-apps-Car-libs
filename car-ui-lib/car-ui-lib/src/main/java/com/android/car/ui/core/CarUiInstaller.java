@@ -17,6 +17,7 @@ package com.android.car.ui.core;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
@@ -31,7 +32,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import com.android.car.ui.CarUiLayoutInflaterFactory;
+import com.android.car.ui.R;
 import com.android.car.ui.baselayout.Insets;
+import com.android.car.ui.utils.CarUiUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -63,11 +66,10 @@ public class CarUiInstaller extends ContentProvider {
     @Override
     public boolean onCreate() {
         Context context = getContext();
-        if (context == null) {
+        if (context == null || !(context.getApplicationContext() instanceof Application)) {
             Log.e(TAG, "CarUiInstaller had a null context!");
             return false;
         }
-        Log.i(TAG, "CarUiInstaller started for " + context.getPackageName());
 
         Application application = (Application) context.getApplicationContext();
         application.registerActivityLifecycleCallbacks(
@@ -75,8 +77,20 @@ public class CarUiInstaller extends ContentProvider {
                     private Insets mInsets = null;
                     private boolean mIsActivityStartedForFirstTime = false;
 
+                    private boolean shouldRun(Activity activity) {
+                        return CarUiUtils.getThemeBoolean(activity, R.attr.carUiActivity);
+                    }
+
                     @Override
                     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+                        if (!shouldRun(activity)) {
+                            return;
+                        }
+
+                        ComponentName comp = ComponentName.createRelative(
+                                activity, activity.getClass().getName());
+                        Log.i(TAG, "CarUiInstaller started for " + comp.flattenToShortString());
+
                         injectLayoutInflaterFactory(activity);
 
                         callMethodReflective(
@@ -99,6 +113,10 @@ public class CarUiInstaller extends ContentProvider {
 
                     @Override
                     public void onActivityPostStarted(Activity activity) {
+                        if (!shouldRun(activity)) {
+                            return;
+                        }
+
                         Object controller = callMethodReflective(
                                 activity.getClassLoader(),
                                 BaseLayoutController.class,
@@ -135,6 +153,10 @@ public class CarUiInstaller extends ContentProvider {
 
                     @Override
                     public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+                        if (!shouldRun(activity)) {
+                            return;
+                        }
+
                         Object controller = callMethodReflective(
                                 activity.getClassLoader(),
                                 BaseLayoutController.class,
@@ -176,6 +198,10 @@ public class CarUiInstaller extends ContentProvider {
 
                     @Override
                     public void onActivityDestroyed(Activity activity) {
+                        if (!shouldRun(activity)) {
+                            return;
+                        }
+
                         callMethodReflective(
                                 activity.getClassLoader(),
                                 BaseLayoutController.class,

@@ -15,10 +15,10 @@
  */
 package com.android.car.ui.core;
 
+import static com.android.car.ui.utils.CarUiUtils.getThemeBoolean;
 import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
 import android.app.Activity;
-import android.content.res.TypedArray;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -123,20 +123,6 @@ public final class BaseLayoutController {
                         mInsetsUpdater,
                         toolbarEnabled,
                         true);
-    }
-
-    /**
-     * Gets the boolean value of an Attribute from an {@link Activity Activity's}
-     * {@link android.content.res.Resources.Theme}.
-     */
-    private static boolean getThemeBoolean(Activity activity, int attr) {
-        TypedArray a = activity.getTheme().obtainStyledAttributes(new int[]{attr});
-
-        try {
-            return a.getBoolean(0, false);
-        } finally {
-            a.recycle();
-        }
     }
 
     /**
