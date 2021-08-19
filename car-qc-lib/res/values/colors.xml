@@ -15,6 +15,7 @@
   -->
 
 <resources>
+    <color name="qc_start_icon_color">@android:color/white</color>
     <color name="qc_toggle_off_background_color">#626262</color>
     <color name="qc_toggle_unavailable_background_color">@android:color/transparent</color>
     <color name="qc_toggle_unavailable_color">#75FFFFFF</color>

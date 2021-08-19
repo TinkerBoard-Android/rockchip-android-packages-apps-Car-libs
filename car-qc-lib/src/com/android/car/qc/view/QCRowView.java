@@ -41,6 +41,7 @@ import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -64,6 +65,8 @@ public class QCRowView extends FrameLayout {
     private TextView mTitle;
     private TextView mSubtitle;
     private ImageView mStartIcon;
+    @ColorInt
+    private int mStartIconTint;
     private LinearLayout mStartItemsContainer;
     private LinearLayout mEndItemsContainer;
     private LinearLayout mSeekBarContainer;
@@ -209,6 +212,12 @@ public class QCRowView extends FrameLayout {
         if (row.getStartIcon() != null) {
             mStartIcon.setVisibility(VISIBLE);
             Drawable drawable = row.getStartIcon().loadDrawable(getContext());
+            if (drawable != null) {
+                if (mStartIconTint == 0) {
+                    mStartIconTint = getContext().getColor(R.color.qc_start_icon_color);
+                }
+                drawable.setTint(mStartIconTint);
+            }
             mStartIcon.setImageDrawable(drawable);
         } else {
             mStartIcon.setImageDrawable(null);
