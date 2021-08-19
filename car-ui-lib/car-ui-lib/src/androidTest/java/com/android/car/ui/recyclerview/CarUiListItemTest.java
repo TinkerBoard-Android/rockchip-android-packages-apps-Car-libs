@@ -28,23 +28,15 @@ import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
 import static com.android.car.ui.matchers.ViewMatchers.isActivated;
 
-import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
@@ -60,10 +52,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Unit tests for {@link CarUiListItem}.
@@ -434,73 +423,6 @@ public class CarUiListItemTest {
 
         // Verify that the standard click listener wasn't also fired.
         verify(clickListener, times(1)).onClick(item);
-    }
-
-    @Test
-    public void test_secureListItem_doesntCallOnClickListeners() {
-        CarUiContentListItem.OnClickListener clickListener = mock(
-                CarUiContentListItem.OnClickListener.class);
-
-        CarUiContentListItem item1 = new CarUiContentListItem(CarUiContentListItem.Action.ICON);
-        item1.setTitle("Test 1!");
-        item1.setOnItemClickedListener(clickListener);
-        item1.setSupplementalIcon(
-                mActivity.getDrawable(R.drawable.car_ui_icon_close),
-                clickListener);
-        item1.setSecure(true);
-
-        CarUiContentListItem item2 = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
-        item2.setTitle("Test 2!");
-        item2.setOnItemClickedListener(clickListener);
-        item2.setSecure(true);
-
-        CarUiContentListItem item3 = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
-        item3.setTitle("Insecure!");
-        item3.setOnItemClickedListener(clickListener);
-
-        final String overlayWindowAdded = "com.android.car.ui.OVERLAY_WINDOW_ADDED";
-        final CountDownLatch latch = new CountDownLatch(1);
-        final Intent intent = new Intent();
-        intent.setClassName(
-                "com.android.car.ui.overlayservice", "com.android.car.ui.OverlayTestService");
-        final BroadcastReceiver receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().contentEquals(overlayWindowAdded)) {
-                    latch.countDown();
-                }
-            }
-        };
-        mActivityRule.getScenario().onActivity(activity -> {
-            mCarUiRecyclerView.setAdapter(
-                    CarUi.createListItemAdapter(mActivity, Arrays.asList(item1, item2, item3)));
-            mActivity.registerReceiver(receiver, new IntentFilter(overlayWindowAdded));
-            mActivity.startForegroundService(intent);
-        });
-
-        try {
-            // Wait until overlay window could be added in service.
-            assertTrue(latch.await(5000, TimeUnit.MILLISECONDS));
-            // Wait for a while to make sure the overlay window could be visible completely.
-            Thread.sleep(300);
-        } catch (InterruptedException e) {
-            fail("Overlay window didn't be added.");
-        }
-
-        try {
-            onView(withText("Test 1!")).perform(click());
-            onView(withText("Test 2!")).perform(click());
-            onView(allOf(withTagValue(is("supplemental_icon")), isDisplayed()))
-                    .perform(click());
-            verify(clickListener, times(0)).onClick(any());
-            onView(withText("Insecure!")).perform(click());
-            verify(clickListener, times(1)).onClick(item3);
-        } finally {
-            mActivityRule.getScenario().onActivity(activity -> {
-                mActivity.unregisterReceiver(receiver);
-                mActivity.stopService(intent);
-            });
-        }
     }
 
     @Test
