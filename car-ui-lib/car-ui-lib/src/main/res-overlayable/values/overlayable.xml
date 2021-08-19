@@ -444,6 +444,7 @@ limitations under the License.-->
       <item type="string" name="car_ui_ellipsis"/>
       <item type="string" name="car_ui_ime_wide_screen_system_property_name"/>
       <item type="string" name="car_ui_installer_process_name"/>
+      <item type="string" name="car_ui_plugin_enabled_system_property_name"/>
       <item type="string" name="car_ui_plugin_package_system_property_name"/>
       <item type="string" name="car_ui_preference_switch_off"/>
       <item type="string" name="car_ui_preference_switch_on"/>

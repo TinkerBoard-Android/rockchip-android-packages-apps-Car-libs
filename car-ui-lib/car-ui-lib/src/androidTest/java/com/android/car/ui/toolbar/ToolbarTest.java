@@ -66,7 +66,7 @@ public class ToolbarTest {
 
     public ToolbarTest(boolean pluginEnabled) {
         mPluginEnabled = pluginEnabled;
-        PluginFactorySingleton.setPluginEnabled(pluginEnabled);
+        PluginFactorySingleton.setPluginEnabledForTesting(pluginEnabled);
     }
 
     @Rule

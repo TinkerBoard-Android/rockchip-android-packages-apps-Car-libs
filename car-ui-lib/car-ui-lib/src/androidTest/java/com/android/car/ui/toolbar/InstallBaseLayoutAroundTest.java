@@ -51,7 +51,7 @@ public class InstallBaseLayoutAroundTest {
     }
 
     public InstallBaseLayoutAroundTest(boolean pluginEnabled) {
-        PluginFactorySingleton.setPluginEnabled(pluginEnabled);
+        PluginFactorySingleton.setPluginEnabledForTesting(pluginEnabled);
     }
 
     @Rule
