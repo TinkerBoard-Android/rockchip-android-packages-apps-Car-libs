@@ -29,35 +29,31 @@ import androidx.annotation.NonNull;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 
-/* package */ class DrawableMatcher extends TypeSafeMatcher<View> {
+public class DrawableMatcher extends TypeSafeMatcher<View> {
 
-    private final Bitmap mBitmap;
+    private final Drawable mDrawable;
 
     DrawableMatcher(@NonNull Context context, @DrawableRes int drawableId) {
         this(context.getDrawable(drawableId));
     }
+
     DrawableMatcher(Drawable drawable) {
-        mBitmap = drawableToBitmap(drawable);
+        mDrawable = drawable;
     }
 
     @Override
-    protected boolean matchesSafely(View item) {
-        if (!(item instanceof ImageView) || !item.isShown()) {
+    protected boolean matchesSafely(View target) {
+        if (!(target instanceof ImageView) || !target.isShown()) {
             return false;
         }
 
-        ImageView imageView = (ImageView) item;
-
-        Bitmap bitmap = drawableToBitmap(imageView.getDrawable());
-        Bitmap otherBitmap = mBitmap;
-
-        if (bitmap == null && otherBitmap == null) {
-            return true;
-        } else if ((bitmap == null) != (otherBitmap == null)) {
-            return false;
-        }
-
-        return bitmap.sameAs(otherBitmap);
+        Drawable targetDrawable = ((ImageView) target).getDrawable();
+        Drawable.ConstantState targetState = targetDrawable.getConstantState();
+        Drawable.ConstantState expectedState = mDrawable.getConstantState();
+        // If the constant state is identical, they are using the same drawable resource.
+        // However, the opposite is not necessarily true.
+        return (expectedState.equals(targetState) || drawableToBitmap(mDrawable).sameAs(
+                drawableToBitmap(targetDrawable)));
     }
 
     private Bitmap drawableToBitmap(Drawable drawable) {
