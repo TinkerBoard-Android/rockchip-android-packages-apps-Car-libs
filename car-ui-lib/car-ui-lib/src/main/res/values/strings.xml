@@ -82,4 +82,9 @@ limitations under the License.
     <string name="car_ui_plugin_package_system_property_name" translatable="false">
         ro.build.automotive.car.ui.plugin.package.name
     </string>
+
+    <!-- Name of system property used that specifies if the CarUi plugin should be used. -->
+    <string name="car_ui_plugin_enabled_system_property_name" translatable="false">
+        persist.automotive.car.ui.plugin.enabled
+    </string>
 </resources>

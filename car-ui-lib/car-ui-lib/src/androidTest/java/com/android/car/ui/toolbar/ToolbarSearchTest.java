@@ -76,7 +76,7 @@ public class ToolbarSearchTest {
     private final boolean mIsPluginEnabled;
 
     public ToolbarSearchTest(boolean pluginEnabled, SearchMode searchMode) {
-        PluginFactorySingleton.setPluginEnabled(pluginEnabled);
+        PluginFactorySingleton.setPluginEnabledForTesting(pluginEnabled);
         mSearchMode = searchMode;
         mIsPluginEnabled = pluginEnabled;
     }

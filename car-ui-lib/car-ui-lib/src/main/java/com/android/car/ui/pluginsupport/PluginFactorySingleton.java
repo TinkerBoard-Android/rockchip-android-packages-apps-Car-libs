@@ -40,22 +40,25 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * This is a singleton that contains a {@link PluginFactory}. That PluginFactory
- * is used to create UI components that we want to be customizable by the OEM.
+ * This is a singleton that contains a {@link PluginFactory}. That PluginFactory is used to create
+ * UI components that we want to be customizable by the OEM.
  */
 @SuppressWarnings("AndroidJdkLibsChecker")
 public final class PluginFactorySingleton {
+    private enum TestingOverride {
+        NOT_SET, ENABLED, DISABLED
+    }
 
     private static final String TAG = "carui";
     private static PluginFactory sInstance;
-    private static boolean sPluginEnabled = false;
+    private static TestingOverride sTestingOverride = TestingOverride.NOT_SET;
 
     /**
      * Get the {@link PluginFactory}.
-     *
+     * <p>
      * If this is the first time the method is being called, it will initialize it using reflection
-     * to check for the existence of a CarUi plugin, and resolving the appropriate version
-     * of the plugin to use.
+     * to check for the existence of a CarUi plugin, and resolving the appropriate version of the
+     * plugin to use.
      */
     public static PluginFactory get(Context context) {
         if (sInstance != null) {
@@ -64,7 +67,21 @@ public final class PluginFactorySingleton {
 
         context = context.getApplicationContext();
 
-        if (!sPluginEnabled) {
+        boolean isPluginEnabled;
+        switch (sTestingOverride) {
+            case ENABLED:
+                isPluginEnabled = true;
+                break;
+            case DISABLED:
+                isPluginEnabled = false;
+                break;
+            case NOT_SET:
+            default:
+                isPluginEnabled = isPluginEnabled(context);
+                break;
+        }
+
+        if (!isPluginEnabled) {
             sInstance = new PluginFactoryStub();
             return sInstance;
         }
@@ -146,23 +163,27 @@ public final class PluginFactorySingleton {
     }
 
     /**
-     * This method globally enables/disables the plugin. It only applies upon the next
-     * call to {@link #get}, components that have already been created won't switch between
-     * the plugin and regular implementations.
+     * This method enables/disables the plugin for testing purposes. It only applies upon the next
+     * call to {@link #get}, components that have already been created won't switch between the
+     * plugin and regular implementations.
      * <p>
-     * This method is @VisibleForTesting so that unit tests can run both with and without
-     * the plugin. Since it's tricky to use correctly, real apps shouldn't use it.
-     * Instead, apps should use {@link PluginConfigProvider} to control if their
-     * plugin is disabled.
+     * This method is @VisibleForTesting so that unit tests can run both with and without the
+     * plugin. Apps should not use this method. Instead, apps should use {@link
+     * PluginConfigProvider} to control if their plugin is disabled.
      */
     @VisibleForTesting
-    public static void setPluginEnabled(boolean pluginEnabled) {
-        sPluginEnabled = pluginEnabled;
+    public static void setPluginEnabledForTesting(boolean pluginEnabled) {
+        if (pluginEnabled) {
+            sTestingOverride = TestingOverride.ENABLED;
+        } else {
+            sTestingOverride = TestingOverride.DISABLED;
+        }
         // Cause the next call to get() to reinitialize the plugin
         sInstance = null;
     }
 
-    private PluginFactorySingleton() {}
+    private PluginFactorySingleton() {
+    }
 
     @NonNull
     private static AdapterClassLoader instantiateClassLoader(@NonNull ApplicationInfo appInfo,
@@ -203,5 +224,10 @@ public final class PluginFactorySingleton {
             Collections.addAll(abis, Build.SUPPORTED_32_BIT_ABIS);
         }
         return abis;
+    }
+
+    private static boolean isPluginEnabled(Context context) {
+        return CarUiUtils.getBooleanSystemProperty(context.getResources(),
+                R.string.car_ui_plugin_enabled_system_property_name, false);
     }
 }
