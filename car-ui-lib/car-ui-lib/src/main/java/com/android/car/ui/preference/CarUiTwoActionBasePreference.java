@@ -25,8 +25,11 @@ import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StyleableRes;
+import androidx.preference.Preference;
 
 import com.android.car.ui.R;
+
+import java.util.function.Consumer;
 
 /**
  * A base class for several types of preferences, that all have a main click action along
@@ -123,8 +126,19 @@ public abstract class CarUiTwoActionBasePreference extends CarUiPreference {
      * Like {@link #onClick()}, but for the secondary action.
      */
     public void performSecondaryActionClick() {
-        if (mSecondaryActionEnabled && mSecondaryActionVisible) {
-            performSecondaryActionClickInternal();
+        if (isSecondaryActionEnabled()) {
+            if (isUxRestricted()) {
+                Consumer<Preference> restrictedListener = getOnClickWhileRestrictedListener();
+                if (restrictedListener != null) {
+                    restrictedListener.accept(this);
+                }
+            } else {
+                performSecondaryActionClickInternal();
+            }
+        } else if (isClickableWhileDisabled()) {
+            if (getDisabledClickListener() != null) {
+                getDisabledClickListener().accept(this);
+            }
         }
     }
 

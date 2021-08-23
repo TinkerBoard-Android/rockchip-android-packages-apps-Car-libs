@@ -147,6 +147,8 @@
         <attr name="showChevron" format="boolean" />
         <!-- Display this preference as ux restricted. -->
         <attr name="car_ui_ux_restricted" format="boolean" />
+        <!-- Allow the preference to be clicked when disabled. -->
+        <attr name="car_ui_clickable_while_disabled" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="CarUiTwoActionPreference">
