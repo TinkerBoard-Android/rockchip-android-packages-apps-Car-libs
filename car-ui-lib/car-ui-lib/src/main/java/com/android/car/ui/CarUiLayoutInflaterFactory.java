@@ -22,6 +22,7 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatViewInflater;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.pluginsupport.PluginFactorySingleton;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
@@ -45,6 +46,14 @@ public class CarUiLayoutInflaterFactory extends AppCompatViewInflater
                     .createRecyclerView(context, attrs);
         } else if (name.contentEquals("CarUiTextView")) {
             view = PluginFactorySingleton.get(context).createTextView(context, attrs);
+        } else if ("androidx.recyclerview.widget.RecyclerView".equals(name)) {
+            // Some apps use the old android.support.v7.widget.RecyclerView package name for the
+            // RecyclerView. When RROs are applied, they must also use that old package name to
+            // instantiate the RecyclerView. So if an RRO is found using the new package name,
+            // inflate a RecyclerView using the old package name. We are using the new package name
+            // here, but when car-ui-lib is included in one of those apps that uses the old package
+            // name, the RecyclerView class is renamed using jettifier.
+            view = new RecyclerView(context, attrs);
         }
 
         return view;
