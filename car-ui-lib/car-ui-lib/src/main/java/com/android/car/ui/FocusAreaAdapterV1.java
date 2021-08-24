@@ -21,7 +21,7 @@ import android.widget.LinearLayout;
 import com.android.car.ui.plugin.oemapis.FocusAreaOEMV1;
 
 /**
- * Adapter from {@link FocusArea} to {@link FocusAreaOEMV1}.
+ * Adapter from {@link com.android.car.ui.FocusArea} to {@link FocusAreaOEMV1}.
  */
 public class FocusAreaAdapterV1 implements FocusAreaOEMV1 {
     private final FocusArea mFocusArea;
