@@ -44,14 +44,14 @@ public class CarUi {
     private CarUi() {}
 
     /**
-     * Gets a CarUi component, such as {@link com.android.car.ui.button.CarUiButton}, from the
+     * Gets a CarUi component, such as {@link com.android.car.ui.widget.CarUiTextView}, from the
      * view hierarchy. The interfaces for these components don't extend View, so you can't
      * get them through findViewById().
      *
      * @param view The parent view. Its descendants will be searched for the component.
      * @param id The id of the component.
      * @param <T> The resulting type of the component, such as
-     *            {@link com.android.car.ui.button.CarUiButton}
+     *            {@link com.android.car.ui.widget.CarUiTextView}
      * @return The component found, or null.
      */
     @Nullable

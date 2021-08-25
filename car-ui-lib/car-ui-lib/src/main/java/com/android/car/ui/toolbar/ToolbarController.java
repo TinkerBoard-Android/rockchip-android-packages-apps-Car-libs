@@ -472,7 +472,7 @@ public interface ToolbarController {
     @Deprecated
     boolean unregisterOnBackListener(Toolbar.OnBackListener listener);
 
-    /** Registers a new {@link Supplier<Boolean>} to the list of listeners. */
+    /** Registers a new {@link Supplier} to the list of listeners. */
     void registerBackListener(Supplier<Boolean> listener);
 
     /** Unregisters an existing {@link Runnable} from the list of listeners. */

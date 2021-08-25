@@ -61,13 +61,13 @@ public final class CarUiLinearLayoutStyle implements CarUiLayoutStyle {
         return CarUiRecyclerViewLayout.LINEAR;
     }
 
-    /** Returns layout direction {@link Orientation} */
+    /** Returns layout direction {@link CarUiLayoutStyle.Orientation} */
     @Orientation
     public int getOrientation() {
         return mLayoutOrientation;
     }
 
-    /** sets layout direction {@link Orientation} */
+    /** sets layout direction {@link CarUiLayoutStyle.Orientation} */
     public void setOrientation(@Orientation int orientation) {
         mLayoutOrientation = orientation;
     }

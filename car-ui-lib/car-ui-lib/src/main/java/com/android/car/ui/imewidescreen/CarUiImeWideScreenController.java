@@ -330,7 +330,7 @@ public class CarUiImeWideScreenController {
      * description and not the title.
      * <p>
      * When the IME window is closed all the views are reset. For the default view visibility see
-     * {@link #resetAutomotiveWideScreenViews()}.
+     * {@code resetAutomotiveWideScreenViews}.
      *
      * @param action Name of the command to be performed.
      * @param data Any data to include with the command.
