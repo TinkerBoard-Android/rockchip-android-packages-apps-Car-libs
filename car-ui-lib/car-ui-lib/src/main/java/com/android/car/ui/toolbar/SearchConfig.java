@@ -137,7 +137,7 @@ public final class SearchConfig {
          * Sets list of search item {@link CarUiListItem} to be displayed in the IMS
          * template. This method should be called when system is running in a wide screen mode. Apps
          * can check that by using
-         * {@link com.android.car.ui.toolbar.ToolbarController##canShowSearchResultItems()}
+         * {@link com.android.car.ui.toolbar.ToolbarController#canShowSearchResultItems()}
          * Else, this method will throw an {@link IllegalStateException}
          */
         public SearchConfigBuilder setSearchResultItems(

@@ -689,8 +689,8 @@ public class AlertDialogBuilder {
      *
      * @param prompt              the string that will be set on the edit text view
      * @param textChangedListener textWatcher whose methods are called whenever this TextView's text
-     *                            changes {@link null} otherwise.
-     * @param inputFilters        list of input filters, {@link null} if no filter is needed
+     *                            changes {@code null} otherwise.
+     * @param inputFilters        list of input filters, {@code null} if no filter is needed
      * @param inputType           See {@link EditText#setInputType(int)}, except
      *                            {@link android.text.InputType#TYPE_NULL} will not be set.
      * @return this Builder object to allow for chaining of calls to set methods
@@ -724,8 +724,8 @@ public class AlertDialogBuilder {
      *
      * @param prompt              the string that will be set on the edit text view
      * @param textChangedListener textWatcher whose methods are called whenever this TextView's text
-     *                            changes {@link null} otherwise.
-     * @param inputFilters        list of input filters, {@link null} if no filter is needed
+     *                            changes {@code null} otherwise.
+     * @param inputFilters        list of input filters, {@code null} if no filter is needed
      * @return this Builder object to allow for chaining of calls to set methods
      */
     public AlertDialogBuilder setEditBox(String prompt, TextWatcher textChangedListener,

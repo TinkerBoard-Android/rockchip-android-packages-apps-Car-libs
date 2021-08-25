@@ -106,7 +106,7 @@ public class TabLayout extends LinearLayout {
 
     /**
      * Returns if this TabLayout has tabs. That is, if the most recent call to
-     * {@link #setTabs(List)} contained a non-empty list.
+     * {@link #setTabs(List, int)} contained a non-empty list.
      */
     public boolean hasTabs() {
         return !mTabs.isEmpty();

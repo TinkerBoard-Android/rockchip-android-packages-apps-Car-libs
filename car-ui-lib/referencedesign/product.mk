@@ -23,6 +23,7 @@ PRODUCT_PACKAGES += \
     googlecarui-com-android-car-media \
     googlecarui-com-android-car-radio \
     googlecarui-com-android-car-calendar \
+    googlecarui-com-android-car-messenger \
     googlecarui-com-android-car-companiondevicesupport \
     googlecarui-com-android-car-systemupdater \
     googlecarui-com-android-car-dialer \

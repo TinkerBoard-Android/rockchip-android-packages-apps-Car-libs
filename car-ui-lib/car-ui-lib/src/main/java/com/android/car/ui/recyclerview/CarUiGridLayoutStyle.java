@@ -76,13 +76,13 @@ public final class CarUiGridLayoutStyle implements CarUiLayoutStyle {
         return CarUiRecyclerViewLayout.GRID;
     }
 
-    /** Returns layout direction {@link Orientation} */
+    /** Returns layout direction {@link CarUiLayoutStyle.Orientation} */
     @Orientation
     public int getOrientation() {
         return mLayoutOrientation;
     }
 
-    /** sets layout direction {@link Orientation} */
+    /** sets layout direction {@link CarUiLayoutStyle.Orientation} */
     public void setOrientation(@Orientation int orientation) {
         mLayoutOrientation = orientation;
     }
