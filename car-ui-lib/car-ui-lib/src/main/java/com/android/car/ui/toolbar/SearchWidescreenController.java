@@ -36,7 +36,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
 import android.net.Uri;
 import android.os.Build;
@@ -182,9 +181,6 @@ public class SearchWidescreenController {
                 }
 
                 displaySearchWideScreen();
-                if (mSearchConfig.getSearchResultsInputViewIcon() != null) {
-                    setSearchResultsInputViewIcon(mSearchConfig.getSearchResultsInputViewIcon());
-                }
                 mHandler.post(() -> {
                     if (mSurfaceControlViewHost != null
                             && wideScreenImeContentAreaViewContainer != null
@@ -226,15 +222,6 @@ public class SearchWidescreenController {
                 });
             }
         }
-    }
-
-    private void setSearchResultsInputViewIcon(Drawable drawable) {
-        Bitmap bitmap = CarUiUtils.drawableToBitmap(drawable);
-        byte[] byteArray = bitmapToByteArray(bitmap);
-
-        Bundle bundle = new Bundle();
-        bundle.putByteArray(WIDE_SCREEN_EXTRACTED_TEXT_ICON, byteArray);
-        mInputMethodManager.sendAppPrivateCommand(mTextView, WIDE_SCREEN_ACTION, bundle);
     }
 
     private void displaySearchWideScreen() {
@@ -341,6 +328,13 @@ public class SearchWidescreenController {
         mSurfaceWidth = width;
 
         Bundle bundle = new Bundle();
+        if (mSearchConfig.getSearchResultsInputViewIcon() != null) {
+            Bitmap bitmap = CarUiUtils.drawableToBitmap(
+                    mSearchConfig.getSearchResultsInputViewIcon());
+            byte[] byteArray = bitmapToByteArray(bitmap);
+            bundle.putByteArray(WIDE_SCREEN_EXTRACTED_TEXT_ICON, byteArray);
+        }
+
         bundle.putParcelable(CONTENT_AREA_SURFACE_PACKAGE,
                 mSurfaceControlViewHost.getSurfacePackage());
         mInputMethodManager.sendAppPrivateCommand(mTextView, WIDE_SCREEN_ACTION, bundle);
