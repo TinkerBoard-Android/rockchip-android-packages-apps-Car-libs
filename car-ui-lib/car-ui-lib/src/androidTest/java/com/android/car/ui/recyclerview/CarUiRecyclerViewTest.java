@@ -404,13 +404,13 @@ public class CarUiRecyclerViewTest {
         });
 
         assertTrue(carUiRecyclerView.getLayoutManager() instanceof GridLayoutManager);
-        assertEquals(carUiRecyclerView.getItemDecorationCount(), 3);
+        assertEquals(carUiRecyclerView.getItemDecorationCount(), 1);
         assertTrue(carUiRecyclerView.getItemDecorationAt(0) instanceof GridDividerItemDecoration);
 
         carUiRecyclerView.setLayoutManager(new LinearLayoutManager(mTestableContext));
 
         assertTrue(carUiRecyclerView.getLayoutManager() instanceof LinearLayoutManager);
-        assertEquals(carUiRecyclerView.getItemDecorationCount(), 3);
+        assertEquals(carUiRecyclerView.getItemDecorationCount(), 1);
         assertFalse(carUiRecyclerView.getItemDecorationAt(0) instanceof GridDividerItemDecoration);
     }
 
