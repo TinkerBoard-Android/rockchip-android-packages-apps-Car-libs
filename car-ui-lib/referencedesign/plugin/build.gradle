@@ -38,7 +38,7 @@ android {
     // support signing apps using individual pk8 and x509.pem files, it requires a keystore file.
     signingConfigs {
         debug {
-            storeFile file('chassis_upload_key.pepk')
+            storeFile file('chassis_upload_key.jks')
             storePassword 'chassis'
             keyAlias 'chassis'
             keyPassword 'chassis'
