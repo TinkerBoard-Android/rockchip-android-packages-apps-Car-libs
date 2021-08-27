@@ -15,7 +15,7 @@ limitations under the License.-->
 <!-- THIS FILE WAS AUTO GENERATED, DO NOT EDIT MANUALLY. -->
 <resources>
   <overlayable name="car-ui-lib">
-    <policy type="public">
+    <policy type="odm|oem|product|signature|system|vendor">
       <item type="array" name="car_ui_ime_wide_screen_allowed_package_list"/>
       <item type="attr" name="CarUiToolbarStyle"/>
       <item type="attr" name="barrierDirection"/>

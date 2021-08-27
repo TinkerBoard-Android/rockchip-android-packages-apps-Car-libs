@@ -120,7 +120,8 @@ def generate_overlayable_file(resources, output_file='overlayable.xml'):
     overlayable.set('name', 'car-ui-lib')
 
     policy = etree.SubElement(overlayable, 'policy')
-    policy.set('type', 'public')
+    # everything except public. source: frameworks/base/cmds/idmap2/libidmap2_policies/include/idmap2/Policies.h
+    policy.set('type', 'odm|oem|product|signature|system|vendor')
 
     for resource in resources:
         item = etree.SubElement(policy, 'item')
