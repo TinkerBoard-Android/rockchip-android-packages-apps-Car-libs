@@ -23,6 +23,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 class TestDelegatingContentLimitingAdapter
@@ -70,15 +71,13 @@ class TestDelegatingContentLimitingAdapter
     }
 
     public void insertItemRange(int position, String... items) {
-        for (int i = 0; i < items.length; i++) {
-            mItems.add(position, items[i]);
-        }
+        mItems.addAll(position, Arrays.asList(items));
         notifyItemRangeInserted(position, items.length);
     }
 
     public void removeItemRange(int positionStart, int itemCount) {
         for (int i = 0; i < itemCount; i++) {
-            mItems.remove(positionStart + i);
+            mItems.remove(positionStart);
         }
         notifyItemRangeRemoved(positionStart, itemCount);
     }
