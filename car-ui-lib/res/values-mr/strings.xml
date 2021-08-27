@@ -20,7 +20,7 @@ limitations under the License.
     <string name="car_ui_scrollbar_page_down_button" msgid="2419547312871553905">"खाली स्क्रोल करा"</string>
     <string name="car_ui_scrollbar_page_up_button" msgid="4152120100101092092">"वर स्क्रोल करा"</string>
     <string name="car_ui_toolbar_nav_icon_content_description" msgid="2689756063478650269">"मागे जा"</string>
-    <string name="car_ui_toolbar_menu_item_search_title" msgid="8705757227447034030">"Search"</string>
+    <string name="car_ui_toolbar_menu_item_search_title" msgid="8705757227447034030">"शोधा"</string>
     <string name="car_ui_toolbar_menu_item_settings_title" msgid="6694060516340354337">"सेटिंग्ज"</string>
     <string name="car_ui_toolbar_menu_item_overflow_title" msgid="771643815366812499">"ओव्हरफ्लो"</string>
     <string name="car_ui_preference_switch_on" msgid="5512335363135043642">"सुरू आहे"</string>
