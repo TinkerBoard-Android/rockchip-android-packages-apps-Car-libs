@@ -45,10 +45,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.R;
 import com.android.car.ui.recyclerview.decorations.grid.GridDividerItemDecoration;
-import com.android.car.ui.recyclerview.decorations.grid.GridOffsetItemDecoration;
 import com.android.car.ui.recyclerview.decorations.linear.LinearDividerItemDecoration;
-import com.android.car.ui.recyclerview.decorations.linear.LinearOffsetItemDecoration;
-import com.android.car.ui.recyclerview.decorations.linear.LinearOffsetItemDecoration.OffsetPosition;
 import com.android.car.ui.utils.CarUxRestrictionsUtil;
 
 import java.lang.reflect.Constructor;
@@ -78,14 +75,6 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView implements La
     @Nullable
     private ScrollBar mScrollBar;
 
-    @Nullable
-    private GridOffsetItemDecoration mTopOffsetItemDecorationGrid;
-    @Nullable
-    private GridOffsetItemDecoration mBottomOffsetItemDecorationGrid;
-    @Nullable
-    private RecyclerView.ItemDecoration mTopOffsetItemDecorationLinear;
-    @Nullable
-    private RecyclerView.ItemDecoration mBottomOffsetItemDecorationLinear;
     @Nullable
     private GridDividerItemDecoration mDividerItemDecorationGrid;
     @Nullable
@@ -154,17 +143,6 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView implements La
                         context.getDrawable(R.drawable.car_ui_divider),
                         context.getDrawable(R.drawable.car_ui_divider),
                         mNumOfColumns);
-
-        mTopOffsetItemDecorationLinear =
-                new LinearOffsetItemDecoration(0, OffsetPosition.START);
-        mBottomOffsetItemDecorationLinear =
-                new LinearOffsetItemDecoration(0, OffsetPosition.END);
-        mTopOffsetItemDecorationGrid =
-                new GridOffsetItemDecoration(0, mNumOfColumns,
-                        OffsetPosition.START);
-        mBottomOffsetItemDecorationGrid =
-                new GridOffsetItemDecoration(0, mNumOfColumns,
-                        OffsetPosition.END);
 
         mIsInitialized = true;
 
@@ -308,25 +286,17 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView implements La
     private void addItemDecorations(LayoutManager layoutManager) {
         // remove existing Item decorations.
         removeItemDecoration(Objects.requireNonNull(mDividerItemDecorationGrid));
-        removeItemDecoration(Objects.requireNonNull(mTopOffsetItemDecorationGrid));
-        removeItemDecoration(Objects.requireNonNull(mBottomOffsetItemDecorationGrid));
         removeItemDecoration(Objects.requireNonNull(mDividerItemDecorationLinear));
-        removeItemDecoration(Objects.requireNonNull(mTopOffsetItemDecorationLinear));
-        removeItemDecoration(Objects.requireNonNull(mBottomOffsetItemDecorationLinear));
 
         if (layoutManager instanceof GridLayoutManager) {
             if (mEnableDividers) {
                 addItemDecoration(Objects.requireNonNull(mDividerItemDecorationGrid));
             }
-            addItemDecoration(Objects.requireNonNull(mTopOffsetItemDecorationGrid));
-            addItemDecoration(Objects.requireNonNull(mBottomOffsetItemDecorationGrid));
             setNumOfColumns(((GridLayoutManager) layoutManager).getSpanCount());
         } else {
             if (mEnableDividers) {
                 addItemDecoration(Objects.requireNonNull(mDividerItemDecorationLinear));
             }
-            addItemDecoration(Objects.requireNonNull(mTopOffsetItemDecorationLinear));
-            addItemDecoration(Objects.requireNonNull(mBottomOffsetItemDecorationLinear));
         }
     }
 
@@ -403,9 +373,6 @@ public final class CarUiRecyclerViewImpl extends CarUiRecyclerView implements La
      */
     private void setNumOfColumns(int numberOfColumns) {
         mNumOfColumns = numberOfColumns;
-        if (mTopOffsetItemDecorationGrid != null) {
-            mTopOffsetItemDecorationGrid.setNumOfColumns(mNumOfColumns);
-        }
         if (mDividerItemDecorationGrid != null) {
             mDividerItemDecorationGrid.setNumOfColumns(mNumOfColumns);
         }
