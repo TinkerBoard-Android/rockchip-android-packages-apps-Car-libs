@@ -24,9 +24,11 @@ import static com.android.car.ui.utils.RotaryConstants.ROTARY_HORIZONTALLY_SCROL
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_VERTICALLY_SCROLLABLE;
 
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.ViewTreeObserver;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
@@ -42,11 +44,14 @@ import java.lang.annotation.RetentionPolicy;
 /** Utility class for helpful methods related to {@link View} objects. */
 public final class ViewUtils {
 
+    private static final String TAG = "ViewUtils";
+
     /**
      * How many milliseconds to wait before trying to restore the focus inside the LazyLayoutView
      * the second time.
      */
-    private static final int RESTORE_FOCUS_RETRY_DELAY_MS = 3000;
+    @VisibleForTesting
+    static final int RESTORE_FOCUS_RETRY_DELAY_MS = 3000;
 
     /**
      * No view is focused, the focused view is not shown, or the focused view is a FocusParkingView.
@@ -156,9 +161,7 @@ public final class ViewUtils {
      *         or if it was already focused
      */
     public static boolean hideFocus(@NonNull View root) {
-        FocusParkingView fpv = (FocusParkingView) depthFirstSearch(root,
-                /* targetPredicate= */ v -> v instanceof FocusParkingView,
-                /* skipPredicate= */ null);
+        FocusParkingView fpv = findFocusParkingView(root);
         if (fpv == null) {
             return false;
         }
@@ -166,6 +169,17 @@ public final class ViewUtils {
             return true;
         }
         return fpv.performAccessibilityAction(ACTION_FOCUS, /* arguments= */ null);
+    }
+
+    /**
+     * Returns the first {@link FocusParkingView} of the view tree, if any. Returns null if not
+     * found.
+     */
+    @VisibleForTesting
+    static FocusParkingView findFocusParkingView(@NonNull View root) {
+        return (FocusParkingView) depthFirstSearch(root,
+                /* targetPredicate= */ v -> v instanceof FocusParkingView,
+                /* skipPredicate= */ null);
     }
 
     /** Gets the ancestor IFocusArea of the {@code view}, if any. Returns null if not found. */
@@ -353,7 +367,7 @@ public final class ViewUtils {
     /**
      * If the {code lazyLayoutView} has a focusable descendant and no visible view is focused,
      * focuses on the descendant. Otherwise tries again when the {code lazyLayoutView} completes
-     * layout or after a timeout, whichever comes first.
+     * layout, shows up on the screen, or after a timeout, whichever comes first.
      */
     public static void initFocus(@NonNull LazyLayoutView lazyLayoutView) {
         if (initFocusImmediately(lazyLayoutView)) {
@@ -368,22 +382,88 @@ public final class ViewUtils {
         }
         View lazyView = (View) lazyLayoutView;
         Runnable[] onLayoutCompleteListener = new Runnable[1];
-        Runnable delayedTask = () -> {
-            lazyLayoutView.removeOnLayoutCompleteListener(onLayoutCompleteListener[0]);
-            initFocusImmediately(lazyLayoutView);
-        };
-        onLayoutCompleteListener[0] = () -> {
-            if (initFocusImmediately(lazyLayoutView)) {
-                // Remove the delayedTask only when onLayoutCompleteListener has initialized the
-                // focus successfully, because the delayedTask needs to kick in when it fails, such
-                // as when the lazyLayoutView is still loading after a timeout, or when it's loaded
-                // but has no descendants to take focus.
-                lazyView.removeCallbacks(delayedTask);
-                lazyLayoutView.removeOnLayoutCompleteListener(onLayoutCompleteListener[0]);
+        Runnable[] delayedTask = new Runnable[1];
+        ViewTreeObserver.OnGlobalLayoutListener[] onGlobalLayoutListener =
+                new ViewTreeObserver.OnGlobalLayoutListener[1];
+
+        // If the lazyLayoutView has not completed layout yet, try to restore focus inside it once
+        // it's completed.
+        if (!lazyLayoutView.isLayoutCompleted()) {
+            Log.v(TAG, "The lazyLayoutView has not completed layout: " + lazyLayoutView);
+            onLayoutCompleteListener[0] = () -> {
+                Log.v(TAG, "The lazyLayoutView completed layout: "
+                        + lazyLayoutView);
+                if (initFocusImmediately(lazyLayoutView)) {
+                    Log.v(TAG, "Focus restored after lazyLayoutView completed layout");
+                    // Remove the other tasks only when onLayoutCompleteListener has initialized the
+                    // focus successfully, because the other tasks need to kick in when it fails,
+                    // such as when it has completed layout but has no descendants to take focus,
+                    // or it's not shown (e.g., its ancestor is invisible). In the former case,
+                    // the delayedTask needs to run after a timeout, while in the latter case the
+                    // onGlobalLayoutListener needs to run when it shows up on the screen.
+                    removeCallbacks(lazyLayoutView, onGlobalLayoutListener,
+                            onLayoutCompleteListener, delayedTask);
+                }
+            };
+            lazyLayoutView.addOnLayoutCompleteListener(onLayoutCompleteListener[0]);
+        }
+
+        // If the lazyLayoutView is not shown yet, try to restore focus inside it once it's shown.
+        if (!lazyView.isShown()) {
+            Log.d(TAG, "The lazyLayoutView is not shown: " + lazyLayoutView);
+            onGlobalLayoutListener[0] = () -> {
+                Log.d(TAG, "onGlobalLayoutListener is called");
+                if (lazyView.isShown()) {
+                    Log.d(TAG, "The lazyLayoutView is shown");
+                    if (initFocusImmediately(lazyLayoutView)) {
+                        Log.v(TAG, "Focus restored after showing lazyLayoutView");
+                        removeCallbacks(lazyLayoutView, onGlobalLayoutListener,
+                                onLayoutCompleteListener, delayedTask);
+                    }
+                }
+            };
+            lazyView.getViewTreeObserver()
+                    .addOnGlobalLayoutListener(onGlobalLayoutListener[0]);
+        }
+
+        // Run a delayed task as fallback.
+        delayedTask[0] = () -> {
+            Log.d(TAG, "Starting delayedTask");
+            removeCallbacks(lazyLayoutView, onGlobalLayoutListener,
+                    onLayoutCompleteListener, delayedTask);
+            if (!hasVisibleFocusInRoot(lazyView)) {
+                // Make one last attempt to restore focus inside the lazyLayoutView. For example,
+                // in ViewUtilsTest.testInitFocus_inLazyLayoutView5(), when lazyLayoutView's parent
+                // becomes visible, onGlobalLayoutListener won't be triggered, so it won't try to
+                // restore focus there.
+                if (lazyLayoutView.isLayoutCompleted() && lazyView.isShown()) {
+                    Log.d(TAG, "Last attempt to restore focus inside the lazyLayoutView");
+                    if (initFocusImmediately(lazyLayoutView)) {
+                        Log.d(TAG, "Restored focus inside the lazyLayoutView");
+                        return;
+                    }
+                }
+                // Search the view tree and find the view to focus when it failed to restore focus
+                // inside the lazyLayoutView.
+                adjustFocus(lazyView.getRootView(), NO_FOCUS, /* cachedFocusedView= */ null,
+                        /* defaultFocusOverridesHistory= */ false, /* delayed= */ false);
             }
         };
-        lazyLayoutView.addOnLayoutCompleteListener(onLayoutCompleteListener[0]);
-        lazyView.postDelayed(delayedTask, RESTORE_FOCUS_RETRY_DELAY_MS);
+        lazyView.postDelayed(delayedTask[0], RESTORE_FOCUS_RETRY_DELAY_MS);
+    }
+
+    private static void removeCallbacks(@NonNull LazyLayoutView lazyLayoutView,
+            ViewTreeObserver.OnGlobalLayoutListener[] onGlobalLayoutListener,
+            Runnable[] onLayoutCompleteListener,
+            Runnable[] delayedTask) {
+        lazyLayoutView.removeOnLayoutCompleteListener(onLayoutCompleteListener[0]);
+        if (!(lazyLayoutView instanceof View)) {
+            return;
+        }
+        View lazyView = (View) lazyLayoutView;
+        lazyView.removeCallbacks(delayedTask[0]);
+        lazyView.getViewTreeObserver()
+                .removeOnGlobalLayoutListener(onGlobalLayoutListener[0]);
     }
 
     private static boolean initFocusImmediately(@NonNull LazyLayoutView lazyLayoutView) {
@@ -391,16 +471,16 @@ public final class ViewUtils {
             return false;
         }
         View lazyView = (View) lazyLayoutView;
-        View focusedView = lazyView.getRootView().findFocus();
-        // If the currently focused view won't draw, it's not a valid focus.
-        View visibleFocusedView =
-                focusedView != null && !focusedView.willNotDraw() ? focusedView : null;
-        // If there is a visible view focused, just return true.
-        if (visibleFocusedView != null && !(visibleFocusedView instanceof FocusParkingView)) {
+        // If there is a visible view focused in the view tree, just return true.
+        if (hasVisibleFocusInRoot(lazyView)) {
             return true;
         }
+        return ViewUtils.adjustFocusImmediately(lazyView, /* currentFocus= */ null);
+    }
 
-        return ViewUtils.adjustFocusImmediately(lazyView, visibleFocusedView);
+    private static boolean hasVisibleFocusInRoot(@NonNull View view) {
+        View focus = view.getRootView().findFocus();
+        return focus != null && !(focus instanceof FocusParkingView);
     }
 
     @VisibleForTesting
@@ -641,7 +721,8 @@ public final class ViewUtils {
 
     /**
      * Searches the {@code view} and its descendants in depth first order, and returns the first
-     * rotary container shown on the screen. Returns null if not found.
+     * rotary container shown on the screen. If the rotary containers are LazyLayoutViews, returns
+     * the first layout completed one. Returns null if not found.
      * <p>
      * Unlike other similar methods, don't skip the {@code root} because some callers may pass
      * a rotary container as parameter.
@@ -649,7 +730,16 @@ public final class ViewUtils {
     @Nullable
     private static View findRotaryContainer(@NonNull View view) {
         return depthFirstSearch(view,
-                /* targetPredicate= */ v -> isRotaryContainer(v),
+                /* targetPredicate= */ v -> {
+                    if (!isRotaryContainer(v)) {
+                        return false;
+                    }
+                    if (v instanceof LazyLayoutView) {
+                        LazyLayoutView lazyLayoutView = (LazyLayoutView) v;
+                        return lazyLayoutView.isLayoutCompleted();
+                    }
+                    return true;
+                },
                 /* skipPredicate= */ v -> !v.isShown());
     }
 

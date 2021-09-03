@@ -30,6 +30,7 @@ import static com.android.car.ui.utils.ViewUtils.FOCUSED_BY_DEFAULT;
 import static com.android.car.ui.utils.ViewUtils.IMPLICIT_DEFAULT_FOCUS;
 import static com.android.car.ui.utils.ViewUtils.NO_FOCUS;
 import static com.android.car.ui.utils.ViewUtils.REGULAR_FOCUS;
+import static com.android.car.ui.utils.ViewUtils.RESTORE_FOCUS_RETRY_DELAY_MS;
 import static com.android.car.ui.utils.ViewUtils.SCROLLABLE_CONTAINER_FOCUS;
 import static com.android.car.ui.utils.ViewUtils.SELECTED_FOCUS;
 import static com.android.car.ui.utils.ViewUtils.setRotaryScrollEnabled;
@@ -40,7 +41,6 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.rule.ActivityTestRule;
 
@@ -67,13 +67,16 @@ public class ViewUtilsTest {
     private FocusArea mFocusArea3;
     private FocusArea mFocusArea4;
     private FocusArea mFocusArea5;
-    private FocusParkingView mFpv;
     private View mView2;
     private View mFocusedByDefault3;
     private View mView4;
     private View mDefaultFocus4;
+    private CarUiRecyclerView mCarUiRecyclerView5;
     private RecyclerView mList5;
+    private CarUiRecyclerView mCarUiRecyclerView6;
+    private RecyclerView mList6;
     private View mRoot;
+    private FocusParkingView mFpv;
 
     @Before
     public void setUp() {
@@ -83,17 +86,24 @@ public class ViewUtilsTest {
         mFocusArea3 = mActivity.findViewById(R.id.focus_area3);
         mFocusArea4 = mActivity.findViewById(R.id.focus_area4);
         mFocusArea5 = mActivity.findViewById(R.id.focus_area5);
-        mFpv = mActivity.findViewById(R.id.fpv);
         mView2 = mActivity.findViewById(R.id.view2);
         mFocusedByDefault3 = mActivity.findViewById(R.id.focused_by_default3);
         mView4 = mActivity.findViewById(R.id.view4);
         mDefaultFocus4 = mActivity.findViewById(R.id.default_focus4);
-        CarUiRecyclerView list = mActivity.findViewById(R.id.list5);
-        mList5 = list.getRecyclerView();
+        mCarUiRecyclerView5 = mActivity.findViewById(R.id.list5);
+        mList5 = mCarUiRecyclerView5.getRecyclerView();
+        mCarUiRecyclerView6 = mActivity.findViewById(R.id.list6);
+        mList6 = mCarUiRecyclerView6.getRecyclerView();
         mRoot = mFocusArea1.getRootView();
 
+        // Since ViewUtilsTestActivity uses Theme.CarUi.NoToolbar, a FocusParkingView has been added
+        // to the view tree automatically.
+        mFpv = ViewUtils.findFocusParkingView(mRoot);
+
         mRoot.post(() -> {
-            mList5.setLayoutManager(new LinearLayoutManager(mActivity));
+            // Don't set the LayoutManager of mList5 because it already has a default one, which
+            // contains important Runnables in its onLayoutCompleted(). Resetting its LayoutManager
+            // will remove the Runnables.
             mList5.setAdapter(new TestAdapter(/* numItems= */ 2));
             setRotaryScrollEnabled(mList5, /* isVertical= */ true);
         });
@@ -523,11 +533,124 @@ public class ViewUtilsTest {
         });
     }
 
+    @Test
+    public void testInitFocus_inLazyLayoutView1() {
+        ViewUtils.LazyLayoutView lazyLayoutView =
+                (ViewUtils.LazyLayoutView) mCarUiRecyclerView5;
+        assertThat(lazyLayoutView.isLayoutCompleted()).isTrue();
+        mRoot.post(() -> {
+            assertRequestFocus(mView2, true);
+            ViewUtils.initFocus(lazyLayoutView);
+        });
+        waitForFocusRestored();
+        // The focus shouldn't change because there was a visible focus.
+        assertThat(mView2.isFocused()).isTrue();
+    }
+
+    @Test
+    public void testInitFocus_inLazyLayoutView2() {
+        ViewUtils.LazyLayoutView lazyLayoutView =
+                (ViewUtils.LazyLayoutView) mCarUiRecyclerView5;
+        assertThat(lazyLayoutView.isLayoutCompleted()).isTrue();
+        mRoot.post(() -> {
+            ViewUtils.hideFocus(mRoot);
+            assertThat(mFpv.isFocused()).isTrue();
+            ViewUtils.initFocus(lazyLayoutView);
+        });
+        waitForFocusRestored();
+        // The focus should move into the lazyLayoutView because there was no visible focus.
+        assertThat(mList5.hasFocus()).isTrue();
+    }
+
+    @Test
+    public void testInitFocus_inLazyLayoutView3() {
+        ViewUtils.LazyLayoutView lazyLayoutView =
+                (ViewUtils.LazyLayoutView) mCarUiRecyclerView6;
+        assertThat(lazyLayoutView.isLayoutCompleted()).isFalse();
+        mRoot.post(() -> {
+            ViewUtils.hideFocus(mRoot);
+            assertThat(mFpv.isFocused()).isTrue();
+
+            // mList6 hasn't completed layout when initializing focus.
+            ViewUtils.initFocus(lazyLayoutView);
+
+            mList6.setAdapter(new TestAdapter(/* numItems= */ 2));
+        });
+        waitForFocusRestored();
+        // mList5 has completed layout, so the focus should be restored successfully.
+        assertThat(lazyLayoutView.isLayoutCompleted()).isTrue();
+        assertThat(mList6.hasFocus()).isTrue();
+    }
+
+    @Test
+    public void testInitFocus_inLazyLayoutView4() {
+        ViewUtils.LazyLayoutView lazyLayoutView =
+                (ViewUtils.LazyLayoutView) mCarUiRecyclerView6;
+        assertThat(lazyLayoutView.isLayoutCompleted()).isFalse();
+        mRoot.post(() -> {
+            ViewUtils.hideFocus(mRoot);
+            assertThat(mFpv.isFocused()).isTrue();
+
+            // mList6 will never complete layout because its adapter has never been set.
+            ViewUtils.initFocus(lazyLayoutView);
+        });
+        waitForFocusRestored();
+        // The focus should move to the best view in the view tree as fallback.
+        assertThat(mFocusedByDefault3.isFocused()).isTrue();
+    }
+
+    @Test
+    public void testInitFocus_inLazyLayoutView5() {
+        ViewUtils.LazyLayoutView lazyLayoutView =
+                (ViewUtils.LazyLayoutView) mCarUiRecyclerView5;
+        assertThat(lazyLayoutView.isLayoutCompleted()).isTrue();
+        mRoot.post(() -> {
+            ViewUtils.hideFocus(mRoot);
+            assertThat(mFpv.isFocused()).isTrue();
+
+            // mList5 has completed layout, but it is invisible now. It will become visible after
+            // ViewUtils.initFocus() is called..
+            mFocusArea5.setVisibility(INVISIBLE);
+            ViewUtils.initFocus(lazyLayoutView);
+            mFocusArea5.setVisibility(VISIBLE);
+        });
+        waitForFocusRestored();
+        // The focus should be restored successfully.
+        assertThat(mList5.hasFocus()).isTrue();
+    }
+
+    @Test
+    public void testInitFocus_inLazyLayoutView6() {
+        ViewUtils.LazyLayoutView lazyLayoutView =
+                (ViewUtils.LazyLayoutView) mCarUiRecyclerView5;
+        assertThat(lazyLayoutView.isLayoutCompleted()).isTrue();
+        mRoot.post(() -> {
+            ViewUtils.hideFocus(mRoot);
+            assertThat(mFpv.isFocused()).isTrue();
+            mFocusArea5.setVisibility(INVISIBLE);
+            ViewUtils.initFocus(lazyLayoutView);
+        });
+        // mList5 has completed layout, but it's invisible forever, so it should move to the best
+        // view in the view tree as fallback.
+        waitForFocusRestored();
+        assertThat(mFocusedByDefault3.isFocused()).isTrue();
+    }
+
     private static void assertRequestFocus(@Nullable View view, boolean focused) {
         boolean result = ViewUtils.requestFocus(view);
         assertThat(result).isEqualTo(focused);
         if (view != null) {
             assertThat(view.isFocused()).isEqualTo(focused);
+        }
+    }
+
+    private static void waitForFocusRestored() {
+        try {
+            // Wait longer than RESTORE_FOCUS_RETRY_DELAY_MS to make sure the delayedTask in
+            // ViewUtils.initFocusDelayed() has completed.
+            Thread.sleep(RESTORE_FOCUS_RETRY_DELAY_MS + 1000);
+        } catch (InterruptedException e) {
+            throw new AssertionError("Unexpected InterruptedException", e);
         }
     }
 }
