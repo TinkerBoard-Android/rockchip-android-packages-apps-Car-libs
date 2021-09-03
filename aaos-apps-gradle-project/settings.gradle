@@ -17,6 +17,10 @@
 rootProject.name='AAOS Apps'
 
 gradle.ext.aaosLatestSDK = 31
+gradle.ext.aaosTargetSDK = 31
+
+gradle.ext.lib_car_system_stubs = rootDir.absolutePath + "../../../../../../prebuilts/sdk/" + gradle.ext.aaosLatestSDK + "/system/android.car-system-stubs.jar"
+gradle.ext.lib_system_stubs = rootDir.absolutePath + "../../../../../../prebuilts/sdk/" + gradle.ext.aaosLatestSDK + "/system/android.jar"
 
 //TODO: find something that works
 //def repoRootFolder = settingsDir.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile()
@@ -47,6 +51,16 @@ project(':car-media-common').projectDir = new File('../car-media-common')
 include ':car-uxr-client-lib'
 project(':car-uxr-client-lib').projectDir = new File('../car-uxr-client-lib')
 
+include ':car-telephony-common'
+project(':car-telephony-common').projectDir = new File('../car-telephony-common')
+
+include ':car-assist-lib'
+project(':car-assist-lib').projectDir = new File('../car-assist-lib')
+
+include ':car-messenger-common'
+project(':car-messenger-common').projectDir = new File('../car-messenger-common')
+include ':car-messenger-common:model'
+
 include ':car-media-app'
 project(':car-media-app').projectDir = new File('../../Media')
 
@@ -59,3 +73,7 @@ project(':test-rotary-playground').projectDir = new File('../../tests/RotaryPlay
 include ':test-rotary-ime'
 project(':test-rotary-ime').projectDir = new File('../../tests/RotaryIME')
 
+include ':car-dialer-app'
+project(':car-dialer-app').projectDir = new File('../../Dialer')
+include ':car-dialer-app:testing'
+include ':car-dialer-app:framework'

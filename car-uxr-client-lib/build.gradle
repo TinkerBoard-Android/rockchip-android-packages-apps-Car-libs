@@ -22,8 +22,8 @@ android {
     compileSdkVersion gradle.ext.aaosLatestSDK
 
     defaultConfig {
-        minSdkVersion 30
-        targetSdkVersion 31
+        minSdkVersion 28
+        targetSdkVersion gradle.ext.aaosTargetSDK
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -57,7 +57,7 @@ dependencies {
     def lifecycle_version = "2.2.0"
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
 
-    implementation "androidx.recyclerview:recyclerview:1.2.0"
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
 
     implementation project(":car-ui-lib")
 }
