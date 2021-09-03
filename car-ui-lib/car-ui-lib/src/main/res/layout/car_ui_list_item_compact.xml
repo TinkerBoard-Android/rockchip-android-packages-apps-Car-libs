@@ -56,7 +56,6 @@
 
     <FrameLayout
         android:id="@+id/car_ui_list_item_icon_container"
-        android:tag="icon_container"
         android:layout_width="@dimen/car_ui_list_item_icon_container_width"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -91,7 +90,6 @@
 
     <CarUiTextView
         android:id="@+id/car_ui_list_item_title"
-        android:tag="title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/car_ui_list_item_text_start_margin"
@@ -106,7 +104,6 @@
         app:layout_goneMarginStart="@dimen/car_ui_list_item_text_no_icon_start_margin" />
     <CarUiTextView
         android:id="@+id/car_ui_list_item_body"
-        android:tag="body"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/car_ui_list_item_text_start_margin"
@@ -132,7 +129,6 @@
 
     <FrameLayout
         android:id="@+id/car_ui_list_item_action_container"
-        android:tag="action_container"
         android:layout_width="wrap_content"
         android:minWidth="@dimen/car_ui_list_item_icon_container_width"
         android:layout_height="0dp"
