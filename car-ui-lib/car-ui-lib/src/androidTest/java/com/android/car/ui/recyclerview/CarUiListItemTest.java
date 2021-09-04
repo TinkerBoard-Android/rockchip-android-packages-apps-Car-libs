@@ -23,12 +23,13 @@ import static androidx.test.espresso.matcher.ViewMatchers.isChecked;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isEnabled;
 import static androidx.test.espresso.matcher.ViewMatchers.isNotChecked;
-import static androidx.test.espresso.matcher.ViewMatchers.withTagValue;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
 import static com.android.car.ui.matchers.ViewMatchers.isActivated;
+import static com.android.car.ui.matchers.ViewMatchers.withDrawable;
 
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -37,6 +38,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
+import android.widget.CompoundButton;
 
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
@@ -90,16 +93,14 @@ public class CarUiListItemTest {
         List<CarUiListItem> items = new ArrayList<>();
 
         CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
-        item.setTitle("Test title");
+        String title = "Test title";
+        item.setTitle(title);
         items.add(item);
 
         mCarUiRecyclerView.post(
                 () -> mCarUiRecyclerView.setAdapter(CarUi.createListItemAdapter(mActivity, items)));
 
-        onView(withTagValue(is("title"))).check(matches(isDisplayed()));
-        onView(withTagValue(is("body"))).check(matches(not(isDisplayed())));
-        onView(withTagValue(is("icon_container"))).check(matches(not(isDisplayed())));
-        onView(withTagValue(is("action_container"))).check(matches(not(isDisplayed())));
+        onView(withText(title)).check(matches(isDisplayed()));
     }
 
     @Test
@@ -107,39 +108,35 @@ public class CarUiListItemTest {
         List<CarUiListItem> items = new ArrayList<>();
 
         CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
-        item.setBody("Test body");
+        String body = "Test body";
+        item.setBody(body);
         items.add(item);
 
         mCarUiRecyclerView.post(
                 () -> mCarUiRecyclerView.setAdapter(CarUi.createListItemAdapter(mActivity, items)));
 
-        onView(withTagValue(is("body"))).check(matches(isDisplayed()));
-        onView(withTagValue(is("body"))).check(matches(isEnabled()));
-        onView(withTagValue(is("body"))).check(matches(not(isActivated())));
-        onView(withTagValue(is("title"))).check(matches(not(isDisplayed())));
-        onView(withTagValue(is("icon_container"))).check(matches(not(isDisplayed())));
-        onView(withTagValue(is("action_container"))).check(matches(not(isDisplayed())));
+        onView(withText(body)).check(matches(isDisplayed()));
     }
 
     @Test
     public void testHeaderItemVisibility() {
         List<CarUiListItem> items = new ArrayList<>();
 
-        CharSequence title = "Test title";
-        CharSequence body = "Test body";
+        String title = "Test title";
+        String body = "Test body";
         CarUiListItem item = new CarUiHeaderListItem(title, body);
         items.add(item);
 
-        CharSequence title2 = "Test title2";
+        String title2 = "Test title2";
         item = new CarUiHeaderListItem(title2);
         items.add(item);
 
         mCarUiRecyclerView.post(
                 () -> mCarUiRecyclerView.setAdapter(CarUi.createListItemAdapter(mActivity, items)));
 
-        onView(withText(title.toString())).check(matches(isDisplayed()));
-        onView(withText(body.toString())).check(matches(isDisplayed()));
-        onView(withText(title2.toString())).check(matches(isDisplayed()));
+        onView(withText(title)).check(matches(isDisplayed()));
+        onView(withText(body)).check(matches(isDisplayed()));
+        onView(withText(title2)).check(matches(isDisplayed()));
     }
 
     @Test
@@ -147,14 +144,15 @@ public class CarUiListItemTest {
         List<CarUiListItem> items = new ArrayList<>();
 
         CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
-        item.setBody("Item that is disabled");
+        String body = "Item that is disabled";
+        item.setBody(body);
         item.setEnabled(false);
         items.add(item);
 
         mCarUiRecyclerView.post(
                 () -> mCarUiRecyclerView.setAdapter(CarUi.createListItemAdapter(mActivity, items)));
 
-        onView(withTagValue(is("body"))).check(matches(not(isEnabled())));
+        onView(withText(body)).check(matches(not(isEnabled())));
     }
 
     @Test
@@ -162,14 +160,15 @@ public class CarUiListItemTest {
         List<CarUiListItem> items = new ArrayList<>();
 
         CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.NONE);
-        item.setBody("Item that is disabled");
+        String body = "Item that is activated";
+        item.setBody(body);
         item.setActivated(true);
         items.add(item);
 
         mCarUiRecyclerView.post(
                 () -> mCarUiRecyclerView.setAdapter(CarUi.createListItemAdapter(mActivity, items)));
 
-        onView(withTagValue(is("body"))).check(matches(isActivated()));
+        onView(withText(body)).check(matches(isActivated()));
     }
 
     @Test
@@ -184,11 +183,9 @@ public class CarUiListItemTest {
         mCarUiRecyclerView.post(
                 () -> mCarUiRecyclerView.setAdapter(CarUi.createListItemAdapter(mActivity, items)));
 
-        onView(withTagValue(is("title"))).check(matches(isDisplayed()));
         onView(withText(title)).check(matches(isDisplayed()));
-        onView(withTagValue(is("body"))).check(matches(not(isDisplayed())));
-        onView(withTagValue(is("icon_container"))).check(matches(not(isDisplayed())));
-        onView(withTagValue(is("action_container"))).check(matches(isDisplayed()));
+        onView(withDrawable(mActivity, R.drawable.car_ui_icon_chevron)).check(
+                matches(isDisplayed()));
     }
 
     @Test
@@ -201,18 +198,14 @@ public class CarUiListItemTest {
         item.setTitle(title);
         item.setBody(body);
         item.setIcon(mActivity.getDrawable(R.drawable.car_ui_icon_close));
-        item.setPrimaryIconType(CarUiContentListItem.IconType.CONTENT);
         items.add(item);
 
         mCarUiRecyclerView.post(
                 () -> mCarUiRecyclerView.setAdapter(CarUi.createListItemAdapter(mActivity, items)));
 
-        onView(withTagValue(is("title"))).check(matches(isDisplayed()));
         onView(withText(title)).check(matches(isDisplayed()));
-        onView(withTagValue(is("body"))).check(matches(isDisplayed()));
         onView(withText(body)).check(matches(isDisplayed()));
-        onView(withTagValue(is("icon_container"))).check(matches(isDisplayed()));
-        onView(withTagValue(is("action_container"))).check(matches(not(isDisplayed())));
+        onView(withDrawable(mActivity, R.drawable.car_ui_icon_close)).check(matches(isDisplayed()));
     }
 
     @Test
@@ -223,28 +216,29 @@ public class CarUiListItemTest {
                 CarUiContentListItem.OnCheckedChangeListener.class);
 
         CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.CHECK_BOX);
-        item.setTitle("Test item with checkbox");
+        String title = "Test item with checkbox";
+        item.setTitle(title);
         item.setOnCheckedChangeListener(mockOnCheckedChangeListener);
         items.add(item);
 
         mCarUiRecyclerView.post(
                 () -> mCarUiRecyclerView.setAdapter(CarUi.createListItemAdapter(mActivity, items)));
 
-        onView(withTagValue(is("title"))).check(matches(isDisplayed()));
-        onView(withTagValue(is("checkbox_widget"))).check(matches(isDisplayed()));
-        onView(withTagValue(is("action_divider"))).check(matches(not(isDisplayed())));
+        onView(withText(title)).check(matches(isDisplayed()));
 
         // List item with checkbox should be initially unchecked.
-        onView(withTagValue(is("checkbox_widget"))).check(matches(isNotChecked()));
+        onView(allOf(instanceOf(CompoundButton.class), isDisplayed())).check(
+                matches(isNotChecked()));
         // Clicks anywhere on the item should toggle the checkbox
-        onView(withTagValue(is("title"))).perform(click());
-        onView(withTagValue(is("checkbox_widget"))).check(matches(isChecked()));
+        onView(withText(title)).perform(click());
+        onView(allOf(instanceOf(CompoundButton.class), isDisplayed())).check(matches(isChecked()));
         // Check that onCheckChangedListener was invoked.
         verify(mockOnCheckedChangeListener, times(1)).onCheckedChanged(item, true);
 
-        // Uncheck checkbox with click on the action container
-        onView(withTagValue(is("action_container"))).perform(click());
-        onView(withTagValue(is("checkbox_widget"))).check(matches(isNotChecked()));
+        // Uncheck checkbox with click on the checkbox
+        onView(allOf(instanceOf(CompoundButton.class), isDisplayed())).perform(click());
+        onView(allOf(instanceOf(CompoundButton.class), isDisplayed())).check(
+                matches(isNotChecked()));
         // Check that onCheckChangedListener was invoked.
         verify(mockOnCheckedChangeListener, times(1)).onCheckedChanged(item, false);
     }
@@ -257,28 +251,29 @@ public class CarUiListItemTest {
                 CarUiContentListItem.OnCheckedChangeListener.class);
 
         CarUiContentListItem item = new CarUiCheckBoxListItem();
-        item.setTitle("Test item with checkbox");
+        String title = "Test item with checkbox";
+        item.setTitle(title);
         item.setOnCheckedChangeListener(mockOnCheckedChangeListener);
         items.add(item);
 
         mCarUiRecyclerView.post(
                 () -> mCarUiRecyclerView.setAdapter(CarUi.createListItemAdapter(mActivity, items)));
 
-        onView(withTagValue(is("title"))).check(matches(isDisplayed()));
-        onView(withTagValue(is("checkbox_widget"))).check(matches(isDisplayed()));
-        onView(withTagValue(is("action_divider"))).check(matches(not(isDisplayed())));
+        onView(withText(title)).check(matches(isDisplayed()));
 
         // List item with checkbox should be initially unchecked.
-        onView(withTagValue(is("checkbox_widget"))).check(matches(isNotChecked()));
+        onView(allOf(instanceOf(CompoundButton.class), isDisplayed())).check(
+                matches(isNotChecked()));
         // Clicks anywhere on the item should toggle the checkbox
-        onView(withTagValue(is("title"))).perform(click());
-        onView(withTagValue(is("checkbox_widget"))).check(matches(isChecked()));
+        onView(withText(title)).perform(click());
+        onView(allOf(instanceOf(CompoundButton.class), isDisplayed())).check(matches(isChecked()));
         // Check that onCheckChangedListener was invoked.
         verify(mockOnCheckedChangeListener, times(1)).onCheckedChanged(item, true);
 
-        // Uncheck checkbox with click on the action container
-        onView(withTagValue(is("action_container"))).perform(click());
-        onView(withTagValue(is("checkbox_widget"))).check(matches(isNotChecked()));
+        // Uncheck checkbox with click on the checkbox
+        onView(allOf(instanceOf(CompoundButton.class), isDisplayed())).perform(click());
+        onView(allOf(instanceOf(CompoundButton.class), isDisplayed())).check(
+                matches(isNotChecked()));
         // Check that onCheckChangedListener was invoked.
         verify(mockOnCheckedChangeListener, times(1)).onCheckedChanged(item, false);
     }
@@ -288,7 +283,8 @@ public class CarUiListItemTest {
         List<CarUiListItem> items = new ArrayList<>();
 
         CarUiContentListItem item = new CarUiContentListItem(CarUiContentListItem.Action.SWITCH);
-        item.setBody("Test item with switch");
+        String body = "Test item with switch";
+        item.setBody(body);
         item.setChecked(true);
         item.setActionDividerVisible(true);
         items.add(item);
@@ -296,18 +292,17 @@ public class CarUiListItemTest {
         mCarUiRecyclerView.post(
                 () -> mCarUiRecyclerView.setAdapter(CarUi.createListItemAdapter(mActivity, items)));
 
-        onView(withTagValue(is("body"))).check(matches(isDisplayed()));
-        onView(withTagValue(is("switch_widget"))).check(matches(isDisplayed()));
-        onView(withTagValue(is("action_divider"))).check(matches(isDisplayed()));
+        onView(withText(body)).check(matches(isDisplayed()));
 
         // List item with checkbox should be initially checked.
-        onView(withTagValue(is("switch_widget"))).check(matches(isChecked()));
+        onView(allOf(instanceOf(CompoundButton.class), isDisplayed())).check(matches(isChecked()));
         // Clicks anywhere on the item should toggle the switch
-        onView(withTagValue(is("switch_widget"))).perform(click());
-        onView(withTagValue(is("switch_widget"))).check(matches(isNotChecked()));
-        // Uncheck checkbox with click on the action container
-        onView(withTagValue(is("body"))).perform(click());
-        onView(withTagValue(is("switch_widget"))).check(matches(isChecked()));
+        onView(allOf(instanceOf(CompoundButton.class), isDisplayed())).perform(click());
+        onView(allOf(instanceOf(CompoundButton.class), isDisplayed())).check(
+                matches(isNotChecked()));
+        // Uncheck checkbox with click on the body text
+        onView(withText(body)).perform(click());
+        onView(allOf(instanceOf(CompoundButton.class), isDisplayed())).check(matches(isChecked()));
     }
 
     @Test
@@ -316,25 +311,26 @@ public class CarUiListItemTest {
 
         CarUiContentListItem item = new CarUiContentListItem(
                 CarUiContentListItem.Action.RADIO_BUTTON);
-        item.setTitle("Test item with radio button");
+        String title = "Test item with radio button";
+        item.setTitle(title);
         item.setChecked(false);
         items.add(item);
 
         mCarUiRecyclerView.post(
                 () -> mCarUiRecyclerView.setAdapter(CarUi.createListItemAdapter(mActivity, items)));
 
-        onView(withTagValue(is("title"))).check(matches(isDisplayed()));
-        onView(withTagValue(is("radio_button_widget"))).check(matches(isDisplayed()));
+        onView(withText(title)).check(matches(isDisplayed()));
 
         // List item with checkbox should be initially not checked.
-        onView(withTagValue(is("radio_button_widget"))).check(matches(isNotChecked()));
+        onView(allOf(instanceOf(CompoundButton.class), isDisplayed())).check(
+                matches(isNotChecked()));
         // Clicks anywhere on the item should toggle the radio button.
-        onView(withTagValue(is("radio_button_widget"))).perform(click());
-        onView(withTagValue(is("radio_button_widget"))).check(matches(isChecked()));
+        onView(allOf(instanceOf(CompoundButton.class), isDisplayed())).perform(click());
+        onView(allOf(instanceOf(CompoundButton.class), isDisplayed())).check(matches(isChecked()));
 
         // Repeated clicks on a selected radio button should not toggle the element once checked.
-        onView(withTagValue(is("title"))).perform(click());
-        onView(withTagValue(is("radio_button_widget"))).check(matches(isChecked()));
+        onView(withText(title)).perform(click());
+        onView(allOf(instanceOf(CompoundButton.class), isDisplayed())).check(matches(isChecked()));
     }
 
     @Test
@@ -352,8 +348,8 @@ public class CarUiListItemTest {
         mCarUiRecyclerView.post(
                 () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items, true)));
 
-        onView(withTagValue(is("title"))).check(matches(withText(titleText)));
-        onView(withTagValue(is("body"))).check(matches(withText(bodyText)));
+        onView(withText(titleText)).check(matches(isDisplayed()));
+        onView(withText(bodyText)).check(matches(isDisplayed()));
     }
 
     @Test
@@ -367,24 +363,26 @@ public class CarUiListItemTest {
                 CarUiContentListItem.Action.NONE);
         item.setIcon(mActivity.getDrawable(R.drawable.car_ui_icon_close));
         item.setPrimaryIconType(CarUiContentListItem.IconType.AVATAR);
-        item.setTitle("Test item with listener");
-        item.setBody("Body text");
+        String title = "Test item with listener";
+        String body = "Body text";
+        item.setTitle(title);
+        item.setBody(body);
         item.setOnItemClickedListener(mockOnCheckedChangeListener);
         items.add(item);
 
         mCarUiRecyclerView.post(
                 () -> mCarUiRecyclerView.setAdapter(CarUi.createListItemAdapter(mActivity, items)));
 
-        onView(withTagValue(is("title"))).check(matches(isDisplayed()));
+        onView(withText(title)).check(matches(isDisplayed()));
 
         // Clicks anywhere on the item should toggle the listener
-        onView(withTagValue(is("title"))).perform(click());
+        onView(withText(title)).perform(click());
         verify(mockOnCheckedChangeListener, times(1)).onClick(item);
 
-        onView(withTagValue(is("body"))).perform(click());
+        onView(withText(body)).perform(click());
         verify(mockOnCheckedChangeListener, times(2)).onClick(item);
 
-        onView(withTagValue(is("icon_container"))).perform(click());
+        onView(withDrawable(mActivity, R.drawable.car_ui_icon_close)).perform(click());
         verify(mockOnCheckedChangeListener, times(3)).onClick(item);
     }
 
@@ -399,7 +397,8 @@ public class CarUiListItemTest {
 
         CarUiContentListItem item = new CarUiContentListItem(
                 CarUiContentListItem.Action.ICON);
-        item.setTitle("Test item with two listeners");
+        String title = "Test item with two listeners";
+        item.setTitle(title);
         item.setOnItemClickedListener(clickListener);
         item.setSupplementalIcon(
                 mActivity.getDrawable(R.drawable.car_ui_icon_close),
@@ -409,15 +408,15 @@ public class CarUiListItemTest {
         mCarUiRecyclerView.post(
                 () -> mCarUiRecyclerView.setAdapter(CarUi.createListItemAdapter(mActivity, items)));
 
-        onView(withTagValue(is("title"))).check(matches(isDisplayed()));
+        onView(withText(title)).check(matches(isDisplayed()));
 
         // Clicks anywhere on the item (except supplemental icon) should trigger the item click
         // listener.
-        onView(withTagValue(is("title"))).perform(click());
+        onView(withText(title)).perform(click());
         verify(clickListener, times(1)).onClick(item);
         verify(supplementalIconClickListener, times(0)).onClick(item);
 
-        onView(withTagValue(is("supplemental_icon"))).perform(click());
+        onView(withDrawable(mActivity, R.drawable.car_ui_icon_close)).perform(click());
         // Check that icon is argument for single call to click listener.
         verify(supplementalIconClickListener, times(1)).onClick(item);
 
@@ -436,16 +435,17 @@ public class CarUiListItemTest {
                 CarUiContentListItem.Action.ICON);
         item.setSupplementalIcon(mActivity.getDrawable(R.drawable.car_ui_icon_close));
         item.setOnItemClickedListener(mockedItemOnClickListener);
-        item.setTitle("Test item with listener");
+        String title = "Test item with listener";
+        item.setTitle(title);
         items.add(item);
 
         mCarUiRecyclerView.post(
                 () -> mCarUiRecyclerView.setAdapter(CarUi.createListItemAdapter(mActivity, items)));
 
-        onView(withTagValue(is("title"))).check(matches(isDisplayed()));
+        onView(withText(title)).check(matches(isDisplayed()));
 
         // Clicks anywhere on the icon should invoke listener.
-        onView(withTagValue(is("action_container"))).perform(click());
+        onView(withDrawable(mActivity, R.drawable.car_ui_icon_close)).perform(click());
         verify(mockedItemOnClickListener, times(1)).onClick(item);
     }
 
@@ -477,21 +477,22 @@ public class CarUiListItemTest {
                 mActivity.getDrawable(R.drawable.car_ui_icon_close),
                 mockedIconListener);
         item.setOnItemClickedListener(mockedItemOnClickListener);
-        item.setTitle("Test item with listeners");
+        String title = "Test item with listeners";
+        item.setTitle(title);
         items.add(item);
 
         mCarUiRecyclerView.post(
                 () -> mCarUiRecyclerView.setAdapter(CarUi.createListItemAdapter(mActivity, items)));
 
-        onView(withTagValue(is("title"))).check(matches(isDisplayed()));
+        onView(withText(title)).check(matches(isDisplayed()));
 
         // Clicks anywhere on the item (outside of the icon) should only invoke the item click
         // listener.
-        onView(withTagValue(is("title"))).perform(click());
+        onView(withText(title)).perform(click());
         verify(mockedItemOnClickListener, times(1)).onClick(item);
 
         // Clicks anywhere on the icon should invoke both listeners.
-        onView(withTagValue(is("action_container"))).perform(click());
+        onView(withDrawable(mActivity, R.drawable.car_ui_icon_close)).perform(click());
         verify(mockedItemOnClickListener, times(1)).onClick(item);
         verify(mockedIconListener, times(1)).onClick(item);
     }

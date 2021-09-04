@@ -47,6 +47,7 @@ import static com.android.car.ui.actions.LowLevelActions.pressAndHold;
 import static com.android.car.ui.actions.LowLevelActions.release;
 import static com.android.car.ui.actions.LowLevelActions.touchDownAndUp;
 import static com.android.car.ui.actions.ViewActions.waitForView;
+import static com.android.car.ui.matchers.ViewMatchers.doesNotExistOrIsNotDisplayed;
 import static com.android.car.ui.recyclerview.CarUiRecyclerView.ItemCap.UNLIMITED;
 import static com.android.car.ui.utils.ViewUtils.setRotaryScrollEnabled;
 
@@ -1328,7 +1329,7 @@ public class CarUiRecyclerViewTest {
             carUiRecyclerView.setAdapter(adapter);
         });
 
-        onView(withId(R.id.car_ui_scroll_bar)).check(doesNotExist());
+        onView(withId(R.id.car_ui_scroll_bar)).check(doesNotExistOrIsNotDisplayed());
         onView(withText(adapter.getItemText(0))).check(isLeftAlignedWith(withId(listId)));
         onView(withText(adapter.getItemText(0))).check(isRightAlignedWith(withId(listId)));
     }
