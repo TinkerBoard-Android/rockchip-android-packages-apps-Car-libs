@@ -18,6 +18,29 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
+android_library {
+    name: "car-messenger-common",
+
+    manifest: "AndroidManifest-unbundled.xml",
+
+    srcs: ["src/**/*.java"],
+
+    optimize: {
+        enabled: false,
+    },
+
+    sdk_version: "system_current",
+
+    libs: ["android.car-system-stubs",],
+
+    static_libs: [
+        "androidx.legacy_legacy-support-v4",
+        "androidx.annotation_annotation",
+        "car-assist-lib",
+        "car-telephony-common",
+    ],
+}
+
 // Car Messaging Models, Unbundled
 android_library {
     name: "car-messaging-models",
