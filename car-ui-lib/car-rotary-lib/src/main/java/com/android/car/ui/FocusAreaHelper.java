@@ -188,6 +188,13 @@ class FocusAreaHelper {
 
     private final OnGlobalFocusChangeListener mFocusChangeListener;
 
+    /**
+     * Whether to restore focus when Android frameworks want to focus inside {@link #mFocusArea}.
+     * This should be false if {@link #mFocusArea} is in a {@link com.android.wm.shell.TaskView}.
+     * The default value is true.
+     */
+    private boolean mShouldRestoreFocus = true;
+
     FocusAreaHelper(@NonNull ViewGroup viewGroup, @Nullable AttributeSet attrs) {
         mFocusArea = viewGroup;
 
@@ -469,6 +476,11 @@ class FocusAreaHelper {
 
     void onAttachedToWindow() {
         mFocusArea.getViewTreeObserver().addOnGlobalFocusChangeListener(mFocusChangeListener);
+
+        // Disable restore focus behavior if mFocusArea is in a TaskView.
+        if (mShouldRestoreFocus && ViewUtils.isInMultiWindowMode(mFocusArea)) {
+            mShouldRestoreFocus = false;
+        }
     }
 
     void onDetachedFromWindow() {
@@ -476,10 +488,15 @@ class FocusAreaHelper {
     }
 
     boolean onWindowFocusChanged(boolean hasWindowFocus) {
+        // TODO(b/201700195): sometimes onWindowFocusChanged() won't be called when window focus
+        //  has changed, so add the log for debugging.
+        Log.d(TAG, "The window of Activity ["
+                + ViewUtils.findActivity(mFocusArea.getContext())
+                + (hasWindowFocus ? "] gained" : "] lost") + " focus");
         // To ensure the focus is initialized properly in rotary mode when there is a window focus
         // change, mFocusArea will grab the focus if nothing is focused or the currently
         // focused view's FocusLevel is lower than REGULAR_FOCUS.
-        if (hasWindowFocus && !mFocusArea.isInTouchMode()) {
+        if (hasWindowFocus && mShouldRestoreFocus && !mFocusArea.isInTouchMode()) {
             maybeInitFocus();
             return true;
         }
@@ -665,10 +682,16 @@ class FocusAreaHelper {
     }
 
     boolean onRequestFocusInDescendants() {
+        if (!mShouldRestoreFocus) {
+            return false;
+        }
         return maybeAdjustFocus();
     }
 
     boolean restoreDefaultFocus() {
+        if (!mShouldRestoreFocus) {
+            return false;
+        }
         return maybeAdjustFocus();
     }
 

@@ -91,7 +91,7 @@ public class FocusArea extends LinearLayout implements IFocusArea {
 
     @Override
     public void onWindowFocusChanged(boolean hasWindowFocus) {
-        if (!mFocusAreaHelper.onWindowFocusChanged(hasWindowFocus())) {
+        if (!mFocusAreaHelper.onWindowFocusChanged(hasWindowFocus)) {
             super.onWindowFocusChanged(hasWindowFocus);
         }
     }
