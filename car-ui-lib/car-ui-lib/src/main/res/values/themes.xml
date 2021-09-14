@@ -212,6 +212,7 @@
 
         <!-- textAppearance -->
         <item name="android:textAppearance">@style/TextAppearance.CarUi</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
         <!--@color/transparent does not completely remove highlight  -->
         <item name="android:textColorHighlight">#00FFFFFF</item>
     </style>
