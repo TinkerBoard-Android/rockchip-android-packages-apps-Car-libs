@@ -1,14 +1,14 @@
 # Inherit from this product to include the "Reference Design" RROs for CarUi
 
-PRODUCT_PACKAGES += \
-   car-ui-lib-plugin \
+# PRODUCT_PACKAGES += \
+#    car-ui-lib-plugin \
 
 PRODUCT_PRODUCT_PROPERTIES += \
     ro.build.automotive.car.ui.plugin.package.name=com.chassis.car.ui.plugin \
     persist.automotive.car.ui.plugin.enabled=false \
 
-PRODUCT_COPY_FILES += \
-    packages/apps/Car/libs/car-ui-lib/referencedesign/car-ui-lib-preinstalled-packages.xml:system/etc/sysconfig/car-ui-lib-preinstalled-packages.xml \
+# PRODUCT_COPY_FILES += \
+    # packages/apps/Car/libs/car-ui-lib/referencedesign/car-ui-lib-preinstalled-packages.xml:system/etc/sysconfig/car-ui-lib-preinstalled-packages.xml \
 
 
 # Include generated RROs
