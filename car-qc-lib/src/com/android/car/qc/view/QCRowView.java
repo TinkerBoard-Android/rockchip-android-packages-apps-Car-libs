@@ -212,7 +212,7 @@ public class QCRowView extends FrameLayout {
         if (row.getStartIcon() != null) {
             mStartIcon.setVisibility(VISIBLE);
             Drawable drawable = row.getStartIcon().loadDrawable(getContext());
-            if (drawable != null) {
+            if (drawable != null && row.isStartIconTintable()) {
                 if (mStartIconTint == 0) {
                     mStartIconTint = getContext().getColor(R.color.qc_start_icon_color);
                 }

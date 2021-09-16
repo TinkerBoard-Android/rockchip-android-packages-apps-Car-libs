@@ -39,13 +39,14 @@ public class QCRow extends QCItem {
     private final String mTitle;
     private final String mSubtitle;
     private final Icon mStartIcon;
+    private final boolean mIsStartIconTintable;
     private final QCSlider mSlider;
     private final List<QCActionItem> mStartItems;
     private final List<QCActionItem> mEndItems;
     private final PendingIntent mPrimaryAction;
 
     public QCRow(@Nullable String title, @Nullable String subtitle,
-            @Nullable PendingIntent primaryAction, @Nullable Icon startIcon,
+            @Nullable PendingIntent primaryAction, @Nullable Icon startIcon, boolean isIconTintable,
             @Nullable QCSlider slider, @NonNull List<QCActionItem> startItems,
             @NonNull List<QCActionItem> endItems) {
         super(QC_TYPE_ROW);
@@ -53,6 +54,7 @@ public class QCRow extends QCItem {
         mSubtitle = subtitle;
         mPrimaryAction = primaryAction;
         mStartIcon = startIcon;
+        mIsStartIconTintable = isIconTintable;
         mSlider = slider;
         mStartItems = Collections.unmodifiableList(startItems);
         mEndItems = Collections.unmodifiableList(endItems);
@@ -68,6 +70,7 @@ public class QCRow extends QCItem {
         } else {
             mStartIcon = null;
         }
+        mIsStartIconTintable = in.readBoolean();
         boolean hasSlider = in.readBoolean();
         if (hasSlider) {
             mSlider = QCSlider.CREATOR.createFromParcel(in);
@@ -104,6 +107,7 @@ public class QCRow extends QCItem {
         if (hasStartIcon) {
             mStartIcon.writeToParcel(dest, flags);
         }
+        dest.writeBoolean(mIsStartIconTintable);
         boolean hasSlider = mSlider != null;
         dest.writeBoolean(hasSlider);
         if (hasSlider) {
@@ -144,6 +148,10 @@ public class QCRow extends QCItem {
         return mStartIcon;
     }
 
+    public boolean isStartIconTintable() {
+        return mIsStartIconTintable;
+    }
+
     @Nullable
     public QCSlider getSlider() {
         return mSlider;
@@ -178,6 +186,7 @@ public class QCRow extends QCItem {
         private final List<QCActionItem> mStartItems = new ArrayList<>();
         private final List<QCActionItem> mEndItems = new ArrayList<>();
         private Icon mStartIcon;
+        private boolean mIsStartIconTintable = true;
         private String mTitle;
         private String mSubtitle;
         private QCSlider mSlider;
@@ -204,6 +213,14 @@ public class QCRow extends QCItem {
          */
         public Builder setIcon(@Nullable Icon icon) {
             mStartIcon = icon;
+            return this;
+        }
+
+        /**
+         * Sets whether or not the row icon is tintable.
+         */
+        public Builder setIconTintable(boolean tintable) {
+            mIsStartIconTintable = tintable;
             return this;
         }
 
@@ -243,8 +260,8 @@ public class QCRow extends QCItem {
          * Builds the final {@link QCRow}.
          */
         public QCRow build() {
-            return new QCRow(mTitle, mSubtitle, mPrimaryAction, mStartIcon, mSlider, mStartItems,
-                    mEndItems);
+            return new QCRow(mTitle, mSubtitle, mPrimaryAction, mStartIcon, mIsStartIconTintable,
+                    mSlider, mStartItems, mEndItems);
         }
     }
 }
