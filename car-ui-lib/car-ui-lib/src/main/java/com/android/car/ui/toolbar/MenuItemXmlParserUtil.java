@@ -15,6 +15,9 @@
  */
 package com.android.car.ui.toolbar;
 
+import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
+
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -44,6 +47,7 @@ import java.util.List;
  * Apps don't need to use this, as there also exists a {@link ToolbarController#setMenuItems(int)}
  * function that will include the same functionality.
  */
+@TargetApi(MIN_TARGET_API)
 public class MenuItemXmlParserUtil {
 
     private MenuItemXmlParserUtil() {}

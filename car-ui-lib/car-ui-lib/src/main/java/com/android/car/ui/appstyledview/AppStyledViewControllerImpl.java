@@ -16,6 +16,9 @@
 
 package com.android.car.ui.appstyledview;
 
+import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
+
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.DisplayMetrics;
@@ -38,6 +41,7 @@ import com.android.car.ui.R;
 /**
  * Controller to interact with the app styled view.
  */
+@TargetApi(MIN_TARGET_API)
 public class AppStyledViewControllerImpl implements AppStyledViewController {
 
     private static final double VISIBLE_SCREEN_PERCENTAGE = 0.9;

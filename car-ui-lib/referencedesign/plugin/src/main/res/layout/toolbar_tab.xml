@@ -9,6 +9,8 @@
     android:paddingEnd="12dp"
     android:gravity="center"
     android:background="?android:attr/selectableItemBackground">
+    <!-- we need to use android:tint instead of app:tint, because we're
+        not using classes from androidx/appcompat such as AppCompatImageView -->
     <ImageView
         android:id="@+id/car_ui_toolbar_tab_item_icon"
         android:layout_width="36dp"

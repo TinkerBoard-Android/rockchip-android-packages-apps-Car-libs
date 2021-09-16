@@ -23,6 +23,7 @@ import static org.junit.Assert.assertThrows;
 
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
@@ -108,7 +109,7 @@ public class CarUiImeSearchListItemTest {
 
             @Override
             public int getOpacity() {
-                return 0;
+                return PixelFormat.UNKNOWN;
             }
         };
     }

@@ -16,6 +16,9 @@
 
 package com.android.car.ui.matchers;
 
+import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
+
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -29,6 +32,7 @@ import androidx.annotation.NonNull;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 
+@TargetApi(MIN_TARGET_API)
 public class DrawableMatcher extends TypeSafeMatcher<View> {
 
     private final Drawable mDrawable;

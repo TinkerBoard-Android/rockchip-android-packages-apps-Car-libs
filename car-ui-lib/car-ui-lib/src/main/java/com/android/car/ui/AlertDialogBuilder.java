@@ -17,6 +17,7 @@ package com.android.car.ui;
 
 import static android.view.WindowInsets.Type.ime;
 
+import static com.android.car.ui.core.CarUi.TARGET_API_R;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.ADD_DESC_TITLE_TO_CONTENT_AREA;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.ADD_DESC_TO_CONTENT_AREA;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_ACTION;
@@ -48,6 +49,7 @@ import androidx.annotation.ArrayRes;
 import androidx.annotation.AttrRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -59,6 +61,7 @@ import com.android.car.ui.utils.CarUiUtils;
 /**
  * Wrapper for AlertDialog.Builder
  */
+@RequiresApi(TARGET_API_R)
 public class AlertDialogBuilder {
 
     private AlertDialog.Builder mBuilder;

@@ -15,11 +15,13 @@
  */
 package com.android.car.ui.recyclerview;
 
+import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
 import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
@@ -47,6 +49,7 @@ import com.android.car.ui.utils.CarUiUtils;
  * <p>Inspired by {@code androidx.car.widget.PagedListView}. Most pagination and scrolling logic
  * has been ported from the PLV with minor updates.
  */
+@TargetApi(MIN_TARGET_API)
 class DefaultScrollBar implements ScrollBar {
     private final SparseArray<Integer> mChildHeightByAdapterPosition = new SparseArray();
     private final Handler mHandler = new Handler(Looper.getMainLooper());

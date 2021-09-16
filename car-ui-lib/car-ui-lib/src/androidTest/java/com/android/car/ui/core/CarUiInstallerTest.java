@@ -15,14 +15,18 @@
  */
 package com.android.car.ui.core;
 
+import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.net.Uri;
 
 import org.junit.Test;
 
+@TargetApi(MIN_TARGET_API)
 public class CarUiInstallerTest {
     @Test
     public void test_CarUiInstallerCRUDMethods_DoNothing() {

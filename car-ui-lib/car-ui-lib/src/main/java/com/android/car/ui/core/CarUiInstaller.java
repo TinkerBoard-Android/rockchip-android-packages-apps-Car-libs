@@ -15,6 +15,9 @@
  */
 package com.android.car.ui.core;
 
+import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
+
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Application;
 import android.content.ComponentName;
@@ -29,6 +32,7 @@ import android.view.LayoutInflater;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import com.android.car.ui.CarUiLayoutInflaterFactory;
@@ -55,6 +59,9 @@ import java.util.Arrays;
  * {@link BaseLayoutController} class otherwise the base layout will be loaded
  * by the wrong classloader. And then calls to {@see CarUi#getToolbar(Activity)} will return null.
  */
+// TODO: (b/200322953)
+@SuppressLint("LogConditional")
+@RequiresApi(MIN_TARGET_API)
 public class CarUiInstaller extends ContentProvider {
 
     private static final String TAG = "CarUiInstaller";
