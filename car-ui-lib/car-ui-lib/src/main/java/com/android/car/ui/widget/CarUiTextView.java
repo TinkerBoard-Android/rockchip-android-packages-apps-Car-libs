@@ -16,7 +16,10 @@
 
 package com.android.car.ui.widget;
 
+import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
+
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.TextView;
@@ -35,6 +38,7 @@ import java.util.List;
  * CarUiText}.
  */
 @SuppressLint("AppCompatCustomView")
+@TargetApi(MIN_TARGET_API)
 public abstract class CarUiTextView extends TextView {
 
     /**

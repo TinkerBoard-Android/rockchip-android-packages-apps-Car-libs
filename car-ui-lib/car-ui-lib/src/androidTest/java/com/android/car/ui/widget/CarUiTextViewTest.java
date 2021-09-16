@@ -23,10 +23,13 @@ import static androidx.test.espresso.matcher.ViewMatchers.withHint;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
+import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
+
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 
+import android.annotation.TargetApi;
 import android.graphics.Color;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -52,6 +55,7 @@ import java.util.List;
 /**
  * Unit tests for {@link CarUiTextViewTest}.
  */
+@TargetApi(MIN_TARGET_API)
 public class CarUiTextViewTest {
     private static final String ELLIPSIS = "…";
     private static final CharSequence LONG_CHAR_SEQUENCE =

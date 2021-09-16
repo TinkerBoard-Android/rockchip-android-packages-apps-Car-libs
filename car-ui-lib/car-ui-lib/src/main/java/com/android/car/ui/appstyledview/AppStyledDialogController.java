@@ -16,6 +16,9 @@
 
 package com.android.car.ui.appstyledview;
 
+import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
+
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.view.View;
 
@@ -30,6 +33,7 @@ import java.util.Objects;
 /**
  * Controller to interact with the app styled view UI.
  */
+@TargetApi(MIN_TARGET_API)
 public final class AppStyledDialogController {
 
     @NonNull

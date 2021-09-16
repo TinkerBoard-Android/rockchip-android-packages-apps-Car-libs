@@ -15,15 +15,19 @@
  */
 package com.android.car.ui.pluginsupport;
 
+import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.annotation.TargetApi;
 import android.content.pm.PackageInfo;
 
 import androidx.test.core.content.pm.PackageInfoBuilder;
 
 import org.junit.Test;
 
+@TargetApi(MIN_TARGET_API)
 public class PluginSpecifierTest {
 
     @Test

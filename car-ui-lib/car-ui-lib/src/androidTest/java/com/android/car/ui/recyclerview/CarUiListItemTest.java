@@ -25,6 +25,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.isEnabled;
 import static androidx.test.espresso.matcher.ViewMatchers.isNotChecked;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
+import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
 import static com.android.car.ui.matchers.ViewMatchers.isActivated;
 import static com.android.car.ui.matchers.ViewMatchers.withDrawable;
 
@@ -39,6 +40,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.annotation.TargetApi;
 import android.widget.CompoundButton;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -61,6 +63,7 @@ import java.util.List;
  * Unit tests for {@link CarUiListItem}.
  */
 @RunWith(Parameterized.class)
+@TargetApi(MIN_TARGET_API)
 public class CarUiListItemTest {
     @Rule
     public ActivityScenarioRule<CarUiRecyclerViewTestActivity> mActivityRule =
