@@ -324,29 +324,68 @@ public final class CarUiUtils {
      * {@link DrawableStateView#setExtraDrawableState(int[], int[])}
      */
     public static void makeAllViewsUxRestricted(@Nullable View view, boolean restricted) {
-        if (view instanceof DrawableStateView) {
-            if (sRestrictedState == null) {
-                int androidStateUxRestricted = view.getResources()
-                        .getIdentifier("state_ux_restricted", "attr", "android");
-
-                if (androidStateUxRestricted == 0) {
-                    sRestrictedState = new int[] { R.attr.state_ux_restricted };
-                } else {
-                    sRestrictedState = new int[] {
-                            R.attr.state_ux_restricted,
-                            androidStateUxRestricted
-                    };
-                }
-            }
-
-            ((DrawableStateView) view).setExtraDrawableState(
-                    restricted ? sRestrictedState : null, null);
+        if (view == null) {
+            return;
         }
+        initializeRestrictedState(view);
+        applyStatesToAllViews(view, restricted ? sRestrictedState : null, null);
+    }
 
+    /**
+     * Traverses the view hierarchy, and whenever it sees a {@link DrawableStateView}, adds
+     * the relevant state_enabled and state_ux_restricted to the view.
+     *
+     * Note that this will remove any other drawable states added by other calls to
+     * {@link DrawableStateView#setExtraDrawableState(int[], int[])}
+     */
+    public static void makeAllViewsEnabledAndUxRestricted(@Nullable View view, boolean enabled,
+            boolean restricted) {
+        if (view == null) {
+            return;
+        }
+        initializeRestrictedState(view);
+        int[] statesToAdd = null;
+        if (enabled) {
+            if (restricted) {
+                statesToAdd = new int[sRestrictedState.length + 1];
+                statesToAdd[0] = android.R.attr.state_enabled;
+                System.arraycopy(sRestrictedState, 0, statesToAdd, 1, sRestrictedState.length);
+            } else {
+                statesToAdd = new int[] {android.R.attr.state_enabled};
+            }
+        } else if (restricted) {
+            statesToAdd = sRestrictedState;
+        }
+        int[] statesToRemove = enabled ? null : new int[] {android.R.attr.state_enabled};
+        applyStatesToAllViews(view, statesToAdd, statesToRemove);
+    }
+
+    private static void initializeRestrictedState(@NonNull View view) {
+        if (sRestrictedState != null) {
+            return;
+        }
+        int androidStateUxRestricted = view.getResources()
+                .getIdentifier("state_ux_restricted", "attr", "android");
+
+        if (androidStateUxRestricted == 0) {
+            sRestrictedState = new int[] { R.attr.state_ux_restricted };
+        } else {
+            sRestrictedState = new int[] {
+                    R.attr.state_ux_restricted,
+                    androidStateUxRestricted
+            };
+        }
+    }
+
+    private static void applyStatesToAllViews(@NonNull View view, int[] statesToAdd,
+            int[] statesToRemove) {
+        if (view instanceof DrawableStateView) {
+            ((DrawableStateView) view).setExtraDrawableState(statesToAdd, statesToRemove);
+        }
         if (view instanceof ViewGroup) {
             ViewGroup vg = (ViewGroup) view;
             for (int i = 0; i < vg.getChildCount(); i++) {
-                makeAllViewsUxRestricted(vg.getChildAt(i), restricted);
+                applyStatesToAllViews(vg.getChildAt(i), statesToAdd, statesToRemove);
             }
         }
     }

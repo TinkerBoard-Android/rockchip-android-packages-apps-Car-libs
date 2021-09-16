@@ -35,11 +35,14 @@ import java.util.function.Consumer;
  * the preference if there is one of fragment, intent or onPreferenceClickListener set.
  */
 @SuppressWarnings("AndroidJdkLibsChecker")
-public class CarUiPreference extends Preference implements DisabledPreferenceCallback {
+public class CarUiPreference extends Preference implements DisabledPreferenceCallback,
+        ClickableWhileDisabledPreference {
     private boolean mShowChevron;
 
     private Consumer<Preference> mRestrictedClickListener;
+    private Consumer<Preference> mDisabledClickListener;
     private boolean mUxRestricted = false;
+    private boolean mIsClickableWhileDisabled = false;
 
     public CarUiPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
@@ -68,6 +71,11 @@ public class CarUiPreference extends Preference implements DisabledPreferenceCal
 
         mShowChevron = a.getBoolean(R.styleable.CarUiPreference_showChevron, true);
         mUxRestricted = a.getBoolean(R.styleable.CarUiPreference_car_ui_ux_restricted, false);
+        mIsClickableWhileDisabled = a.getBoolean(
+                R.styleable.CarUiPreference_car_ui_clickable_while_disabled, false);
+        if (mIsClickableWhileDisabled) {
+            super.setShouldDisableView(false);
+        }
 
         a.recycle();
     }
@@ -76,7 +84,8 @@ public class CarUiPreference extends Preference implements DisabledPreferenceCal
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
 
-        CarUiUtils.makeAllViewsUxRestricted(holder.itemView, isUxRestricted());
+        CarUiUtils.makeAllViewsEnabledAndUxRestricted(holder.itemView, isEnabled(),
+                isUxRestricted());
     }
 
     @Override
@@ -109,13 +118,23 @@ public class CarUiPreference extends Preference implements DisabledPreferenceCal
     @Override
     @SuppressWarnings("RestrictTo")
     public void performClick() {
-        if ((isEnabled() || isSelectable()) && isUxRestricted()) {
+        if (!isEnabled() && mIsClickableWhileDisabled) {
+            if (mDisabledClickListener != null) {
+                mDisabledClickListener.accept(this);
+            }
+        } else if ((isEnabled() || isSelectable()) && isUxRestricted()) {
             if (mRestrictedClickListener != null) {
                 mRestrictedClickListener.accept(this);
             }
         } else {
             super.performClick();
         }
+    }
+
+    @Override
+    public void setShouldDisableView(boolean shouldDisableView) {
+        throw new UnsupportedOperationException("android:shouldDisableView is"
+                + "unsupported on CarUiPreferences");
     }
 
     public void setShowChevron(boolean showChevron) {
@@ -142,5 +161,29 @@ public class CarUiPreference extends Preference implements DisabledPreferenceCal
     public void setUxRestricted(boolean restricted) {
         mUxRestricted = restricted;
         notifyChanged();
+    }
+
+    @Override
+    public void setClickableWhileDisabled(boolean clickableWhileDisabled) {
+        if (mIsClickableWhileDisabled != clickableWhileDisabled) {
+            super.setShouldDisableView(!clickableWhileDisabled);
+            mIsClickableWhileDisabled = clickableWhileDisabled;
+            notifyChanged();
+        }
+    }
+
+    @Override
+    public boolean isClickableWhileDisabled() {
+        return mIsClickableWhileDisabled;
+    }
+
+    @Override
+    public void setDisabledClickListener(Consumer<Preference> listener) {
+        mDisabledClickListener = listener;
+    }
+
+    @Override
+    public Consumer<Preference> getDisabledClickListener() {
+        return mDisabledClickListener;
     }
 }

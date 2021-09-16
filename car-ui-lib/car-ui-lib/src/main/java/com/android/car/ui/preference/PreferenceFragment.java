@@ -346,11 +346,14 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
         to.setIconSpaceReserved(from.isIconSpaceReserved());
         to.setWidgetLayoutResource(from.getWidgetLayoutResource());
         to.setPreferenceDataStore(from.getPreferenceDataStore());
-        to.setShouldDisableView(from.getShouldDisableView());
         to.setSingleLineTitle(from.isSingleLineTitle());
         to.setVisible(from.isVisible());
         to.setLayoutResource(from.getLayoutResource());
         to.setCopyingEnabled(from.isCopyingEnabled());
+
+        if (!(to instanceof UxRestrictablePreference)) {
+            to.setShouldDisableView(from.getShouldDisableView());
+        }
 
         if (from.getSummaryProvider() != null) {
             to.setSummaryProvider(from.getSummaryProvider());

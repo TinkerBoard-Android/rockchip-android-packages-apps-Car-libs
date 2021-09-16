@@ -24,7 +24,6 @@ import android.view.View;
 import android.widget.Switch;
 
 import androidx.annotation.Nullable;
-import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
 import com.android.car.ui.R;
@@ -68,19 +67,10 @@ public class CarUiTwoActionSwitchPreference extends CarUiTwoActionBasePreference
 
     @Override
     protected void performSecondaryActionClickInternal() {
-        if (isSecondaryActionEnabled()) {
-            if (isUxRestricted()) {
-                Consumer<Preference> restrictedListener = getOnClickWhileRestrictedListener();
-                if (restrictedListener != null) {
-                    restrictedListener.accept(this);
-                }
-            } else {
-                mSecondaryActionChecked = !mSecondaryActionChecked;
-                notifyChanged();
-                if (mSecondaryActionOnClickListener != null) {
-                    mSecondaryActionOnClickListener.accept(mSecondaryActionChecked);
-                }
-            }
+        mSecondaryActionChecked = !mSecondaryActionChecked;
+        notifyChanged();
+        if (mSecondaryActionOnClickListener != null) {
+            mSecondaryActionOnClickListener.accept(mSecondaryActionChecked);
         }
     }
 
@@ -100,16 +90,20 @@ public class CarUiTwoActionSwitchPreference extends CarUiTwoActionBasePreference
         holder.itemView.setFocusable(false);
         holder.itemView.setClickable(false);
         firstActionContainer.setOnClickListener(this::performClickUnrestricted);
-        firstActionContainer.setEnabled(isEnabled() || isUxRestricted());
-        firstActionContainer.setFocusable(isEnabled() || isUxRestricted());
+        firstActionContainer.setEnabled(
+                isEnabled() || isUxRestricted() || isClickableWhileDisabled());
+        firstActionContainer.setFocusable(
+                isEnabled() || isUxRestricted() || isClickableWhileDisabled());
 
         secondActionContainer.setVisibility(mSecondaryActionVisible ? View.VISIBLE : View.GONE);
         s.setChecked(mSecondaryActionChecked);
         s.setEnabled(isSecondaryActionEnabled());
 
-        secondaryAction.setOnClickListener(v -> performSecondaryActionClickInternal());
-        secondaryAction.setEnabled(isSecondaryActionEnabled() || isUxRestricted());
-        secondaryAction.setFocusable(isSecondaryActionEnabled() || isUxRestricted());
+        secondaryAction.setOnClickListener(v -> performSecondaryActionClick());
+        secondaryAction.setEnabled(
+                isSecondaryActionEnabled() || isUxRestricted() || isClickableWhileDisabled());
+        secondaryAction.setFocusable(
+                isSecondaryActionEnabled() || isUxRestricted() || isClickableWhileDisabled());
     }
 
     /**

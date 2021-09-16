@@ -32,13 +32,16 @@ import java.util.function.Consumer;
 
 /**
  * This class is the same as the base {@link SwitchPreference} class, except it implements
- * {@link UxRestrictablePreference}
+ * {@link UxRestrictablePreference} and {@link ClickableWhileDisabledPreference}
  */
 @SuppressWarnings("AndroidJdkLibsChecker")
-public class CarUiSwitchPreference extends SwitchPreference implements DisabledPreferenceCallback {
+public class CarUiSwitchPreference extends SwitchPreference implements DisabledPreferenceCallback,
+        ClickableWhileDisabledPreference {
 
     private Consumer<Preference> mRestrictedClickListener;
+    private Consumer<Preference> mDisabledClickListener;
     private boolean mUxRestricted = false;
+    private boolean mIsClickableWhileDisabled = false;
 
     public CarUiSwitchPreference(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
@@ -64,6 +67,11 @@ public class CarUiSwitchPreference extends SwitchPreference implements DisabledP
     private void init(AttributeSet attrs) {
         TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.CarUiPreference);
         mUxRestricted = a.getBoolean(R.styleable.CarUiPreference_car_ui_ux_restricted, false);
+        mIsClickableWhileDisabled = a.getBoolean(
+                R.styleable.CarUiPreference_car_ui_clickable_while_disabled, false);
+        if (mIsClickableWhileDisabled) {
+            super.setShouldDisableView(false);
+        }
         a.recycle();
     }
 
@@ -71,19 +79,30 @@ public class CarUiSwitchPreference extends SwitchPreference implements DisabledP
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
 
-        CarUiUtils.makeAllViewsUxRestricted(holder.itemView, isUxRestricted());
+        CarUiUtils.makeAllViewsEnabledAndUxRestricted(holder.itemView, isEnabled(),
+                isUxRestricted());
     }
 
     @Override
     @SuppressWarnings("RestrictTo")
     public void performClick() {
-        if ((isEnabled() || isSelectable()) && isUxRestricted()) {
+        if (!isEnabled() && mIsClickableWhileDisabled) {
+            if (mDisabledClickListener != null) {
+                mDisabledClickListener.accept(this);
+            }
+        } else if ((isEnabled() || isSelectable()) && isUxRestricted()) {
             if (mRestrictedClickListener != null) {
                 mRestrictedClickListener.accept(this);
             }
         } else {
             super.performClick();
         }
+    }
+
+    @Override
+    public void setShouldDisableView(boolean shouldDisableView) {
+        throw new UnsupportedOperationException("Dynamically setting shouldDisableView is"
+                + "unsupported in CarUiPreferences");
     }
 
     @Override
@@ -108,5 +127,29 @@ public class CarUiSwitchPreference extends SwitchPreference implements DisabledP
     @Override
     public Consumer<Preference> getOnClickWhileRestrictedListener() {
         return mRestrictedClickListener;
+    }
+
+    @Override
+    public void setClickableWhileDisabled(boolean clickableWhileDisabled) {
+        if (mIsClickableWhileDisabled != clickableWhileDisabled) {
+            super.setShouldDisableView(!clickableWhileDisabled);
+            mIsClickableWhileDisabled = clickableWhileDisabled;
+            notifyChanged();
+        }
+    }
+
+    @Override
+    public boolean isClickableWhileDisabled() {
+        return mIsClickableWhileDisabled;
+    }
+
+    @Override
+    public void setDisabledClickListener(Consumer<Preference> listener) {
+        mDisabledClickListener = listener;
+    }
+
+    @Override
+    public Consumer<Preference> getDisabledClickListener() {
+        return mDisabledClickListener;
     }
 }
