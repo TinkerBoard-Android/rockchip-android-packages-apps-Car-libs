@@ -23,9 +23,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.car.ui.plugin.oemapis.recyclerview.AdapterOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.ViewHolderOEMV1;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * Wrapper class that passes the data to car-ui via AdapterOEMV1 interface
  */
@@ -34,8 +31,6 @@ public final class CarUiListItemAdapterAdapterV1 extends
 
     @NonNull
     private AdapterOEMV1 mAdapter;
-    @NonNull
-    private Set<RecyclerView.AdapterDataObserver> mDataObservers = new HashSet<>();
 
     public CarUiListItemAdapterAdapterV1(@NonNull AdapterOEMV1 adapter) {
         this.mAdapter = adapter;
@@ -88,18 +83,6 @@ public final class CarUiListItemAdapterAdapterV1 extends
     }
 
     @Override
-    public void registerAdapterDataObserver(@NonNull RecyclerView.AdapterDataObserver observer) {
-        mDataObservers.add(observer);
-        super.registerAdapterDataObserver(observer);
-    }
-
-    @Override
-    public void unregisterAdapterDataObserver(@NonNull RecyclerView.AdapterDataObserver observer) {
-        mDataObservers.remove(observer);
-        super.unregisterAdapterDataObserver(observer);
-    }
-
-    @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         // TODO: can we return something other than null here?
         mAdapter.onAttachedToRecyclerView(null);
@@ -107,9 +90,6 @@ public final class CarUiListItemAdapterAdapterV1 extends
 
     @Override
     public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
-        for (RecyclerView.AdapterDataObserver observer: mDataObservers) {
-            super.unregisterAdapterDataObserver(observer);
-        }
         // TODO: can we return something other than null here?
         mAdapter.onDetachedFromRecyclerView(null);
     }

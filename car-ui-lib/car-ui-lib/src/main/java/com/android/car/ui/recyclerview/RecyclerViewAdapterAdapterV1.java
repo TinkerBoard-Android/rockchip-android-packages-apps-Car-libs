@@ -45,8 +45,6 @@ public final class RecyclerViewAdapterAdapterV1
     private final Adapter mAdapter;
     @NonNull
     private final Context mAppContext;
-    @Nullable
-    private RecyclerView mRecyclerView;
     @NonNull
     private List<AdapterDataObserverOEMV1> mAdapterDataObservers = new ArrayList<>();
 
@@ -145,7 +143,8 @@ public final class RecyclerViewAdapterAdapterV1
 
     @Override
     public void onAttachedToRecyclerView(RecyclerViewOEMV1 recyclerView) {
-        mAdapter.onAttachedToRecyclerView(mRecyclerView);
+        // TODO: can we return something other than null here?
+        mAdapter.onAttachedToRecyclerView(null);
         mAdapter.registerAdapterDataObserver(mAdapterDataObserver);
     }
 
@@ -165,7 +164,8 @@ public final class RecyclerViewAdapterAdapterV1
     @Override
     public void onDetachedFromRecyclerView(RecyclerViewOEMV1 recyclerView) {
         mAdapter.unregisterAdapterDataObserver(mAdapterDataObserver);
-        mAdapter.onDetachedFromRecyclerView(mRecyclerView);
+        // TODO: can we return something other than null here?
+        mAdapter.onDetachedFromRecyclerView(null);
     }
 
     @Override
@@ -207,11 +207,6 @@ public final class RecyclerViewAdapterAdapterV1
     @Override
     public boolean hasStableIds() {
         return mAdapter.hasStableIds();
-    }
-
-    @Override
-    public void setRecyclerView(@Nullable View recyclerview) {
-        mRecyclerView = (RecyclerView) recyclerview;
     }
 
     static class ViewHolderAdapterV1 implements ViewHolderOEMV1 {

@@ -47,7 +47,7 @@ public class CarUiLayoutInflaterFactory extends AppCompatViewInflater
         // it will no longer match what's in xml.
         if (CarUiRecyclerView.class.getName().equals(name)) {
             view = PluginFactorySingleton.get(context)
-                    .createRecyclerView(context, attrs);
+                    .createRecyclerView(context, attrs).getView();
         } else if (name.contentEquals("CarUiTextView")) {
             view = PluginFactorySingleton.get(context).createTextView(context, attrs);
         } else if (("androidx.recyclerview.widget." + "RecyclerView").equals(name)) {

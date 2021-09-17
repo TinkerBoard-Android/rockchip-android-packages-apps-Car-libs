@@ -96,18 +96,19 @@ class DefaultScrollBar implements ScrollBar {
     private View mUpButton;
     private View mDownButton;
     private int mScrollbarThumbMinHeight;
+    private Context mContext;
     private RecyclerView mRecyclerView;
     private OrientationHelper mOrientationHelper;
     private OnContinuousScrollListener mPageUpOnContinuousScrollListener;
     private OnContinuousScrollListener mPageDownOnContinuousScrollListener;
 
     @Override
-    public void initialize(RecyclerView rv, View scrollView) {
+    public void initialize(Context context, RecyclerView rv, View scrollView) {
+        mContext = context;
         mRecyclerView = rv;
 
         mScrollView = scrollView;
 
-        Context context = rv.getContext();
         Resources res = context.getResources();
 
         mButtonDisabledAlpha = CarUiUtils.getFloat(res, R.dimen.car_ui_button_disabled_alpha);
@@ -523,7 +524,7 @@ class DefaultScrollBar implements ScrollBar {
         } else {
             OrientationHelper orientationHelper = getOrientationHelper(layoutManager);
             int screenSize = orientationHelper.getTotalSpace();
-            int touchTargetSize = getRecyclerView().getContext().getResources()
+            int touchTargetSize = mContext.getResources()
                     .getDimensionPixelSize(R.dimen.car_ui_touch_target_size);
             ViewGroup.MarginLayoutParams upButtonLayoutParam =
                     (ViewGroup.MarginLayoutParams) mUpButton.getLayoutParams();

@@ -36,3 +36,9 @@
 # Required for reflection code in CarUiInstaller
 -keep class com.android.car.ui.baselayout.Insets {*;}
 -keep class com.android.car.ui.core.BaseLayoutController {*;}
+
+# Required for car-lib APIs
+# One of the GAS apps is failing during obfuscation by CrossReferenceValidator.
+# The root cause is unknown, and the suggestion from the team was to
+# suppress this warning.
+-dontwarn android.car.Car

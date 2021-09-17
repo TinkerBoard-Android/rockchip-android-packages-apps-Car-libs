@@ -15,6 +15,8 @@
  */
 package com.android.car.ui.plugin.oemapis.recyclerview;
 
+import android.graphics.drawable.Drawable;
+
 /**
  * Set of attributes passed from UI/layout to the oem implementation
  */
@@ -35,4 +37,43 @@ public interface RecyclerViewAttributesOEMV1 {
 
     /** Returns information regarding the layout style */
     LayoutStyleOEMV1 getLayoutStyle();
+
+    /** Returns requested width of the list view */
+    int getLayoutWidth();
+
+    /** Returns requested height of the list view */
+    int getLayoutHeight();
+
+    /** Returns requested minimum width of the list view */
+    int geMinWidth();
+
+    /** Returns requested minimum height of the list view */
+    int getMinHeight();
+
+    /** Returns requested left padding for the list view */
+    int getPaddingLeft();
+
+    /** Returns requested right padding for the list view */
+    int getPaddingRight();
+
+    /** Returns requested top padding for the list view */
+    int getPaddingTop();
+
+    /** Returns requested bottom padding for the list view */
+    int getPaddingBottom();
+
+    /** Returns requested left margin for the list view */
+    int getMarginLeft();
+
+    /** Returns requested right margin for the list view */
+    int getMarginRight();
+
+    /** Returns requested top margin for the list view */
+    int getMarginTop();
+
+    /** Returns requested bottom margin for the list view */
+    int getMarginBottom();
+
+    /** Returns background specified for the list view */
+    Drawable getBackground();
 }

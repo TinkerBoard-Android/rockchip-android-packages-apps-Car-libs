@@ -73,6 +73,37 @@ android_library {
     ],
 }
 
+android_library {
+    name: "car-ui-lib-testing",
+
+    sdk_version: "current",
+    min_sdk_version: "28",
+    target_sdk_version: "30",
+
+    manifest: "car-ui-lib/src/androidTest/AndroidManifest.xml",
+    srcs: [
+        "car-ui-lib/src/androidTest/java/**/actions/*.java",
+        "car-ui-lib/src/androidTest/java/**/matchers/*.java",
+    ],
+    resource_dirs: [
+        "car-ui-lib/src/androidTest/res",
+    ],
+    optimize: {
+        enabled: false,
+    },
+    static_libs: [
+        "car-ui-lib",
+        "androidx.test.rules",
+        "androidx.test.espresso.core",
+        "androidx.test.espresso.contrib",
+        "androidx.test.ext.junit",
+    ],
+    apex_available: [
+        "com.android.permission",
+        "//apex_available:platform",
+    ],
+}
+
 android_test {
     name: "CarUILibUnitTests",
     certificate: "platform",

@@ -57,7 +57,7 @@ public final class RotaryConstants {
 
     /**
      * Content description indicating that the view is a focus delegating container. When
-     * restoring focus, FocusParkingView and FocusArea will skip non-focusable views unless it's
+     * restoring focus, FocusParkingView and focus area will skip non-focusable views unless it's
      * a focus delegating container. The focus delegating container can delegate focus to one of
      * its descendants.
      */
@@ -100,19 +100,19 @@ public final class RotaryConstants {
     public static final String BOTTOM_BOUND_OFFSET_FOR_NUDGE =
             "com.android.car.ui.utils.BOTTOM_BOUND_OFFSET_FOR_NUDGE";
 
-    /** The key to store the offset of the FocusArea's left bound in the node's extras. */
+    /** The key to store the offset of the focus area's left bound in the node's extras. */
     public static final String FOCUS_AREA_LEFT_BOUND_OFFSET =
             "com.android.car.ui.utils.FOCUS_AREA_LEFT_BOUND_OFFSET";
 
-    /** The key to store the offset of the FocusArea's right bound in the node's extras. */
+    /** The key to store the offset of the focus area's right bound in the node's extras. */
     public static final String FOCUS_AREA_RIGHT_BOUND_OFFSET =
             "com.android.car.ui.utils.FOCUS_AREA_RIGHT_BOUND_OFFSET";
 
-    /** The key to store the offset of the FocusArea's top bound in the node's extras. */
+    /** The key to store the offset of the focus area's top bound in the node's extras. */
     public static final String FOCUS_AREA_TOP_BOUND_OFFSET =
             "com.android.car.ui.utils.FOCUS_AREA_TOP_BOUND_OFFSET";
 
-    /** The key to store the offset of the FocusArea's bottom bound in the node's extras. */
+    /** The key to store the offset of the focus area's bottom bound in the node's extras. */
     public static final String FOCUS_AREA_BOTTOM_BOUND_OFFSET =
             "com.android.car.ui.utils.FOCUS_AREA_BOTTOM_BOUND_OFFSET";
 
@@ -120,9 +120,12 @@ public final class RotaryConstants {
     public static final String NUDGE_DIRECTION =
             "com.android.car.ui.utils.NUDGE_DIRECTION";
 
+    /** The accessibility class name of {@link com.android.car.ui.IFocusArea} implementations. */
+    public static final String I_FOCUS_AREA_CLASS_NAME = "com.android.car.ui.FocusArea";
+
     /**
-     * Action performed on a FocusArea to move focus to the nudge shortcut within the same
-     * FocusArea.
+     * Action performed on a focus area to move focus to the nudge shortcut within the same
+     * focus area.
      * <p>
      * This action and the actions below only use the most significant 8 bits to avoid
      * conflicting with legacy standard actions (which don't use the most significant 8 bits),
@@ -131,7 +134,7 @@ public final class RotaryConstants {
      */
     public static final int ACTION_NUDGE_SHORTCUT = 0x01000000;
 
-    /** Action performed on a FocusArea to move focus to another FocusArea. */
+    /** Action performed on a focus area to move focus to another focus area. */
     public static final int ACTION_NUDGE_TO_ANOTHER_FOCUS_AREA = 0x02000000;
 
     /** Action performed on a FocusParkingView to restore the focus in the window. */

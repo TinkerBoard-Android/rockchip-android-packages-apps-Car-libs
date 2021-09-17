@@ -53,11 +53,10 @@
                 tools:ignore="UseAppTint" />
         </FrameLayout>
     </com.android.car.ui.FocusArea>
-    <com.android.car.ui.recyclerview.CarUiRecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/car_ui_app_styled_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:carUiSize="small"
         android:layout_marginLeft="@dimen/car_ui_toolbar_first_row_height"
         app:layout_constraintBottom_toBottomOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

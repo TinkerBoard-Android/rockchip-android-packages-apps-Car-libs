@@ -23,7 +23,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.plugin.oemapis.recyclerview.AdapterDataObserverOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.AdapterOEMV1;
-import com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.ViewHolderOEMV1;
 
 import com.chassis.car.ui.plugin.recyclerview.AdapterWrapper.ViewHolderWrapper;
@@ -115,7 +114,7 @@ public final class AdapterWrapper extends RecyclerView.Adapter<ViewHolderWrapper
 
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
-        mAdapter.onAttachedToRecyclerView((RecyclerViewOEMV1) recyclerView);
+        mAdapter.onAttachedToRecyclerView(null);
     }
 
     @Override
@@ -130,7 +129,7 @@ public final class AdapterWrapper extends RecyclerView.Adapter<ViewHolderWrapper
 
     @Override
     public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
-        mAdapter.onDetachedFromRecyclerView((RecyclerViewOEMV1) recyclerView);
+        mAdapter.onDetachedFromRecyclerView(null);
     }
 
     @Override
