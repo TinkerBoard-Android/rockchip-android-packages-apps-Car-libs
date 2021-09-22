@@ -78,7 +78,7 @@ public class MainActivity extends Activity implements InsetsChangedListener {
     private final List<ListElement> mActivities = Arrays.asList(
             new ServiceElement("Show foreground activities", CurrentActivityService.class),
             new ServiceElement("Simulate Screen Bounds", VisibleBoundsSimulator.class),
-            new SwitchElement("Enable plugin", this::isPluginEnabled,
+            new SwitchElement("Add PaintBooth to plugin deny-list", this::isInPluginDenyList,
                     this::onPluginSwitchChanged),
             new ActivityElement("Dialogs sample", DialogsActivity.class),
             new ActivityElement("App Styled View Modal", AppStyledViewSampleActivity.class),
@@ -287,16 +287,16 @@ public class MainActivity extends Activity implements InsetsChangedListener {
         startForegroundService(intent);
     }
 
-    private boolean isPluginEnabled() {
+    private boolean isInPluginDenyList() {
         return getSharedPreferences(SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
-                .getStringSet(SHARED_PREFERENCES_PLUGIN_DENYLIST, null) == null;
+                .getStringSet(SHARED_PREFERENCES_PLUGIN_DENYLIST, null) != null;
     }
 
     private void onPluginSwitchChanged(CompoundButton unused, boolean checked) {
         getSharedPreferences(SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE)
                 .edit()
                 .putStringSet(SHARED_PREFERENCES_PLUGIN_DENYLIST,
-                        checked ? null : Collections.singleton("com.chassis.car.ui.plugin"))
+                        checked ? Collections.singleton("com.chassis.car.ui.plugin") : null)
                 .apply();
         Toast.makeText(this, "Relaunch PaintBooth to see effects", Toast.LENGTH_SHORT).show();
     }
