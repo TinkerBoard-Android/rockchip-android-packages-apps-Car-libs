@@ -21,6 +21,7 @@ import static com.android.car.assist.CarVoiceInteractionSession.KEY_PHONE_NUMBER
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.telephony.SmsManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
@@ -77,8 +78,13 @@ public final class MessagingUtils {
             return;
         }
 
-        SmsManager smsManager = context.getSystemService(SmsManager.class)
-                .createForSubscriptionId(subInfo.getSubscriptionId());
+        SmsManager smsManager;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            smsManager = context.getSystemService(SmsManager.class)
+                    .createForSubscriptionId(subInfo.getSubscriptionId());
+        } else {
+            smsManager = SmsManager.getSmsManagerForSubscriptionId(subInfo.getSubscriptionId());
+        }
         smsManager.sendTextMessage(
                 phoneNumber.toString(),
                 /* scAddress= */ null,
