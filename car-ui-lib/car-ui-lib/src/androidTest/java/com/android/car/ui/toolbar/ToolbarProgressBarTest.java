@@ -20,12 +20,14 @@ import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 
+import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
 import static com.android.car.ui.matchers.ViewMatchers.hasIndeterminateProgress;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.hamcrest.Matchers.allOf;
 
+import android.annotation.TargetApi;
 import android.widget.ProgressBar;
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
@@ -42,6 +44,7 @@ import java.util.function.Consumer;
 
 @SuppressWarnings("AndroidJdkLibsChecker")
 @RunWith(Parameterized.class)
+@TargetApi(MIN_TARGET_API)
 public class ToolbarProgressBarTest {
 
     @Parameterized.Parameters

@@ -23,7 +23,7 @@ android {
 
     defaultConfig {
         minSdkVersion 28
-        targetSdkVersion 31
+        targetSdkVersion gradle.ext.aaosTargetSDK
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

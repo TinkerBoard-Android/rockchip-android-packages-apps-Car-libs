@@ -16,9 +16,12 @@
 package com.android.car.ui.core;
 
 import static com.android.car.ui.core.BaseLayoutController.getBaseLayoutController;
+import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.os.Build.VERSION_CODES;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -38,7 +41,13 @@ import java.util.Objects;
 /**
  * Public interface for general CarUi static functions.
  */
+@TargetApi(MIN_TARGET_API)
 public class CarUi {
+
+    // Unfortunately, because some of our clients don't have a car specific build we can't set the
+    // minSdk to 28. so we need to enforce minSdk to 28 in the code.
+    public static final int MIN_TARGET_API = VERSION_CODES.P;
+    public static final int TARGET_API_R = VERSION_CODES.R;
 
     /** Prevent instantiating this class */
     private CarUi() {}

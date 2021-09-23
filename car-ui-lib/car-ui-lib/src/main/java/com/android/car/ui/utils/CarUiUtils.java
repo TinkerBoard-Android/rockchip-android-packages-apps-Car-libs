@@ -15,6 +15,10 @@
  */
 package com.android.car.ui.utils;
 
+import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
+
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -51,6 +55,7 @@ import java.util.function.Function;
  * Collection of utility methods
  */
 @SuppressWarnings("AndroidJdkLibsChecker")
+@TargetApi(MIN_TARGET_API)
 public final class CarUiUtils {
 
     private static final String TAG = "CarUiUtils";
@@ -221,6 +226,7 @@ public final class CarUiUtils {
     }
 
     @Nullable
+    @SuppressLint("PrivateApi")
     private static String readSystemProperty(String propertyName) {
         Class<?> systemPropertiesClass;
         try {

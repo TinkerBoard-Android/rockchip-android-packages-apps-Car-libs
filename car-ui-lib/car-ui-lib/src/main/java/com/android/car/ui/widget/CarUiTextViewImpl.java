@@ -16,8 +16,11 @@
 
 package com.android.car.ui.widget;
 
+import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
+
 import static java.util.Objects.requireNonNull;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.text.Layout;
 import android.text.SpannableStringBuilder;
@@ -40,6 +43,7 @@ import java.util.Scanner;
  * Extension of {@link TextView} that supports {@link CarUiText}.
  */
 @SuppressWarnings("AndroidJdkLibsChecker")
+@TargetApi(MIN_TARGET_API)
 public final class CarUiTextViewImpl extends CarUiTextView {
 
     @NonNull

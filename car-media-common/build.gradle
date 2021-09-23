@@ -23,7 +23,7 @@ android {
 
     defaultConfig {
         minSdkVersion 30 // Media requires apis that became public in R.
-        targetSdkVersion 31
+        targetSdkVersion gradle.ext.aaosTargetSDK
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -60,12 +60,11 @@ dependencies {
     // Not available in 2.3+
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
 
-    implementation "androidx.constraintlayout:constraintlayout:2.0.4"
-    implementation "androidx.recyclerview:recyclerview:1.2.0"
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
 
     implementation "androidx.media:media:1.4.1"
-    implementation files("../../../../../prebuilts/sdk/" + gradle.ext.aaosLatestSDK
-            + "/system/android.car-system-stubs.jar")
+    implementation files(gradle.ext.lib_car_system_stubs)
 
     implementation project(":car-apps-common")
     implementation project(":car-arch-common")

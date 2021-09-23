@@ -15,8 +15,11 @@
  */
 package com.android.car.ui.pluginsupport;
 
+import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
+
 import static java.util.Objects.requireNonNull;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -27,6 +30,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.car.ui.R;
@@ -44,6 +48,9 @@ import java.util.Set;
  * UI components that we want to be customizable by the OEM.
  */
 @SuppressWarnings("AndroidJdkLibsChecker")
+// TODO: (b/200322953)
+@SuppressLint("LogConditional")
+@RequiresApi(MIN_TARGET_API)
 public final class PluginFactorySingleton {
     private enum TestingOverride {
         NOT_SET, ENABLED, DISABLED

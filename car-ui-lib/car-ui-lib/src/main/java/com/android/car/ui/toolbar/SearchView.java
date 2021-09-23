@@ -15,8 +15,10 @@
  */
 package com.android.car.ui.toolbar;
 
+import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
 import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
+import android.annotation.TargetApi;
 import android.car.drivingstate.CarUxRestrictions;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -46,6 +48,7 @@ import java.util.function.Consumer;
  * A search view used by {@link Toolbar}.
  */
 @SuppressWarnings("AndroidJdkLibsChecker")
+@TargetApi(MIN_TARGET_API)
 public class SearchView extends ConstraintLayout {
 
     private final InputMethodManager mInputMethodManager;
