@@ -15,6 +15,7 @@
  */
 package com.chassis.car.ui.plugin.toolbar;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.AttributeSet;
@@ -27,6 +28,7 @@ import java.util.function.BiConsumer;
  * {@link #setOnPrivateImeCommandListener} argument. This allows listening to calls to
  * {@link android.widget.TextView#onPrivateIMECommand(String, Bundle)}.
  */
+@SuppressLint("AppCompatCustomView")
 public class OnPrivateImeCommandEditText extends EditText {
 
     private BiConsumer<String, Bundle> mOnAppPrivateCommandListener;

@@ -16,11 +16,13 @@
 
 package com.android.car.ui.toolbar;
 
+import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
 import static com.android.car.ui.utils.CarUiUtils.charSequenceToString;
 import static com.android.car.ui.utils.CarUiUtils.convertList;
 
 import static java.util.stream.Collectors.toList;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -59,6 +61,7 @@ import java.util.stream.Stream;
  * into a {@link ToolbarController}
  */
 @SuppressWarnings("AndroidJdkLibsChecker")
+@TargetApi(MIN_TARGET_API)
 public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
     private static final String TAG = ToolbarControllerAdapterV1.class.getName();

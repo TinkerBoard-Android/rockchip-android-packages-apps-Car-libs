@@ -15,10 +15,14 @@
  */
 package com.android.car.ui.pluginsupport;
 
+import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
+
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import com.android.car.ui.plugin.oemapis.PluginFactoryOEMV1;
 import com.android.car.ui.plugin.oemapis.PluginFactoryOEMV2;
@@ -31,6 +35,7 @@ import com.android.car.ui.plugin.oemapis.PluginVersionProviderOEMV1;
  * be created with the app's classloader. You must use {@link AdapterClassLoader} to load it
  * so that both the app and plugin's classes can be loaded from this class.
  */
+@RequiresApi(MIN_TARGET_API)
 final class OemApiUtil {
 
     private static final String TAG = "carui";
@@ -49,6 +54,7 @@ final class OemApiUtil {
      *                       so that it can provide unique customizations per-app.
      * @return A {@link PluginFactory}
      */
+    @SuppressLint("PrivateApi")
     static PluginFactory getPluginFactory(
             Context pluginContext, String appPackageName) {
 

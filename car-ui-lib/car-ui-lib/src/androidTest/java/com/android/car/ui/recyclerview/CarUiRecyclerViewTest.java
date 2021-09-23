@@ -47,6 +47,7 @@ import static com.android.car.ui.actions.LowLevelActions.pressAndHold;
 import static com.android.car.ui.actions.LowLevelActions.release;
 import static com.android.car.ui.actions.LowLevelActions.touchDownAndUp;
 import static com.android.car.ui.actions.ViewActions.waitForView;
+import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
 import static com.android.car.ui.matchers.ViewMatchers.doesNotExistOrIsNotDisplayed;
 import static com.android.car.ui.recyclerview.CarUiRecyclerView.ItemCap.UNLIMITED;
 import static com.android.car.ui.utils.ViewUtils.setRotaryScrollEnabled;
@@ -77,6 +78,7 @@ import static org.mockito.Mockito.when;
 
 import static java.lang.Math.max;
 
+import android.annotation.TargetApi;
 import android.car.drivingstate.CarUxRestrictions;
 import android.content.Context;
 import android.content.res.Resources;
@@ -117,12 +119,14 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
 /**
  * Unit tests for {@link CarUiRecyclerView}.
  */
+@TargetApi(MIN_TARGET_API)
 public class CarUiRecyclerViewTest {
 
     @Rule
@@ -2071,7 +2075,7 @@ public class CarUiRecyclerViewTest {
                 return null;
             }
 
-            return String.format("Sample item #%d", position);
+            return String.format(Locale.US, "Sample item #%d", position);
         }
 
         @NonNull
@@ -2172,7 +2176,7 @@ public class CarUiRecyclerViewTest {
         }
 
         String getItemText(int position) {
-            return String.format("Sample item #%d", position);
+            return String.format(Locale.US, "Sample item #%d", position);
         }
 
         @NonNull

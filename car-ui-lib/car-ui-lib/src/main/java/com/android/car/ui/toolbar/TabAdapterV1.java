@@ -16,11 +16,16 @@
 
 package com.android.car.ui.toolbar;
 
+import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
+
+import android.annotation.TargetApi;
+
 import com.android.car.ui.plugin.oemapis.toolbar.TabOEMV1;
 
 import java.util.function.Consumer;
 
 @SuppressWarnings("AndroidJdkLibsChecker")
+@TargetApi(MIN_TARGET_API)
 class TabAdapterV1 {
 
     private final Tab mClientTab;
