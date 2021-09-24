@@ -16,8 +16,6 @@
 
 package com.android.car.ui.preference;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
-
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,7 +25,6 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.preference.DialogPreference;
@@ -68,7 +65,6 @@ import java.util.Map;
  * defaultValue, and enabled state.
  */
 @SuppressWarnings("AndroidJdkLibsChecker")
-@RequiresApi(MIN_TARGET_API)
 public abstract class PreferenceFragment extends PreferenceFragmentCompat implements
         InsetsChangedListener {
 

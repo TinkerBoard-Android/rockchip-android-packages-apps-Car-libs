@@ -15,9 +15,6 @@
  */
 package com.android.car.ui.pluginsupport;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
-
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
@@ -53,7 +50,6 @@ import java.util.List;
  * PluginFactory}, to provide a version-agnostic way of interfacing with the OEM's
  * PluginFactory.
  */
-@TargetApi(MIN_TARGET_API)
 public final class PluginFactoryAdapterV1 implements PluginFactory {
     @NonNull
     private final PluginFactoryOEMV1 mOem;

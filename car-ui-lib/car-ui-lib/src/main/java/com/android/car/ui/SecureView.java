@@ -15,9 +15,6 @@
  */
 package com.android.car.ui;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
-
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -29,7 +26,6 @@ import androidx.annotation.Nullable;
 /**
  * A view that cannot be clicked on when the window is obscured.
  */
-@TargetApi(MIN_TARGET_API)
 public class SecureView extends View {
 
     private boolean mSecure = true;

@@ -16,9 +16,6 @@
 
 package com.android.car.ui.preference;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
-
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -38,7 +35,6 @@ import java.util.function.Consumer;
  * the preference if there is one of fragment, intent or onPreferenceClickListener set.
  */
 @SuppressWarnings("AndroidJdkLibsChecker")
-@TargetApi(MIN_TARGET_API)
 public class CarUiPreference extends Preference implements DisabledPreferenceCallback,
         ClickableWhileDisabledPreference {
     private boolean mShowChevron;

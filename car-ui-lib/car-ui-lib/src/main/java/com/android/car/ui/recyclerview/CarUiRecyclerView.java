@@ -16,11 +16,8 @@
 
 package com.android.car.ui.recyclerview;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
-
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
@@ -40,7 +37,6 @@ import java.lang.annotation.Retention;
  * <p>
  * This is the base class for CarUiRecyclerView implementation.
  */
-@TargetApi(MIN_TARGET_API)
 public abstract class CarUiRecyclerView extends RecyclerView {
 
     /**

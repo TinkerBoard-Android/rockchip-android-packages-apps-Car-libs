@@ -16,9 +16,6 @@
 
 package com.android.car.ui.preference;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
-
-import android.annotation.TargetApi;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -35,7 +32,6 @@ import java.util.Set;
 /**
  * Test Fragment to load test preferences.
  */
-@TargetApi(MIN_TARGET_API)
 public class PreferenceTestFragment extends PreferenceFragment {
 
     @Override

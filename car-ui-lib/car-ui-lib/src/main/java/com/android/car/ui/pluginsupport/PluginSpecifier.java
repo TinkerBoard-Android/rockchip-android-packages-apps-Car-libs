@@ -15,9 +15,6 @@
  */
 package com.android.car.ui.pluginsupport;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
-
-import android.annotation.TargetApi;
 import android.content.pm.PackageInfo;
 
 import androidx.annotation.NonNull;
@@ -29,7 +26,6 @@ import androidx.annotation.Nullable;
  *
  * Create a new instance of this class using {@link #builder()}.
  */
-@TargetApi(MIN_TARGET_API)
 public final class PluginSpecifier {
 
     @Nullable

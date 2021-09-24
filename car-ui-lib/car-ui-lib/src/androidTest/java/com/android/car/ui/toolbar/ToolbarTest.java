@@ -23,7 +23,6 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withContentDescription;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
 import static com.android.car.ui.matchers.ViewMatchers.doesNotExistOrIsNotDisplayed;
 import static com.android.car.ui.matchers.ViewMatchers.withDrawable;
 
@@ -32,7 +31,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.TestCase.assertEquals;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 
 import androidx.core.content.ContextCompat;
@@ -55,7 +53,6 @@ import java.util.function.Consumer;
 /** Unit test for {@link ToolbarController}. */
 @SuppressWarnings("AndroidJdkLibsChecker")
 @RunWith(Parameterized.class)
-@TargetApi(MIN_TARGET_API)
 public class ToolbarTest {
 
     @Parameterized.Parameters

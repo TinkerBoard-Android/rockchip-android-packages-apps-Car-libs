@@ -15,11 +15,9 @@
  */
 package com.android.car.ui.core;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
 import static com.android.car.ui.utils.CarUiUtils.getThemeBoolean;
 import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.view.View;
 
@@ -42,7 +40,6 @@ import java.util.WeakHashMap;
  * It also exposes a {@link ToolbarController} to access the toolbar. This may be null if
  * used with a base layout without a Toolbar.
  */
-@TargetApi(MIN_TARGET_API)
 public final class BaseLayoutController {
 
     private static final Map<Activity, BaseLayoutController> sBaseLayoutMap = new WeakHashMap<>();

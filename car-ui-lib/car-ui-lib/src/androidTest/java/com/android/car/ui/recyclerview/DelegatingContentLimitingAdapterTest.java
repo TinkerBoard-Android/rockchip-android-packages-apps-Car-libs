@@ -28,7 +28,6 @@ import static org.mockito.Mockito.verify;
 
 import android.view.View;
 
-import androidx.annotation.IdRes;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.OrientationHelper;
 import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver;
@@ -45,9 +44,6 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class DelegatingContentLimitingAdapterTest {
-
-    @IdRes
-    private static final int DEFAULT_CONFIG_ID = R.id.test_config_id;
 
     @Rule
     public ActivityScenarioRule<CarUiRecyclerViewTestActivity> mActivityRule =
@@ -67,8 +63,7 @@ public class DelegatingContentLimitingAdapterTest {
     @Test
     public void setMaxItem_noScrolling_noContentLimiting() {
         mDelegateAdapter = new TestDelegatingContentLimitingAdapter(50);
-        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter,
-            DEFAULT_CONFIG_ID);
+        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter, 1);
 
         onView(withId(R.id.list)).check(matches(isDisplayed()));
 
@@ -95,8 +90,7 @@ public class DelegatingContentLimitingAdapterTest {
     @Test
     public void setMaxItem_noScrolling() {
         mDelegateAdapter = new TestDelegatingContentLimitingAdapter.WithContentLimiting(50);
-        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter,
-            DEFAULT_CONFIG_ID);
+        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter, 1);
 
         onView(withId(R.id.list)).check(matches(isDisplayed()));
 
@@ -123,8 +117,7 @@ public class DelegatingContentLimitingAdapterTest {
     @Test
     public void setMaxItem_withScrolling() {
         mDelegateAdapter = new TestDelegatingContentLimitingAdapter.WithContentLimiting(50);
-        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter,
-            DEFAULT_CONFIG_ID);
+        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter, 1);
 
         onView(withId(R.id.list)).check(matches(isDisplayed()));
 
@@ -143,8 +136,7 @@ public class DelegatingContentLimitingAdapterTest {
     @Test
     public void testChangeItem_callsObservers() {
         mDelegateAdapter = new TestDelegatingContentLimitingAdapter(50);
-        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter,
-            DEFAULT_CONFIG_ID);
+        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter, 1);
 
         AdapterDataObserver observer = mock(AdapterDataObserver.class);
         mContentLimitingAdapter.registerAdapterDataObserver(observer);
@@ -167,8 +159,7 @@ public class DelegatingContentLimitingAdapterTest {
     @Test
     public void testInsertItem_callsObservers() {
         mDelegateAdapter = new TestDelegatingContentLimitingAdapter(50);
-        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter,
-            DEFAULT_CONFIG_ID);
+        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter, 1);
 
         AdapterDataObserver observer = mock(AdapterDataObserver.class);
         mContentLimitingAdapter.registerAdapterDataObserver(observer);
@@ -191,8 +182,7 @@ public class DelegatingContentLimitingAdapterTest {
     @Test
     public void testRemoveItem_callsObservers() {
         mDelegateAdapter = new TestDelegatingContentLimitingAdapter(50);
-        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter,
-            DEFAULT_CONFIG_ID);
+        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter, 1);
 
         AdapterDataObserver observer = mock(AdapterDataObserver.class);
         mContentLimitingAdapter.registerAdapterDataObserver(observer);
@@ -215,8 +205,7 @@ public class DelegatingContentLimitingAdapterTest {
     @Test
     public void testMoveItem_callsObservers() {
         mDelegateAdapter = new TestDelegatingContentLimitingAdapter(50);
-        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter,
-            DEFAULT_CONFIG_ID);
+        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter, 1);
 
         AdapterDataObserver observer = mock(AdapterDataObserver.class);
         mContentLimitingAdapter.registerAdapterDataObserver(observer);
@@ -239,8 +228,7 @@ public class DelegatingContentLimitingAdapterTest {
     @Test
     public void testChangeDataSet_callsObservers() {
         mDelegateAdapter = new TestDelegatingContentLimitingAdapter(50);
-        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter,
-            DEFAULT_CONFIG_ID);
+        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter, 1);
 
         AdapterDataObserver observer = mock(AdapterDataObserver.class);
         mContentLimitingAdapter.registerAdapterDataObserver(observer);
@@ -274,8 +262,7 @@ public class DelegatingContentLimitingAdapterTest {
         mDelegateAdapter = new TestDelegatingContentLimitingAdapter(50);
         mDelegateAdapter.setHasStableIds(false);
 
-        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter,
-            DEFAULT_CONFIG_ID);
+        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter, 1);
 
         mContentLimitingAdapter.setHasStableIds(true);
 
@@ -285,8 +272,7 @@ public class DelegatingContentLimitingAdapterTest {
     @Test
     public void testGetIds_callsDelegate() {
         mDelegateAdapter = new TestDelegatingContentLimitingAdapter(50);
-        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter,
-            DEFAULT_CONFIG_ID);
+        mContentLimitingAdapter = new DelegatingContentLimitingAdapter<>(mDelegateAdapter, 1);
 
         for (int i = 0; i < 50; i++) {
             assertEquals(mDelegateAdapter.getItemId(i), mContentLimitingAdapter.getItemId(i));
