@@ -16,7 +16,7 @@
 
 package com.android.car.ui.toolbar;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
+import static com.android.car.ui.core.CarUi.TARGET_API_R;
 import static com.android.car.ui.utils.CarUiUtils.charSequenceToString;
 import static com.android.car.ui.utils.CarUiUtils.convertList;
 
@@ -61,7 +61,7 @@ import java.util.stream.Stream;
  * into a {@link ToolbarController}
  */
 @SuppressWarnings("AndroidJdkLibsChecker")
-@TargetApi(MIN_TARGET_API)
+@TargetApi(TARGET_API_R)
 public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
     private static final String TAG = ToolbarControllerAdapterV1.class.getName();

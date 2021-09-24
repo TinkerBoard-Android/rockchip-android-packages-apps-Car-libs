@@ -16,6 +16,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="20dp"
@@ -49,7 +50,8 @@
                 android:layout_height="@dimen/car_ui_toolbar_nav_icon_size"
                 android:tint="@color/car_ui_toolbar_nav_icon_color"
                 android:layout_gravity="center"
-                android:scaleType="fitXY"/>
+                android:scaleType="fitXY"
+                tools:ignore="UseAppTint" />
         </FrameLayout>
     </com.android.car.ui.FocusArea>
     <androidx.recyclerview.widget.RecyclerView

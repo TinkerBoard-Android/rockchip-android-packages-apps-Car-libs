@@ -17,11 +17,12 @@ package com.android.car.ui;
 
 import static android.view.WindowInsets.Type.ime;
 
-import static com.android.car.ui.core.CarUi.TARGET_API_R;
+import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.ADD_DESC_TITLE_TO_CONTENT_AREA;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.ADD_DESC_TO_CONTENT_AREA;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_ACTION;
 
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -29,6 +30,8 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
@@ -49,7 +52,6 @@ import androidx.annotation.ArrayRes;
 import androidx.annotation.AttrRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -61,7 +63,7 @@ import com.android.car.ui.utils.CarUiUtils;
 /**
  * Wrapper for AlertDialog.Builder
  */
-@RequiresApi(TARGET_API_R)
+@TargetApi(MIN_TARGET_API)
 public class AlertDialogBuilder {
 
     private AlertDialog.Builder mBuilder;
@@ -89,12 +91,15 @@ public class AlertDialogBuilder {
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-            Bundle bundle = new Bundle();
-            String titleString = mWideScreenTitle != null ? mWideScreenTitle : mTitle.toString();
-            bundle.putString(ADD_DESC_TITLE_TO_CONTENT_AREA, titleString);
-            bundle.putString(ADD_DESC_TO_CONTENT_AREA, s.toString());
-            mInputMethodManager.sendAppPrivateCommand(mCarUiEditText, WIDE_SCREEN_ACTION,
+            if (VERSION.SDK_INT >= VERSION_CODES.R) {
+                Bundle bundle = new Bundle();
+                String titleString = mWideScreenTitle != null ? mWideScreenTitle
+                        : mTitle.toString();
+                bundle.putString(ADD_DESC_TITLE_TO_CONTENT_AREA, titleString);
+                bundle.putString(ADD_DESC_TO_CONTENT_AREA, s.toString());
+                mInputMethodManager.sendAppPrivateCommand(mCarUiEditText, WIDE_SCREEN_ACTION,
                     bundle);
+            }
         }
 
         @Override
