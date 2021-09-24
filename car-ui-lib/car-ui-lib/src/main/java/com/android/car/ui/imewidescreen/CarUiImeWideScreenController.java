@@ -16,9 +16,6 @@
 
 package com.android.car.ui.imewidescreen;
 
-import static com.android.car.ui.core.CarUi.TARGET_API_R;
-
-import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -103,7 +100,6 @@ import java.util.regex.Pattern;
  * {@link InputMethodService#setExtractViewShown(boolean)} and return the original value instead
  * of false. for more info see {@link #setExtractViewShown(boolean)}
  */
-@RequiresApi(TARGET_API_R)
 public class CarUiImeWideScreenController {
 
     private static final String TAG = "ImeWideScreenController";
@@ -339,7 +335,7 @@ public class CarUiImeWideScreenController {
      * @param action Name of the command to be performed.
      * @param data Any data to include with the command.
      */
-    @RequiresApi(TARGET_API_R)
+    @RequiresApi(api = VERSION_CODES.R)
     public void onAppPrivateCommand(String action, Bundle data) {
         if (!isWideScreenMode()) {
             return;
@@ -439,7 +435,6 @@ public class CarUiImeWideScreenController {
         }
     }
 
-    @SuppressLint("Range")
     private void loadSearchItems() {
         if (mInputEditorInfo == null) {
             Log.w(TAG, "Result can't be loaded, input InputEditorInfo not available ");
@@ -525,7 +520,7 @@ public class CarUiImeWideScreenController {
      * Initialize the view in the wide screen template based on the data provided by the app through
      * {@link #onAppPrivateCommand(String, Bundle)}
      */
-    @RequiresApi(TARGET_API_R)
+    @RequiresApi(api = VERSION_CODES.R)
     public void onStartInputView(@NonNull EditorInfo editorInfo,
             @Nullable InputConnection inputConnection,
             @Nullable CharSequence textForImeAction) {
@@ -610,7 +605,7 @@ public class CarUiImeWideScreenController {
      * information will ONLY be sent if OEM allows an application to hide the content area and let
      * it draw its own content.
      */
-    @RequiresApi(TARGET_API_R)
+    @RequiresApi(api = VERSION_CODES.R)
     private void sendSurfaceInfo() {
         if (!mAllowAppToHideContentArea && mContentAreaSurfaceView.getDisplay() == null
                 && !(mInputEditorInfo != null
@@ -813,7 +808,7 @@ public class CarUiImeWideScreenController {
     /**
      * Called when IME window closes. Reset all the views once that happens.
      */
-    @RequiresApi(TARGET_API_R)
+    @RequiresApi(api = VERSION_CODES.R)
     public void onFinishInputView() {
         if (!isWideScreenMode()) {
             return;
@@ -821,7 +816,7 @@ public class CarUiImeWideScreenController {
         resetAutomotiveWideScreenViews();
     }
 
-    @RequiresApi(TARGET_API_R)
+    @RequiresApi(api = VERSION_CODES.R)
     private void resetAutomotiveWideScreenViews() {
         mWideScreenDescriptionTitle.setVisibility(View.GONE);
         mContentAreaSurfaceView.setVisibility(View.GONE);

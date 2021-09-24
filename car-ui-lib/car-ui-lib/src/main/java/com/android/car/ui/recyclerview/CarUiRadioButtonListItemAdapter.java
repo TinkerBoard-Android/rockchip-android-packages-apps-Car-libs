@@ -16,7 +16,6 @@
 
 package com.android.car.ui.recyclerview;
 
-import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,8 +69,6 @@ public class CarUiRadioButtonListItemAdapter extends CarUiListItemAdapter {
     }
 
     @Override
-    @SuppressLint("Correctness")
-    // TODO: (b/200168151)
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder.getItemViewType() == VIEW_TYPE_LIST_ITEM) {
             if (!(holder instanceof RadioButtonListItemViewHolder)) {

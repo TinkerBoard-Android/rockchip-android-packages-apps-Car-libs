@@ -26,11 +26,9 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withContentDescription;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
 import static com.android.car.ui.matchers.ViewMatchers.withPadding;
 import static com.android.car.ui.matchers.ViewMatchers.withPaddingAtLeast;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -56,7 +54,6 @@ import com.android.car.ui.toolbar.ToolbarController;
 import org.junit.Rule;
 import org.junit.Test;
 
-@TargetApi(MIN_TARGET_API)
 public class NonFullscreenPreferenceFragmentTest {
 
     private static final String EXTRA_FULLSCREEN = "fullscreen";
@@ -145,14 +142,10 @@ public class NonFullscreenPreferenceFragmentTest {
             toolbar.setTitle(TOOLBAR_DEFAULT_TEXT);
 
             mIsFullScreen = getIntent().getBooleanExtra(EXTRA_FULLSCREEN, true);
-            Fragment fragment = new MyPreferenceFragment();
-            Bundle args = new Bundle();
-            args.putBoolean("IsFullScreen", mIsFullScreen);
-            fragment.setArguments(args);
             if (savedInstanceState == null) {
                 getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(android.R.id.content, fragment)
+                        .replace(android.R.id.content, new MyPreferenceFragment(mIsFullScreen))
                         .commitNow();
             }
         }
@@ -175,12 +168,10 @@ public class NonFullscreenPreferenceFragmentTest {
 
     public static class MyPreferenceFragment extends PreferenceFragment {
 
-        private boolean mIsFullScreen;
+        private final boolean mIsFullScreen;
 
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            mIsFullScreen = getArguments().getBoolean("IsFullScreen");
+        public MyPreferenceFragment(boolean isFullScreen) {
+            mIsFullScreen = isFullScreen;
         }
 
         @Override

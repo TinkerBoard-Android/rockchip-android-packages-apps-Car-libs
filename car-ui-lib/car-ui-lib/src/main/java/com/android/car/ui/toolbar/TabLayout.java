@@ -15,10 +15,8 @@
  */
 package com.android.car.ui.toolbar;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
 import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -58,7 +56,6 @@ import java.util.function.Consumer;
  * <p>Touch feedback is using @android:attr/selectableItemBackground.
  */
 @SuppressWarnings("AndroidJdkLibsChecker")
-@TargetApi(MIN_TARGET_API)
 public class TabLayout extends LinearLayout {
     @LayoutRes
     private final int mTabLayoutRes;

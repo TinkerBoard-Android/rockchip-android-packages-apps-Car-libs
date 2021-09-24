@@ -16,7 +16,6 @@
 
 package com.android.car.ui.core;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
 import static com.android.car.ui.core.SearchResultsProvider.ITEM_ID;
 import static com.android.car.ui.core.SearchResultsProvider.PRIMARY_IMAGE_BLOB;
 import static com.android.car.ui.core.SearchResultsProvider.SECONDARY_IMAGE_BLOB;
@@ -24,8 +23,6 @@ import static com.android.car.ui.core.SearchResultsProvider.SECONDARY_IMAGE_ID;
 import static com.android.car.ui.core.SearchResultsProvider.SUBTITLE;
 import static com.android.car.ui.core.SearchResultsProvider.TITLE;
 
-import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -49,7 +46,6 @@ import org.junit.runner.RunWith;
  * Unit tests for {@link SearchResultsProvider}.
  */
 @RunWith(AndroidJUnit4.class)
-@TargetApi(MIN_TARGET_API)
 public class SearchResultsProviderTest extends ProviderTestCase2<SearchResultsProvider> {
 
     public static final String AUTHORITY =
@@ -98,7 +94,6 @@ public class SearchResultsProviderTest extends ProviderTestCase2<SearchResultsPr
     }
 
     @Test
-    @SuppressLint("Range")
     public void query_shouldHaveValidData() {
         ContentValues values = getRecord();
 

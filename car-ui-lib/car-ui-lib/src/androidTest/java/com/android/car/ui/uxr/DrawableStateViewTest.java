@@ -15,11 +15,8 @@
  */
 package com.android.car.ui.uxr;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
-
 import static org.junit.Assert.assertNotNull;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.AttributeSet;
@@ -46,7 +43,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @RunWith(Parameterized.class)
-@TargetApi(MIN_TARGET_API)
 public class DrawableStateViewTest {
 
     private static final List<Class<? extends DrawableStateView>> ALL_DRAWABLE_STATE_VIEWS =

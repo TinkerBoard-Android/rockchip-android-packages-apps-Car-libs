@@ -15,9 +15,6 @@
  */
 package com.android.car.ui.toolbar;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
-
-import android.annotation.TargetApi;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -29,7 +26,6 @@ import androidx.annotation.NonNull;
  * <p>This class accepts a {@link ProgressBar} in it's constructor and forwards the methods
  * of {@link ProgressBarController} to it.
  */
-@TargetApi(MIN_TARGET_API)
 class ProgressBarControllerImpl implements ProgressBarController {
 
     @NonNull

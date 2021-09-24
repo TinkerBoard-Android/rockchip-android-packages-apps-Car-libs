@@ -15,7 +15,6 @@
  */
 package com.android.car.ui.uxr;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.ImageView;
@@ -26,7 +25,6 @@ import androidx.annotation.Nullable;
  * A {@link ImageView} that implements {@link DrawableStateView}, for allowing additional states
  * such as ux restriction.
  */
-@SuppressLint("AppCompatCustomView")
 public class DrawableStateImageView extends ImageView implements DrawableStateView {
     private DrawableStateUtil mUtil;
 

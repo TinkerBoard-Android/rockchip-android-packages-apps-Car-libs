@@ -27,7 +27,6 @@ import static androidx.test.espresso.matcher.ViewMatchers.withContentDescription
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
 import static com.android.car.ui.actions.ViewActions.waitForView;
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
 import static com.android.car.ui.matchers.ViewMatchers.doesNotExistOrIsNotDisplayed;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -36,7 +35,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import android.annotation.TargetApi;
 import android.car.drivingstate.CarUxRestrictions;
 import android.content.Context;
 import android.view.View;
@@ -67,7 +65,6 @@ import java.util.function.Consumer;
 
 @SuppressWarnings("AndroidJdkLibsChecker")
 @RunWith(Parameterized.class)
-@TargetApi(MIN_TARGET_API)
 public class ToolbarMenuItemsTest {
     @Parameterized.Parameters
     public static Object[] data() {

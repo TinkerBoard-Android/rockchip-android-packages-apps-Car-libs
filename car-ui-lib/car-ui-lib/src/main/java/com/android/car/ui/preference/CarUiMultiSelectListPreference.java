@@ -16,9 +16,6 @@
 
 package com.android.car.ui.preference;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
-
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -38,7 +35,6 @@ import java.util.function.Consumer;
  * to the preference.
  */
 @SuppressWarnings("AndroidJdkLibsChecker")
-@TargetApi(MIN_TARGET_API)
 public class CarUiMultiSelectListPreference extends MultiSelectListPreference
         implements UxRestrictablePreference {
 

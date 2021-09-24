@@ -18,7 +18,6 @@ package com.android.car.ui.recyclerview;
 
 import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
-import android.annotation.SuppressLint;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -35,7 +34,6 @@ import com.android.car.ui.R;
  *     <li>User can click anywhere on the track and thumb will scroll to that position.</li>
  * </ul>
  */
-@SuppressLint("ClickableViewAccessibility")
 class FastScroller implements View.OnTouchListener {
 
     private float mTouchDownY = -1;

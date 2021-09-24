@@ -22,13 +22,9 @@ import static androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
-
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
-
-import android.annotation.TargetApi;
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
@@ -45,7 +41,6 @@ import org.junit.runners.Parameterized;
 
 /** A test of {@link com.android.car.ui.core.CarUi#installBaseLayoutAround} */
 @RunWith(Parameterized.class)
-@TargetApi(MIN_TARGET_API)
 public class InstallBaseLayoutAroundTest {
 
     @Parameterized.Parameters

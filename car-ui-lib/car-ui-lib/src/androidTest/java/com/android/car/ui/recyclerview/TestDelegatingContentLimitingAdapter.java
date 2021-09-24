@@ -15,7 +15,6 @@
  */
 package com.android.car.ui.recyclerview;
 
-import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -95,7 +94,6 @@ class TestDelegatingContentLimitingAdapter
         notifyItemMoved(fromPosition, toPosition);
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     public void changeList(List<String> newItems) {
         mItems.clear();
         mItems.addAll(newItems);

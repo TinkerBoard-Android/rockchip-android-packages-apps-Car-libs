@@ -15,9 +15,6 @@
  */
 package com.android.car.ui;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
-
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -35,7 +32,6 @@ import com.android.car.ui.recyclerview.CarUiRecyclerView;
  * CarUiRecyclerView}. It extends AppCompatViewInflater so that it can still let AppCompat
  * components be created correctly.
  */
-@TargetApi(MIN_TARGET_API)
 public class CarUiLayoutInflaterFactory extends AppCompatViewInflater
         implements LayoutInflater.Factory2 {
 

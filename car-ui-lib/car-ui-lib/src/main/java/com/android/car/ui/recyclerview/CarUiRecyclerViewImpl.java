@@ -15,7 +15,6 @@
  */
 package com.android.car.ui.recyclerview;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
 import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_CONTAINER;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_HORIZONTALLY_SCROLLABLE;
@@ -23,7 +22,6 @@ import static com.android.car.ui.utils.RotaryConstants.ROTARY_VERTICALLY_SCROLLA
 import static com.android.car.ui.utils.ViewUtils.LazyLayoutView;
 import static com.android.car.ui.utils.ViewUtils.setRotaryScrollEnabled;
 
-import android.annotation.SuppressLint;
 import android.car.drivingstate.CarUxRestrictions;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -41,7 +39,6 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -61,8 +58,6 @@ import java.util.Set;
  * potentially include a scrollbar that has page up and down arrows. Interaction with this view is
  * similar to a {@code RecyclerView} as it takes the same adapter and the layout manager.
  */
-@SuppressLint("CustomViewStyleable")
-@RequiresApi(MIN_TARGET_API)
 public final class CarUiRecyclerViewImpl extends CarUiRecyclerView implements LazyLayoutView {
 
     private static final String TAG = "CarUiRecyclerView";

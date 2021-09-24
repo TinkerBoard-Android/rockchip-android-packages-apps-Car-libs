@@ -15,7 +15,6 @@
  */
 package com.android.car.ui.pluginsupport;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
 import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
 import android.app.Activity;
@@ -30,7 +29,6 @@ import android.widget.FrameLayout;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
 import com.android.car.ui.R;
@@ -57,7 +55,6 @@ import java.util.List;
  * Do not use from client apps, for car-ui-lib internal use only.
  */
 //TODO(b/179092760) Find a way to prevent apps from using this
-@RequiresApi(MIN_TARGET_API)
 public final class PluginFactoryStub implements PluginFactory {
 
     public PluginFactoryStub() {

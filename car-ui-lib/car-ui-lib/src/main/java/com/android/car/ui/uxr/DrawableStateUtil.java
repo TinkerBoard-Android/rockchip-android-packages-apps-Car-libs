@@ -15,9 +15,6 @@
  */
 package com.android.car.ui.uxr;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
-
-import android.annotation.TargetApi;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -32,7 +29,6 @@ import java.util.function.Function;
  * {@link DrawableStateView#setExtraDrawableState(int[], int[])} methods to this object.
  */
 @SuppressWarnings("AndroidJdkLibsChecker")
-@TargetApi(MIN_TARGET_API)
 class DrawableStateUtil implements DrawableStateView {
 
     private final View mView;

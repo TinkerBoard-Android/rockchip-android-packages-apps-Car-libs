@@ -17,7 +17,6 @@ package com.android.car.ui.toolbar;
 
 import static android.view.WindowInsets.Type.ime;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.CONTENT_AREA_SURFACE_DISPLAY_ID;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.CONTENT_AREA_SURFACE_HEIGHT;
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.CONTENT_AREA_SURFACE_HOST_TOKEN;
@@ -33,7 +32,6 @@ import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE
 import static com.android.car.ui.imewidescreen.CarUiImeWideScreenController.WIDE_SCREEN_SEARCH_RESULTS;
 import static com.android.car.ui.utils.CarUiUtils.getBooleanSystemProperty;
 
-import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -81,7 +79,6 @@ import java.util.function.BiConsumer;
  * the TextView has been set, it will just wait for the TextView before doing anything.
  */
 @SuppressWarnings("AndroidJdkLibsChecker")
-@TargetApi(MIN_TARGET_API)
 public class SearchWidescreenController {
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());

@@ -16,21 +16,12 @@
 
 package com.android.car.ui.toolbar;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
-
-import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.widget.TextView;
 
 import java.util.function.Consumer;
 
-/**
- * Listener for setting text on {@link DeprecatedTabWrapper}
- */
-@SuppressLint("AppCompatCustomView")
 @SuppressWarnings("AndroidJdkLibsChecker")
-@TargetApi(MIN_TARGET_API)
 public final class TextViewListener extends TextView {
     private Consumer<CharSequence> mTextListener;
 

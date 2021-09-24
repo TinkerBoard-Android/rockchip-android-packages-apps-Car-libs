@@ -26,7 +26,6 @@ import static androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibilit
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
-import static com.android.car.ui.core.CarUi.TARGET_API_R;
 import static com.android.car.ui.core.SearchResultsProvider.ITEM_ID;
 import static com.android.car.ui.core.SearchResultsProvider.SECONDARY_IMAGE_ID;
 import static com.android.car.ui.core.SearchResultsProvider.SUBTITLE;
@@ -81,7 +80,6 @@ import android.view.inputmethod.InputConnection;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.core.app.ActivityScenario;
@@ -112,7 +110,6 @@ import org.mockito.MockitoAnnotations;
  * Unit tests for {@link CarUiImeWideScreenController}.
  */
 @RunWith(AndroidJUnit4.class)
-@RequiresApi(TARGET_API_R)
 public class CarUiImeWideScreenControllerTest {
 
     private final Context mContext = ApplicationProvider.getApplicationContext();
