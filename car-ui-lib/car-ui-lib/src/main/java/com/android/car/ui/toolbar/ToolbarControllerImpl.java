@@ -20,7 +20,7 @@ import static android.view.View.GONE;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
-import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
+import static com.android.car.ui.core.CarUi.TARGET_API_R;
 import static com.android.car.ui.utils.CarUiUtils.findViewByRefId;
 import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
@@ -70,7 +70,7 @@ import java.util.function.Supplier;
  * in the ViewGroup to find all the toolbar-related views to control.
  */
 @SuppressWarnings("AndroidJdkLibsChecker")
-@TargetApi(MIN_TARGET_API)
+@TargetApi(TARGET_API_R)
 public final class ToolbarControllerImpl implements ToolbarController {
     private static final String TAG = "CarUiToolbarController";
 
