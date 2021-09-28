@@ -32,6 +32,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.rule.ActivityTestRule;
 
 import com.android.car.rotary.test.R;
+import com.android.car.ui.recyclerview.CarUiRecyclerView;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -65,7 +66,8 @@ public class FocusParkingViewTest {
         mParent1 = mActivity.findViewById(R.id.parent1);
         mView1 = mActivity.findViewById(R.id.view1);
         mFocusedByDefault = mActivity.findViewById(R.id.focused_by_default);
-        mList = mActivity.findViewById(R.id.list);
+        CarUiRecyclerView list = mActivity.findViewById(R.id.list);
+        mList = list.getRecyclerView();
 
         mList.post(() -> {
             mList.setLayoutManager(new LinearLayoutManager(mActivity));

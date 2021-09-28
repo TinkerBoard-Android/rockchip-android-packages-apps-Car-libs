@@ -16,7 +16,7 @@
 package com.android.car.ui.plugin.oemapis.recyclerview;
 
 /**
- * Class for storing recyclerview layout style informatioon.
+ * Class for storing recyclerview layout style information.
  */
 public interface LayoutStyleOEMV1 {
 
@@ -37,7 +37,4 @@ public interface LayoutStyleOEMV1 {
 
     /** Returns true if layout is reversed */
     boolean getReverseLayout();
-
-    /** Returns a wrapper {@link androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup} */
-    SpanSizeLookupOEMV1 getSpanSizeLookup();
 }

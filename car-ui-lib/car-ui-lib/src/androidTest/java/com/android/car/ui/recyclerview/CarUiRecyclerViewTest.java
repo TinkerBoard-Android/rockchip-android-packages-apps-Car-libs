@@ -32,7 +32,6 @@ import static androidx.test.espresso.assertion.PositionAssertions.isRightAligned
 import static androidx.test.espresso.assertion.PositionAssertions.isTopAlignedWith;
 import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
-import static androidx.test.espresso.contrib.RecyclerViewActions.scrollToPosition;
 import static androidx.test.espresso.matcher.ViewMatchers.assertThat;
 import static androidx.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
@@ -42,6 +41,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.withContentDescription
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
+import static com.android.car.ui.actions.CarUiRecyclerViewActions.scrollToPosition;
 import static com.android.car.ui.actions.LowLevelActions.performDrag;
 import static com.android.car.ui.actions.LowLevelActions.pressAndHold;
 import static com.android.car.ui.actions.LowLevelActions.release;
@@ -76,6 +76,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static java.lang.Math.abs;
 import static java.lang.Math.max;
 
 import android.annotation.TargetApi;
@@ -107,6 +108,7 @@ import androidx.test.espresso.IdlingResource;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
 import com.android.car.ui.TestActivity;
+import com.android.car.ui.pluginsupport.PluginFactorySingleton;
 import com.android.car.ui.recyclerview.decorations.grid.GridDividerItemDecoration;
 import com.android.car.ui.test.R;
 import com.android.car.ui.utils.CarUxRestrictionsUtil;
@@ -115,6 +117,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -127,7 +131,15 @@ import java.util.Objects;
  * Unit tests for {@link CarUiRecyclerView}.
  */
 @TargetApi(MIN_TARGET_API)
+@RunWith(Parameterized.class)
 public class CarUiRecyclerViewTest {
+
+    @Parameterized.Parameters
+    public static Object[] data() {
+        // It's important to do no plugin first, so that the plugin will
+        // still be enabled when this test finishes
+        return new Object[]{false, /* true b/192677345 */};
+    }
 
     @Rule
     public ActivityScenarioRule<TestActivity> mActivityRule =
@@ -138,6 +150,10 @@ public class CarUiRecyclerViewTest {
     private TestActivity mActivity;
     private Context mTestableContext;
     private Resources mTestableResources;
+
+    public CarUiRecyclerViewTest(boolean pluginEnabled) {
+        PluginFactorySingleton.setPluginEnabledForTesting(pluginEnabled);
+    }
 
     @Before
     public void setUp() {
@@ -159,25 +175,88 @@ public class CarUiRecyclerViewTest {
     }
 
     @Test
-    public void testIsScrollbarPresent_scrollbarEnabled() {
-        doReturn(true).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+    public void testIsScrollbarPresent_scrollbarDisabled() {
+        doReturn(false).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
+
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         container.post(() -> {
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
             carUiRecyclerView.setAdapter(new TestAdapter(100));
         });
 
-        onView(withId(R.id.car_ui_scroll_bar)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_scroll_bar)).check(doesNotExist());
     }
 
     @Test
-    public void testIsScrollbarPresent_scrollbarDisabled() {
+    public void testSmallRecyclerView_scrollbarDisabled() {
         doReturn(false).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+
+        TypedArray typedArray = spy(mActivity.getBaseContext().obtainStyledAttributes(
+                null, R.styleable.CarUiRecyclerView));
+
+        doReturn(typedArray).when(mTestableContext).obtainStyledAttributes(
+                any(),
+                eq(R.styleable.CarUiRecyclerView),
+                anyInt(),
+                anyInt());
+        when(typedArray.getInt(eq(R.styleable.CarUiRecyclerView_carUiSize),
+                anyInt())).thenReturn(0); // Small size
+
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         container.post(() -> {
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
+            carUiRecyclerView.setAdapter(new TestAdapter(100));
+        });
+
+        onView(withId(R.id.car_ui_scroll_bar)).check(doesNotExist());
+    }
+
+    @Test
+    public void testMediumRecyclerView_scrollbarDisabled() {
+        doReturn(false).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
+
+        TypedArray typedArray = spy(mActivity.getBaseContext().obtainStyledAttributes(
+                null, R.styleable.CarUiRecyclerView));
+
+        doReturn(typedArray).when(mTestableContext).obtainStyledAttributes(
+                any(),
+                eq(R.styleable.CarUiRecyclerView),
+                anyInt(),
+                anyInt());
+        when(typedArray.getInt(eq(R.styleable.CarUiRecyclerView_carUiSize),
+                anyInt())).thenReturn(1); // Medium size
+
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
+        ViewGroup container = mActivity.findViewById(R.id.test_container);
+        container.post(() -> {
+            container.addView(carUiRecyclerView.getView());
+            carUiRecyclerView.setAdapter(new TestAdapter(100));
+        });
+
+        onView(withId(R.id.car_ui_scroll_bar)).check(doesNotExist());
+    }
+
+    @Test
+    public void testLargeRecyclerView_scrollbarDisabled() {
+        doReturn(false).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
+
+        TypedArray typedArray = spy(mActivity.getBaseContext().obtainStyledAttributes(
+                null, R.styleable.CarUiRecyclerView));
+
+        doReturn(typedArray).when(mTestableContext).obtainStyledAttributes(
+                any(),
+                eq(R.styleable.CarUiRecyclerView),
+                anyInt(),
+                anyInt());
+        when(typedArray.getInt(eq(R.styleable.CarUiRecyclerView_carUiSize),
+                anyInt())).thenReturn(2); // Large size
+
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
+        ViewGroup container = mActivity.findViewById(R.id.test_container);
+        container.post(() -> {
+            container.addView(carUiRecyclerView.getView());
             carUiRecyclerView.setAdapter(new TestAdapter(100));
         });
 
@@ -186,12 +265,12 @@ public class CarUiRecyclerViewTest {
 
     @Test
     public void testPadding() {
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         int padding = 100;
         carUiRecyclerView.setPadding(padding, 0, padding, 0);
         container.post(() -> {
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
             carUiRecyclerView.setAdapter(new TestAdapter(100));
         });
 
@@ -217,11 +296,11 @@ public class CarUiRecyclerViewTest {
         // Ensure the CarUiRecyclerViewLayout constant matches the styleable attribute enum value
         assertEquals(CarUiRecyclerView.CarUiRecyclerViewLayout.GRID, 1);
 
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         TestAdapter adapter = new TestAdapter(4);
         container.post(() -> {
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
             carUiRecyclerView.setAdapter(adapter);
         });
 
@@ -264,11 +343,11 @@ public class CarUiRecyclerViewTest {
         // Ensure the CarUiRecyclerViewLayout constant matches the styleable attribute enum value
         assertEquals(CarUiRecyclerView.CarUiRecyclerViewLayout.LINEAR, 0);
 
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         TestAdapter adapter = new TestAdapter(4);
         container.post(() -> {
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
             carUiRecyclerView.setAdapter(adapter);
         });
 
@@ -289,7 +368,7 @@ public class CarUiRecyclerViewTest {
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         TestAdapter adapter = new TestAdapter(100);
         container.post(() -> {
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
             carUiRecyclerView.setAdapter(adapter);
         });
 
@@ -307,7 +386,7 @@ public class CarUiRecyclerViewTest {
         TestAdapter adapter = new TestAdapter(100);
         int testPosition = 40;
         container.post(() -> {
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
             carUiRecyclerView.setAdapter(adapter);
             carUiRecyclerView.scrollToPosition(testPosition);
         });
@@ -335,7 +414,7 @@ public class CarUiRecyclerViewTest {
         TestAdapter adapter = new TestAdapter(100);
         int testPosition = 40;
         container.post(() -> {
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
             carUiRecyclerView.setAdapter(adapter);
             carUiRecyclerView.scrollToPosition(testPosition);
         });
@@ -370,7 +449,7 @@ public class CarUiRecyclerViewTest {
         CarUiRecyclerView carUiRecyclerView = mActivity.requireViewById(R.id.list);
         TestAdapter adapter = new TestAdapter(3);
         mActivity.runOnUiThread(() -> {
-            setRotaryScrollEnabled(carUiRecyclerView, /* isVertical= */ true);
+            setRotaryScrollEnabled(carUiRecyclerView.getView(), /* isVertical= */ true);
             carUiRecyclerView.setAdapter(adapter);
             carUiRecyclerView.setVisibility(View.VISIBLE);
         });
@@ -400,23 +479,29 @@ public class CarUiRecyclerViewTest {
         when(typedArray.getInt(eq(R.styleable.CarUiRecyclerView_numOfColumns), anyInt()))
                 .thenReturn(3);
 
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         TestAdapter adapter = new TestAdapter(4);
         container.post(() -> {
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
             carUiRecyclerView.setAdapter(adapter);
         });
+
+        onView(withText(adapter.getItemText(0))).check(matches(isDisplayed()));
 
         assertTrue(carUiRecyclerView.getLayoutManager() instanceof GridLayoutManager);
         assertEquals(carUiRecyclerView.getItemDecorationCount(), 1);
         assertTrue(carUiRecyclerView.getItemDecorationAt(0) instanceof GridDividerItemDecoration);
 
-        carUiRecyclerView.setLayoutManager(new LinearLayoutManager(mTestableContext));
+        container.post(() -> carUiRecyclerView.setLayoutManager(
+                new LinearLayoutManager(mTestableContext)));
+
+        onView(withText(adapter.getItemText(0))).check(matches(isDisplayed()));
 
         assertTrue(carUiRecyclerView.getLayoutManager() instanceof LinearLayoutManager);
         assertEquals(carUiRecyclerView.getItemDecorationCount(), 1);
-        assertFalse(carUiRecyclerView.getItemDecorationAt(0) instanceof GridDividerItemDecoration);
+        assertFalse(carUiRecyclerView.getItemDecorationAt(0)
+                instanceof GridDividerItemDecoration);
     }
 
     @Test
@@ -649,12 +734,13 @@ public class CarUiRecyclerViewTest {
 
     @Test
     public void testPageUpScrollsWithoutSnap() {
-        RecyclerView.OnScrollListener scrollListener = mock(RecyclerView.OnScrollListener.class);
+        CarUiRecyclerView.OnScrollListener scrollListener =
+                mock(CarUiRecyclerView.OnScrollListener.class);
 
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         container.post(() -> {
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
             carUiRecyclerView.setAdapter(new TestAdapter(100));
         });
 
@@ -674,24 +760,25 @@ public class CarUiRecyclerViewTest {
         // Verify that scroll operation only settles on the destination once. This means a single
         // smooth scroll to the destination. If the scroll includes a secondary snap after an
         // initial scroll, this callback will have more than one invocation.
-        verify(scrollListener, times(1)).onScrollStateChanged(carUiRecyclerView,
-                SCROLL_STATE_SETTLING);
+        verify(scrollListener, times(1)).onScrollStateChanged(
+                carUiRecyclerView, SCROLL_STATE_SETTLING);
 
         onView(withId(R.id.car_ui_scrollbar_page_up)).perform(click());
 
         // Make same verification as above for a second page up operation.
-        verify(scrollListener, times(2)).onScrollStateChanged(carUiRecyclerView,
-                SCROLL_STATE_SETTLING);
+        verify(scrollListener, times(2)).onScrollStateChanged(
+                carUiRecyclerView, SCROLL_STATE_SETTLING);
     }
 
     @Test
     public void testPageDownScrollsWithoutSnap() {
-        RecyclerView.OnScrollListener scrollListener = mock(RecyclerView.OnScrollListener.class);
+        CarUiRecyclerView.OnScrollListener scrollListener =
+                mock(CarUiRecyclerView.OnScrollListener.class);
 
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         container.post(() -> {
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
             carUiRecyclerView.setAdapter(new TestAdapter(100));
         });
 
@@ -705,14 +792,14 @@ public class CarUiRecyclerViewTest {
         // Verify that scroll operation only settles on the destination once. This means a single
         // smooth scroll to the destination. If the scroll includes a secondary snap after an
         // initial scroll, this callback will have more than one invocation.
-        verify(scrollListener, times(1)).onScrollStateChanged(carUiRecyclerView,
-                SCROLL_STATE_SETTLING);
+        verify(scrollListener, times(1)).onScrollStateChanged(
+                carUiRecyclerView, SCROLL_STATE_SETTLING);
 
         onView(withId(R.id.car_ui_scrollbar_page_down)).perform(click());
 
         // Make same verification as above for a second page down operation.
-        verify(scrollListener, times(2)).onScrollStateChanged(carUiRecyclerView,
-                SCROLL_STATE_SETTLING);
+        verify(scrollListener, times(2)).onScrollStateChanged(
+                carUiRecyclerView, SCROLL_STATE_SETTLING);
     }
 
     @Test
@@ -739,13 +826,16 @@ public class CarUiRecyclerViewTest {
         OrientationHelper orientationHelper =
                 OrientationHelper.createVerticalHelper(carUiRecyclerView.getLayoutManager());
         int screenHeight = orientationHelper.getTotalSpace();
+
         // Scroll to a position where long item is partially visible.
         // Scrolling from top, scrollToPosition() aligns the pos-1 item to bottom.
         onView(withId(R.id.list)).perform(scrollToPosition(longItemPosition - 1));
-        // Scroll by half the height of the screen so the long item is partially visible.
-        mActivity.runOnUiThread(() -> carUiRecyclerView.scrollBy(0, screenHeight / 2));
         // This is needed to make sure scroll is finished before looking for the long item.
         onView(withText(adapter.getItemText(longItemPosition - 1))).check(matches(isDisplayed()));
+
+        // Scroll by half the height of the screen so the long item is partially visible.
+        mActivity.runOnUiThread(() -> carUiRecyclerView.scrollBy(0, screenHeight / 2));
+        onView(withText(adapter.getItemText(longItemPosition))).check(matches(isDisplayed()));
 
         // Verify long item is partially shown.
         View longItem = getLongItem(carUiRecyclerView);
@@ -849,6 +939,7 @@ public class CarUiRecyclerViewTest {
 
         // Scroll to a position just below the long item.
         onView(withId(R.id.list)).perform(scrollToPosition(longItemPosition + 1));
+        onView(withText(adapter.getItemText(longItemPosition + 1))).check(matches(isDisplayed()));
 
         // Verify long item is off-screen.
         View longItem = getLongItem(carUiRecyclerView);
@@ -901,6 +992,10 @@ public class CarUiRecyclerViewTest {
         // Scroll to a position where long item is partially visible.
         // Scrolling from top, scrollToPosition() aligns the pos-1 item to bottom.
         onView(withId(R.id.list)).perform(scrollToPosition(longItemPosition - 1));
+
+        onView(withText(adapter.getItemText(longItemPosition - 1)))
+                .check(matches(isDisplayed()));
+
         // Scroll by half the height of the screen so the long item is partially visible.
         mActivity.runOnUiThread(() -> carUiRecyclerView.scrollBy(0, screenHeight / 2));
 
@@ -979,7 +1074,7 @@ public class CarUiRecyclerViewTest {
 
         onView(withId(R.id.list)).check(matches(isDisplayed()));
 
-        int itemCount = 25000;
+        int itemCount = 2500;
         TestAdapter adapter = new TestAdapter(itemCount);
 
         CarUiRecyclerView carUiRecyclerView = mActivity.requireViewById(R.id.list);
@@ -990,138 +1085,200 @@ public class CarUiRecyclerViewTest {
         onView(withId(R.id.car_ui_scrollbar_page_down)).perform(click());
 
         // Check that thumb track maintains minimum height
-        int minThumbViewHeight = mActivity.getResources()
-                .getDimensionPixelOffset(R.dimen.car_ui_scrollbar_min_thumb_height);
+        int minThumbViewHeight = (int) mActivity.getResources()
+                .getDimension(R.dimen.car_ui_scrollbar_min_thumb_height);
         View thumbView = mActivity.requireViewById(R.id.car_ui_scrollbar_thumb);
-        assertThat(thumbView.getHeight(), is(equalTo(minThumbViewHeight)));
+        // Conversion from DP to pixel sometimes makes these two value differ by 1
+        assertThat(abs(thumbView.getHeight() - minThumbViewHeight), is(lessThanOrEqualTo(1)));
     }
 
     @Test
     public void testSetPaddingToRecyclerViewContainerWithScrollbar() {
         doReturn(true).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
 
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        TestAdapter adapter = new TestAdapter(50);
 
-        assertThat(carUiRecyclerView.getPaddingBottom(), is(equalTo(0)));
-        assertThat(carUiRecyclerView.getPaddingTop(), is(equalTo(0)));
-        assertThat(carUiRecyclerView.getPaddingStart(), is(equalTo(0)));
-        assertThat(carUiRecyclerView.getPaddingEnd(), is(equalTo(0)));
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
+        ViewGroup container = mActivity.findViewById(R.id.test_container);
+        mActivity.runOnUiThread(() -> {
+            container.addView(carUiRecyclerView.getView());
+            carUiRecyclerView.setAdapter(adapter);
+        });
 
-        carUiRecyclerView.setPadding(10, 10, 10, 10);
+        onView(withText(adapter.getItemText(0))).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_scroll_bar)).check(matches(isDisplayed()));
 
-        assertThat(carUiRecyclerView.getPaddingTop(), is(equalTo(10)));
-        assertThat(carUiRecyclerView.getPaddingBottom(), is(equalTo(10)));
-        assertThat(carUiRecyclerView.getPaddingStart(), is(equalTo(0)));
-        assertThat(carUiRecyclerView.getPaddingEnd(), is(equalTo(0)));
+        OrientationHelper orientationHelper =
+                OrientationHelper.createVerticalHelper(carUiRecyclerView.getLayoutManager());
+
+        assertThat(orientationHelper.getStartAfterPadding(), is(equalTo(0)));
+        assertThat(carUiRecyclerView.getView().getPaddingLeft(), is(equalTo(0)));
+        assertThat(carUiRecyclerView.getView().getPaddingRight(), is(equalTo(0)));
+        // available space in recyclerview after applying paddings.
+        int screenHeight = orientationHelper.getTotalSpace();
+        assertThat(carUiRecyclerView.getHeight(), is(equalTo(screenHeight)));
+
+        View scrollbar = mActivity.findViewById(R.id.car_ui_scroll_bar);
+        assertThat(scrollbar.getPaddingTop(), is(equalTo(0)));
+        assertThat(scrollbar.getPaddingLeft(), is(equalTo(0)));
+        assertThat(scrollbar.getPaddingRight(), is(equalTo(0)));
+        assertThat(scrollbar.getPaddingBottom(), is(equalTo(0)));
+
+        mActivity.runOnUiThread(() -> carUiRecyclerView.setPadding(20, 150, 30, 170));
+
+        onView(withText(adapter.getItemText(0))).check(matches(isDisplayed()));
+
+        assertThat(carUiRecyclerView.getView().getPaddingLeft(), is(equalTo(20)));
+        assertThat(carUiRecyclerView.getView().getPaddingRight(), is(equalTo(30)));
+        assertThat(orientationHelper.getStartAfterPadding(), is(equalTo(150)));
+        // available space in recyclerview after applying paddings.
+        screenHeight = orientationHelper.getTotalSpace();
+        assertThat(carUiRecyclerView.getHeight() - 150 - 170, is(equalTo(screenHeight)));
+
+        assertThat(scrollbar.getPaddingTop(), is(equalTo(150)));
+        assertThat(scrollbar.getPaddingLeft(), is(equalTo(0)));
+        assertThat(scrollbar.getPaddingRight(), is(equalTo(0)));
+        assertThat(scrollbar.getPaddingBottom(), is(equalTo(170)));
     }
 
     @Test
     public void testSetPaddingToRecyclerViewContainerWithoutScrollbar() {
         doReturn(false).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
 
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        TestAdapter adapter = new TestAdapter(5);
 
-        assertThat(carUiRecyclerView.getPaddingBottom(), is(equalTo(0)));
-        assertThat(carUiRecyclerView.getPaddingTop(), is(equalTo(0)));
-        assertThat(carUiRecyclerView.getPaddingStart(), is(equalTo(0)));
-        assertThat(carUiRecyclerView.getPaddingEnd(), is(equalTo(0)));
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
+        ViewGroup container = mActivity.findViewById(R.id.test_container);
+        mActivity.runOnUiThread(() -> {
+            container.addView(carUiRecyclerView.getView());
+            carUiRecyclerView.setAdapter(adapter);
+        });
 
-        carUiRecyclerView.setPadding(10, 10, 10, 10);
+        onView(withText(adapter.getItemText(0))).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_scroll_bar)).check(doesNotExist());
 
-        assertThat(carUiRecyclerView.getPaddingTop(), is(equalTo(10)));
-        assertThat(carUiRecyclerView.getPaddingBottom(), is(equalTo(10)));
-        assertThat(carUiRecyclerView.getPaddingStart(), is(equalTo(10)));
-        assertThat(carUiRecyclerView.getPaddingEnd(), is(equalTo(10)));
+        OrientationHelper orientationHelper =
+                OrientationHelper.createVerticalHelper(carUiRecyclerView.getLayoutManager());
+
+        assertThat(orientationHelper.getStartAfterPadding(), is(equalTo(0)));
+        assertThat(carUiRecyclerView.getView().getPaddingLeft(), is(equalTo(0)));
+        assertThat(carUiRecyclerView.getView().getPaddingRight(), is(equalTo(0)));
+        // available space in recyclerview after applying paddings.
+        int screenHeight = orientationHelper.getTotalSpace();
+        assertThat(carUiRecyclerView.getHeight(), is(equalTo(screenHeight)));
+
+        mActivity.runOnUiThread(() -> carUiRecyclerView.setPadding(20, 150, 30, 170));
+
+        onView(withText(adapter.getItemText(0))).check(matches(isDisplayed()));
+
+        assertThat(carUiRecyclerView.getView().getPaddingLeft(), is(equalTo(20)));
+        assertThat(carUiRecyclerView.getView().getPaddingRight(), is(equalTo(30)));
+        assertThat(orientationHelper.getStartAfterPadding(), is(equalTo(150)));
+        // available space in recyclerview after applying paddings.
+        screenHeight = orientationHelper.getTotalSpace();
+        assertThat(carUiRecyclerView.getHeight() - 150 - 170, is(equalTo(screenHeight)));
     }
 
     @Test
     public void testSetPaddingRelativeToRecyclerViewContainerWithScrollbar() {
         doReturn(true).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
 
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        TestAdapter adapter = new TestAdapter(50);
 
-        assertThat(carUiRecyclerView.getPaddingBottom(), is(equalTo(0)));
-        assertThat(carUiRecyclerView.getPaddingTop(), is(equalTo(0)));
-        assertThat(carUiRecyclerView.getPaddingStart(), is(equalTo(0)));
-        assertThat(carUiRecyclerView.getPaddingEnd(), is(equalTo(0)));
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
+        ViewGroup container = mActivity.findViewById(R.id.test_container);
+        mActivity.runOnUiThread(() -> {
+            container.addView(carUiRecyclerView.getView());
+            carUiRecyclerView.setAdapter(adapter);
+        });
 
-        carUiRecyclerView.setPaddingRelative(10, 10, 10, 10);
+        onView(withText(adapter.getItemText(0))).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_scroll_bar)).check(matches(isDisplayed()));
 
-        assertThat(carUiRecyclerView.getPaddingTop(), is(equalTo(10)));
-        assertThat(carUiRecyclerView.getPaddingBottom(), is(equalTo(10)));
-        assertThat(carUiRecyclerView.getPaddingStart(), is(equalTo(0)));
-        assertThat(carUiRecyclerView.getPaddingEnd(), is(equalTo(0)));
+        OrientationHelper orientationHelper =
+                OrientationHelper.createVerticalHelper(carUiRecyclerView.getLayoutManager());
+
+        assertThat(orientationHelper.getStartAfterPadding(), is(equalTo(0)));
+        assertThat(carUiRecyclerView.getView().getPaddingStart(), is(equalTo(0)));
+        assertThat(carUiRecyclerView.getView().getPaddingEnd(), is(equalTo(0)));
+        // available space in recyclerview after applying paddings.
+        int screenHeight = orientationHelper.getTotalSpace();
+        assertThat(carUiRecyclerView.getHeight(), is(equalTo(screenHeight)));
+
+        View scrollbar = mActivity.findViewById(R.id.car_ui_scroll_bar);
+        assertThat(scrollbar.getPaddingTop(), is(equalTo(0)));
+        assertThat(scrollbar.getPaddingStart(), is(equalTo(0)));
+        assertThat(scrollbar.getPaddingEnd(), is(equalTo(0)));
+        assertThat(scrollbar.getPaddingBottom(), is(equalTo(0)));
+
+        mActivity.runOnUiThread(() -> {
+            carUiRecyclerView.setPaddingRelative(20, 150, 30, 170);
+        });
+
+        onView(withText(adapter.getItemText(0))).check(matches(isDisplayed()));
+
+        assertThat(carUiRecyclerView.getView().getPaddingStart(), is(equalTo(20)));
+        assertThat(carUiRecyclerView.getView().getPaddingEnd(), is(equalTo(30)));
+        assertThat(orientationHelper.getStartAfterPadding(), is(equalTo(150)));
+        // available space in recyclerview after applying paddings.
+        screenHeight = orientationHelper.getTotalSpace();
+        assertThat(carUiRecyclerView.getHeight() - 150 - 170, is(equalTo(screenHeight)));
+
+        assertThat(scrollbar.getPaddingTop(), is(equalTo(150)));
+        assertThat(scrollbar.getPaddingStart(), is(equalTo(0)));
+        assertThat(scrollbar.getPaddingEnd(), is(equalTo(0)));
+        assertThat(scrollbar.getPaddingBottom(), is(equalTo(170)));
     }
 
     @Test
     public void testSetPaddingRelativeToRecyclerViewContainerWithoutScrollbar() {
         doReturn(false).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
 
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        TestAdapter adapter = new TestAdapter(5);
 
-        assertThat(carUiRecyclerView.getPaddingBottom(), is(equalTo(0)));
-        assertThat(carUiRecyclerView.getPaddingTop(), is(equalTo(0)));
-        assertThat(carUiRecyclerView.getPaddingStart(), is(equalTo(0)));
-        assertThat(carUiRecyclerView.getPaddingEnd(), is(equalTo(0)));
-
-        carUiRecyclerView.setPaddingRelative(10, 10, 10, 10);
-
-        assertThat(carUiRecyclerView.getPaddingTop(), is(equalTo(10)));
-        assertThat(carUiRecyclerView.getPaddingBottom(), is(equalTo(10)));
-        assertThat(carUiRecyclerView.getPaddingStart(), is(equalTo(10)));
-        assertThat(carUiRecyclerView.getPaddingEnd(), is(equalTo(10)));
-    }
-
-    @Test
-    public void testSetAlphaToRecyclerViewWithoutScrollbar() {
-        doReturn(false).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
-
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
-
-        assertThat(carUiRecyclerView.getAlpha(), is(equalTo(1.0f)));
-
-        carUiRecyclerView.setAlpha(0.5f);
-
-        assertThat(carUiRecyclerView.getAlpha(), is(equalTo(0.5f)));
-    }
-
-    @Test
-    public void testSetAlphaToRecyclerViewWithScrollbar() {
-        mActivity.runOnUiThread(
-                () -> mActivity.setContentView(
-                        R.layout.car_ui_recycler_view_test_activity));
-
-        onView(withId(R.id.list)).check(matches(isDisplayed()));
-
-        CarUiRecyclerView carUiRecyclerView = mActivity.requireViewById(R.id.list);
-
-        ViewGroup container = (ViewGroup) carUiRecyclerView.getParent().getParent();
-
-        assertThat(carUiRecyclerView.getAlpha(), is(equalTo(1.0f)));
-        assertThat(container.getAlpha(), is(equalTo(1.0f)));
-
-        carUiRecyclerView.setAlpha(0.5f);
-
-        assertThat(carUiRecyclerView.getAlpha(), is(equalTo(1.0f)));
-        assertThat(container.getAlpha(), is(equalTo(0.5f)));
-    }
-
-    @Test
-    public void testCallAnimateOnRecyclerViewWithScrollbar() {
-        doReturn(true).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
-
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
-        container.post(() -> {
-            container.addView(carUiRecyclerView);
-            carUiRecyclerView.setAdapter(new TestAdapter(100));
+        mActivity.runOnUiThread(() -> {
+            container.addView(carUiRecyclerView.getView());
+            carUiRecyclerView.setAdapter(adapter);
         });
 
-        onView(withId(R.id.car_ui_scroll_bar)).check(matches(isDisplayed()));
+        onView(withText(adapter.getItemText(0))).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_scroll_bar)).check(doesNotExist());
 
-        ViewGroup recyclerViewContainer = (ViewGroup) carUiRecyclerView.getParent().getParent();
+        OrientationHelper orientationHelper =
+                OrientationHelper.createVerticalHelper(carUiRecyclerView.getLayoutManager());
 
-        assertThat(carUiRecyclerView.animate(), is(equalTo(recyclerViewContainer.animate())));
+        assertThat(orientationHelper.getStartAfterPadding(), is(equalTo(0)));
+        assertThat(carUiRecyclerView.getView().getPaddingStart(), is(equalTo(0)));
+        assertThat(carUiRecyclerView.getView().getPaddingEnd(), is(equalTo(0)));
+        // available space in recyclerview after applying paddings.
+        int screenHeight = orientationHelper.getTotalSpace();
+        assertThat(carUiRecyclerView.getHeight(), is(equalTo(screenHeight)));
+
+        mActivity.runOnUiThread(() -> carUiRecyclerView.setPaddingRelative(20, 150, 30, 170));
+
+        onView(withText(adapter.getItemText(0))).check(matches(isDisplayed()));
+
+        assertThat(carUiRecyclerView.getView().getPaddingStart(), is(equalTo(20)));
+        assertThat(carUiRecyclerView.getView().getPaddingEnd(), is(equalTo(30)));
+        assertThat(orientationHelper.getStartAfterPadding(), is(equalTo(150)));
+        // available space in recyclerview after applying paddings.
+        screenHeight = orientationHelper.getTotalSpace();
+        assertThat(carUiRecyclerView.getHeight() - 150 - 170, is(equalTo(screenHeight)));
+    }
+
+    @Test
+    public void testSetAlphaToRecyclerView() {
+        doReturn(false).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
+
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
+
+        assertThat(carUiRecyclerView.getView().getAlpha(), is(equalTo(1.0f)));
+
+        carUiRecyclerView.setAlpha(0.5f);
+
+        assertThat(carUiRecyclerView.getView().getAlpha(), is(equalTo(0.5f)));
     }
 
     @Test
@@ -1133,12 +1290,11 @@ public class CarUiRecyclerViewTest {
         // margin is button up top margin or button down bottom margin
         int recyclerviewHeight = 1;
 
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
-
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         container.post(() -> {
             FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(-1, recyclerviewHeight);
-            container.addView(carUiRecyclerView, lp);
+            container.addView(carUiRecyclerView.getView(), lp);
             carUiRecyclerView.setAdapter(new TestAdapter(100));
         });
 
@@ -1163,12 +1319,11 @@ public class CarUiRecyclerViewTest {
         // Set to 2 * (minTouchSize + margin)
         int recyclerviewHeight = 2 * (int) (minTouchSize + margin);
 
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
-
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         container.post(() -> {
             FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(-1, recyclerviewHeight);
-            container.addView(carUiRecyclerView, lp);
+            container.addView(carUiRecyclerView.getView(), lp);
             carUiRecyclerView.setAdapter(new TestAdapter(100));
         });
 
@@ -1204,12 +1359,11 @@ public class CarUiRecyclerViewTest {
                         + max(minTouchSize, mScrollbarThumbMinHeight)
                         + 2 * margin + trackMargin;
 
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
-
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         container.post(() -> {
             FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(-1, recyclerviewHeight);
-            container.addView(carUiRecyclerView, lp);
+            container.addView(carUiRecyclerView.getView(), lp);
             carUiRecyclerView.setAdapter(new TestAdapter(100));
         });
 
@@ -1230,12 +1384,12 @@ public class CarUiRecyclerViewTest {
     public void testDefaultSize_noScrollbar() {
         doReturn(false).when(mTestableResources).getBoolean(R.bool.car_ui_scrollbar_enable);
 
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         int listId = View.generateViewId();
         TestAdapter adapter = new TestAdapter(50);
         container.post(() -> {
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
             carUiRecyclerView.setId(listId);
             carUiRecyclerView.setAdapter(adapter);
         });
@@ -1260,12 +1414,12 @@ public class CarUiRecyclerViewTest {
         when(typedArray.getInt(eq(R.styleable.CarUiRecyclerView_carUiSize),
                 anyInt())).thenReturn(2); // Large size
 
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         int listId = View.generateViewId();
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         TestAdapter adapter = new TestAdapter(50);
         container.post(() -> {
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
             carUiRecyclerView.setId(listId);
             carUiRecyclerView.setAdapter(adapter);
         });
@@ -1292,12 +1446,12 @@ public class CarUiRecyclerViewTest {
         when(typedArray.getInt(eq(R.styleable.CarUiRecyclerView_carUiSize),
                 anyInt())).thenReturn(1); // Medium size
 
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         int listId = View.generateViewId();
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         TestAdapter adapter = new TestAdapter(50);
         container.post(() -> {
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
             carUiRecyclerView.setId(listId);
             carUiRecyclerView.setAdapter(adapter);
         });
@@ -1323,12 +1477,12 @@ public class CarUiRecyclerViewTest {
         when(typedArray.getInt(eq(R.styleable.CarUiRecyclerView_carUiSize),
                 anyInt())).thenReturn(0); // Small size
 
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         int listId = View.generateViewId();
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         TestAdapter adapter = new TestAdapter(1);
         container.post(() -> {
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
             carUiRecyclerView.setId(listId);
             carUiRecyclerView.setAdapter(adapter);
         });
@@ -1358,7 +1512,7 @@ public class CarUiRecyclerViewTest {
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         TestAdapter adapter = new TestAdapter(50);
         container.post(() -> {
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
             carUiRecyclerView.setId(listId);
             carUiRecyclerView.setAdapter(adapter);
         });
@@ -1500,14 +1654,14 @@ public class CarUiRecyclerViewTest {
 
         LinearSnapHelper linearSnapHelper = new LinearSnapHelper();
         carUiRecyclerView.setOnFlingListener(null);
-        linearSnapHelper.attachToRecyclerView(carUiRecyclerView);
+        linearSnapHelper.attachToRecyclerView(carUiRecyclerView.getRecyclerView());
         // 200 is just an arbitrary number. the intent is to make sure the return value is smaller
         // than the layoutmanager height.
         int[] baseOutDist = linearSnapHelper.calculateScrollDistance(200, -200);
 
         CarUiSnapHelper carUiSnapHelper = new CarUiSnapHelper(mTestableContext);
         carUiRecyclerView.setOnFlingListener(null);
-        carUiSnapHelper.attachToRecyclerView(carUiRecyclerView);
+        carUiSnapHelper.attachToRecyclerView(carUiRecyclerView.getRecyclerView());
         int[] outDist = carUiSnapHelper.calculateScrollDistance(200, -200);
 
         assertEquals(outDist[0], baseOutDist[0]);
@@ -1535,14 +1689,14 @@ public class CarUiRecyclerViewTest {
 
         LinearSnapHelper linearSnapHelper = new LinearSnapHelper();
         carUiRecyclerView.setOnFlingListener(null);
-        linearSnapHelper.attachToRecyclerView(carUiRecyclerView);
+        linearSnapHelper.attachToRecyclerView(carUiRecyclerView.getRecyclerView());
         // 8000 is just an arbitrary number. the intent is to make sure the return value is bigger
         // than the layoutmanager height.
         int[] baseOutDist = linearSnapHelper.calculateScrollDistance(8000, -8000);
 
         CarUiSnapHelper carUiSnapHelper = new CarUiSnapHelper(mTestableContext);
         carUiRecyclerView.setOnFlingListener(null);
-        carUiSnapHelper.attachToRecyclerView(carUiRecyclerView);
+        carUiSnapHelper.attachToRecyclerView(carUiRecyclerView.getRecyclerView());
         int[] outDist = carUiSnapHelper.calculateScrollDistance(8000, -8000);
 
         int lastChildPosition = carUiSnapHelper.isAtEnd(layoutManager)
@@ -1571,13 +1725,9 @@ public class CarUiRecyclerViewTest {
         doReturn(-1).when(mTestableResources)
                 .getInteger(R.integer.car_ui_scrollbar_longpress_initial_delay);
 
-        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
-        ViewGroup container = mActivity.findViewById(R.id.test_container);
-        TestAdapter adapter = new TestAdapter(50);
-
-        container.post(() -> carUiRecyclerView.setAdapter(adapter));
-        container.post(() -> assertThrows("negative intervals are not allowed",
-                IllegalArgumentException.class, () -> container.addView(carUiRecyclerView)));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> CarUiRecyclerView.create(mTestableContext));
+        assertEquals("negative intervals are not allowed", ex.getMessage());
     }
 
     @Test
@@ -1586,13 +1736,9 @@ public class CarUiRecyclerViewTest {
         doReturn(-1).when(mTestableResources)
                 .getInteger(R.integer.car_ui_scrollbar_longpress_repeat_interval);
 
-        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
-        ViewGroup container = mActivity.findViewById(R.id.test_container);
-        TestAdapter adapter = new TestAdapter(50);
-
-        container.post(() -> carUiRecyclerView.setAdapter(adapter));
-        container.post(() -> assertThrows("negative intervals are not allowed",
-                IllegalArgumentException.class, () -> container.addView(carUiRecyclerView)));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> CarUiRecyclerView.create(mTestableContext));
+        assertEquals("negative intervals are not allowed", ex.getMessage());
     }
 
     @Test
@@ -1600,29 +1746,21 @@ public class CarUiRecyclerViewTest {
         doReturn("random.class").when(mTestableResources)
                 .getString(R.string.car_ui_scrollbar_component);
 
-        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
-        ViewGroup container = mActivity.findViewById(R.id.test_container);
-        TestAdapter adapter = new TestAdapter(50);
-
-        container.post(() -> carUiRecyclerView.setAdapter(adapter));
-        container.post(() -> assertThrows("Error loading scroll bar component: random.class",
-                RuntimeException.class, () -> container.addView(carUiRecyclerView)));
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> CarUiRecyclerView.create(mTestableContext));
+        assertEquals("Error loading scroll bar component: random.class", ex.getMessage());
     }
 
     @Test
     public void testWrongType_createScrollBarFromConfig() {
         // Basically return any class that exists but doesn't extend ScrollBar
-        doReturn(CarUiRecyclerViewImpl.class.getName()).when(mTestableResources)
+        doReturn(CarUiRecyclerView.class.getName()).when(mTestableResources)
                 .getString(R.string.car_ui_scrollbar_component);
 
-        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
-        ViewGroup container = mActivity.findViewById(R.id.test_container);
-        TestAdapter adapter = new TestAdapter(50);
-
-        container.post(() -> carUiRecyclerView.setAdapter(adapter));
-        container.post(() -> assertThrows("Error loading scroll bar component: "
-                        + CarUiRecyclerViewImpl.class.getName(),
-                RuntimeException.class, () -> container.addView(carUiRecyclerView)));
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> CarUiRecyclerView.create(mTestableContext));
+        assertEquals("Error creating scroll bar component: "
+                + CarUiRecyclerView.class.getName(), ex.getMessage());
     }
 
     @Test
@@ -1634,7 +1772,7 @@ public class CarUiRecyclerViewTest {
         TestAdapter adapter = new TestAdapter(50);
 
         container.post(() -> {
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
             carUiRecyclerView.setAdapter(adapter);
         });
 
@@ -1656,7 +1794,7 @@ public class CarUiRecyclerViewTest {
         TestAdapter adapter = new TestAdapter(50);
 
         container.post(() -> {
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
             carUiRecyclerView.setAdapter(adapter);
         });
 
@@ -1673,9 +1811,10 @@ public class CarUiRecyclerViewTest {
 
     @Test
     public void testNegativeSpanCount_setSpanCount() {
-        CarUiLayoutStyle layoutStyle = new CarUiGridLayoutStyle();
-        assertThrows(AssertionError.class, () -> ((CarUiGridLayoutStyle) layoutStyle)
-                .setSpanCount((-1)));
+        CarUiGridLayoutStyle layoutStyle = new CarUiGridLayoutStyle();
+        AssertionError ex = assertThrows(AssertionError.class,
+                () -> layoutStyle.setSpanCount((-1)));
+        assertEquals("Span count must be bigger than 0", ex.getMessage());
     }
 
     @Test
@@ -1703,7 +1842,7 @@ public class CarUiRecyclerViewTest {
         TestAdapter adapter = new TestAdapter(50);
 
         container.post(() -> {
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
             carUiRecyclerView.setAdapter(adapter);
         });
 
@@ -1742,7 +1881,7 @@ public class CarUiRecyclerViewTest {
         TestAdapter adapter = new TestAdapter(50);
 
         container.post(() -> {
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
             carUiRecyclerView.setAdapter(adapter);
         });
 
@@ -1766,7 +1905,9 @@ public class CarUiRecyclerViewTest {
     @Test
     public void testCarUiGridLayoutStyle_fromLinearLayout_throwsException() {
         LinearLayoutManager layoutManager = new LinearLayoutManager(mTestableContext);
-        assertThrows(AssertionError.class, () -> CarUiGridLayoutStyle.from(layoutManager));
+        AssertionError ex = assertThrows(AssertionError.class,
+                () -> CarUiGridLayoutStyle.from(layoutManager));
+        assertEquals("GridLayoutManager required.", ex.getMessage());
     }
 
     @Test
@@ -1785,7 +1926,7 @@ public class CarUiRecyclerViewTest {
         TestAdapter adapter = new TestAdapter(50);
 
         container.post(() -> {
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
             carUiRecyclerView.setAdapter(adapter);
         });
 
@@ -1801,7 +1942,9 @@ public class CarUiRecyclerViewTest {
     @Test
     public void testCarUiLinearLayoutStyle_fromGridLayout_throwsException() {
         NotLinearLayoutManager layoutManager = new NotLinearLayoutManager(mTestableContext);
-        assertThrows(AssertionError.class, () -> CarUiLinearLayoutStyle.from(layoutManager));
+        AssertionError ex = assertThrows(AssertionError.class,
+                () -> CarUiLinearLayoutStyle.from(layoutManager));
+        assertEquals("LinearLayoutManager required.", ex.getMessage());
     }
 
     @Test
@@ -1833,13 +1976,13 @@ public class CarUiRecyclerViewTest {
         when(restriction.getActiveRestrictions()).thenReturn(UX_RESTRICTIONS_LIMIT_CONTENT);
         when(restriction.getMaxCumulativeContentItems()).thenReturn(10);
 
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         TestAdapter.WithItemCap adapter = spy(new TestAdapter.WithItemCap(100));
         container.post(() -> {
             uxRestriction.setUxRestrictions(restriction);
             carUiRecyclerView.setAdapter(adapter);
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
         });
 
         IdlingRegistry.getInstance().register(new ScrollIdlingResource(carUiRecyclerView));
@@ -1854,13 +1997,13 @@ public class CarUiRecyclerViewTest {
         CarUxRestrictions restriction = mock(CarUxRestrictions.class);
         when(restriction.getMaxCumulativeContentItems()).thenReturn(10);
 
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         TestAdapter.WithItemCap adapter = spy(new TestAdapter.WithItemCap(100));
         container.post(() -> {
             uxRestriction.setUxRestrictions(restriction);
             carUiRecyclerView.setAdapter(adapter);
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
         });
 
         IdlingRegistry.getInstance().register(new ScrollIdlingResource(carUiRecyclerView));
@@ -1875,13 +2018,12 @@ public class CarUiRecyclerViewTest {
         doReturn(TestScrollBar.class.getName()).when(mTestableResources)
                 .getString(R.string.car_ui_scrollbar_component);
 
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
-
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         TestAdapter adapter = new TestAdapter(100);
         container.post(() -> {
             carUiRecyclerView.setAdapter(adapter);
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
         });
 
         IdlingRegistry.getInstance().register(new ScrollIdlingResource(carUiRecyclerView));
@@ -1908,13 +2050,12 @@ public class CarUiRecyclerViewTest {
         doReturn(TestScrollBar.class.getName()).when(mTestableResources)
                 .getString(R.string.car_ui_scrollbar_component);
 
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
-
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         TestAdapter adapter = new TestAdapter(100);
         container.post(() -> {
             carUiRecyclerView.setAdapter(adapter);
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
         });
 
         IdlingRegistry.getInstance().register(new ScrollIdlingResource(carUiRecyclerView));
@@ -1941,13 +2082,12 @@ public class CarUiRecyclerViewTest {
         doReturn(TestScrollBar.class.getName()).when(mTestableResources)
                 .getString(R.string.car_ui_scrollbar_component);
 
-        CarUiRecyclerView carUiRecyclerView = new CarUiRecyclerViewImpl(mTestableContext);
-
+        CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         TestAdapter adapter = new TestAdapter(100);
         container.post(() -> {
             carUiRecyclerView.setAdapter(adapter);
-            container.addView(carUiRecyclerView);
+            container.addView(carUiRecyclerView.getView());
         });
 
         IdlingRegistry.getInstance().register(new ScrollIdlingResource(carUiRecyclerView));
@@ -1986,8 +2126,8 @@ public class CarUiRecyclerViewTest {
         boolean mReturnZeroVerticalScrollOffset = false;
 
         @Override
-        public void initialize(RecyclerView rv, View scrollView) {
-            super.initialize(rv, scrollView);
+        public void initialize(Context context, RecyclerView rv, View scrollView) {
+            super.initialize(context, rv, scrollView);
 
             scrollView.setTag(this);
         }
@@ -2219,14 +2359,14 @@ public class CarUiRecyclerViewTest {
         private boolean mIdle = true;
         private ResourceCallback mResourceCallback;
 
-        ScrollIdlingResource(CarUiRecyclerView carUiRecyclerView) {
-            carUiRecyclerView
+        ScrollIdlingResource(CarUiRecyclerView recyclerView) {
+            recyclerView
                     .addOnScrollListener(
-                            new RecyclerView.OnScrollListener() {
+                            new CarUiRecyclerView.OnScrollListener() {
                                 @Override
-                                public void onScrollStateChanged(@NonNull RecyclerView recyclerView,
+                                public void onScrollStateChanged(
+                                        @NonNull CarUiRecyclerView recyclerView,
                                         int newState) {
-                                    super.onScrollStateChanged(recyclerView, newState);
                                     mIdle = (newState == SCROLL_STATE_IDLE
                                             // Treat dragging as idle, or Espresso will
                                             // block itself when swiping.
@@ -2237,8 +2377,9 @@ public class CarUiRecyclerViewTest {
                                 }
 
                                 @Override
-                                public void onScrolled(@NonNull RecyclerView recyclerView, int dx,
-                                        int dy) {
+                                public void onScrolled(@NonNull CarUiRecyclerView recyclerView,
+                                                       int dx,
+                                                       int dy) {
                                 }
                             });
         }
@@ -2261,8 +2402,7 @@ public class CarUiRecyclerViewTest {
 
     private static class NotLinearLayoutManager extends LayoutManager {
 
-        NotLinearLayoutManager(Context mTestableContext) {
-        }
+        NotLinearLayoutManager(Context mTestableContext) {}
 
         @Override
         public LayoutParams generateDefaultLayoutParams() {

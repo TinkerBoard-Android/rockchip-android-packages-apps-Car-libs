@@ -50,56 +50,41 @@ public class CarUxRestrictionsUtil {
 
     private final Set<OnUxRestrictionsChangedListener> mObservers =
             Collections.newSetFromMap(new WeakHashMap<>());
-    private final CarUxRestrictionsManager.OnUxRestrictionsChangedListener mListener;
+    private final CarUxRestrictionsManager.OnUxRestrictionsChangedListener mListener =
+            (carUxRestrictions) -> {
+                if (carUxRestrictions == null) {
+                    mCarUxRestrictions = getDefaultRestrictions();
+                } else {
+                    mCarUxRestrictions = carUxRestrictions;
+                }
+
+                for (OnUxRestrictionsChangedListener observer : mObservers) {
+                    observer.onRestrictionsChanged(mCarUxRestrictions);
+                }
+            };
     private static CarUxRestrictionsUtil sInstance = null;
 
     private CarUxRestrictionsUtil(Context context) {
-        mListener = (carUxRestrictions) -> {
-            if (carUxRestrictions == null) {
-                mCarUxRestrictions = getDefaultRestrictions();
-            } else {
-                mCarUxRestrictions = carUxRestrictions;
-            }
-
-            for (OnUxRestrictionsChangedListener observer : mObservers) {
-                observer.onRestrictionsChanged(mCarUxRestrictions);
-            }
-        };
-
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 Car.createCar(context.getApplicationContext(), null,
                         Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT,
                         (Car car, boolean ready) -> {
                             if (ready) {
-                                CarUxRestrictionsManager carUxRestrictionsManager =
-                                        (CarUxRestrictionsManager) car.getCarManager(
-                                                Car.CAR_UX_RESTRICTION_SERVICE);
-                                carUxRestrictionsManager.registerListener(mListener);
-                                mListener.onUxRestrictionsChanged(
-                                        carUxRestrictionsManager.getCurrentCarUxRestrictions());
+                                registerCarUxRestrictionsListener(car, mListener);
                             } else {
-                                Log.w(TAG,
-                                        "Car service disconnected, assuming fully restricted uxr");
+                                Log.w(TAG, "Car service disconnected, assuming fully"
+                                        + " restricted uxr");
                                 mListener.onUxRestrictionsChanged(null);
                             }
                         });
             } else {
-                Car carApi = Car.createCar(context.getApplicationContext());
-
-                try {
-                    CarUxRestrictionsManager carUxRestrictionsManager =
-                            (CarUxRestrictionsManager) carApi.getCarManager(
-                                    Car.CAR_UX_RESTRICTION_SERVICE);
-                    carUxRestrictionsManager.registerListener(mListener);
-                    mListener.onUxRestrictionsChanged(
-                            carUxRestrictionsManager.getCurrentCarUxRestrictions());
-                } catch (NullPointerException e) {
-                    Log.e(TAG, "Car not connected", e);
-                    // mCarUxRestrictions will be the default
-                }
+                Car car = Car.createCar(context.getApplicationContext());
+                registerCarUxRestrictionsListener(car, mListener);
             }
-        } catch (SecurityException e) {
+        } catch (RuntimeException e) {
+            // Can't catch more specific exception, because
+            // Car class literally throws RuntimeException or SecurityException on error.
             Log.w(TAG, "Unable to connect to car service, assuming unrestricted", e);
             mListener.onUxRestrictionsChanged(new CarUxRestrictions.Builder(
                     false, CarUxRestrictions.UX_RESTRICTIONS_BASELINE, 0)
@@ -195,5 +180,21 @@ public class CarUxRestrictionsUtil {
     public void setUxRestrictions(CarUxRestrictions carUxRestrictions) {
         mCarUxRestrictions = carUxRestrictions;
         mListener.onUxRestrictionsChanged(mCarUxRestrictions);
+    }
+
+    private static void registerCarUxRestrictionsListener(
+            @NonNull Car car,
+            @NonNull CarUxRestrictionsManager.OnUxRestrictionsChangedListener listener) {
+        try {
+            CarUxRestrictionsManager carUxRestrictionsManager =
+                    (CarUxRestrictionsManager) car.getCarManager(
+                            Car.CAR_UX_RESTRICTION_SERVICE);
+            carUxRestrictionsManager.registerListener(listener);
+            listener.onUxRestrictionsChanged(
+                    carUxRestrictionsManager.getCurrentCarUxRestrictions());
+        } catch (NullPointerException e) {
+            Log.e(TAG, "Car not connected", e);
+            // mCarUxRestrictions will be the default
+        }
     }
 }

@@ -20,14 +20,9 @@
         android:id="@+id/car_ui_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingStart="@dimen/car_ui_scrollbar_margin"
-        android:paddingEnd="@dimen/car_ui_scrollbar_margin"
-        android:tag="carUiRecyclerView" />
+        android:layout_marginStart="@dimen/car_ui_scrollbar_margin"
+        android:layout_marginEnd="@dimen/car_ui_scrollbar_margin"
+        android:tag="RecyclerView" />
 
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="left" >
-        <include layout="@layout/car_ui_recyclerview_scrollbar"/>
-    </FrameLayout>
+    <include layout="@layout/car_ui_recyclerview_scrollbar"/>
 </merge>

@@ -32,6 +32,7 @@ import com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.ViewHolderOEMV1;
 import com.android.car.ui.plugin.oemapis.toolbar.ToolbarControllerOEMV1;
 
+import com.chassis.car.ui.plugin.recyclerview.RecyclerViewImpl;
 import com.chassis.car.ui.plugin.toolbar.BaseLayoutInstaller;
 
 import java.util.List;
@@ -97,8 +98,8 @@ public class PluginFactoryImpl implements PluginFactoryOEMV2 {
     public RecyclerViewOEMV1 createRecyclerView(
             Context sourceContext,
             RecyclerViewAttributesOEMV1 attrs) {
-        //return new RecyclerViewImpl(mPluginContext, attrs);
-        return null;
+        return new RecyclerViewImpl(mPluginContext, attrs);
+        //return null;
     }
 
     @Override

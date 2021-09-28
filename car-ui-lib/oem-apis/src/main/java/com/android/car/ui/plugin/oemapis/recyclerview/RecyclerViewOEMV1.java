@@ -22,8 +22,30 @@ import android.view.View;
  */
 public interface RecyclerViewOEMV1 {
 
+    /**
+     * The RecyclerView is not currently scrolling.
+     *
+     * @see #getScrollState()
+     */
+    int SCROLL_STATE_IDLE = 0;
+
+    /**
+     * The RecyclerView is currently being dragged by outside input such as user touch input.
+     *
+     * @see #getScrollState()
+     */
+    int SCROLL_STATE_DRAGGING = 1;
+
+    /**
+     * The RecyclerView is currently animating to a final position while not under
+     * outside control.
+     *
+     * @see #getScrollState()
+     */
+    int SCROLL_STATE_SETTLING = 2;
+
     /** {@link androidx.recyclerview.widget.RecyclerView#setAdapter(Adapter)} */
-    void setAdapter(AdapterOEMV1 adapter);
+    <V extends ViewHolderOEMV1> void setAdapter(AdapterOEMV1<V> adapter);
 
     /** {@link androidx.recyclerview.widget.RecyclerView#addOnScrollListener} */
     void addOnScrollListener(OnScrollListenerOEMV1 listener);
@@ -56,6 +78,12 @@ public interface RecyclerViewOEMV1 {
     void setLayoutStyle(LayoutStyleOEMV1 layoutStyle);
 
     /**
+     * set {@link LayoutStyleOEMV1}. This is the replacement for
+     * {@link androidx.recyclerview.widget.RecyclerView.LayoutManager}
+     */
+    LayoutStyleOEMV1 getLayoutStyle();
+
+    /**
      * Returns the view that will be displayed on the screen.
      */
     View getView();
@@ -69,8 +97,27 @@ public interface RecyclerViewOEMV1 {
     /** {@link androidx.recyclerview.widget.RecyclerView#setClipToPadding(boolean)} */
     void setClipToPadding(boolean clipToPadding);
 
-    /**
-     * Return's the container which contains the scrollbar and this RecyclerView.
-     */
-    View getContainer();
+    /** setter for {@link androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup} */
+    void setSpanSizeLookup(SpanSizeLookupOEMV1 spanSizeLookup);
+
+    /** see {@link LinearLayoutManager#findFirstCompletelyVisibleItemPosition()} */
+    int findFirstCompletelyVisibleItemPosition();
+
+    /** see {@link LinearLayoutManager#findFirstVisibleItemPosition()} */
+    int findFirstVisibleItemPosition();
+
+    /** see {@link LinearLayoutManager#findLastCompletelyVisibleItemPosition()} */
+    int findLastCompletelyVisibleItemPosition();
+
+    /** see {@link LinearLayoutManager#findLastVisibleItemPosition()} */
+    int findLastVisibleItemPosition();
+
+    /** see {@link RecyclerView#getScrollState()} */
+    int getScrollState();
+
+    /** see {@link View#setContentDescription(CharSequence)} */
+    void setContentDescription(CharSequence contentDescription);
+
+    /** see {@link View#setAlpha(float)} */
+    void setAlpha(float alpha);
 }

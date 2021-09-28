@@ -6,4 +6,6 @@
     <string name="toolbar_ux_restricted_search_hint" msgid="4107155717310782144">"Nije dostupno tijekom vožnje"</string>
     <string name="toolbar_nav_icon_content_description" msgid="2480730986615479860">"Natrag"</string>
     <string name="toolbar_menu_item_overflow_title" msgid="5386814151990860080">"Dodatno"</string>
+    <string name="scrollbar_page_down_button" msgid="7317333289151090392">"Pomicanje prema dolje"</string>
+    <string name="scrollbar_page_up_button" msgid="8856997791538307943">"Pomicanje prema gore"</string>
 </resources>

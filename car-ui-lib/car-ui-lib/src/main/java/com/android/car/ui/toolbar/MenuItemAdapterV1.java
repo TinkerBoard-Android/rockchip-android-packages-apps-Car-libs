@@ -25,7 +25,6 @@ import com.android.car.ui.utils.CarUiUtils;
  * Adapts a {@link com.android.car.ui.toolbar.MenuItem} into a
  * {@link com.android.car.ui.plugin.oemapis.toolbar.MenuItemOEMV1}
  */
-@SuppressWarnings("AndroidJdkLibsChecker")
 public class MenuItemAdapterV1 {
 
     @NonNull

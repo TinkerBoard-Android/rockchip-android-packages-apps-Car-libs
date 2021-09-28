@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.LayoutManager;
 
 import com.android.car.ui.recyclerview.CarUiRecyclerView.CarUiRecyclerViewLayout;
+import com.android.car.ui.recyclerview.CarUiRecyclerView.Size;
 
 /**
  * CarUi proxy class for {@link LinearLayoutManager}
@@ -32,6 +33,7 @@ public final class CarUiLinearLayoutStyle implements CarUiLayoutStyle {
     @Orientation
     private int mLayoutOrientation = VERTICAL;
     private boolean mReverseLayout = false;
+    @Size
     private int mSize = CarUiRecyclerView.SIZE_LARGE;
 
     /**
@@ -58,19 +60,17 @@ public final class CarUiLinearLayoutStyle implements CarUiLayoutStyle {
         return layoutStyle;
     }
 
-    /** Returns number of recyclerview spans */
+    @Override
     public int getSpanCount() {
         return 1;
     }
 
-    /** Returns {@link CarUiRecyclerViewLayout} */
-    @CarUiRecyclerViewLayout
+    @Override
     public int getLayoutType() {
         return CarUiRecyclerViewLayout.LINEAR;
     }
 
-    /** Returns layout direction {@link CarUiLayoutStyle.Orientation} */
-    @Orientation
+    @Override
     public int getOrientation() {
         return mLayoutOrientation;
     }
@@ -80,7 +80,7 @@ public final class CarUiLinearLayoutStyle implements CarUiLayoutStyle {
         mLayoutOrientation = orientation;
     }
 
-    /** Returns true if layout is reversed */
+    @Override
     public boolean getReverseLayout() {
         return mReverseLayout;
     }
@@ -90,9 +90,7 @@ public final class CarUiLinearLayoutStyle implements CarUiLayoutStyle {
         mReverseLayout = reverseLayout;
     }
 
-    /**
-     * @return CarUiRecyclerView size
-     */
+    @Override
     public int getSize() {
         return mSize;
     }

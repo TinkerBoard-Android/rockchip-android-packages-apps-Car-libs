@@ -131,7 +131,7 @@ public class SearchWidescreenController {
     private View getSearchResultsView() {
         View view = mSearchConfig.getSearchResultsView();
         if (view instanceof CarUiRecyclerView) {
-            return ((CarUiRecyclerView) view).getContainer();
+            return ((CarUiRecyclerView) view).getView();
         }
         return view;
     }

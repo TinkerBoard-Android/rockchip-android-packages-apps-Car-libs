@@ -18,7 +18,7 @@ import argparse
 import os
 import sys
 import re
-from resource_utils import get_all_resources, get_resources_from_single_file, add_resource_to_set, Resource
+from resource_utils import get_all_resources, get_resources_from_single_file, add_resource_to_set, Resource, merge_resources
 from git_utils import has_chassis_changes
 from datetime import datetime
 
@@ -69,10 +69,14 @@ def main():
 
     resources = get_all_resources(os.path.join(ROOT_FOLDER, 'car-ui-lib/src/main/res'))
     check_resource_names(resources, get_resources_from_single_file(os.path.join(OUTPUT_FILE_PATH, 'resource_name_allowed.xml')))
-
+    removed_resources = get_resources_from_single_file(os.path.join(ROOT_FOLDER, 'car-ui-lib/src/main/res-overlayable/values/removed_resources.xml'))
     OVERLAYABLE_OUTPUT_FILE_PATH = os.path.join(ROOT_FOLDER, 'car-ui-lib/src/main/res-overlayable/values/overlayable.xml')
     output_file = args.file or 'current.xml'
+
     if args.compare:
+        check_removed_resources(resources, removed_resources)
+        merge_resources(resources, removed_resources)
+
         old_mapping = get_resources_from_single_file(os.path.join(OUTPUT_FILE_PATH, 'current.xml'))
         compare_resources(old_mapping, resources, os.path.join(OUTPUT_FILE_PATH, 'current.xml'))
 
@@ -80,6 +84,7 @@ def main():
         add_constraintlayout_resources(resources)
         compare_resources(old_mapping, resources, OVERLAYABLE_OUTPUT_FILE_PATH)
     else:
+        merge_resources(resources, removed_resources)
         generate_current_file(resources, output_file)
         generate_overlayable_file(resources, OVERLAYABLE_OUTPUT_FILE_PATH)
 
@@ -219,6 +224,11 @@ def compare_resources(old_mapping, new_mapping, res_public_file):
               "run 'python3 $ANDROID_BUILD_TOP/packages/apps/Car/libs/car-ui-lib/tests/apitest/" +
               "auto-generate-resources.py' again and submit the new %s" % res_public_file)
         sys.exit(1)
+
+def check_removed_resources(mapping, removed_resources):
+    intersection = removed_resources.intersection(mapping)
+    if len(intersection) > 0:
+        print('Usage of removed resources detected\n'+ '\n'.join(map(lambda x: str(x), intersection)))
 
 if __name__ == '__main__':
     main()

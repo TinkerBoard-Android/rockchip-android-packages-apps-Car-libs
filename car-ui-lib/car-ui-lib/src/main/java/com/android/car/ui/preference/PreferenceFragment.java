@@ -17,11 +17,13 @@
 package com.android.car.ui.preference;
 
 import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
+import static com.android.car.ui.utils.CarUiUtils.requireViewByRefId;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -41,12 +43,14 @@ import androidx.preference.PreferenceGroup;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreference;
 import androidx.preference.TwoStatePreference;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.FocusArea;
 import com.android.car.ui.R;
 import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.core.CarUi;
+import com.android.car.ui.recyclerview.CarUiRecyclerView;
 import com.android.car.ui.toolbar.Toolbar;
 import com.android.car.ui.toolbar.ToolbarController;
 import com.android.car.ui.utils.CarUiUtils;
@@ -75,6 +79,9 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
     private static final String TAG = "CarUiPreferenceFragment";
     private static final String DIALOG_FRAGMENT_TAG =
             "com.android.car.ui.PreferenceFragment.DIALOG";
+
+    @NonNull
+    private CarUiRecyclerView mCarUiRecyclerView;
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -149,11 +156,10 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
     @Override
     public void onCarUiInsetsChanged(@NonNull Insets insets) {
         View view = requireView();
-        FocusArea focusArea = CarUiUtils.requireViewByRefId(view, R.id.car_ui_focus_area);
+        FocusArea focusArea = requireViewByRefId(view, R.id.car_ui_focus_area);
         focusArea.setHighlightPadding(0, insets.getTop(), 0, insets.getBottom());
         focusArea.setBoundsOffset(0, insets.getTop(), 0, insets.getBottom());
-        CarUiUtils.requireViewByRefId(view, R.id.recycler_view)
-                .setPadding(0, insets.getTop(), 0, insets.getBottom());
+        getCarUiRecyclerView().setPadding(0, insets.getTop(), 0, insets.getBottom());
         view.setPadding(insets.getLeft(), 0, insets.getRight(), 0);
     }
 
@@ -278,6 +284,22 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
         }
     }
 
+    /**
+     * In order to change the layout for {@link PreferenceFragment}, make sure the correct layout is
+     * passed to PreferenceFragment.CarUi theme.
+     * Override ht method in order to inflate {@link CarUiRecyclerView}
+     */
+    @NonNull
+    public CarUiRecyclerView onCreateCarUiRecyclerView(LayoutInflater inflater, ViewGroup parent,
+                                                       Bundle savedInstanceState) {
+        return requireViewByRefId(parent, R.id.recycler_view);
+    }
+
+    @NonNull
+    public CarUiRecyclerView getCarUiRecyclerView() {
+        return mCarUiRecyclerView;
+    }
+
     // Mapping from regular preferences to CarUi preferences.
     // Order is important, subclasses must come before their base classes
     // Make sure all the following classes are added to proguard configuration.
@@ -327,6 +349,18 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
         }
 
         return preference;
+    }
+
+    @Override
+    public RecyclerView onCreateRecyclerView(LayoutInflater inflater, ViewGroup parent,
+            Bundle savedInstanceState) {
+        mCarUiRecyclerView = onCreateCarUiRecyclerView(inflater, parent, savedInstanceState);
+        RecyclerView recyclerView = mCarUiRecyclerView.getRecyclerView();
+        if (recyclerView != null) {
+            return recyclerView;
+        } else {
+            return super.onCreateRecyclerView(inflater, parent, savedInstanceState);
+        }
     }
 
     /**

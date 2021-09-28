@@ -24,8 +24,7 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.RecyclerView.Adapter;
-import androidx.recyclerview.widget.RecyclerView.ViewHolder;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.FocusArea;
 import com.android.car.ui.FocusAreaAdapterV1;
@@ -92,16 +91,12 @@ public final class PluginFactoryAdapterV1 implements PluginFactory {
                 : null;
     }
 
-    private static Insets adaptInsets(InsetsOEMV1 insetsOEM) {
-        return new Insets(insetsOEM.getLeft(), insetsOEM.getTop(),
-            insetsOEM.getRight(), insetsOEM.getBottom());
-    }
-
     @NonNull
     @Override
     public CarUiTextView createTextView(Context context, AttributeSet attrs) {
         return mFactoryStub.createTextView(context, attrs);
     }
+
 
     @Override
     public AppStyledViewController createAppStyledView(Context activityContext) {
@@ -112,13 +107,18 @@ public final class PluginFactoryAdapterV1 implements PluginFactory {
                 appStyledViewControllerOEMV1);
     }
 
+    private Insets adaptInsets(InsetsOEMV1 insetsOEM) {
+        return new Insets(insetsOEM.getLeft(), insetsOEM.getTop(),
+                insetsOEM.getRight(), insetsOEM.getBottom());
+    }
+
     @Override
     public CarUiRecyclerView createRecyclerView(Context context, AttributeSet attrs) {
         return mFactoryStub.createRecyclerView(context, attrs);
     }
 
     @Override
-    public Adapter<? extends ViewHolder> createListItemAdapter(
+    public RecyclerView.Adapter<? extends RecyclerView.ViewHolder> createListItemAdapter(
             List<? extends CarUiListItem> items) {
         return mFactoryStub.createListItemAdapter(items);
     }

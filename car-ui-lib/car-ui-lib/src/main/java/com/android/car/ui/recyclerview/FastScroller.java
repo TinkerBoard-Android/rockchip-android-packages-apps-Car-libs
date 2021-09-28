@@ -69,7 +69,7 @@ class FastScroller implements View.OnTouchListener {
                 break;
             case MotionEvent.ACTION_MOVE:
                 float thumbBottom = mScrollThumb.getY() + mScrollThumb.getHeight();
-                // check if the move coordinates are within the bounds of the thumb. i.e user is
+                // check if the move coordinates are within the bounds of the thumb. i.e. user is
                 // holding and dragging the thumb.
                 if (!(me.getY() + mScrollTrackView.getY() < thumbBottom
                         && me.getY() + mScrollTrackView.getY() > mScrollThumb.getY())) {

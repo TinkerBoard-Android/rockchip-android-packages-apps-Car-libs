@@ -15,10 +15,24 @@
  */
 package com.chassis.car.ui.plugin.recyclerview;
 
-import android.content.Context;
-import android.view.View;
+import static androidx.recyclerview.widget.RecyclerView.VERTICAL;
 
+import static com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewAttributesOEMV1.SIZE_LARGE;
+import static com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewAttributesOEMV1.SIZE_MEDIUM;
+import static com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewAttributesOEMV1.SIZE_SMALL;
+
+import android.content.Context;
+import android.view.InputDevice;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -29,6 +43,10 @@ import com.android.car.ui.plugin.oemapis.recyclerview.LayoutStyleOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.OnScrollListenerOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewAttributesOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewOEMV1;
+import com.android.car.ui.plugin.oemapis.recyclerview.SpanSizeLookupOEMV1;
+import com.android.car.ui.plugin.oemapis.recyclerview.ViewHolderOEMV1;
+
+import com.chassis.car.ui.plugin.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,43 +54,121 @@ import java.util.List;
 /**
  * Reference OEM implementation for RecyclerView
  */
-public final class RecyclerViewImpl extends RecyclerView implements RecyclerViewOEMV1 {
+public final class RecyclerViewImpl extends FrameLayout implements RecyclerViewOEMV1 {
+
+    /**
+     * {@link com.android.car.ui.utils.RotaryConstants#ROTARY_CONTAINER}
+     */
+    private static final String ROTARY_CONTAINER =
+            "com.android.car.ui.utils.ROTARY_CONTAINER";
+    /**
+     * {@link com.android.car.ui.utils.RotaryConstants#ROTARY_HORIZONTALLY_SCROLLABLE}
+     */
+    private static final String ROTARY_HORIZONTALLY_SCROLLABLE =
+            "com.android.car.ui.utils.HORIZONTALLY_SCROLLABLE";
+    /**
+     * {@link com.android.car.ui.utils.RotaryConstants#ROTARY_VERTICALLY_SCROLLABLE}
+     */
+    private static final String ROTARY_VERTICALLY_SCROLLABLE =
+            "com.android.car.ui.utils.VERTICALLY_SCROLLABLE";
 
     @NonNull
-    private List<OnScrollListenerOEMV1> mScrollListeners = new ArrayList<>();
+    private final RecyclerView mRecyclerView;
+
+    @Nullable
+    private final DefaultScrollBar mScrollBar;
 
     @NonNull
-    private RecyclerView.OnScrollListener mOnScrollListener = new RecyclerView.OnScrollListener() {
-        @Override
-        public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-            for (OnScrollListenerOEMV1 listener: mScrollListeners) {
-                listener.onScrolled((RecyclerViewOEMV1) recyclerView, dx, dy);
-            }
-        }
+    private final List<OnScrollListenerOEMV1> mScrollListeners = new ArrayList<>();
 
-        @Override
-        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-            for (OnScrollListenerOEMV1 listener: mScrollListeners) {
-                listener.onScrollStateChanged((RecyclerViewOEMV1) recyclerView, newState);
-            }
-        }
-    };
+    @NonNull
+    private final RecyclerView.OnScrollListener mOnScrollListener =
+            new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                    for (OnScrollListenerOEMV1 listener : mScrollListeners) {
+                        listener.onScrolled(RecyclerViewImpl.this, dx, dy);
+                    }
+                }
+
+                @Override
+                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                    for (OnScrollListenerOEMV1 listener : mScrollListeners) {
+                        listener.onScrollStateChanged(RecyclerViewImpl.this,
+                                toInternalScrollState(newState));
+                    }
+                }
+            };
+
+    @Nullable
+    private LayoutStyleOEMV1 mLayoutStyle;
 
     public RecyclerViewImpl(@NonNull Context context) {
-        super(context);
+        this(context, null);
     }
 
-    public RecyclerViewImpl(Context context, RecyclerViewAttributesOEMV1 attrs) {
+    public RecyclerViewImpl(@NonNull Context context,
+            @Nullable RecyclerViewAttributesOEMV1 attrs) {
         super(context);
-        setLayoutStyle(attrs.getLayoutStyle());
+        boolean scrollBarEnabled = context.getResources().getBoolean(R.bool.scrollbar_enable);
+        @LayoutRes int layout = R.layout.recycler_view_no_scrollbar;
+        if (scrollBarEnabled && attrs != null) {
+            switch (attrs.getSize()) {
+                case SIZE_SMALL:
+                    layout = R.layout.recycler_view_small;
+                    break;
+                case SIZE_MEDIUM:
+                    layout = R.layout.recycler_view_medium;
+                    break;
+                case SIZE_LARGE:
+                    layout = R.layout.recycler_view;
+            }
+        }
+
+        LayoutInflater factory = LayoutInflater.from(context);
+        View rootView = factory.inflate(layout, this, true);
+        mRecyclerView = rootView.requireViewById(R.id.recycler_view);
+
+        // Set to false so the items below the toolbar are visible.
+        mRecyclerView.setClipToPadding(false);
+
+        if (attrs != null) {
+            setLayoutStyle(attrs.getLayoutStyle());
+            setBackground(attrs.getBackground());
+            setPadding(attrs.getPaddingLeft(), attrs.getPaddingTop(), attrs.getPaddingRight(),
+                    attrs.getPaddingBottom());
+            setMinimumHeight(attrs.getMinHeight());
+            setMinimumWidth(attrs.geMinWidth());
+
+            LayoutParams params = new LayoutParams(attrs.getLayoutWidth(), attrs.getLayoutHeight());
+            params.setMargins(attrs.getMarginLeft(), attrs.getMarginTop(), attrs.getMarginRight(),
+                    attrs.getMarginBottom());
+            setLayoutParams(params);
+        }
+
+        boolean rotaryScrollEnabled = attrs != null && attrs.isRotaryScrollEnabled();
+        int orientation = getLayoutStyle() == null ? LinearLayout.VERTICAL
+                : getLayoutStyle().getOrientation();
+        initRotaryScroll(mRecyclerView, rotaryScrollEnabled, orientation);
+
+        if (!scrollBarEnabled) {
+            mScrollBar = null;
+            return;
+        }
+
+        mRecyclerView.setVerticalScrollBarEnabled(false);
+        mRecyclerView.setHorizontalScrollBarEnabled(false);
+
+        mScrollBar = new DefaultScrollBar();
+        mScrollBar.initialize(context, mRecyclerView, rootView.requireViewById(R.id.scroll_bar));
     }
 
     @Override
-    public void setAdapter(AdapterOEMV1 adapterV1) {
+    public <V extends ViewHolderOEMV1> void setAdapter(AdapterOEMV1<V> adapterV1) {
         if (adapterV1 == null) {
-            super.setAdapter(null);
+            mRecyclerView.setAdapter(null);
         } else {
-            super.setAdapter(new AdapterWrapper(adapterV1));
+            mRecyclerView.setAdapter(new AdapterWrapper(adapterV1));
         }
     }
 
@@ -82,7 +178,7 @@ public final class RecyclerViewImpl extends RecyclerView implements RecyclerView
             return;
         }
         if (mScrollListeners.isEmpty()) {
-            super.addOnScrollListener(mOnScrollListener);
+            mRecyclerView.addOnScrollListener(mOnScrollListener);
         }
         mScrollListeners.add(listener);
     }
@@ -94,63 +190,66 @@ public final class RecyclerViewImpl extends RecyclerView implements RecyclerView
         }
         mScrollListeners.remove(listener);
         if (mScrollListeners.isEmpty()) {
-            super.removeOnScrollListener(mOnScrollListener);
+            mRecyclerView.removeOnScrollListener(mOnScrollListener);
         }
     }
 
     @Override
     public void clearOnScrollListeners() {
-        if (mScrollListeners != null) {
+        if (!mScrollListeners.isEmpty()) {
             mScrollListeners.clear();
-            super.clearOnScrollListeners();
+            mRecyclerView.clearOnScrollListeners();
         }
     }
 
     @Override
     public void scrollToPosition(int position) {
-        super.scrollToPosition(position);
+        mRecyclerView.scrollToPosition(position);
     }
 
     @Override
     public void smoothScrollBy(int dx, int dy) {
-        super.smoothScrollBy(dx, dy);
+        mRecyclerView.smoothScrollBy(dx, dy);
     }
 
     @Override
     public void smoothScrollToPosition(int position) {
-        super.smoothScrollToPosition(position);
+        mRecyclerView.smoothScrollToPosition(position);
     }
 
     @Override
     public void setHasFixedSize(boolean hasFixedSize) {
-        super.setHasFixedSize(hasFixedSize);
+        mRecyclerView.setHasFixedSize(hasFixedSize);
     }
 
     @Override
     public boolean hasFixedSize() {
-        return super.hasFixedSize();
+        return mRecyclerView.hasFixedSize();
     }
 
     @Override
-    public void setLayoutStyle(LayoutStyleOEMV1 layoutStyle) {
-        if (layoutStyle.getLayoutType() == LayoutStyleOEMV1.LAYOUT_TYPE_LINEAR) {
-            setLayoutManager(new LinearLayoutManager(getContext(),
-                    layoutStyle.getOrientation(),
-                    layoutStyle.getReverseLayout()));
+    public void setLayoutStyle(@Nullable LayoutStyleOEMV1 layoutStyle) {
+        mLayoutStyle = layoutStyle;
+
+        int orientation = layoutStyle == null ? VERTICAL : layoutStyle.getOrientation();
+        boolean reverseLayout = layoutStyle != null && layoutStyle.getReverseLayout();
+
+        if (layoutStyle == null
+                || layoutStyle.getLayoutType() == LayoutStyleOEMV1.LAYOUT_TYPE_LINEAR) {
+            mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(),
+                    orientation,
+                    reverseLayout));
         } else {
-            setLayoutManager(new GridLayoutManager(getContext(),
+            mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(),
                     layoutStyle.getSpanCount(),
-                    layoutStyle.getOrientation(),
-                    layoutStyle.getReverseLayout()));
-            if (layoutStyle.getSpanSizeLookup() != null) {
-                ((GridLayoutManager) getLayoutManager()).setSpanSizeLookup(new SpanSizeLookup() {
-                    @Override
-                    public int getSpanSize(int position) {
-                        return layoutStyle.getSpanSizeLookup().getSpanSize(position);
-                    }
-                });
-            }
+                    orientation,
+                    reverseLayout));
         }
+    }
+
+    @Override
+    public LayoutStyleOEMV1 getLayoutStyle() {
+        return mLayoutStyle;
     }
 
     public View getView() {
@@ -158,7 +257,142 @@ public final class RecyclerViewImpl extends RecyclerView implements RecyclerView
     }
 
     @Override
-    public View getContainer() {
-        return this;
+    public int findFirstCompletelyVisibleItemPosition() {
+        RecyclerView.LayoutManager layoutManager = mRecyclerView.getLayoutManager();
+        if (layoutManager instanceof LinearLayoutManager) {
+            return ((LinearLayoutManager) layoutManager)
+                    .findFirstCompletelyVisibleItemPosition();
+        }
+        return 0;
+    }
+
+    @Override
+    public int findFirstVisibleItemPosition() {
+        RecyclerView.LayoutManager layoutManager = mRecyclerView.getLayoutManager();
+        if (layoutManager instanceof LinearLayoutManager) {
+            return ((LinearLayoutManager) layoutManager)
+                    .findFirstVisibleItemPosition();
+        }
+        return 0;
+    }
+
+    @Override
+    public int findLastCompletelyVisibleItemPosition() {
+        RecyclerView.LayoutManager layoutManager = mRecyclerView.getLayoutManager();
+        if (layoutManager instanceof LinearLayoutManager) {
+            return ((LinearLayoutManager) layoutManager)
+                    .findLastCompletelyVisibleItemPosition();
+        }
+        return 0;
+    }
+
+    @Override
+    public int findLastVisibleItemPosition() {
+        RecyclerView.LayoutManager layoutManager = mRecyclerView.getLayoutManager();
+        if (layoutManager instanceof LinearLayoutManager) {
+            return ((LinearLayoutManager) layoutManager)
+                    .findLastVisibleItemPosition();
+        }
+        return 0;
+    }
+
+    @Override
+    public void setSpanSizeLookup(@NonNull SpanSizeLookupOEMV1 spanSizeLookup) {
+        RecyclerView.LayoutManager layoutManager = mRecyclerView.getLayoutManager();
+        if (layoutManager instanceof GridLayoutManager) {
+            ((GridLayoutManager) layoutManager).setSpanSizeLookup(new SpanSizeLookup() {
+                @Override
+                public int getSpanSize(int position) {
+                    return spanSizeLookup.getSpanSize(position);
+                }
+            });
+        }
+    }
+
+    private static int toInternalScrollState(int state) {
+        /* default to RecyclerView.SCROLL_STATE_IDLE */
+        int internalState = RecyclerViewOEMV1.SCROLL_STATE_IDLE;
+        switch (state) {
+            case RecyclerView.SCROLL_STATE_DRAGGING:
+                internalState = RecyclerViewOEMV1.SCROLL_STATE_DRAGGING;
+                break;
+            case RecyclerView.SCROLL_STATE_SETTLING:
+                internalState = RecyclerViewOEMV1.SCROLL_STATE_SETTLING;
+                break;
+        }
+        return internalState;
+    }
+
+    @Override
+    public int getScrollState() {
+        return toInternalScrollState(mRecyclerView.getScrollState());
+    }
+
+    @Override
+    public void setContentDescription(CharSequence contentDescription) {
+        super.setContentDescription(contentDescription);
+        boolean rotaryScrollEnabled = contentDescription != null
+                && (ROTARY_HORIZONTALLY_SCROLLABLE.contentEquals(contentDescription)
+                || ROTARY_VERTICALLY_SCROLLABLE.contentEquals(contentDescription));
+        int orientation = getLayoutStyle() == null ? LinearLayout.VERTICAL
+                : getLayoutStyle().getOrientation();
+        initRotaryScroll(mRecyclerView, rotaryScrollEnabled, orientation);
+    }
+
+    /**
+     * If this view's {@code rotaryScrollEnabled} attribute is set to true, sets the content
+     * description so that the {@code RotaryService} will treat it as a scrollable container and
+     * initializes this view accordingly.
+     */
+    private void initRotaryScroll(@NonNull ViewGroup recyclerView,
+            boolean rotaryScrollEnabled,
+            int orientation) {
+        if (rotaryScrollEnabled) {
+            setRotaryScrollEnabled(
+                    recyclerView, /* isVertical= */ orientation == LinearLayout.VERTICAL);
+        }
+
+        // If rotary scrolling is enabled, set a generic motion event listener to convert
+        // SOURCE_ROTARY_ENCODER scroll events into SOURCE_MOUSE scroll events that RecyclerView
+        // knows how to handle.
+        recyclerView.setOnGenericMotionListener(rotaryScrollEnabled ? (v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_SCROLL) {
+                if (event.getSource() == InputDevice.SOURCE_ROTARY_ENCODER) {
+                    MotionEvent mouseEvent = MotionEvent.obtain(event);
+                    mouseEvent.setSource(InputDevice.SOURCE_MOUSE);
+                    recyclerView.onGenericMotionEvent(mouseEvent);
+                    return true;
+                }
+            }
+            return false;
+        } : null);
+
+        // If rotary scrolling is enabled, mark this view as focusable. This view will be focused
+        // when no focusable elements are visible.
+        recyclerView.setFocusable(rotaryScrollEnabled);
+
+        // Focus this view before descendants so that the RotaryService can focus this view when it
+        // wants to.
+        recyclerView.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
+
+        // Disable the default focus highlight. No highlight should appear when this view is
+        // focused.
+        recyclerView.setDefaultFocusHighlightEnabled(false);
+
+        // If rotary scrolling is enabled, set a focus change listener to highlight the scrollbar
+        // thumb when this recycler view is focused, i.e. when no focusable descendant is visible.
+        recyclerView.setOnFocusChangeListener(rotaryScrollEnabled ? (v, hasFocus) -> {
+            if (mScrollBar != null) mScrollBar.setHighlightThumb(hasFocus);
+        } : null);
+
+        // This view is a rotary container if it's not a scrollable container.
+        if (!rotaryScrollEnabled) {
+            super.setContentDescription(ROTARY_CONTAINER);
+        }
+    }
+
+    private static void setRotaryScrollEnabled(@NonNull View view, boolean isVertical) {
+        view.setContentDescription(
+                isVertical ? ROTARY_VERTICALLY_SCROLLABLE : ROTARY_HORIZONTALLY_SCROLLABLE);
     }
 }

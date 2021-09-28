@@ -132,10 +132,6 @@
         <item name="android:textAppearance">@style/TextAppearance.CarUi.Widget.Toolbar.Tab</item>
     </style>
 
-    <style name="Widget.CarUi.CarUiRecyclerView">
-        <item name="android:scrollbars">vertical</item>
-    </style>
-
     <style name="Widget.CarUi.AlertDialog"/>
 
     <style name="Widget.CarUi.AlertDialog.HeaderContainer">
@@ -225,7 +221,6 @@
 
     <style name="PreferenceFragment.CarUi">
         <item name="android:divider">?android:attr/listDivider</item>
-        <!-- TODO(b/150230923) change this to car_ui_preference_fragment -->
         <item name="android:layout">@layout/car_ui_preference_fragment</item>
     </style>
 

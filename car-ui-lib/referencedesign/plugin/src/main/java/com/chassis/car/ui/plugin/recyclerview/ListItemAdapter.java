@@ -43,6 +43,7 @@ import com.android.car.ui.plugin.oemapis.recyclerview.ViewHolderOEMV1;
 import com.chassis.car.ui.plugin.R;
 import com.chassis.car.ui.plugin.SecureView;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -57,6 +58,62 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemAdapter.BaseVi
 
     private final Context mContext;
     private final List<? extends ListItemOEMV1> mItems;
+    @NonNull
+    private final List<AdapterDataObserverOEMV1> mAdapterDataObservers = new ArrayList<>();
+    private final RecyclerView.AdapterDataObserver mAdapterDataObserver =
+            new RecyclerView.AdapterDataObserver() {
+                @Override
+                public void onChanged() {
+                    for (AdapterDataObserverOEMV1 observer : mAdapterDataObservers) {
+                        observer.onChanged();
+                    }
+                }
+
+                @Override
+                public void onItemRangeChanged(int positionStart, int itemCount) {
+                    for (AdapterDataObserverOEMV1 observer : mAdapterDataObservers) {
+                        observer.onItemRangeChanged(positionStart, itemCount);
+                    }
+                }
+
+                @Override
+                public void onItemRangeChanged(int positionStart, int itemCount,
+                        @Nullable Object payload) {
+                    for (AdapterDataObserverOEMV1 observer : mAdapterDataObservers) {
+                        observer.onItemRangeChanged(positionStart, itemCount, payload);
+                    }
+                }
+
+                @Override
+                public void onItemRangeInserted(int positionStart, int itemCount) {
+                    for (AdapterDataObserverOEMV1 observer : mAdapterDataObservers) {
+                        observer.onItemRangeInserted(positionStart, itemCount);
+                    }
+                }
+
+                @Override
+                public void onItemRangeRemoved(int positionStart, int itemCount) {
+                    for (AdapterDataObserverOEMV1 observer : mAdapterDataObservers) {
+                        observer.onItemRangeRemoved(positionStart, itemCount);
+                    }
+                }
+
+                @Override
+                public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+                    for (AdapterDataObserverOEMV1 observer : mAdapterDataObservers) {
+                        for (int i = 0; i < itemCount; i++) {
+                            observer.onItemMoved(fromPosition + i, toPosition + i);
+                        }
+                    }
+                }
+
+                @Override
+                public void onStateRestorationPolicyChanged() {
+                    for (AdapterDataObserverOEMV1 observer : mAdapterDataObservers) {
+                        observer.onStateRestorationPolicyChanged();
+                    }
+                }
+            };
 
     public ListItemAdapter(Context context, List<? extends ListItemOEMV1> items) {
         mContext = context;
@@ -117,17 +174,18 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemAdapter.BaseVi
 
     @Override
     public void registerAdapterDataObserver(AdapterDataObserverOEMV1 observer) {
-        //  Do nothing. This method will never be invoked.
+        if (observer == null) {
+            return;
+        }
+        mAdapterDataObservers.add(observer);
     }
 
     @Override
     public void unregisterAdapterDataObserver(AdapterDataObserverOEMV1 observer) {
-        //  Do nothing. This method will never be invoked.
-    }
-
-    @Override
-    public void setRecyclerView(View recyclerview) {
-        //  Do nothing. This method will never be invoked.
+        if (observer == null) {
+            return;
+        }
+        mAdapterDataObservers.remove(observer);
     }
 
     @Override
@@ -142,7 +200,7 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemAdapter.BaseVi
                 if (!(item instanceof ContentListItemOEMV1)) {
                     throw new IllegalStateException(
                             "Expected item to be bound to viewHolder to be instance of "
-                                    + "CarUiContentListItem.");
+                                    + "ContentListItemOEMV1.");
                 }
 
                 ((ListItemViewHolder) holder).bind((ContentListItemOEMV1) item);
@@ -156,7 +214,7 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemAdapter.BaseVi
                 if (!(header instanceof HeaderListItemOEMV1)) {
                     throw new IllegalStateException(
                             "Expected item to be bound to viewHolder to be instance of "
-                                    + "CarUiHeaderListItem.");
+                                    + "HeaderListItemOEMV1.");
                 }
 
                 ((HeaderViewHolder) holder).bind((HeaderListItemOEMV1) header);

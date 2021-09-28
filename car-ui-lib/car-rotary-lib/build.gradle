@@ -69,6 +69,7 @@ android {
 
 dependencies {
     api 'androidx.annotation:annotation:1.2.0'
+    api 'androidx.constraintlayout:constraintlayout:2.0.4'
     api 'androidx.recyclerview:recyclerview:1.2.1'
 
     // The tests use a CarUiRecyclerView
