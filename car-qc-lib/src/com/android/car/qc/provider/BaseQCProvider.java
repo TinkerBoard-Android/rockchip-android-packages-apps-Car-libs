@@ -41,6 +41,7 @@ public abstract class BaseQCProvider extends ContentProvider {
     public static final String METHOD_BIND = "QC_METHOD_BIND";
     public static final String METHOD_SUBSCRIBE = "QC_METHOD_SUBSCRIBE";
     public static final String METHOD_UNSUBSCRIBE = "QC_METHOD_UNSUBSCRIBE";
+    public static final String METHOD_DESTROY = "QC_METHOD_DESTROY";
     public static final String EXTRA_URI = "QC_EXTRA_URI";
     public static final String EXTRA_ITEM = "QC_EXTRA_ITEM";
 
@@ -75,6 +76,9 @@ public abstract class BaseQCProvider extends ContentProvider {
                 break;
             case METHOD_UNSUBSCRIBE:
                 handleUnsubscribe(uri);
+                break;
+            case METHOD_DESTROY:
+                handleDestroy(uri);
                 break;
         }
         return super.call(method, arg, extras);
@@ -139,6 +143,15 @@ public abstract class BaseQCProvider extends ContentProvider {
     }
 
     /**
+     * Called to inform an app that an item is being destroyed.
+     *
+     * This is used to notify providing apps that a host is no longer going to use this QCItem
+     * instance, so the relevant elements should be cleaned up.
+     */
+    protected void onDestroy(@NonNull Uri uri) {
+    }
+
+    /**
      * Returns a Set of packages that are allowed to call this provider.
      */
     @NonNull
@@ -182,6 +195,16 @@ public abstract class BaseQCProvider extends ContentProvider {
         MAIN_THREAD_HANDLER.postDelayed(mAnr, QC_ANR_TIMEOUT);
         try {
             onUnsubscribed(uri);
+        } finally {
+            MAIN_THREAD_HANDLER.removeCallbacks(mAnr);
+        }
+    }
+
+    private void handleDestroy(@NonNull Uri uri) {
+        mCallbackMethod = "handleDestroy";
+        MAIN_THREAD_HANDLER.postDelayed(mAnr, QC_ANR_TIMEOUT);
+        try {
+            onDestroy(uri);
         } finally {
             MAIN_THREAD_HANDLER.removeCallbacks(mAnr);
         }

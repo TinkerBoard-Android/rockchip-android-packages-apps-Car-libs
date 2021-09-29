@@ -19,11 +19,14 @@ package com.android.car.qc.provider;
 import static com.android.car.qc.provider.BaseQCProvider.EXTRA_ITEM;
 import static com.android.car.qc.provider.BaseQCProvider.EXTRA_URI;
 import static com.android.car.qc.provider.BaseQCProvider.METHOD_BIND;
+import static com.android.car.qc.provider.BaseQCProvider.METHOD_DESTROY;
 import static com.android.car.qc.provider.BaseQCProvider.METHOD_SUBSCRIBE;
 import static com.android.car.qc.provider.BaseQCProvider.METHOD_UNSUBSCRIBE;
+import static com.android.car.qc.testutils.TestQCProvider.IS_DESTROYED_KEY;
 import static com.android.car.qc.testutils.TestQCProvider.IS_SUBSCRIBED_KEY;
 import static com.android.car.qc.testutils.TestQCProvider.KEY_DEFAULT;
 import static com.android.car.qc.testutils.TestQCProvider.KEY_SLOW;
+import static com.android.car.qc.testutils.TestQCProvider.METHOD_IS_DESTROYED;
 import static com.android.car.qc.testutils.TestQCProvider.METHOD_IS_SUBSCRIBED;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -126,6 +129,22 @@ public class BaseQCProviderTest {
         assertThat(res).isNotNull();
         boolean isSubscribed = res.getBoolean(IS_SUBSCRIBED_KEY, true);
         assertThat(isSubscribed).isFalse();
+    }
+
+    @Test
+    public void callDestroy_isDestroyed() throws RemoteException {
+        ContentProviderClient provider = getClient(mDefaultUri);
+        assertThat(provider).isNotNull();
+        Bundle extras = new Bundle();
+        extras.putParcelable(EXTRA_URI, mDefaultUri);
+        provider.call(METHOD_SUBSCRIBE, null, extras);
+        provider.call(METHOD_UNSUBSCRIBE, null, extras);
+        provider.call(METHOD_DESTROY, null, extras);
+
+        Bundle res = provider.call(METHOD_IS_DESTROYED, null, extras);
+        assertThat(res).isNotNull();
+        boolean isDestroyed = res.getBoolean(IS_DESTROYED_KEY, false);
+        assertThat(isDestroyed).isTrue();
     }
 
     private ContentProviderClient getClient(Uri uri) {

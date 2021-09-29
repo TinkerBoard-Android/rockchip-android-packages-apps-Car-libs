@@ -72,4 +72,10 @@ public class LocalQCControllerTest extends BaseQCControllerTestCase<LocalQCContr
         verify(mProvider).getQCItem();
         verify(spiedController).onQCItemUpdated(any());
     }
+
+    @Test
+    public void onDestroy_callsProviderDestroy() {
+        getController().destroy();
+        verify(mProvider).onDestroy();
+    }
 }
