@@ -32,6 +32,7 @@ import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceViewHolder;
 
 import com.android.car.ui.R;
+import com.android.car.ui.utils.CarUiUtils;
 
 /**
  * A preference that has an icon button that can be pressed independently of pressing the main
@@ -110,6 +111,9 @@ public class CarUiTwoActionIconPreference extends CarUiTwoActionBasePreference {
         secondaryButton.setEnabled(isSecondaryActionEnabled() || isClickableWhileDisabled());
         secondaryButton.setFocusable(isSecondaryActionEnabled() || isClickableWhileDisabled());
         secondaryButton.setOnClickListener(v -> performSecondaryActionClick());
+
+        CarUiUtils.makeAllViewsEnabledAndUxRestricted(secondaryButton, isSecondaryActionEnabled(),
+                isUxRestricted());
     }
 
     /**
