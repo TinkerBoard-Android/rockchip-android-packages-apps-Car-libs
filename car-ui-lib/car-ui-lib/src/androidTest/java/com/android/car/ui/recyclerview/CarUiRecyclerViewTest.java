@@ -268,7 +268,7 @@ public class CarUiRecyclerViewTest {
         CarUiRecyclerView carUiRecyclerView = CarUiRecyclerView.create(mTestableContext);
         ViewGroup container = mActivity.findViewById(R.id.test_container);
         int padding = 100;
-        carUiRecyclerView.setPadding(padding, 0, padding, 0);
+        carUiRecyclerView.setPadding(padding, padding, padding, padding);
         container.post(() -> {
             container.addView(carUiRecyclerView.getView());
             carUiRecyclerView.setAdapter(new TestAdapter(100));
@@ -276,6 +276,8 @@ public class CarUiRecyclerViewTest {
 
         assertEquals(padding, carUiRecyclerView.getPaddingLeft());
         assertEquals(padding, carUiRecyclerView.getPaddingRight());
+        assertEquals(padding, carUiRecyclerView.getPaddingTop());
+        assertEquals(padding, carUiRecyclerView.getPaddingBottom());
     }
 
     @Test
