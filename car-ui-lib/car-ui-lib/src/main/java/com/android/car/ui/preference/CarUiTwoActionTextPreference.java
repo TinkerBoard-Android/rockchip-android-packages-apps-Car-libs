@@ -29,6 +29,7 @@ import androidx.annotation.StringRes;
 import androidx.preference.PreferenceViewHolder;
 
 import com.android.car.ui.R;
+import com.android.car.ui.utils.CarUiUtils;
 
 /**
  * A preference that has a text button that can be pressed independently of pressing the main
@@ -110,6 +111,9 @@ public class CarUiTwoActionTextPreference extends CarUiTwoActionBasePreference {
         secondaryButton.setOnClickListener(v -> performSecondaryActionClick());
         secondaryButton.setEnabled(isSecondaryActionEnabled() || isClickableWhileDisabled());
         secondaryButton.setFocusable(isSecondaryActionEnabled() || isClickableWhileDisabled());
+
+        CarUiUtils.makeAllViewsEnabledAndUxRestricted(secondaryButton, isSecondaryActionEnabled(),
+                isUxRestricted());
     }
 
     @Nullable

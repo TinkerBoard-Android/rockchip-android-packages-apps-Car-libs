@@ -29,6 +29,7 @@ import androidx.annotation.Nullable;
 import androidx.preference.PreferenceViewHolder;
 
 import com.android.car.ui.R;
+import com.android.car.ui.utils.CarUiUtils;
 
 import java.util.function.Consumer;
 
@@ -107,6 +108,9 @@ public class CarUiTwoActionSwitchPreference extends CarUiTwoActionBasePreference
                 isSecondaryActionEnabled() || isUxRestricted() || isClickableWhileDisabled());
         secondaryAction.setFocusable(
                 isSecondaryActionEnabled() || isUxRestricted() || isClickableWhileDisabled());
+
+        CarUiUtils.makeAllViewsEnabledAndUxRestricted(secondaryAction, isSecondaryActionEnabled(),
+                isUxRestricted());
     }
 
     /**
