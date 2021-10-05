@@ -77,3 +77,6 @@ include ':car-dialer-app'
 project(':car-dialer-app').projectDir = new File('../../Dialer')
 include ':car-dialer-app:testing'
 include ':car-dialer-app:framework'
+
+include ':car-messenger-app'
+project(':car-messenger-app').projectDir = new File('../../Messenger')
