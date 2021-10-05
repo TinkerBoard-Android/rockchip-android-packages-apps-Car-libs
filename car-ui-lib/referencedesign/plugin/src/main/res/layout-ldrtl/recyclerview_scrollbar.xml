@@ -18,11 +18,13 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="@dimen/scrollbar_container_width"
     android:layout_height="match_parent"
     android:id="@+id/scroll_bar"
     android:layout_gravity="left"
-    android:gravity="center">
+    android:gravity="center"
+    tools:ignore="MissingDefaultResource">
 
     <ImageView
         android:id="@+id/scrollbar_page_up"
