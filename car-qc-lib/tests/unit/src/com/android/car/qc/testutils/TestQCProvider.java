@@ -40,11 +40,14 @@ public abstract class TestQCProvider extends BaseQCProvider {
 
     public static final String METHOD_IS_SUBSCRIBED = "METHOD_IS_SUBSCRIBED";
     public static final String IS_SUBSCRIBED_KEY = "IS_SUBSCRIBED";
+    public static final String METHOD_IS_DESTROYED = "METHOD_IS_DESTROYED";
+    public static final String IS_DESTROYED_KEY = "IS_DESTROYED";
 
     public static final String KEY_DEFAULT = "DEFAULT";
     public static final String KEY_SLOW = "SLOW";
 
     private final Set<Uri> mSubscribedUris = new HashSet<>();
+    private final Set<Uri> mDestroyedUris = new HashSet<>();
 
     @Override
     public Bundle call(String method, String arg, Bundle extras) {
@@ -52,6 +55,12 @@ public abstract class TestQCProvider extends BaseQCProvider {
             Uri uri = getUriWithoutUserId(extras.getParcelable(EXTRA_URI));
             Bundle bundle = new Bundle();
             bundle.putBoolean(IS_SUBSCRIBED_KEY, mSubscribedUris.contains(uri));
+            return bundle;
+        }
+        if (METHOD_IS_DESTROYED.equals(method)) {
+            Uri uri = getUriWithoutUserId(extras.getParcelable(EXTRA_URI));
+            Bundle bundle = new Bundle();
+            bundle.putBoolean(IS_DESTROYED_KEY, mDestroyedUris.contains(uri));
             return bundle;
         }
         return super.call(method, arg, extras);
@@ -89,6 +98,11 @@ public abstract class TestQCProvider extends BaseQCProvider {
     @Override
     protected void onUnsubscribed(@NonNull Uri uri) {
         mSubscribedUris.remove(uri);
+    }
+
+    @Override
+    protected void onDestroy(@NonNull Uri uri) {
+        mDestroyedUris.add(uri);
     }
 
     private static Bitmap drawableToBitmap(Drawable drawable) {

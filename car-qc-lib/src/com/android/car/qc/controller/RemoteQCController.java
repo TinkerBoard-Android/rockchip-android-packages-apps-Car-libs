@@ -19,6 +19,7 @@ package com.android.car.qc.controller;
 import static com.android.car.qc.provider.BaseQCProvider.EXTRA_ITEM;
 import static com.android.car.qc.provider.BaseQCProvider.EXTRA_URI;
 import static com.android.car.qc.provider.BaseQCProvider.METHOD_BIND;
+import static com.android.car.qc.provider.BaseQCProvider.METHOD_DESTROY;
 import static com.android.car.qc.provider.BaseQCProvider.METHOD_SUBSCRIBE;
 import static com.android.car.qc.provider.BaseQCProvider.METHOD_UNSUBSCRIBE;
 
@@ -86,6 +87,18 @@ public class RemoteQCController extends BaseQCController {
         super.destroy();
         if (mBackgroundHandlerThread != null) {
             mBackgroundHandlerThread.quit();
+        }
+        try (ContentProviderClient client = getClient()) {
+            if (client == null) {
+                return;
+            }
+            Bundle b = new Bundle();
+            b.putParcelable(EXTRA_URI, mUri);
+            try {
+                client.call(METHOD_DESTROY, /* arg= */ null, b);
+            } catch (Exception e) {
+                Log.d(TAG, "Error destroying QCItem", e);
+            }
         }
     }
 

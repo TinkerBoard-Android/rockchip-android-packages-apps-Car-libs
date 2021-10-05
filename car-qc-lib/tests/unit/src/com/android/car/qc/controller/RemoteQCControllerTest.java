@@ -17,8 +17,10 @@
 package com.android.car.qc.controller;
 
 import static com.android.car.qc.provider.BaseQCProvider.EXTRA_URI;
+import static com.android.car.qc.testutils.TestQCProvider.IS_DESTROYED_KEY;
 import static com.android.car.qc.testutils.TestQCProvider.IS_SUBSCRIBED_KEY;
 import static com.android.car.qc.testutils.TestQCProvider.KEY_DEFAULT;
+import static com.android.car.qc.testutils.TestQCProvider.METHOD_IS_DESTROYED;
 import static com.android.car.qc.testutils.TestQCProvider.METHOD_IS_SUBSCRIBED;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -130,5 +132,22 @@ public class RemoteQCControllerTest extends BaseQCControllerTestCase<RemoteQCCon
         getController().listen(false);
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
         verify(resolver).unregisterContentObserver(any(ContentObserver.class));
+    }
+
+    @Test
+    public void onDestroy_callsProviderOnDestroy() throws RemoteException {
+        Observer<QCItem> observer = mock(Observer.class);
+        getController().addObserver(observer);
+        getController().listen(true);
+        getController().listen(false);
+        getController().destroy();
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+
+        Bundle extras = new Bundle();
+        extras.putParcelable(EXTRA_URI, mDefaultUri);
+        Bundle res = getController().getClient().call(METHOD_IS_DESTROYED, null, extras);
+        assertThat(res).isNotNull();
+        boolean isDestroyed = res.getBoolean(IS_DESTROYED_KEY, false);
+        assertThat(isDestroyed).isTrue();
     }
 }
