@@ -81,7 +81,7 @@ public class QCRowViewTest {
         String title = "TEST_TITLE";
         QCRow row = new QCRow.Builder().setTitle(title).build();
         mView.setRow(row);
-        TextView titleView = mView.findViewById(android.R.id.title);
+        TextView titleView = mView.findViewById(R.id.qc_title);
         assertThat(titleView.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(titleView.getText().toString()).isEqualTo(title);
     }
@@ -91,7 +91,7 @@ public class QCRowViewTest {
         String subtitle = "TEST_TITLE";
         QCRow row = new QCRow.Builder().setSubtitle(subtitle).build();
         mView.setRow(row);
-        TextView subtitleView = mView.findViewById(android.R.id.summary);
+        TextView subtitleView = mView.findViewById(R.id.qc_summary);
         assertThat(subtitleView.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(subtitleView.getText().toString()).isEqualTo(subtitle);
     }
@@ -101,7 +101,7 @@ public class QCRowViewTest {
         Icon icon = Icon.createWithResource(mContext, android.R.drawable.btn_star);
         QCRow row = new QCRow.Builder().setIcon(icon).build();
         mView.setRow(row);
-        ImageView iconView = mView.findViewById(android.R.id.icon);
+        ImageView iconView = mView.findViewById(R.id.qc_icon);
         assertThat(iconView.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(iconView.getDrawable()).isNotNull();
     }

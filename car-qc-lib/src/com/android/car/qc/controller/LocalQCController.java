@@ -56,4 +56,10 @@ public class LocalQCController extends BaseQCController {
             }
         }
     }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        mProvider.onDestroy();
+    }
 }

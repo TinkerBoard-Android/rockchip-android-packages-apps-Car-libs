@@ -83,6 +83,12 @@ public abstract class BaseLocalQCProvider {
     protected void onUnsubscribed() {
     }
 
+    /**
+     * Called to inform the provider that it is being destroyed.
+     */
+    public void onDestroy() {
+    }
+
     protected void notifyChange() {
         if (mNotifier != null) {
             mNotifier.notifyUpdate();
