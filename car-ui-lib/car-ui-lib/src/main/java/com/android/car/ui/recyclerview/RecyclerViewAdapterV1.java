@@ -40,6 +40,7 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 import com.android.car.ui.plugin.oemapis.recyclerview.AdapterOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.LayoutStyleOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.OnScrollListenerOEMV1;
+import com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewAttributesOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewOEMV1;
 
 import java.util.ArrayList;
@@ -87,10 +88,29 @@ public final class RecyclerViewAdapterV1 extends FrameLayout
     /**
      * Called to pass the oem recyclerview implementation.
      *
-     * @param oemRecyclerView
+     * @param oemRecyclerView plugin implementation of {@link CarUiRecyclerView}
      */
-    public void setRecyclerViewOEMV1(@NonNull RecyclerViewOEMV1 oemRecyclerView) {
+    public void setRecyclerViewOEMV1(@NonNull RecyclerViewOEMV1 oemRecyclerView,
+            @Nullable RecyclerViewAttributesOEMV1 oemAttrs) {
         mOEMRecyclerView = oemRecyclerView;
+
+        LayoutStyleOEMV1 oemLayoutStyle = mOEMRecyclerView.getLayoutStyle();
+        if (oemLayoutStyle.getLayoutType() == LayoutStyleOEMV1.LAYOUT_TYPE_GRID) {
+            CarUiGridLayoutStyle layoutStyle = new CarUiGridLayoutStyle();
+            layoutStyle.setReverseLayout(oemLayoutStyle.getReverseLayout());
+            layoutStyle.setSpanCount(oemLayoutStyle.getSpanCount());
+            layoutStyle.setOrientation(oemLayoutStyle.getOrientation());
+            layoutStyle.setSize(oemAttrs == null
+                    ? RecyclerViewAttributesOEMV1.SIZE_LARGE : oemAttrs.getSize());
+            mLayoutStyle = layoutStyle;
+        } else {
+            CarUiLinearLayoutStyle layoutStyle = new CarUiLinearLayoutStyle();
+            layoutStyle.setReverseLayout(oemLayoutStyle.getReverseLayout());
+            layoutStyle.setOrientation(oemLayoutStyle.getOrientation());
+            layoutStyle.setSize(oemAttrs == null
+                    ? RecyclerViewAttributesOEMV1.SIZE_LARGE : oemAttrs.getSize());
+            mLayoutStyle = layoutStyle;
+        }
 
         // Adding this parent so androidx PreferenceFragmentCompat doesn't add the ProxyRecyclerView
         // to the view hierarchy
@@ -204,6 +224,21 @@ public final class RecyclerViewAdapterV1 extends FrameLayout
     @Override
     public int getScrollState() {
         return toInternalScrollState(mOEMRecyclerView.getScrollState());
+    }
+
+    @Override
+    public int getEndAfterPadding() {
+        return mOEMRecyclerView.getEndAfterPadding();
+    }
+
+    @Override
+    public int getStartAfterPadding() {
+        return mOEMRecyclerView.getStartAfterPadding();
+    }
+
+    @Override
+    public int getTotalSpace() {
+        return mOEMRecyclerView.getTotalSpace();
     }
 
     @NonNull
@@ -396,6 +431,60 @@ public final class RecyclerViewAdapterV1 extends FrameLayout
     public void setPadding(int left, int top, int right, int bottom) {
         if (mOEMRecyclerView != null) {
             mOEMRecyclerView.getView().setPadding(left, top, right, bottom);
+        }
+    }
+
+    @Override
+    public int getPaddingLeft() {
+        if (mOEMRecyclerView != null) {
+            return mOEMRecyclerView.getView().getPaddingLeft();
+        }
+        return super.getPaddingLeft();
+    }
+
+    @Override
+    public int getPaddingTop() {
+        if (mOEMRecyclerView != null) {
+            return mOEMRecyclerView.getView().getPaddingTop();
+        }
+        return super.getPaddingTop();
+    }
+
+    @Override
+    public int getPaddingRight() {
+        if (mOEMRecyclerView != null) {
+            return mOEMRecyclerView.getView().getPaddingRight();
+        }
+        return super.getPaddingRight();
+    }
+
+    @Override
+    public int getPaddingBottom() {
+        if (mOEMRecyclerView != null) {
+            return mOEMRecyclerView.getView().getPaddingBottom();
+        }
+        return super.getPaddingBottom();
+    }
+
+    @Override
+    public int getPaddingStart() {
+        boolean isLtr = getContext().getResources().getConfiguration().getLayoutDirection()
+                == View.LAYOUT_DIRECTION_LTR;
+        if (isLtr) {
+            return getPaddingLeft();
+        } else {
+            return getPaddingRight();
+        }
+    }
+
+    @Override
+    public int getPaddingEnd() {
+        boolean isLtr = getContext().getResources().getConfiguration().getLayoutDirection()
+                == View.LAYOUT_DIRECTION_LTR;
+        if (isLtr) {
+            return getPaddingRight();
+        } else {
+            return getPaddingLeft();
         }
     }
 

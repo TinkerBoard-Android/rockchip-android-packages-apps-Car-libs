@@ -189,6 +189,11 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemAdapter.BaseVi
     }
 
     @Override
+    public void setMaxItems(int maxItems) {
+        // TODO(b/202433866):
+    }
+
+    @Override
     public void onBindViewHolder(@NonNull ListItemAdapter.BaseViewHolder holder, int position) {
         switch (holder.getItemViewType()) {
             case VIEW_TYPE_LIST_ITEM:

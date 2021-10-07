@@ -99,7 +99,6 @@ public class PluginFactoryImpl implements PluginFactoryOEMV2 {
             Context sourceContext,
             RecyclerViewAttributesOEMV1 attrs) {
         return new RecyclerViewImpl(mPluginContext, attrs);
-        //return null;
     }
 
     @Override
