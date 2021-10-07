@@ -18,9 +18,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.android.car.ui">
     <queries>
-        <intent>
-            <action android:name="com.android.car.ui.intent.action.PLUGIN"/>
-        </intent>
+      <provider
+        android:name="com.android.car.ui.plugin.PluginNameProvider"
+        android:authorities="com.android.car.ui.plugin" />
     </queries>
     <application>
         <provider
