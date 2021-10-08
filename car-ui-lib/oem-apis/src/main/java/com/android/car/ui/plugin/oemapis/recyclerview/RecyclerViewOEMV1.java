@@ -129,4 +129,16 @@ public interface RecyclerViewOEMV1 {
 
     /** see {@link OrientationHelper#getTotalSpace()} */
     int getTotalSpace();
+
+    /**
+     * see {@link LayoutManager#getChildCount()}
+     * Prefer this method over {@link View#getChildCount()}
+     */
+    int getRecyclerViewChildCount();
+
+    /**
+     * see {@link LayoutManager#getChildAt(int)}
+     * Prefer this method over {@link View#getChildAt(int)}
+     */
+    View getRecyclerViewChildAt(int index);
 }

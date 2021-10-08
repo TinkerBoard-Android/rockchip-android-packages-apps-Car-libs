@@ -207,6 +207,16 @@ public final class RecyclerViewAdapterV1 extends FrameLayout
         return mRecyclerView;
     }
 
+    @Override
+    public int getRecyclerViewChildCount() {
+        return mOEMRecyclerView.getRecyclerViewChildCount();
+    }
+
+    @Override
+    public View getRecyclerViewChildAt(int index) {
+        return mOEMRecyclerView.getRecyclerViewChildAt(index);
+    }
+
     private static int toInternalScrollState(int state) {
         /* default to RecyclerViewOEMV1.SCROLL_STATE_IDLE */
         int internalState = SCROLL_STATE_IDLE;

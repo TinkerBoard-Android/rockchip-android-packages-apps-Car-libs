@@ -454,6 +454,24 @@ public final class RecyclerViewImpl extends FrameLayout implements RecyclerViewO
         mCarUxRestrictionsUtil.unregister(mListener);
     }
 
+    @Override
+    public int getRecyclerViewChildCount() {
+        if (mRecyclerView.getLayoutManager() != null) {
+            return mRecyclerView.getLayoutManager().getChildCount();
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public View getRecyclerViewChildAt(int index) {
+        if (mRecyclerView.getLayoutManager() != null) {
+            return mRecyclerView.getLayoutManager().getChildAt(index);
+        } else {
+            return null;
+        }
+    }
+
     /**
      * If this view's {@code rotaryScrollEnabled} attribute is set to true, sets the content
      * description so that the {@code RotaryService} will treat it as a scrollable container and
