@@ -30,6 +30,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 
@@ -59,6 +60,11 @@ public final class PluginFactorySingleton {
     private static final String TAG = "carui";
     private static PluginFactory sInstance;
     private static TestingOverride sTestingOverride = TestingOverride.NOT_SET;
+
+    @Nullable
+    @VisibleForTesting
+    /** Only has value during testing, null otherwise */
+    private static Context sPluginContext = null;
 
     /**
      * Get the {@link PluginFactory}.
@@ -166,6 +172,10 @@ public final class PluginFactorySingleton {
                 + " version " + pluginPackageInfo.getLongVersionCode()
                 + " for package " + context.getPackageName());
 
+        if (sTestingOverride != TestingOverride.NOT_SET) {
+            sPluginContext = pluginContext;
+        }
+
         return sInstance;
     }
 
@@ -187,6 +197,13 @@ public final class PluginFactorySingleton {
         }
         // Cause the next call to get() to reinitialize the plugin
         sInstance = null;
+        sPluginContext = null;
+    }
+
+    @Nullable
+    @VisibleForTesting
+    public static Context getPluginContext() {
+        return sPluginContext;
     }
 
     private PluginFactorySingleton() {

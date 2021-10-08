@@ -45,6 +45,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.OrientationHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
 import androidx.recyclerview.widget.RecyclerView.ItemAnimator;
@@ -697,6 +698,32 @@ public final class CarUiRecyclerViewImpl extends FrameLayout
     @Override
     public void setOnFlingListener(OnFlingListener listener) {
         mRecyclerView.setOnFlingListener(listener);
+    }
+
+    private OrientationHelper createOrientationHelper() {
+        if (mLayoutStyle.getOrientation() == CarUiLayoutStyle.VERTICAL) {
+            return OrientationHelper.createVerticalHelper(mRecyclerView.getLayoutManager());
+        } else {
+            return OrientationHelper.createHorizontalHelper(mRecyclerView.getLayoutManager());
+        }
+    }
+
+    @Override
+    public int getEndAfterPadding() {
+        if (mLayoutStyle == null) return 0;
+        return createOrientationHelper().getEndAfterPadding();
+    }
+
+    @Override
+    public int getStartAfterPadding() {
+        if (mLayoutStyle == null) return 0;
+        return createOrientationHelper().getStartAfterPadding();
+    }
+
+    @Override
+    public int getTotalSpace() {
+        if (mLayoutStyle == null) return 0;
+        return createOrientationHelper().getTotalSpace();
     }
 
     private void createScrollBarFromConfig(Context context, View scrollView) {

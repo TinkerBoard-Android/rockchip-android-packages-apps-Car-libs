@@ -142,7 +142,7 @@ public final class PluginFactoryAdapterV2 implements PluginFactory {
         RecyclerViewOEMV1 oemRecyclerView = mOem.createRecyclerView(context, oemAttrs);
         if (oemRecyclerView != null) {
             RecyclerViewAdapterV1 rv = new RecyclerViewAdapterV1(context, attrs, 0);
-            rv.setRecyclerViewOEMV1(oemRecyclerView);
+            rv.setRecyclerViewOEMV1(oemRecyclerView, oemAttrs);
             return rv;
         } else {
             return mFactoryStub.createRecyclerView(context, attrs);
@@ -216,241 +216,239 @@ public final class PluginFactoryAdapterV2 implements PluginFactory {
 
     private static RecyclerViewAttributesOEMV1 from(Context context, AttributeSet attrs) {
         RecyclerViewAttributesOEMV1 oemAttrs = null;
-        if (attrs != null) {
-            TypedArray a = context.obtainStyledAttributes(
-                    attrs,
-                    R.styleable.CarUiRecyclerView,
-                    0,
-                    0);
-            final int carUiRecyclerViewLayout = a.getInt(
-                    R.styleable.CarUiRecyclerView_layoutStyle,
-                    CarUiRecyclerViewLayout.LINEAR);
-            final int spanCount = a.getInt(
-                    R.styleable.CarUiRecyclerView_numOfColumns, /* defValue= */ 1);
-            final boolean rotaryScrollEnabled = a.getBoolean(
-                    R.styleable.CarUiRecyclerView_rotaryScrollEnabled,
-                    /* defValue=*/ false);
-            final int orientation = a.getInt(
-                    R.styleable.CarUiRecyclerView_android_orientation,
-                    CarUiLayoutStyle.VERTICAL);
-            final boolean reversed = a.getBoolean(
-                    R.styleable.CarUiRecyclerView_reverseLayout, false);
-            final int size = a.getInt(R.styleable.CarUiRecyclerView_carUiSize,
-                    CarUiRecyclerView.SIZE_LARGE);
+        TypedArray a = context.obtainStyledAttributes(
+                attrs,
+                R.styleable.CarUiRecyclerView,
+                0,
+                0);
+        final int carUiRecyclerViewLayout = a.getInt(
+                R.styleable.CarUiRecyclerView_layoutStyle,
+                CarUiRecyclerViewLayout.LINEAR);
+        final int spanCount = a.getInt(
+                R.styleable.CarUiRecyclerView_numOfColumns, /* defValue= */ 1);
+        final boolean rotaryScrollEnabled = a.getBoolean(
+                R.styleable.CarUiRecyclerView_rotaryScrollEnabled,
+                /* defValue=*/ false);
+        final int orientation = a.getInt(
+                R.styleable.CarUiRecyclerView_android_orientation,
+                CarUiLayoutStyle.VERTICAL);
+        final boolean reversed = a.getBoolean(
+                R.styleable.CarUiRecyclerView_reverseLayout, false);
+        final int size = a.getInt(R.styleable.CarUiRecyclerView_carUiSize,
+                CarUiRecyclerView.SIZE_LARGE);
 
-            a.recycle();
+        a.recycle();
 
-            int[] attrsArray = new int[]{
-                    android.R.attr.layout_width,
-                    android.R.attr.layout_height,
-                    android.R.attr.minWidth,
-                    android.R.attr.minHeight,
-                    android.R.attr.paddingStart,
-                    android.R.attr.paddingLeft,
-                    android.R.attr.paddingEnd,
-                    android.R.attr.paddingRight,
-                    android.R.attr.paddingTop,
-                    android.R.attr.paddingBottom,
-                    android.R.attr.layout_marginStart,
-                    android.R.attr.layout_marginLeft,
-                    android.R.attr.layout_marginEnd,
-                    android.R.attr.layout_marginRight,
-                    android.R.attr.layout_marginTop,
-                    android.R.attr.layout_marginBottom,
-                    android.R.attr.background,
-            };
+        int[] attrsArray = new int[]{
+                android.R.attr.layout_width,
+                android.R.attr.layout_height,
+                android.R.attr.minWidth,
+                android.R.attr.minHeight,
+                android.R.attr.paddingStart,
+                android.R.attr.paddingLeft,
+                android.R.attr.paddingEnd,
+                android.R.attr.paddingRight,
+                android.R.attr.paddingTop,
+                android.R.attr.paddingBottom,
+                android.R.attr.layout_marginStart,
+                android.R.attr.layout_marginLeft,
+                android.R.attr.layout_marginEnd,
+                android.R.attr.layout_marginRight,
+                android.R.attr.layout_marginTop,
+                android.R.attr.layout_marginBottom,
+                android.R.attr.background,
+        };
 
-            Arrays.sort(attrsArray);
-            TypedArray ta = context.obtainStyledAttributes(attrs, attrsArray, 0, 0);
-            final int width = ta.getLayoutDimension(
-                    Arrays.binarySearch(attrsArray, android.R.attr.layout_width),
-                    ViewGroup.LayoutParams.MATCH_PARENT);
-            final int height = ta.getLayoutDimension(
-                    Arrays.binarySearch(attrsArray, android.R.attr.layout_height),
-                    ViewGroup.LayoutParams.WRAP_CONTENT);
-            final int minWidth = ta.getLayoutDimension(
-                    Arrays.binarySearch(attrsArray, android.R.attr.minWidth), 0);
-            final int minHeight = ta.getLayoutDimension(
-                    Arrays.binarySearch(attrsArray, android.R.attr.minHeight), 0);
-            final int paddingLeft = ta.getLayoutDimension(
-                    Arrays.binarySearch(attrsArray, android.R.attr.paddingLeft), 0);
-            final int paddingRight = ta.getLayoutDimension(
-                    Arrays.binarySearch(attrsArray, android.R.attr.paddingRight), 0);
-            final int paddingStart = ta.getLayoutDimension(
-                    Arrays.binarySearch(attrsArray, android.R.attr.paddingStart), 0);
-            final int paddingEnd = ta.getLayoutDimension(
-                    Arrays.binarySearch(attrsArray, android.R.attr.paddingEnd), 0);
-            final int paddingTop = ta.getLayoutDimension(
-                    Arrays.binarySearch(attrsArray, android.R.attr.paddingTop), 0);
-            final int paddingBottom = ta.getLayoutDimension(
-                    Arrays.binarySearch(attrsArray, android.R.attr.paddingBottom), 0);
-            final int marginLeft = ta.getLayoutDimension(
-                    Arrays.binarySearch(attrsArray, android.R.attr.layout_marginLeft), 0);
-            final int marginRight = ta.getLayoutDimension(
-                    Arrays.binarySearch(attrsArray, android.R.attr.layout_marginRight), 0);
-            final int marginStart = ta.getLayoutDimension(
-                    Arrays.binarySearch(attrsArray, android.R.attr.layout_marginStart), 0);
-            final int marginEnd = ta.getLayoutDimension(
-                    Arrays.binarySearch(attrsArray, android.R.attr.layout_marginEnd), 0);
-            final int marginTop = ta.getLayoutDimension(
-                    Arrays.binarySearch(attrsArray, android.R.attr.layout_marginTop), 0);
-            final int marginBottom = ta.getLayoutDimension(
-                    Arrays.binarySearch(attrsArray, android.R.attr.layout_marginBottom), 0);
-            final Drawable background = ta.getDrawable(
-                    Arrays.binarySearch(attrsArray, android.R.attr.background));
-            ta.recycle();
+        Arrays.sort(attrsArray);
+        TypedArray ta = context.obtainStyledAttributes(attrs, attrsArray, 0, 0);
+        final int width = ta.getLayoutDimension(
+                Arrays.binarySearch(attrsArray, android.R.attr.layout_width),
+                ViewGroup.LayoutParams.MATCH_PARENT);
+        final int height = ta.getLayoutDimension(
+                Arrays.binarySearch(attrsArray, android.R.attr.layout_height),
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        final int minWidth = ta.getLayoutDimension(
+                Arrays.binarySearch(attrsArray, android.R.attr.minWidth), 0);
+        final int minHeight = ta.getLayoutDimension(
+                Arrays.binarySearch(attrsArray, android.R.attr.minHeight), 0);
+        final int paddingLeft = ta.getLayoutDimension(
+                Arrays.binarySearch(attrsArray, android.R.attr.paddingLeft), 0);
+        final int paddingRight = ta.getLayoutDimension(
+                Arrays.binarySearch(attrsArray, android.R.attr.paddingRight), 0);
+        final int paddingStart = ta.getLayoutDimension(
+                Arrays.binarySearch(attrsArray, android.R.attr.paddingStart), 0);
+        final int paddingEnd = ta.getLayoutDimension(
+                Arrays.binarySearch(attrsArray, android.R.attr.paddingEnd), 0);
+        final int paddingTop = ta.getLayoutDimension(
+                Arrays.binarySearch(attrsArray, android.R.attr.paddingTop), 0);
+        final int paddingBottom = ta.getLayoutDimension(
+                Arrays.binarySearch(attrsArray, android.R.attr.paddingBottom), 0);
+        final int marginLeft = ta.getLayoutDimension(
+                Arrays.binarySearch(attrsArray, android.R.attr.layout_marginLeft), 0);
+        final int marginRight = ta.getLayoutDimension(
+                Arrays.binarySearch(attrsArray, android.R.attr.layout_marginRight), 0);
+        final int marginStart = ta.getLayoutDimension(
+                Arrays.binarySearch(attrsArray, android.R.attr.layout_marginStart), 0);
+        final int marginEnd = ta.getLayoutDimension(
+                Arrays.binarySearch(attrsArray, android.R.attr.layout_marginEnd), 0);
+        final int marginTop = ta.getLayoutDimension(
+                Arrays.binarySearch(attrsArray, android.R.attr.layout_marginTop), 0);
+        final int marginBottom = ta.getLayoutDimension(
+                Arrays.binarySearch(attrsArray, android.R.attr.layout_marginBottom), 0);
+        final Drawable background = ta.getDrawable(
+                Arrays.binarySearch(attrsArray, android.R.attr.background));
+        ta.recycle();
 
-            final LayoutStyleOEMV1 layoutStyle = new LayoutStyleOEMV1() {
-                @Override
-                public int getSpanCount() {
-                    return spanCount;
+        final LayoutStyleOEMV1 layoutStyle = new LayoutStyleOEMV1() {
+            @Override
+            public int getSpanCount() {
+                return spanCount;
+            }
+
+            @Override
+            public int getLayoutType() {
+                switch (carUiRecyclerViewLayout) {
+                    case CarUiRecyclerViewLayout.GRID:
+                        return LayoutStyleOEMV1.LAYOUT_TYPE_GRID;
+                    case CarUiRecyclerViewLayout.LINEAR:
+                    default:
+                        return LayoutStyleOEMV1.LAYOUT_TYPE_LINEAR;
                 }
+            }
 
-                @Override
-                public int getLayoutType() {
-                    switch (carUiRecyclerViewLayout) {
-                        case CarUiRecyclerViewLayout.GRID:
-                            return LayoutStyleOEMV1.LAYOUT_TYPE_GRID;
-                        case CarUiRecyclerViewLayout.LINEAR:
-                        default:
-                            return LayoutStyleOEMV1.LAYOUT_TYPE_LINEAR;
-                    }
+            @Override
+            public int getOrientation() {
+                switch (orientation) {
+                    case CarUiLayoutStyle.HORIZONTAL:
+                        return LayoutStyleOEMV1.ORIENTATION_HORIZONTAL;
+                    case CarUiLayoutStyle.VERTICAL:
+                    default:
+                        return LayoutStyleOEMV1.ORIENTATION_VERTICAL;
                 }
+            }
 
-                @Override
-                public int getOrientation() {
-                    switch (orientation) {
-                        case CarUiLayoutStyle.HORIZONTAL:
-                            return LayoutStyleOEMV1.ORIENTATION_HORIZONTAL;
-                        case CarUiLayoutStyle.VERTICAL:
-                        default:
-                            return LayoutStyleOEMV1.ORIENTATION_VERTICAL;
-                    }
+            @Override
+            public boolean getReverseLayout() {
+                return reversed;
+            }
+        };
+
+        boolean isLtr = context.getResources().getConfiguration().getLayoutDirection()
+                == View.LAYOUT_DIRECTION_LTR;
+
+        oemAttrs = new RecyclerViewAttributesOEMV1() {
+            @Override
+            public boolean isRotaryScrollEnabled() {
+                return rotaryScrollEnabled;
+            }
+
+            @Override
+            public int getSize() {
+                switch (size) {
+                    case CarUiRecyclerView.SIZE_SMALL:
+                        return RecyclerViewAttributesOEMV1.SIZE_SMALL;
+                    case CarUiRecyclerView.SIZE_MEDIUM:
+                        return RecyclerViewAttributesOEMV1.SIZE_MEDIUM;
+                    case CarUiRecyclerView.SIZE_LARGE:
+                    default:
+                        return RecyclerViewAttributesOEMV1.SIZE_LARGE;
                 }
+            }
 
-                @Override
-                public boolean getReverseLayout() {
-                    return reversed;
+            @Override
+            public LayoutStyleOEMV1 getLayoutStyle() {
+                return layoutStyle;
+            }
+
+            @Override
+            public int getLayoutWidth() {
+                return width;
+            }
+
+            @Override
+            public int getLayoutHeight() {
+                return height;
+            }
+
+            @Override
+            public int geMinWidth() {
+                return minWidth;
+            }
+
+            @Override
+            public int getMinHeight() {
+                return minHeight;
+            }
+
+            @Override
+            public int getPaddingLeft() {
+                if (paddingLeft != 0) {
+                    return paddingLeft;
+                } else if (isLtr) {
+                    return paddingStart;
+                } else {
+                    return paddingEnd;
                 }
-            };
+            }
 
-            boolean isLtr = context.getResources().getConfiguration().getLayoutDirection()
-                    == View.LAYOUT_DIRECTION_LTR;
-
-            oemAttrs = new RecyclerViewAttributesOEMV1() {
-                @Override
-                public boolean isRotaryScrollEnabled() {
-                    return rotaryScrollEnabled;
+            @Override
+            public int getPaddingRight() {
+                if (paddingRight != 0) {
+                    return paddingRight;
+                } else if (isLtr) {
+                    return paddingEnd;
+                } else {
+                    return paddingStart;
                 }
+            }
 
-                @Override
-                public int getSize() {
-                    switch (size) {
-                        case CarUiRecyclerView.SIZE_SMALL:
-                            return RecyclerViewAttributesOEMV1.SIZE_SMALL;
-                        case CarUiRecyclerView.SIZE_MEDIUM:
-                            return RecyclerViewAttributesOEMV1.SIZE_MEDIUM;
-                        case CarUiRecyclerView.SIZE_LARGE:
-                        default:
-                            return RecyclerViewAttributesOEMV1.SIZE_LARGE;
-                    }
-                }
+            @Override
+            public int getPaddingTop() {
+                return paddingTop;
+            }
 
-                @Override
-                public LayoutStyleOEMV1 getLayoutStyle() {
-                    return layoutStyle;
-                }
+            @Override
+            public int getPaddingBottom() {
+                return paddingBottom;
+            }
 
-                @Override
-                public int getLayoutWidth() {
-                    return width;
+            @Override
+            public int getMarginLeft() {
+                if (marginLeft != 0) {
+                    return marginLeft;
+                } else if (isLtr) {
+                    return marginStart;
+                } else {
+                    return marginEnd;
                 }
+            }
 
-                @Override
-                public int getLayoutHeight() {
-                    return height;
+            @Override
+            public int getMarginRight() {
+                if (marginRight != 0) {
+                    return marginRight;
+                } else if (isLtr) {
+                    return marginEnd;
+                } else {
+                    return marginStart;
                 }
+            }
 
-                @Override
-                public int geMinWidth() {
-                    return minWidth;
-                }
+            @Override
+            public int getMarginTop() {
+                return marginTop;
+            }
 
-                @Override
-                public int getMinHeight() {
-                    return minHeight;
-                }
+            @Override
+            public int getMarginBottom() {
+                return marginBottom;
+            }
 
-                @Override
-                public int getPaddingLeft() {
-                    if (paddingLeft != 0) {
-                        return paddingLeft;
-                    } else if (isLtr) {
-                        return paddingStart;
-                    } else {
-                        return paddingEnd;
-                    }
-                }
-
-                @Override
-                public int getPaddingRight() {
-                    if (paddingRight != 0) {
-                        return paddingRight;
-                    } else if (isLtr) {
-                        return paddingEnd;
-                    } else {
-                        return paddingStart;
-                    }
-                }
-
-                @Override
-                public int getPaddingTop() {
-                    return paddingTop;
-                }
-
-                @Override
-                public int getPaddingBottom() {
-                    return paddingBottom;
-                }
-
-                @Override
-                public int getMarginLeft() {
-                    if (marginLeft != 0) {
-                        return marginLeft;
-                    } else if (isLtr) {
-                        return marginStart;
-                    } else {
-                        return marginEnd;
-                    }
-                }
-
-                @Override
-                public int getMarginRight() {
-                    if (marginRight != 0) {
-                        return marginRight;
-                    } else if (isLtr) {
-                        return marginEnd;
-                    } else {
-                        return marginStart;
-                    }
-                }
-
-                @Override
-                public int getMarginTop() {
-                    return marginTop;
-                }
-
-                @Override
-                public int getMarginBottom() {
-                    return marginBottom;
-                }
-
-                @Override
-                public Drawable getBackground() {
-                    return background;
-                }
-            };
-        }
+            @Override
+            public Drawable getBackground() {
+                return background;
+            }
+        };
         return oemAttrs;
     }
 

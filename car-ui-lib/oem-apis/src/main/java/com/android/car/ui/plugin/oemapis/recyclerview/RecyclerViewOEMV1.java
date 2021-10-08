@@ -120,4 +120,13 @@ public interface RecyclerViewOEMV1 {
 
     /** see {@link View#setAlpha(float)} */
     void setAlpha(float alpha);
+
+    /** see {@link OrientationHelper#getEndAfterPadding()} */
+    int getEndAfterPadding();
+
+    /** see {@link OrientationHelper#getStartAfterPadding()} */
+    int getStartAfterPadding();
+
+    /** see {@link OrientationHelper#getTotalSpace()} */
+    int getTotalSpace();
 }

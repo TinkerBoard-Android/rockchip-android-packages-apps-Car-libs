@@ -37,6 +37,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.OrientationHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
 import androidx.recyclerview.widget.RecyclerView.ItemAnimator;
@@ -246,6 +247,9 @@ public interface CarUiRecyclerView {
     /** see {@link View#getContext()} */
     Context getContext();
 
+    /** see {@link OrientationHelper#getEndAfterPadding()} */
+    int getEndAfterPadding();
+
     /** see {@link View#getHeight()} */
     int getHeight();
 
@@ -316,8 +320,14 @@ public interface CarUiRecyclerView {
     /** see {@link RecyclerView#getScrollState()} */
     int getScrollState();
 
+    /** see {@link OrientationHelper#getStartAfterPadding()} */
+    int getStartAfterPadding();
+
     /** see {@link View#getTag()} */
     Object getTag();
+
+    /** see {@link OrientationHelper#getTotalSpace()} */
+    int getTotalSpace();
 
     /**
      * Returns a view that will be attached to the view hierarchy.

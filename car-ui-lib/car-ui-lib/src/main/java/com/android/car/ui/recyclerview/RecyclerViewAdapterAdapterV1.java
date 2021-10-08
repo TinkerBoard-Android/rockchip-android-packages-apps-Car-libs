@@ -103,7 +103,7 @@ public final class RecyclerViewAdapterAdapterV1
     };
 
     public RecyclerViewAdapterAdapterV1(@NonNull Context appContext,
-            @NonNull RecyclerView.Adapter adapter) {
+            @NonNull RecyclerView.Adapter<?> adapter) {
         mAppContext = appContext;
         mAdapter = adapter;
     }
@@ -207,6 +207,13 @@ public final class RecyclerViewAdapterAdapterV1
     @Override
     public boolean hasStableIds() {
         return mAdapter.hasStableIds();
+    }
+
+    @Override
+    public void setMaxItems(int maxItems) {
+        if (mAdapter instanceof CarUiRecyclerView.ItemCap) {
+            ((CarUiRecyclerView.ItemCap) mAdapter).setMaxItems(maxItems);
+        }
     }
 
     static class ViewHolderAdapterV1 implements ViewHolderOEMV1 {
