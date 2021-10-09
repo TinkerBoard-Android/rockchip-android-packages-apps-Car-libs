@@ -31,8 +31,6 @@ import com.android.car.ui.recyclerview.CarUiRecyclerView.Size;
 public final class CarUiGridLayoutStyle implements CarUiLayoutStyle {
 
     private int mSpanCount = 1;
-    @CarUiRecyclerViewLayout
-    private  int mLayoutType = CarUiRecyclerViewLayout.GRID;
     @Orientation
     private int mLayoutOrientation = VERTICAL;
     private boolean mReverseLayout = false;

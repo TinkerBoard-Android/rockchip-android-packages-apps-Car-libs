@@ -28,8 +28,6 @@ import com.android.car.ui.recyclerview.CarUiRecyclerView.Size;
  */
 public final class CarUiLinearLayoutStyle implements CarUiLayoutStyle {
 
-    @CarUiRecyclerViewLayout
-    private  int mLayoutType = CarUiRecyclerViewLayout.LINEAR;
     @Orientation
     private int mLayoutOrientation = VERTICAL;
     private boolean mReverseLayout = false;

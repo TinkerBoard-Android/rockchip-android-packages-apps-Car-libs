@@ -15,6 +15,7 @@
  */
 package com.chassis.car.ui.plugin.recyclerview;
 
+import android.annotation.SuppressLint;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -33,11 +34,12 @@ import com.chassis.car.ui.plugin.recyclerview.AdapterWrapper.ViewHolderWrapper;
 public final class AdapterWrapper extends RecyclerView.Adapter<ViewHolderWrapper> {
 
     @NonNull
-    private AdapterOEMV1 mAdapter;
+    private final AdapterOEMV1 mAdapter;
 
     @NonNull
-    private AdapterDataObserverOEMV1 mAdapterDataObserver = new AdapterDataObserverOEMV1() {
+    private final AdapterDataObserverOEMV1 mAdapterDataObserver = new AdapterDataObserverOEMV1() {
         @Override
+        @SuppressLint("NotifyDataSetChanged")
         public void onChanged() {
             AdapterWrapper.super.notifyDataSetChanged();
         }
@@ -74,7 +76,7 @@ public final class AdapterWrapper extends RecyclerView.Adapter<ViewHolderWrapper
         }
     };
 
-    public AdapterWrapper(@NonNull AdapterOEMV1 adapter) {
+    public AdapterWrapper(@NonNull AdapterOEMV1<?> adapter) {
         this.mAdapter = adapter;
         AdapterWrapper.super.setHasStableIds(adapter.hasStableIds());
         updateStateRestorationPolicy();
@@ -185,5 +187,12 @@ public final class AdapterWrapper extends RecyclerView.Adapter<ViewHolderWrapper
         public ViewHolderOEMV1 getViewHolder() {
             return mViewHolder;
         }
+    }
+
+    /**
+     * returns the wrapped {@link AdapterOEMV1}
+     */
+    public AdapterOEMV1<?> getOEMAdapter() {
+        return mAdapter;
     }
 }

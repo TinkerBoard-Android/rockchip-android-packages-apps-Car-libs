@@ -29,6 +29,11 @@ public interface AdapterOEMV1<V extends ViewHolderOEMV1> {
     int PREVENT = 2;
 
     /**
+     * A value to pass to {@link #setMaxItems(int)} that indicates there should be no limit.
+     */
+    int UNLIMITED = -1;
+
+    /**
      * See {@link androidx.recyclerview.widget.RecyclerView.Adapter#getItemCount()}
      */
     int getItemCount();
@@ -102,4 +107,10 @@ public interface AdapterOEMV1<V extends ViewHolderOEMV1> {
      * See {@link androidx.recyclerview.widget.RecyclerView.Adapter#hasStableIds}
      */
     boolean hasStableIds();
+
+    /**
+     * Sets the maximum number of items available in the adapter. A value less than '0' means
+     * the list should not be capped.
+     */
+    void setMaxItems(int maxItems);
 }

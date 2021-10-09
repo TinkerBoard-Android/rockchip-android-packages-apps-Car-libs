@@ -21,6 +21,7 @@ import static com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewAttribu
 import static com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewAttributesOEMV1.SIZE_MEDIUM;
 import static com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewAttributesOEMV1.SIZE_SMALL;
 
+import android.car.drivingstate.CarUxRestrictions;
 import android.content.Context;
 import android.view.InputDevice;
 import android.view.LayoutInflater;
@@ -36,7 +37,9 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.OrientationHelper;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView.Adapter;
 
 import com.android.car.ui.plugin.oemapis.recyclerview.AdapterOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.LayoutStyleOEMV1;
@@ -47,6 +50,7 @@ import com.android.car.ui.plugin.oemapis.recyclerview.SpanSizeLookupOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.ViewHolderOEMV1;
 
 import com.chassis.car.ui.plugin.R;
+import com.chassis.car.ui.plugin.uxr.CarUxRestrictionsUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,6 +78,11 @@ public final class RecyclerViewImpl extends FrameLayout implements RecyclerViewO
 
     @NonNull
     private final RecyclerView mRecyclerView;
+
+    private final CarUxRestrictionsUtil.OnUxRestrictionsChangedListener mListener =
+            new UxRestrictionChangedListener();
+    @NonNull
+    private final CarUxRestrictionsUtil mCarUxRestrictionsUtil;
 
     @Nullable
     private final DefaultScrollBar mScrollBar;
@@ -112,8 +121,9 @@ public final class RecyclerViewImpl extends FrameLayout implements RecyclerViewO
         super(context);
         boolean scrollBarEnabled = context.getResources().getBoolean(R.bool.scrollbar_enable);
         @LayoutRes int layout = R.layout.recycler_view_no_scrollbar;
-        if (scrollBarEnabled && attrs != null) {
-            switch (attrs.getSize()) {
+        if (scrollBarEnabled) {
+            int size = attrs != null ? attrs.getSize() : SIZE_LARGE;
+            switch (size) {
                 case SIZE_SMALL:
                     layout = R.layout.recycler_view_small;
                     break;
@@ -132,6 +142,8 @@ public final class RecyclerViewImpl extends FrameLayout implements RecyclerViewO
         // Set to false so the items below the toolbar are visible.
         mRecyclerView.setClipToPadding(false);
 
+        mCarUxRestrictionsUtil = CarUxRestrictionsUtil.getInstance(context);
+
         if (attrs != null) {
             setLayoutStyle(attrs.getLayoutStyle());
             setBackground(attrs.getBackground());
@@ -144,12 +156,36 @@ public final class RecyclerViewImpl extends FrameLayout implements RecyclerViewO
             params.setMargins(attrs.getMarginLeft(), attrs.getMarginTop(), attrs.getMarginRight(),
                     attrs.getMarginBottom());
             setLayoutParams(params);
+
+            mLayoutStyle = attrs.getLayoutStyle();
+        } else {
+            mLayoutStyle = new LayoutStyleOEMV1() {
+                @Override
+                public int getSpanCount() {
+                    return 1;
+                }
+
+                @Override
+                public int getLayoutType() {
+                    return LayoutStyleOEMV1.LAYOUT_TYPE_LINEAR;
+                }
+
+                @Override
+                public int getOrientation() {
+                    return LayoutStyleOEMV1.ORIENTATION_VERTICAL;
+                }
+
+                @Override
+                public boolean getReverseLayout() {
+                    return false;
+                }
+            };
         }
 
+        setLayoutStyle(mLayoutStyle);
+
         boolean rotaryScrollEnabled = attrs != null && attrs.isRotaryScrollEnabled();
-        int orientation = getLayoutStyle() == null ? LinearLayout.VERTICAL
-                : getLayoutStyle().getOrientation();
-        initRotaryScroll(mRecyclerView, rotaryScrollEnabled, orientation);
+        initRotaryScroll(mRecyclerView, rotaryScrollEnabled, getLayoutStyle().getOrientation());
 
         if (!scrollBarEnabled) {
             mScrollBar = null;
@@ -339,6 +375,85 @@ public final class RecyclerViewImpl extends FrameLayout implements RecyclerViewO
         initRotaryScroll(mRecyclerView, rotaryScrollEnabled, orientation);
     }
 
+    private OrientationHelper createOrientationHelper() {
+        if (mLayoutStyle.getOrientation() == LayoutStyleOEMV1.ORIENTATION_VERTICAL) {
+            return OrientationHelper.createVerticalHelper(mRecyclerView.getLayoutManager());
+        } else {
+            return OrientationHelper.createHorizontalHelper(mRecyclerView.getLayoutManager());
+        }
+    }
+
+    @Override
+    public int getEndAfterPadding() {
+        if (mLayoutStyle == null) return 0;
+        return createOrientationHelper().getEndAfterPadding();
+    }
+
+    @Override
+    public int getStartAfterPadding() {
+        if (mLayoutStyle == null) return 0;
+        return createOrientationHelper().getStartAfterPadding();
+    }
+
+    @Override
+    public int getTotalSpace() {
+        if (mLayoutStyle == null) return 0;
+        return createOrientationHelper().getTotalSpace();
+    }
+
+    @Override
+    public void setPadding(int left, int top, int right, int bottom) {
+        if (mScrollBar != null) {
+            int currentPosition = findFirstVisibleItemPosition();
+            setScrollBarPadding(top, bottom);
+            // Maintain same index position after setting padding
+            scrollToPosition(currentPosition);
+        }
+        mRecyclerView.setPadding(mRecyclerView.getPaddingLeft(),
+                top, mRecyclerView.getPaddingRight(), bottom);
+        super.setPadding(left, 0, right, 0);
+    }
+
+    @Override
+    public int getPaddingTop() {
+        return mRecyclerView.getPaddingTop();
+    }
+
+    @Override
+    public int getPaddingBottom() {
+        return mRecyclerView.getPaddingBottom();
+    }
+
+    @Override
+    public void setPaddingRelative(int start, int top, int end, int bottom) {
+        if (mScrollBar != null) {
+            int currentPosition = findFirstVisibleItemPosition();
+            setScrollBarPadding(top, bottom);
+            // Maintain same index position after setting padding
+            scrollToPosition(currentPosition);
+        }
+        mRecyclerView.setPaddingRelative(0, top, 0, bottom);
+        super.setPaddingRelative(start, 0, end, 0);
+    }
+
+    private void setScrollBarPadding(int paddingTop, int paddingBottom) {
+        if (mScrollBar != null) {
+            mScrollBar.setPadding(paddingTop, paddingBottom);
+        }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        mCarUxRestrictionsUtil.register(mListener);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mCarUxRestrictionsUtil.unregister(mListener);
+    }
+
     /**
      * If this view's {@code rotaryScrollEnabled} attribute is set to true, sets the content
      * description so that the {@code RotaryService} will treat it as a scrollable container and
@@ -394,5 +509,35 @@ public final class RecyclerViewImpl extends FrameLayout implements RecyclerViewO
     private static void setRotaryScrollEnabled(@NonNull View view, boolean isVertical) {
         view.setContentDescription(
                 isVertical ? ROTARY_VERTICALLY_SCROLLABLE : ROTARY_HORIZONTALLY_SCROLLABLE);
+    }
+
+    private class UxRestrictionChangedListener implements
+            CarUxRestrictionsUtil.OnUxRestrictionsChangedListener {
+
+        @Override
+        public void onRestrictionsChanged(@NonNull CarUxRestrictions carUxRestrictions) {
+            Adapter<?> adapter = mRecyclerView.getAdapter();
+            if (adapter == null) return;
+
+            int maxItems = AdapterOEMV1.UNLIMITED;
+            if ((carUxRestrictions.getActiveRestrictions()
+                    & CarUxRestrictions.UX_RESTRICTIONS_LIMIT_CONTENT) != 0) {
+                maxItems = carUxRestrictions.getMaxCumulativeContentItems();
+            }
+
+            int originalCount = adapter.getItemCount();
+            ((AdapterWrapper) adapter).getOEMAdapter().setMaxItems(maxItems);
+            int newCount = adapter.getItemCount();
+
+            if (newCount == originalCount) {
+                return;
+            }
+
+            if (newCount < originalCount) {
+                adapter.notifyItemRangeRemoved(newCount, originalCount - newCount);
+            } else {
+                adapter.notifyItemRangeInserted(originalCount, newCount - originalCount);
+            }
+        }
     }
 }
