@@ -26,6 +26,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.text.BidiFormatter;
+import android.text.TextDirectionHeuristics;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -61,6 +63,7 @@ public class QCRowView extends FrameLayout {
     private static final String TAG = "QCRowView";
 
     private LayoutInflater mLayoutInflater;
+    private BidiFormatter mBidiFormatter;
     private View mContentView;
     private TextView mTitle;
     private TextView mSubtitle;
@@ -171,6 +174,7 @@ public class QCRowView extends FrameLayout {
 
     private void init(Context context) {
         mLayoutInflater = LayoutInflater.from(context);
+        mBidiFormatter = BidiFormatter.getInstance();
         mLayoutInflater.inflate(R.layout.qc_row_view, /* root= */ this);
         mContentView = findViewById(R.id.qc_row_content);
         mTitle = findViewById(R.id.qc_title);
@@ -199,13 +203,15 @@ public class QCRowView extends FrameLayout {
         }
         if (!TextUtils.isEmpty(row.getTitle())) {
             mTitle.setVisibility(VISIBLE);
-            mTitle.setText(row.getTitle());
+            mTitle.setText(
+                    mBidiFormatter.unicodeWrap(row.getTitle(), TextDirectionHeuristics.LOCALE));
         } else {
             mTitle.setVisibility(GONE);
         }
         if (!TextUtils.isEmpty(row.getSubtitle())) {
             mSubtitle.setVisibility(VISIBLE);
-            mSubtitle.setText(row.getSubtitle());
+            mSubtitle.setText(
+                    mBidiFormatter.unicodeWrap(row.getSubtitle(), TextDirectionHeuristics.LOCALE));
         } else {
             mSubtitle.setVisibility(GONE);
         }
