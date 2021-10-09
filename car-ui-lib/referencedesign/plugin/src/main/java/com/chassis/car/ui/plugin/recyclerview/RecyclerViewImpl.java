@@ -366,13 +366,18 @@ public final class RecyclerViewImpl extends FrameLayout implements RecyclerViewO
 
     @Override
     public void setContentDescription(CharSequence contentDescription) {
-        super.setContentDescription(contentDescription);
         boolean rotaryScrollEnabled = contentDescription != null
                 && (ROTARY_HORIZONTALLY_SCROLLABLE.contentEquals(contentDescription)
                 || ROTARY_VERTICALLY_SCROLLABLE.contentEquals(contentDescription));
         int orientation = getLayoutStyle() == null ? LinearLayout.VERTICAL
                 : getLayoutStyle().getOrientation();
         initRotaryScroll(mRecyclerView, rotaryScrollEnabled, orientation);
+        // Only change this view's content description when not related to rotary scroll. Don't
+        // change its content description when related to rotary scroll, because the content
+        // description should be set on its inner recyclerview in this case.
+        if (!rotaryScrollEnabled) {
+            super.setContentDescription(contentDescription);
+        }
     }
 
     private OrientationHelper createOrientationHelper() {
@@ -500,9 +505,9 @@ public final class RecyclerViewImpl extends FrameLayout implements RecyclerViewO
             if (mScrollBar != null) mScrollBar.setHighlightThumb(hasFocus);
         } : null);
 
-        // This view is a rotary container if it's not a scrollable container.
+        // This recyclerView is a rotary container if it's not a scrollable container.
         if (!rotaryScrollEnabled) {
-            super.setContentDescription(ROTARY_CONTAINER);
+            recyclerView.setContentDescription(ROTARY_CONTAINER);
         }
     }
 
