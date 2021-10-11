@@ -24,10 +24,8 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 /**
- * A proxy class that passes through all the calls to the {@link #mTarget}
- *
- * This class is used for working around {@link androidx.preference.PreferenceFragmentCompat}
- * requiring an instance of {@link RecyclerView}.
+ * A proxy class that passes through all the calls to the CarUiRecyclerView supplied in
+ * {@code #ProxyRecyclerView(Context, com.android.car.ui.CarUiRecyclerView)}
  */
 public final class ProxyRecyclerView extends RecyclerView {
 
