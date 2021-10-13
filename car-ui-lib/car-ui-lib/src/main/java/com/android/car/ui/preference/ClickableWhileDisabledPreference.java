@@ -26,6 +26,7 @@ import java.util.function.Consumer;
  *
  * These preference will appear disabled but will still perform an action when clicked.
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public interface ClickableWhileDisabledPreference {
     /** Sets this preference as clickable while disabled or not */
     void setClickableWhileDisabled(boolean clickableWhileDisabled);
