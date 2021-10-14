@@ -23,6 +23,9 @@ import static com.android.car.ui.utils.RotaryConstants.ROTARY_FOCUS_DELEGATING_C
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_HORIZONTALLY_SCROLLABLE;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_VERTICALLY_SCROLLABLE;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -135,6 +138,27 @@ public final class ViewUtils {
          * Removes a listener to be called when the view's layout is completed.
          */
         void removeOnLayoutCompleteListener(@Nullable Runnable runnable);
+    }
+
+    /** Returns whether the {@code view} is in multi-window mode. */
+    public static boolean isInMultiWindowMode(@NonNull View view) {
+        Context context = view.getContext();
+        // Find the Activity context in case the view was inflated with Hilt dependency injector.
+        Activity activity = findActivity(context);
+        return activity != null && activity.isInMultiWindowMode();
+    }
+
+    /** Returns the Activity of the given {@code context}. */
+    @Nullable
+    public static Activity findActivity(@Nullable Context context) {
+        while (context instanceof ContextWrapper
+                && !(context instanceof Activity)) {
+            context = ((ContextWrapper) context).getBaseContext();
+        }
+        if (context instanceof Activity) {
+            return (Activity) context;
+        }
+        return null;
     }
 
     /** Returns whether the {@code descendant} view is a descendant of the {@code view}. */
