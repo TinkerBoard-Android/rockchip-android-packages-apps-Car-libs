@@ -43,6 +43,7 @@ import com.android.car.ui.IFocusArea;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.function.Predicate;
 
 /** Utility class for helpful methods related to {@link View} objects. */
 public final class ViewUtils {
@@ -104,17 +105,6 @@ public final class ViewUtils {
 
     /** This is a utility class. */
     private ViewUtils() {
-    }
-
-    /**
-     * This is a functional interface and can therefore be used as the assignment target for a
-     * lambda expression or method reference.
-     *
-     * @param <T> the type of the input to the predicate
-     */
-    private interface Predicate<T> {
-        /** Evaluates this predicate on the given argument. */
-        boolean test(@NonNull T t);
     }
 
     /**
@@ -200,7 +190,7 @@ public final class ViewUtils {
      * found.
      */
     @VisibleForTesting
-    static FocusParkingView findFocusParkingView(@NonNull View root) {
+    public static FocusParkingView findFocusParkingView(@NonNull View root) {
         return (FocusParkingView) depthFirstSearch(root,
                 /* targetPredicate= */ v -> v instanceof FocusParkingView,
                 /* skipPredicate= */ null);
@@ -754,17 +744,17 @@ public final class ViewUtils {
     @Nullable
     private static View findRotaryContainer(@NonNull View view) {
         return depthFirstSearch(view,
-                /* targetPredicate= */ v -> {
-                    if (!isRotaryContainer(v)) {
-                        return false;
+                /* targetPredicate= */ ViewUtils::isRotaryContainer,
+                /* skipPredicate= */ v -> {
+                    if (!v.isShown()) {
+                        return true;
                     }
                     if (v instanceof LazyLayoutView) {
                         LazyLayoutView lazyLayoutView = (LazyLayoutView) v;
-                        return lazyLayoutView.isLayoutCompleted();
+                        return !lazyLayoutView.isLayoutCompleted();
                     }
-                    return true;
-                },
-                /* skipPredicate= */ v -> !v.isShown());
+                    return false;
+                });
     }
 
     /**

@@ -38,10 +38,7 @@ import static com.android.car.ui.utils.ViewUtils.setRotaryScrollEnabled;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.view.View;
-import android.view.ViewTreeObserver;
 
-import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.rule.ActivityTestRule;
 
 import com.android.car.ui.FocusArea;
@@ -72,9 +69,7 @@ public class ViewUtilsTest {
     private View mView4;
     private View mDefaultFocus4;
     private CarUiRecyclerView mCarUiRecyclerView5;
-    private RecyclerView mList5;
     private CarUiRecyclerView mCarUiRecyclerView6;
-    private RecyclerView mList6;
     private View mRoot;
     private FocusParkingView mFpv;
 
@@ -91,9 +86,7 @@ public class ViewUtilsTest {
         mView4 = mActivity.findViewById(R.id.view4);
         mDefaultFocus4 = mActivity.findViewById(R.id.default_focus4);
         mCarUiRecyclerView5 = mActivity.findViewById(R.id.list5);
-        mList5 = mCarUiRecyclerView5.getRecyclerView();
         mCarUiRecyclerView6 = mActivity.findViewById(R.id.list6);
-        mList6 = mCarUiRecyclerView6.getRecyclerView();
         mRoot = mFocusArea1.getRootView();
 
         // Since ViewUtilsTestActivity uses Theme.CarUi.NoToolbar, a FocusParkingView has been added
@@ -101,11 +94,11 @@ public class ViewUtilsTest {
         mFpv = ViewUtils.findFocusParkingView(mRoot);
 
         mRoot.post(() -> {
-            // Don't set the LayoutManager of mList5 because it already has a default one, which
-            // contains important Runnables in its onLayoutCompleted(). Resetting its LayoutManager
-            // will remove the Runnables.
-            mList5.setAdapter(new TestAdapter(/* numItems= */ 2));
-            setRotaryScrollEnabled(mList5, /* isVertical= */ true);
+            // Don't set the LayoutManager of mCarUiRecyclerView5 because it already has a default
+            // one, which contains important Runnables in its onLayoutCompleted(). Resetting it
+            // LayoutManager will remove the Runnables.
+            mCarUiRecyclerView5.setAdapter(new TestAdapter(/* numItems= */ 2));
+            setRotaryScrollEnabled(mCarUiRecyclerView5.getView(), /* isVertical= */ true);
         });
         // If we don't wait for the recyclerview items to show up, some of the tests flake
         onView(isRoot()).perform(waitForView(withText("Item 0"), 500));
@@ -113,485 +106,374 @@ public class ViewUtilsTest {
 
     @Test
     public void testRootVisible() {
-        mRoot.post(() -> assertThat(mRoot.getVisibility()).isEqualTo(VISIBLE));
+        assertThat(mRoot.getVisibility()).isEqualTo(VISIBLE);
     }
 
     @Test
     public void testGetAncestorFocusArea() {
-        mRoot.post(() -> assertThat(ViewUtils.getAncestorFocusArea(mView2)).isEqualTo(mFocusArea2));
+        assertThat(ViewUtils.getAncestorFocusArea(mView2)).isEqualTo(mFocusArea2);
     }
 
     @Test
     public void testGetAncestorFocusArea_doesNotReturnItself() {
-        mRoot.post(() -> assertThat(ViewUtils.getAncestorFocusArea(mFocusArea2)).isNull());
+        assertThat(ViewUtils.getAncestorFocusArea(mFocusArea2)).isNull();
     }
 
     @Test
     public void testGetAncestorFocusArea_outsideFocusArea() {
-        mRoot.post(() -> assertThat(ViewUtils.getAncestorFocusArea(mFpv)).isNull());
+        assertThat(ViewUtils.getAncestorFocusArea(mFpv)).isNull();
     }
 
     @Test
     public void testGetAncestorScrollableContainer() {
-        mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        View firstItem = mList5.getLayoutManager().findViewByPosition(0);
-                        assertThat(ViewUtils.getAncestorScrollableContainer(firstItem))
-                                .isEqualTo(mList5);
-                    }
-                }));
+        View firstItem = mCarUiRecyclerView5.getLayoutManager().findViewByPosition(0);
+        View container = ViewUtils.getAncestorScrollableContainer(firstItem);
+        // Since there is no API to get the inner RecyclerView, verify its focus level instead.
+        assertThat(ViewUtils.getFocusLevel(container)).isEqualTo(SCROLLABLE_CONTAINER_FOCUS);
     }
 
     @Test
     public void testGetAncestorScrollableContainer_returnNull() {
-        mRoot.post(() -> assertThat(ViewUtils.getAncestorScrollableContainer(mView2)).isNull());
+        assertThat(ViewUtils.getAncestorScrollableContainer(mView2)).isNull();
     }
 
     @Test
     public void testFindFocusedByDefaultView() {
-        mRoot.post(() -> {
-            View focusedByDefault = ViewUtils.findFocusedByDefaultView(mRoot);
-            assertThat(focusedByDefault).isEqualTo(mFocusedByDefault3);
-        });
+        View focusedByDefault = ViewUtils.findFocusedByDefaultView(mRoot);
+        assertThat(focusedByDefault).isEqualTo(mFocusedByDefault3);
     }
 
     @Test
-    public void testFindFocusedByDefaultView_skipNotFocusable() {
-        mRoot.post(() -> {
-            mFocusedByDefault3.setFocusable(false);
-            View focusedByDefault = ViewUtils.findFocusedByDefaultView(mRoot);
-            assertThat(focusedByDefault).isNull();
-        });
+    public void testFindFocusedByDefaultView_skipNotFocusable() throws InterruptedException {
+        TestUtils.accept(mFocusedByDefault3, v -> v.setFocusable(false));
+        View focusedByDefault = ViewUtils.findFocusedByDefaultView(mRoot);
+        assertThat(focusedByDefault).isNull();
     }
 
     @Test
-    public void testFindFocusedByDefaultView_skipInvisibleView() {
-        mRoot.post(() -> {
-            mFocusArea3.setVisibility(INVISIBLE);
-            assertThat(mFocusArea3.getVisibility()).isEqualTo(INVISIBLE);
-            View focusedByDefault = ViewUtils.findFocusedByDefaultView(mRoot);
-            assertThat(focusedByDefault).isNull();
-        });
+    public void testFindFocusedByDefaultView_skipInvisibleView() throws InterruptedException {
+        TestUtils.accept(mFocusArea3, v -> v.setVisibility(INVISIBLE));
+        assertThat(mFocusArea3.getVisibility()).isEqualTo(INVISIBLE);
+        View focusedByDefault = ViewUtils.findFocusedByDefaultView(mRoot);
+        assertThat(focusedByDefault).isNull();
     }
 
     @Test
-    public void testFindFocusedByDefaultView_skipInvisibleAncestor() {
-        mRoot.post(() -> {
-            mRoot.setVisibility(INVISIBLE);
-            View focusedByDefault = ViewUtils.findFocusedByDefaultView(mFocusArea3);
-            assertThat(focusedByDefault).isNull();
-        });
+    public void testFindFocusedByDefaultView_skipInvisibleAncestor() throws InterruptedException {
+        TestUtils.accept(mRoot, v -> v.setVisibility(INVISIBLE));
+        View focusedByDefault = ViewUtils.findFocusedByDefaultView(mFocusArea3);
+        assertThat(focusedByDefault).isNull();
     }
 
     @Test
     public void testFindImplicitDefaultFocusView_inRoot() {
-        mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        View firstItem = mList5.getLayoutManager().findViewByPosition(0);
-                        View implicitDefaultFocus = ViewUtils.findImplicitDefaultFocusView(mRoot);
-                        assertThat(implicitDefaultFocus).isEqualTo(firstItem);
-                    }
-                }));
+        View firstItem = mCarUiRecyclerView5.getLayoutManager().findViewByPosition(0);
+        View implicitDefaultFocus = ViewUtils.findImplicitDefaultFocusView(mRoot);
+        assertThat(implicitDefaultFocus).isEqualTo(firstItem);
     }
 
     @Test
     public void testFindImplicitDefaultFocusView_inFocusArea() {
-        mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        View firstItem = mList5.getLayoutManager().findViewByPosition(0);
-                        View implicitDefaultFocus =
-                                ViewUtils.findImplicitDefaultFocusView(mFocusArea5);
-                        assertThat(implicitDefaultFocus).isEqualTo(firstItem);
-                    }
-                }));
+        View firstItem = mCarUiRecyclerView5.getLayoutManager().findViewByPosition(0);
+        View implicitDefaultFocus =
+                ViewUtils.findImplicitDefaultFocusView(mFocusArea5);
+        assertThat(implicitDefaultFocus).isEqualTo(firstItem);
     }
 
     @Test
-    public void testFindImplicitDefaultFocusView_skipInvisibleAncestor() {
-        mRoot.post(() -> {
-            mRoot.setVisibility(INVISIBLE);
-            View implicitDefaultFocus = ViewUtils.findImplicitDefaultFocusView(mFocusArea5);
-            assertThat(implicitDefaultFocus).isNull();
-        });
+    public void testFindImplicitDefaultFocusView_skipInvisibleAncestor()
+            throws InterruptedException {
+        TestUtils.accept(mRoot, v -> v.setVisibility(INVISIBLE));
+        View implicitDefaultFocus = ViewUtils.findImplicitDefaultFocusView(mFocusArea5);
+        assertThat(implicitDefaultFocus).isNull();
     }
 
     @Test
-    public void testFindImplicitDefaultFocusView_selectedItem_inFocusArea() {
-        mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        View selectedItem = mList5.getLayoutManager().findViewByPosition(1);
-                        selectedItem.setSelected(true);
-                        View implicitDefaultFocus =
-                                ViewUtils.findImplicitDefaultFocusView(mFocusArea5);
-                        assertThat(implicitDefaultFocus).isEqualTo(selectedItem);
-                    }
-                }));
+    public void testFindImplicitDefaultFocusView_selectedItem_inFocusArea()
+            throws InterruptedException {
+        View selectedItem = mCarUiRecyclerView5.getLayoutManager().findViewByPosition(1);
+        TestUtils.accept(selectedItem, v -> v.setSelected(true));
+        View implicitDefaultFocus =
+                ViewUtils.findImplicitDefaultFocusView(mFocusArea5);
+        assertThat(implicitDefaultFocus).isEqualTo(selectedItem);
     }
 
     @Test
-    public void testFindFirstFocusableDescendant() {
-        mRoot.post(() -> {
-            mFocusArea2.setFocusable(true);
-            View firstFocusable = ViewUtils.findFirstFocusableDescendant(mRoot);
-            assertThat(firstFocusable).isEqualTo(mFocusArea2);
-        });
+    public void testFindFirstFocusableDescendant() throws InterruptedException {
+        TestUtils.accept(mFocusArea2, v -> v.setFocusable(true));
+        View firstFocusable = ViewUtils.findFirstFocusableDescendant(mRoot);
+        assertThat(firstFocusable).isEqualTo(mFocusArea2);
     }
 
     @Test
-    public void testFindFirstFocusableDescendant_skipItself() {
-        mRoot.post(() -> {
-            mFocusArea2.setFocusable(true);
-            View firstFocusable = ViewUtils.findFirstFocusableDescendant(mFocusArea2);
-            assertThat(firstFocusable).isEqualTo(mView2);
-        });
+    public void testFindFirstFocusableDescendant_skipItself() throws InterruptedException {
+        TestUtils.accept(mFocusArea2, v -> v.setFocusable(true));
+        View firstFocusable = ViewUtils.findFirstFocusableDescendant(mFocusArea2);
+        assertThat(firstFocusable).isEqualTo(mView2);
     }
 
     @Test
-    public void testFindFirstFocusableDescendant_skipInvisibleAndGoneView() {
-        mRoot.post(() -> {
+    public void testFindFirstFocusableDescendant_skipInvisibleAndGoneView()
+            throws InterruptedException {
+        TestUtils.accept(mRoot, v -> {
             mFocusArea2.setVisibility(INVISIBLE);
             mFocusArea3.setVisibility(GONE);
-            View firstFocusable = ViewUtils.findFirstFocusableDescendant(mRoot);
-            assertThat(firstFocusable).isEqualTo(mView4);
         });
+        View firstFocusable = ViewUtils.findFirstFocusableDescendant(mRoot);
+        assertThat(firstFocusable).isEqualTo(mView4);
     }
 
     @Test
-    public void testFindFirstFocusableDescendant_skipInvisibleAncestor() {
-        mRoot.post(() -> {
-            mRoot.setVisibility(INVISIBLE);
-            View firstFocusable = ViewUtils.findFirstFocusableDescendant(mFocusArea2);
-            assertThat(firstFocusable).isNull();
-        });
+    public void testFindFirstFocusableDescendant_skipInvisibleAncestor()
+            throws InterruptedException {
+        TestUtils.accept(mRoot, v -> v.setVisibility(View.INVISIBLE));
+        View firstFocusable = ViewUtils.findFirstFocusableDescendant(mFocusArea2);
+        assertThat(firstFocusable).isNull();
     }
 
     @Test
     public void testIsImplicitDefaultFocusView_firstItem() {
-        mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        View firstItem = mList5.getLayoutManager().findViewByPosition(0);
-                        assertThat(ViewUtils.isImplicitDefaultFocusView(firstItem)).isTrue();
-                    }
-                }));
+        View firstItem = mCarUiRecyclerView5.getLayoutManager().findViewByPosition(0);
+        assertThat(ViewUtils.isImplicitDefaultFocusView(firstItem)).isTrue();
     }
 
     @Test
     public void testIsImplicitDefaultFocusView_secondItem() {
-        mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        View secondItem = mList5.getLayoutManager().findViewByPosition(1);
-                        assertThat(ViewUtils.isImplicitDefaultFocusView(secondItem)).isFalse();
-                    }
-                }));
+        View secondItem = mCarUiRecyclerView5.getLayoutManager().findViewByPosition(1);
+        assertThat(ViewUtils.isImplicitDefaultFocusView(secondItem)).isFalse();
     }
 
     @Test
     public void testIsImplicitDefaultFocusView_normalView() {
-        mRoot.post(() -> assertThat(ViewUtils.isImplicitDefaultFocusView(mView2)).isFalse());
+        assertThat(ViewUtils.isImplicitDefaultFocusView(mView2)).isFalse();
     }
 
     @Test
-    public void testIsImplicitDefaultFocusView_skipInvisibleAncestor() {
-        mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        mFocusArea5.setVisibility(INVISIBLE);
-                        View firstItem = mList5.getLayoutManager().findViewByPosition(0);
-                        assertThat(ViewUtils.isImplicitDefaultFocusView(firstItem)).isFalse();
-                    }
-                }));
+    public void testIsImplicitDefaultFocusView_skipInvisibleAncestor() throws InterruptedException {
+        TestUtils.accept(mFocusArea5, v -> v.setVisibility(View.INVISIBLE));
+        View firstItem = mCarUiRecyclerView5.getLayoutManager().findViewByPosition(0);
+        assertThat(ViewUtils.isImplicitDefaultFocusView(firstItem)).isFalse();
     }
 
     @Test
-    public void testIsImplicitDefaultFocusView_selectedItem() {
-        mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        View selectedItem = mList5.getLayoutManager().findViewByPosition(1);
-                        selectedItem.setSelected(true);
-                        assertThat(ViewUtils.isImplicitDefaultFocusView(selectedItem)).isTrue();
-                    }
-                }));
+    public void testIsImplicitDefaultFocusView_selectedItem() throws InterruptedException {
+        View selectedItem = mCarUiRecyclerView5.getLayoutManager().findViewByPosition(1);
+        TestUtils.accept(selectedItem, v -> v.setSelected(true));
+        assertThat(ViewUtils.isImplicitDefaultFocusView(selectedItem)).isTrue();
     }
 
     @Test
-    public void testRequestFocus() {
-        mRoot.post(() -> assertRequestFocus(mView2, true));
+    public void testRequestFocus() throws InterruptedException {
+        TestUtils.requestFocusAndAssertFocused(mView2, true);
     }
 
     @Test
-    public void testRequestFocus_nullView() {
-        mRoot.post(() -> assertRequestFocus(null, false));
+    public void testRequestFocus_nullView() throws InterruptedException {
+        TestUtils.requestFocusAndAssertFocused(null, false);
     }
 
     @Test
-    public void testRequestFocus_alreadyFocused() {
+    public void testRequestFocus_alreadyFocused() throws InterruptedException {
+        TestUtils.requestFocusAndAssertFocused(mView2, true);
+        // mView2 is already focused before requesting focus.
+        TestUtils.requestFocusAndAssertFocused(mView2, true);
+    }
+
+    @Test
+    public void testRequestFocus_notFocusable() throws InterruptedException {
+        TestUtils.accept(mView2, v -> v.setFocusable(false));
+        TestUtils.requestFocusAndAssertFocused(mView2, false);
+    }
+
+    @Test
+    public void testRequestFocus_disabled() throws InterruptedException {
+        TestUtils.accept(mView2, v -> v.setEnabled(false));
+        TestUtils.requestFocusAndAssertFocused(mView2, false);
+    }
+
+    @Test
+    public void testRequestFocus_notVisible() throws InterruptedException {
+        TestUtils.accept(mView2, v -> v.setVisibility(View.INVISIBLE));
+        TestUtils.requestFocusAndAssertFocused(mView2, false);
+    }
+
+    @Test
+    public void testRequestFocus_skipInvisibleAncestor() throws InterruptedException {
+        TestUtils.accept(mFocusArea2, v -> v.setVisibility(View.INVISIBLE));
+        TestUtils.requestFocusAndAssertFocused(mView2, false);
+    }
+
+    @Test
+    public void testRequestFocus_zeroWidth() throws InterruptedException {
+        TestUtils.accept(mView2, v -> v.setRight(v.getLeft()));
+        assertThat(mView2.getWidth()).isEqualTo(0);
+        TestUtils.requestFocusAndAssertFocused(mView2, false);
+    }
+
+    @Test
+    public void testRequestFocus_detachedFromWindow() throws InterruptedException {
+        TestUtils.accept(mFocusArea2, v -> mFocusArea2.removeView(mView2));
+        // mView2 is detached from window, so post the Runnable on another view mFocusArea2.
+        TestUtils.requestFocusAndAssertFocused(mView2, false,
+                /* viewToPostRunnable= */ mFocusArea2);
+    }
+
+    @Test
+    public void testRequestFocus_FocusParkingView() throws InterruptedException {
+        TestUtils.requestFocusAndAssertFocused(mView2, true);
+        TestUtils.requestFocusAndAssertFocused(mFpv, false);
+    }
+
+    @Test
+    public void testAdjustFocus_rotaryContainer() throws InterruptedException {
+        mRoot.post(() -> setRotaryScrollEnabled(mCarUiRecyclerView5.getView(), false));
+        // This test verifies that the rotary container can't be focused because it's not focusable.
+        // Instead, its focusable descendant should get focused.
+        TestUtils.adjustFocusAndAssertFocusAdjusted(mCarUiRecyclerView5.getView(), NO_FOCUS, true);
+        View firstItem = mCarUiRecyclerView5.getLayoutManager().findViewByPosition(0);
+        assertThat(firstItem.isFocused()).isTrue();
+    }
+
+    @Test
+    public void testAdjustFocus_scrollableContainer() throws InterruptedException {
+        // This test verifies that the scrollable container can't be focused. Thought it's
+        // focusable, its focusable descendant should get focused.
+        TestUtils.adjustFocusAndAssertFocusAdjusted(mCarUiRecyclerView5.getView(), NO_FOCUS, true);
+        View firstItem = mCarUiRecyclerView5.getLayoutManager().findViewByPosition(0);
+        assertThat(firstItem.isFocused()).isTrue();
+    }
+
+    @Test
+    public void testAdjustFocus_inRoot() throws InterruptedException {
+        TestUtils.requestFocusAndAssertFocused(mView2, true);
+        TestUtils.accept(mRoot, v -> ViewUtils.adjustFocus(mRoot, null));
+        assertThat(mFocusedByDefault3.isFocused()).isTrue();
+    }
+
+    @Test
+    public void testAdjustFocus_inFocusAreaWithDefaultFocus() throws InterruptedException {
+        TestUtils.requestFocusAndAssertFocused(mView2, true);
+        TestUtils.accept(mRoot, v -> ViewUtils.adjustFocus(mFocusArea3, null));
+        assertThat(mFocusedByDefault3.isFocused()).isTrue();
+    }
+
+    @Test
+    public void testAdjustFocus_inFocusAreaWithoutDefaultFocus() throws InterruptedException {
+        TestUtils.requestFocusAndAssertFocused(mView4, true);
+        TestUtils.accept(mRoot, v -> ViewUtils.adjustFocus(mFocusArea2, null));
+        assertThat(mView2.isFocused()).isTrue();
+    }
+
+    @Test
+    public void testAdjustFocus_inFocusAreaWithoutFocusableDescendant()
+            throws InterruptedException {
+        TestUtils.requestFocusAndAssertFocused(mView2, true);
+        boolean success = TestUtils.test(mRoot, v -> ViewUtils.adjustFocus(mFocusArea1, null));
+        assertThat(success).isFalse();
+        assertThat(mFocusArea1.hasFocus()).isFalse();
+    }
+
+    @Test
+    public void testAdjustFocus_differentFocusLevels() throws InterruptedException {
+        TestUtils.adjustFocusAndAssertFocusAdjusted(mFocusArea2, SCROLLABLE_CONTAINER_FOCUS, true);
+        TestUtils.adjustFocusAndAssertFocusAdjusted(mFocusArea2, REGULAR_FOCUS, false);
+
+        mRoot.post(() -> mView2.setSelected(true));
+        TestUtils.adjustFocusAndAssertFocusAdjusted(mFocusArea2, REGULAR_FOCUS, true);
+        TestUtils.adjustFocusAndAssertFocusAdjusted(mFocusArea2, SELECTED_FOCUS, false);
+
+        TestUtils.adjustFocusAndAssertFocusAdjusted(mFocusArea5, SELECTED_FOCUS, true);
+        TestUtils.adjustFocusAndAssertFocusAdjusted(mFocusArea5, IMPLICIT_DEFAULT_FOCUS, false);
+
+        TestUtils.adjustFocusAndAssertFocusAdjusted(mFocusArea4, IMPLICIT_DEFAULT_FOCUS, true);
+        TestUtils.adjustFocusAndAssertFocusAdjusted(mFocusArea4, DEFAULT_FOCUS, false);
+
+        TestUtils.adjustFocusAndAssertFocusAdjusted(mFocusArea3, DEFAULT_FOCUS, true);
+        TestUtils.adjustFocusAndAssertFocusAdjusted(mFocusArea3, FOCUSED_BY_DEFAULT, false);
+
         mRoot.post(() -> {
-            assertRequestFocus(mView2, true);
-            // mView2 is already focused before requesting focus.
-            assertRequestFocus(mView2, true);
-        });
-    }
-
-    @Test
-    public void testRequestFocus_notFocusable() {
-        mRoot.post(() -> {
-            mView2.setFocusable(false);
-            assertRequestFocus(mView2, false);
-        });
-    }
-
-    @Test
-    public void testRequestFocus_disabled() {
-        mRoot.post(() -> {
-            mView2.setEnabled(false);
-            assertRequestFocus(mView2, false);
-        });
-    }
-
-    @Test
-    public void testRequestFocus_notVisible() {
-        mRoot.post(() -> {
-            mView2.setVisibility(View.INVISIBLE);
-            assertRequestFocus(mView2, false);
-        });
-    }
-
-    @Test
-    public void testRequestFocus_skipInvisibleAncestor() {
-        mRoot.post(() -> {
-            mFocusArea2.setVisibility(View.INVISIBLE);
-            assertRequestFocus(mView2, false);
-        });
-    }
-
-    @Test
-    public void testRequestFocus_zeroWidth() {
-        mRoot.post(() -> {
-            mView2.setRight(mView2.getLeft());
-            assertThat(mView2.getWidth()).isEqualTo(0);
-            assertRequestFocus(mView2, false);
-        });
-    }
-
-    @Test
-    public void testRequestFocus_detachedFromWindow() {
-        mRoot.post(() -> {
-            mFocusArea2.removeView(mView2);
-            assertRequestFocus(mView2, false);
-        });
-    }
-
-    @Test
-    public void testRequestFocus_FocusParkingView() {
-        mRoot.post(() -> {
-            assertRequestFocus(mView2, true);
-            assertRequestFocus(mFpv, false);
-        });
-    }
-
-    @Test
-    public void testRequestFocus_rotaryContainer() {
-        mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        assertRequestFocus(mList5, false);
-                    }
-                }));
-    }
-
-    @Test
-    public void testRequestFocus_scrollableContainer() {
-        mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        assertRequestFocus(mList5, false);
-                    }
-                }));
-    }
-
-    @Test
-    public void testAdjustFocus_inRoot() {
-        mRoot.post(() -> {
-            assertRequestFocus(mView2, true);
-            ViewUtils.adjustFocus(mRoot, null);
-            assertThat(mFocusedByDefault3.isFocused()).isTrue();
-        });
-    }
-
-    @Test
-    public void testAdjustFocus_inFocusAreaWithDefaultFocus() {
-        mRoot.post(() -> {
-            assertRequestFocus(mView2, true);
-            ViewUtils.adjustFocus(mFocusArea3, null);
-            assertThat(mFocusedByDefault3.isFocused()).isTrue();
-        });
-    }
-
-    @Test
-    public void testAdjustFocus_inFocusAreaWithoutDefaultFocus() {
-        mRoot.post(() -> {
-            assertRequestFocus(mView4, true);
-            ViewUtils.adjustFocus(mFocusArea2, null);
-            assertThat(mView2.isFocused()).isTrue();
-        });
-    }
-
-    @Test
-    public void testAdjustFocus_inFocusAreaWithoutFocusableDescendant() {
-        mRoot.post(() -> {
-            assertRequestFocus(mView2, true);
-            boolean success = ViewUtils.adjustFocus(mFocusArea1, null);
-            assertThat(mFocusArea1.hasFocus()).isFalse();
-            assertThat(success).isFalse();
-        });
-    }
-
-    @Test
-    public void testAdjustFocus_differentFocusLevels() {
-        mRoot.post(() -> {
-            assertThat(ViewUtils.adjustFocus(mFocusArea2, SCROLLABLE_CONTAINER_FOCUS)).isTrue();
-            assertThat(ViewUtils.adjustFocus(mFocusArea2, REGULAR_FOCUS)).isFalse();
-
-            mView2.setSelected(true);
-            assertThat(ViewUtils.adjustFocus(mFocusArea2, REGULAR_FOCUS)).isTrue();
-            assertThat(ViewUtils.adjustFocus(mFocusArea2, SELECTED_FOCUS)).isFalse();
-
-            assertThat(ViewUtils.adjustFocus(mFocusArea5, SELECTED_FOCUS)).isTrue();
-            assertThat(ViewUtils.adjustFocus(mFocusArea5, IMPLICIT_DEFAULT_FOCUS)).isFalse();
-
-            assertThat(ViewUtils.adjustFocus(mFocusArea4, IMPLICIT_DEFAULT_FOCUS)).isTrue();
-            assertThat(ViewUtils.adjustFocus(mFocusArea4, DEFAULT_FOCUS)).isFalse();
-
-            assertThat(ViewUtils.adjustFocus(mFocusArea3, DEFAULT_FOCUS)).isTrue();
-            assertThat(ViewUtils.adjustFocus(mFocusArea3, FOCUSED_BY_DEFAULT)).isFalse();
-
-            View firstItem = mList5.getLayoutManager().findViewByPosition(0);
+            View firstItem = mCarUiRecyclerView5.getLayoutManager().findViewByPosition(0);
             firstItem.setFocusable(false);
-            View secondItem = mList5.getLayoutManager().findViewByPosition(1);
+            View secondItem = mCarUiRecyclerView5.getLayoutManager().findViewByPosition(1);
             secondItem.setFocusable(false);
-            assertThat(ViewUtils.adjustFocus(mFocusArea5, NO_FOCUS)).isTrue();
-            assertThat(ViewUtils.adjustFocus(mFocusArea5, SCROLLABLE_CONTAINER_FOCUS)).isFalse();
         });
+        TestUtils.adjustFocusAndAssertFocusAdjusted(mFocusArea5, NO_FOCUS, true);
+        ViewUtils.adjustFocus(mFocusArea5, NO_FOCUS);
+        TestUtils.adjustFocusAndAssertFocusAdjusted(mFocusArea5, SCROLLABLE_CONTAINER_FOCUS, false);
     }
 
     @Test
     public void testGetFocusLevel() {
-        mRoot.post(() -> {
-            assertThat(ViewUtils.getFocusLevel(null)).isEqualTo(NO_FOCUS);
-            assertThat(ViewUtils.getFocusLevel(mFpv)).isEqualTo(NO_FOCUS);
-            mFocusArea2.setVisibility(INVISIBLE);
-            assertThat(ViewUtils.getFocusLevel(mView2)).isEqualTo(NO_FOCUS);
+        assertThat(ViewUtils.getFocusLevel(null)).isEqualTo(NO_FOCUS);
+        assertThat(ViewUtils.getFocusLevel(mFpv)).isEqualTo(NO_FOCUS);
+        mFocusArea2.setVisibility(INVISIBLE);
+        assertThat(ViewUtils.getFocusLevel(mView2)).isEqualTo(NO_FOCUS);
 
-            assertThat(ViewUtils.getFocusLevel(mList5)).isEqualTo(SCROLLABLE_CONTAINER_FOCUS);
+        // SCROLLABLE_CONTAINER_FOCUS is tested in testGetAncestorScrollableContainer().
 
-            assertThat(ViewUtils.getFocusLevel(mView4)).isEqualTo(REGULAR_FOCUS);
+        assertThat(ViewUtils.getFocusLevel(mView4)).isEqualTo(REGULAR_FOCUS);
 
-            mView4.setSelected(true);
-            assertThat(ViewUtils.getFocusLevel(mView4)).isEqualTo(SELECTED_FOCUS);
+        mView4.setSelected(true);
+        assertThat(ViewUtils.getFocusLevel(mView4)).isEqualTo(SELECTED_FOCUS);
 
-            mRoot.post(() -> mList5.getViewTreeObserver().addOnGlobalLayoutListener(
-                    new ViewTreeObserver.OnGlobalLayoutListener() {
-                        @Override
-                        public void onGlobalLayout() {
-                            mList5.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                            View firstItem = mList5.getLayoutManager().findViewByPosition(0);
-                            assertThat(ViewUtils.getFocusLevel(firstItem))
-                                    .isEqualTo(IMPLICIT_DEFAULT_FOCUS);
-                        }
-                    }));
+        View firstItem = mCarUiRecyclerView5.getLayoutManager().findViewByPosition(0);
+        assertThat(ViewUtils.getFocusLevel(firstItem)).isEqualTo(IMPLICIT_DEFAULT_FOCUS);
 
-            assertThat(ViewUtils.getFocusLevel(mDefaultFocus4)).isEqualTo(DEFAULT_FOCUS);
+        assertThat(ViewUtils.getFocusLevel(mDefaultFocus4)).isEqualTo(DEFAULT_FOCUS);
 
-            assertThat(ViewUtils.getFocusLevel(mFocusedByDefault3)).isEqualTo(FOCUSED_BY_DEFAULT);
-        });
+        assertThat(ViewUtils.getFocusLevel(mFocusedByDefault3)).isEqualTo(FOCUSED_BY_DEFAULT);
     }
 
     @Test
-    public void testInitFocus_inLazyLayoutView1() {
+    public void testInitFocus_inLazyLayoutView1() throws InterruptedException {
         ViewUtils.LazyLayoutView lazyLayoutView =
                 (ViewUtils.LazyLayoutView) mCarUiRecyclerView5;
         assertThat(lazyLayoutView.isLayoutCompleted()).isTrue();
-        mRoot.post(() -> {
-            assertRequestFocus(mView2, true);
-            ViewUtils.initFocus(lazyLayoutView);
-        });
+        TestUtils.requestFocusAndAssertFocused(mView2, true);
+        mRoot.post(() -> ViewUtils.initFocus(lazyLayoutView));
         waitForFocusRestored();
         // The focus shouldn't change because there was a visible focus.
         assertThat(mView2.isFocused()).isTrue();
     }
 
     @Test
-    public void testInitFocus_inLazyLayoutView2() {
+    public void testInitFocus_inLazyLayoutView2() throws InterruptedException {
         ViewUtils.LazyLayoutView lazyLayoutView =
                 (ViewUtils.LazyLayoutView) mCarUiRecyclerView5;
         assertThat(lazyLayoutView.isLayoutCompleted()).isTrue();
-        mRoot.post(() -> {
-            ViewUtils.hideFocus(mRoot);
-            assertThat(mFpv.isFocused()).isTrue();
-            ViewUtils.initFocus(lazyLayoutView);
-        });
+        TestUtils.hideFocusAndAssertFocusHidden(mRoot, mFpv);
+        mRoot.post(() -> ViewUtils.initFocus(lazyLayoutView));
         waitForFocusRestored();
         // The focus should move into the lazyLayoutView because there was no visible focus.
-        assertThat(mList5.hasFocus()).isTrue();
+        assertThat(mCarUiRecyclerView5.getView().hasFocus()).isTrue();
     }
 
     @Test
-    public void testInitFocus_inLazyLayoutView3() {
+    public void testInitFocus_inLazyLayoutView3() throws InterruptedException {
         ViewUtils.LazyLayoutView lazyLayoutView =
                 (ViewUtils.LazyLayoutView) mCarUiRecyclerView6;
         assertThat(lazyLayoutView.isLayoutCompleted()).isFalse();
+        TestUtils.hideFocusAndAssertFocusHidden(mRoot, mFpv);
         mRoot.post(() -> {
-            ViewUtils.hideFocus(mRoot);
-            assertThat(mFpv.isFocused()).isTrue();
-
-            // mList6 hasn't completed layout when initializing focus.
+            // mCarUiRecyclerView6 hasn't completed layout when initializing focus.
             ViewUtils.initFocus(lazyLayoutView);
-
-            mList6.setAdapter(new TestAdapter(/* numItems= */ 2));
+            mCarUiRecyclerView6.setAdapter(new TestAdapter(/* numItems= */ 2));
         });
         waitForFocusRestored();
-        // mList5 has completed layout, so the focus should be restored successfully.
+        // mCarUiRecyclerView6 has completed layout, so the focus should be restored successfully.
         assertThat(lazyLayoutView.isLayoutCompleted()).isTrue();
-        assertThat(mList6.hasFocus()).isTrue();
+        assertThat(mCarUiRecyclerView6.getView().hasFocus()).isTrue();
     }
 
     @Test
-    public void testInitFocus_inLazyLayoutView4() {
+    public void testInitFocus_inLazyLayoutView4() throws InterruptedException {
         ViewUtils.LazyLayoutView lazyLayoutView =
                 (ViewUtils.LazyLayoutView) mCarUiRecyclerView6;
         assertThat(lazyLayoutView.isLayoutCompleted()).isFalse();
+        TestUtils.hideFocusAndAssertFocusHidden(mRoot, mFpv);
         mRoot.post(() -> {
-            ViewUtils.hideFocus(mRoot);
-            assertThat(mFpv.isFocused()).isTrue();
-
-            // mList6 will never complete layout because its adapter has never been set.
+            // mCarUiRecyclerView6 will never complete layout because its adapter has never been
+            // set.
             ViewUtils.initFocus(lazyLayoutView);
         });
         waitForFocusRestored();
@@ -600,48 +482,37 @@ public class ViewUtilsTest {
     }
 
     @Test
-    public void testInitFocus_inLazyLayoutView5() {
+    public void testInitFocus_inLazyLayoutView5() throws InterruptedException {
         ViewUtils.LazyLayoutView lazyLayoutView =
                 (ViewUtils.LazyLayoutView) mCarUiRecyclerView5;
         assertThat(lazyLayoutView.isLayoutCompleted()).isTrue();
+        TestUtils.hideFocusAndAssertFocusHidden(mRoot, mFpv);
         mRoot.post(() -> {
-            ViewUtils.hideFocus(mRoot);
-            assertThat(mFpv.isFocused()).isTrue();
-
-            // mList5 has completed layout, but it is invisible now. It will become visible after
-            // ViewUtils.initFocus() is called..
+            // mCarUiRecyclerView5 has completed layout, but it is invisible now. It will become
+            // visible after ViewUtils.initFocus() is called..
             mFocusArea5.setVisibility(INVISIBLE);
             ViewUtils.initFocus(lazyLayoutView);
             mFocusArea5.setVisibility(VISIBLE);
         });
         waitForFocusRestored();
         // The focus should be restored successfully.
-        assertThat(mList5.hasFocus()).isTrue();
+        assertThat(mCarUiRecyclerView5.getView().hasFocus()).isTrue();
     }
 
     @Test
-    public void testInitFocus_inLazyLayoutView6() {
+    public void testInitFocus_inLazyLayoutView6() throws InterruptedException {
         ViewUtils.LazyLayoutView lazyLayoutView =
                 (ViewUtils.LazyLayoutView) mCarUiRecyclerView5;
         assertThat(lazyLayoutView.isLayoutCompleted()).isTrue();
+        TestUtils.hideFocusAndAssertFocusHidden(mRoot, mFpv);
         mRoot.post(() -> {
-            ViewUtils.hideFocus(mRoot);
-            assertThat(mFpv.isFocused()).isTrue();
             mFocusArea5.setVisibility(INVISIBLE);
             ViewUtils.initFocus(lazyLayoutView);
         });
-        // mList5 has completed layout, but it's invisible forever, so it should move to the best
-        // view in the view tree as fallback.
+        // mCarUiRecyclerView5 has completed layout, but it's invisible forever, so it should move
+        // to the best view in the view tree as fallback.
         waitForFocusRestored();
         assertThat(mFocusedByDefault3.isFocused()).isTrue();
-    }
-
-    private static void assertRequestFocus(@Nullable View view, boolean focused) {
-        boolean result = ViewUtils.requestFocus(view);
-        assertThat(result).isEqualTo(focused);
-        if (view != null) {
-            assertThat(view.isFocused()).isEqualTo(focused);
-        }
     }
 
     private static void waitForFocusRestored() {
