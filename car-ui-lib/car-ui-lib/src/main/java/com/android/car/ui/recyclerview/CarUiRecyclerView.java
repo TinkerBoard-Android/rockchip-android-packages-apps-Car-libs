@@ -317,6 +317,19 @@ public interface CarUiRecyclerView {
     @Nullable
     RecyclerView getRecyclerView();
 
+    /**
+     * see {@link LayoutManager#getChildCount()}
+     * Prefer this method over {@link #getChildCount()}
+     */
+    int getRecyclerViewChildCount();
+
+    /**
+     * see {@link LayoutManager#getChildAt(int)}
+     * Prefer this method over {@link #getChildAt(int)}
+     */
+    @Nullable
+    View getRecyclerViewChildAt(int index);
+
     /** see {@link RecyclerView#getScrollState()} */
     int getScrollState();
 
