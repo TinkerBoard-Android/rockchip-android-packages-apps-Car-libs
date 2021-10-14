@@ -23,6 +23,9 @@ import static com.android.car.ui.utils.RotaryConstants.ROTARY_FOCUS_DELEGATING_C
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_HORIZONTALLY_SCROLLABLE;
 import static com.android.car.ui.utils.RotaryConstants.ROTARY_VERTICALLY_SCROLLABLE;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -40,6 +43,7 @@ import com.android.car.ui.IFocusArea;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.function.Predicate;
 
 /** Utility class for helpful methods related to {@link View} objects. */
 public final class ViewUtils {
@@ -104,17 +108,6 @@ public final class ViewUtils {
     }
 
     /**
-     * This is a functional interface and can therefore be used as the assignment target for a
-     * lambda expression or method reference.
-     *
-     * @param <T> the type of the input to the predicate
-     */
-    private interface Predicate<T> {
-        /** Evaluates this predicate on the given argument. */
-        boolean test(@NonNull T t);
-    }
-
-    /**
      * An interface used to restore focus inside a view when its layout is completed.
      * <p>
      * The view that needs to restore focus lazily should implement this interface.
@@ -135,6 +128,27 @@ public final class ViewUtils {
          * Removes a listener to be called when the view's layout is completed.
          */
         void removeOnLayoutCompleteListener(@Nullable Runnable runnable);
+    }
+
+    /** Returns whether the {@code view} is in multi-window mode. */
+    public static boolean isInMultiWindowMode(@NonNull View view) {
+        Context context = view.getContext();
+        // Find the Activity context in case the view was inflated with Hilt dependency injector.
+        Activity activity = findActivity(context);
+        return activity != null && activity.isInMultiWindowMode();
+    }
+
+    /** Returns the Activity of the given {@code context}. */
+    @Nullable
+    public static Activity findActivity(@Nullable Context context) {
+        while (context instanceof ContextWrapper
+                && !(context instanceof Activity)) {
+            context = ((ContextWrapper) context).getBaseContext();
+        }
+        if (context instanceof Activity) {
+            return (Activity) context;
+        }
+        return null;
     }
 
     /** Returns whether the {@code descendant} view is a descendant of the {@code view}. */
@@ -176,7 +190,7 @@ public final class ViewUtils {
      * found.
      */
     @VisibleForTesting
-    static FocusParkingView findFocusParkingView(@NonNull View root) {
+    public static FocusParkingView findFocusParkingView(@NonNull View root) {
         return (FocusParkingView) depthFirstSearch(root,
                 /* targetPredicate= */ v -> v instanceof FocusParkingView,
                 /* skipPredicate= */ null);
@@ -730,17 +744,17 @@ public final class ViewUtils {
     @Nullable
     private static View findRotaryContainer(@NonNull View view) {
         return depthFirstSearch(view,
-                /* targetPredicate= */ v -> {
-                    if (!isRotaryContainer(v)) {
-                        return false;
+                /* targetPredicate= */ ViewUtils::isRotaryContainer,
+                /* skipPredicate= */ v -> {
+                    if (!v.isShown()) {
+                        return true;
                     }
                     if (v instanceof LazyLayoutView) {
                         LazyLayoutView lazyLayoutView = (LazyLayoutView) v;
-                        return lazyLayoutView.isLayoutCompleted();
+                        return !lazyLayoutView.isLayoutCompleted();
                     }
-                    return true;
-                },
-                /* skipPredicate= */ v -> !v.isShown());
+                    return false;
+                });
     }
 
     /**

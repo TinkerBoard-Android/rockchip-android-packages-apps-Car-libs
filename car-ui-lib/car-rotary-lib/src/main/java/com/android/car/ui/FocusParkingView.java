@@ -29,6 +29,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver.OnGlobalFocusChangeListener;
@@ -62,13 +63,16 @@ import com.android.car.ui.utils.ViewUtils;
  * Then it will avoid the wrap-around by not moving focus.
  * <p>
  * To ensure the focus is initialized properly when there is a window change, the FocusParkingView
- * will not get focused when the framework wants to focus on it. Instead, it will try to find a
+ * will not get focused when Android frameworks want to focus on it. Instead, it will try to find a
  * better focus target in the window and focus on the target. That said, the FocusParkingView can
  * still be focused in order to clear focus highlight in the window, such as when RotaryService
  * performs {@link android.view.accessibility.AccessibilityNodeInfo#ACTION_FOCUS} on the
  * FocusParkingView, or the window has lost focus.
  */
 public class FocusParkingView extends View {
+
+    private static final String TAG = "FocusParkingView";
+    private static final boolean DEBUG = false;
 
     /** Interface used to dismiss a popup window. */
     public interface OnDismissPopupWindow {
@@ -93,9 +97,9 @@ public class FocusParkingView extends View {
     ViewGroup mScrollableContainer;
 
     /**
-     * Whether to restore focus when the frameworks wants to focus this view. When false, this view
-     * allows itself to be focused instead. This should be false for the {@code FocusParkingView} in
-     * a {@code TaskView}. The default value is true.
+     * Whether to restore focus when Android frameworks want to focus this view. When false, this
+     * view allows itself to be focused instead. This should be false if this view is in a
+     * {@link com.android.wm.shell.TaskView}. The default value is true.
      */
     private boolean mShouldRestoreFocus = true;
 
@@ -108,6 +112,12 @@ public class FocusParkingView extends View {
 
     private final OnGlobalFocusChangeListener mFocusChangeListener =
             (oldFocus, newFocus) -> {
+                if (DEBUG) {
+                    Log.d(TAG, "oldFocus:" + oldFocus + ", newFocus:" + newFocus);
+                    for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
+                        Log.d(TAG, ste.toString());
+                    }
+                }
                 // Keep track of the focused view so that we can recover focus when it's removed.
                 View focusedView = newFocus instanceof FocusParkingView ? null : newFocus;
                 updateFocusedView(focusedView);
@@ -188,6 +198,10 @@ public class FocusParkingView extends View {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         getViewTreeObserver().addOnGlobalFocusChangeListener(mFocusChangeListener);
+        // Disable restore focus behavior if this view is in a TaskView.
+        if (mShouldRestoreFocus && ViewUtils.isInMultiWindowMode(this)) {
+            mShouldRestoreFocus = false;
+        }
     }
 
     @Override
@@ -198,6 +212,11 @@ public class FocusParkingView extends View {
 
     @Override
     public void onWindowFocusChanged(boolean hasWindowFocus) {
+        // TODO(b/201700195): sometimes onWindowFocusChanged() won't be called when window focus
+        //  has changed, so add the log for debugging.
+        Log.d(TAG, "The window of Activity [" + ViewUtils.findActivity(getContext())
+                    + (hasWindowFocus ? "] gained" : "] lost") + " focus");
+
         if (!hasWindowFocus) {
             // We need to clear the focus highlight(by parking the focus on the FocusParkingView)
             // once the current window goes to background. This can't be done by RotaryService
@@ -209,7 +228,7 @@ public class FocusParkingView extends View {
             // OnGlobalFocusChangeListener won't be triggered when the window lost focus, so reset
             // the focused view here.
             updateFocusedView(null);
-        } else if (isFocused()) {
+        } else if (isFocused() && mShouldRestoreFocus) {
             // When FocusParkingView is focused and the window just gets focused, transfer the view
             // focus to a non-FocusParkingView in the window.
             restoreFocusInRoot(/* checkForTouchMode= */ true);
@@ -253,8 +272,8 @@ public class FocusParkingView extends View {
         if (!mShouldRestoreFocus) {
             return super.requestFocus(direction, previouslyFocusedRect);
         }
-        // Find a better target to focus instead of focusing this FocusParkingView when the
-        // framework wants to focus it.
+        // Find a better target to focus instead of focusing this FocusParkingView when
+        // Android frameworks want to focus it.
         return restoreFocusInRoot(/* checkForTouchMode= */ true);
     }
 
@@ -269,9 +288,9 @@ public class FocusParkingView extends View {
     }
 
     /**
-     * Sets whether this view should restore focus when the framework wants to focus this view. When
-     * set to false, this view allows itself to be focused instead. This should be set to false for
-     * the {@code FocusParkingView} in a {@code TaskView}.  The default value is true.
+     * Sets whether this view should restore focus when Android frameworks want to focus this view.
+     * When set to false, this view allows itself to be focused instead. This should be set to false
+     * for the {@code FocusParkingView} in a {@code TaskView}.  The default value is true.
      */
     public void setShouldRestoreFocus(boolean shouldRestoreFocus) {
         mShouldRestoreFocus = shouldRestoreFocus;

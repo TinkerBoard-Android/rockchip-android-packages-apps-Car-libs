@@ -38,6 +38,7 @@ import java.util.function.Consumer;
  * A base class for several types of preferences, that all have a main click action along
  * with a secondary action.
  */
+@SuppressWarnings("AndroidJdkLibsChecker")
 @TargetApi(MIN_TARGET_API)
 public abstract class CarUiTwoActionBasePreference extends CarUiPreference {
 
