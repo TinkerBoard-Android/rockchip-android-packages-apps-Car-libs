@@ -92,13 +92,13 @@ public class ToolbarTest {
     }
 
     /**
-     * This is somewhat of a bug, but various tests in other apps rely on this functionality.
+     * Various tests in other apps rely on this functionality.
      */
     @Test
     public void test_setTitle_null_returns_nonNull() {
         CharSequence[] getTitleResult = new CharSequence[] {"Something obviously incorrect"};
         runWithToolbar((toolbar) -> {
-            toolbar.setTitle(null);
+            toolbar.setTitle((CharSequence) null);
             getTitleResult[0] = toolbar.getTitle();
         });
 
@@ -106,13 +106,13 @@ public class ToolbarTest {
     }
 
     /**
-     * This is somewhat of a bug, but various tests in other apps rely on this functionality.
+     * Various tests in other apps rely on this functionality.
      */
     @Test
     public void test_setSubtitle_null_returns_nonNull() {
         CharSequence[] getTitleResult = new CharSequence[] {"Something obviously incorrect"};
         runWithToolbar((toolbar) -> {
-            toolbar.setSubtitle(null);
+            toolbar.setSubtitle((CharSequence) null);
             getTitleResult[0] = toolbar.getSubtitle();
         });
 

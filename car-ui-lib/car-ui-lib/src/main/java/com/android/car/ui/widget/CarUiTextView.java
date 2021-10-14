@@ -41,11 +41,10 @@ import java.util.List;
 @SuppressLint("AppCompatCustomView")
 @TargetApi(MIN_TARGET_API)
 public abstract class CarUiTextView extends AppCompatTextView {
-
     /**
      * Creates a CarUiTextView.
      *
-     * Most of the time, you should prefer creating a CarUiButton with a {@code <CarUiTextView>}
+     * Most of the time, you should prefer creating a CarUiTextView with a {@code <CarUiTextView>}
      * tag in your layout file. This is only for if you need to create a CarUiTextView in java code.
      * The CarUiTextView xml tag is enabled by the usage of {@link CarUiLayoutInflaterFactory}.
      */
@@ -56,7 +55,7 @@ public abstract class CarUiTextView extends AppCompatTextView {
     /**
      * Creates a CarUiTextView.
      *
-     * Most of the time, you should prefer creating a CarUiButton with a {@code <CarUiTextView>}
+     * Most of the time, you should prefer creating a CarUiTextView with a {@code <CarUiTextView>}
      * tag in your layout file. This is only for if you need to create a CarUiTextView in java code.
      * The CarUiTextView xml tag is enabled by the usage of {@link CarUiLayoutInflaterFactory}.
      */

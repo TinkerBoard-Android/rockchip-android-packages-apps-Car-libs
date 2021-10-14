@@ -23,6 +23,7 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.text.Layout;
+import android.text.PrecomputedText;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
@@ -35,9 +36,11 @@ import androidx.core.view.OneShotPreDrawListener;
 
 import com.android.car.ui.CarUiText;
 
+import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.Executor;
 
 /**
  * Extension of {@link TextView} that supports {@link CarUiText}.
@@ -71,10 +74,7 @@ public final class CarUiTextViewImpl extends CarUiTextView {
     @Override
     public void setText(@NonNull List<CarUiText> textList) {
         mText = requireNonNull(textList);
-        if (mOneShotPreDrawListener == null) {
-            mOneShotPreDrawListener = OneShotPreDrawListener.add(this, this::updateText);
-        }
-        setText(CarUiText.combineMultiLine(textList));
+        asyncSetText(CarUiText.combineMultiLine(textList), true, Runnable::run);
     }
 
     /**
@@ -83,10 +83,7 @@ public final class CarUiTextViewImpl extends CarUiTextView {
     @Override
     public void setText(@NonNull CarUiText text) {
         mText = Collections.singletonList(requireNonNull(text));
-        if (mOneShotPreDrawListener == null) {
-            mOneShotPreDrawListener = OneShotPreDrawListener.add(this, this::updateText);
-        }
-        setText(text.getPreferredText());
+        asyncSetText(text.getPreferredText(), true, Runnable::run);
     }
 
     private void updateText() {
@@ -115,7 +112,38 @@ public final class CarUiTextViewImpl extends CarUiTextView {
             delimiter = "\n";
         }
 
-        setText(builder);
+        asyncSetText(builder, false, Runnable::run);
+    }
+
+    private void asyncSetText(@NonNull CharSequence text, boolean requiresUpdate,
+            @NonNull Executor bgExecutor) {
+        // construct precompute related parameters using the TextView that we will set the text on.
+        PrecomputedText.Params params = getTextMetricsParams();
+        WeakReference<TextView> textViewRef = new WeakReference<>(this);
+        bgExecutor.execute(() -> {
+            // background thread
+            TextView tv = textViewRef.get();
+            if (tv == null) {
+                return;
+            }
+            PrecomputedText precomputedText = PrecomputedText.create(text, params);
+            tv.post(() -> {
+                // UI thread
+                TextView tvUi = textViewRef.get();
+                if (tvUi == null) return;
+                try {
+                    tvUi.setTextMetricsParams(precomputedText.getParams());
+                    tvUi.setText(precomputedText);
+                } catch (IllegalArgumentException e) {
+                    tvUi.setText(text);
+                }
+
+                if (requiresUpdate && mOneShotPreDrawListener == null) {
+                    mOneShotPreDrawListener = OneShotPreDrawListener.add(this, this::updateText);
+                }
+
+            });
+        });
     }
 
     private CharSequence getBestVariant(CarUiText text) {

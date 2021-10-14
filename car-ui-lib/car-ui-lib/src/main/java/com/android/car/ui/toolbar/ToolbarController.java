@@ -25,6 +25,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.annotation.XmlRes;
 
+import com.android.car.ui.CarUiText;
 import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
 import com.android.car.ui.recyclerview.CarUiListItem;
 import com.android.car.ui.toolbar.SearchConfig.SearchConfigBuilder;
@@ -55,7 +56,14 @@ public interface ToolbarController {
      *
      * <p>The title may not always be shown, for example with one row layout with tabs.
      */
-    void setTitle(CharSequence title);
+    void setTitle(@Nullable CharSequence title);
+
+    /**
+     * Sets the title of the toolbar to a CharSequence.
+     *
+     * <p>The title may not always be shown, for example with one row layout with tabs.
+     */
+    void setTitle(@Nullable CarUiText title);
 
     /**
      * Gets the current toolbar title.
@@ -74,7 +82,14 @@ public interface ToolbarController {
      *
      * <p>The title may not always be shown, for example with one row layout with tabs.
      */
-    void setSubtitle(CharSequence title);
+    void setSubtitle(@Nullable CharSequence text);
+
+    /**
+     * Sets the subtitle of the toolbar to a CharSequence.
+     *
+     * <p>The title may not always be shown, for example with one row layout with tabs.
+     */
+    void setSubtitle(@Nullable CarUiText text);
 
     /**
      * Gets the current toolbar subtitle.

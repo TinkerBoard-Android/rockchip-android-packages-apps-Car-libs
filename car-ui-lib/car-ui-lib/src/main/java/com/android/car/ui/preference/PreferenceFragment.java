@@ -111,7 +111,7 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
         if (preferenceScreen != null) {
             toolbar.setTitle(preferenceScreen.getTitle());
         } else {
-            toolbar.setTitle(null);
+            toolbar.setTitle("");
         }
     }
 

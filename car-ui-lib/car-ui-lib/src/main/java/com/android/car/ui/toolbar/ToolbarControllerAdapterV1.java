@@ -35,6 +35,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
+import com.android.car.ui.CarUiText;
 import com.android.car.ui.imewidescreen.CarUiImeSearchListItem;
 import com.android.car.ui.plugin.oemapis.toolbar.ImeSearchInterfaceOEMV1;
 import com.android.car.ui.plugin.oemapis.toolbar.MenuItemOEMV1;
@@ -57,15 +58,12 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
- * Adapts a {@link com.android.car.ui.plugin.oemapis.toolbar.ToolbarControllerOEMV1}
- * into a {@link ToolbarController}
+ * Adapts a {@link com.android.car.ui.plugin.oemapis.toolbar.ToolbarControllerOEMV1} into a
+ * {@link ToolbarController}
  */
 @SuppressWarnings("AndroidJdkLibsChecker")
 @TargetApi(TARGET_API_R)
 public final class ToolbarControllerAdapterV1 implements ToolbarController {
-
-    private static final String TAG = ToolbarControllerAdapterV1.class.getName();
-
     private final ToolbarControllerOEMV1 mOemToolbar;
     private final Context mContext;
 
@@ -147,6 +145,11 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     }
 
     @Override
+    public void setTitle(CarUiText title) {
+        update(mAdapterState.copy().setTitle(charSequenceToString(title.toString())).build());
+    }
+
+    @Override
     public CharSequence getTitle() {
         return mAdapterState.getTitle();
     }
@@ -159,6 +162,12 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     @Override
     public void setSubtitle(CharSequence subtitle) {
         update(mAdapterState.copy().setSubtitle(charSequenceToString(subtitle)).build());
+    }
+
+    @Override
+    public void setSubtitle(CarUiText subtitle) {
+        update(mAdapterState.copy().setSubtitle(
+                charSequenceToString(subtitle.getPreferredText())).build());
     }
 
     @Override
@@ -419,13 +428,13 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
 
     /**
      * This method takes a new {@link ToolbarAdapterState} and compares it to the current
-     * {@link #mAdapterState}. It then sends any differences it detects to the plugin toolbar.
-     *
-     * This is also the core of the logic that adapts from the client's toolbar interface to
-     * the OEM apis toolbar interface. For example, when you are in the HOME state and add tabs,
-     * it will call setTitle(null) on the plugin toolbar. This is because the plugin interface
-     * doesn't have a setState(), and the title is expected to not be present when there are
-     * tabs and a HOME state.
+     * {@link ToolbarAdapterState}. It then sends any differences it detects to the plugin toolbar.
+     * <p>
+     * This is also the core of the logic that adapts from the client's toolbar interface to the OEM
+     * apis toolbar interface. For example, when you are in the HOME state and add tabs, it will
+     * call setTitle(null) on the plugin toolbar. This is because the plugin interface doesn't have
+     * a setState(), and the title is expected to not be present when there are tabs and a HOME
+     * state.
      */
     private void update(ToolbarAdapterState newAdapterState) {
         ToolbarAdapterState oldAdapterState = mAdapterState;
@@ -476,9 +485,9 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
         boolean losingTabs = !newAdapterState.hasTabs() && oldAdapterState.hasTabs();
         if (gainingTabs) {
             mOemToolbar.setTabs(newAdapterState.getTabs()
-                    .stream()
-                    .map(TabAdapterV1::getPluginTab)
-                    .collect(toList()),
+                            .stream()
+                            .map(TabAdapterV1::getPluginTab)
+                            .collect(toList()),
                     newAdapterState.getSelectedTab());
         } else if (losingTabs) {
             mOemToolbar.setTabs(Collections.emptyList(), -1);
@@ -499,7 +508,9 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
         }
     }
 
-    /** Called by {@link MenuItemAdapterV1} whenever a MenuItem changes. */
+    /**
+     * Called by {@link MenuItemAdapterV1} whenever a MenuItem changes.
+     */
     public void updateMenuItems() {
         mOemToolbar.setMenuItems(mAdapterState.getShownMenuItems());
     }
