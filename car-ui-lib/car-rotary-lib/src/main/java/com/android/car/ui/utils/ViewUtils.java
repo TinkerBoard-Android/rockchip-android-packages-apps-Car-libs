@@ -46,6 +46,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.function.Predicate;
 
 /** Utility class for helpful methods related to {@link View} objects. */
+@SuppressWarnings("AndroidJdkLibsChecker")
 public final class ViewUtils {
 
     private static final String TAG = "ViewUtils";
