@@ -381,6 +381,24 @@ public final class CarUiRecyclerViewImpl extends FrameLayout
         return mRecyclerView;
     }
 
+    @Override
+    public int getRecyclerViewChildCount() {
+        if (mRecyclerView.getLayoutManager() != null) {
+            return mRecyclerView.getLayoutManager().getChildCount();
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public View getRecyclerViewChildAt(int index) {
+        if (mRecyclerView.getLayoutManager() != null) {
+            return mRecyclerView.getLayoutManager().getChildAt(index);
+        } else {
+            return null;
+        }
+    }
+
     private static int toInternalScrollState(int state) {
         /* default to RecyclerView.SCROLL_STATE_IDLE */
         int internalState = SCROLL_STATE_IDLE;
