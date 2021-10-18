@@ -23,6 +23,7 @@
     android:layout_centerVertical="true"
     android:clipToPadding="false"
     android:minHeight="@dimen/qc_row_min_height"
+    android:paddingVertical="@dimen/qc_row_padding_vertical"
     android:paddingEnd="@dimen/qc_row_padding_end"
     android:paddingStart="@dimen/qc_row_padding_start">
 
@@ -30,6 +31,7 @@
         android:id="@+id/qc_row_start_items"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/qc_action_items_horizontal_margin"
         android:orientation="horizontal"
         android:divider="@drawable/qc_row_action_divider"
         android:showDividers="middle"
@@ -128,6 +130,7 @@
         android:id="@+id/qc_row_end_items"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/qc_action_items_horizontal_margin"
         android:orientation="horizontal"
         android:divider="@drawable/qc_row_action_divider"
         android:showDividers="middle"

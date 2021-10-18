@@ -247,6 +247,11 @@ public class QCRowView extends FrameLayout {
             mStartItemsContainer.removeViews(startItemCount,
                     mStartItemsContainer.getChildCount() - startItemCount);
         }
+        if (startItemCount == 0) {
+            mStartItemsContainer.setVisibility(View.GONE);
+        } else {
+            mStartItemsContainer.setVisibility(View.VISIBLE);
+        }
 
         int endItemCount = row.getEndItems().size();
         for (int i = 0; i < endItemCount; i++) {
@@ -257,6 +262,11 @@ public class QCRowView extends FrameLayout {
             // remove extra items
             mEndItemsContainer.removeViews(endItemCount,
                     mEndItemsContainer.getChildCount() - endItemCount);
+        }
+        if (endItemCount == 0) {
+            mEndItemsContainer.setVisibility(View.GONE);
+        } else {
+            mEndItemsContainer.setVisibility(View.VISIBLE);
         }
     }
 
