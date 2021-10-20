@@ -453,9 +453,10 @@ public class AlertDialogBuilder {
     private void setCustomList(@NonNull CarUiListItemAdapter adapter) {
         View customList = LayoutInflater.from(mContext).inflate(
                 R.layout.car_ui_alert_dialog_list, null);
-        RecyclerView mList = CarUiUtils.requireViewByRefId(customList, R.id.list);
-        mList.setLayoutManager(new LinearLayoutManager(mContext));
-        mList.setAdapter(adapter);
+        RecyclerView list = CarUiUtils.requireViewByRefId(customList, R.id.list);
+        list.setLayoutManager(new LinearLayoutManager(mContext));
+        list.setAdapter(adapter);
+        list.setFocusable(false);
         mBuilder.setView(customList);
     }
 

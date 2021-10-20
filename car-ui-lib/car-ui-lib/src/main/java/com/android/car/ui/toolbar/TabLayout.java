@@ -149,7 +149,7 @@ public class TabLayout extends LinearLayout {
     }
 
     private void presentTabView(int position) {
-        if (position < 0 || position > mTabs.size()) {
+        if (position < 0 || position >= mTabs.size()) {
             return;
         }
         View tabView = getChildAt(position);
