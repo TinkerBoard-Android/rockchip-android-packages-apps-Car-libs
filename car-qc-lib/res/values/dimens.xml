@@ -17,11 +17,13 @@
 <resources>
     <dimen name="qc_row_padding_start">32dp</dimen>
     <dimen name="qc_row_padding_end">32dp</dimen>
-    <dimen name="qc_row_min_height">96dp</dimen>
+    <dimen name="qc_row_min_height">76dp</dimen>
+    <dimen name="qc_row_padding_vertical">16dp</dimen>
     <dimen name="qc_row_icon_size">44dp</dimen>
     <dimen name="qc_row_icon_margin_end">32dp</dimen>
     <dimen name="qc_row_content_margin">16dp</dimen>
 
+    <dimen name="qc_action_items_horizontal_margin">32dp</dimen>
     <dimen name="qc_toggle_size">72dp</dimen>
     <dimen name="qc_toggle_margin">12dp</dimen>
     <dimen name="qc_toggle_background_radius">16dp</dimen>
