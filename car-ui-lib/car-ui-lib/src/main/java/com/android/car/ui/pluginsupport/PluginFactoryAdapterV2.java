@@ -215,7 +215,6 @@ public final class PluginFactoryAdapterV2 implements PluginFactory {
     }
 
     private static RecyclerViewAttributesOEMV1 from(Context context, AttributeSet attrs) {
-        RecyclerViewAttributesOEMV1 oemAttrs = null;
         TypedArray a = context.obtainStyledAttributes(
                 attrs,
                 R.styleable.CarUiRecyclerView,
@@ -336,7 +335,7 @@ public final class PluginFactoryAdapterV2 implements PluginFactory {
         boolean isLtr = context.getResources().getConfiguration().getLayoutDirection()
                 == View.LAYOUT_DIRECTION_LTR;
 
-        oemAttrs = new RecyclerViewAttributesOEMV1() {
+        return new RecyclerViewAttributesOEMV1() {
             @Override
             public boolean isRotaryScrollEnabled() {
                 return rotaryScrollEnabled;
@@ -449,7 +448,6 @@ public final class PluginFactoryAdapterV2 implements PluginFactory {
                 return background;
             }
         };
-        return oemAttrs;
     }
 
     private static ListItemOEMV1 toOemListItem(CarUiListItem item) {
