@@ -117,8 +117,8 @@ public class TabLayout extends LinearLayout {
 
     /** Set the tab at given position as the current selected tab. */
     public void selectTab(int position) {
-        if (position < 0 || position > mTabs.size()) {
-            position = mTabs.isEmpty() ? -1 : 0;
+        if (position < 0 || position >= mTabs.size()) {
+            throw new IllegalArgumentException("Tab position is invalid: " + position);
         }
         if (position == mSelectedTab) {
             return;
@@ -129,12 +129,10 @@ public class TabLayout extends LinearLayout {
         presentTabView(oldPosition);
         presentTabView(position);
 
-        if (position >= 0) {
-            com.android.car.ui.toolbar.Tab tab = mTabs.get(position);
-            Consumer<com.android.car.ui.toolbar.Tab> listener = tab.getSelectedListener();
-            if (listener != null) {
-                listener.accept(tab);
-            }
+        com.android.car.ui.toolbar.Tab tab = mTabs.get(position);
+        Consumer<com.android.car.ui.toolbar.Tab> listener = tab.getSelectedListener();
+        if (listener != null) {
+            listener.accept(tab);
         }
     }
 
@@ -150,7 +148,7 @@ public class TabLayout extends LinearLayout {
 
     private void presentTabView(int position) {
         if (position < 0 || position >= mTabs.size()) {
-            return;
+            throw new IllegalArgumentException("Tab position is invalid: " + position);
         }
         View tabView = getChildAt(position);
         com.android.car.ui.toolbar.Tab tab = mTabs.get(position);

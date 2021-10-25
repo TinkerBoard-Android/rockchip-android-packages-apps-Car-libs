@@ -24,6 +24,8 @@ import static com.android.car.ui.matchers.ViewMatchers.doesNotExistOrIsNotDispla
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -146,6 +148,23 @@ public class ToolbarTabTest {
 
         onView(withText("Tab 1")).check(doesNotExistOrIsNotDisplayed());
         onView(withText("Tab 2")).check(doesNotExistOrIsNotDisplayed());
+    }
+
+    @Test
+    public void test_selectTab_onEmptyToolbars() {
+        runWithToolbar(toolbar -> {
+            toolbar.setTabs(null);
+            assertThrows(IllegalArgumentException.class, () -> toolbar.selectTab(0));
+        });
+    }
+
+    @Test
+    public void test_getSelectedTab_onEmptyToolbars() {
+        runWithToolbar(toolbar -> {
+            toolbar.setTabs(null);
+            assertThrows(IllegalArgumentException.class, () -> toolbar.selectTab(0));
+            assertEquals(-1, toolbar.getSelectedTab());
+        });
     }
 
     private void runWithToolbar(Consumer<ToolbarController> toRun) {
