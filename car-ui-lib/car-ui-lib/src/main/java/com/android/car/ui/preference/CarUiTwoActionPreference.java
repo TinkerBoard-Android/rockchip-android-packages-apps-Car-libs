@@ -30,6 +30,10 @@ import com.android.car.ui.utils.CarUiUtils;
 /**
  * A preference which can perform two actions. The secondary action is shown by default.
  * {@link #showAction(boolean)} may be used to manually set the visibility of the action.
+ *
+ * @deprecated This preference relies on the use of custom views. Use
+ *             {@link CarUiTwoActionTextPreference}, {@link CarUiTwoActionSwitchPreference}, or
+ *             {@link CarUiTwoActionIconPreference} instead.
  */
 public class CarUiTwoActionPreference extends CarUiPreference {
 
@@ -95,7 +99,7 @@ public class CarUiTwoActionPreference extends CarUiPreference {
         View widgetFrame = CarUiUtils.findViewByRefId(holder.itemView, android.R.id.widget_frame);
         holder.itemView.setFocusable(!mIsActionShown);
         containerWithoutWidget.setOnClickListener(
-                mIsActionShown ? this::performClickUnrestricted : null);
+                mIsActionShown ? this::performClick : null);
         containerWithoutWidget.setClickable(mIsActionShown);
         containerWithoutWidget.setFocusable(mIsActionShown);
         actionContainer.setVisibility(mIsActionShown ? View.VISIBLE : View.GONE);

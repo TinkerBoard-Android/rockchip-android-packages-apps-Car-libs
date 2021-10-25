@@ -17,6 +17,20 @@
     <!-- Id used for the search button when using Toolbar.createSearch() method -->
     <item name="search" type="id"/>
 
-    <!-- Id used for in car_ui_toolbar_menu_item.xml -->
-    <item name="car_ui_toolbar_menu_item_text_container" type="id"/>
+    <!-- WideScreen Keyboard IDs-->
+    <item type="id" name="car_ui_wideScreenInputArea"/>
+    <item type="id" name="car_ui_imeWideScreenInputArea"/>
+    <item type="id" name="car_ui_closeKeyboard"/>
+    <item type="id" name="car_ui_ime_surface"/>
+    <item type="id" name="car_ui_fullscreenArea"/>
+    <item type="id" name="car_ui_wideScreenErrorMessage"/>
+    <item type="id" name="car_ui_contentAreaAutomotive"/>
+    <item type="id" name="car_ui_wideScreenSearchResultList"/>
+    <item type="id" name="car_ui_wideScreenDescriptionTitle"/>
+    <item type="id" name="car_ui_wideScreenDescription"/>
+    <item type="id" name="car_ui_inputExtractActionAutomotive"/>
+    <item type="id" name="car_ui_wideScreenExtractedTextIcon"/>
+    <item type="id" name="car_ui_wideScreenClearData"/>
+    <item type="id" name="car_ui_wideScreenError"/>
+    <item type="id" name="car_ui_inputExtractEditTextContainer"/>
 </resources>

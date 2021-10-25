@@ -51,8 +51,8 @@ import com.android.car.apps.common.imaging.ImageBinder.PlaceholderType;
 import com.android.car.apps.common.util.CarPackageManagerUtils;
 import com.android.car.apps.common.util.ViewUtils;
 import com.android.car.arch.common.FutureData;
-import com.android.car.media.common.browse.BrowsedMediaItems;
-import com.android.car.media.common.browse.MediaBrowserViewModel;
+import com.android.car.media.common.browse.MediaBrowserViewModelImpl;
+import com.android.car.media.common.browse.MediaItemsRepository;
 import com.android.car.media.common.playback.PlaybackViewModel;
 import com.android.car.media.common.playback.PlaybackViewModel.PlaybackStateWrapper;
 import com.android.car.media.common.source.MediaSource;
@@ -88,14 +88,14 @@ public class PlaybackFragment extends Fragment {
         mCar = Car.createCar(activity);
         mCarPackageManager = (CarPackageManager) mCar.getCarManager(Car.PACKAGE_SERVICE);
 
-        mPlaybackViewModel = PlaybackViewModel.get(activity.getApplication(),
-                MEDIA_SOURCE_MODE_PLAYBACK);
-        mMediaSourceViewModel = MediaSourceViewModel.get(activity.getApplication(),
-                MEDIA_SOURCE_MODE_PLAYBACK);
+        Application application = activity.getApplication();
+        mPlaybackViewModel = PlaybackViewModel.get(application, MEDIA_SOURCE_MODE_PLAYBACK);
+        mMediaSourceViewModel = MediaSourceViewModel.get(application, MEDIA_SOURCE_MODE_PLAYBACK);
         mAppSelectorIntent = MediaSource.getSourceSelectorIntent(getContext(), true);
 
         mInnerViewModel = ViewModelProviders.of(activity).get(ViewModel.class);
-        mInnerViewModel.init(activity, mMediaSourceViewModel, mPlaybackViewModel);
+        mInnerViewModel.init(activity, mMediaSourceViewModel, mPlaybackViewModel,
+                MediaItemsRepository.get(application, MEDIA_SOURCE_MODE_PLAYBACK));
 
         View view = inflater.inflate(R.layout.playback_fragment, container, false);
 
@@ -121,8 +121,22 @@ public class PlaybackFragment extends Fragment {
         TextView subtitle = view.findViewById(R.id.subtitle);
         mInnerViewModel.getSubtitle().observe(getViewLifecycleOwner(), subtitle::setText);
 
+        boolean useSourceLogoForAppSelector =
+                getResources().getBoolean(R.bool.use_media_source_logo_for_app_selector);
+
         ImageView appIcon = view.findViewById(R.id.app_icon);
-        mInnerViewModel.getAppIcon().observe(getViewLifecycleOwner(), appIcon::setImageBitmap);
+        View appSelector = view.findViewById(R.id.app_selector_container);
+        mInnerViewModel.getAppIcon().observe(getViewLifecycleOwner(), bitmap -> {
+            if (useSourceLogoForAppSelector) {
+                ImageView appSelectorIcon = appSelector.findViewById(R.id.app_selector);
+                appSelectorIcon.setImageBitmap(bitmap);
+                appSelectorIcon.setImageTintList(null);
+
+                appIcon.setVisibility(View.GONE);
+            } else {
+                appIcon.setImageBitmap(bitmap);
+            }
+        });
 
         mInnerViewModel.getBrowseTreeHasChildren().observe(getViewLifecycleOwner(),
                 this::onBrowseTreeHasChildrenChanged);
@@ -152,10 +166,8 @@ public class PlaybackFragment extends Fragment {
         mPlaybackViewModel.getMetadata().observe(getViewLifecycleOwner(),
                 item -> mAlbumArtBinder.setImage(PlaybackFragment.this.getContext(),
                         item != null ? item.getArtworkKey() : null));
-        View appSelector = view.findViewById(R.id.app_selector_container);
         appSelector.setVisibility(mAppSelectorIntent != null ? View.VISIBLE : View.GONE);
         appSelector.setOnClickListener(e -> getContext().startActivity(mAppSelectorIntent));
-
 
         mErrorsHelper = new PlaybackErrorsHelper(activity) {
 
@@ -214,32 +226,32 @@ public class PlaybackFragment extends Fragment {
         private LiveData<CharSequence> mSubtitle;
         private MutableLiveData<Boolean> mBrowseTreeHasChildren = new MutableLiveData<>();
 
+        private MediaItemsRepository mMediaItemsRepository;
         private PlaybackViewModel mPlaybackViewModel;
         private MediaSourceViewModel mMediaSourceViewModel;
-        private MediaBrowserViewModel mRootMediaBrowserViewModel;
 
         public ViewModel(Application application) {
             super(application);
         }
 
         void init(FragmentActivity activity, MediaSourceViewModel mediaSourceViewModel,
-                PlaybackViewModel playbackViewModel) {
+                PlaybackViewModel playbackViewModel, MediaItemsRepository mediaItemsRepository) {
             if (mMediaSourceViewModel == mediaSourceViewModel
-                    && mPlaybackViewModel == playbackViewModel) {
+                    && mPlaybackViewModel == playbackViewModel
+                    && mMediaItemsRepository == mediaItemsRepository) {
                 return;
             }
             mPlaybackViewModel = playbackViewModel;
             mMediaSourceViewModel = mediaSourceViewModel;
+            mMediaItemsRepository = mediaItemsRepository;
             mMediaSource = mMediaSourceViewModel.getPrimaryMediaSource();
             mAppName = mapNonNull(mMediaSource, MediaSource::getDisplayName);
             mAppIcon = mapNonNull(mMediaSource, MediaSource::getCroppedPackageIcon);
             mTitle = mapNonNull(playbackViewModel.getMetadata(), MediaItemMetadata::getTitle);
             mSubtitle = mapNonNull(playbackViewModel.getMetadata(), MediaItemMetadata::getArtist);
 
-            mRootMediaBrowserViewModel = MediaBrowserViewModel.Factory.getInstanceForBrowseRoot(
-                    mMediaSourceViewModel, ViewModelProviders.of(activity));
-            mRootMediaBrowserViewModel.getBrowsedMediaItems()
-                    .observe(activity, this::onItemsUpdate);
+            mMediaItemsRepository.getRootMediaItems()
+                    .observe(activity, this::onRootMediaItemsUpdate);
         }
 
         LiveData<CharSequence> getAppName() {
@@ -262,14 +274,14 @@ public class PlaybackFragment extends Fragment {
             return mBrowseTreeHasChildren;
         }
 
-        private void onItemsUpdate(FutureData<List<MediaItemMetadata>> futureData) {
-            if (futureData.isLoading()) {
+        private void onRootMediaItemsUpdate(FutureData<List<MediaItemMetadata>> data) {
+            if (data.isLoading()) {
                 mBrowseTreeHasChildren.setValue(null);
                 return;
             }
 
             List<MediaItemMetadata> items =
-                    BrowsedMediaItems.filterItems(/*forRoot*/ true, futureData.getData());
+                    MediaBrowserViewModelImpl.filterItems(/*forRoot*/ true, data.getData());
 
             boolean browseTreeHasChildren = items != null && !items.isEmpty();
             mBrowseTreeHasChildren.setValue(browseTreeHasChildren);

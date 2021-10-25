@@ -30,6 +30,8 @@
          row, replacing the title -->
     <bool name="car_ui_toolbar_tabs_on_second_row">false</bool>
 
+    <bool name="car_ui_toolbar_menuitem_individual_click_listeners">false</bool>
+
     <!-- CarUiRecyclerView -->
 
     <!-- Whether to display the Scroll Bar or not. Defaults to true. If this is set to false,
@@ -42,6 +44,8 @@
     <bool name="car_ui_preference_show_chevron">false</bool>
     <!-- whether list preference should be shown in full screen or as a dialog -->
     <bool name="car_ui_preference_list_show_full_screen">true</bool>
+    <!-- Whether list and multi-select preference selection changes should propagate instantly -->
+    <bool name="car_ui_preference_list_instant_change_callback">false</bool>
 
     <!-- List items -->
 
@@ -55,12 +59,20 @@
     <!-- Whether to draw highlight (car_ui_focus_area_background_highlight) on top of the FocusArea
          but behind its children when the FocusArea's descendant gets focused. -->
     <bool name="car_ui_enable_focus_area_background_highlight">false</bool>
-    <!-- Whether to focus on the app:defaultFocus view when nudging to the FocusArea, even if there
-         was another view focused in the FocusArea. -->
-    <bool name="car_ui_focus_area_default_focus_overrides_history">true</bool>
+    <!-- Deprecated. -->
+    <bool name="car_ui_focus_area_default_focus_overrides_history">false</bool>
     <!-- Whether to clear FocusArea history when the user rotates the rotary controller. -->
     <bool name="car_ui_clear_focus_area_history_when_rotating">true</bool>
 
     <!--  Whether to log the escrow components check automatically for all the activities or not.  -->
     <bool name="car_ui_escrow_check_components_automatically">false</bool>
+
+    <!-- If there is no positive/negative/neutral button, should we add one that says "dismiss"? -->
+    <bool name="car_ui_alert_dialog_force_dismiss_button">true</bool>
+    <!-- Whether or not to allow application to hide the content area in IME wide screen.  -->
+    <bool name="car_ui_ime_wide_screen_allow_app_hide_content_area">true</bool>
+
+    <!-- Whether IME is aligned left or not(which means its on right). This value will be used by
+         the applications not using car-ui-lib components and are hiding the content area. -->
+    <bool name="car_ui_ime_wide_screen_aligned_left">true</bool>
 </resources>

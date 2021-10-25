@@ -26,16 +26,18 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 /** Helper class to toggle direct manipulation mode. */
 public final class DirectManipulationHelper {
 
     /**
-     * StateDescription for a {@link View} to support direct manipulation mode. It's also used as
+     * ContentDescription for a {@link View} to support direct manipulation mode. It's also used as
      * class name of {@link AccessibilityEvent} to indicate that the AccessibilityEvent represents
      * a request to toggle direct manipulation mode.
      */
-    private static final String DIRECT_MANIPULATION =
+    @VisibleForTesting
+    public static final String DIRECT_MANIPULATION =
             "com.android.car.ui.utils.DIRECT_MANIPULATION";
 
     /** This is a utility class. */
@@ -77,7 +79,7 @@ public final class DirectManipulationHelper {
     /** Returns whether the given {@code node} supports rotate directly. */
     @TargetApi(R)
     public static boolean supportRotateDirectly(@NonNull AccessibilityNodeInfo node) {
-        return TextUtils.equals(DIRECT_MANIPULATION, node.getStateDescription());
+        return TextUtils.equals(DIRECT_MANIPULATION, node.getContentDescription());
     }
 
     /**
@@ -98,7 +100,7 @@ public final class DirectManipulationHelper {
      */
     @TargetApi(R)
     public static void setSupportsRotateDirectly(@NonNull View view, boolean enable) {
-        view.setStateDescription(enable ? DIRECT_MANIPULATION : null);
+        view.setContentDescription(enable ? DIRECT_MANIPULATION : null);
     }
 
     /**

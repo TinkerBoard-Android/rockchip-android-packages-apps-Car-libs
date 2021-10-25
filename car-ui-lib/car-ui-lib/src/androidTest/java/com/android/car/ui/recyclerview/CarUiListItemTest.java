@@ -29,12 +29,9 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
-import android.view.View;
 
 import androidx.test.rule.ActivityTestRule;
 
@@ -43,7 +40,6 @@ import com.android.car.ui.R;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,10 +71,10 @@ public class CarUiListItemTest {
         mCarUiRecyclerView.post(
                 () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items)));
 
-        onView(withId(R.id.title)).check(matches(isDisplayed()));
-        onView(withId(R.id.body)).check(matches(not(isDisplayed())));
-        onView(withId(R.id.icon_container)).check(matches(not(isDisplayed())));
-        onView(withId(R.id.action_container)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.car_ui_list_item_title)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_list_item_body)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.car_ui_list_item_icon_container)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.car_ui_list_item_action_container)).check(matches(not(isDisplayed())));
     }
 
     @Test
@@ -92,10 +88,10 @@ public class CarUiListItemTest {
         mCarUiRecyclerView.post(
                 () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items)));
 
-        onView(withId(R.id.body)).check(matches(isDisplayed()));
-        onView(withId(R.id.title)).check(matches(not(isDisplayed())));
-        onView(withId(R.id.icon_container)).check(matches(not(isDisplayed())));
-        onView(withId(R.id.action_container)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.car_ui_list_item_body)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_list_item_title)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.car_ui_list_item_icon_container)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.car_ui_list_item_action_container)).check(matches(not(isDisplayed())));
     }
 
     @Test
@@ -111,10 +107,10 @@ public class CarUiListItemTest {
         mCarUiRecyclerView.post(
                 () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items)));
 
-        onView(withId(R.id.title)).check(matches(isDisplayed()));
-        onView(withId(R.id.body)).check(matches(isDisplayed()));
-        onView(withId(R.id.icon_container)).check(matches(isDisplayed()));
-        onView(withId(R.id.action_container)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.car_ui_list_item_title)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_list_item_body)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_list_item_icon_container)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_list_item_action_container)).check(matches(not(isDisplayed())));
     }
 
     @Test
@@ -132,21 +128,21 @@ public class CarUiListItemTest {
         mCarUiRecyclerView.post(
                 () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items)));
 
-        onView(withId(R.id.title)).check(matches(isDisplayed()));
-        onView(withId(R.id.checkbox_widget)).check(matches(isDisplayed()));
-        onView(withId(R.id.action_divider)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.car_ui_list_item_title)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_list_item_checkbox_widget)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_list_item_action_divider)).check(matches(not(isDisplayed())));
 
         // List item with checkbox should be initially unchecked.
-        onView(withId(R.id.checkbox_widget)).check(matches(isNotChecked()));
+        onView(withId(R.id.car_ui_list_item_checkbox_widget)).check(matches(isNotChecked()));
         // Clicks anywhere on the item should toggle the checkbox
-        onView(withId(R.id.title)).perform(click());
-        onView(withId(R.id.checkbox_widget)).check(matches(isChecked()));
+        onView(withId(R.id.car_ui_list_item_title)).perform(click());
+        onView(withId(R.id.car_ui_list_item_checkbox_widget)).check(matches(isChecked()));
         // Check that onCheckChangedListener was invoked.
         verify(mockOnCheckedChangeListener, times(1)).onCheckedChanged(item, true);
 
         // Uncheck checkbox with click on the action container
-        onView(withId(R.id.action_container)).perform(click());
-        onView(withId(R.id.checkbox_widget)).check(matches(isNotChecked()));
+        onView(withId(R.id.car_ui_list_item_action_container)).perform(click());
+        onView(withId(R.id.car_ui_list_item_checkbox_widget)).check(matches(isNotChecked()));
         // Check that onCheckChangedListener was invoked.
         verify(mockOnCheckedChangeListener, times(1)).onCheckedChanged(item, false);
     }
@@ -164,18 +160,18 @@ public class CarUiListItemTest {
         mCarUiRecyclerView.post(
                 () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items)));
 
-        onView(withId(R.id.body)).check(matches(isDisplayed()));
-        onView(withId(R.id.switch_widget)).check(matches(isDisplayed()));
-        onView(withId(R.id.action_divider)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_list_item_body)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_list_item_switch_widget)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_list_item_action_divider)).check(matches(isDisplayed()));
 
         // List item with checkbox should be initially checked.
-        onView(withId(R.id.switch_widget)).check(matches(isChecked()));
+        onView(withId(R.id.car_ui_list_item_switch_widget)).check(matches(isChecked()));
         // Clicks anywhere on the item should toggle the switch
-        onView(withId(R.id.switch_widget)).perform(click());
-        onView(withId(R.id.switch_widget)).check(matches(isNotChecked()));
+        onView(withId(R.id.car_ui_list_item_switch_widget)).perform(click());
+        onView(withId(R.id.car_ui_list_item_switch_widget)).check(matches(isNotChecked()));
         // Uncheck checkbox with click on the action container
-        onView(withId(R.id.body)).perform(click());
-        onView(withId(R.id.switch_widget)).check(matches(isChecked()));
+        onView(withId(R.id.car_ui_list_item_body)).perform(click());
+        onView(withId(R.id.car_ui_list_item_switch_widget)).check(matches(isChecked()));
     }
 
     @Test
@@ -191,18 +187,18 @@ public class CarUiListItemTest {
         mCarUiRecyclerView.post(
                 () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items)));
 
-        onView(withId(R.id.title)).check(matches(isDisplayed()));
-        onView(withId(R.id.radio_button_widget)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_list_item_title)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_list_item_radio_button_widget)).check(matches(isDisplayed()));
 
         // List item with checkbox should be initially not checked.
-        onView(withId(R.id.radio_button_widget)).check(matches(isNotChecked()));
+        onView(withId(R.id.car_ui_list_item_radio_button_widget)).check(matches(isNotChecked()));
         // Clicks anywhere on the item should toggle the radio button.
-        onView(withId(R.id.radio_button_widget)).perform(click());
-        onView(withId(R.id.radio_button_widget)).check(matches(isChecked()));
+        onView(withId(R.id.car_ui_list_item_radio_button_widget)).perform(click());
+        onView(withId(R.id.car_ui_list_item_radio_button_widget)).check(matches(isChecked()));
 
         // Repeated clicks on a selected radio button should not toggle the element once checked.
-        onView(withId(R.id.title)).perform(click());
-        onView(withId(R.id.radio_button_widget)).check(matches(isChecked()));
+        onView(withId(R.id.car_ui_list_item_title)).perform(click());
+        onView(withId(R.id.car_ui_list_item_radio_button_widget)).check(matches(isChecked()));
     }
 
     @Test
@@ -223,16 +219,16 @@ public class CarUiListItemTest {
         mCarUiRecyclerView.post(
                 () -> mCarUiRecyclerView.setAdapter(new CarUiListItemAdapter(items)));
 
-        onView(withId(R.id.title)).check(matches(isDisplayed()));
+        onView(withId(R.id.car_ui_list_item_title)).check(matches(isDisplayed()));
 
         // Clicks anywhere on the item should toggle the listener
-        onView(withId(R.id.title)).perform(click());
+        onView(withId(R.id.car_ui_list_item_title)).perform(click());
         verify(mockOnCheckedChangeListener, times(1)).onClick(item);
 
-        onView(withId(R.id.body)).perform(click());
+        onView(withId(R.id.car_ui_list_item_body)).perform(click());
         verify(mockOnCheckedChangeListener, times(2)).onClick(item);
 
-        onView(withId(R.id.icon_container)).perform(click());
+        onView(withId(R.id.car_ui_list_item_icon_container)).perform(click());
         verify(mockOnCheckedChangeListener, times(3)).onClick(item);
     }
 
@@ -242,7 +238,8 @@ public class CarUiListItemTest {
 
         CarUiContentListItem.OnClickListener clickListener = mock(
                 CarUiContentListItem.OnClickListener.class);
-        View.OnClickListener supplementalIconClickListener = mock(View.OnClickListener.class);
+        CarUiContentListItem.OnClickListener supplementalIconClickListener = mock(
+                CarUiContentListItem.OnClickListener.class);
 
         CarUiContentListItem item = new CarUiContentListItem(
                 CarUiContentListItem.Action.ICON);
@@ -262,18 +259,14 @@ public class CarUiListItemTest {
         // listener.
         onView(withId(R.id.title)).perform(click());
         verify(clickListener, times(1)).onClick(item);
-        verify(supplementalIconClickListener, times(0)).onClick(any());
+        verify(supplementalIconClickListener, times(0)).onClick(item);
 
-        ArgumentCaptor<View> iconCaptor = ArgumentCaptor.forClass(View.class);
-        onView(withId(R.id.supplemental_icon)).perform(click());
+        onView(withId(R.id.car_ui_list_item_supplemental_icon)).perform(click());
         // Check that icon is argument for single call to click listener.
-        verify(supplementalIconClickListener, times(1)).onClick(iconCaptor.capture());
+        verify(supplementalIconClickListener, times(1)).onClick(item);
 
         // Verify that the standard click listener wasn't also fired.
         verify(clickListener, times(1)).onClick(item);
-
-        View icon = mCarUiRecyclerView.findViewById(R.id.supplemental_icon);
-        assertEquals(icon, iconCaptor.getValue());
     }
 
     @Test
@@ -282,7 +275,8 @@ public class CarUiListItemTest {
 
         CarUiContentListItem.OnClickListener mockedItemOnClickListener = mock(
                 CarUiContentListItem.OnClickListener.class);
-        View.OnClickListener mockedIconListener = mock(View.OnClickListener.class);
+        CarUiContentListItem.OnClickListener mockedIconListener = mock(
+                CarUiContentListItem.OnClickListener.class);
 
         CarUiContentListItem item = new CarUiContentListItem(
                 CarUiContentListItem.Action.ICON);
@@ -306,7 +300,7 @@ public class CarUiListItemTest {
         // Clicks anywhere on the icon should invoke both listeners.
         onView(withId(R.id.action_container)).perform(click());
         verify(mockedItemOnClickListener, times(1)).onClick(item);
-        verify(mockedIconListener, times(1)).onClick(any(View.class));
+        verify(mockedIconListener, times(1)).onClick(item);
     }
 
     @Test

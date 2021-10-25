@@ -42,6 +42,7 @@ import android.text.TextUtils;
 import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
@@ -129,11 +130,10 @@ public class TelecomUtils {
         }
 
         String countryIso = getCurrentCountryIsoFromLocale(context);
-        L.d(TAG, "PhoneNumberUtils.formatNumberToE16, number: "
-                    + piiLog(number) + ", country: " + countryIso);
+        L.d(TAG, "PhoneNumberUtils.formatNumber, number: " + piiLog(number)
+                + ", country: " + countryIso);
 
-        String e164 = PhoneNumberUtils.formatNumberToE164(number, countryIso);
-        String formattedNumber = PhoneNumberUtils.formatNumber(number, e164, countryIso);
+        String formattedNumber = PhoneNumberUtils.formatNumber(number, countryIso);
         formattedNumber = TextUtils.isEmpty(formattedNumber) ? number : formattedNumber;
         L.d(TAG, "getFormattedNumber, result: " + piiLog(formattedNumber));
 
@@ -188,17 +188,21 @@ public class TelecomUtils {
     public static final class PhoneNumberInfo {
         private final String mPhoneNumber;
         private final String mDisplayName;
+        private final String mDisplayNameAlt;
         private final String mInitials;
         private final Uri mAvatarUri;
         private final String mTypeLabel;
+        private final String mLookupKey;
 
-        public PhoneNumberInfo(String phoneNumber, String displayName,
-                String initials, Uri avatarUri, String typeLabel) {
+        public PhoneNumberInfo(String phoneNumber, String displayName, String displayNameAlt,
+                String initials, Uri avatarUri, String typeLabel, String lookupKey) {
             mPhoneNumber = phoneNumber;
             mDisplayName = displayName;
+            mDisplayNameAlt = displayNameAlt;
             mInitials = initials;
             mAvatarUri = avatarUri;
             mTypeLabel = typeLabel;
+            mLookupKey = lookupKey;
         }
 
         public String getPhoneNumber() {
@@ -207,6 +211,10 @@ public class TelecomUtils {
 
         public String getDisplayName() {
             return mDisplayName;
+        }
+
+        public String getDisplayNameAlt() {
+            return mDisplayNameAlt;
         }
 
         /**
@@ -227,6 +235,12 @@ public class TelecomUtils {
             return mTypeLabel;
         }
 
+        /** Returns the lookup key of the contact if any is found. */
+        @Nullable
+        public String getLookupKey() {
+            return mLookupKey;
+        }
+
     }
 
     /**
@@ -241,97 +255,131 @@ public class TelecomUtils {
             return CompletableFuture.completedFuture(new PhoneNumberInfo(
                     number,
                     context.getString(R.string.unknown),
+                    context.getString(R.string.unknown),
                     null,
                     null,
-                    ""));
+                    "",
+                    null));
         }
 
         if (isVoicemailNumber(context, number)) {
             return CompletableFuture.completedFuture(new PhoneNumberInfo(
                     number,
                     context.getString(R.string.voicemail),
+                    context.getString(R.string.voicemail),
                     null,
                     makeResourceUri(context, R.drawable.ic_voicemail),
-                    ""));
+                    "",
+                    null));
+        }
+
+        return CompletableFuture.supplyAsync(() -> lookupNumberInBackground(context, number));
+    }
+
+    /** Lookup phone number info in background. */
+    @WorkerThread
+    public static PhoneNumberInfo lookupNumberInBackground(Context context, String number) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            String readableNumber = getReadableNumber(context, number);
+            return new PhoneNumberInfo(number, readableNumber, readableNumber, null, null, null,
+                    null);
         }
 
         if (InMemoryPhoneBook.isInitialized()) {
             Contact contact = InMemoryPhoneBook.get().lookupContactEntry(number);
             if (contact != null) {
                 String name = contact.getDisplayName();
-                if (name == null) {
-                    name = getFormattedNumber(context, number);
+                String nameAlt = contact.getDisplayNameAlt();
+                if (TextUtils.isEmpty(name)) {
+                    name = getReadableNumber(context, number);
                 }
-
-                if (name == null) {
-                    name = context.getString(R.string.unknown);
+                if (TextUtils.isEmpty(nameAlt)) {
+                    nameAlt = name;
                 }
 
                 PhoneNumber phoneNumber = contact.getPhoneNumber(context, number);
-                CharSequence typeLabel = "";
-                if (phoneNumber != null) {
-                    typeLabel = Phone.getTypeLabel(context.getResources(),
-                            phoneNumber.getType(),
-                            phoneNumber.getLabel());
-                }
+                CharSequence typeLabel = phoneNumber == null ? "" : phoneNumber.getReadableLabel(
+                        context.getResources());
 
-                return CompletableFuture.completedFuture(new PhoneNumberInfo(
+                return new PhoneNumberInfo(
                         number,
                         name,
+                        nameAlt,
                         contact.getInitials(),
                         contact.getAvatarUri(),
-                        typeLabel.toString()));
+                        typeLabel.toString(),
+                        contact.getLookupKey());
+            }
+        } else {
+          L.d(TAG, "InMemoryPhoneBook not initialized.");
+        }
+
+        String name = null;
+        String nameAlt = null;
+        String initials = null;
+        String photoUriString = null;
+        CharSequence typeLabel = "";
+        String lookupKey = null;
+
+        ContentResolver cr = context.getContentResolver();
+        try (Cursor cursor = cr.query(
+                Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number)),
+                new String[]{
+                        PhoneLookup.DISPLAY_NAME,
+                        PhoneLookup.DISPLAY_NAME_ALTERNATIVE,
+                        PhoneLookup.PHOTO_URI,
+                        PhoneLookup.TYPE,
+                        PhoneLookup.LABEL,
+                        PhoneLookup.LOOKUP_KEY,
+                },
+                null, null, null)) {
+
+            if (cursor != null && cursor.moveToFirst()) {
+                int nameColumn = cursor.getColumnIndex(PhoneLookup.DISPLAY_NAME);
+                int altNameColumn = cursor.getColumnIndex(PhoneLookup.DISPLAY_NAME_ALTERNATIVE);
+                int photoUriColumn = cursor.getColumnIndex(PhoneLookup.PHOTO_URI);
+                int typeColumn = cursor.getColumnIndex(PhoneLookup.TYPE);
+                int labelColumn = cursor.getColumnIndex(PhoneLookup.LABEL);
+                int lookupKeyColumn = cursor.getColumnIndex(PhoneLookup.LOOKUP_KEY);
+
+                name = cursor.getString(nameColumn);
+                nameAlt = cursor.getString(altNameColumn);
+                photoUriString = cursor.getString(photoUriColumn);
+                initials = getInitials(name, nameAlt);
+
+                int type = cursor.getInt(typeColumn);
+                String label = cursor.getString(labelColumn);
+                typeLabel = Phone.getTypeLabel(context.getResources(), type, label);
+
+                lookupKey = cursor.getString(lookupKeyColumn);
             }
         }
 
-        return CompletableFuture.supplyAsync(() -> {
-            String name = null;
-            String nameAlt = null;
-            String photoUriString = null;
-            CharSequence typeLabel = "";
-            ContentResolver cr = context.getContentResolver();
-            String initials;
-            try (Cursor cursor = cr.query(
-                    Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number)),
-                    new String[]{
-                            PhoneLookup.DISPLAY_NAME,
-                            PhoneLookup.DISPLAY_NAME_ALTERNATIVE,
-                            PhoneLookup.PHOTO_URI,
-                            PhoneLookup.TYPE,
-                            PhoneLookup.LABEL,
-                    },
-                    null, null, null)) {
+        if (TextUtils.isEmpty(name)) {
+            name = getReadableNumber(context, number);
+        }
+        if (TextUtils.isEmpty(nameAlt)) {
+            nameAlt = name;
+        }
 
-                if (cursor != null && cursor.moveToFirst()) {
-                    int nameColumn = cursor.getColumnIndex(PhoneLookup.DISPLAY_NAME);
-                    int altNameColumn = cursor.getColumnIndex(PhoneLookup.DISPLAY_NAME_ALTERNATIVE);
-                    int photoUriColumn = cursor.getColumnIndex(PhoneLookup.PHOTO_URI);
-                    int typeColumn = cursor.getColumnIndex(PhoneLookup.TYPE);
-                    int labelColumn = cursor.getColumnIndex(PhoneLookup.LABEL);
+        return new PhoneNumberInfo(
+                number,
+                name,
+                nameAlt,
+                initials,
+                TextUtils.isEmpty(photoUriString) ? null : Uri.parse(photoUriString),
+                typeLabel.toString(),
+                lookupKey);
+    }
 
-                    name = cursor.getString(nameColumn);
-                    nameAlt = cursor.getString(altNameColumn);
-                    photoUriString = cursor.getString(photoUriColumn);
-                    int type = cursor.getInt(typeColumn);
-                    String label = cursor.getString(labelColumn);
-                    typeLabel = Phone.getTypeLabel(context.getResources(), type, label);
-                }
-            }
+    private static String getReadableNumber(Context context, String number) {
+        String readableNumber = getFormattedNumber(context, number);
 
-            initials = getInitials(name, nameAlt);
-
-            if (name == null) {
-                name = getFormattedNumber(context, number);
-            }
-
-            if (name == null) {
-                name = context.getString(R.string.unknown);
-            }
-
-            return new PhoneNumberInfo(number, name, initials,
-                    TextUtils.isEmpty(photoUriString) ? null : Uri.parse(photoUriString),
-                    typeLabel.toString());
-        });
+        if (readableNumber == null) {
+            readableNumber = context.getString(R.string.unknown);
+        }
+        return readableNumber;
     }
 
     /**
@@ -477,6 +525,11 @@ public class TelecomUtils {
      * Set the given phone number as the primary phone number for its associated contact.
      */
     public static void setAsPrimaryPhoneNumber(Context context, PhoneNumber phoneNumber) {
+        if (context.checkSelfPermission(Manifest.permission.WRITE_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            L.w(TAG, "Missing WRITE_CONTACTS permission, not setting primary number.");
+            return;
+        }
         // Update the primary values in the data record.
         ContentValues values = new ContentValues(1);
         values.put(ContactsContract.Data.IS_SUPER_PRIMARY, 1);
@@ -488,27 +541,28 @@ public class TelecomUtils {
     }
 
     /**
-     * Add a contact to favorite or remove it from favorite.
-     */
-    public static int setAsFavoriteContact(Context context, Contact contact, boolean isFavorite) {
-        if (contact.isStarred() == isFavorite) {
-            return 0;
-        }
-
-        ContentValues values = new ContentValues(1);
-        values.put(ContactsContract.Contacts.STARRED, isFavorite ? 1 : 0);
-
-        String where = ContactsContract.Contacts._ID + " = ?";
-        String[] selectionArgs = new String[]{Long.toString(contact.getId())};
-        return context.getContentResolver().update(ContactsContract.Contacts.CONTENT_URI, values,
-                where, selectionArgs);
-    }
-
-    /**
      * Mark missed call log matching given phone number as read. If phone number string is not
      * valid, it will mark all new missed call log as read.
      */
     public static void markCallLogAsRead(Context context, String phoneNumberString) {
+        markCallLogAsRead(context, CallLog.Calls.NUMBER, phoneNumberString);
+    }
+
+    /**
+     * Mark missed call log matching given call log id as read. If phone number string is not
+     * valid, it will mark all new missed call log as read.
+     */
+    public static void markCallLogAsRead(Context context, long callLogId) {
+        markCallLogAsRead(context, CallLog.Calls._ID,
+                callLogId < 0 ? null : String.valueOf(callLogId));
+    }
+
+    /**
+     * Mark missed call log matching given column name and selection argument as read. If the column
+     * name or the selection argument is not valid, mark all new missed call log as read.
+     */
+    private static void markCallLogAsRead(Context context, String columnName,
+            String selectionArg) {
         if (context.checkSelfPermission(Manifest.permission.WRITE_CALL_LOG)
                 != PackageManager.PERMISSION_GRANTED) {
             L.w(TAG, "Missing WRITE_CALL_LOG permission; not marking missed calls as read.");
@@ -525,21 +579,22 @@ public class TelecomUtils {
         where.append(CallLog.Calls.TYPE);
         where.append(" = ?");
         selectionArgs.add(Integer.toString(CallLog.Calls.MISSED_TYPE));
-        if (!TextUtils.isEmpty(phoneNumberString)) {
+        if (!TextUtils.isEmpty(columnName) && !TextUtils.isEmpty(selectionArg)) {
             where.append(" AND ");
-            where.append(CallLog.Calls.NUMBER);
+            where.append(columnName);
             where.append(" = ?");
-            selectionArgs.add(phoneNumberString);
+            selectionArgs.add(selectionArg);
         }
         String[] selectionArgsArray = new String[0];
         try {
-            context
-                    .getContentResolver()
-                    .update(
-                            CallLog.Calls.CONTENT_URI,
-                            contentValues,
-                            where.toString(),
-                            selectionArgs.toArray(selectionArgsArray));
+            ContentResolver contentResolver = context.getContentResolver();
+            contentResolver.update(
+                    CallLog.Calls.CONTENT_URI,
+                    contentValues,
+                    where.toString(),
+                    selectionArgs.toArray(selectionArgsArray));
+            // #update doesn't notify change any more. Notify change to rerun query from database.
+            contentResolver.notifyChange(CallLog.Calls.CONTENT_URI, null);
         } catch (IllegalArgumentException e) {
             L.e(TAG, "markCallLogAsRead failed", e);
         }

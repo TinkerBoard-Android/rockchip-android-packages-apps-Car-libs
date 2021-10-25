@@ -16,6 +16,7 @@
 
 package com.android.car.telephony.common;
 
+import android.Manifest;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.ContactsContract;
@@ -25,8 +26,8 @@ import android.util.ArrayMap;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.Transformations;
 
 import com.android.car.apps.common.log.L;
 
@@ -59,10 +60,9 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
     private final Map<String, Map<String, Contact>> mLookupKeyContactMap = new HashMap<>();
 
     /**
-     * A map which divides contacts LiveData by account.
+     * A map which divides contacts by account.
      */
-    private final Map<String, MutableLiveData<List<Contact>>> mAccountContactsLiveDataMap =
-            new ArrayMap<>();
+    private final Map<String, List<Contact>> mAccountContactsMap = new ArrayMap<>();
     private boolean mIsLoaded = false;
 
     /**
@@ -120,7 +120,8 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
                         ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE,
                         ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE,
                         ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE},
-                ContactsContract.Contacts.DISPLAY_NAME + " ASC ");
+                ContactsContract.Contacts.DISPLAY_NAME + " ASC ",
+                Manifest.permission.READ_CONTACTS);
         mContactListAsyncQueryLiveData = new AsyncQueryLiveData<List<Contact>>(mContext,
                 QueryParam.of(contactListQueryParam), Executors.newSingleThreadExecutor()) {
             @Override
@@ -160,10 +161,8 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
      *                    Bluetooth address.
      */
     public LiveData<List<Contact>> getContactsLiveDataByAccount(String accountName) {
-        if (!mAccountContactsLiveDataMap.containsKey(accountName)) {
-            mAccountContactsLiveDataMap.put(accountName, new MutableLiveData<>());
-        }
-        return mAccountContactsLiveDataMap.get(accountName);
+        return Transformations.map(mContactListAsyncQueryLiveData,
+                contacts -> contacts == null ? null : mAccountContactsMap.get(accountName));
     }
 
     /**
@@ -252,12 +251,13 @@ public class InMemoryPhoneBook implements Observer<List<Contact>> {
             subMap.put(lookupKey, Contact.fromCursor(mContext, cursor, subMap.get(lookupKey)));
         }
 
+        mAccountContactsMap.clear();
         for (String accountName : contactMap.keySet()) {
             Map<String, Contact> subMap = contactMap.get(accountName);
             contactList.addAll(subMap.values());
-            MutableLiveData<List<Contact>> accountContactsLiveData =
-                    (MutableLiveData<List<Contact>>) getContactsLiveDataByAccount(accountName);
-            accountContactsLiveData.postValue(new ArrayList<>(subMap.values()));
+            List<Contact> accountContacts = new ArrayList<>();
+            accountContacts.addAll(subMap.values());
+            mAccountContactsMap.put(accountName, accountContacts);
         }
 
         mLookupKeyContactMap.clear();

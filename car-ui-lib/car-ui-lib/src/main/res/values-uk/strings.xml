@@ -16,7 +16,7 @@ limitations under the License.
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="car_ui_toolbar_default_search_hint" msgid="8339474149462104372">"Шукайте…"</string>
+    <string name="car_ui_toolbar_default_search_hint" msgid="8339474149462104372">"Пошук…"</string>
     <string name="car_ui_scrollbar_page_down_button" msgid="746830252244551947">"Прокрутити вниз"</string>
     <string name="car_ui_scrollbar_page_up_button" msgid="965431866383176249">"Прокрутити вгору"</string>
     <string name="car_ui_toolbar_nav_icon_content_description" msgid="6116610935599234725">"Назад"</string>

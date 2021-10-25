@@ -16,3 +16,6 @@ build/
 
 # Android studio's layout inspector captures
 captures/
+
+# A file created when launching android emulators
+read-snapshot.txt

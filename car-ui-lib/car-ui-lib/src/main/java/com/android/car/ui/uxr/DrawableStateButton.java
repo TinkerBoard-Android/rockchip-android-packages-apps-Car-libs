@@ -26,8 +26,7 @@ import androidx.annotation.Nullable;
  * such as ux restriction.
  */
 public class DrawableStateButton extends Button implements DrawableStateView {
-
-    private int[] mState;
+    private DrawableStateUtil mUtil;
 
     public DrawableStateButton(Context context) {
         super(context);
@@ -41,24 +40,19 @@ public class DrawableStateButton extends Button implements DrawableStateView {
         super(context, attrs, defStyleAttr);
     }
 
-    public DrawableStateButton(
-            Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-    }
-
     @Override
-    public void setDrawableState(int[] state) {
-        mState = state;
-        refreshDrawableState();
+    public void setExtraDrawableState(@Nullable int[] stateToAdd, @Nullable int[] stateToRemove) {
+        if (mUtil == null) {
+            mUtil = new DrawableStateUtil(this);
+        }
+        mUtil.setExtraDrawableState(stateToAdd, stateToRemove);
     }
 
     @Override
     public int[] onCreateDrawableState(int extraSpace) {
-        if (mState == null) {
-            return super.onCreateDrawableState(extraSpace);
-        } else {
-            return mergeDrawableStates(
-                    super.onCreateDrawableState(extraSpace + mState.length), mState);
+        if (mUtil == null) {
+            mUtil = new DrawableStateUtil(this);
         }
+        return mUtil.onCreateDrawableState(extraSpace, space -> super.onCreateDrawableState(space));
     }
 }
