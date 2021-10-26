@@ -62,11 +62,6 @@ public final class CarUiTextViewImpl extends CarUiTextView {
         super(context, attrs, defStyleAttr);
     }
 
-    public CarUiTextViewImpl(Context context, @Nullable AttributeSet attrs, int defStyleAttr,
-                             int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-    }
-
     /**
      * Set text to display.
      *
