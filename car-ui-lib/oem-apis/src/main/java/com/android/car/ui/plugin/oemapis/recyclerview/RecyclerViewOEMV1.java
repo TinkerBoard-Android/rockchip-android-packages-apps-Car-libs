@@ -97,9 +97,6 @@ public interface RecyclerViewOEMV1 {
     /** {@link androidx.recyclerview.widget.RecyclerView#setClipToPadding(boolean)} */
     void setClipToPadding(boolean clipToPadding);
 
-    /** setter for {@link androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup} */
-    void setSpanSizeLookup(SpanSizeLookupOEMV1 spanSizeLookup);
-
     /** see {@link LinearLayoutManager#findFirstCompletelyVisibleItemPosition()} */
     int findFirstCompletelyVisibleItemPosition();
 

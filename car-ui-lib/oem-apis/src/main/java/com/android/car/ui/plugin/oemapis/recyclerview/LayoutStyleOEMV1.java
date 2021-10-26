@@ -37,4 +37,9 @@ public interface LayoutStyleOEMV1 {
 
     /** Returns true if layout is reversed */
     boolean getReverseLayout();
+
+    /** {@link androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup#getSpanSize} */
+    default int getSpanSize(int position) {
+        return 1;
+    }
 }
