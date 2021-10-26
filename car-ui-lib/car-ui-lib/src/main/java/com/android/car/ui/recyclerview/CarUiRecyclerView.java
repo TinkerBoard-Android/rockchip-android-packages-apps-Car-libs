@@ -154,6 +154,14 @@ public interface CarUiRecyclerView {
     }
 
     /**
+     * Adapters that implement this interface will receive the calls
+     */
+    interface OnAttachListener {
+        void onAttachedToCarUiRecyclerView(@NonNull CarUiRecyclerView carUiRecyclerView);
+        void onDetachedFromCarUiRecyclerView(@NonNull CarUiRecyclerView carUiRecyclerView);
+    }
+
+    /**
      * Use this method to create an instance of CarUiRecyclerView at runtime.
      */
     static CarUiRecyclerView create(Context context) {
