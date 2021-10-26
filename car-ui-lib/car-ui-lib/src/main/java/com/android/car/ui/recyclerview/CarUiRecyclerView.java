@@ -309,15 +309,6 @@ public interface CarUiRecyclerView {
     ViewParent getParent();
 
     /**
-     * Only for car-ui-lib internal usage. Will return null when there is an oem implementation.
-     * @return internal instance of {@link RecyclerView}
-     * @deprecated this will fail when there is a oem implementation
-     */
-    @Deprecated
-    @Nullable
-    RecyclerView getRecyclerView();
-
-    /**
      * see {@link LayoutManager#getChildCount()}
      * Prefer this method over {@link #getChildCount()}
      */

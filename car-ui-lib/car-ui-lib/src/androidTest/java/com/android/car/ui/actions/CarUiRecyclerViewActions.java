@@ -17,6 +17,7 @@ package com.android.car.ui.actions;
 
 import android.util.SparseArray;
 import android.view.View;
+import android.widget.FrameLayout;
 
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.espresso.ViewAction;
@@ -68,8 +69,10 @@ public class CarUiRecyclerViewActions {
             VH cachedViewHolder = viewHolderCache.get(itemType);
             // Create a view holder per type if not exists
             if (null == cachedViewHolder) {
-                cachedViewHolder = adapter.createViewHolder(recyclerView.getRecyclerView(),
-                        itemType);
+                // Return a view created with the app context so that a LayoutInflator created from
+                // this view can find resources as expected.
+                FrameLayout fakeParent = new FrameLayout(recyclerView.getContext());
+                cachedViewHolder = adapter.createViewHolder(fakeParent, itemType);
                 viewHolderCache.put(itemType, cachedViewHolder);
             }
             // Bind data to ViewHolder and apply matcher to view descendants.

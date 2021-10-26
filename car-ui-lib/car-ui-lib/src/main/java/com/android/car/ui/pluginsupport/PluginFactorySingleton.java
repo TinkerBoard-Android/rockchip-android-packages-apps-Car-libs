@@ -66,9 +66,9 @@ public final class PluginFactorySingleton {
     private static PluginFactory sInstance;
     private static TestingOverride sTestingOverride = TestingOverride.NOT_SET;
 
-    @Nullable
-    @VisibleForTesting
     /** Only has value during testing, null otherwise */
+    @SuppressLint("StaticFieldLeak")
+    @Nullable
     private static Context sPluginContext = null;
 
     /**

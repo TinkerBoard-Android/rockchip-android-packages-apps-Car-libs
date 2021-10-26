@@ -26,6 +26,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatTextView;
 
 import com.android.car.ui.CarUiLayoutInflaterFactory;
 import com.android.car.ui.CarUiText;
@@ -39,7 +40,7 @@ import java.util.List;
  */
 @SuppressLint("AppCompatCustomView")
 @TargetApi(MIN_TARGET_API)
-public abstract class CarUiTextView extends TextView {
+public abstract class CarUiTextView extends AppCompatTextView {
 
     /**
      * Creates a CarUiTextView.
@@ -59,7 +60,7 @@ public abstract class CarUiTextView extends TextView {
      * tag in your layout file. This is only for if you need to create a CarUiTextView in java code.
      * The CarUiTextView xml tag is enabled by the usage of {@link CarUiLayoutInflaterFactory}.
      */
-    static CarUiTextView create(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public static CarUiTextView create(@NonNull Context context, @Nullable AttributeSet attrs) {
         return PluginFactorySingleton.get(context).createTextView(context, attrs);
     }
 
@@ -72,12 +73,7 @@ public abstract class CarUiTextView extends TextView {
     }
 
     public CarUiTextView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, 0);
-    }
-
-    public CarUiTextView(Context context, @Nullable AttributeSet attrs, int defStyleAttr,
-            int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
+        super(context, attrs, defStyleAttr);
     }
 
     /**

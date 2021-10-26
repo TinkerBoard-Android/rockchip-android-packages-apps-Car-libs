@@ -202,7 +202,6 @@ public final class RecyclerViewAdapterV1 extends FrameLayout
     }
 
     @Nullable
-    @Override
     public RecyclerView getRecyclerView() {
         return mRecyclerView;
     }

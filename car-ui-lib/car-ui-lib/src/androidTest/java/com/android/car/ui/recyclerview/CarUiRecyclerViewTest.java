@@ -1650,14 +1650,16 @@ public class CarUiRecyclerViewTest {
 
         LinearSnapHelper linearSnapHelper = new LinearSnapHelper();
         carUiRecyclerView.setOnFlingListener(null);
-        linearSnapHelper.attachToRecyclerView(carUiRecyclerView.getRecyclerView());
+        linearSnapHelper.attachToRecyclerView(
+                ((CarUiRecyclerViewImpl) carUiRecyclerView).getRecyclerView());
         // 200 is just an arbitrary number. the intent is to make sure the return value is smaller
         // than the layoutmanager height.
         int[] baseOutDist = linearSnapHelper.calculateScrollDistance(200, -200);
 
         CarUiSnapHelper carUiSnapHelper = new CarUiSnapHelper(mTestableContext);
         carUiRecyclerView.setOnFlingListener(null);
-        carUiSnapHelper.attachToRecyclerView(carUiRecyclerView.getRecyclerView());
+        carUiSnapHelper.attachToRecyclerView(
+                ((CarUiRecyclerViewImpl) carUiRecyclerView).getRecyclerView());
         int[] outDist = carUiSnapHelper.calculateScrollDistance(200, -200);
 
         assertEquals(outDist[0], baseOutDist[0]);
@@ -1687,14 +1689,16 @@ public class CarUiRecyclerViewTest {
 
         LinearSnapHelper linearSnapHelper = new LinearSnapHelper();
         carUiRecyclerView.setOnFlingListener(null);
-        linearSnapHelper.attachToRecyclerView(carUiRecyclerView.getRecyclerView());
+        linearSnapHelper.attachToRecyclerView(
+                ((CarUiRecyclerViewImpl) carUiRecyclerView).getRecyclerView());
         // 8000 is just an arbitrary number. the intent is to make sure the return value is bigger
         // than the layoutmanager height.
         int[] baseOutDist = linearSnapHelper.calculateScrollDistance(8000, -8000);
 
         CarUiSnapHelper carUiSnapHelper = new CarUiSnapHelper(mTestableContext);
         carUiRecyclerView.setOnFlingListener(null);
-        carUiSnapHelper.attachToRecyclerView(carUiRecyclerView.getRecyclerView());
+        carUiSnapHelper.attachToRecyclerView(
+                ((CarUiRecyclerViewImpl) carUiRecyclerView).getRecyclerView());
         int[] outDist = carUiSnapHelper.calculateScrollDistance(8000, -8000);
 
         int lastChildPosition = carUiSnapHelper.isAtEnd(layoutManager)

@@ -175,7 +175,7 @@ public final class ToolbarControllerAdapterV1 implements ToolbarController {
     public void setTabs(@Nullable List<Tab> tabs, int selectedTab) {
         mDeprecatedTabs.clear();
         if (tabs == null || tabs.isEmpty()) {
-            selectedTab = 0;
+            selectedTab = -1;
         } else if (selectedTab < 0 || selectedTab >= tabs.size()) {
             throw new IllegalArgumentException("Tab position is invalid: " + selectedTab);
         }
