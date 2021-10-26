@@ -51,6 +51,8 @@ import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.core.CarUi;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
+import com.android.car.ui.recyclerview.CarUiRecyclerViewImpl;
+import com.android.car.ui.recyclerview.RecyclerViewAdapterV1;
 import com.android.car.ui.toolbar.Toolbar;
 import com.android.car.ui.toolbar.ToolbarController;
 import com.android.car.ui.utils.CarUiUtils;
@@ -355,7 +357,12 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
     public RecyclerView onCreateRecyclerView(LayoutInflater inflater, ViewGroup parent,
             Bundle savedInstanceState) {
         mCarUiRecyclerView = onCreateCarUiRecyclerView(inflater, parent, savedInstanceState);
-        RecyclerView recyclerView = mCarUiRecyclerView.getRecyclerView();
+        RecyclerView recyclerView = null;
+        if (mCarUiRecyclerView instanceof CarUiRecyclerViewImpl) {
+            recyclerView = ((CarUiRecyclerViewImpl) mCarUiRecyclerView).getRecyclerView();
+        } else if (mCarUiRecyclerView instanceof RecyclerViewAdapterV1) {
+            recyclerView = ((RecyclerViewAdapterV1) mCarUiRecyclerView).getRecyclerView();
+        }
         if (recyclerView != null) {
             return recyclerView;
         } else {
