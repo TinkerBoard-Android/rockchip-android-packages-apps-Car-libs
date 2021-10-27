@@ -59,6 +59,8 @@ public final class RecyclerViewAdapterV1 extends FrameLayout
     private RecyclerViewOEMV1 mOEMRecyclerView;
     @Nullable
     private AdapterOEMV1 mOEMAdapter;
+    @Nullable
+    private Adapter<?> mAdapter;
 
     @NonNull
     private final List<OnScrollListener> mScrollListeners = new ArrayList<>();
@@ -290,8 +292,15 @@ public final class RecyclerViewAdapterV1 extends FrameLayout
         if (adapter == null) {
             mOEMRecyclerView.setAdapter(null);
         } else {
+            if (mAdapter instanceof OnAttachListener) {
+                ((OnAttachListener) mAdapter).onDetachedFromCarUiRecyclerView(this);
+            }
+            mAdapter = adapter;
             mOEMAdapter = new RecyclerViewAdapterAdapterV1(getContext(), adapter);
             mOEMRecyclerView.setAdapter(mOEMAdapter);
+            if (adapter instanceof OnAttachListener) {
+                ((OnAttachListener) adapter).onAttachedToCarUiRecyclerView(this);
+            }
         }
     }
 

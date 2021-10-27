@@ -83,6 +83,8 @@ public final class CarUiRecyclerViewImpl extends FrameLayout
     private static final Class<?>[] LAYOUT_MANAGER_CONSTRUCTOR_SIGNATURE =
             new Class<?>[]{Context.class, AttributeSet.class, int.class, int.class};
 
+    @Nullable
+    private Adapter<?> mAdapter;
     @NonNull
     private RecyclerView mRecyclerView;
 
@@ -703,7 +705,14 @@ public final class CarUiRecyclerViewImpl extends FrameLayout
             // the adapter using RecyclerView#getAdapter()
             mScrollBar.adapterChanged(adapter);
         }
+        if (mAdapter instanceof OnAttachListener) {
+            ((OnAttachListener) mAdapter).onDetachedFromCarUiRecyclerView(this);
+        }
+        mAdapter = adapter;
         mRecyclerView.setAdapter(adapter);
+        if (adapter instanceof OnAttachListener) {
+            ((OnAttachListener) adapter).onAttachedToCarUiRecyclerView(this);
+        }
     }
 
     @Override
