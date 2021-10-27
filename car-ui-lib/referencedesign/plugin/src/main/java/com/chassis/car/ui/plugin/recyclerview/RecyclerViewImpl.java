@@ -46,7 +46,6 @@ import com.android.car.ui.plugin.oemapis.recyclerview.LayoutStyleOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.OnScrollListenerOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewAttributesOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewOEMV1;
-import com.android.car.ui.plugin.oemapis.recyclerview.SpanSizeLookupOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.ViewHolderOEMV1;
 
 import com.chassis.car.ui.plugin.R;
@@ -276,10 +275,17 @@ public final class RecyclerViewImpl extends FrameLayout implements RecyclerViewO
                     orientation,
                     reverseLayout));
         } else {
-            mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(),
+            GridLayoutManager glm = new GridLayoutManager(getContext(),
                     layoutStyle.getSpanCount(),
                     orientation,
-                    reverseLayout));
+                    reverseLayout);
+            glm.setSpanSizeLookup(new SpanSizeLookup() {
+                @Override
+                public int getSpanSize(int position) {
+                    return layoutStyle.getSpanSize(position);
+                }
+            });
+            mRecyclerView.setLayoutManager(glm);
         }
     }
 
@@ -330,19 +336,6 @@ public final class RecyclerViewImpl extends FrameLayout implements RecyclerViewO
                     .findLastVisibleItemPosition();
         }
         return 0;
-    }
-
-    @Override
-    public void setSpanSizeLookup(@NonNull SpanSizeLookupOEMV1 spanSizeLookup) {
-        RecyclerView.LayoutManager layoutManager = mRecyclerView.getLayoutManager();
-        if (layoutManager instanceof GridLayoutManager) {
-            ((GridLayoutManager) layoutManager).setSpanSizeLookup(new SpanSizeLookup() {
-                @Override
-                public int getSpanSize(int position) {
-                    return spanSizeLookup.getSpanSize(position);
-                }
-            });
-        }
     }
 
     private static int toInternalScrollState(int state) {

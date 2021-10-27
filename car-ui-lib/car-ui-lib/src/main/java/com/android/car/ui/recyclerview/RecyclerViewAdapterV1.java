@@ -432,15 +432,18 @@ public final class RecyclerViewAdapterV1 extends FrameLayout
             public boolean getReverseLayout() {
                 return layoutStyle.getReverseLayout();
             }
+
+            @Override
+            public int getSpanSize(int position) {
+                if (layoutStyle instanceof CarUiGridLayoutStyle) {
+                    return ((CarUiGridLayoutStyle) layoutStyle).getSpanSizeLookup()
+                        .getSpanSize(position);
+                }
+                return 1;
+            }
         };
 
         if (mOEMRecyclerView != null) {
-            if (layoutStyle instanceof CarUiGridLayoutStyle) {
-                mOEMRecyclerView.setSpanSizeLookup(position ->
-                        ((CarUiGridLayoutStyle) layoutStyle).getSpanSizeLookup()
-                                .getSpanSize(position));
-            }
-
             mOEMRecyclerView.setLayoutStyle(oemLayoutStyle);
         }
     }
