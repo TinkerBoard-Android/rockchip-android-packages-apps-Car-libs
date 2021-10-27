@@ -28,12 +28,14 @@ import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import android.annotation.TargetApi;
 import android.graphics.Color;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
@@ -148,7 +150,7 @@ public class CarUiTextViewTest {
         container.post(() -> container.addView(textView));
 
         onView(withHint(hint)).check(matches(isDisplayed()));
-        assertEquals(text, new SpannableString(textView.getText()));
+        assertTrue(TextUtils.equals(text, textView.getText()));
     }
 
     @Test
@@ -381,7 +383,7 @@ public class CarUiTextViewTest {
         container.post(() -> container.addView(textView));
 
         onView(withId(id)).check(matches(isDisplayed()));
-        assertEquals(line1, new SpannableString(textView.getText()));
+        assertTrue(TextUtils.equals(line1, textView.getText()));
     }
 
     @Test

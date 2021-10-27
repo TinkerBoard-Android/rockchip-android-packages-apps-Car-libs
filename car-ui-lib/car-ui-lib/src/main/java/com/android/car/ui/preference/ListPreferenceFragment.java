@@ -97,7 +97,7 @@ public class ListPreferenceFragment extends Fragment implements InsetsChangedLis
         mPreference = getListPreference();
         if (toolbar != null) {
             toolbar.setTitle(mPreference.getTitle());
-            toolbar.setSubtitle(null);
+            toolbar.setSubtitle("");
             if (toolbar.isStateSet()) {
                 toolbar.setState(Toolbar.State.SUBPAGE);
             } else {

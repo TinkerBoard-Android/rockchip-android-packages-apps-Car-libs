@@ -61,6 +61,10 @@ public class CarUiLayoutInflaterFactory extends AppCompatViewInflater
             // here, but when car-ui-lib is included in one of those apps that uses the old package
             // name, the RecyclerView class is renamed.
             view = new RecyclerView(context, attrs);
+        } else if ("TextView".equals(name)) {
+            // Replace all TextView occurrences with CarUiTextView to support older RROs that still
+            // use TextView where CarUiTextView is now expected. ie. `car_ui_list_item.xml`.
+            view = PluginFactorySingleton.get(context).createTextView(context, attrs);
         }
 
         return view;
