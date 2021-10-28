@@ -51,6 +51,7 @@ import androidx.recyclerview.widget.RecyclerView.Adapter;
 import androidx.recyclerview.widget.RecyclerView.ItemAnimator;
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration;
 import androidx.recyclerview.widget.RecyclerView.LayoutManager;
+import androidx.recyclerview.widget.RecyclerView.OnChildAttachStateChangeListener;
 import androidx.recyclerview.widget.RecyclerView.OnFlingListener;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
@@ -391,6 +392,11 @@ public final class CarUiRecyclerViewImpl extends FrameLayout
     }
 
     @Override
+    public int getChildLayoutPosition(View child) {
+        return mRecyclerView.getChildLayoutPosition(child);
+    }
+
+    @Override
     public RecyclerView getRecyclerView() {
         return mRecyclerView;
     }
@@ -441,6 +447,11 @@ public final class CarUiRecyclerViewImpl extends FrameLayout
     }
 
     @Override
+    public void clearOnChildAttachStateChangeListeners() {
+        mRecyclerView.clearOnChildAttachStateChangeListeners();
+    }
+
+    @Override
     public void clearOnScrollListeners() {
         mScrollListeners.clear();
         mRecyclerView.removeOnScrollListener(mOnScrollListener);
@@ -458,6 +469,11 @@ public final class CarUiRecyclerViewImpl extends FrameLayout
         mRecyclerView.addItemDecoration(decor, index);
     }
 
+    @Override
+    public void addOnChildAttachStateChangeListener(OnChildAttachStateChangeListener listener) {
+        mRecyclerView.addOnChildAttachStateChangeListener(listener);
+    }
+
     @NonNull
     @Override
     public ItemDecoration getItemDecorationAt(int index) {
@@ -472,6 +488,11 @@ public final class CarUiRecyclerViewImpl extends FrameLayout
     @Override
     public void removeItemDecorationAt(int index) {
         mRecyclerView.removeItemDecorationAt(index);
+    }
+
+    @Override
+    public void removeOnChildAttachStateChangeListener(OnChildAttachStateChangeListener listener) {
+        mRecyclerView.removeOnChildAttachStateChangeListener(listener);
     }
 
     @Override

@@ -44,31 +44,31 @@ public interface RecyclerViewOEMV1 {
      */
     int SCROLL_STATE_SETTLING = 2;
 
-    /** {@link androidx.recyclerview.widget.RecyclerView#setAdapter(Adapter)} */
+    /** {@link RecyclerView#setAdapter(Adapter)} */
     <V extends ViewHolderOEMV1> void setAdapter(AdapterOEMV1<V> adapter);
 
-    /** {@link androidx.recyclerview.widget.RecyclerView#addOnScrollListener} */
+    /** {@link RecyclerView#addOnScrollListener} */
     void addOnScrollListener(OnScrollListenerOEMV1 listener);
 
-    /** {@link androidx.recyclerview.widget.RecyclerView#removeOnScrollListener} */
+    /** {@link RecyclerView#removeOnScrollListener} */
     void removeOnScrollListener(OnScrollListenerOEMV1 listener);
 
-    /** {@link androidx.recyclerview.widget.RecyclerView#clearOnScrollListeners()} */
+    /** {@link RecyclerView#clearOnScrollListeners()} */
     void clearOnScrollListeners();
 
-    /** {@link androidx.recyclerview.widget.RecyclerView#scrollToPosition(int)} */
+    /** {@link RecyclerView#scrollToPosition(int)} */
     void scrollToPosition(int position);
 
-    /** {@link androidx.recyclerview.widget.RecyclerView#smoothScrollBy(int, int)} */
+    /** {@link RecyclerView#smoothScrollBy(int, int)} */
     void smoothScrollBy(int dx, int dy);
 
-    /** {@link androidx.recyclerview.widget.RecyclerView#smoothScrollToPosition(int)} */
+    /** {@link RecyclerView#smoothScrollToPosition(int)} */
     void smoothScrollToPosition(int position);
 
-    /** {@link androidx.recyclerview.widget.RecyclerView#setHasFixedSize(boolean)} */
+    /** {@link RecyclerView#setHasFixedSize(boolean)} */
     void setHasFixedSize(boolean hasFixedSize);
 
-    /** {@link androidx.recyclerview.widget.RecyclerView#hasFixedSize()} */
+    /** {@link RecyclerView#hasFixedSize()} */
     boolean hasFixedSize();
 
     /**
@@ -148,4 +148,16 @@ public interface RecyclerViewOEMV1 {
      * see {@link RecyclerView#findViewHolderForLayoutPosition(int)}
      */
     ViewHolderOEMV1 findViewHolderForLayoutPosition(int position);
+
+    /** {@link RecyclerView#addOnChildAttachStateChangeListener} */
+    void addOnChildAttachStateChangeListener(OnChildAttachStateChangeListenerOEMV1 listener);
+
+    /** {@link RecyclerView#removeOnChildAttachStateChangeListener} */
+    void removeOnChildAttachStateChangeListener(OnChildAttachStateChangeListenerOEMV1 listener);
+
+    /** {@link RecyclerView#clearOnChildAttachStateChangeListener()} */
+    void clearOnChildAttachStateChangeListener();
+
+    /** {@link RecyclerView#getChildLayoutPosition} */
+    int getChildLayoutPosition(View child);
 }

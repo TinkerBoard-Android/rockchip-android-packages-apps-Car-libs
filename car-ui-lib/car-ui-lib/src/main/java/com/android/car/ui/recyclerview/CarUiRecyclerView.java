@@ -43,7 +43,9 @@ import androidx.recyclerview.widget.RecyclerView.Adapter;
 import androidx.recyclerview.widget.RecyclerView.ItemAnimator;
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration;
 import androidx.recyclerview.widget.RecyclerView.LayoutManager;
+import androidx.recyclerview.widget.RecyclerView.OnChildAttachStateChangeListener;
 import androidx.recyclerview.widget.RecyclerView.OnFlingListener;
+import androidx.recyclerview.widget.RecyclerView.OnScrollListener;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import com.android.car.ui.pluginsupport.PluginFactorySingleton;
@@ -191,11 +193,17 @@ public interface CarUiRecyclerView {
     @Deprecated
     void addItemDecoration(@NonNull ItemDecoration decor, int index);
 
+    /** see {@link RecyclerView#addOnChildAttachStateChangeListener} */
+    void addOnChildAttachStateChangeListener(OnChildAttachStateChangeListener listener);
+
     /** see {@link View#addOnLayoutChangeListener(OnLayoutChangeListener)} */
     void addOnLayoutChangeListener(OnLayoutChangeListener listener);
 
-    /** see {@link RecyclerView#addOnScrollListener(OnScrollListener)} */
+    /** see {@link RecyclerView#addOnScrollListener(RecyclerView.OnScrollListener)} */
     void addOnScrollListener(OnScrollListener scrollListener);
+
+    /** {@link RecyclerView#clearOnChildAttachStateChangeListeners()} */
+    void clearOnChildAttachStateChangeListeners();
 
     /** {@link RecyclerView#clearOnScrollListeners()} */
     void clearOnScrollListeners();
@@ -248,6 +256,11 @@ public interface CarUiRecyclerView {
      */
     @Deprecated
     int getChildCount();
+
+    /**
+     * see {@link RecyclerView#getChildLayoutPosition(View)}
+     */
+    int getChildLayoutPosition(View child);
 
     /** see {@link View#getContentDescription()} */
     CharSequence getContentDescription();
@@ -373,6 +386,9 @@ public interface CarUiRecyclerView {
      */
     @Deprecated
     void removeItemDecorationAt(int index);
+
+    /** see {@link RecyclerView#removeOnChildAttachStateChangeListener} */
+    void removeOnChildAttachStateChangeListener(OnChildAttachStateChangeListener listener);
 
     /** see {@link View#removeOnLayoutChangeListener(OnLayoutChangeListener)} */
     void removeOnLayoutChangeListener(OnLayoutChangeListener listener);

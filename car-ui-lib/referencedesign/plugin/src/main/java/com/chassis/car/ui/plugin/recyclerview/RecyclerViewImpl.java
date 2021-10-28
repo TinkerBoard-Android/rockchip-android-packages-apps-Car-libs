@@ -40,10 +40,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.OrientationHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
+import androidx.recyclerview.widget.RecyclerView.OnChildAttachStateChangeListener;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import com.android.car.ui.plugin.oemapis.recyclerview.AdapterOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.LayoutStyleOEMV1;
+import com.android.car.ui.plugin.oemapis.recyclerview.OnChildAttachStateChangeListenerOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.OnScrollListenerOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewAttributesOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewOEMV1;
@@ -106,6 +108,30 @@ public final class RecyclerViewImpl extends FrameLayout implements RecyclerViewO
                     for (OnScrollListenerOEMV1 listener : mScrollListeners) {
                         listener.onScrollStateChanged(RecyclerViewImpl.this,
                                 toInternalScrollState(newState));
+                    }
+                }
+            };
+
+    @NonNull
+    private final List<OnChildAttachStateChangeListenerOEMV1> mOnChildAttachStateChangeListeners =
+            new ArrayList<>();
+
+    @NonNull
+    private final RecyclerView.OnChildAttachStateChangeListener mOnChildAttachStateChangeListener =
+            new OnChildAttachStateChangeListener() {
+                @Override
+                public void onChildViewAttachedToWindow(@NonNull View view) {
+                    for (OnChildAttachStateChangeListenerOEMV1 listener :
+                            mOnChildAttachStateChangeListeners) {
+                        listener.onChildViewAttachedToWindow(view);
+                    }
+                }
+
+                @Override
+                public void onChildViewDetachedFromWindow(@NonNull View view) {
+                    for (OnChildAttachStateChangeListenerOEMV1 listener :
+                            mOnChildAttachStateChangeListeners) {
+                        listener.onChildViewDetachedFromWindow(view);
                     }
                 }
             };
@@ -498,6 +524,43 @@ public final class RecyclerViewImpl extends FrameLayout implements RecyclerViewO
     @Override
     public boolean canScrollVertically(int direction) {
         return mRecyclerView.canScrollVertically(direction);
+    }
+
+    @Override
+    public void addOnChildAttachStateChangeListener(
+            OnChildAttachStateChangeListenerOEMV1 listener) {
+        if (listener == null) {
+            return;
+        }
+        if (mOnChildAttachStateChangeListeners.isEmpty()) {
+            mRecyclerView.addOnChildAttachStateChangeListener(mOnChildAttachStateChangeListener);
+        }
+        mOnChildAttachStateChangeListeners.add(listener);
+    }
+
+    @Override
+    public void removeOnChildAttachStateChangeListener(
+            OnChildAttachStateChangeListenerOEMV1 listener) {
+        if (listener == null) {
+            return;
+        }
+        mOnChildAttachStateChangeListeners.remove(listener);
+        if (mOnChildAttachStateChangeListeners.isEmpty()) {
+            mRecyclerView.removeOnChildAttachStateChangeListener(mOnChildAttachStateChangeListener);
+        }
+    }
+
+    @Override
+    public void clearOnChildAttachStateChangeListener() {
+        if (!mOnChildAttachStateChangeListeners.isEmpty()) {
+            mOnChildAttachStateChangeListeners.clear();
+            mRecyclerView.clearOnChildAttachStateChangeListeners();
+        }
+    }
+
+    @Override
+    public int getChildLayoutPosition(View child) {
+        return mRecyclerView.getChildLayoutPosition(child);
     }
 
     /**
