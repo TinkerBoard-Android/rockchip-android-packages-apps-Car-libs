@@ -22,4 +22,26 @@
     <item type="attr" name="carUiRecyclerViewStyle"/>
     <item type="style" name="Widget.CarUi.CarUiRecyclerView"/>
 
+    <!-- Some resources that exists on rvc but not on sc -->
+    <!-- Rotary resources that are now part of car-rotary-lib can't be added here. Because they're
+      now part of rotary-lib overlayable group and 1 resource can't exists in 2 overlaybale group
+      at the same time. -->
+    <item type="dimen" name="car_ui_list_item_check_box_end_inset"/>
+    <item type="dimen" name="car_ui_list_item_check_box_height"/>
+    <item type="dimen" name="car_ui_list_item_check_box_icon_container_width"/>
+    <item type="dimen" name="car_ui_list_item_check_box_start_inset"/>
+    <item type="dimen" name="car_ui_list_item_radio_button_end_inset"/>
+    <item type="dimen" name="car_ui_list_item_radio_button_height"/>
+    <item type="dimen" name="car_ui_list_item_radio_button_icon_container_width"/>
+    <item type="dimen" name="car_ui_list_item_radio_button_start_inset"/>
+    <item type="id" name="car_ui_list_item_text_container"/>
+    <item type="id" name="car_ui_preference_fragment_container"/>
+    <item type="id" name="car_ui_toolbar"/>
+    <item type="id" name="toolbar"/>
+    <item type="layout" name="car_ui_base_layout_toolbar_legacy"/>
+    <item type="layout" name="car_ui_list_preference_with_toolbar"/>
+    <item type="layout" name="car_ui_preference_fragment_with_toolbar"/>
+    <item type="style" name="CarUiPreferenceTheme.WithToolbar"/>
+    <item type="style" name="PreferenceFragment.CarUi.WithToolbar"/>
+
 </resources>

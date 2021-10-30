@@ -166,6 +166,10 @@ limitations under the License.-->
       <item type="dimen" name="car_ui_list_item_action_divider_width"/>
       <item type="dimen" name="car_ui_list_item_avatar_icon_height"/>
       <item type="dimen" name="car_ui_list_item_avatar_icon_width"/>
+      <item type="dimen" name="car_ui_list_item_check_box_end_inset"/>
+      <item type="dimen" name="car_ui_list_item_check_box_height"/>
+      <item type="dimen" name="car_ui_list_item_check_box_icon_container_width"/>
+      <item type="dimen" name="car_ui_list_item_check_box_start_inset"/>
       <item type="dimen" name="car_ui_list_item_content_icon_height"/>
       <item type="dimen" name="car_ui_list_item_content_icon_width"/>
       <item type="dimen" name="car_ui_list_item_end_inset"/>
@@ -174,6 +178,10 @@ limitations under the License.-->
       <item type="dimen" name="car_ui_list_item_height"/>
       <item type="dimen" name="car_ui_list_item_icon_container_width"/>
       <item type="dimen" name="car_ui_list_item_icon_size"/>
+      <item type="dimen" name="car_ui_list_item_radio_button_end_inset"/>
+      <item type="dimen" name="car_ui_list_item_radio_button_height"/>
+      <item type="dimen" name="car_ui_list_item_radio_button_icon_container_width"/>
+      <item type="dimen" name="car_ui_list_item_radio_button_start_inset"/>
       <item type="dimen" name="car_ui_list_item_start_inset"/>
       <item type="dimen" name="car_ui_list_item_supplemental_icon_size"/>
       <item type="dimen" name="car_ui_list_item_text_no_icon_start_margin"/>
@@ -329,10 +337,12 @@ limitations under the License.-->
       <item type="id" name="car_ui_list_item_start_guideline"/>
       <item type="id" name="car_ui_list_item_supplemental_icon"/>
       <item type="id" name="car_ui_list_item_switch_widget"/>
+      <item type="id" name="car_ui_list_item_text_container"/>
       <item type="id" name="car_ui_list_item_title"/>
       <item type="id" name="car_ui_list_item_touch_interceptor"/>
       <item type="id" name="car_ui_list_limiting_message"/>
       <item type="id" name="car_ui_preference_container_without_widget"/>
+      <item type="id" name="car_ui_preference_fragment_container"/>
       <item type="id" name="car_ui_recycler_view"/>
       <item type="id" name="car_ui_scroll_bar"/>
       <item type="id" name="car_ui_scrollbar_page_down"/>
@@ -342,6 +352,7 @@ limitations under the License.-->
       <item type="id" name="car_ui_second_action_container"/>
       <item type="id" name="car_ui_secondary_action"/>
       <item type="id" name="car_ui_secondary_action_concrete"/>
+      <item type="id" name="car_ui_toolbar"/>
       <item type="id" name="car_ui_toolbar_background"/>
       <item type="id" name="car_ui_toolbar_bottom_guideline"/>
       <item type="id" name="car_ui_toolbar_bottom_styleable"/>
@@ -395,6 +406,7 @@ limitations under the License.-->
       <item type="id" name="spinner"/>
       <item type="id" name="textbox"/>
       <item type="id" name="title_template"/>
+      <item type="id" name="toolbar"/>
       <item type="integer" name="car_ui_default_max_string_length"/>
       <item type="integer" name="car_ui_scrollbar_longpress_initial_delay"/>
       <item type="integer" name="car_ui_scrollbar_longpress_repeat_interval"/>
@@ -403,18 +415,21 @@ limitations under the License.-->
       <item type="layout" name="car_ui_alert_dialog_title_with_subtitle"/>
       <item type="layout" name="car_ui_base_layout"/>
       <item type="layout" name="car_ui_base_layout_toolbar"/>
+      <item type="layout" name="car_ui_base_layout_toolbar_legacy"/>
       <item type="layout" name="car_ui_header_list_item"/>
       <item type="layout" name="car_ui_ims_wide_screen_input_view"/>
       <item type="layout" name="car_ui_list_item"/>
       <item type="layout" name="car_ui_list_item_compact"/>
       <item type="layout" name="car_ui_list_limiting_message"/>
       <item type="layout" name="car_ui_list_preference"/>
+      <item type="layout" name="car_ui_list_preference_with_toolbar"/>
       <item type="layout" name="car_ui_preference"/>
       <item type="layout" name="car_ui_preference_category"/>
       <item type="layout" name="car_ui_preference_chevron"/>
       <item type="layout" name="car_ui_preference_dialog_edittext"/>
       <item type="layout" name="car_ui_preference_dropdown"/>
       <item type="layout" name="car_ui_preference_fragment"/>
+      <item type="layout" name="car_ui_preference_fragment_with_toolbar"/>
       <item type="layout" name="car_ui_preference_two_action_icon"/>
       <item type="layout" name="car_ui_preference_two_action_switch"/>
       <item type="layout" name="car_ui_preference_two_action_text"/>
@@ -458,6 +473,7 @@ limitations under the License.-->
       <item type="string" name="car_ui_toolbar_menu_item_settings_title"/>
       <item type="string" name="car_ui_toolbar_nav_icon_content_description"/>
       <item type="style" name="CarUiPreferenceTheme"/>
+      <item type="style" name="CarUiPreferenceTheme.WithToolbar"/>
       <item type="style" name="Preference.CarUi"/>
       <item type="style" name="Preference.CarUi.Category"/>
       <item type="style" name="Preference.CarUi.CheckBoxPreference"/>
@@ -477,6 +493,7 @@ limitations under the License.-->
       <item type="style" name="Preference.CarUi.SeekBarPreference"/>
       <item type="style" name="Preference.CarUi.SwitchPreference"/>
       <item type="style" name="PreferenceFragment.CarUi"/>
+      <item type="style" name="PreferenceFragment.CarUi.WithToolbar"/>
       <item type="style" name="PreferenceFragmentList.CarUi"/>
       <item type="style" name="TextAppearance.CarUi"/>
       <item type="style" name="TextAppearance.CarUi.AlertDialog.Subtitle"/>
