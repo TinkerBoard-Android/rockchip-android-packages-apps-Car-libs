@@ -23,6 +23,7 @@ import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isChecked;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.isFocused;
 import static androidx.test.espresso.matcher.ViewMatchers.isNotChecked;
 import static androidx.test.espresso.matcher.ViewMatchers.withContentDescription;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
@@ -49,12 +50,14 @@ import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.res.Resources;
+import android.view.KeyEvent;
 import android.view.View;
 
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.DropDownPreference;
 import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 
 import com.android.car.ui.test.R;
@@ -157,6 +160,21 @@ public class PreferenceTest {
                 .check(matches(isChecked()));
         onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 2))
                 .check(matches(isNotChecked()));
+
+        // Rotary focus test
+        // Return to main screen and turn off touch mode.
+        onView(withContentDescription("Back")).perform(click());
+        InstrumentationRegistry.getInstrumentation().setInTouchMode(false);
+        // Return to list preference screen. Requires two inputs to focus and then click.
+        InstrumentationRegistry.getInstrumentation()
+                .sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER);
+        InstrumentationRegistry.getInstrumentation()
+                .sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER);
+        // Check that second option is selected and focused.
+        onView(withIndex(withId(R.id.car_ui_list_item_radio_button_widget), 1))
+                .check(matches(isChecked()));
+        onView(withIndex(withId(R.id.car_ui_list_item_touch_interceptor), 1))
+                .check(matches(isFocused()));
     }
 
     @Test

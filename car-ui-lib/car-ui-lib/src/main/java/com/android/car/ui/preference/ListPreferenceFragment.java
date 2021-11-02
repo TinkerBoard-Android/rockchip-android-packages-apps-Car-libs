@@ -31,6 +31,7 @@ import androidx.fragment.app.Fragment;
 import androidx.preference.DialogPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.car.ui.FocusArea;
 import com.android.car.ui.R;
@@ -158,6 +159,15 @@ public class ListPreferenceFragment extends Fragment implements InsetsChangedLis
         }
 
         carUiRecyclerView.setAdapter(adapter);
+        carUiRecyclerView.scrollToPosition(mSelectedIndex);
+        carUiRecyclerView.post(
+                () -> {
+                    RecyclerView.ViewHolder viewHolder =
+                            carUiRecyclerView.findViewHolderForAdapterPosition(mSelectedIndex);
+                    if (viewHolder != null) {
+                        viewHolder.itemView.requestFocus();
+                    }
+                });
     }
 
     @Override
