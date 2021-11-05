@@ -51,8 +51,6 @@ import com.android.car.ui.baselayout.Insets;
 import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.core.CarUi;
 import com.android.car.ui.recyclerview.CarUiRecyclerView;
-import com.android.car.ui.recyclerview.CarUiRecyclerViewImpl;
-import com.android.car.ui.recyclerview.RecyclerViewAdapterV1;
 import com.android.car.ui.toolbar.Toolbar;
 import com.android.car.ui.toolbar.ToolbarController;
 import com.android.car.ui.utils.CarUiUtils;
@@ -77,6 +75,20 @@ import java.util.Map;
 @RequiresApi(MIN_TARGET_API)
 public abstract class PreferenceFragment extends PreferenceFragmentCompat implements
         InsetsChangedListener {
+
+    /**
+     * Only for PreferenceFragment internal usage. Apps shouldn't use this as the
+     * {@link RecyclerView} that's provided here is not the real RecyclerView and has very limited
+     * functionality.
+     */
+    public interface AndroidxRecyclerViewProvider {
+
+        /**
+         * returns instance of {@link RecyclerView} that proxies PreferenceFragment calls to the
+         * real RecyclerView implementation.
+         */
+        RecyclerView getRecyclerView();
+    }
 
     private static final String TAG = "CarUiPreferenceFragment";
     private static final String DIALOG_FRAGMENT_TAG =
@@ -358,10 +370,8 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
             Bundle savedInstanceState) {
         mCarUiRecyclerView = onCreateCarUiRecyclerView(inflater, parent, savedInstanceState);
         RecyclerView recyclerView = null;
-        if (mCarUiRecyclerView instanceof CarUiRecyclerViewImpl) {
-            recyclerView = ((CarUiRecyclerViewImpl) mCarUiRecyclerView).getRecyclerView();
-        } else if (mCarUiRecyclerView instanceof RecyclerViewAdapterV1) {
-            recyclerView = ((RecyclerViewAdapterV1) mCarUiRecyclerView).getRecyclerView();
+        if (mCarUiRecyclerView instanceof AndroidxRecyclerViewProvider) {
+            recyclerView = ((AndroidxRecyclerViewProvider) mCarUiRecyclerView).getRecyclerView();
         }
         if (recyclerView != null) {
             return recyclerView;
