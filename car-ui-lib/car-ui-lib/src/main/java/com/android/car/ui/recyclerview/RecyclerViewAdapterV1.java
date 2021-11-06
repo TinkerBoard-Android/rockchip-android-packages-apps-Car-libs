@@ -42,6 +42,7 @@ import com.android.car.ui.plugin.oemapis.recyclerview.LayoutStyleOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.OnScrollListenerOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewAttributesOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewOEMV1;
+import com.android.car.ui.preference.PreferenceFragment.AndroidxRecyclerViewProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +54,7 @@ import java.util.List;
  */
 @TargetApi(MIN_TARGET_API)
 public final class RecyclerViewAdapterV1 extends FrameLayout
-        implements CarUiRecyclerView, OnScrollListenerOEMV1 {
+        implements CarUiRecyclerView, OnScrollListenerOEMV1, AndroidxRecyclerViewProvider {
 
     @Nullable
     private RecyclerViewOEMV1 mOEMRecyclerView;
@@ -204,6 +205,7 @@ public final class RecyclerViewAdapterV1 extends FrameLayout
     }
 
     @Nullable
+    @Override
     public RecyclerView getRecyclerView() {
         return mRecyclerView;
     }
