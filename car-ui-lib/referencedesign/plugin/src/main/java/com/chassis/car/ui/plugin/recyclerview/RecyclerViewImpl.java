@@ -40,6 +40,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.OrientationHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
+import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import com.android.car.ui.plugin.oemapis.recyclerview.AdapterOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.LayoutStyleOEMV1;
@@ -49,6 +50,7 @@ import com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.ViewHolderOEMV1;
 
 import com.chassis.car.ui.plugin.R;
+import com.chassis.car.ui.plugin.recyclerview.AdapterWrapper.ViewHolderWrapper;
 import com.chassis.car.ui.plugin.uxr.CarUxRestrictionsUtil;
 
 import java.util.ArrayList;
@@ -468,6 +470,24 @@ public final class RecyclerViewImpl extends FrameLayout implements RecyclerViewO
         } else {
             return null;
         }
+    }
+
+    @Override
+    public ViewHolderOEMV1 findViewHolderForAdapterPosition(int position) {
+        ViewHolder viewHolder = mRecyclerView.findViewHolderForAdapterPosition(position);
+        if (viewHolder instanceof ViewHolderWrapper) {
+            return ((ViewHolderWrapper) viewHolder).getViewHolder();
+        }
+        return null;
+    }
+
+    @Override
+    public ViewHolderOEMV1 findViewHolderForLayoutPosition(int position) {
+        ViewHolder viewHolder = mRecyclerView.findViewHolderForLayoutPosition(position);
+        if (viewHolder instanceof ViewHolderWrapper) {
+            return ((ViewHolderWrapper) viewHolder).getViewHolder();
+        }
+        return null;
     }
 
     /**
