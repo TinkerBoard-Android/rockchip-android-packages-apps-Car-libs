@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.car.arch.common.testing;
+package com.android.car.apps.common.testutils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RestrictTo;

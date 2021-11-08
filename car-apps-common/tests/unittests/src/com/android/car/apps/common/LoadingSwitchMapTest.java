@@ -14,26 +14,27 @@
  * limitations under the License.
  */
 
-package com.android.car.arch.common;
+package com.android.car.apps.common;
 
-import static com.android.car.arch.common.LiveDataFunctions.loadingSwitchMap;
+import static com.android.car.apps.common.util.LiveDataFunctions.loadingSwitchMap;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.android.car.arch.common.testing.CaptureObserver;
-import com.android.car.arch.common.testing.InstantTaskExecutorRule;
-import com.android.car.arch.common.testing.TestLifecycleOwner;
+import com.android.car.apps.common.testutils.CaptureObserver;
+import com.android.car.apps.common.testutils.InstantTaskExecutorRule;
+import com.android.car.apps.common.testutils.TestLifecycleOwner;
+import com.android.car.apps.common.util.FutureData;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class LoadingSwitchMapTest {
 
     @Rule

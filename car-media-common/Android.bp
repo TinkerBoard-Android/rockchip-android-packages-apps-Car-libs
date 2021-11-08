@@ -36,7 +36,6 @@ android_library {
         "androidx.mediarouter_mediarouter",
         "androidx-constraintlayout_constraintlayout",
         "car-apps-common",
-        "car-arch-common",
         "androidx-constraintlayout_constraintlayout-solver",
     ],
 
