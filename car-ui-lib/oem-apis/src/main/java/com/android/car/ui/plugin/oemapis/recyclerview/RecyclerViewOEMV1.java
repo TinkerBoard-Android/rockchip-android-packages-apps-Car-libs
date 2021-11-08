@@ -138,4 +138,14 @@ public interface RecyclerViewOEMV1 {
      * Prefer this method over {@link View#getChildAt(int)}
      */
     View getRecyclerViewChildAt(int index);
+
+    /**
+     * see {@link RecyclerView#findViewHolderForAdapterPosition(int)}
+     */
+    ViewHolderOEMV1 findViewHolderForAdapterPosition(int position);
+
+    /**
+     * see {@link RecyclerView#findViewHolderForLayoutPosition(int)}
+     */
+    ViewHolderOEMV1 findViewHolderForLayoutPosition(int position);
 }
