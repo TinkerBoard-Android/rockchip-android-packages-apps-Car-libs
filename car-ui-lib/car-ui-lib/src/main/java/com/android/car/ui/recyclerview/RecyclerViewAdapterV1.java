@@ -42,7 +42,9 @@ import com.android.car.ui.plugin.oemapis.recyclerview.LayoutStyleOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.OnScrollListenerOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewAttributesOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewOEMV1;
+import com.android.car.ui.plugin.oemapis.recyclerview.ViewHolderOEMV1;
 import com.android.car.ui.preference.PreferenceFragment.AndroidxRecyclerViewProvider;
+import com.android.car.ui.recyclerview.RecyclerViewAdapterAdapterV1.ViewHolderAdapterV1;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -292,6 +294,8 @@ public final class RecyclerViewAdapterV1 extends FrameLayout
     @Override
     public void setAdapter(RecyclerView.Adapter<?> adapter) {
         if (adapter == null) {
+            mAdapter = null;
+            mOEMAdapter = null;
             mOEMRecyclerView.setAdapter(null);
         } else {
             if (mAdapter instanceof OnAttachListener) {
@@ -361,20 +365,25 @@ public final class RecyclerViewAdapterV1 extends FrameLayout
 
     @Override
     public ViewHolder findViewHolderForAdapterPosition(int position) {
-        // TODO
+        ViewHolderOEMV1 viewHolder = mOEMRecyclerView.findViewHolderForAdapterPosition(position);
+        if (viewHolder instanceof ViewHolderAdapterV1) {
+            return ((ViewHolderAdapterV1) viewHolder).getViewHolder();
+        }
         return null;
     }
 
     @Override
     public ViewHolder findViewHolderForLayoutPosition(int position) {
-        // TODO
+        ViewHolderOEMV1 viewHolder = mOEMRecyclerView.findViewHolderForLayoutPosition(position);
+        if (viewHolder instanceof ViewHolderAdapterV1) {
+            return ((ViewHolderAdapterV1) viewHolder).getViewHolder();
+        }
         return null;
     }
 
     @Override
     public Adapter<?> getAdapter() {
-        // TODO
-        return null;
+        return mAdapter;
     }
 
     @Override
