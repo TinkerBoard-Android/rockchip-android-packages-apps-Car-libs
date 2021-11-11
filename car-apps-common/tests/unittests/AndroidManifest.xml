@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2018 Google Inc.
+    Copyright (C) 2021 Google Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -15,7 +15,16 @@
     limitations under the License.
 -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.car.arch.common.robotests">
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.car.apps.common.unittests">
 
+    <application android:testOnly="false"
+                 android:debuggable="true">
+        <uses-library android:name="android.test.runner" />
+    </application>
+
+    <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
+                     android:targetPackage="com.android.car.apps.common.unittests"
+                     android:label="Car apps common Unit Tests" />
 </manifest>

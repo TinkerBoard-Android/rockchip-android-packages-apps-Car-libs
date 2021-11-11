@@ -16,7 +16,7 @@
 
 package com.android.car.media.common.source;
 
-import static com.android.car.arch.common.LiveDataFunctions.dataOf;
+import static com.android.car.apps.common.util.LiveDataFunctions.dataOf;
 
 import android.app.Application;
 import android.car.Car;

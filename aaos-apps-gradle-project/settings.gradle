@@ -42,9 +42,6 @@ project(':car-rotary-lib').projectDir = new File('../car-ui-lib/car-rotary-lib')
 include ':car-apps-common'
 project(':car-apps-common').projectDir = new File('../car-apps-common')
 
-include ':car-arch-common'
-project(':car-arch-common').projectDir = new File('../car-arch-common')
-
 include ':car-media-common'
 project(':car-media-common').projectDir = new File('../car-media-common')
 
