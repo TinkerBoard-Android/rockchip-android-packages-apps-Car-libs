@@ -43,6 +43,7 @@ import com.android.car.ui.utils.CarUiUtils;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * {@link ContentProvider ContentProvider's} onCreate() methods are "called for all registered
@@ -70,15 +71,40 @@ public class CarUiInstaller extends ContentProvider {
     private static final String CAR_UI_INSET_TOP = "CAR_UI_INSET_TOP";
     private static final String CAR_UI_INSET_BOTTOM = "CAR_UI_INSET_BOTTOM";
 
+    // applications against which we have already called register
+    private static final HashSet<Application> sAppsRegistered = new HashSet<Application>();
+
+    private static boolean hasAlreadyRegistered(Application application) {
+        synchronized (sAppsRegistered) {
+            return !sAppsRegistered.add(application);
+        }
+    }
+
     @Override
     public boolean onCreate() {
         Context context = getContext();
         if (context == null || !(context.getApplicationContext() instanceof Application)) {
-            Log.e(TAG, "CarUiInstaller had a null context!");
+            Log.e(TAG, "CarUiInstaller had a null context, unable to call register!"
+                        + " Need app to call register by itself");
             return false;
         }
 
         Application application = (Application) context.getApplicationContext();
+        register(application);
+
+        return true;
+    }
+
+    /**
+     * In some cases {@link CarUiInstaller#onCreate} is called before the {@link Application}
+     * instance is created. In those cases applications have to call this method separately
+     * after the Application instance is fully initialized.
+     */
+    public static void register(@NonNull Application application) {
+        if (hasAlreadyRegistered(application)) {
+            return;
+        }
+
         application.registerActivityLifecycleCallbacks(
                 new Application.ActivityLifecycleCallbacks() {
                     private Insets mInsets = null;
@@ -217,8 +243,6 @@ public class CarUiInstaller extends ContentProvider {
                                 activity);
                     }
                 });
-
-        return true;
     }
 
     @Nullable
