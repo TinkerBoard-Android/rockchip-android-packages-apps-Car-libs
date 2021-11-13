@@ -421,7 +421,10 @@ public final class RecyclerViewAdapterV1 extends FrameLayout
     @Override
     public void setLayoutStyle(CarUiLayoutStyle layoutStyle) {
         mLayoutStyle = layoutStyle;
-        if (layoutStyle == null) mOEMRecyclerView.setLayoutStyle(null);
+        if (layoutStyle == null) {
+            mOEMRecyclerView.setLayoutStyle(null);
+            return;
+        }
 
         final LayoutStyleOEMV1 oemLayoutStyle = new LayoutStyleOEMV1() {
             @Override

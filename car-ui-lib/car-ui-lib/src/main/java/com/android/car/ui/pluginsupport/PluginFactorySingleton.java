@@ -104,6 +104,21 @@ public final class PluginFactorySingleton {
             return sInstance;
         }
 
+        // Check if the factory is already on the classpath and if so use it. Note: this would
+        // only happen if the plugin was added as a library to the apk
+        try {
+            Class<?> oemApiUtilClass = Class
+                    .forName("com.android.car.ui.pluginsupport.OemApiUtil");
+            Method getPluginFactoryMethod = oemApiUtilClass.getDeclaredMethod(
+                    "getPluginFactory", Context.class, String.class);
+            getPluginFactoryMethod.setAccessible(true);
+            sInstance = (PluginFactory) getPluginFactoryMethod
+                    .invoke(null, context, context.getPackageName());
+            return sInstance;
+        } catch (ReflectiveOperationException e) {
+            // plugin not found in current classpath
+        }
+
         String pluginPackageName = getPluginPackageName(context);
 
         if (TextUtils.isEmpty(pluginPackageName)) {
@@ -111,7 +126,7 @@ public final class PluginFactorySingleton {
             return sInstance;
         }
 
-        PackageInfo pluginPackageInfo;
+        final PackageInfo pluginPackageInfo;
         try {
             pluginPackageInfo = context.getPackageManager()
                     .getPackageInfo(pluginPackageName, 0);
