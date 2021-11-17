@@ -53,6 +53,7 @@ import com.android.car.qc.QCItem;
 import com.android.car.qc.QCRow;
 import com.android.car.qc.QCSlider;
 import com.android.car.qc.R;
+import com.android.car.ui.utils.CarUiUtils;
 import com.android.car.ui.utils.DirectManipulationHelper;
 import com.android.car.ui.uxr.DrawableStateToggleButton;
 
@@ -73,6 +74,8 @@ public class QCRowView extends FrameLayout {
     private LinearLayout mStartItemsContainer;
     private LinearLayout mEndItemsContainer;
     private LinearLayout mSeekBarContainer;
+    @Nullable
+    private QCSlider mQCSlider;
     private SeekBar mSeekBar;
     private QCActionListener mActionListener;
     private boolean mInDirectManipulationMode;
@@ -81,7 +84,7 @@ public class QCRowView extends FrameLayout {
     private final View.OnKeyListener mSeekBarKeyListener = new View.OnKeyListener() {
         @Override
         public boolean onKey(View v, int keyCode, KeyEvent event) {
-            if (mSeekBar == null) {
+            if (mSeekBar == null || !mSeekBar.isEnabled()) {
                 return false;
             }
             // Consume nudge events in direct manipulation mode.
@@ -96,7 +99,13 @@ public class QCRowView extends FrameLayout {
             // Handle events to enter or exit direct manipulation mode.
             if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
                 if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                    setInDirectManipulationMode(v, mSeekBar, !mInDirectManipulationMode);
+                    if (mQCSlider != null) {
+                        if (mQCSlider.isEnabled()) {
+                            setInDirectManipulationMode(v, mSeekBar, !mInDirectManipulationMode);
+                        } else {
+                            fireAction(mQCSlider, new Intent());
+                        }
+                    }
                 }
                 return true;
             }
@@ -196,7 +205,15 @@ public class QCRowView extends FrameLayout {
             return;
         }
         setVisibility(VISIBLE);
-        if (row.getPrimaryAction() != null || row.getActionHandler() != null) {
+        CarUiUtils.makeAllViewsEnabled(mContentView, row.isEnabled());
+        if (!row.isEnabled()) {
+            if (row.isClickableWhileDisabled() && (row.getDisabledClickAction() != null
+                    || row.getDisabledClickActionHandler() != null)) {
+                mContentView.setOnClickListener(v -> {
+                    fireAction(row, /* intent= */ null);
+                });
+            }
+        } else if (row.getPrimaryAction() != null || row.getActionHandler() != null) {
             mContentView.setOnClickListener(v -> {
                 fireAction(row, /* intent= */ null);
             });
@@ -235,6 +252,7 @@ public class QCRowView extends FrameLayout {
             initSlider(slider);
         } else {
             mSeekBarContainer.setVisibility(View.GONE);
+            mQCSlider = null;
         }
 
         int startItemCount = row.getStartItems().size();
@@ -286,10 +304,22 @@ public class QCRowView extends FrameLayout {
             actionView = createActionView(root, actionView, R.layout.qc_action_switch);
             switchView = actionView.requireViewById(android.R.id.switch_widget);
         }
+        CarUiUtils.makeAllViewsEnabled(switchView, action.isEnabled());
 
+        boolean shouldEnableView =
+                (action.isEnabled() || action.isClickableWhileDisabled()) && action.isAvailable();
         switchView.setOnCheckedChangeListener(null);
-        switchView.setEnabled(action.isEnabled());
+        switchView.setEnabled(shouldEnableView);
         switchView.setChecked(action.isChecked());
+        switchView.setOnTouchListener((v, event) -> {
+            if (!action.isEnabled()) {
+                if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+                    fireAction(action, new Intent());
+                }
+                return true;
+            }
+            return false;
+        });
         switchView.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> {
                     Intent intent = new Intent();
@@ -299,12 +329,14 @@ public class QCRowView extends FrameLayout {
     }
 
     private void initToggleView(QCActionItem action, ViewGroup root, View actionView) {
-        DrawableStateToggleButton toggleButton =
+        DrawableStateToggleButton tmpToggleButton =
                 actionView == null ? null : actionView.findViewById(R.id.qc_toggle_button);
-        if (toggleButton == null) {
+        if (tmpToggleButton == null) {
             actionView = createActionView(root, actionView, R.layout.qc_action_toggle);
-            toggleButton = actionView.requireViewById(R.id.qc_toggle_button);
+            tmpToggleButton = actionView.requireViewById(R.id.qc_toggle_button);
         }
+        DrawableStateToggleButton toggleButton = tmpToggleButton; // must be effectively final
+        CarUiUtils.makeAllViewsEnabled(toggleButton, action.isEnabled());
         toggleButton.setText(null);
         toggleButton.setTextOn(null);
         toggleButton.setTextOff(null);
@@ -314,6 +346,15 @@ public class QCRowView extends FrameLayout {
         toggleButton.setButtonDrawable(icon);
         toggleButton.setChecked(action.isChecked());
         toggleButton.setEnabled(action.isEnabled() && action.isAvailable());
+        toggleButton.setOnTouchListener((v, event) -> {
+            if (!action.isEnabled()) {
+                if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+                    fireAction(action, new Intent());
+                }
+                return true;
+            }
+            return false;
+        });
         toggleButton.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> {
                     Intent intent = new Intent();
@@ -329,21 +370,36 @@ public class QCRowView extends FrameLayout {
             // remove current action view
             root.removeView(actionView);
         }
-        actionView = mLayoutInflater.inflate(resId, /* root = */ null);
+        actionView = mLayoutInflater.inflate(resId, /* root= */ null);
         root.addView(actionView);
         return actionView;
     }
 
     private void initSlider(QCSlider slider) {
+        mQCSlider = slider;
         mSeekBar.setOnSeekBarChangeListener(null);
         mSeekBar.setMin(slider.getMin());
         mSeekBar.setMax(slider.getMax());
         mSeekBar.setProgress(slider.getValue());
+        mSeekBar.setEnabled(slider.isEnabled() || slider.isClickableWhileDisabled());
+        CarUiUtils.makeAllViewsEnabled(mSeekBar, slider.isEnabled());
+        if (!slider.isEnabled() && mInDirectManipulationMode) {
+            setInDirectManipulationMode(mSeekBarContainer, mSeekBar, false);
+        }
         if (mSeekbarChangeListener == null) {
             mSeekbarChangeListener = new QCSeekbarChangeListener();
         }
         mSeekbarChangeListener.setSlider(slider);
         mSeekBar.setOnSeekBarChangeListener(mSeekbarChangeListener);
+        mSeekBar.setOnTouchListener((v, event) -> {
+            if (!slider.isEnabled()) {
+                if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+                    fireAction(slider, new Intent());
+                }
+                return true;
+            }
+            return false;
+        });
         // set up rotary support
         mSeekBarContainer.setOnKeyListener(mSeekBarKeyListener);
         mSeekBarContainer.setOnFocusChangeListener(mSeekBarFocusChangeListener);
@@ -358,11 +414,30 @@ public class QCRowView extends FrameLayout {
     }
 
     private void fireAction(QCItem item, Intent intent) {
+        if (!item.isEnabled()) {
+            if (item.getDisabledClickAction() != null) {
+                try {
+                    item.getDisabledClickAction().send(getContext(), 0, intent);
+                    if (mActionListener != null) {
+                        mActionListener.onQCAction(item, item.getDisabledClickAction());
+                    }
+                } catch (PendingIntent.CanceledException e) {
+                    Log.d(TAG, "Error sending intent", e);
+                }
+            } else if (item.getDisabledClickActionHandler() != null) {
+                item.getDisabledClickActionHandler().onAction(item, getContext(), intent);
+                if (mActionListener != null) {
+                    mActionListener.onQCAction(item, item.getDisabledClickActionHandler());
+                }
+            }
+            return;
+        }
+
         if (item.getPrimaryAction() != null) {
             try {
                 item.getPrimaryAction().send(getContext(), 0, intent);
                 if (mActionListener != null) {
-                    mActionListener.onQCAction(item);
+                    mActionListener.onQCAction(item, item.getPrimaryAction());
                 }
             } catch (PendingIntent.CanceledException e) {
                 Log.d(TAG, "Error sending intent", e);
@@ -370,7 +445,7 @@ public class QCRowView extends FrameLayout {
         } else if (item.getActionHandler() != null) {
             item.getActionHandler().onAction(item, getContext(), intent);
             if (mActionListener != null) {
-                mActionListener.onQCAction(item);
+                mActionListener.onQCAction(item, item.getActionHandler());
             }
         }
     }

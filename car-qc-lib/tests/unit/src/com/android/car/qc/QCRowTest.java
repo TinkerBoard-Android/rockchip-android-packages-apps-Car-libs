@@ -37,27 +37,27 @@ public class QCRowTest extends QCItemTestCase<QCRow> {
 
     @Test
     public void onCreate_hasCorrectType() {
-        QCRow row = createRow(/* action= */ null, /* icon= */ null);
+        QCRow row = createRow(/* action= */ null, /* disabledAction= */ null, /* icon= */ null);
         assertThat(row.getType()).isEqualTo(QC_TYPE_ROW);
     }
 
     @Test
-    public void onBundle_nullAction_noCrash() {
-        QCRow row = createRow(/* action= */ null, mDefaultIcon);
+    public void onBundle_nullActions_noCrash() {
+        QCRow row = createRow(/* action= */ null, /* disabledAction= */ null, mDefaultIcon);
         writeAndLoadFromBundle(row);
         // Test passes if this doesn't crash
     }
 
     @Test
     public void onBundle_nullIcon_noCrash() {
-        QCRow row = createRow(mDefaultAction, /* icon= */ null);
+        QCRow row = createRow(mDefaultAction, mDefaultDisabledAction, /* icon= */ null);
         writeAndLoadFromBundle(row);
         // Test passes if this doesn't crash
     }
 
     @Test
     public void createFromParcel_accurateData() {
-        QCRow row = createRow(mDefaultAction, mDefaultIcon);
+        QCRow row = createRow(mDefaultAction, mDefaultDisabledAction, mDefaultIcon);
         QCRow newRow = writeAndLoadFromBundle(row);
         assertThat(newRow.getType()).isEqualTo(QC_TYPE_ROW);
         assertThat(newRow.getTitle()).isEqualTo(TEST_TITLE);
@@ -70,8 +70,8 @@ public class QCRowTest extends QCItemTestCase<QCRow> {
     public void createFromParcel_accurateData_startItem() {
         QCActionItem item = new QCActionItem.Builder(QC_TYPE_ACTION_SWITCH).build();
 
-        QCRow row = createRow(/* action= */ null, /* icon= */ null, Collections.singletonList(item),
-                Collections.emptyList(), Collections.emptyList());
+        QCRow row = createRow(/* action= */ null, /* disabledAction= */ null, /* icon= */ null,
+                Collections.singletonList(item), Collections.emptyList(), Collections.emptyList());
         QCRow newRow = writeAndLoadFromBundle(row);
         assertThat(newRow.getStartItems().size()).isEqualTo(1);
     }
@@ -80,8 +80,8 @@ public class QCRowTest extends QCItemTestCase<QCRow> {
     public void createFromParcel_accurateData_endItem() {
         QCActionItem item = new QCActionItem.Builder(QC_TYPE_ACTION_SWITCH).build();
 
-        QCRow row = createRow(/* action= */ null, /* icon= */ null, Collections.emptyList(),
-                Collections.singletonList(item), Collections.emptyList());
+        QCRow row = createRow(/* action= */ null, /* disabledAction= */ null, /* icon= */ null,
+                Collections.emptyList(), Collections.singletonList(item), Collections.emptyList());
         QCRow newRow = writeAndLoadFromBundle(row);
         assertThat(newRow.getEndItems().size()).isEqualTo(1);
     }
@@ -90,24 +90,26 @@ public class QCRowTest extends QCItemTestCase<QCRow> {
     public void createFromParcel_accurateData_slider() {
         QCSlider slider = new QCSlider.Builder().build();
 
-        QCRow row = createRow(/* action= */ null, /* icon= */ null, Collections.emptyList(),
-                Collections.emptyList(), Collections.singletonList(slider));
+        QCRow row = createRow(/* action= */ null, /* disabledAction= */ null, /* icon= */ null,
+                Collections.emptyList(), Collections.emptyList(),
+                Collections.singletonList(slider));
         QCRow newRow = writeAndLoadFromBundle(row);
         assertThat(newRow.getSlider()).isNotNull();
     }
 
-    private QCRow createRow(PendingIntent action, Icon icon) {
-        return createRow(action, icon, Collections.emptyList(), Collections.emptyList(),
-                Collections.emptyList());
+    private QCRow createRow(PendingIntent action, PendingIntent disabledAction, Icon icon) {
+        return createRow(action, disabledAction, icon, Collections.emptyList(),
+                Collections.emptyList(), Collections.emptyList());
     }
 
-    private QCRow createRow(PendingIntent action, Icon icon, List<QCActionItem> startItems,
-            List<QCActionItem> endItems, List<QCSlider> sliders) {
+    private QCRow createRow(PendingIntent action, PendingIntent disabledAction, Icon icon,
+            List<QCActionItem> startItems, List<QCActionItem> endItems, List<QCSlider> sliders) {
         QCRow.Builder builder = new QCRow.Builder()
                 .setTitle(TEST_TITLE)
                 .setSubtitle(TEST_SUBTITLE)
                 .setIcon(icon)
-                .setPrimaryAction(action);
+                .setPrimaryAction(action)
+                .setDisabledClickAction(disabledAction);
         for (QCActionItem item : startItems) {
             builder.addStartItem(item);
         }

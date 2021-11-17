@@ -37,64 +37,73 @@ public class QCActionItemTest extends QCItemTestCase<QCActionItem> {
     @Test
     public void onCreate_invalidType_throwsException() {
         assertThrows(IllegalArgumentException.class,
-                () -> createAction("INVALID_TYPE", /* action= */ null, /* icon= */ null));
+                () -> createAction("INVALID_TYPE", /* action= */ null,
+                        /* disabledAction= */ null, /* icon= */ null));
     }
 
     @Test
     public void onCreateSwitch_hasCorrectType() {
         QCActionItem action = createAction(QC_TYPE_ACTION_SWITCH, /* action= */ null,
-                /* icon= */null);
+                /* disabledAction= */ null, /* icon= */null);
         assertThat(action.getType()).isEqualTo(QC_TYPE_ACTION_SWITCH);
     }
 
     @Test
     public void onCreateToggle_hasCorrectType() {
         QCActionItem action = createAction(QC_TYPE_ACTION_TOGGLE, /* action= */ null,
-                /* icon= */ null);
+                /* disabledAction= */ null, /* icon= */ null);
         assertThat(action.getType()).isEqualTo(QC_TYPE_ACTION_TOGGLE);
     }
 
     @Test
-    public void onBundle_nullAction_noCrash() {
-        QCActionItem action = createAction(QC_TYPE_ACTION_TOGGLE, /* action= */ null, mDefaultIcon);
+    public void onBundle_nullActions_noCrash() {
+        QCActionItem action = createAction(QC_TYPE_ACTION_TOGGLE, /* action= */ null,
+                /* disabledAction= */ null, mDefaultIcon);
         writeAndLoadFromBundle(action);
         // Test passes if this doesn't crash
     }
 
     @Test
     public void onBundle_nullIcon_noCrash() {
-        QCActionItem action = createAction(QC_TYPE_ACTION_TOGGLE, mDefaultAction, /* icon= */ null);
+        QCActionItem action = createAction(QC_TYPE_ACTION_TOGGLE, mDefaultAction,
+                mDefaultDisabledAction, /* icon= */ null);
         writeAndLoadFromBundle(action);
         // Test passes if this doesn't crash
     }
 
     @Test
     public void onBundle_switch_accurateData() {
-        QCActionItem action = createAction(QC_TYPE_ACTION_SWITCH, mDefaultAction, /* icon= */ null);
+        QCActionItem action = createAction(QC_TYPE_ACTION_SWITCH, mDefaultAction,
+                mDefaultDisabledAction, /* icon= */ null);
         QCActionItem newAction = writeAndLoadFromBundle(action);
         assertThat(newAction.getType()).isEqualTo(QC_TYPE_ACTION_SWITCH);
         assertThat(newAction.isChecked()).isTrue();
         assertThat(newAction.isEnabled()).isTrue();
+        assertThat(newAction.isClickableWhileDisabled()).isFalse();
         assertThat(newAction.getPrimaryAction()).isNotNull();
         assertThat(newAction.getIcon()).isNull();
     }
 
     @Test
     public void onBundle_toggle_accurateDate() {
-        QCActionItem action = createAction(QC_TYPE_ACTION_TOGGLE, mDefaultAction, mDefaultIcon);
+        QCActionItem action = createAction(QC_TYPE_ACTION_TOGGLE, mDefaultAction,
+                mDefaultDisabledAction, mDefaultIcon);
         QCActionItem newAction = writeAndLoadFromBundle(action);
         assertThat(newAction.getType()).isEqualTo(QC_TYPE_ACTION_TOGGLE);
         assertThat(newAction.isChecked()).isTrue();
         assertThat(newAction.isEnabled()).isTrue();
+        assertThat(newAction.isClickableWhileDisabled()).isFalse();
         assertThat(newAction.getPrimaryAction()).isNotNull();
         assertThat(newAction.getIcon()).isNotNull();
     }
 
-    private QCActionItem createAction(String type, PendingIntent action, Icon icon) {
+    private QCActionItem createAction(String type, PendingIntent action,
+            PendingIntent disabledAction, Icon icon) {
         return new QCActionItem.Builder(type)
                 .setChecked(true)
                 .setEnabled(true)
                 .setAction(action)
+                .setDisabledClickAction(disabledAction)
                 .setIcon(icon)
                 .build();
     }

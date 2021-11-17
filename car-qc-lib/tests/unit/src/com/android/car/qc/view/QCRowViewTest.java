@@ -107,6 +107,7 @@ public class QCRowViewTest {
     }
 
     @Test
+    @UiThreadTest
     public void setRow_createsStartItems() {
         QCRow row = new QCRow.Builder()
                 .addStartItem(new QCActionItem.Builder(QC_TYPE_ACTION_SWITCH).build())
@@ -122,6 +123,7 @@ public class QCRowViewTest {
     }
 
     @Test
+    @UiThreadTest
     public void setRow_createsEndItems() {
         QCRow row = new QCRow.Builder()
                 .addEndItem(new QCActionItem.Builder(QC_TYPE_ACTION_SWITCH).build())

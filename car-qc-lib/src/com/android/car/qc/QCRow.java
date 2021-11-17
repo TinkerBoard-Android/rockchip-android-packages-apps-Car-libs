@@ -44,15 +44,18 @@ public class QCRow extends QCItem {
     private final List<QCActionItem> mStartItems;
     private final List<QCActionItem> mEndItems;
     private final PendingIntent mPrimaryAction;
+    private PendingIntent mDisabledClickAction;
 
-    public QCRow(@Nullable String title, @Nullable String subtitle,
-            @Nullable PendingIntent primaryAction, @Nullable Icon startIcon, boolean isIconTintable,
-            @Nullable QCSlider slider, @NonNull List<QCActionItem> startItems,
-            @NonNull List<QCActionItem> endItems) {
-        super(QC_TYPE_ROW);
+    public QCRow(@Nullable String title, @Nullable String subtitle, boolean isEnabled,
+            boolean isClickableWhileDisabled, @Nullable PendingIntent primaryAction,
+            @Nullable PendingIntent disabledClickAction, @Nullable Icon startIcon,
+            boolean isIconTintable, @Nullable QCSlider slider,
+            @NonNull List<QCActionItem> startItems, @NonNull List<QCActionItem> endItems) {
+        super(QC_TYPE_ROW, isEnabled, isClickableWhileDisabled);
         mTitle = title;
         mSubtitle = subtitle;
         mPrimaryAction = primaryAction;
+        mDisabledClickAction = disabledClickAction;
         mStartIcon = startIcon;
         mIsStartIconTintable = isIconTintable;
         mSlider = slider;
@@ -95,6 +98,12 @@ public class QCRow extends QCItem {
         } else {
             mPrimaryAction = null;
         }
+        boolean hasDisabledClickAction = in.readBoolean();
+        if (hasDisabledClickAction) {
+            mDisabledClickAction = PendingIntent.CREATOR.createFromParcel(in);
+        } else {
+            mDisabledClickAction = null;
+        }
     }
 
     @Override
@@ -121,16 +130,26 @@ public class QCRow extends QCItem {
         for (QCActionItem endItem : mEndItems) {
             endItem.writeToParcel(dest, flags);
         }
-        dest.writeBoolean(mPrimaryAction != null);
         boolean hasPrimaryAction = mPrimaryAction != null;
+        dest.writeBoolean(hasPrimaryAction);
         if (hasPrimaryAction) {
             mPrimaryAction.writeToParcel(dest, flags);
+        }
+        boolean hasDisabledClickAction = mDisabledClickAction != null;
+        dest.writeBoolean(hasDisabledClickAction);
+        if (hasDisabledClickAction) {
+            mDisabledClickAction.writeToParcel(dest, flags);
         }
     }
 
     @Override
     public PendingIntent getPrimaryAction() {
         return mPrimaryAction;
+    }
+
+    @Override
+    public PendingIntent getDisabledClickAction() {
+        return mDisabledClickAction;
     }
 
     @Nullable
@@ -189,8 +208,11 @@ public class QCRow extends QCItem {
         private boolean mIsStartIconTintable = true;
         private String mTitle;
         private String mSubtitle;
+        private boolean mIsEnabled = true;
+        private boolean mIsClickableWhileDisabled = false;
         private QCSlider mSlider;
         private PendingIntent mPrimaryAction;
+        private PendingIntent mDisabledClickAction;
 
         /**
          * Sets the row title.
@@ -205,6 +227,23 @@ public class QCRow extends QCItem {
          */
         public Builder setSubtitle(@Nullable String subtitle) {
             mSubtitle = subtitle;
+            return this;
+        }
+
+        /**
+         * Sets whether or not the row is enabled. Note that this only affects the main row area,
+         * not the action items contained within the row.
+         */
+        public Builder setEnabled(boolean enabled) {
+            mIsEnabled = enabled;
+            return this;
+        }
+
+        /**
+         * Sets whether or not the row should be clickable while disabled.
+         */
+        public Builder setClickableWhileDisabled(boolean clickable) {
+            mIsClickableWhileDisabled = clickable;
             return this;
         }
 
@@ -241,6 +280,14 @@ public class QCRow extends QCItem {
         }
 
         /**
+         * Sets the PendingIntent to be sent when the action item is clicked while disabled.
+         */
+        public Builder setDisabledClickAction(@Nullable PendingIntent action) {
+            mDisabledClickAction = action;
+            return this;
+        }
+
+        /**
          * Adds a {@link QCActionItem} to the start items area.
          */
         public Builder addStartItem(@NonNull QCActionItem item) {
@@ -260,7 +307,8 @@ public class QCRow extends QCItem {
          * Builds the final {@link QCRow}.
          */
         public QCRow build() {
-            return new QCRow(mTitle, mSubtitle, mPrimaryAction, mStartIcon, mIsStartIconTintable,
+            return new QCRow(mTitle, mSubtitle, mIsEnabled, mIsClickableWhileDisabled,
+                    mPrimaryAction, mDisabledClickAction, mStartIcon, mIsStartIconTintable,
                     mSlider, mStartItems, mEndItems);
         }
     }

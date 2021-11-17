@@ -112,7 +112,9 @@ public class QCView extends FrameLayout implements Observer<QCItem> {
         /**
          * Called when an interaction has occurred with an element in this view.
          * @param item the specific item within the {@link QCItem} that was interacted with.
+         * @param action the action that was executed - is generally either a
+         *               {@link android.app.PendingIntent} or {@link QCItem.ActionHandler}
          */
-        void onQCAction(@NonNull QCItem item);
+        void onQCAction(@NonNull QCItem item, @NonNull Object action);
     }
 }

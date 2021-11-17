@@ -120,7 +120,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/barrier2"
             app:layout_constraintBottom_toBottomOf="parent">
-            <SeekBar
+            <com.android.car.ui.uxr.DrawableStateSeekBar
                 android:id="@+id/seekbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

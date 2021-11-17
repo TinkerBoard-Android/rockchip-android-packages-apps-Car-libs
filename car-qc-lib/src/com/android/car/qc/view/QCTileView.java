@@ -34,6 +34,7 @@ import androidx.lifecycle.Observer;
 import com.android.car.qc.QCItem;
 import com.android.car.qc.QCTile;
 import com.android.car.qc.R;
+import com.android.car.ui.utils.CarUiUtils;
 import com.android.car.ui.uxr.DrawableStateToggleButton;
 
 /**
@@ -82,7 +83,6 @@ public class QCTileView extends FrameLayout implements Observer<QCItem> {
         mToggleButton.setText(null);
         mToggleButton.setTextOn(null);
         mToggleButton.setTextOff(null);
-
     }
 
     @Override
@@ -97,11 +97,34 @@ public class QCTileView extends FrameLayout implements Observer<QCItem> {
         }
         QCTile qcTile = (QCTile) qcItem;
         mSubtitle.setText(qcTile.getSubtitle());
+        CarUiUtils.makeAllViewsEnabled(mToggleButton, qcTile.isEnabled());
         mToggleButton.setOnCheckedChangeListener(null);
         mToggleButton.setChecked(qcTile.isChecked());
-        mToggleButton.setEnabled(qcTile.isEnabled());
-        mTileWrapper.setEnabled(qcTile.isEnabled() && qcTile.isAvailable());
-        mTileWrapper.setOnClickListener(v -> mToggleButton.toggle());
+        mToggleButton.setEnabled(qcTile.isEnabled() || qcTile.isClickableWhileDisabled());
+        mTileWrapper.setEnabled(
+                (qcTile.isEnabled() || qcTile.isClickableWhileDisabled()) && qcTile.isAvailable());
+        mTileWrapper.setOnClickListener(v -> {
+            if (!qcTile.isEnabled()) {
+                if (qcTile.getDisabledClickAction() != null) {
+                    try {
+                        qcTile.getDisabledClickAction().send(getContext(), 0, new Intent());
+                        if (mActionListener != null) {
+                            mActionListener.onQCAction(qcTile, qcTile.getDisabledClickAction());
+                        }
+                    } catch (PendingIntent.CanceledException e) {
+                        Log.d(TAG, "Error sending intent", e);
+                    }
+                } else if (qcTile.getDisabledClickActionHandler() != null) {
+                    qcTile.getDisabledClickActionHandler().onAction(qcTile, getContext(),
+                            new Intent());
+                    if (mActionListener != null) {
+                        mActionListener.onQCAction(qcTile, qcTile.getDisabledClickActionHandler());
+                    }
+                }
+                return;
+            }
+            mToggleButton.toggle();
+        });
         Drawable icon = QCViewUtils.getInstance(mContext).getToggleIcon(
                 qcTile.getIcon(), qcTile.isAvailable());
         mToggleButton.setButtonDrawable(icon);
@@ -113,7 +136,7 @@ public class QCTileView extends FrameLayout implements Observer<QCItem> {
                         try {
                             qcTile.getPrimaryAction().send(getContext(), 0, intent);
                             if (mActionListener != null) {
-                                mActionListener.onQCAction(qcTile);
+                                mActionListener.onQCAction(qcTile, qcTile.getPrimaryAction());
                             }
                         } catch (PendingIntent.CanceledException e) {
                             Log.d(TAG, "Error sending intent", e);
@@ -121,7 +144,7 @@ public class QCTileView extends FrameLayout implements Observer<QCItem> {
                     } else if (qcTile.getActionHandler() != null) {
                         qcTile.getActionHandler().onAction(qcTile, getContext(), intent);
                         if (mActionListener != null) {
-                            mActionListener.onQCAction(qcTile);
+                            mActionListener.onQCAction(qcTile, qcTile.getActionHandler());
                         }
                     }
                 });

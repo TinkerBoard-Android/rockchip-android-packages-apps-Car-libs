@@ -34,6 +34,8 @@ public abstract class QCItemTestCase<T extends QCItem> {
 
     protected PendingIntent mDefaultAction = PendingIntent.getActivity(mContext,
             /* requestCode= */ 0, new Intent(), PendingIntent.FLAG_IMMUTABLE);
+    protected PendingIntent mDefaultDisabledAction = PendingIntent.getActivity(mContext,
+            /* requestCode= */ 1, new Intent(), PendingIntent.FLAG_IMMUTABLE);
     protected Icon mDefaultIcon = Icon.createWithResource(mContext, R.drawable.btn_star);
 
     protected T writeAndLoadFromBundle(T item) {

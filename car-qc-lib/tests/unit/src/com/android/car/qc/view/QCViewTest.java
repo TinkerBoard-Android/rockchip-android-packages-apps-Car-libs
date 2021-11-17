@@ -24,6 +24,7 @@ import static org.testng.Assert.assertThrows;
 
 import android.content.Context;
 
+import androidx.test.annotation.UiThreadTest;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
@@ -69,6 +70,7 @@ public class QCViewTest {
     }
 
     @Test
+    @UiThreadTest
     public void onChanged_tile_createsTileView() {
         QCTile tile = new QCTile.Builder().build();
         mView.onChanged(tile);
@@ -77,6 +79,7 @@ public class QCViewTest {
     }
 
     @Test
+    @UiThreadTest
     public void onChanged_alreadyHasView_callsOnChanged() {
         QCTile tile = new QCTile.Builder().build();
         mView.onChanged(tile);
@@ -89,6 +92,7 @@ public class QCViewTest {
     }
 
     @Test
+    @UiThreadTest
     public void setActionListener_setsOnChildView() {
         QCTile tile = new QCTile.Builder().build();
         mView.onChanged(tile);
