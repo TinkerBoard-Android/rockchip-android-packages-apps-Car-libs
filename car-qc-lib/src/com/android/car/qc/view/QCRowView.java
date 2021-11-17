@@ -280,17 +280,15 @@ public class QCRowView extends FrameLayout {
     }
 
     private void initSwitchView(QCActionItem action, ViewGroup root, View actionView) {
-        FrameLayout switchFrame = actionView == null ? null : actionView.findViewById(
-                R.id.qc_switch_frame);
-        if (switchFrame == null) {
+        Switch switchView = actionView == null ? null : actionView.findViewById(
+                android.R.id.switch_widget);
+        if (switchView == null) {
             actionView = createActionView(root, actionView, R.layout.qc_action_switch);
-            switchFrame = actionView.requireViewById(R.id.qc_switch_frame);
+            switchView = actionView.requireViewById(android.R.id.switch_widget);
         }
-        Switch switchView = actionView.requireViewById(android.R.id.switch_widget);
 
         switchView.setOnCheckedChangeListener(null);
-        switchFrame.setEnabled(action.isEnabled());
-        switchFrame.setOnClickListener(v -> switchView.toggle());
+        switchView.setEnabled(action.isEnabled());
         switchView.setChecked(action.isChecked());
         switchView.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> {

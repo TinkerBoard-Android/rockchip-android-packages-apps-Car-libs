@@ -116,7 +116,7 @@ public class QCRowViewTest {
         LinearLayout startContainer = mView.findViewById(R.id.qc_row_start_items);
         assertThat(startContainer.getChildCount()).isEqualTo(2);
         assertThat((View) startContainer.getChildAt(0).findViewById(
-                R.id.qc_switch_frame)).isNotNull();
+                android.R.id.switch_widget)).isNotNull();
         assertThat((View) startContainer.getChildAt(1).findViewById(
                 R.id.qc_toggle_button)).isNotNull();
     }
@@ -131,7 +131,7 @@ public class QCRowViewTest {
         LinearLayout endContainer = mView.findViewById(R.id.qc_row_end_items);
         assertThat(endContainer.getChildCount()).isEqualTo(2);
         assertThat((View) endContainer.getChildAt(0).findViewById(
-                R.id.qc_switch_frame)).isNotNull();
+                android.R.id.switch_widget)).isNotNull();
         assertThat((View) endContainer.getChildAt(1).findViewById(
                 R.id.qc_toggle_button)).isNotNull();
     }

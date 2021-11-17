@@ -14,17 +14,9 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<FrameLayout
+<Switch
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/qc_switch_frame"
+    android:id="@android:id/switch_widget"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground">
-    <Switch
-        android:id="@android:id/switch_widget"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:clickable="false"
-        android:focusable="false" />
-</FrameLayout>
+    android:layout_height="wrap_content" />
+
