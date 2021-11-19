@@ -32,6 +32,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.car.ui.plugin.oemapis.TextOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.AdapterDataObserverOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.AdapterOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.ContentListItemOEMV1;
@@ -285,14 +286,14 @@ public class ListItemAdapter extends RecyclerView.Adapter<ListItemAdapter.BaseVi
 
         void bind(@NonNull ContentListItemOEMV1 item) {
             if (item.getTitle() != null) {
-                mTitle.setText(item.getTitle());
+                mTitle.setText(item.getTitle().getPreferredText());
                 mTitle.setVisibility(View.VISIBLE);
             } else {
                 mTitle.setVisibility(View.GONE);
             }
 
             if (item.getBody() != null) {
-                mBody.setText(TextUtils.join("\n", item.getBody()));
+                mBody.setText(TextOEMV1.combineMultiLine(item.getBody()));
                 mBody.setVisibility(View.VISIBLE);
             } else {
                 mBody.setVisibility(View.GONE);

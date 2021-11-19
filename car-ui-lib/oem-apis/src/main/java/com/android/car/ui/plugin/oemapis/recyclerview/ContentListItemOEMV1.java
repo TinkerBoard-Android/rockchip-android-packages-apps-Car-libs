@@ -19,6 +19,8 @@ package com.android.car.ui.plugin.oemapis.recyclerview;
 import android.graphics.drawable.Drawable;
 import android.text.SpannableString;
 
+import com.android.car.ui.plugin.oemapis.TextOEMV1;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -78,8 +80,8 @@ public final class ContentListItemOEMV1 implements ListItemOEMV1 {
     }
 
     private final Action mAction;
-    private final SpannableString mTitle;
-    private final List<SpannableString> mBody;
+    private final TextOEMV1 mTitle;
+    private final List<TextOEMV1> mBody;
     private final Drawable mIcon;
     private final IconType mPrimaryIconType;
     private final Drawable mSupplementalIcon;
@@ -112,14 +114,14 @@ public final class ContentListItemOEMV1 implements ListItemOEMV1 {
     /**
      * Returns the title of the item.
      */
-    public SpannableString getTitle() {
+    public TextOEMV1 getTitle() {
         return mTitle;
     }
 
     /**
      * Returns the body of the item.
      */
-    public List<SpannableString> getBody() {
+    public List<TextOEMV1> getBody() {
         return mBody;
     }
 
@@ -167,8 +169,8 @@ public final class ContentListItemOEMV1 implements ListItemOEMV1 {
     }
 
     /**
-     * Returns {@code true} if list item is secure. A secure list item must not call
-     * it's click listeners when there is a full or partial overlay on the window.
+     * Returns {@code true} if list item is secure. A secure list item must not call it's click
+     * listeners when there is a full or partial overlay on the window.
      */
     public boolean isSecure() {
         return mIsSecure;
@@ -235,8 +237,8 @@ public final class ContentListItemOEMV1 implements ListItemOEMV1 {
      */
     public static final class Builder {
         private final Action mAction;
-        private SpannableString mTitle;
-        private List<SpannableString> mBody;
+        private TextOEMV1 mTitle;
+        private List<TextOEMV1> mBody;
         private Drawable mIcon;
         private IconType mPrimaryIconType = IconType.STANDARD;
         private Drawable mSupplementalIcon;
@@ -262,6 +264,16 @@ public final class ContentListItemOEMV1 implements ListItemOEMV1 {
          * @param text text to display as title
          */
         public Builder setTitle(SpannableString text) {
+            mTitle = new TextOEMV1.Builder(text).build();
+            return this;
+        }
+
+        /**
+         * Sets the title of the item.
+         *
+         * @param text text to display as title
+         */
+        public Builder setTitle(TextOEMV1 text) {
             mTitle = text;
             return this;
         }
@@ -272,7 +284,7 @@ public final class ContentListItemOEMV1 implements ListItemOEMV1 {
          * @param text text to display as body text.
          */
         public Builder setBody(SpannableString text) {
-            mBody = Collections.singletonList(text);
+            mBody = Collections.singletonList(new TextOEMV1.Builder(text).build());
             return this;
         }
 
@@ -280,9 +292,9 @@ public final class ContentListItemOEMV1 implements ListItemOEMV1 {
          * Sets the body of the item.
          *
          * @param textList list of text to display as body text. Each {@link SpannableString} in the
-         *                list will be rendered on a new line, separated by a line break.
+         *                 list will be rendered on a new line, separated by a line break.
          */
-        public Builder setBody(List<SpannableString> textList) {
+        public Builder setBody(List<TextOEMV1> textList) {
             mBody = textList;
             return this;
         }
@@ -340,9 +352,8 @@ public final class ContentListItemOEMV1 implements ListItemOEMV1 {
         }
 
         /**
-         * Sets if the list item is secure or not. If it is secure, it won't sent any
-         * click events if there is a full or partial overlay on the screen when
-         * they're clicked.
+         * Sets if the list item is secure or not. If it is secure, it won't sent any click events
+         * if there is a full or partial overlay on the screen when they're clicked.
          *
          * @param secure If the list item is secure or not.
          */
