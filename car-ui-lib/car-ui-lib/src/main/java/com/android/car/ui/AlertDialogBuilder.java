@@ -812,11 +812,11 @@ public class AlertDialogBuilder {
             mIconView.setImageTintList(
                     mContext.getColorStateList(R.color.car_ui_dialog_icon_color));
         }
-        // Empty title doesn't take up any space.
-        if (TextUtils.isEmpty(mTitle) && TextUtils.isEmpty(mSubtitle) && mIcon == null) {
-            customTitle.setVisibility(View.GONE);
+        // Do not set custom title if not required to maintain extra padding for messages with no
+        // title logic
+        if (!TextUtils.isEmpty(mTitle) || !TextUtils.isEmpty(mSubtitle) || mIcon != null) {
+            mBuilder.setCustomTitle(customTitle);
         }
-        mBuilder.setCustomTitle(customTitle);
 
         if (!mAllowDismissButton && !mHasSingleChoiceBodyButton
                 && !mNeutralButtonSet && !mNegativeButtonSet && !mPositiveButtonSet) {
