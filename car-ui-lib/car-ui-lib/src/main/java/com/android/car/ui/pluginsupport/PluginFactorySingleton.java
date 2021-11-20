@@ -32,6 +32,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.os.Build;
 import android.os.Process;
+import android.os.Trace;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -66,7 +67,9 @@ public final class PluginFactorySingleton {
     private static PluginFactory sInstance;
     private static TestingOverride sTestingOverride = TestingOverride.NOT_SET;
 
-    /** Only has value during testing, null otherwise */
+    /**
+     * Only has value during testing, null otherwise
+     */
     @SuppressLint("StaticFieldLeak")
     @Nullable
     private static Context sPluginContext = null;
@@ -79,6 +82,15 @@ public final class PluginFactorySingleton {
      * plugin to use.
      */
     public static PluginFactory get(Context context) {
+        try {
+            Trace.beginSection("car-ui-plugin-load");
+            return getImpl(context);
+        } finally {
+            Trace.endSection();
+        }
+    }
+
+    private static PluginFactory getImpl(Context context) {
         if (sInstance != null) {
             return sInstance;
         }
