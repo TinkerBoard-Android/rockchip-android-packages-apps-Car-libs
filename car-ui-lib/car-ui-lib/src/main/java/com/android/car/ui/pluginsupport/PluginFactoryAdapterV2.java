@@ -44,6 +44,7 @@ import com.android.car.ui.baselayout.InsetsChangedListener;
 import com.android.car.ui.plugin.oemapis.InsetsOEMV1;
 import com.android.car.ui.plugin.oemapis.PluginFactoryOEMV1;
 import com.android.car.ui.plugin.oemapis.PluginFactoryOEMV2;
+import com.android.car.ui.plugin.oemapis.TextOEMV1;
 import com.android.car.ui.plugin.oemapis.appstyledview.AppStyledViewControllerOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.AdapterOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.ContentListItemOEMV1;
@@ -67,6 +68,7 @@ import com.android.car.ui.toolbar.ToolbarControllerAdapterV1;
 import com.android.car.ui.utils.CarUiUtils;
 import com.android.car.ui.widget.CarUiTextView;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
@@ -463,13 +465,11 @@ public final class PluginFactoryAdapterV2 implements PluginFactory {
                     toOemListItemAction(contentItem.getAction()));
 
             if (contentItem.getTitle() != null) {
-                builder.setTitle(
-                        new SpannableString(contentItem.getTitle().getPreferredText()));
+                builder.setTitle(toOemText(contentItem.getTitle()));
             }
 
             if (contentItem.getBody() != null) {
-                builder.setBody(new SpannableString(
-                        CarUiText.combineMultiLine(contentItem.getBody())));
+                builder.setBody(toOemText(contentItem.getBody()));
             }
 
             builder.setIcon(contentItem.getIcon(),
@@ -502,6 +502,21 @@ public final class PluginFactoryAdapterV2 implements PluginFactory {
         } else {
             throw new IllegalStateException("Unknown view type.");
         }
+    }
+
+    private static TextOEMV1 toOemText(CarUiText text) {
+        return new TextOEMV1.Builder(text.getTextVariants()).setMaxChars(
+                text.getMaxChars()).setMaxLines(text.getMaxLines()).build();
+    }
+
+    private static List<TextOEMV1> toOemText(List<CarUiText> lines) {
+        List<TextOEMV1> oemLines = new ArrayList<>();
+
+        for (CarUiText line : lines) {
+            oemLines.add(new TextOEMV1.Builder(line.getTextVariants()).setMaxChars(
+                    line.getMaxChars()).setMaxLines(line.getMaxLines()).build());
+        }
+        return oemLines;
     }
 
     private static ContentListItemOEMV1.Action toOemListItemAction(
