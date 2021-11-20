@@ -38,7 +38,7 @@ import java.util.function.Consumer;
 @TargetApi(MIN_TARGET_API)
 class MenuItemRenderer implements MenuItem.Listener {
 
-    private static final int[] RESTRICTED_STATE = new int[] {R.attr.state_ux_restricted};
+    private static final int[] RESTRICTED_STATE = new int[]{R.attr.state_ux_restricted};
 
     private final int mMenuItemIconSize;
 
@@ -84,7 +84,7 @@ class MenuItemRenderer implements MenuItem.Listener {
                 ? R.layout.car_ui_toolbar_menu_item_primary
                 : R.layout.car_ui_toolbar_menu_item;
         inflater.inflate(layout, mParentView, (View view, int resid,
-                ViewGroup parent) -> {
+                                               ViewGroup parent) -> {
             mView = view;
 
             mIconContainer =
