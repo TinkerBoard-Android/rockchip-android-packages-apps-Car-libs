@@ -490,6 +490,16 @@ public final class RecyclerViewImpl extends FrameLayout implements RecyclerViewO
         return null;
     }
 
+    @Override
+    public boolean canScrollHorizontally(int direction) {
+        return mRecyclerView.canScrollHorizontally(direction);
+    }
+
+    @Override
+    public boolean canScrollVertically(int direction) {
+        return mRecyclerView.canScrollVertically(direction);
+    }
+
     /**
      * If this view's {@code rotaryScrollEnabled} attribute is set to true, sets the content
      * description so that the {@code RotaryService} will treat it as a scrollable container and

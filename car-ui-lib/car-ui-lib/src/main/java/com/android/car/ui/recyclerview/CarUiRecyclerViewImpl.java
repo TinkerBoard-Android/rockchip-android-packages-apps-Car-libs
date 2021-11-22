@@ -157,6 +157,16 @@ public final class CarUiRecyclerViewImpl extends FrameLayout
         init(context, attrs, defStyle);
     }
 
+    @Override
+    public boolean canScrollHorizontally(int direction) {
+        return mRecyclerView.canScrollHorizontally(direction);
+    }
+
+    @Override
+    public boolean canScrollVertically(int direction) {
+        return mRecyclerView.canScrollVertically(direction);
+    }
+
     private void init(Context context, AttributeSet attrs, int defStyleAttr) {
         TypedArray a = context.obtainStyledAttributes(
                 attrs,

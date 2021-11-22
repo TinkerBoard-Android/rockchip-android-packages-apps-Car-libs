@@ -1098,6 +1098,34 @@ public class CarUiRecyclerViewTest {
     }
 
     @Test
+    public void testRecyclerView_canScrollVertically() {
+        mActivity.runOnUiThread(
+                () -> mActivity.setContentView(R.layout.car_ui_recycler_view_test_activity));
+
+        onView(withId(R.id.list)).check(matches(isDisplayed()));
+
+        CarUiRecyclerView carUiRecyclerView = mActivity.requireViewById(R.id.list);
+
+        // Can't use OrientationHelper here, because it returns 0 when calling getTotalSpace methods
+        // until LayoutManager's onLayoutComplete is called. In this case waiting until the first
+        // item of the list is displayed guarantees that OrientationHelper is initialized properly.
+        int totalSpace = carUiRecyclerView.getHeight()
+                - carUiRecyclerView.getPaddingTop()
+                - carUiRecyclerView.getPaddingBottom();
+        PerfectFitTestAdapter adapter = new PerfectFitTestAdapter(1, totalSpace);
+        mActivity.runOnUiThread(() -> carUiRecyclerView.setAdapter(adapter));
+
+        IdlingRegistry.getInstance().register(new ScrollIdlingResource(carUiRecyclerView));
+        onView(withText(adapter.getItemText(0))).check(matches(isDisplayed()));
+
+        assertEquals(totalSpace, carUiRecyclerView.getTotalSpace());
+
+        // Both scroll up and down are disabled
+        assertFalse(carUiRecyclerView.getView().canScrollVertically(1));
+        assertFalse(carUiRecyclerView.getView().canScrollVertically(-1));
+    }
+
+    @Test
     public void testSetPaddingToRecyclerViewContainerWithScrollbar() {
         if (isScrollbarEnabledNotAsExpected(true)) return;
 
@@ -2361,7 +2389,7 @@ public class CarUiRecyclerViewTest {
 
         @Override
         public void onBindViewHolder(@NonNull TestViewHolder holder, int position) {
-            holder.itemView.setMinimumHeight(mItemHeight);
+            holder.itemView.getLayoutParams().height = mItemHeight;
             holder.bind(mData.get(position));
         }
 
