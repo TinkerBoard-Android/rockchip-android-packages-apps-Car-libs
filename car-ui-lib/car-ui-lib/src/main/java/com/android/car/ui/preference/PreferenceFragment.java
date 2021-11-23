@@ -234,7 +234,7 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
             }
 
             Context context = getContext();
-            getActivity().getSupportFragmentManager().beginTransaction()
+            getParentFragmentManager().beginTransaction()
                     .setCustomAnimations(
                             CarUiUtils.getAttrResourceId(context,
                                     android.R.attr.fragmentOpenEnterAnimation),
