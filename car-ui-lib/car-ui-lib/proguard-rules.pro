@@ -42,3 +42,6 @@
 # The root cause is unknown, and the suggestion from the team was to
 # suppress this warning.
 -dontwarn android.car.Car
+
+# This is needed so proguard would ignore the missing content provider.
+-dontwarn com.android.car.ui.plugin.PluginNameProvider
