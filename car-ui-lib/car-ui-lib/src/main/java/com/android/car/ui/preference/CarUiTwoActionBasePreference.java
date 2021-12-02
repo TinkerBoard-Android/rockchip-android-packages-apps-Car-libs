@@ -75,7 +75,7 @@ public abstract class CarUiTwoActionBasePreference extends CarUiPreference {
                 .obtainStyledAttributes(attrs, R.styleable.CarUiTwoActionBasePreference);
         try {
             disallowResourceIds(a,
-                    R.styleable.CarUiTwoActionBasePreference_layout,
+                    R.styleable.CarUiTwoActionBasePreference_carUiLayout,
                     R.styleable.CarUiTwoActionBasePreference_android_layout,
                     R.styleable.CarUiTwoActionBasePreference_widgetLayout,
                     R.styleable.CarUiTwoActionBasePreference_android_widgetLayout);

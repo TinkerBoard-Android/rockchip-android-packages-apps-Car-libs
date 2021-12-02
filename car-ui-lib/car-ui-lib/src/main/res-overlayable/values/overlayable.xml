@@ -18,17 +18,63 @@ limitations under the License.-->
     <policy type="odm|oem|product|signature|system|vendor">
       <item type="array" name="car_ui_ime_wide_screen_allowed_package_list"/>
       <item type="attr" name="CarUiToolbarStyle"/>
+      <item type="attr" name="actionEnabled"/>
+      <item type="attr" name="actionShown"/>
+      <item type="attr" name="activatable"/>
+      <item type="attr" name="activated"/>
+      <item type="attr" name="barrierAllowsGoneWidgets"/>
       <item type="attr" name="barrierDirection"/>
+      <item type="attr" name="barrierMargin"/>
+      <item type="attr" name="carUiActivity"/>
+      <item type="attr" name="carUiBaseLayout"/>
+      <item type="attr" name="carUiClickableWhileDisabled"/>
+      <item type="attr" name="carUiIcon"/>
+      <item type="attr" name="carUiLayout"/>
       <item type="attr" name="carUiPreferenceStyle"/>
       <item type="attr" name="carUiRecyclerViewStyle"/>
+      <item type="attr" name="carUiShowChevron"/>
+      <item type="attr" name="carUiSize"/>
+      <item type="attr" name="carUiToolbar"/>
+      <item type="attr" name="car_ui_ux_restricted"/>
       <item type="attr" name="chainUseRtl"/>
+      <item type="attr" name="checkable"/>
+      <item type="attr" name="checked"/>
       <item type="attr" name="constraintSet"/>
       <item type="attr" name="constraint_referenced_ids"/>
+      <item type="attr" name="displayBehavior"/>
+      <item type="attr" name="enableDivider"/>
+      <item type="attr" name="flow_firstHorizontalBias"/>
+      <item type="attr" name="flow_firstHorizontalStyle"/>
+      <item type="attr" name="flow_firstVerticalBias"/>
+      <item type="attr" name="flow_firstVerticalStyle"/>
+      <item type="attr" name="flow_horizontalAlign"/>
+      <item type="attr" name="flow_horizontalBias"/>
+      <item type="attr" name="flow_horizontalGap"/>
+      <item type="attr" name="flow_horizontalStyle"/>
+      <item type="attr" name="flow_lastHorizontalBias"/>
+      <item type="attr" name="flow_lastHorizontalStyle"/>
+      <item type="attr" name="flow_lastVerticalBias"/>
+      <item type="attr" name="flow_lastVerticalStyle"/>
+      <item type="attr" name="flow_maxElementsWrap"/>
+      <item type="attr" name="flow_verticalAlign"/>
+      <item type="attr" name="flow_verticalBias"/>
+      <item type="attr" name="flow_verticalGap"/>
+      <item type="attr" name="flow_verticalStyle"/>
+      <item type="attr" name="flow_wrapMode"/>
+      <item type="attr" name="id"/>
+      <item type="attr" name="layoutDescription"/>
+      <item type="attr" name="layoutManager"/>
+      <item type="attr" name="layoutStyle"/>
+      <item type="attr" name="layout_constrainedHeight"/>
+      <item type="attr" name="layout_constrainedWidth"/>
       <item type="attr" name="layout_constraintBaseline_creator"/>
       <item type="attr" name="layout_constraintBaseline_toBaselineOf"/>
       <item type="attr" name="layout_constraintBottom_creator"/>
       <item type="attr" name="layout_constraintBottom_toBottomOf"/>
       <item type="attr" name="layout_constraintBottom_toTopOf"/>
+      <item type="attr" name="layout_constraintCircle"/>
+      <item type="attr" name="layout_constraintCircleAngle"/>
+      <item type="attr" name="layout_constraintCircleRadius"/>
       <item type="attr" name="layout_constraintDimensionRatio"/>
       <item type="attr" name="layout_constraintEnd_toEndOf"/>
       <item type="attr" name="layout_constraintEnd_toStartOf"/>
@@ -50,6 +96,7 @@ limitations under the License.-->
       <item type="attr" name="layout_constraintRight_toRightOf"/>
       <item type="attr" name="layout_constraintStart_toEndOf"/>
       <item type="attr" name="layout_constraintStart_toStartOf"/>
+      <item type="attr" name="layout_constraintTag"/>
       <item type="attr" name="layout_constraintTop_creator"/>
       <item type="attr" name="layout_constraintTop_toBottomOf"/>
       <item type="attr" name="layout_constraintTop_toTopOf"/>
@@ -69,9 +116,29 @@ limitations under the License.-->
       <item type="attr" name="layout_goneMarginStart"/>
       <item type="attr" name="layout_goneMarginTop"/>
       <item type="attr" name="layout_optimizationLevel"/>
+      <item type="attr" name="logo"/>
+      <item type="attr" name="menuItems"/>
+      <item type="attr" name="numOfColumns"/>
+      <item type="attr" name="onClick"/>
       <item type="attr" name="preferenceStyle"/>
+      <item type="attr" name="reverseLayout"/>
+      <item type="attr" name="rotaryScrollEnabled"/>
+      <item type="attr" name="search"/>
+      <item type="attr" name="searchHint"/>
+      <item type="attr" name="secondaryActionIcon"/>
+      <item type="attr" name="secondaryActionStyle"/>
+      <item type="attr" name="secondaryActionText"/>
+      <item type="attr" name="settings"/>
+      <item type="attr" name="showBackground"/>
+      <item type="attr" name="showIconAndTitle"/>
+      <item type="attr" name="showMenuItemsWhileSearching"/>
+      <item type="attr" name="showTabsInSubpage"/>
       <item type="attr" name="state_ux_restricted"/>
+      <item type="attr" name="tinted"/>
       <item type="attr" name="title"/>
+      <item type="attr" name="uxRestrictions"/>
+      <item type="attr" name="visible"/>
+      <item type="attr" name="widgetLayout"/>
       <item type="bool" name="car_ui_alert_dialog_force_dismiss_button"/>
       <item type="bool" name="car_ui_escrow_check_components_automatically"/>
       <item type="bool" name="car_ui_ime_wide_screen_aligned_left"/>
