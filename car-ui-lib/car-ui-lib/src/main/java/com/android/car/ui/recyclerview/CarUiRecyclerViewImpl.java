@@ -842,7 +842,7 @@ public final class CarUiRecyclerViewImpl extends FrameLayout
                 try {
                     ClassLoader classLoader;
                     if (isInEditMode()) {
-                        // Stupid layoutlib cannot handle simple class loaders.
+                        // layoutlib cannot handle simple class loaders.
                         classLoader = this.getClass().getClassLoader();
                     } else {
                         classLoader = context.getClassLoader();
