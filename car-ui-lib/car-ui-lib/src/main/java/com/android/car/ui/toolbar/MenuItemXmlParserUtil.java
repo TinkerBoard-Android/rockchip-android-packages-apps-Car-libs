@@ -90,7 +90,7 @@ public class MenuItemXmlParserUtil {
         try {
             int id = a.getResourceId(R.styleable.CarUiToolbarMenuItem_id, View.NO_ID);
             String title = a.getString(R.styleable.CarUiToolbarMenuItem_title);
-            Drawable icon = a.getDrawable(R.styleable.CarUiToolbarMenuItem_icon);
+            Drawable icon = a.getDrawable(R.styleable.CarUiToolbarMenuItem_carUiIcon);
             boolean isSearch = a.getBoolean(R.styleable.CarUiToolbarMenuItem_search, false);
             boolean isSettings = a.getBoolean(R.styleable.CarUiToolbarMenuItem_settings, false);
             boolean tinted = a.getBoolean(R.styleable.CarUiToolbarMenuItem_tinted, true);

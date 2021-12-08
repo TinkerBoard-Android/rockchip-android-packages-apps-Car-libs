@@ -21,6 +21,7 @@ import re
 from resource_utils import get_all_resources, get_resources_from_single_file, add_resource_to_set, Resource, merge_resources
 from git_utils import has_chassis_changes
 from datetime import datetime
+import urllib.request
 
 if sys.version_info[0] != 3:
     print("Must use python 3")
@@ -140,58 +141,36 @@ def generate_overlayable_file(resources, output_file='overlayable.xml'):
 
 def add_constraintlayout_resources(resources):
     # We need these to be able to use base layouts in RROs
-    # This should become unnecessary in S
-    # source: https://android.googlesource.com/platform/frameworks/opt/sherpa/+/studio-3.0/constraintlayout/src/main/res/values/attrs.xml
-    add_resource_to_set(resources, Resource('layout_optimizationLevel', 'attr'))
-    add_resource_to_set(resources, Resource('constraintSet', 'attr'))
-    add_resource_to_set(resources, Resource('barrierDirection', 'attr'))
-    add_resource_to_set(resources, Resource('constraint_referenced_ids', 'attr'))
-    add_resource_to_set(resources, Resource('chainUseRtl', 'attr'))
-    add_resource_to_set(resources, Resource('title', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintGuide_begin', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintGuide_end', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintGuide_percent', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintLeft_toLeftOf', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintLeft_toRightOf', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintRight_toLeftOf', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintRight_toRightOf', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintTop_toTopOf', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintTop_toBottomOf', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintBottom_toTopOf', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintBottom_toBottomOf', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintBaseline_toBaselineOf', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintStart_toEndOf', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintStart_toStartOf', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintEnd_toStartOf', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintEnd_toEndOf', 'attr'))
-    add_resource_to_set(resources, Resource('layout_goneMarginLeft', 'attr'))
-    add_resource_to_set(resources, Resource('layout_goneMarginTop', 'attr'))
-    add_resource_to_set(resources, Resource('layout_goneMarginRight', 'attr'))
-    add_resource_to_set(resources, Resource('layout_goneMarginBottom', 'attr'))
-    add_resource_to_set(resources, Resource('layout_goneMarginStart', 'attr'))
-    add_resource_to_set(resources, Resource('layout_goneMarginEnd', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintHorizontal_bias', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintVertical_bias', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintWidth_default', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintHeight_default', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintWidth_min', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintWidth_max', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintWidth_percent', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintHeight_min', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintHeight_max', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintHeight_percent', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintLeft_creator', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintTop_creator', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintRight_creator', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintBottom_creator', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintBaseline_creator', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintDimensionRatio', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintHorizontal_weight', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintVertical_weight', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintHorizontal_chainStyle', 'attr'))
-    add_resource_to_set(resources, Resource('layout_constraintVertical_chainStyle', 'attr'))
-    add_resource_to_set(resources, Resource('layout_editor_absoluteX', 'attr'))
-    add_resource_to_set(resources, Resource('layout_editor_absoluteY', 'attr'))
+    # This should become unnecessary some time in future?
+    # Please keep this in-sync with res/raw/car_ui_keep.xml
+    url = "https://raw.githubusercontent.com/androidx/constraintlayout/main/constraintlayout/constraintlayout/src/main/res/values/attrs.xml"
+    import xml.etree.ElementTree as ET
+    tree = ET.parse(urllib.request.urlopen(url))
+    root = tree.getroot()
+
+    # The source here always points to the latest version of attrs.xml from androidx repo
+    # and since platform is not using the latest one, some of the tags should be excluded.
+    unsupported_attrs = [
+        "circularflow_radiusInDP",
+        "constraint_referenced_tags",
+        "layout_goneMarginBaseline",
+        "circularflow_angles",
+        "circularflow_defaultRadius",
+        "circularflow_defaultAngle",
+        "layout_marginBaseline",
+        "circularflow_viewCenter",
+        "layout_wrapBehaviorInParent",
+        "layout_constraintWidth",
+        "layout_constraintBaseline_toBottomOf",
+        "layout_constraintHeight",
+        "layout_constraintBaseline_toTopOf",
+    ]
+
+    attrs = root.findall("./declare-styleable[@name='ConstraintLayout_Layout']/attr")
+    for attr in attrs:
+      if "android:" not in attr.get('name') and attr.get('name') not in unsupported_attrs:
+        add_resource_to_set(resources, Resource(attr.get('name'), 'attr'))
+
 
 def check_resource_names(resources, allowed):
     newlist = resources.difference(allowed)
