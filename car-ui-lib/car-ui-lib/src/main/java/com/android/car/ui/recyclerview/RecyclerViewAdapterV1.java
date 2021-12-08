@@ -419,6 +419,16 @@ public final class RecyclerViewAdapterV1 extends FrameLayout
     }
 
     @Override
+    public boolean canScrollHorizontally(int direction) {
+        return mOEMRecyclerView.getView().canScrollHorizontally(direction);
+    }
+
+    @Override
+    public boolean canScrollVertically(int direction) {
+        return mOEMRecyclerView.getView().canScrollVertically(direction);
+    }
+
+    @Override
     public void setLayoutStyle(CarUiLayoutStyle layoutStyle) {
         mLayoutStyle = layoutStyle;
         if (layoutStyle == null) {

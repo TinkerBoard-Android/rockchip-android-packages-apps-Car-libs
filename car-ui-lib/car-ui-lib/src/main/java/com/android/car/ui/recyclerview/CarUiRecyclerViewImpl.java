@@ -157,6 +157,16 @@ public final class CarUiRecyclerViewImpl extends FrameLayout
         init(context, attrs, defStyle);
     }
 
+    @Override
+    public boolean canScrollHorizontally(int direction) {
+        return mRecyclerView.canScrollHorizontally(direction);
+    }
+
+    @Override
+    public boolean canScrollVertically(int direction) {
+        return mRecyclerView.canScrollVertically(direction);
+    }
+
     private void init(Context context, AttributeSet attrs, int defStyleAttr) {
         TypedArray a = context.obtainStyledAttributes(
                 attrs,
@@ -832,7 +842,7 @@ public final class CarUiRecyclerViewImpl extends FrameLayout
                 try {
                     ClassLoader classLoader;
                     if (isInEditMode()) {
-                        // Stupid layoutlib cannot handle simple class loaders.
+                        // layoutlib cannot handle simple class loaders.
                         classLoader = this.getClass().getClassLoader();
                     } else {
                         classLoader = context.getClassLoader();
