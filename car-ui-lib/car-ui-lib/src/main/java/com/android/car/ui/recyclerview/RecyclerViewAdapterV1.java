@@ -34,11 +34,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
 import androidx.recyclerview.widget.RecyclerView.ItemAnimator;
 import androidx.recyclerview.widget.RecyclerView.LayoutManager;
+import androidx.recyclerview.widget.RecyclerView.OnChildAttachStateChangeListener;
 import androidx.recyclerview.widget.RecyclerView.OnFlingListener;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import com.android.car.ui.plugin.oemapis.recyclerview.AdapterOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.LayoutStyleOEMV1;
+import com.android.car.ui.plugin.oemapis.recyclerview.OnChildAttachStateChangeListenerOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.OnScrollListenerOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewAttributesOEMV1;
 import com.android.car.ui.plugin.oemapis.recyclerview.RecyclerViewOEMV1;
@@ -56,7 +58,8 @@ import java.util.List;
  */
 @TargetApi(MIN_TARGET_API)
 public final class RecyclerViewAdapterV1 extends FrameLayout
-        implements CarUiRecyclerView, OnScrollListenerOEMV1, AndroidxRecyclerViewProvider {
+        implements CarUiRecyclerView, OnScrollListenerOEMV1, AndroidxRecyclerViewProvider,
+        OnChildAttachStateChangeListenerOEMV1 {
 
     @Nullable
     private RecyclerViewOEMV1 mOEMRecyclerView;
@@ -73,6 +76,9 @@ public final class RecyclerViewAdapterV1 extends FrameLayout
     private CarUiLayoutStyle mLayoutStyle;
     private int mHeight;
     private int mWidth;
+    @NonNull
+    private final List<OnChildAttachStateChangeListener> mChildAttachStateChangeListeners =
+            new ArrayList<>();
 
     public RecyclerViewAdapterV1(@NonNull Context context) {
         this(context, null);
@@ -124,6 +130,7 @@ public final class RecyclerViewAdapterV1 extends FrameLayout
         parent.addView(mRecyclerView);
 
         mOEMRecyclerView.addOnScrollListener(this);
+        mOEMRecyclerView.addOnChildAttachStateChangeListener(this);
 
         ViewGroup.LayoutParams params = new MarginLayoutParams(mWidth, mHeight);
         addView(mOEMRecyclerView.getView(), params);
@@ -319,6 +326,22 @@ public final class RecyclerViewAdapterV1 extends FrameLayout
     }
 
     @Override
+    public void addOnChildAttachStateChangeListener(OnChildAttachStateChangeListener listener) {
+        mChildAttachStateChangeListeners.add(listener);
+    }
+
+    @Override
+    public void removeOnChildAttachStateChangeListener(OnChildAttachStateChangeListener listener) {
+        mChildAttachStateChangeListeners.remove(listener);
+    }
+
+    @Override
+    public void clearOnChildAttachStateChangeListeners() {
+        mChildAttachStateChangeListeners.clear();
+        mOEMRecyclerView.clearOnScrollListeners();
+    }
+
+    @Override
     public void addOnScrollListener(@NonNull OnScrollListener listener) {
         mScrollListeners.add(listener);
     }
@@ -384,6 +407,11 @@ public final class RecyclerViewAdapterV1 extends FrameLayout
     @Override
     public Adapter<?> getAdapter() {
         return mAdapter;
+    }
+
+    @Override
+    public int getChildLayoutPosition(View child) {
+        return mOEMRecyclerView.getChildLayoutPosition(child);
     }
 
     @Override
@@ -580,6 +608,20 @@ public final class RecyclerViewAdapterV1 extends FrameLayout
         if (mLayoutStyle instanceof CarUiGridLayoutStyle) {
             ((CarUiGridLayoutStyle) mLayoutStyle).setSpanSizeLookup(spanSizeLookup);
             setLayoutStyle(mLayoutStyle);
+        }
+    }
+
+    @Override
+    public void onChildViewAttachedToWindow(@NonNull View view) {
+        for (OnChildAttachStateChangeListener listener : mChildAttachStateChangeListeners) {
+            listener.onChildViewAttachedToWindow(view);
+        }
+    }
+
+    @Override
+    public void onChildViewDetachedFromWindow(@NonNull View view) {
+        for (OnChildAttachStateChangeListener listener : mChildAttachStateChangeListeners) {
+            listener.onChildViewDetachedFromWindow(view);
         }
     }
 }

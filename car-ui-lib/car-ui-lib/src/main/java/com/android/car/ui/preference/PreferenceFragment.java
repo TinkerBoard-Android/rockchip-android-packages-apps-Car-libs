@@ -96,6 +96,9 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
 
     @NonNull
     private CarUiRecyclerView mCarUiRecyclerView;
+    @Nullable
+    private String mLastSelectedPrefKey;
+    private int mLastFocusedAndSelectedPrefPosition;
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -250,6 +253,23 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mLastSelectedPrefKey != null) {
+            scrollToPreference(mLastSelectedPrefKey);
+        }
+    }
+
+    @Override
+    public boolean onPreferenceTreeClick(Preference preference) {
+        mLastSelectedPrefKey = preference.getKey();
+        View focus = getView().findFocus();
+        mLastFocusedAndSelectedPrefPosition = mCarUiRecyclerView.getChildLayoutPosition(focus);
+
+        return super.onPreferenceTreeClick(preference);
+    }
+
     /**
      * This override of setPreferenceScreen replaces preferences with their CarUi versions first.
      */
@@ -373,11 +393,27 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
         if (mCarUiRecyclerView instanceof AndroidxRecyclerViewProvider) {
             recyclerView = ((AndroidxRecyclerViewProvider) mCarUiRecyclerView).getRecyclerView();
         }
-        if (recyclerView != null) {
-            return recyclerView;
-        } else {
-            return super.onCreateRecyclerView(inflater, parent, savedInstanceState);
+        if (recyclerView == null) {
+            recyclerView = super.onCreateRecyclerView(inflater, parent, savedInstanceState);
         }
+
+        // When not in touch mode, focus on the previously focused and selected item, if any.
+        if (mCarUiRecyclerView != null) {
+            mCarUiRecyclerView.addOnChildAttachStateChangeListener(
+                        new RecyclerView.OnChildAttachStateChangeListener() {
+                            @Override
+                            public void onChildViewAttachedToWindow(View view) {
+                                int position = mCarUiRecyclerView.getChildLayoutPosition(view);
+                                if (position == mLastFocusedAndSelectedPrefPosition) {
+                                    view.requestFocus();
+                                }
+                            }
+                            @Override
+                            public void onChildViewDetachedFromWindow(View view) {
+                            }
+                });
+        }
+        return recyclerView;
     }
 
     /**
