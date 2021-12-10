@@ -73,10 +73,10 @@ public class CarUiPreference extends Preference implements DisabledPreferenceCal
                 defStyleAttr,
                 defStyleRes);
 
-        mShowChevron = a.getBoolean(R.styleable.CarUiPreference_showChevron, true);
+        mShowChevron = a.getBoolean(R.styleable.CarUiPreference_carUiShowChevron, true);
         mUxRestricted = a.getBoolean(R.styleable.CarUiPreference_car_ui_ux_restricted, false);
         mIsClickableWhileDisabled = a.getBoolean(
-                R.styleable.CarUiPreference_car_ui_clickable_while_disabled, false);
+                R.styleable.CarUiPreference_carUiClickableWhileDisabled, false);
         if (mIsClickableWhileDisabled) {
             super.setShouldDisableView(false);
         }

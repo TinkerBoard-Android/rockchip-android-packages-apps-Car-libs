@@ -75,7 +75,7 @@ public class CarUiEditTextPreference extends EditTextPreference
                 defStyleAttr,
                 defStyleRes);
 
-        mShowChevron = a.getBoolean(R.styleable.CarUiPreference_showChevron, true);
+        mShowChevron = a.getBoolean(R.styleable.CarUiPreference_carUiShowChevron, true);
         mUxRestricted = a.getBoolean(R.styleable.CarUiPreference_car_ui_ux_restricted, false);
 
         a.recycle();

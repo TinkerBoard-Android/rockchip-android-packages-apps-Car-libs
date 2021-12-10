@@ -72,7 +72,7 @@ public class CarUiSwitchPreference extends SwitchPreference implements DisabledP
         TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.CarUiPreference);
         mUxRestricted = a.getBoolean(R.styleable.CarUiPreference_car_ui_ux_restricted, false);
         mIsClickableWhileDisabled = a.getBoolean(
-                R.styleable.CarUiPreference_car_ui_clickable_while_disabled, false);
+                R.styleable.CarUiPreference_carUiClickableWhileDisabled, false);
         if (mIsClickableWhileDisabled) {
             super.setShouldDisableView(false);
         }
