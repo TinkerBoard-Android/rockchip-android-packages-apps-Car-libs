@@ -76,7 +76,7 @@ public class QCRowView extends FrameLayout {
     private LinearLayout mSeekBarContainer;
     @Nullable
     private QCSlider mQCSlider;
-    private SeekBar mSeekBar;
+    private QCSeekBarView mSeekBar;
     private QCActionListener mActionListener;
     private boolean mInDirectManipulationMode;
 
@@ -84,7 +84,8 @@ public class QCRowView extends FrameLayout {
     private final View.OnKeyListener mSeekBarKeyListener = new View.OnKeyListener() {
         @Override
         public boolean onKey(View v, int keyCode, KeyEvent event) {
-            if (mSeekBar == null || !mSeekBar.isEnabled()) {
+            if (mSeekBar == null || (!mSeekBar.isEnabled()
+                    && !mSeekBar.isClickableWhileDisabled())) {
                 return false;
             }
             // Consume nudge events in direct manipulation mode.
@@ -381,8 +382,9 @@ public class QCRowView extends FrameLayout {
         mSeekBar.setMin(slider.getMin());
         mSeekBar.setMax(slider.getMax());
         mSeekBar.setProgress(slider.getValue());
-        mSeekBar.setEnabled(slider.isEnabled() || slider.isClickableWhileDisabled());
-        CarUiUtils.makeAllViewsEnabled(mSeekBar, slider.isEnabled());
+        mSeekBar.setEnabled(slider.isEnabled());
+        mSeekBar.setClickableWhileDisabled(slider.isClickableWhileDisabled());
+        mSeekBar.setDisabledClickListener(seekBar -> fireAction(slider, new Intent()));
         if (!slider.isEnabled() && mInDirectManipulationMode) {
             setInDirectManipulationMode(mSeekBarContainer, mSeekBar, false);
         }
@@ -391,15 +393,6 @@ public class QCRowView extends FrameLayout {
         }
         mSeekbarChangeListener.setSlider(slider);
         mSeekBar.setOnSeekBarChangeListener(mSeekbarChangeListener);
-        mSeekBar.setOnTouchListener((v, event) -> {
-            if (!slider.isEnabled()) {
-                if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-                    fireAction(slider, new Intent());
-                }
-                return true;
-            }
-            return false;
-        });
         // set up rotary support
         mSeekBarContainer.setOnKeyListener(mSeekBarKeyListener);
         mSeekBarContainer.setOnFocusChangeListener(mSeekBarFocusChangeListener);
