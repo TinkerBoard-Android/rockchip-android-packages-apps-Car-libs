@@ -28,25 +28,25 @@ import androidx.annotation.Nullable;
  */
 public class QCActionItem extends QCItem {
     private final boolean mIsChecked;
-    private final boolean mIsEnabled;
     private final boolean mIsAvailable;
     private Icon mIcon;
     private PendingIntent mAction;
+    private PendingIntent mDisabledClickAction;
 
     public QCActionItem(@NonNull @QCItemType String type, boolean isChecked, boolean isEnabled,
-            boolean isAvailable, @Nullable Icon icon, @Nullable PendingIntent action) {
-        super(type);
-        mIsEnabled = isEnabled;
+            boolean isAvailable, boolean isClickableWhileDisabled, @Nullable Icon icon,
+            @Nullable PendingIntent action, @Nullable PendingIntent disabledClickAction) {
+        super(type, isEnabled, isClickableWhileDisabled);
         mIsChecked = isChecked;
         mIsAvailable = isAvailable;
         mIcon = icon;
         mAction = action;
+        mDisabledClickAction = disabledClickAction;
     }
 
     public QCActionItem(@NonNull Parcel in) {
         super(in);
         mIsChecked = in.readBoolean();
-        mIsEnabled = in.readBoolean();
         mIsAvailable = in.readBoolean();
         boolean hasIcon = in.readBoolean();
         if (hasIcon) {
@@ -56,13 +56,16 @@ public class QCActionItem extends QCItem {
         if (hasAction) {
             mAction = PendingIntent.CREATOR.createFromParcel(in);
         }
+        boolean hasDisabledClickAction = in.readBoolean();
+        if (hasDisabledClickAction) {
+            mDisabledClickAction = PendingIntent.CREATOR.createFromParcel(in);
+        }
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeBoolean(mIsChecked);
-        dest.writeBoolean(mIsEnabled);
         dest.writeBoolean(mIsAvailable);
         boolean includeIcon = getType().equals(QC_TYPE_ACTION_TOGGLE) && mIcon != null;
         dest.writeBoolean(includeIcon);
@@ -74,6 +77,11 @@ public class QCActionItem extends QCItem {
         if (hasAction) {
             mAction.writeToParcel(dest, flags);
         }
+        boolean hasDisabledClickAction = mDisabledClickAction != null;
+        dest.writeBoolean(hasDisabledClickAction);
+        if (hasDisabledClickAction) {
+            mDisabledClickAction.writeToParcel(dest, flags);
+        }
     }
 
     @Override
@@ -81,12 +89,13 @@ public class QCActionItem extends QCItem {
         return mAction;
     }
 
-    public boolean isChecked() {
-        return mIsChecked;
+    @Override
+    public PendingIntent getDisabledClickAction() {
+        return mDisabledClickAction;
     }
 
-    public boolean isEnabled() {
-        return mIsEnabled;
+    public boolean isChecked() {
+        return mIsChecked;
     }
 
     public boolean isAvailable() {
@@ -118,8 +127,10 @@ public class QCActionItem extends QCItem {
         private boolean mIsChecked;
         private boolean mIsEnabled = true;
         private boolean mIsAvailable = true;
+        private boolean mIsClickableWhileDisabled = false;
         private Icon mIcon;
         private PendingIntent mAction;
+        private PendingIntent mDisabledClickAction;
 
         public Builder(@NonNull @QCItemType String type) {
             if (!isValidType(type)) {
@@ -153,6 +164,14 @@ public class QCActionItem extends QCItem {
         }
 
         /**
+         * Sets whether or not an action item should be clickable while disabled.
+         */
+        public Builder setClickableWhileDisabled(boolean clickable) {
+            mIsClickableWhileDisabled = clickable;
+            return this;
+        }
+
+        /**
          * Sets the icon for {@link QC_TYPE_ACTION_TOGGLE} actions
          */
         public Builder setIcon(@Nullable Icon icon) {
@@ -169,10 +188,19 @@ public class QCActionItem extends QCItem {
         }
 
         /**
+         * Sets the PendingIntent to be sent when the action item is clicked while disabled.
+         */
+        public Builder setDisabledClickAction(@Nullable PendingIntent action) {
+            mDisabledClickAction = action;
+            return this;
+        }
+
+        /**
          * Builds the final {@link QCActionItem}.
          */
         public QCActionItem build() {
-            return new QCActionItem(mType, mIsChecked, mIsEnabled, mIsAvailable, mIcon, mAction);
+            return new QCActionItem(mType, mIsChecked, mIsEnabled, mIsAvailable,
+                    mIsClickableWhileDisabled, mIcon, mAction, mDisabledClickAction);
         }
 
         private boolean isValidType(String type) {

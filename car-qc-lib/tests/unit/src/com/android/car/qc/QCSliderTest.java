@@ -35,34 +35,36 @@ public class QCSliderTest extends QCItemTestCase<QCSlider> {
 
     @Test
     public void onCreate_hasCorrectType() {
-        QCSlider slider = createSlider(/* action= */ null);
+        QCSlider slider = createSlider(/* action= */ null, /* disabledAction= */ null);
         assertThat(slider.getType()).isEqualTo(QC_TYPE_SLIDER);
     }
 
     @Test
-    public void onBundle_nullAction_noCrash() {
-        QCSlider slider = createSlider(/* action= */ null);
+    public void onBundle_nullActions_noCrash() {
+        QCSlider slider = createSlider(/* action= */ null, /* disabledAction= */ null);
         writeAndLoadFromBundle(slider);
         // Test passes if this doesn't crash
     }
 
     @Test
     public void createFromParcel_accurateData() {
-        QCSlider slider = createSlider(mDefaultAction);
+        QCSlider slider = createSlider(mDefaultAction, mDefaultDisabledAction);
         QCSlider newSlider = writeAndLoadFromBundle(slider);
         assertThat(newSlider.getType()).isEqualTo(QC_TYPE_SLIDER);
         assertThat(newSlider.getPrimaryAction()).isNotNull();
+        assertThat(newSlider.getDisabledClickAction()).isNotNull();
         assertThat(newSlider.getMin()).isEqualTo(MIN);
         assertThat(newSlider.getMax()).isEqualTo(MAX);
         assertThat(newSlider.getValue()).isEqualTo(VALUE);
     }
 
-    private QCSlider createSlider(PendingIntent action) {
+    private QCSlider createSlider(PendingIntent action, PendingIntent disabledAction) {
         return new QCSlider.Builder()
                 .setMin(MIN)
                 .setMax(MAX)
                 .setValue(VALUE)
                 .setInputAction(action)
+                .setDisabledClickAction(disabledAction)
                 .build();
     }
 }

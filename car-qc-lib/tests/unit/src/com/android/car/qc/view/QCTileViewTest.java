@@ -70,6 +70,7 @@ public class QCTileViewTest {
     }
 
     @Test
+    @UiThreadTest
     public void onChanged_setsSubtitleView() {
         String subtitle = "TEST_SUBTITLE";
         QCTile tile = new QCTile.Builder().setSubtitle(subtitle).build();
@@ -89,6 +90,7 @@ public class QCTileViewTest {
     }
 
     @Test
+    @UiThreadTest
     public void onChanged_setsIcon() {
         Icon icon = Icon.createWithResource(mContext, android.R.drawable.btn_star);
         QCTile tile = new QCTile.Builder().setIcon(icon).build();

@@ -339,6 +339,23 @@ public final class CarUiUtils {
 
     /**
      * Traverses the view hierarchy, and whenever it sees a {@link DrawableStateView}, adds
+     * state_enabled to it.
+     *
+     * Note that this will remove any other drawable states added by other calls to
+     * {@link DrawableStateView#setExtraDrawableState(int[], int[])}
+     */
+    public static void makeAllViewsEnabled(@Nullable View view, boolean enabled) {
+        if (view == null) {
+            return;
+        }
+        initializeRestrictedState(view);
+        int[] statesToAdd = enabled ? new int[] {android.R.attr.state_enabled} : null;
+        int[] statesToRemove = enabled ? null : new int[] {android.R.attr.state_enabled};
+        applyStatesToAllViews(view, statesToAdd, statesToRemove);
+    }
+
+    /**
+     * Traverses the view hierarchy, and whenever it sees a {@link DrawableStateView}, adds
      * the relevant state_enabled and state_ux_restricted to the view.
      *
      * Note that this will remove any other drawable states added by other calls to

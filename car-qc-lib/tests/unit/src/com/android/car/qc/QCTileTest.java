@@ -33,42 +33,44 @@ public class QCTileTest extends QCItemTestCase<QCTile> {
 
     @Test
     public void onCreate_hasCorrectType() {
-        QCTile tile = createTile(/* action= */ null, /* icon= */ null);
+        QCTile tile = createTile(/* action= */ null, /* disabledAction= */ null, /* icon= */ null);
         assertThat(tile.getType()).isEqualTo(QC_TYPE_TILE);
     }
 
     @Test
     public void onBundle_nullAction_noCrash() {
-        QCTile tile = createTile(/* action= */ null, mDefaultIcon);
+        QCTile tile = createTile(/* action= */ null, /* disabledAction= */ null, mDefaultIcon);
         writeAndLoadFromBundle(tile);
         // Test passes if this doesn't crash
     }
 
     @Test
     public void onBundle_nullIcon_noCrash() {
-        QCTile tile = createTile(mDefaultAction, /* icon= */ null);
+        QCTile tile = createTile(mDefaultAction, mDefaultDisabledAction, /* icon= */ null);
         writeAndLoadFromBundle(tile);
         // Test passes if this doesn't crash
     }
 
     @Test
     public void createFromParcel_accurateData() {
-        QCTile tile = createTile(mDefaultAction, mDefaultIcon);
+        QCTile tile = createTile(mDefaultAction, mDefaultDisabledAction, mDefaultIcon);
         QCTile newTile = writeAndLoadFromBundle(tile);
         assertThat(newTile.getType()).isEqualTo(QC_TYPE_TILE);
         assertThat(newTile.getSubtitle()).isEqualTo(TEST_SUBTITLE);
         assertThat(newTile.isChecked()).isTrue();
         assertThat(newTile.isEnabled()).isTrue();
         assertThat(newTile.getPrimaryAction()).isNotNull();
+        assertThat(newTile.getDisabledClickAction()).isNotNull();
         assertThat(newTile.getIcon()).isNotNull();
     }
 
-    private QCTile createTile(PendingIntent action, Icon icon) {
+    private QCTile createTile(PendingIntent action, PendingIntent disabledAction, Icon icon) {
         return new QCTile.Builder()
                 .setSubtitle(TEST_SUBTITLE)
                 .setChecked(true)
                 .setEnabled(true)
                 .setAction(action)
+                .setDisabledClickAction(disabledAction)
                 .setIcon(icon)
                 .build();
     }

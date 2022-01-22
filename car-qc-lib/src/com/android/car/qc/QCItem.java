@@ -57,20 +57,40 @@ public abstract class QCItem implements Parcelable {
     }
 
     private final String mType;
+    private final boolean mIsEnabled;
+    private final boolean mIsClickableWhileDisabled;
     private ActionHandler mActionHandler;
+    private ActionHandler mDisabledClickActionHandler;
 
     public QCItem(@NonNull @QCItemType String type) {
+        this(type, /* isEnabled= */true, /* isClickableWhileDisabled= */ false);
+    }
+
+    public QCItem(@NonNull @QCItemType String type, boolean isEnabled,
+            boolean isClickableWhileDisabled) {
         mType = type;
+        mIsEnabled = isEnabled;
+        mIsClickableWhileDisabled = isClickableWhileDisabled;
     }
 
     public QCItem(@NonNull Parcel in) {
         mType = in.readString();
+        mIsEnabled = in.readBoolean();
+        mIsClickableWhileDisabled = in.readBoolean();
     }
 
     @NonNull
     @QCItemType
     public String getType() {
         return mType;
+    }
+
+    public boolean isEnabled() {
+        return mIsEnabled;
+    }
+
+    public boolean isClickableWhileDisabled() {
+        return mIsClickableWhileDisabled;
     }
 
     @Override
@@ -81,10 +101,16 @@ public abstract class QCItem implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mType);
+        dest.writeBoolean(mIsEnabled);
+        dest.writeBoolean(mIsClickableWhileDisabled);
     }
 
     public void setActionHandler(@Nullable ActionHandler handler) {
         mActionHandler = handler;
+    }
+
+    public void setDisabledClickActionHandler(@Nullable ActionHandler handler) {
+        mDisabledClickActionHandler = handler;
     }
 
     @Nullable
@@ -92,11 +118,22 @@ public abstract class QCItem implements Parcelable {
         return mActionHandler;
     }
 
+    @Nullable
+    public ActionHandler getDisabledClickActionHandler() {
+        return mDisabledClickActionHandler;
+    }
+
     /**
      * Returns the PendingIntent that is sent when the item is clicked.
      */
     @Nullable
     public abstract PendingIntent getPrimaryAction();
+
+    /**
+     * Returns the PendingIntent that is sent when the item is clicked while disabled.
+     */
+    @Nullable
+    public abstract PendingIntent getDisabledClickAction();
 
     /**
      * Action handler that can listen for an action to occur and notify listeners.

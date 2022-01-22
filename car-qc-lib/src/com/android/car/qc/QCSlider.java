@@ -30,13 +30,16 @@ public class QCSlider extends QCItem {
     private int mMax = 100;
     private int mValue = 0;
     private PendingIntent mInputAction;
+    private PendingIntent mDisabledClickAction;
 
-    public QCSlider(int min, int max, int value, @Nullable PendingIntent inputAction) {
-        super(QC_TYPE_SLIDER);
+    public QCSlider(int min, int max, int value, boolean enabled, boolean clickableWhileDisabled,
+            @Nullable PendingIntent inputAction, @Nullable PendingIntent disabledClickAction) {
+        super(QC_TYPE_SLIDER, enabled, clickableWhileDisabled);
         mMin = min;
         mMax = max;
         mValue = value;
         mInputAction = inputAction;
+        mDisabledClickAction = disabledClickAction;
     }
 
     public QCSlider(@NonNull Parcel in) {
@@ -47,6 +50,10 @@ public class QCSlider extends QCItem {
         boolean hasAction = in.readBoolean();
         if (hasAction) {
             mInputAction = PendingIntent.CREATOR.createFromParcel(in);
+        }
+        boolean hasDisabledClickAction = in.readBoolean();
+        if (hasDisabledClickAction) {
+            mDisabledClickAction = PendingIntent.CREATOR.createFromParcel(in);
         }
     }
 
@@ -61,11 +68,21 @@ public class QCSlider extends QCItem {
         if (hasAction) {
             mInputAction.writeToParcel(dest, flags);
         }
+        boolean hasDisabledClickAction = mDisabledClickAction != null;
+        dest.writeBoolean(hasDisabledClickAction);
+        if (hasDisabledClickAction) {
+            mDisabledClickAction.writeToParcel(dest, flags);
+        }
     }
 
     @Override
     public PendingIntent getPrimaryAction() {
         return mInputAction;
+    }
+
+    @Override
+    public PendingIntent getDisabledClickAction() {
+        return mDisabledClickAction;
     }
 
     public int getMin() {
@@ -99,7 +116,10 @@ public class QCSlider extends QCItem {
         private int mMin = 0;
         private int mMax = 100;
         private int mValue = 0;
+        private boolean mIsEnabled = true;
+        private boolean mIsClickableWhileDisabled = false;
         private PendingIntent mInputAction;
+        private PendingIntent mDisabledClickAction;
 
         /**
          * Set the minimum allowed value for the slider input.
@@ -126,6 +146,23 @@ public class QCSlider extends QCItem {
         }
 
         /**
+         * Sets whether or not the slider is enabled.
+         */
+        public Builder setEnabled(boolean enabled) {
+            mIsEnabled = enabled;
+            return this;
+        }
+
+        /**
+         * Sets whether or not a slider should be clickable while disabled.
+         */
+        public Builder setClickableWhileDisabled(boolean clickable) {
+            mIsClickableWhileDisabled = clickable;
+            return this;
+        }
+
+
+        /**
          * Set the PendingIntent to be sent when the slider value is changed.
          */
         public Builder setInputAction(@Nullable PendingIntent inputAction) {
@@ -134,10 +171,19 @@ public class QCSlider extends QCItem {
         }
 
         /**
+         * Sets the PendingIntent to be sent when the action item is clicked while disabled.
+         */
+        public Builder setDisabledClickAction(@Nullable PendingIntent action) {
+            mDisabledClickAction = action;
+            return this;
+        }
+
+        /**
          * Builds the final {@link QCSlider}.
          */
         public QCSlider build() {
-            return new QCSlider(mMin, mMax, mValue, mInputAction);
+            return new QCSlider(mMin, mMax, mValue, mIsEnabled, mIsClickableWhileDisabled,
+                    mInputAction, mDisabledClickAction);
         }
     }
 }

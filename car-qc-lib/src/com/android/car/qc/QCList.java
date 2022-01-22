@@ -60,6 +60,11 @@ public class QCList extends QCItem {
         return null;
     }
 
+    @Override
+    public PendingIntent getDisabledClickAction() {
+        return null;
+    }
+
     @NonNull
     public List<QCRow> getRows() {
         return mRows;

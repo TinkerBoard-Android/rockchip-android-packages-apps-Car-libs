@@ -34,27 +34,27 @@ import androidx.annotation.Nullable;
  */
 public class QCTile extends QCItem {
     private final boolean mIsChecked;
-    private final boolean mIsEnabled;
     private final boolean mIsAvailable;
     private final String mSubtitle;
     private Icon mIcon;
     private PendingIntent mAction;
+    private PendingIntent mDisabledClickAction;
 
     public QCTile(boolean isChecked, boolean isEnabled, boolean isAvailable,
-            @Nullable String subtitle, @Nullable Icon icon, @Nullable PendingIntent action) {
-        super(QC_TYPE_TILE);
-        mIsEnabled = isEnabled;
+            boolean isClickableWhileDisabled, @Nullable String subtitle, @Nullable Icon icon,
+            @Nullable PendingIntent action, @Nullable PendingIntent disabledClickAction) {
+        super(QC_TYPE_TILE, isEnabled, isClickableWhileDisabled);
         mIsChecked = isChecked;
         mIsAvailable = isAvailable;
         mSubtitle = subtitle;
         mIcon = icon;
         mAction = action;
+        mDisabledClickAction = disabledClickAction;
     }
 
     public QCTile(@NonNull Parcel in) {
         super(in);
         mIsChecked = in.readBoolean();
-        mIsEnabled = in.readBoolean();
         mIsAvailable = in.readBoolean();
         mSubtitle = in.readString();
         boolean hasIcon = in.readBoolean();
@@ -65,13 +65,16 @@ public class QCTile extends QCItem {
         if (hasAction) {
             mAction = PendingIntent.CREATOR.createFromParcel(in);
         }
+        boolean hasDisabledClickAction = in.readBoolean();
+        if (hasDisabledClickAction) {
+            mDisabledClickAction = PendingIntent.CREATOR.createFromParcel(in);
+        }
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeBoolean(mIsChecked);
-        dest.writeBoolean(mIsEnabled);
         dest.writeBoolean(mIsAvailable);
         dest.writeString(mSubtitle);
         boolean hasIcon = mIcon != null;
@@ -84,6 +87,11 @@ public class QCTile extends QCItem {
         if (hasAction) {
             mAction.writeToParcel(dest, flags);
         }
+        boolean hasDisabledClickAction = mDisabledClickAction != null;
+        dest.writeBoolean(hasDisabledClickAction);
+        if (hasDisabledClickAction) {
+            mDisabledClickAction.writeToParcel(dest, flags);
+        }
     }
 
     @Override
@@ -91,12 +99,13 @@ public class QCTile extends QCItem {
         return mAction;
     }
 
-    public boolean isChecked() {
-        return mIsChecked;
+    @Override
+    public PendingIntent getDisabledClickAction() {
+        return mDisabledClickAction;
     }
 
-    public boolean isEnabled() {
-        return mIsEnabled;
+    public boolean isChecked() {
+        return mIsChecked;
     }
 
     public boolean isAvailable() {
@@ -132,9 +141,11 @@ public class QCTile extends QCItem {
         private boolean mIsChecked;
         private boolean mIsEnabled = true;
         private boolean mIsAvailable = true;
+        private boolean mIsClickableWhileDisabled = false;
         private String mSubtitle;
         private Icon mIcon;
         private PendingIntent mAction;
+        private PendingIntent mDisabledClickAction;
 
         /**
          * Sets whether or not the tile should be checked.
@@ -157,6 +168,14 @@ public class QCTile extends QCItem {
          */
         public Builder setAvailable(boolean available) {
             mIsAvailable = available;
+            return this;
+        }
+
+        /**
+         * Sets whether or not a tile should be clickable while disabled.
+         */
+        public Builder setClickableWhileDisabled(boolean clickable) {
+            mIsClickableWhileDisabled = clickable;
             return this;
         }
 
@@ -185,10 +204,19 @@ public class QCTile extends QCItem {
         }
 
         /**
+         * Sets the PendingIntent to be sent when the action item is clicked while disabled.
+         */
+        public Builder setDisabledClickAction(@Nullable PendingIntent action) {
+            mDisabledClickAction = action;
+            return this;
+        }
+
+        /**
          * Builds the final {@link QCTile}.
          */
         public QCTile build() {
-            return new QCTile(mIsChecked, mIsEnabled, mIsAvailable, mSubtitle, mIcon, mAction);
+            return new QCTile(mIsChecked, mIsEnabled, mIsAvailable, mIsClickableWhileDisabled,
+                    mSubtitle, mIcon, mAction, mDisabledClickAction);
         }
     }
 }
