@@ -228,9 +228,11 @@ public class FocusParkingView extends View {
             // OnGlobalFocusChangeListener won't be triggered when the window lost focus, so reset
             // the focused view here.
             updateFocusedView(null);
-        } else if (isFocused() && mShouldRestoreFocus) {
-            // When FocusParkingView is focused and the window just gets focused, transfer the view
-            // focus to a non-FocusParkingView in the window.
+        } else if (mShouldRestoreFocus
+                && (isFocused() || getRootView().findFocus() instanceof FocusParkingView)) {
+            // When a FocusParkingView is focused and the window just gets focused, transfer
+            // the view focus to a non-FocusParkingView in the window. (Though not common,
+            // there might be multiple FocusParkingViews in the view tree.)
             restoreFocusInRoot(/* checkForTouchMode= */ true);
         }
         super.onWindowFocusChanged(hasWindowFocus);
