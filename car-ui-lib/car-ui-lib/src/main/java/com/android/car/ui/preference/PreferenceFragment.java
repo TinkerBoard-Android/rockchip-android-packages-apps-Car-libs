@@ -26,6 +26,7 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -96,6 +97,8 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
 
     @NonNull
     private CarUiRecyclerView mCarUiRecyclerView;
+    @Nullable
+    private ViewParent mRecyclerView;
     @Nullable
     private String mLastSelectedPrefKey;
     private int mLastFocusedAndSelectedPrefPosition;
@@ -264,8 +267,32 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
     @Override
     public boolean onPreferenceTreeClick(Preference preference) {
         mLastSelectedPrefKey = preference.getKey();
-        View focus = getView().findFocus();
-        mLastFocusedAndSelectedPrefPosition = mCarUiRecyclerView.getChildLayoutPosition(focus);
+        if (mRecyclerView != null) {
+            // Search for RecyclerView's direct child that has focus, if any.
+            View fragmentRoot = getView();
+            View focusedChild = fragmentRoot.findFocus();
+            boolean childHasFocus = false;
+            while (focusedChild != null) {
+                ViewParent parent = focusedChild.getParent();
+                if (parent == mRecyclerView) {
+                    childHasFocus = true;
+                    break;
+                }
+                if (parent == null || !(parent instanceof View)) {
+                    break;
+                }
+                focusedChild = (View) parent;
+            }
+            if (childHasFocus) {
+                // Find the position of the focused element.
+                // Note: RecyclerView requires that the parameter passed to getChildLayoutPosition()
+                // must be a direct child of RecyclerView.
+                mLastFocusedAndSelectedPrefPosition =
+                        mCarUiRecyclerView.getChildLayoutPosition(focusedChild);
+                Log.d(TAG, "mLastFocusedAndSelectedPrefPosition is set to "
+                        + mLastFocusedAndSelectedPrefPosition);
+            }
+        }
 
         return super.onPreferenceTreeClick(preference);
     }
@@ -403,6 +430,13 @@ public abstract class PreferenceFragment extends PreferenceFragmentCompat implem
                         new RecyclerView.OnChildAttachStateChangeListener() {
                             @Override
                             public void onChildViewAttachedToWindow(View view) {
+                                // The RecyclerView in onCreateRecyclerView() might not be the real
+                                // RecyclerView in the view tree. However, when an item is attached
+                                // to window, its parent (a RecyclerView) must be the real
+                                // RecyclerView in the view tree, so update mRecyclerView here.
+                                if (mRecyclerView == null) {
+                                    mRecyclerView = view.getParent();
+                                }
                                 int position = mCarUiRecyclerView.getChildLayoutPosition(view);
                                 if (position == mLastFocusedAndSelectedPrefPosition) {
                                     view.requestFocus();
