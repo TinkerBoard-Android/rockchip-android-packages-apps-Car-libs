@@ -337,7 +337,8 @@ public class QCRowView extends FrameLayout {
             tmpToggleButton = actionView.requireViewById(R.id.qc_toggle_button);
         }
         DrawableStateToggleButton toggleButton = tmpToggleButton; // must be effectively final
-        CarUiUtils.makeAllViewsEnabled(toggleButton, action.isEnabled());
+        boolean shouldEnableView =
+                (action.isEnabled() || action.isClickableWhileDisabled()) && action.isAvailable();
         toggleButton.setText(null);
         toggleButton.setTextOn(null);
         toggleButton.setTextOff(null);
@@ -346,7 +347,8 @@ public class QCRowView extends FrameLayout {
                 action.getIcon(), action.isAvailable());
         toggleButton.setButtonDrawable(icon);
         toggleButton.setChecked(action.isChecked());
-        toggleButton.setEnabled(action.isEnabled() && action.isAvailable());
+        toggleButton.setEnabled(shouldEnableView);
+        setToggleButtonDrawableState(toggleButton, action.isEnabled(), action.isAvailable());
         toggleButton.setOnTouchListener((v, event) -> {
             if (!action.isEnabled()) {
                 if (event.getActionMasked() == MotionEvent.ACTION_UP) {
@@ -362,6 +364,30 @@ public class QCRowView extends FrameLayout {
                     intent.putExtra(QC_ACTION_TOGGLE_STATE, isChecked);
                     fireAction(action, intent);
                 });
+    }
+
+    private void setToggleButtonDrawableState(DrawableStateToggleButton view,
+            boolean enabled, boolean available) {
+        int[] statesToAdd = null;
+        int[] statesToRemove = null;
+        if (enabled) {
+            if (!available) {
+                statesToAdd =
+                        new int[]{android.R.attr.state_enabled, R.attr.state_toggle_unavailable};
+            } else {
+                statesToAdd = new int[]{android.R.attr.state_enabled};
+                statesToRemove = new int[]{R.attr.state_toggle_unavailable};
+            }
+        } else {
+            if (available) {
+                statesToRemove =
+                        new int[]{android.R.attr.state_enabled, R.attr.state_toggle_unavailable};
+            } else {
+                statesToAdd = new int[]{R.attr.state_toggle_unavailable};
+                statesToRemove = new int[]{android.R.attr.state_enabled};
+            }
+        }
+        CarUiUtils.applyDrawableStatesToAllViews(view, statesToAdd, statesToRemove);
     }
 
     @NonNull
