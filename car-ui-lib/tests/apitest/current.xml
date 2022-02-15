@@ -406,6 +406,7 @@
   <public type="layout" name="car_ui_preference_dropdown"/>
   <public type="layout" name="car_ui_preference_fragment"/>
   <public type="layout" name="car_ui_preference_fragment_with_toolbar"/>
+  <public type="layout" name="car_ui_preference_primary_switch"/>
   <public type="layout" name="car_ui_preference_two_action_icon"/>
   <public type="layout" name="car_ui_preference_two_action_switch"/>
   <public type="layout" name="car_ui_preference_two_action_text"/>

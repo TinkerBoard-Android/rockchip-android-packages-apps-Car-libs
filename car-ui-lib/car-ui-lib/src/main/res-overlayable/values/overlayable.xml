@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!--Copyright (C) 2021 The Android Open Source Project
+<!--Copyright (C) 2022 The Android Open Source Project
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -497,6 +497,7 @@ limitations under the License.-->
       <item type="layout" name="car_ui_preference_dropdown"/>
       <item type="layout" name="car_ui_preference_fragment"/>
       <item type="layout" name="car_ui_preference_fragment_with_toolbar"/>
+      <item type="layout" name="car_ui_preference_primary_switch"/>
       <item type="layout" name="car_ui_preference_two_action_icon"/>
       <item type="layout" name="car_ui_preference_two_action_switch"/>
       <item type="layout" name="car_ui_preference_two_action_text"/>
