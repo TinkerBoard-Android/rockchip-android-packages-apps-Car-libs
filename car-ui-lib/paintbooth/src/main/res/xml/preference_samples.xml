@@ -77,6 +77,11 @@
             android:summary="@string/summary_switch_preference"
             android:title="@string/title_switch_preference"/>
 
+        <com.android.car.ui.preference.CarUiPrimarySwitchPreference
+            android:key="primaryswitch"
+            android:summary="@string/summary_switch_preference"
+            android:title="@string/title_primary_switch_preference"/>
+
         <com.android.car.ui.preference.CarUiTwoActionPreference
             android:key="twoaction"
             android:summary="@string/summary_deprecated_twoaction_preference"

@@ -31,6 +31,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
 import static com.android.car.ui.actions.ViewActions.setProgress;
 import static com.android.car.ui.core.CarUi.MIN_TARGET_API;
+import static com.android.car.ui.matchers.ViewMatchers.isActivated;
 import static com.android.car.ui.matchers.ViewMatchers.withIndex;
 
 import static junit.framework.Assert.assertFalse;
@@ -331,7 +332,6 @@ public class PreferenceTest {
         // Scroll until list preference is visible
         mActivity.runOnUiThread(() -> mActivity.scrollToPreference("switch"));
 
-
         // Check title and summary are displayed as expected.
         onView(withIndex(withId(android.R.id.title), 0)).check(matches(
                 withText(mActivity.getString(R.string.title_switch_preference))));
@@ -363,6 +363,54 @@ public class PreferenceTest {
 
         // Verify switch preference correctly indicates preference is selected.
         onView(withId(android.R.id.switch_widget)).check(matches(isNotChecked()));
+    }
+
+    @Test
+    public void testPrimarySwitchPreference() {
+        // Create switch preference and add it to screen.
+        CarUiPrimarySwitchPreference preference = new CarUiPrimarySwitchPreference(mActivity);
+        preference.setOrder(0);
+        preference.setKey("switch");
+        preference.setTitle(R.string.title_switch_preference);
+        preference.setSummary(R.string.summary_compound_button_preference);
+        mActivity.addPreference(preference);
+
+        // Scroll until list preference is visible
+        mActivity.runOnUiThread(() -> mActivity.scrollToPreference("switch"));
+
+        // Check title and summary are displayed as expected.
+        onView(withIndex(withId(android.R.id.title), 0)).check(matches(
+                withText(mActivity.getString(R.string.title_switch_preference))));
+        onView(withIndex(withId(android.R.id.summary), 0)).check(matches(
+                withText(mActivity.getString(R.string.summary_compound_button_preference))));
+
+        // Ensure switch preference is initially not selected.
+        onView(withId(android.R.id.switch_widget)).check(matches(isNotChecked()));
+
+        Preference.OnPreferenceChangeListener mockListener = mock(
+                Preference.OnPreferenceChangeListener.class);
+        when(mockListener.onPreferenceChange(any(), any())).thenReturn(true);
+        mActivity.setOnPreferenceChangeListener("switch", mockListener);
+
+        // Select switch preference.
+        onView(withText(R.string.title_switch_preference)).perform(click());
+
+        // Verify preference value was updated.
+        verify(mockListener, times(1)).onPreferenceChange(any(), eq(true));
+
+        // Verify switch preference correctly indicates preference is selected.
+        onView(withId(android.R.id.switch_widget)).check(matches(isChecked()));
+        onView(withText(R.string.title_switch_preference)).check(matches(isActivated()));
+
+        // Un-select switch preference.
+        onView(withText(R.string.title_switch_preference)).perform(click());
+
+        // Verify preference value was updated.
+        verify(mockListener, times(1)).onPreferenceChange(any(), eq(false));
+
+        // Verify switch preference correctly indicates preference is selected.
+        onView(withId(android.R.id.switch_widget)).check(matches(isNotChecked()));
+        onView(withText(R.string.title_switch_preference)).check(matches(not(isActivated())));
     }
 
     @Test
