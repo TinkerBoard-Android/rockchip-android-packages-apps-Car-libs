@@ -30,5 +30,5 @@
     <string name="error_code_content_already_playing" msgid="1306236349553004461">"ఇప్పటికే ఆ కంటెంట్ ప్లే అవుతోంది"</string>
     <string name="error_code_skip_limit_reached" msgid="4203743406433151146">"ఇంక ఏ ట్రాక్‌లనూ స్కిప్ చేయడం సాధ్యపడదు"</string>
     <string name="error_code_action_aborted" msgid="8611777981356536501">"పూర్తి చేయడం సాధ్యపడలేదు. మళ్లీ ట్రై చేయండి."</string>
-    <string name="error_code_end_of_queue" msgid="6935022448319288887">"క్రమ వరుసలో ఏమీ లేదు"</string>
+    <string name="error_code_end_of_queue" msgid="6935022448319288887">"క్యూలో ఏమీ లేదు"</string>
 </resources>

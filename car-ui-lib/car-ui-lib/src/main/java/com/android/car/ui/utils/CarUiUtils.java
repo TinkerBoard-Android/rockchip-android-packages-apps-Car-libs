@@ -334,7 +334,24 @@ public final class CarUiUtils {
             return;
         }
         initializeRestrictedState(view);
-        applyStatesToAllViews(view, restricted ? sRestrictedState : null, null);
+        applyDrawableStatesToAllViews(view, restricted ? sRestrictedState : null, null);
+    }
+
+    /**
+     * Traverses the view hierarchy, and whenever it sees a {@link DrawableStateView}, adds
+     * state_enabled to it.
+     *
+     * Note that this will remove any other drawable states added by other calls to
+     * {@link DrawableStateView#setExtraDrawableState(int[], int[])}
+     */
+    public static void makeAllViewsEnabled(@Nullable View view, boolean enabled) {
+        if (view == null) {
+            return;
+        }
+        initializeRestrictedState(view);
+        int[] statesToAdd = enabled ? new int[] {android.R.attr.state_enabled} : null;
+        int[] statesToRemove = enabled ? null : new int[] {android.R.attr.state_enabled};
+        applyDrawableStatesToAllViews(view, statesToAdd, statesToRemove);
     }
 
     /**
@@ -363,7 +380,27 @@ public final class CarUiUtils {
             statesToAdd = sRestrictedState;
         }
         int[] statesToRemove = enabled ? null : new int[] {android.R.attr.state_enabled};
-        applyStatesToAllViews(view, statesToAdd, statesToRemove);
+        applyDrawableStatesToAllViews(view, statesToAdd, statesToRemove);
+    }
+
+    /**
+     * Traverses the view hierarchy, and whenever it sees a {@link DrawableStateView}, adds and
+     * removes the specified states from the view.
+     *
+     * Note that this will remove any other drawable states added by other calls to
+     * {@link DrawableStateView#setExtraDrawableState(int[], int[])}
+     */
+    public static void applyDrawableStatesToAllViews(@NonNull View view, int[] statesToAdd,
+            int[] statesToRemove) {
+        if (view instanceof DrawableStateView) {
+            ((DrawableStateView) view).setExtraDrawableState(statesToAdd, statesToRemove);
+        }
+        if (view instanceof ViewGroup) {
+            ViewGroup vg = (ViewGroup) view;
+            for (int i = 0; i < vg.getChildCount(); i++) {
+                applyDrawableStatesToAllViews(vg.getChildAt(i), statesToAdd, statesToRemove);
+            }
+        }
     }
 
     private static void initializeRestrictedState(@NonNull View view) {
@@ -380,19 +417,6 @@ public final class CarUiUtils {
                     R.attr.state_ux_restricted,
                     androidStateUxRestricted
             };
-        }
-    }
-
-    private static void applyStatesToAllViews(@NonNull View view, int[] statesToAdd,
-            int[] statesToRemove) {
-        if (view instanceof DrawableStateView) {
-            ((DrawableStateView) view).setExtraDrawableState(statesToAdd, statesToRemove);
-        }
-        if (view instanceof ViewGroup) {
-            ViewGroup vg = (ViewGroup) view;
-            for (int i = 0; i < vg.getChildCount(); i++) {
-                applyStatesToAllViews(vg.getChildAt(i), statesToAdd, statesToRemove);
-            }
         }
     }
 }

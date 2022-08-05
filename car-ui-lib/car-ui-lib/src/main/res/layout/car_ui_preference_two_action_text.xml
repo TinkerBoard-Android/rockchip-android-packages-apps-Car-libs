@@ -25,7 +25,7 @@
 
     <com.android.car.ui.uxr.DrawableStateConstraintLayout
         android:id="@+id/car_ui_first_action_container"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_width="0dp"
         android:background="?android:attr/selectableItemBackground"
         android:paddingStart="?android:attr/listPreferredItemPaddingStart"
@@ -76,7 +76,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/car_ui_second_action_container"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
         app:layout_constraintStart_toEndOf="@id/car_ui_first_action_container"

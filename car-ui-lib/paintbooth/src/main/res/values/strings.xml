@@ -77,6 +77,8 @@
 
   <!-- Title of a switch preference [CHAR_LIMIT=28]-->
   <string name="title_switch_preference">Switch preference</string>
+  <!-- Title of a primary switch preference [CHAR_LIMIT=28]-->
+  <string name="title_primary_switch_preference">Primary switch preference</string>
   <!-- Summary of a switch preference [CHAR_LIMIT=78]-->
   <string name="summary_switch_preference">Tap anywhere in this preference to toggle state</string>
 
